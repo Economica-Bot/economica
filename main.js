@@ -7,7 +7,7 @@ const embed = new Discord.MessageEmbed()
 const reactMessage = require('./reaction-message')
 
 const default_blue = 0x0099ff
-
+// test new branch
 
 client.on('ready', () => {
      console.log('Connected as ', client.user.tag)
