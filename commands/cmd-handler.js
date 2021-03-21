@@ -1,0 +1,208 @@
+const { prefix, botAuth } = require('../config.json')
+const errorColor = 'RED'
+
+// custom bot authorities
+const validateAuth = (_auth) => {
+     const validAuths = [
+          'BOT:ADMIN',
+          'BOT:BOT',
+          'BOT:TESTER',
+          'BOT:VIP',
+     ]
+
+     for (const __auth of _auth) {
+          if (!validAuths.includes(__auth)) {
+               throw new Error(`Unknown BOT:AUTHORITY node "${__auth}" in command "${command}"`)
+          }
+     }
+}
+
+// function used to check if a permission is indeed an actual discord permission key
+const validatePermissions = (permissions) => {
+     const validPermissions = [
+          'CREATE_INSTANT_INVITE',
+          'KICK_MEMBERS',
+          'BAN_MEMBERS',
+          'ADMINISTRATOR',
+          'MANAGE_CHANNELS',
+          'MANAGE_GUILD',
+          'ADD_REACTIONS',
+          'VIEW_AUDIT_LOG',
+          'PRIORITY_SPEAKER',
+          'STREAM',
+          'VIEW_CHANNEL',
+          'SEND_MESSAGES',
+          'SEND_TTS_MESSAGES',
+          'MANAGE_MESSAGES',
+          'EMBED_LINKS',
+          'ATTACH_FILES',
+          'READ_MESSAGE_HISTORY',
+          'MENTION_EVERYONE',
+          'USE_EXTERNAL_EMOJIS',
+          'VIEW_GUILD_INSIGHTS',
+          'CONNECT',
+          'SPEAK',
+          'MUTE_MEMBERS',
+          'DEAFEN_MEMBERS',
+          'MOVE_MEMBERS',
+          'USE_VAD',
+          'CHANGE_NICKNAME',
+          'MANAGE_NICKNAMES',
+          'MANAGE_ROLES',
+          'MANAGE_WEBHOOKS',
+          'MANAGE_EMOJIS',
+     ]
+
+     for (const permission of permissions) {
+          if (!validPermissions.includes(permission)) {
+               throw new Error(`Unknown permission node "${permission}"`)
+          }
+     }
+}
+
+module.exports = (client, commandOptions) => {
+     let {
+          commands,
+          expectedArgs = '',
+          exUse = 'N/A',
+          minArgs = 0,
+          maxArgs = null,
+          permissions = [],
+          requiredRoles = [],
+          _auth = null,
+          callback,
+     } = commandOptions
+
+     // Ensure the command and aliases are in an array
+     if (typeof commands === 'string') {
+          commands = [commands]
+     }
+
+     console.log(`Registering command "${commands[0]}"`)
+
+     // Ensure the permissions are in an array and are all valid
+     if (permissions.length) {
+          if (typeof permissions === 'string') {
+               permissions = [permissions]
+          }
+
+          validatePermissions(permissions)
+     }
+
+     if (_auth.length) {
+          if (typeof _auth === 'string') {
+               _auth = [_auth]
+          }
+
+          validateAuth(_auth)
+     }
+
+     // Listen for messages
+     client.on('message', (message) => {
+          const { member, content, guild } = message
+
+          for (const alias of commands) {
+               const command = `${prefix}${alias.toLowerCase()}`
+
+               if (
+                    content.toLowerCase().startsWith(`${command} `) ||
+                    content.toLowerCase() === command
+               ) {
+                    // A command has been ran
+
+                    // check if bot authority is required and if member has that authority
+                    if (_auth) {
+                         if (!
+                              (
+
+                                   (botAuth.admin_id.includes(member.id)) ||
+                                   (_auth.includes('BOT:BOT') && member === client) ||
+                                   (_auth.includes('BOT:TESTER') && botAuth.tester_id.includes(member.id)) ||
+                                   (_auth.includes('BOT:VIP') && botAuth.vip_id.includes(member.id))
+                              )
+
+                         ) {
+
+                              message.channel.send({
+                                   embed: {
+                                        color: errorColor,
+                                        title: '🔏 Missing Authority',
+                                        description: `> \`${_auth}\``,
+                                        footer: {
+                                             text: 'This command is reserved for testing or\nhas not yet been released'
+                                        }
+                                   }
+                              })
+                              return
+                         }
+                    }
+
+                    // Ensure the user has the required roles
+                    for (const requiredRole of requiredRoles) {
+                         const role = guild.roles.cache.find(
+                              (role) => role.id === requiredRole
+                         )
+
+                         if (!role || !member.roles.cache.has(role.id)) {
+                              message.channel.send({
+                                   embed: {
+                                        color: errorColor,
+                                        title: '🔏 Missing Role',
+                                        description: `> <@&${role.id}>`,
+                                        footer: {
+                                             text: `You need this role to use the ${prefix}${alias} command.`
+                                        }
+                                   }
+                              })
+                              return
+                         }
+                    }
+
+
+                    // Ensure the user has the required permissions 
+                    for (const permission of permissions) {
+                         if (!member.hasPermission(permission)) {
+                              message.channel.send({
+                                   embed: {
+                                        color: errorColor,
+                                        title: '🔏 Missing Permission',
+                                        description: `> \`${permission}\``
+                                   }
+                              })
+                              return
+                         }
+                    }
+
+
+                    // Split on any number of spaces
+                    const arguments = content.split(/[ ]+/)
+
+                    // Remove the command which is the first index
+                    arguments.shift()
+
+                    // Ensure we have the correct number of arguments
+                    if (
+                         arguments.length < minArgs ||
+                         (maxArgs !== null && arguments.length > maxArgs)
+                    ) {
+                         message.channel.send({
+                              embed: {
+                                   color: errorColor,
+                                   title: '🔏 Incorrect Syntax',
+                                   description: `Usage:\n\`${prefix}${alias} ${expectedArgs}\`\n\nExample:\n\`${prefix}${alias} ${exUse}\``
+                              }
+                         })
+                         return
+                    }
+
+
+
+                    // Handle the custom command code
+                    callback(message, arguments, arguments.join(' '), client)
+
+                    return
+               }
+          }
+     })
+}
+// source: https://www.youtube.com/watch?v=lbpUc17InkM&list=PLaxxQQak6D_fxb9_-YsmRwxfw5PH9xALe&index=25
