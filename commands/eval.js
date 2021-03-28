@@ -8,7 +8,7 @@ module.exports = {
           const clean = text => {
                if (typeof (text) === "string") {
                     return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203));
-               } else return text;
+               }else return text;
           }
 
           const { channel } = message
@@ -18,12 +18,22 @@ module.exports = {
                     if (typeof _message !== 'string') {
                          _message = require('util').inspect(_message)
                     }
-                    message.channel.send({
-                         embed: {
-                              color: 'GREEN',
-                              description: `Action:\n\`\`\`js\n${text}\n\`\`\`\nResult:\`\`\`js\n${clean(_message)}\n\`\`\``
-                         }
-                    }), { code: 'xl' }
+                    if (_message.length + text.length < 2015) {
+                         message.channel.send({
+                              embed: {
+                                   color: 'GREEN',
+                                   description: `Action:\n\`\`\`js\n${text}\n\`\`\`\nResult:\`\`\`js\n${clean(_message)}\n\`\`\``
+                              }
+                         }), { code: 'xl' }
+                    } else {
+                         message.channel.send({
+                              embed: {
+                                   color: 'RED',
+                                   title: 'ERROR',
+                                   description: `\`\`\`xl\nDiscordAPIError: Invalid Form Body embed.description: Must be 2048 or fewer in length.\n\`\`\`\nThe evaluated message is too long!`
+                              }
+                         })
+                    }
                } catch (err) {
                     message.channel.send({
                          embed: {
