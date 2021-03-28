@@ -1,18 +1,18 @@
 const { prefix, botAuth } = require('../config.json')
 const errorColor = 'RED'
 
-// custom bot authorities
+// custom bot authorities, more can be added
 const validateAuth = (_auth) => {
      const validAuths = [
-          'BOT:ADMIN',
-          'BOT:BOT',
-          'BOT:TESTER',
-          'BOT:VIP',
+          'BOT:OPERATOR', // full permissions (intended use)
+          'BOT:CLIENT', // the bot itself
+          'BOT:TESTER', // early command testers in the main economica server (intended use)
+          'BOT:VIP', // VIPs/premium/etc... (intended use)
      ]
 
      for (const __auth of _auth) {
           if (!validAuths.includes(__auth)) {
-               throw new Error(`Unknown BOT:AUTHORITY node "${__auth}" in command "${command}"`)
+               throw new Error(`Unknown BOT:AUTHORITY node "${__auth}"`)
           }
      }
 }
@@ -62,15 +62,16 @@ const validatePermissions = (permissions) => {
 
 module.exports = (client, commandOptions) => {
      let {
-          commands,
-          expectedArgs = '',
-          exUse = 'N/A',
-          minArgs = 0,
-          maxArgs = null,
-          permissions = [],
-          requiredRoles = [],
-          _auth = null,
-          callback,
+          commands, // ['ping', 'pong'] aliases and names *required
+          expectedArgs = '', // '<num1> <num2>' arg description +recommended
+          exUse = '', // '2 2' args nExample +recommended
+          minArgs = 0, // number
+          maxArgs = minArgs, // number
+          permissions = [], // ['BAN_MEMBERS', 'KICK_MEMBERS']
+          requiredRoles = [], // ['1234567890123', 'some_role_id']
+          _auth = null, // ['BOT:OPERATOR', 'BOT:TESTER'] 
+          silent = false, // boolean
+          callback, // string and/or embed. Parameters: (message, arguments, text) *required
      } = commandOptions
 
      // Ensure the command and aliases are in an array
@@ -89,7 +90,7 @@ module.exports = (client, commandOptions) => {
           validatePermissions(permissions)
      }
 
-     if (_auth.length) {
+     if (_auth) {
           if (typeof _auth === 'string') {
                _auth = [_auth]
           }
@@ -115,6 +116,8 @@ module.exports = (client, commandOptions) => {
                          if (!
                               (
 
+                                   // botAuth is an object variable from ./config.json
+                                   // operators have access to all commands regardless of _auth
                                    (botAuth.admin_id.includes(member.id)) ||
                                    (_auth.includes('BOT:BOT') && member === client) ||
                                    (_auth.includes('BOT:TESTER') && botAuth.tester_id.includes(member.id)) ||
@@ -123,16 +126,18 @@ module.exports = (client, commandOptions) => {
 
                          ) {
 
-                              message.channel.send({
-                                   embed: {
-                                        color: errorColor,
-                                        title: '🔏 Missing Authority',
-                                        description: `> \`${_auth}\``,
-                                        footer: {
-                                             text: 'This command is reserved for testing or\nhas not yet been released'
+                              if (silent == false) {
+                                   message.channel.send({
+                                        embed: {
+                                             color: errorColor,
+                                             title: '🔏 Missing Authority',
+                                             description: `> \`${_auth}\``,
+                                             footer: {
+                                                  text: 'This command is reserved for testing or\nhas not yet been released'
+                                             }
                                         }
-                                   }
-                              })
+                                   })
+                              }
                               return
                          }
                     }
@@ -144,16 +149,18 @@ module.exports = (client, commandOptions) => {
                          )
 
                          if (!role || !member.roles.cache.has(role.id)) {
-                              message.channel.send({
-                                   embed: {
-                                        color: errorColor,
-                                        title: '🔏 Missing Role',
-                                        description: `> <@&${role.id}>`,
-                                        footer: {
-                                             text: `You need this role to use the ${prefix}${alias} command.`
+                              if (silent == false) {
+                                   message.channel.send({
+                                        embed: {
+                                             color: errorColor,
+                                             title: '🔏 Missing Role',
+                                             description: `> <@&${role.id}>`,
+                                             footer: {
+                                                  text: `You need this role to use the ${prefix}${alias} command.`
+                                             }
                                         }
-                                   }
-                              })
+                                   })
+                              }
                               return
                          }
                     }
@@ -162,13 +169,15 @@ module.exports = (client, commandOptions) => {
                     // Ensure the user has the required permissions 
                     for (const permission of permissions) {
                          if (!member.hasPermission(permission)) {
-                              message.channel.send({
-                                   embed: {
-                                        color: errorColor,
-                                        title: '🔏 Missing Permission',
-                                        description: `> \`${permission}\``
-                                   }
-                              })
+                              if (silent == false) {
+                                   message.channel.send({
+                                        embed: {
+                                             color: errorColor,
+                                             title: '🔏 Missing Permission',
+                                             description: `> \`${permission}\``
+                                        }
+                                   })
+                              }
                               return
                          }
                     }
@@ -185,13 +194,15 @@ module.exports = (client, commandOptions) => {
                          arguments.length < minArgs ||
                          (maxArgs !== null && arguments.length > maxArgs)
                     ) {
-                         message.channel.send({
-                              embed: {
-                                   color: errorColor,
-                                   title: '🔏 Incorrect Syntax',
-                                   description: `Usage:\n\`${prefix}${alias} ${expectedArgs}\`\n\nExample:\n\`${prefix}${alias} ${exUse}\``
-                              }
-                         })
+                         if (silent == false) {
+                              message.channel.send({
+                                   embed: {
+                                        color: errorColor,
+                                        title: '🔏 Incorrect Syntax',
+                                        description: `Usage:\n\`${prefix}${alias} ${expectedArgs}\`\n\nExample:\n\`${prefix}${alias} ${exUse}\``
+                                   }
+                              })
+                         }
                          return
                     }
 

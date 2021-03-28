@@ -4,7 +4,7 @@ module.exports = {
      commands: 'test',
      expectedArgs: '<cmd>',
      minArgs: 1,
-     _auth: 'BOT:ADMIN',
+     _auth: 'BOT:OPERATOR',
      exUse: 'add 2 2',
      callback: (message, arguments, text) => {
           let _message = ''
