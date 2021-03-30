@@ -66,7 +66,7 @@ module.exports = (client, commandOptions) => {
           expectedArgs = '', // '<num1> <num2>' arg description +recommended
           exUse = '', // '2 2' args nExample +recommended
           minArgs = 0, // number
-          maxArgs = minArgs, // number
+          maxArgs = Number.POSITIVE_INFINITY, // number
           permissions = [], // ['BAN_MEMBERS', 'KICK_MEMBERS']
           requiredRoles = [], // ['1234567890123', 'some_role_id']
           _auth = null, // ['BOT:OPERATOR', 'BOT:TESTER'] 
