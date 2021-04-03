@@ -5,7 +5,7 @@ module.exports = {
      expectedArgs: '<cmd>',
      minArgs: 1,
      _auth: 'BOT:OPERATOR',
-     exUse: 'add 2 2',
+     exUse: 'bal',
      callback: (message, arguments, text) => {
           let _message = ''
           arguments.forEach(argument => _message = `${_message}${argument} `)

@@ -1,12 +1,15 @@
 const mongo = require('./mongo')
 const economySchema = require('./schemas/economy-sch')
 
+// memory (faster than database) - we store values here once we get them from db
+const balanceCache = {} // syntax: String (guildID-userID) : Number (balance)
+
 module.exports = (client) => {}
 
 module.exports.addBal = async (guildID, userID, balance) => {
      return await mongo().then(async (mongoose) => {
           try {
-               console.log('findOneAndUpdate() running')
+               // console.log('findOneAndUpdate() running')
 
                const result = await economySchema.findOneAndUpdate({
                     guildID,
@@ -22,7 +25,9 @@ module.exports.addBal = async (guildID, userID, balance) => {
                     new: true
                })
 
-               console.log('RESULT BAL:', result.balance)
+               // console.log('RESULT BAL:', result.balance)
+
+               balanceCache[`${guildID}-${userID}`] = result.balance
 
                return result.balance
           } finally {
@@ -32,6 +37,11 @@ module.exports.addBal = async (guildID, userID, balance) => {
 }
 
 module.exports.getBal = async (guildID, userID) => {
+     const cached = balanceCache[`${guildID}-${userID}`] + 1
+     if ( cached ) {
+          console.log(balanceCache)
+          return cached - 1
+     }
      return await mongo().then(async (mongoose) => {
           try {
                console.log('findOne() running')
@@ -41,7 +51,7 @@ module.exports.getBal = async (guildID, userID) => {
                     userID,
                })
 
-               console.log('Result: ', result)
+               // console.log('Result: ', result)
 
                let balance = 0
                if (result) {
@@ -55,6 +65,8 @@ module.exports.getBal = async (guildID, userID) => {
                          balance
                     }).save()
                }
+
+               balanceCache[`${guildID}-${userID}`] = balance
 
                return balance
           } finally {

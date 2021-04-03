@@ -7,8 +7,10 @@ module.exports = {
      expectedArgs: '[@user]',
      exUse: 'bal\nbal @Bob',
      callback: async (message, arguments, text) => {
-          const user = message.mentions.users.first() || message.author, userID = user.id
-          const { guild } = message, guildID = guild.id
+          const user = message.mentions.users.first() || message.author
+          const { guild } = message 
+          const guildID = guild.id
+          const userID = user.id
 
           const balance = await economy.getBal(guildID, userID)
 
