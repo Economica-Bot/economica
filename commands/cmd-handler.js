@@ -189,17 +189,23 @@ module.exports = (client, commandOptions) => {
                     // Remove the command which is the first index
                     arguments.shift()
 
+                    // clean syntax error
+                    let _expectedArgs = ''
+
                     // Ensure we have the correct number of arguments
                     if (
                          arguments.length < minArgs ||
                          (maxArgs !== null && arguments.length > maxArgs)
                     ) {
                          if (silent == false) {
+                              if ((! expectedArgs) || (expectedArgs.toLowerCase() === 'none' || expectedArgs.toLowerCase() === 'n/a')) {
+                                   _expectedArgs = ''
+                              } else _expectedArgs = ` ${expectedArgs}`
                               message.channel.send({
                                    embed: {
                                         color: errorColor,
                                         title: '🔏 Incorrect Syntax',
-                                        description: `Usage:\n\`${prefix}${alias} ${expectedArgs}\`\n\nExample:\n\`${prefix}${alias} ${exUse}\``
+                                        description: `Usage:\n\`${prefix}${alias}${_expectedArgs}\`\n\nExample:\n\`${prefix}${alias} ${exUse}\``
                                    }
                               })
                          }

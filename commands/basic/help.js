@@ -6,6 +6,7 @@ module.exports = {
     exUse: 'help ping',
     callback: (message, arguments, text) => {
 
+        /*
         const fs = require('fs')
         let files = fs.readdirSync("commands");
         files.shift(); //gets rid of cmd-handler.js
@@ -37,6 +38,9 @@ module.exports = {
 
         //Embed Visualizer
         //https://leovoel.github.io/embed-visualizer/
+        */
+
+        message.channel.send('under maintenance')
         
     },
 }

@@ -6,5 +6,7 @@
           "admin_id": ["229731234727723008", "421096080210526210"],
           "tester_id": ["282766323417743360", "806343258757922838", "+admin_id+"],
           "vip_id": ["282766323417743360", "806343258757922838"]
-     }
+     },
+     "mongoPath": "mongodb+srv://economica-admin:NChNGmhZQhVD2xG9@economica-1.qe3bp.mongodb.net/bot",
+     "cSymbol": "<:dollar:827400636659793930>"
 }
