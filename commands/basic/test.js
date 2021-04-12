@@ -6,6 +6,7 @@ module.exports = {
      minArgs: 1,
      _auth: 'BOT:OPERATOR',
      exUse: 'bal',
+     description: 'test',
      callback: (message, arguments, text) => {
           let _message = ''
           arguments.forEach(argument => _message = `${_message}${argument} `)

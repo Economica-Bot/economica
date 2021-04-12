@@ -5,6 +5,7 @@ module.exports = {
      commands: ['work', 'w'],
      expectedArgs: 'none',
      exUse: 'work',
+     description: 'test',
      callback: async (message, arguments, text) => {
           const randInt = (min = 0, max = 1) => {
                min = Math.ceil(min);
