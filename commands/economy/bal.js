@@ -6,7 +6,7 @@ module.exports = {
      maxArgs: 1,
      expectedArgs: '[@user]',
      exUse: 'bal\nbal @Bob',
-     description: 'test',
+     description: 'Displays your balance',
      callback: async (message, arguments, text) => {
           const user = message.mentions.users.first() || message.author
           const { guild } = message 
