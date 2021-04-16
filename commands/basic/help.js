@@ -5,7 +5,7 @@ module.exports = {
     commands: ['help', 'command', 'commands'],
     expectedArgs: ['none', '<cmd>'],
     exUse: 'help ping',
-    description: 'Help menu',
+    description: 'The Help menu lists all commands and their descriptions',
     callback: (message, arguments, text) => {
 
         let reply = 'Supported Commands:\n\n'
