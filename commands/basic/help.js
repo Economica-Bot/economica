@@ -1,4 +1,4 @@
-const Discord = require("discord.js");
+const Discord = require("discord.js")
 const loadCommands = require('../load-cmnds')
 
 module.exports = {
@@ -59,32 +59,6 @@ module.exports = {
         }
 
         message.channel.send(helpEmbed)
-
-        /*
-        const fs = require('fs')
-        let files = fs.readdirSync("commands");
-        files.shift(); //gets rid of cmd-handler.js
-        
-        var nameList="";
-        var argList="";
-        var usageEx="";
-
-
-        let result=files.forEach((f, i) => {
-            let command=require(`./${f}`);
-            helpEmbed.addFields (
-                {
-                   name:`${command.commands}`,
-                   value:`Expected Arguments: ${command.expectedArgs}\nExample Usage: ${command.exUse}`
-                } 
-            )
-            //(`** \n"Expected Arguments: "+${command.expectedArgs} \n"Example Usage: "+${command.exUse}`)  
-        });
-        message.channel.send(helpEmbed);
-
-        //Embed Visualizer
-        //https://leovoel.github.io/embed-visualizer/
-        */
         
   ***REMOVED***
 }
