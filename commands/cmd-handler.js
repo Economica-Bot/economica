@@ -63,7 +63,7 @@ const validatePermissions = (permissions) => {
 module.exports = (client, commandOptions) => {
      let {
           commands, // ['ping', 'pong'] aliases and names *required
-          expectedArgs = '', // '<num1> <num2>' arg description +recommended
+          expectedArgs = '\`none\`', // '<num1> <num2>' arg description +recommended
           exUse = '', // '2 2' args nExample +recommended
           minArgs = 0, // number
           maxArgs = minArgs * 2000/(minArgs+1), // number
