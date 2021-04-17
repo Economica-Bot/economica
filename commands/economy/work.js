@@ -3,7 +3,6 @@ const { cSymbol } = require('../../config.json')
 
 module.exports = {
      commands: ['work', 'w'],
-     expectedArgs: 'none',
      exUse: 'work',
      description: 'Get some quick cash',
      callback: async (message, arguments, text) => {
