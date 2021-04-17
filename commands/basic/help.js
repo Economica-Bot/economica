@@ -1,16 +1,40 @@
 const Discord = require("discord.js")
 const loadCommands = require('../load-cmnds')
+const { prefix } = require('../../config.json')
 
 module.exports = {
     commands: ['help', 'command', 'commands'],
     expectedArgs: ['none', '<cmd>'],
-    exUse: 'help ping',
+    maxArgs: 1,
+    exUse: 'ping',
     description: 'The Help menu lists all commands and their descriptions',
     callback: (message, arguments, text) => {
 
-        let reply = 'Supported Commands:\n\n'
-
         const commands = loadCommands()
+
+        //Single-Command Help
+        if(arguments[0]) {
+            for(const command of commands) {
+                for(const name of command.commands) {
+                    if(arguments[0] == name) {
+                        return message.channel.send({
+                            embed: {
+                                title: `${name}`,
+                                color: 'GREEN',
+                                description: `${command.description}\nExpected Arguments: \`${command.expectedArgs}\``
+                            }
+                        })
+                    }
+                }
+            }
+            return message.channel.send({
+                embed: {
+                        color: 'RED',
+                        title: 'Command not Found',
+                        description: `For a list of available commands, type \`${prefix}help\``
+                }
+            })
+        }
 
         let helpEmbed= new Discord.MessageEmbed()
         helpEmbed
