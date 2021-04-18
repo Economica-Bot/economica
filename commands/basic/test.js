@@ -1,7 +1,7 @@
 const { prefix } = require('../../config.json')
 
 module.exports = {
-     commands: 'test',
+     commands: ['test'],
      expectedArgs: '<cmd>',
      minArgs: 1,
      _auth: 'BOT:OPERATOR',
