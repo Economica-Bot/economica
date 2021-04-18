@@ -36,4 +36,6 @@ client.on('ready', async () => {
      })
 })
 
-client.login(config.token)
+if (config.useAltToken == true) {
+     client.login(config.alt_token)
+} else client.login(config.token)
