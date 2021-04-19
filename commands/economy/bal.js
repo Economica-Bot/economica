@@ -2,7 +2,7 @@ const economy = require('../../economy')
 const { cSymbol } = require('../../config.json')
 
 module.exports = {
-     commands: ['balance', 'bal', 'money'],
+     aliases: ['balance', 'bal', 'money'],
      maxArgs: 1,
      expectedArgs: '[@user]',
      exUse: '@Bob',

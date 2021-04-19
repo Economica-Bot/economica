@@ -1,5 +1,5 @@
 module.exports = {
-     commands: ['ping', 'latency'],
+     aliases: ['ping', 'latency'],
      description: 'Returns the latency in MS',
      callback: (message, arguments, text) => {
           const user = message.author

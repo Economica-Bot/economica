@@ -1,7 +1,7 @@
 const { prefix } = require('../../config.json')
 
 module.exports = {
-     commands: ['test'],
+     aliases: ['test'],
      expectedArgs: '<cmd>',
      minArgs: 1,
      maxArgs: 1, 

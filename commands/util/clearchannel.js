@@ -1,5 +1,5 @@
 module.exports = {
-    commands: ['clearchannel', 'clear'],
+    aliases: ['clearchannel', 'clear'],
     description: 'Deletes all messages sent in the last 14 days.',
     callback: (message, arguments, text) => {
 
