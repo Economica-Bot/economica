@@ -63,7 +63,8 @@ const validatePermissions = (permissions) => {
 module.exports = (client, commandOptions) => {
      let {
           commands, // ['ping', 'pong'] aliases and names *required
-          expectedArgs = '\`none\`', // '<num1> <num2>' arg description +recommended
+          //expectedArgs = '\`none\`', // '<num1> <num2>' arg description +recommended
+          expectedArgs = 'none',
           exUse = '', // '2 2' args nExample +recommended
           minArgs = 0, // number
           maxArgs = minArgs * 2000/(minArgs+1), // number
@@ -193,12 +194,9 @@ module.exports = (client, commandOptions) => {
                     let _expectedArgs = ''
 
                     // Ensure we have the correct number of arguments
-                    if (
-                         arguments.length < minArgs ||
-                         (maxArgs !== null && arguments.length > maxArgs)
-                    ) {
+                    if ( arguments.length < minArgs || (maxArgs !== null && arguments.length > maxArgs)) {
                          if (silent == false) {
-                              if ((! expectedArgs) || (expectedArgs.toLowerCase() === 'none' || expectedArgs.toLowerCase() === 'n/a')) {
+                              if ((! expectedArgs) || expectedArgs[0] === 'none' ) {
                                    _expectedArgs = ''
                               } else _expectedArgs = ` ${expectedArgs}`
                               message.channel.send({
@@ -211,8 +209,6 @@ module.exports = (client, commandOptions) => {
                          }
                          return
                     }
-
-
 
                     // Handle the custom command code
                     callback(message, arguments, arguments.join(' '), client)
