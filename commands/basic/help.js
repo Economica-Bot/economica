@@ -3,7 +3,7 @@ const loadCommands = require('../load-cmnds')
 const { prefix } = require('../../config.json')
 
 module.exports = {
-    commands: ['help', 'command', 'commands'],
+    aliases: ['help', 'command', 'commands'],
     expectedArgs: ['none', '<cmd>'],
     maxArgs: 1,
     exUse: 'ping',
@@ -15,25 +15,48 @@ module.exports = {
         //Single-Command Help
         if (text) {
             for (const command of commands) {
-                for (const name of command.commands) {
-                    if (arguments[0] == name) {
+                for (const alias of command.aliases) {
+                    if (arguments[0] == alias) {
+
+                        // Check permissions
+                        let permissions = command.permissions
+
+                        if (permissions) {
+                            let hasPermission = true
+                            if (typeof permissions === 'string') {
+                                permissions = [permissions]
+                            }
+                            for(const permission of permissions) {
+                                if (!message.member.hasPermission(permission)) {
+                                    message.channel.send(`${message.author.id} does not have the permission ${permission}`)
+                                    hasPermission = false
+                                    break
+                                }
+                            }
+                            
+                            // If the user is missing any perms, command is not found
+                            if (!hasPermission) {
+                                return message.channel.send({
+                                    embed: {
+                                            color: 'RED',
+                                            title: 'Command not Found',
+                                            description: `For a list of available commands, type \`${prefix}help\``
+                                    }
+                                })
+                            }
+                        }
+
+                        // Send command info if perms are satisfied
                         return message.channel.send ({
                             embed: {
-                                title: `${name}`,
+                                title: `${alias}`,
                                 color: 'GREEN',
-                                description: `${command.description}\nExpected Arguments: \`${command.expectedArgs}\``
+                                description: `Aliases: \`${command.aliases}\`\n${command.description}\nExpected Arguments: \`${command.expectedArgs}\``
                             }
                         })
                     }
                 }
             }
-            return message.channel.send({
-                embed: {
-                        color: 'RED',
-                        title: 'Command not Found',
-                        description: `For a list of available commands, type \`${prefix}help\``
-                }
-            })
         }
 
         let helpEmbed= new Discord.MessageEmbed()
@@ -46,15 +69,11 @@ module.exports = {
         
         let commandlist = ''
         for (const command of commands) {
-            //add all permissible commands
-            let permissions = command.permission
+            // Add all permissible commands
+            let permissions = command.permissions
 
             if (permissions) {
                 let hasPermission = true
-                if (typeof permissions === 'string') {
-                    permissions = [permissions]
-                }
-
                 for(const permission of permissions) {
                     if (!message.member.hasPermission(permission)) {
                         hasPermission = false
@@ -62,14 +81,14 @@ module.exports = {
                     }
                 }
                 
-                //if the user does not have permission, skip to the next iteration
+                // If the user does not have permission, skip to the next iteration
                 if (!hasPermission) {
-                    //temp
-                    message.channel.send(`Missing perm \`${permissions}\` for command \`${prefix}${command.commands}\``)
+                    // temp
+                    message.channel.send(`Missing perm \`${permissions}\` for command \`${prefix}${command.aliases}\``)
                     continue
                 }
             }
-            commandlist = `${commandlist} \`${prefix}${command.commands[0]}\``
+            commandlist = `${commandlist} \`${prefix}${command.aliases}\``
         }
 
         helpEmbed.setDescription(`${commandlist}`)
