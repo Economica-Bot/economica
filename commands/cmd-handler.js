@@ -62,7 +62,7 @@ const validatePermissions = (permissions) => {
 
 module.exports = (client, commandOptions) => {
      let {
-          commands, // ['ping', 'pong'] aliases and names *required
+          aliases, // ['ping', 'pong'] aliases and names *required
           expectedArgs = ['\`none\`'], //expectedArgs = '\`none\`', // '<num1> <num2>' arg description +recommended
           exUse = '', // '2 2' args nExample +recommended
           minArgs = 0, // number
@@ -74,7 +74,7 @@ module.exports = (client, commandOptions) => {
           callback, // string and/or embed. Parameters: (message, arguments, text) *required
      } = commandOptions
 
-     console.log(`Registering command "${commands[0]}"`)
+     console.log(`Registering command "${aliases[0]}"`)
 
      // Ensure the permissions are in an array and are all valid
      if (permissions.length) {
@@ -97,7 +97,7 @@ module.exports = (client, commandOptions) => {
      client.on('message', (message) => {
           const { member, content, guild } = message
 
-          for (const alias of commands) {
+          for (const alias of aliases) {
                const command = `${prefix}${alias.toLowerCase()}`
 
                if (

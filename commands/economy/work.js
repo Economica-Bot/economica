@@ -2,7 +2,7 @@ const economy = require('../../economy')
 const { cSymbol } = require('../../config.json')
 
 module.exports = {
-     commands: ['work', 'w'],
+     aliases: ['work', 'w'],
      exUse: 'work',
      description: 'Get some quick cash',
      callback: async (message, arguments, text) => {

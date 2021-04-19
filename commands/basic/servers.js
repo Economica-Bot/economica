@@ -1,7 +1,7 @@
 const Discord = require("discord.js")
 
 module.exports = {
-    commands: ['server', 'servers'],
+    aliases: ['server', 'servers'],
     description: 'Lists servers and membercounts',
     callback: (message, arguments, text) => {
         const client = message.client
