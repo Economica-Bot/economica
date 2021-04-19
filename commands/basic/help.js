@@ -84,11 +84,11 @@ module.exports = {
                 // If the user does not have permission, skip to the next iteration
                 if (!hasPermission) {
                     // temp
-                    message.channel.send(`Missing perm \`${permissions}\` for command \`${prefix}${command.aliases}\``)
+                    message.channel.send(`Missing perm \`${permissions}\` for command \`${prefix}${command.aliases[0]}\``)
                     continue
                 }
             }
-            commandlist = `${commandlist} \`${prefix}${command.aliases}\``
+            commandlist = `${commandlist} \`${prefix}${command.aliases[0]}\``
         }
 
         helpEmbed.setDescription(`${commandlist}`)
