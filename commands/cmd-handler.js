@@ -63,8 +63,7 @@ const validatePermissions = (permissions) => {
 module.exports = (client, commandOptions) => {
      let {
           commands, // ['ping', 'pong'] aliases and names *required
-          //expectedArgs = '\`none\`', // '<num1> <num2>' arg description +recommended
-          expectedArgs = 'none',
+          expectedArgs = ['\`none\`'], //expectedArgs = '\`none\`', // '<num1> <num2>' arg description +recommended
           exUse = '', // '2 2' args nExample +recommended
           minArgs = 0, // number
           maxArgs = 0, // number
@@ -74,11 +73,6 @@ module.exports = (client, commandOptions) => {
           silent = false, // boolean
           callback, // string and/or embed. Parameters: (message, arguments, text) *required
      } = commandOptions
-
-     // Ensure the command and aliases are in an array
-     if (typeof commands === 'string') {
-          commands = [commands]
-     }
 
      console.log(`Registering command "${commands[0]}"`)
 
