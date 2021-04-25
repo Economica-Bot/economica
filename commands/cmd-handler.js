@@ -63,7 +63,7 @@ const validatePermissions = (permissions) => {
 module.exports = (client, commandOptions) => {
      let {
           aliases, // ['ping', 'pong'] aliases and names *required
-          expectedArgs = ['\`none\`'], //expectedArgs = '\`none\`', // '<num1> <num2>' arg description +recommended
+          expectedArgs = ['none'], //expectedArgs = '\`none\`', // '<num1> <num2>' arg description +recommended
           exUse = '', // '2 2' args nExample +recommended
           minArgs = 0, // number
           maxArgs = 0, // number
@@ -197,8 +197,7 @@ module.exports = (client, commandOptions) => {
                                    embed: {
                                         color: errorColor,
                                         title: '🔏 Incorrect Syntax',
-                                        description: `Usage:\n\`${prefix}${alias}${_expectedArgs}\`\n\nExample:\n\`${prefix}${alias} ${exUse}\``
-                                   }
+                                        description: `Usage:\n\`${prefix}${alias}${_expectedArgs}\`\n\nExample:\n\`${prefix}${alias} ${exUse}\``                                   }
                               })
                          }
                          return
