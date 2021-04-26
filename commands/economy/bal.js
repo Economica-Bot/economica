@@ -3,10 +3,11 @@ const { cSymbol } = require('../../config.json')
 const fn = require('../../fn')
 
 module.exports = {
-     commands: ['balance', 'bal', 'money'],
+     aliases: ['balance', 'bal', 'money'],
      maxArgs: 1,
      expectedArgs: '[@user]',
-     exUse: 'bal\nbal @Bob',
+     exUse: '@Bob',
+     description: 'Displays your balance',
      callback: async (message, arguments, text) => {
           const { guild } = message
 
