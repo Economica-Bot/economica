@@ -1,5 +1,5 @@
 const Discord = require('discord.js')
-const client = new Discord.Client()
+const client = new Discord.Client({ fetchAllMembers: true })
 
 const config = require('./config.json')
 const loadCommands = require('./commands/load-cmnds')
@@ -19,4 +19,6 @@ client.on('ready', async () => {
      })
 })
 
-client.login(config.token)
+if (config.useAltToken == true) {
+     client.login(config.alt_token)
+} else client.login(config.token)

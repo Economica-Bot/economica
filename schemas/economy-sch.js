@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 
-const economySchema = mongoose.Schema(
+const economyBalSchema = mongoose.Schema(
      {
           guildID: {
                type: String,
@@ -18,4 +18,4 @@ const economySchema = mongoose.Schema(
      }
 )
 
-module.exports = mongoose.model('Economy', economySchema)
+module.exports = mongoose.model('Economy', economyBalSchema)
