@@ -1,9 +1,11 @@
 module.exports = {
-     commands: ['eval', 'evaluate'],
+     aliases: ['eval', 'evaluate'],
      expectedArgs: '<statement>',
      minArgs: 0,
      maxArgs: Number.POSITIVE_INFINITY,
+     permissions: ['ADMINISTRATOR'],
      exUse: `console.log('Hello World')`,
+     description: 'Executes JavaScript from a string',
      callback: (message, arguments, text) => {
           const clean = text => {
                if (typeof (text) === "string") return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203));

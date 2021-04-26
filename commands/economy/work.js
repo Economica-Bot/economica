@@ -2,9 +2,9 @@ const economy = require('../../economy')
 const { cSymbol } = require('../../config.json')
 
 module.exports = {
-     commands: ['work', 'w'],
-     expectedArgs: 'none',
+     aliases: ['work', 'w'],
      exUse: 'work',
+     description: 'Get some quick cash',
      callback: async (message, arguments, text) => {
           const randInt = (min = 0, max = 1) => {
                min = Math.ceil(min);
