@@ -1,6 +1,8 @@
 const Discord = require('discord.js')
 const client = new Discord.Client({ fetchAllMembers: true })
 
+client.setMaxListeners(0)
+
 const config = require('./config.json')
 const loadCommands = require('./commands/load-cmnds')
 const mongo = require('./mongo')
