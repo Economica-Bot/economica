@@ -1,7 +1,7 @@
 const fn = require('../../fn')
 
 module.exports = {
-     commands: ['fn', 'fntest'],
+     aliases: ['fn', 'fntest'],
      expectedArgs: '[?args]',
      minArgs: 0,
      maxArgs: Number.POSITIVE_INFINITY,
