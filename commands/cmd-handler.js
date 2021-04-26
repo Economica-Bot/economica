@@ -74,7 +74,9 @@ module.exports = (client, commandOptions) => {
           callback, // string and/or embed. Parameters: (message, arguments, text) *required
      } = commandOptions
 
+
      console.log(`Registering command "${aliases[0]}"`)
+
 
      // Ensure the permissions are in an array and are all valid
      if (permissions.length) {
