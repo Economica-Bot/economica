@@ -1,5 +1,6 @@
 const economy = require('../../economy')
 const { cSymbol } = require('../../config.json')
+const fn = require('../../fn')
 
 module.exports = {
      commands: ['balance', 'bal', 'money'],
@@ -9,64 +10,47 @@ module.exports = {
      callback: async (message, arguments, text) => {
           const { guild } = message
 
-          await guild.members.fetch()
+          let user = message.mentions.users.first() || fn.getMemberUserById(message, arguments[0], arguments[0]) || fn.getMemberUserIdByMatch(message, arguments[0], arguments[0]) || message.author
+          if (user === 'endProcess') return
+          if (
+               Array.isArray(user) &&
+               user.length == 1 
+          ) {
+               user = fn.getMemberUserById(message, user[0], user[0])
+               console.log(user)
+               fn.displayBal(message, guild, user, economy)
 
-          const getMemberUserById = () => {
-
-               if (arguments[0]) {
-                    const member = guild.members.cache.get(arguments[0])
-                    if (
-                         member != undefined
-                    ) {
-                         return member.user
-                    }
-               }
-          }
-
-          const getMemberUserByMatch = () => {
-
-               if (arguments[0]) {
-
-                    const member = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(arguments[0].toLowerCase()) || m.displayName.toLowerCase().includes(arguments[0].toLowerCase()))
-                    // const membersIndexById = member.filter(m => m.user.username)
-                    console.log(member.user)
-
-                    if (
-                         member != undefined
-                    ) {
-                         return member.user
-                    }
-               }
-          } 
-
-          console.log(await getMemberUserById())
-          console.log(`-------------------------\n\n\n-------------------------`)
-          //console.log(await getMemberUserByMatch())
-
-
-          const user = message.mentions.users.first() || getMemberUserById() || /* getMemberUserByMatch()  || */message.author
-
-          const guildID = guild.id
-          const userID = user.id
-
-          const balance = await economy.getBal(guildID, userID)
-
-          message.channel.send({
-               embed: {
-                    color: 'BLUE',
-                    author: {
-                         name: user.username,
-                         icon_url: user.avatarURL()
-                  ***REMOVED***
-                    description: `:trophy: Guild Rank: 0`,
-                    fields: [
-                         {
-                              name: 'Balance',
-                              value: `${cSymbol}${balance}`,
-                              inline: true
+          } else if (
+               Array.isArray(user)
+          ) {
+               let msg = ''; let i = 1
+               user.forEach(id => msg = `${msg}\`${(i++).toString()}\` ${fn.getMemberUserById(message, id, id)}\n`)
+               message.channel.send({
+                    embed: {
+                         color: 'BLUE',
+                         author: {
+                              name: message.author.tag,
+                              icon_url: message.author.avatarURL(),
+                       ***REMOVED***
+                         description: `Multiple members found. Please select one by typing its number.\n\n${msg}`,
+                         footer: {
+                              text: `Your search found ${(i-1).toString()} similar members in this guild.`
                          }
-                    ]
-               }
-          })
+                    }
+               })
+
+               // custom number collector constructor function (see fn.js)
+               const collector = fn.createNumberCollector(message, i, 20000)
+               collector.on('collect', async m => {
+                    user = fn.getMemberUserById(message, user[parseInt(m) - 1], user[parseInt(m) - 1])
+               })
+               collector.on('end', c => {
+                    if (c.size == 0) {
+                         return message.channel.send(`:hourglass_flowing_sand: time ran out ${message.author}`)
+                    } else fn.displayBal(message, guild, user, economy)
+               })
+          } else {
+               fn.displayBal(message, guild, user, economy)
+          }
    ***REMOVED***
 }
