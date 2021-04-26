@@ -1,5 +1,5 @@
 module.exports = {
-     commands: ['set-income'],
+     aliases: ['set-income'],
      expectedArgs: '<type | all> [min] [max]',
      exUse: 'work 0 500',
      callback: (message, arguments, text) => {

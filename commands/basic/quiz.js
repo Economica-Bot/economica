@@ -1,5 +1,5 @@
 module.exports = {
-     commands: ['quiz'],
+     aliases: ['quiz'],
      expectedArgs: 'none',
      exUse: 'quiz',
      _auth: 'BOT:TESTER',
