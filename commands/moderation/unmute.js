@@ -30,7 +30,9 @@ module.exports = {
               ***REMOVED*** {
                     current: false
                 })
+                
                 console.log(`Unmuted ${id} in server ${guild}`)
+                if(result) message.reply(`Unmuted user ${id}`)
 
             } finally {
                 mongoose.connection.close()
