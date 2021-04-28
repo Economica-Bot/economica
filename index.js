@@ -4,23 +4,27 @@ const client = new Discord.Client({ fetchAllMembers: true })
 client.setMaxListeners(0)
 
 const config = require('./config.json')
+
 const loadCommands = require('./commands/load-cmnds')
 const checkMutes = require('./moderation/check-mute')
+const checkBans = require('./moderation/check-ban')
 const mongo = require('./mongo')
 
 client.on('ready', async () => {
      console.log('The client is ready!')
 
      loadCommands(client)
-     checkMutes(client)
 
      await mongo().then(mongoose => {
           try {
-               console.log('connected to mongo')
+               console.log('Connected to Mongo')
           } finally {
                mongoose.connection.close()
           }
      })
+
+     checkMutes(client)
+     checkBans(client)
 })
 
 if (config.useAltToken == true) {
