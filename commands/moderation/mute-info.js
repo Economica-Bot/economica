@@ -17,6 +17,8 @@ module.exports = {
         const members = await guild.members.fetch()
         const target = members.get(id)
 
+        if(!target) return message.reply('Invalid ID')
+
         //checks if target exists
         const inDiscord = !!target
 
@@ -40,12 +42,14 @@ module.exports = {
 
                 if(result) {
 
-                    const date = new Date(result.expires)
+                    const date = new Date(result.createdAt)
+                    const expirdate = new Date(result.expires)
 
                     muteEmbed
+                        .addField('Muted on', `${date.toLocaleString()}`)
                         .addField('Muted by', `<@${result.staffID}>`)
                         .addField('Muted for', `${result.reason}`)
-                        .addField('Mute expires', `${date.toLocaleString()}`)
+                        .addField('Mute expires', `${expirdate.toLocaleString()}`)
                 }
 
                 message.reply(muteEmbed)
