@@ -1,27 +1,43 @@
+const mongo = require('../../mongo')
+const banSchema = require('../../schemas/ban-sch')
+
 module.exports = {
     aliases: ['ban'],
     description: 'Bans a user',
-    expectedArgs: '<user> [length]',
-    exUse: 'kamaji 10d',
-    minArgs: 1,
-    maxArgs: 2, 
+    expectedArgs: '<user> <reason>',
+    exUse: '@Bob spamming',
+    minArgs: 2,
+    maxArgs: 10, 
     permissions: ['BAN_MEMBERS'],
-    callback: (message, arguments, text) => {
+    callback: async (message, arguments, text) => {
 
-        const {member, mentions } = message
-        const target = mentions.users.first();
-        const tag = `<@${member.id}>`
+        const { guild, author: staff } = message
+        const target = message.mentions.users.first();
+        const reason = text.split(" ").splice(1).join(' ')
+        
         if(target) {
+
+            await mongo().then( async (mongoose) => {
+                try {
+                    await new banSchema({
+                        userID: target.id,
+                        guildID: guild.id,
+                        reason,
+                        staffID: staff.id,
+                        staffTag: staff.tag,
+                        current: true,
+                        expired: false, 
+                    }).save()
+                } finally {
+                    mongoose.connection.close()
+                }
+            })
             const targetMember = message.guild.members.cache.get(target.id)
             targetMember.ban()
-
-            if(text.split(" ").splice(1).join(' '))
-                message.channel.send(`Banned user ${arguments[0]} for \`${text.split(" ").splice(1).join(' ')}\``)
-            else 
-                message.channel.send(`Banned ${arguments[0]}`)
+            message.channel.send(`Banned user ${arguments[0]} for \`${reason}\``)
                 
         } else {
-            message.channel.send(`${tag}, Please specify someone to ban`)
+            message.reply('Please specify someone to ban.')
         }
 
   ***REMOVED***
