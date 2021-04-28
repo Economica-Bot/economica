@@ -17,39 +17,40 @@ module.exports = client => {
             try {
                 var results = await muteSchema.find(conditional)
             } catch {
-                console.log('No active mutes found')
+                console.log('No expired active mutes found')
                 mongoose.connection.close()
+                return
             }   
 
+            //Unmute currently muted users
             if(results && results.length) {
                 for (const result of results) {
+
                     const { guildID, userID } = result
-    
                     const guild = client.guilds.cache.get(guildID)
-                    const member = (await guild.members.fetch()).get(userID)
+
+                    try {
+                        const member = (await guild.members.fetch()).get(userID)
     
-                    const mutedRole = guild.roles.cache.find(role => {
-                        return role.name.toLowerCase() === 'muted'
-                    })
-    
-                    member.roles.remove(mutedRole)
-                    console.log(`Unmuted <@${member.id}>`)
-                }
-            }
+                        const mutedRole = guild.roles.cache.find(role => {
+                            return role.name.toLowerCase() === 'muted'
+                        })
+        
+                        member.roles.remove(mutedRole)
+                        console.log(`Unmuted <@${member.id}>`)
+
+                        await muteSchema.updateMany(conditional, {
+                            current: false,
+                        })
+                    } finally {
+                        mongoose.connection.close()
+                    }  
+                } 
+            }  
         })
 
-        await mongo().then(async (mongoose) => { 
-            try {
-                await muteSchema.updateMany(conditional, {
-                    current: false,
-                })
-            } finally {
-                mongoose.connection.close()
-            }    
-        })
-
-        //checks for mutes every 10 minutes
-        setTimeout(checkMutes, 1000 * 60 * 10)
+        //checks for bans every 5 minutes
+        setTimeout(checkMutes, 1000 * 60 * 5)
     }
     checkMutes()
 
