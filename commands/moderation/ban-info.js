@@ -6,30 +6,30 @@ const { db } = require('../../schemas/ban-sch')
 module.exports = {
     aliases: ['baninfo'],
     description: 'Returns information about a banned user',
-    expectedArgs: '<ID>',
+    expectedArgs: '<@user> | <ID>',
     exUse: '796906750569611294',
     minArgs: 1,
     maxArgs: 1, 
     permissions: ['BAN_MEMBERS'],
     callback: async (message, arguments, text) => {
+        
+        let id = text
+        if(message.mentions.users.first()) {
+            id = message.mentions.users.first().id
+        }
         const { guild } = message
-        const id = text
 
         const members = await guild.members.fetch()
         const target = members.get(id)
 
-        //checks if target exists
-        const inDiscord = !!target
+        message.channel.send(`Target: ${target}\nid: ${id}`)
 
-        const conditional = {
-            userID: id,
-            guildID: guild.id,
-        }
+        //checks if target is a server member
+        const inDiscord = !!target
 
         await mongo().then(async (mongoose) => {
 
             try {
-
                 const result = await banSchema.findOne().sort({createdAt: -1})
 
                 let banEmbed= new Discord.MessageEmbed()
