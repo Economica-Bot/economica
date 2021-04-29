@@ -5,7 +5,7 @@ module.exports = {
      expectedArgs: '<cmd>',
      minArgs: 1,
      maxArgs: 1, 
-     permission: 'ADMINISTRATOR',
+     permissions: ['ADMINISTRATOR'],
      _auth: 'BOT:OPERATOR',
      exUse: 'bal',
      description: 'test',
