@@ -5,7 +5,7 @@ module.exports = {
     exUse: 'kamaji',
     minArgs: 1,
     maxArgs: 10, 
-    permissions: 'KICK_MEMBERS',
+    permissions: ['KICK_MEMBERS'],
     callback: (message, arguments, text) => {
 
         const {member, mentions } = message
