@@ -1,6 +1,6 @@
 const Discord = require("discord.js")
 const loadCommands = require('../load-cmnds')
-const { prefix } = require('../../config.json')
+const { prefix, botAuth } = require('../../config.json')
 
 module.exports = {
     aliases: ['help', 'command', 'commands'],
@@ -67,27 +67,40 @@ module.exports = {
         .setThumbnail("https://cdn.discordapp.com/avatars/796906750569611294/34ba71dfc581a2662ec9ac250860b785.png?size=1024")
         
         let commandlist = ''
-        for (const command of commands) {
-            // Add all permissible commands
-            let permissions = command.permissions
 
-            if (permissions) {
-                let hasPermission = true
-                for(const permission of permissions) {
-                    if (!message.member.hasPermission(permission)) {
-                        hasPermission = false
-                        break
+        if (arguments[0] === 'permissible') { // Checks perms iteratively
+            for (const command of commands) {
+                let permissions = command.permissions
+                if (permissions) {
+                    let hasPermission = true
+                    for(const permission of permissions) {
+                        if (!message.member.hasPermission(permission)) {
+                            hasPermission = false
+                            break
+                        }
+                    }
+    
+                    if(command._auth !== undefined) hasPermission = false
+                    // if(botAuth.admin_id.includes(message.author.id)) hasPermission = true
+                    
+                    // If the user does not have permission, skip to the next iteration
+                    if (!hasPermission) {
+                        // temp
+                        message.channel.send(`Missing perm \`${permissions}\` for command \`${prefix}${command.aliases[0]}\``)
+                        continue
                     }
                 }
-                
-                // If the user does not have permission, skip to the next iteration
-                if (!hasPermission) {
-                    // temp
-                    message.channel.send(`Missing perm \`${permissions}\` for command \`${prefix}${command.aliases[0]}\``)
-                    continue
-                }
+                commandlist = `${commandlist} \`${prefix}${command.aliases[0]}\``
             }
-            commandlist = `${commandlist} \`${prefix}${command.aliases[0]}\``
+        } else if (arguments[0] === 'dev') { // Returns all commands
+            for (const command of commands) {
+                if(botAuth.admin_id.includes(message.author.id)) commandlist = `${commandlist} \`${prefix}${command.aliases[0]}\``
+                else continue
+            }
+        } else { // Returns all typical user commands (commands without a specific _auth)
+            for (const command of commands) {
+                if(!command._auth) commandlist = `${commandlist} \`${prefix}${command.aliases[0]}\``
+            }
         }
 
         helpEmbed.setDescription(`${commandlist}`)
