@@ -1,10 +1,8 @@
 const banSchema = require('../schemas/ban-sch')
 const mongo = require('../mongo')
-const { Message } = require('discord.js')
 
 module.exports = client => {
     const checkBans = async () => {
-        console.log('Checking Ban Data')
 
         const conditional = {
             current: true,
@@ -16,8 +14,6 @@ module.exports = client => {
                 var results = await banSchema.find(conditional)
             } catch {
                 console.log('No expired banned users found.')
-                mongoose.connection.close()
-                return 
             }
 
             //Unban expired yet currently banned users
