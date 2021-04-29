@@ -23,15 +23,22 @@ module.exports = {
         await mongo().then(async (mongoose) => {
 
             try {
-                const result = await muteSchema.updateOne({
+                const result = await muteSchema.updateMany({
                     guildID: guild.id,
                     userID: id,
                     current: true
               ***REMOVED*** {
                     current: false
                 })
+
+                const member = (await guild.members.fetch()).get(id)
+    
+                const mutedRole = guild.roles.cache.find(role => {
+                    return role.name.toLowerCase() === 'muted'
+                })
+                member.roles.remove(mutedRole)
                 
-                console.log(`Unmuted ${id} in server ${guild}`)
+                console.log(`Manually unmuted ${id} in server ${guild}`)
                 if(result) message.reply(`Unmuted user ${id}`)
 
             } finally {
