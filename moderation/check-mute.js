@@ -3,7 +3,7 @@ const mongo = require('../mongo')
 
 module.exports = client => {
     const checkMutes = async () => {
-        console.log('Checking Mute Data')
+
         const now = new Date()
 
         const conditional = {
@@ -14,15 +14,14 @@ module.exports = client => {
         }
 
         await mongo().then(async (mongoose) => { 
+
             try {
                 var results = await muteSchema.find(conditional)
-            } catch {
-                console.log('No expired active mutes found')
-                mongoose.connection.close()
-                return
-            }   
+            } catch (e) {
+                console.log(e)
+            }  
 
-            //Unmute currently muted users
+            //Unmute currently muted users whose mute has expired 
             if(results && results.length) {
                 for (const result of results) {
 
@@ -35,7 +34,6 @@ module.exports = client => {
                         const mutedRole = guild.roles.cache.find(role => {
                             return role.name.toLowerCase() === 'muted'
                         })
-        
                         member.roles.remove(mutedRole)
                         console.log(`Unmuted <@${member.id}>`)
 
@@ -70,7 +68,7 @@ module.exports = client => {
 
             if(role) {
                 member.roles.add(role)
-                console.log(`User <@${member.id}> rejoined ${guild} and was muted.`)
+                console.log(`User ${member.id} rejoined ${guild} and was muted.`)
             }
         }
     })
