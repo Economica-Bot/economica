@@ -7,6 +7,10 @@ const guildSettingsSchema = mongoose.Schema(
                type: String,
                required: true
         ***REMOVED***
+          prefix: {
+               type: String,
+               required: false
+        ***REMOVED***
           incomeWorkMin: {
                type: Number,
                required: true
@@ -15,11 +19,7 @@ const guildSettingsSchema = mongoose.Schema(
                type: Number,
                required: true
         ***REMOVED***
-          balance: {
-               type: Number,
-               required: true
-          }
      }
 )
 
-module.exports = mongoose.model('Economy', guildSettingsSchema)
+module.exports = mongoose.model('Guild', guildSettingsSchema)

@@ -1,9 +1,18 @@
 /* Global variables */
 const { cSymbol, prefix } = require('./config.json')
 
+/* Private variables */
+const prefixCache = {} // syntax: String (guildID) : String (prefix)
+
+const mongo = require('./mongo')
+const guildSettingsSchema = require('./schemas/guildsettings-sch')
+
 /* Functions (Helpers) */
 
-// GET functions
+
+// -- GET functions -- //
+
+// returns the user object of the message guild member with the specified id
 module.exports.getMemberUserById = (message, id, condition) => {
      if (condition != undefined) {
           const member = message.guild.members.cache.get(id);
@@ -15,6 +24,7 @@ module.exports.getMemberUserById = (message, id, condition) => {
      } else return;
 }
 
+// returns the id of the message guild member whose username or nickname contains the specified string
 module.exports.getMemberUserIdByMatch = (message, string, condition) => {
      if (condition) {
           const { guild } = message;
@@ -27,7 +37,7 @@ module.exports.getMemberUserIdByMatch = (message, string, condition) => {
                return 'endProcess';
           } else if (
                selectedMembers.size > 0 &&
-               selectedMembers.size < 10
+               selectedMembers.size <= 10
           ) {
                let result = []; selectedMembers.forEach(m => result.push(m.user.id))
                return result;
@@ -40,7 +50,38 @@ module.exports.getMemberUserIdByMatch = (message, string, condition) => {
      }
 }
 
-// CREATE functions
+module.exports.getPrefix = async (guildID) => {
+     const cached = prefixCache[`${guildID}`]
+     if (cached) {
+          console.log(cached)
+          return cached
+     }
+     return await mongo().then(async (mongoose) => {
+          try {
+
+               const result = await guildSettingsSchema.findOne({
+                    guildID,
+               })
+
+               let guildprefix = prefix
+               if (result) {
+                    guildprefix = result.prefix
+               }
+
+               prefixCache[`${guildID}`] = guildprefix
+               
+               return guildprefix
+          } finally {
+               mongoose.connection.close()
+
+          }
+     })
+}
+
+// -- CREATE functions -- //
+
+// returns a message collector in message.channel that accepts one number greater than zero and less than the specified max
+// note this does not activate the collector event, it only constructs the collector. the event must be activated manually: collector.on('collect', m => { ... })
 module.exports.createNumberCollector = (message, numMax, time) => {
      const filter = m => {
           return (
@@ -52,6 +93,8 @@ module.exports.createNumberCollector = (message, numMax, time) => {
 }
 
 // DISPLAY functions
+
+// retrieves message guild member balance and sends an embed in message.channel
 module.exports.displayBal = async (message, guild = message.guild, user = message.author, economy = require('./economy')) => {
      const guildID = guild.id
      const userID = user.id
@@ -77,6 +120,7 @@ module.exports.displayBal = async (message, guild = message.guild, user = messag
      })
 }
 
+// returns error embed with specified author, content, and optional commandName for help reference
 module.exports.displayEmbedError = (author, content, commandName = '\u200b') => {
      return {
           color: 'RED',
@@ -89,4 +133,10 @@ module.exports.displayEmbedError = (author, content, commandName = '\u200b') => 
                text: `${prefix}help ${commandName} | view specific help`
           }
      }
+}
+
+module.exports.displayPrefix = async (guild) => {
+     const guildID = guild.id
+
+     // const guildprefix = await economy. // ...
 }
