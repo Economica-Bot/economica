@@ -16,8 +16,9 @@ module.exports = {
                _message = _message.substr(_message.indexOf(" ") + 1);
                message.channel.send(`${_message}`)
           }
-          arguments.forEach(argument => _message = `${_message}${argument} `)
-
-          message.channel.send(`${prefix}${_message}`)
+          else {
+               arguments.forEach(argument => _message = `${_message}${argument} `)
+               message.channel.send(`${prefix}${_message}`)
+          }
      },
 }
