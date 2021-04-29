@@ -62,10 +62,9 @@ module.exports = {
         let helpEmbed= new Discord.MessageEmbed()
         helpEmbed
         .setTitle("Commands")
-        .setFooter("See the commands you have access to")
+        .setFooter(`Type \`${prefix}help <cmnd>\` for command-specific help.`)
         .setColor(15277667)
         .setThumbnail("https://cdn.discordapp.com/avatars/796906750569611294/34ba71dfc581a2662ec9ac250860b785.png?size=1024")
-        .setTimestamp()
         
         let commandlist = ''
         for (const command of commands) {
