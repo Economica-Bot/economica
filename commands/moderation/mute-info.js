@@ -5,42 +5,42 @@ const mongo = require('../../mongo')
 module.exports = {
     aliases: ['muteinfo'],
     description: 'Returns information about a muted user',
-    expectedArgs: '<ID>',
+    expectedArgs: '<@user> | <ID>',
     exUse: '796906750569611294',
     minArgs: 1,
     maxArgs: 1, 
     permissions: ['MUTE_MEMBERS'],
     callback: async (message, arguments, text) => {
+
+        let id = text
+        if(message.mentions.users.first()) {
+            id = message.mentions.users.first().id
+        }
         const { guild } = message
-        id = text
 
         const members = await guild.members.fetch()
         const target = members.get(id)
 
-        if(!target) return message.reply('Invalid ID')
+        message.channel.send(`Target: ${target}\nid: ${id}`)
 
-        //checks if target exists
+        //checks if target is a server member
         const inDiscord = !!target
 
         await mongo().then(async (mongoose) => {
 
             try {
-                const result = await muteSchema.findOne({
-                    guildID: guild.id,
-                    userID: id,
-                    current: true
-                })
+                const result = await muteSchema.findOne().sort({createdAt: -1})
 
                 let muteEmbed= new Discord.MessageEmbed()
                 muteEmbed
                 .setAuthor(
                     `Mute information for ${target ? target.user.tag : id}`, 
                     target ? target.user.displayAvatarURL() : '')
-                .addField('Mute status:', result ? 'True' : 'False')
+                .addField('Mute status:', result.current ? 'True' : 'False')
                 .addField('Server Member', inDiscord ? 'True' : 'False')
                 .setColor(15105570)
 
-                if(result) {
+                if(result.current) {
 
                     const date = new Date(result.createdAt)
                     const expirdate = new Date(result.expires)
