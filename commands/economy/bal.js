@@ -5,9 +5,9 @@ const fn = require('../../fn')
 module.exports = {
      aliases: ['balance', 'bal', 'money'],
      maxArgs: 1,
-     expectedArgs: '[@user]',
-     exUse: '@Bob',
-     description: 'Displays your balance',
+     expectedArgs: '[@user | userID | name]',
+     exUse: '@Economica#2412',
+     description: 'Displays the requested user\'s balance or yours if left blank',
      callback: async (message, arguments, text) => {
           const { guild } = message
 

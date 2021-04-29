@@ -1,4 +1,5 @@
-const mongo = require('./mongo')
+const { prefix } = require('./config.json')
+
 const economyBalSchema = require('./schemas/economy-sch')
 
 // memory (faster than database) - we store values here once we get them from db
@@ -9,7 +10,6 @@ module.exports = (client) => {}
 module.exports.addBal = async (guildID, userID, balance) => {
      return await mongo().then(async (mongoose) => {
           try {
-               // console.log('findOneAndUpdate() running')
 
                const result = await economyBalSchema.findOneAndUpdate({
                     guildID,
@@ -39,12 +39,10 @@ module.exports.addBal = async (guildID, userID, balance) => {
 module.exports.getBal = async (guildID, userID) => {
      const cached = balanceCache[`${guildID}-${userID}`] + 1
      if ( cached ) {
-          console.log(balanceCache)
           return cached - 1
      }
      return await mongo().then(async (mongoose) => {
           try {
-               console.log('findOne() running')
 
                const result = await economyBalSchema.findOne({
                     guildID,
@@ -57,8 +55,6 @@ module.exports.getBal = async (guildID, userID) => {
                if (result) {
                     balance = result.balance
                } else {
-                    console.log('creating new schema')
-
                     await new economyBalSchema({
                          guildID,
                          userID,
