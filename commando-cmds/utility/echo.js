@@ -1,31 +1,27 @@
-const Commando = require('discord.js-commando');
+const { Command } = require('discord.js-commando');
 
-module.exports = class FirstCommand extends Commando.Command {
+module.exports = class EchoCommand extends Command {
      constructor(client) {
           super(client, {
                name: 'echo',
                group: 'utility',
                memberName: 'echo',
                description: 'Echo arguments',
-               argType: 'single'
           })
      }
 
      async run(message, args) {
-          console.log(args)
-          console.log(args.length)
-          const user = message.author
-          const last = args.length - 1
-
-          if (args[last] == '--embed' || args[last] == '--e') {
-               const text = args[0, last - 1]
-               message.channel.send({ embed: { 
+          if (args.endsWith('--embed') || args.endsWith('--e')) {
+               args = args.substr(0, args.indexOf('--embed'));
+               return message.channel.send({ embed: {
+                    color: '#2c2f33',
                     author: {
-                         name: user.tag,
-                         icon_url: user.avatarURL(),
+                         name: message.author.tag,
+                         icon_url: message.author.avatarURL(),
                   ***REMOVED***
-                    description: text
+                    description: args
                }})
-          } else message.channel.send(args)
+          }
+          return message.channel.send(args);
      }
 }

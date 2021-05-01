@@ -2,27 +2,31 @@
 // const client = new Discord.Client({ fetchAllMembers: true })
 // client.setMaxListeners(0)
 
-const Commando = require('discord.js-commando')
+const { CommandoClient } = require('discord.js-commando')
 const config = require('./config.json')
 const path = require('path')
 
-const client = new Commando.CommandoClient({
+const client = new CommandoClient({
      commandPrefix: config.prefix,
      nonCommandEditable: false,
      owner: config.botAuth.admin_id,
-     invite: 'https://discord.gg/R5jvSarddd'
+     invite: 'https://discord.gg/R5jvSarddd',
+
 })
 
 client.registry
+     .registerDefaultTypes()
      .registerGroups([
           ['config', 'Config & Setup'],
           ['economy', 'Economy'],
           ['utility', 'Utility'],
           ['moderation', 'Moderation']
      ])
-     .registerDefaults()
-     .registerCommandsIn(path.join(__dirname, 'commando-cmds'))
-
+     .registerDefaultGroups()
+     .registerDefaultCommands({
+          unknownCommand: false
+     })
+     .registerCommandsIn(path.join(__dirname, 'commando-cmds'));
 // const loadCommands = require('./commands/load-cmnds')
 // const checkMutes = require('./moderation/check-mute')
 // const checkBans = require('./moderation/check-ban')
