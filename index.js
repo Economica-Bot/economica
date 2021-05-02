@@ -22,7 +22,6 @@ client.registry
           ['utility', 'Utility'],
           ['moderation', 'Moderation']
      ])
-     .registerDefaultGroups()
      .registerDefaultCommands({
           unknownCommand: false
      })
