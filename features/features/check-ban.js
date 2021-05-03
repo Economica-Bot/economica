@@ -1,5 +1,5 @@
-const banSchema = require('../schemas/ban-sch')
-const mongo = require('../mongo')
+const banSchema = require('../../schemas/ban-sch')
+const mongo = require('../../mongo')
 
 module.exports = client => {
     const checkBans = async () => {
@@ -44,7 +44,7 @@ module.exports = client => {
         })
 
         //checks for bans every 5 minutes
-        setTimeout(checkBans, 1000 * 60 * 5)
+        setTimeout(checkBans, 1000 * 3)
     }
     checkBans()
 

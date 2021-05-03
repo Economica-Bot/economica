@@ -1,40 +1,30 @@
-// const Discord = require('discord.js')
-// const client = new Discord.Client({ fetchAllMembers: true })
-// client.setMaxListeners(0)
-
-const { CommandoClient } = require('discord.js-commando')
+const { CommandoClient, GuildSettingsHelper } = require('discord.js-commando')
 const config = require('./config.json')
 const path = require('path')
 
 const client = new CommandoClient({
      commandPrefix: config.prefix,
-     nonCommandEditable: false,
+     //nonCommandEditable: false,
      owner: config.botAuth.admin_id,
      invite: 'https://discord.gg/R5jvSarddd',
 
 })
 
 client.registry
-     .registerDefaultTypes()
+     .registerDefaults()
      .registerGroups([
           ['config', 'Config & Setup'],
           ['economy', 'Economy'],
           ['utility', 'Utility'],
           ['moderation', 'Moderation']
      ])
-     .registerDefaultCommands({
-          unknownCommand: false
-     })
-     .registerCommandsIn(path.join(__dirname, 'commando-cmds'));
-// const loadCommands = require('./commands/load-cmnds')
-// const checkMutes = require('./moderation/check-mute')
-// const checkBans = require('./moderation/check-ban')
-const mongo = require('./mongo')
+     .registerCommandsIn(path.join(__dirname, 'commando-commands'))
 
 client.on('ready', async () => {
-     console.log('The client is ready!')
 
-     // loadCommands(client)
+     console.log('The client is ready!')
+          
+     const mongo = require('./mongo')
 
      await mongo().then(mongoose => {
           try {
@@ -44,8 +34,10 @@ client.on('ready', async () => {
           }
      })
 
-     // checkMutes(client)
-     // checkBans(client)
+     const checkMutes = require('../economica/features/features/check-mute')
+     const checkBans = require('../economica/features/features/check-ban')
+     checkMutes(client)
+     checkBans(client)
 })
 
 if (config.useAltToken == true) {
