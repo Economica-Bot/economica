@@ -35,7 +35,7 @@ module.exports = client => {
                             return role.name.toLowerCase() === 'muted'
                         })
                         member.roles.remove(mutedRole)
-                        console.log(`Unmuted <@${member.id}>`)
+                        console.log(`Unmuted ${userID} in server ${guild}`)
 
                         await muteSchema.updateMany(conditional, {
                             current: false,

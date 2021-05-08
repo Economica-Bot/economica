@@ -10,7 +10,9 @@ module.exports = class BanInfo extends Command {
             group: 'moderation',
             guildOnly: true,
             memberName: 'ban info',
-            description: 'Returns information about a banned user',
+            description: 'Returns ban information about a user', 
+            details: 'The command will work regardless of the user being a member of the server or not.',
+            usage: 'baninfo <@user | id>',
             examples: [
                 'baninfo @Bob',
                 'baninfo 796906750569611294'
@@ -26,7 +28,7 @@ module.exports = class BanInfo extends Command {
             args: [
                 {
                     key: 'user',
-                    prompt: 'please @mention or provide the ID of the user',
+                    prompt: 'please @mention or provide the ID of a user',
                     type: 'string'
                 }
             ]
@@ -36,30 +38,26 @@ module.exports = class BanInfo extends Command {
     async run(message, { user }) {
 
         //convert mention to id
-        let id = user
-        if (message.mentions.users.first()) {
-            id = message.mentions.users.first().id
-        }
+        const id = message.mentions.users.first() ? message.mentions.users.first().id : user
 
         const { guild } = message
         const member = guild.members.cache.get(id)
 
-        //checks if the target is a server member
+        //checks if the member is a server member
         const inDiscord = !!member
 
         await mongo().then(async (mongoose) => {
 
             try {
-                //find newest ban report
+                //find newest ban schema
                 const result = await banSchema.findOne().sort({ createdAt: -1 })
 
                 if (result) {
                     let banEmbed = new Discord.MessageEmbed()
-                    banEmbed
                         .setAuthor(
                             `Ban information for ${member ? member.user.tag : id}`, member ? member.user.displayAvatarURL() : ''
                         )
-                        .addField('Banned?', result.current ? 'True' : 'False')
+                        .addField('Ban Status', result.current ? 'True' : 'False')
                         .addField('Server Member?', inDiscord ? 'True' : 'False')
                         .setColor(12345678)
 
@@ -69,8 +67,8 @@ module.exports = class BanInfo extends Command {
                             .addField('Banned by', `${guild.members.cache.get(result.staffID)}`)
                             .addField('Banned for', `${result.reason}`)
                     }
-                    message.reply(banEmbed)
-                } else message.reply(`User ${member ? member.user.tag : id} has never been banned!`)
+                    message.say(banEmbed)
+                } else message.reply(`User ${member ? member.user.tag : id} has never been banned.`)
 
             } finally {
                 mongoose.connection.close()
