@@ -12,8 +12,8 @@ module.exports = class BanInfo extends Command {
             memberName: 'ban info',
             description: 'Returns ban information about a user', 
             details: 'The command will work regardless of the user being a member of the server or not.',
-            usage: 'baninfo <@user | id>',
             examples: [
+                'baninfo <@user | id>',
                 'baninfo @Bob',
                 'baninfo 796906750569611294'
             ],
@@ -23,7 +23,6 @@ module.exports = class BanInfo extends Command {
             userPermissions: [
                 'BAN_MEMBERS'
             ],
-            argsSingleQuotes: false,
             argsCount: 1,
             args: [
                 {
@@ -52,24 +51,23 @@ module.exports = class BanInfo extends Command {
                 //find newest ban schema
                 const result = await banSchema.findOne().sort({ createdAt: -1 })
 
+                let banEmbed = new Discord.MessageEmbed()
+                    .setAuthor(
+                        `Ban information for ${member ? member.user.tag : id}`, member ? member.user.displayAvatarURL() : ''
+                    )
+                    .addField('Server Member?', inDiscord ? 'True' : 'False')
+                    .setColor(12345678)
+                        
                 if (result) {
-                    let banEmbed = new Discord.MessageEmbed()
-                        .setAuthor(
-                            `Ban information for ${member ? member.user.tag : id}`, member ? member.user.displayAvatarURL() : ''
-                        )
-                        .addField('Ban Status', result.current ? 'True' : 'False')
-                        .addField('Server Member?', inDiscord ? 'True' : 'False')
-                        .setColor(12345678)
-
+                    banEmbed.addField('Ban Status', result.current ? 'True' : 'False')
                     if (result.current) {
                         banEmbed
                             .addField('Banned on', `${new Date(result.createdAt)}`)
                             .addField('Banned by', `${guild.members.cache.get(result.staffID)}`)
                             .addField('Banned for', `${result.reason}`)
                     }
-                    message.say(banEmbed)
-                } else message.reply(`User ${member ? member.user.tag : id} has never been banned.`)
-
+                } else banEmbed.addField('Ban status', 'False')
+                message.say(banEmbed)
             } finally {
                 mongoose.connection.close()
             }

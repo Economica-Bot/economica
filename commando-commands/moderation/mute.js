@@ -11,20 +11,24 @@ module.exports = class MuteCommand extends Command {
             guildOnly: true,
             memberName: 'mute',
             description: 'Mutes a user',
-            details: 'This command requires a \`muted\` role with respective permissions. The length, if specified, must be in a format of minutes, hours, then days. This command only works on current member of your server. If a user leaves and comes back, the mute role will be automatically renewed.',
-            usage: 'mute <@user> [length] [reason]',
+            details: 'This command requires a \`muted\` role with respective permissions. The length, if specified, must be in a format of minutes, hours, then days. This command only works on current member of your server. If a user leaves and comes back, the mute role will be automatically renewed.', 
+            examples: [
+                'mute <@user> [length] [reason]',
+                'mute @Bob 10D',
+                'mute @Bob spamming',
+                'mute @Bob 5m ignoring rules'
+            ],
             clientPermissions: [
                 'MUTE_MEMBERS'
             ],
             userPermissions: [
                 'MUTE_MEMBERS'
             ],
-            argsSingleQuotes: true,
             argsType: 'multiple',
             argsCount: 2, 
             args: [
                 {
-                    key: 'target',
+                    key: 'member',
                     prompt: 'please @mention the member you wish to mute',
                     type: 'member'
                 },
@@ -38,7 +42,7 @@ module.exports = class MuteCommand extends Command {
         })
     }
 
-    async run(message, {target, args}) {
+    async run(message, { member, args }) {
 
         const { guild, author: staff } = message
 
@@ -57,20 +61,10 @@ module.exports = class MuteCommand extends Command {
             var reason = args1.length ? args : 'No reason provided'
         }
 
-       const mutedRole = guild.roles.cache.find(role => {
-            return role.name.toLowerCase() === 'muted'
-        })
-
-        if(!mutedRole) {
-            return message.reply('Please create a "muted" role!')
-        }
-
-        target.roles.add(mutedRole)
-
         await mongo().then(async (mongoose) => { 
 
             const prevMutes = await muteSchema.find({
-                userID: target.id,
+                userID: member.id,
                 guildID: guild.id
             })
 
@@ -83,21 +77,33 @@ module.exports = class MuteCommand extends Command {
                 return message.reply('That user is already muted')
             }
 
+            const mutedRole = guild.roles.cache.find(role => {
+                return role.name.toLowerCase() === 'muted'
+            })
+    
+            if(!mutedRole) {
+                return message.reply('Please create a "muted" role!')
+            }
+    
+            await member.send(`You have been muted in **${guild}** until **${expires}** for \`${reason}\``)
+            member.roles.add(mutedRole)
+    
+            message.say(`Muted **${member.user.tag}** for \`${reason}\`. They will be unmuted on **${expires.toLocaleString()}**`)
+
             try {
                 await new muteSchema({
-                userID: target.id,
-                guildID: guild.id,
-                reason,
-                staffID: staff.id,
-                staffTag: staff.tag,
-                expires,
-                current: true 
+                    userID: member.id,
+                    guildID: guild.id,
+                    reason,
+                    staffID: staff.id,
+                    staffTag: staff.tag,
+                    expires,
+                    current: true 
                 }).save() 
-                console.log(`Muted ${target.user.tag} in server ${guild} for "${reason}" until ${expires.toLocaleString()}`) 
+                //console.log(`Mute Schema created: ${member.user.tag} in server ${guild} for "${reason}" until ${expires.toLocaleString()}`) 
             } finally {
                 mongoose.connection.close()
             }
-            return message.say(`Muted <@${target.user.tag}> for \`${reason}\`. They will be unmuted on ${expires.toLocaleString()}`)
         })
     }
 }

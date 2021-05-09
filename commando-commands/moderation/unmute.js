@@ -11,18 +11,20 @@ module.exports = class UnMuteCommand extends Command {
             memberName: 'unmute',
             description: 'Unmutes a user',
             details: 'This command requires a \`muted\` roles with respective permissions. The command only works on a current member of a server.',
-            usage: 'unmute <@user>',
+            examples: [
+                'unmute <@user>',
+                'unmute @Bob'
+            ],
             clientPermissions: [
                 'MUTE_MEMBERS'
             ],
             userPermissions: [
                 'MUTE_MEMBERS'
             ],
-            argsSingleQuotes: true,
             argsCount: 1,
             args: [
                 {
-                    key: 'target',
+                    key: 'member',
                     prompt: 'please @mention the member you wish to unmute',
                     type: 'member'
                 }
@@ -30,7 +32,7 @@ module.exports = class UnMuteCommand extends Command {
         })
     }
 
-    async run(message, { target }) {
+    async run(message, { member }) {
         
         const { guild } = message
         
@@ -39,7 +41,7 @@ module.exports = class UnMuteCommand extends Command {
 
                 //Checks if there is an active mute 
                 const prevMutes = await muteSchema.find({
-                    userID: target.id,
+                    userID: member.id,
                     guildID: guild.id
                 })
 
@@ -52,7 +54,7 @@ module.exports = class UnMuteCommand extends Command {
                 }
 
                 const result = await muteSchema.updateMany({
-                    userID: target.id,
+                    userID: member.id,
                     guildID: guild.id,
                     current: true
                 }, {
@@ -64,11 +66,11 @@ module.exports = class UnMuteCommand extends Command {
                 })
 
                 if(result) {
-                    target.roles.remove(mutedRole)
-                    console.log(`Manually unmuted ${target.id} in server ${guild}.`)
-                    if(result) message.say(`Unmuted user <@${target.id}>`)
+                    member.roles.remove(mutedRole)
+                    console.log(`Manually unmuted ${member.id} in server ${guild}.`)
+                    if(result) message.say(`Unmuted user <@${member.id}>`)
                 } else {
-                    message.say(`<@${target.id}> could not be unmuted.`)
+                    message.say(`<@${member.id}> could not be unmuted.`)
                 }
             } finally {
                 mongoose.connection.close()
