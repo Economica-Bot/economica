@@ -13,6 +13,7 @@ module.exports = class BanCommand extends Command {
                description: 'Bans a user',
                details: 'This command will ban a specified user and record details about the ban.',
                examples: [
+                    'ban <@user>',
                     'ban @Bob',
                     'ban @Bob Spamming'
                ],
@@ -22,12 +23,11 @@ module.exports = class BanCommand extends Command {
                userPermissions: [
                     'BAN_MEMBERS'
                ],
-               argsSingleQuotes: false,
                argsType: 'multiple',
                argsCount: 2,
                args: [
                     {
-                         key: 'target',
+                         key: 'member',
                          prompt: 'please @mention the member you wish to ban',
                          type: 'member'
                   ***REMOVED***
@@ -35,38 +35,40 @@ module.exports = class BanCommand extends Command {
                          key: 'reason',
                          prompt: 'please provide a reason for this ban',
                          type: 'string',
-                         infinite: true,
-                         default: 'NONE'
+                         default: 'No reason provided'
                     }
                ]
           })
      }
 
-     async run(message, { target, reason }) {
+     async run(message, { member, reason }) {
           const { guild, author: staff } = message
-          if(target.bannable) {
+          if(member.bannable) {
+
+               await member.send(`You have been banned from **${guild}** for \`${reason}\``)
+               member.ban({
+                    reason: reason
+               })
+               message.say(`Banned user ${member} for \`${reason}\``)
+
                await mongo().then( async (mongoose) => {
                     try{
                          await new banSchema({
-                              userID: target.id,
+                              userID: member.id,
                               guildID: guild.id,
-                              reason: `${reason}`,
+                              reason,
                               staffID: staff.id,
                               staffTag: staff.tag,
                               current: true,
                               expired: false,
                          }).save()
+                         //console.log(`Ban Schema created: ${member.user.tag} in server ${guild} for "${reason}"`)
                     } finally {
                          mongoose.connection.close()
                     }
                }) 
-
-               const targetMember = guild.members.cache.get(target.id)
-               targetMember.ban({
-                    reason: reason
-               })
-               message.say(`Banned user ${target} for \`${reason}\``)
+          } else {
+               message.say(`${member.user.tag} could not be banned.`)
           }
      }
-     
 }
