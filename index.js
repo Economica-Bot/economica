@@ -4,14 +4,20 @@ const path = require('path')
 
 const client = new CommandoClient({
      commandPrefix: config.prefix,
-     //nonCommandEditable: false,
+     nonCommandEditable: false,
      owner: config.botAuth.admin_id,
      invite: 'https://discord.gg/R5jvSarddd',
+     unknownCommandResponse: false
 
 })
 
 client.registry
-     .registerDefaults()
+     .registerDefaultTypes()
+     .registerDefaultGroups()
+     .registerDefaultCommands({
+          prefix: false,
+          unknownCommand: false
+     })
      .registerGroups([
           ['config', 'Config & Setup'],
           ['economy', 'Economy'],

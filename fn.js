@@ -9,6 +9,35 @@ const guildSettingsSchema = require('./schemas/guildsettings-sch')
 
 /* Functions (Helpers) */
 
+// -- SET functions -- //
+
+module.exports.setPrefix = async (guildID, prefix) => {
+
+     const cached = prefixCache[`${guildID}`]
+     if(prefix == cached) return
+
+     return await mongo().then(async (mongoose) => {
+          try {
+               const result = await guildSettingsSchema.findOneAndUpdate({
+                    _id: guildID
+               }, {
+                    _id: guildID,
+                    prefix
+               }, {
+                    upsert: true,
+                    new: true
+               })
+               if(!result) {
+                    await new guildSettingsSchema({
+                         _id: guildID,
+                         prefix
+                    }).save()
+               }
+          } finally {
+               mongoose.connection.close()
+          }
+     })
+}
 
 // -- GET functions -- //
 
@@ -60,7 +89,7 @@ module.exports.getPrefix = async (guildID) => {
           try {
 
                const result = await guildSettingsSchema.findOne({
-                    guildID,
+                    _id: guildID
                })
 
                let guildprefix = prefix
@@ -73,7 +102,6 @@ module.exports.getPrefix = async (guildID) => {
                return guildprefix
           } finally {
                mongoose.connection.close()
-
           }
      })
 }
