@@ -1,4 +1,4 @@
-const { Command } = require('discord.js-commando')
+/* const { Command } = require('discord.js-commando')
 const mongo = require('../../mongo')
 const banSchema = require('../../schemas/ban-sch')
 
@@ -71,4 +71,4 @@ module.exports = class BanCommand extends Command {
                message.say(`${member.user.tag} could not be banned.`)
           }
      }
-}
+} */

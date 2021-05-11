@@ -1,6 +1,7 @@
 const { CommandoClient, GuildSettingsHelper } = require('discord.js-commando')
 const config = require('./config.json')
 const path = require('path')
+const helper = require('./helper')
 
 const client = new CommandoClient({
      commandPrefix: config.prefix,

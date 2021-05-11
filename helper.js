@@ -3,7 +3,7 @@ const mongo = require('./mongo')
 
 const guildSettingsSchema = require('./schemas/guildsettings-sch')
 const economyBalSchema = require('./schemas/economy-sch')
-const { User, Guild, Message, User } = require('discord.js')
+const { User, Guild, Message } = require('discord.js')
 
 const prefixCache = {} // syntax: String (guildID) : String (prefix)
 const balanceCache = {} // syntax: String (guildID-userID) : Number (balance)
@@ -27,7 +27,7 @@ module.exports.getMemberUserById = (message, id) => {
  * @param {Message} message - parent object of guild, typically message
  * @param {string} string - string to validate for username match
  */
-module.exports.getMemberUserIdByMatch = (message, string) => {
+module.exports.getMemberUserByMatch = (message, string) => {
      const { guild } = message;
      string = string.toLowerCase()
 
@@ -40,12 +40,21 @@ module.exports.getMemberUserIdByMatch = (message, string) => {
           selectedMembers.size > 0 &&
           selectedMembers.size <= 10
      ) {
-          let result = []; selectedMembers.forEach(m => result.push(m.user.id))
+          let result = []; selectedMembers.forEach(m => result.push(m.user))
           return result;
      } else {
           const content = `Woah, \`${selectedMembers.size.toString()}\` members found with those characters!\nTry being less broad with your search.`
           message.channel.send({ embed: this.displayEmbedError(message.author, content, 'balance') })
           return 'endProcess'
+     }
+}
+
+module.exports.specifyUserByMatch = (message, string, time) => {
+     const collectedUsers = this.getMemberUserByMatch(message, string)
+     if (collectedUsers.length == 1) return collectedUsers[0]
+     const msg = ``; let i = 0
+     for (const user of collectedUsers) {
+          msg = `${msg}\`${(i++).toString()}\` <@!${user.id}>\n`
      }
 }
 
