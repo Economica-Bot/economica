@@ -7,7 +7,8 @@ const client = new CommandoClient({
      nonCommandEditable: false,
      owner: config.botAuth.admin_id,
      invite: 'https://discord.gg/R5jvSarddd',
-     unknownCommandResponse: false
+     unknownCommandResponse: false,
+     fetchAllMembers: true
 
 })
 
