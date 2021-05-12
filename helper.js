@@ -2,9 +2,10 @@ const { cSymbol, prefix } = require('./config.json')
 const mongo = require('./mongo')
 const path = require('path')
 const fs = require('fs')
+const config = require('./config.json')
 
 const economyBalSchema = require('./schemas/economy-bal-sch')
-const prefixSchema = require('./schemas/prefix-sch')
+const guildSettingSchema = require('./schemas/guild-settings-sch')
 const { User, Guild, Message } = require('discord.js')
 
 const prefixCache = {} // guildID: [prefix]
@@ -53,15 +54,14 @@ module.exports.getMemberUserIdByMatch = (message, string) => {
 
 /**
  * Set the prefix of a guild by id
- * @param {String} guildID - the id of the guild
+ * @param {CommandoMessage} guildID - the id of the guild
  * @param {String} prefix - the new prefix
  */
  module.exports.setPrefix = async (guildID, prefix) => {
-     prefixCache[`${guildID}`] = prefix
-
+     prefixCache[`${guildID}`] = prefix ? prefix : config.prefix
      await mongo().then(async (mongoose) => {
           try {
-               await prefixSchema.findOneAndUpdate({
+               await guildSettingSchema.findOneAndUpdate({
                     _id: guildID
                }, {
                     _id: guildID,
@@ -82,28 +82,22 @@ module.exports.getMemberUserIdByMatch = (message, string) => {
  */
 module.exports.getPrefix = async (guildID) => {
      const cached = prefixCache[`${guildID}`]
-     if (cached) {
+     if(cached !== undefined) {
           return cached
-     }
-     else await mongo().then(async (mongoose) => {
+     } else await mongo().then(async (mongoose) => {
           try {
-               const result = await prefixSchema.findOne({
-                    guildID,
+               console.log('Calling mongodb')
+               const result = await guildSettingSchema.findOne({
+                    _id: guildID,
                })
-
-               let guildPrefix = prefix
-               if (result) {
-                    guildPrefix = result.prefix
+               if(result) {
+                    prefixCache[`${guildID}`] = result.prefix
                }
-
-               prefixCache[`${guildID}`] = guildPrefix
-
-               return guildPrefix
           } finally {
                mongoose.connection.close()
-
           }
      })
+     return prefixCache[guildID]
 }
 
 /**
