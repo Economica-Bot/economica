@@ -3,7 +3,7 @@ const mongo = require('./mongo')
 
 const guildSettingsSchema = require('./schemas/guildsettings-sch')
 const economyBalSchema = require('./schemas/economy-sch')
-const { User, Guild, Message, User } = require('discord.js')
+const { User, Guild, Message } = require('discord.js')
 
 const prefixCache = {} // syntax: String (guildID) : String (prefix)
 const balanceCache = {} // syntax: String (guildID-userID) : Number (balance)
@@ -84,7 +84,7 @@ module.exports.getPrefix = async (guildID) => {
 /**
  * returns a message collector in message.channel that accepts one number greater than zero and less than the specified max
  * @param {Message} message - collector parent object, typically message (where the collector listens)
- * @param {number} numMax - maximum number of valid numbers collected
+ * @param {number} numMax - total number of choices
  * @param {number} time - time in ms until collector expires
  */
 module.exports.createNumberCollector = (message, numMax, time) => {
@@ -95,6 +95,26 @@ module.exports.createNumberCollector = (message, numMax, time) => {
           )
      }
      return message.channel.createMessageCollector(filter, { time, max: 1 })
+}
+
+/**
+ * 
+ * @param {User} author - author of the embed
+ * @param {string} content - description of the embed
+ * @param {string} commandName - name of the command optional
+ */
+module.exports.displayEmbedError = (author, content, commandName = '\u200b') => {
+     return {
+          color: 'RED',
+          author: {
+               name: author.tag,
+               icon_url: author.avatarURL(),
+          },
+          description: content,
+          footer: {
+               text: `${prefix}help ${commandName} | view specific help`
+          }
+     }
 }
 
 /**
