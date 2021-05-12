@@ -1,12 +1,14 @@
 const { cSymbol, prefix } = require('./config.json')
 const mongo = require('./mongo')
+const path = require('path')
+const fs = require('fs')
 
-const guildSettingsSchema = require('./schemas/guildsettings-sch')
-const economyBalSchema = require('./schemas/economy-sch')
+const economyBalSchema = require('./schemas/economy-bal-sch')
+const prefixSchema = require('./schemas/prefix-sch')
 const { User, Guild, Message } = require('discord.js')
 
-const prefixCache = {} // syntax: String (guildID) : String (prefix)
-const balanceCache = {} // syntax: String (guildID-userID) : Number (balance)
+const prefixCache = {} // guildID: [prefix]
+const balanceCache = {} // guildID-UserID: [balance]
 
 /**
  * returns the user object of the message guild member with the specified id
@@ -34,7 +36,7 @@ module.exports.getMemberUserIdByMatch = (message, string) => {
      const selectedMembers = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(string) || m.displayName.toLowerCase().includes(string))
      if (selectedMembers.size == 0) {
           const content = `No members with \`${string.substr(0, 32)}\` in their user or nick found.\nTry mentioning this person or using their ID instead.`
-          message.channel.send({ embed: this.displayEmbedError(message.author, content, 'balance') })
+          message.channel.send({ embed: this.createErrorEmbed(message.author, content, 'balance') })
           return 'endProcess';
      } else if (
           selectedMembers.size > 0 &&
@@ -44,9 +46,34 @@ module.exports.getMemberUserIdByMatch = (message, string) => {
           return result;
      } else {
           const content = `Woah, \`${selectedMembers.size.toString()}\` members found with those characters!\nTry being less broad with your search.`
-          message.channel.send({ embed: this.displayEmbedError(message.author, content, 'balance') })
+          message.channel.send({ embed: this.createErrorEmbed(message.author, content, 'balance') })
           return 'endProcess'
      }
+}
+
+/**
+ * Set the prefix of a guild by id
+ * @param {String} guildID - the id of the guild
+ * @param {String} prefix - the new prefix
+ */
+ module.exports.setPrefix = async (guildID, prefix) => {
+     prefixCache[`${guildID}`] = prefix
+
+     await mongo().then(async (mongoose) => {
+          try {
+               await prefixSchema.findOneAndUpdate({
+                    _id: guildID
+               }, {
+                    _id: guildID,
+                    prefix
+               }, {
+                    upsert: true
+               })
+          } finally {
+               mongoose.connection.close()
+          }
+     })
+     return prefixCache[`${guildID}`]
 }
 
 /**
@@ -56,24 +83,22 @@ module.exports.getMemberUserIdByMatch = (message, string) => {
 module.exports.getPrefix = async (guildID) => {
      const cached = prefixCache[`${guildID}`]
      if (cached) {
-          console.log(cached)
           return cached
      }
-     return await mongo().then(async (mongoose) => {
+     else await mongo().then(async (mongoose) => {
           try {
-
-               const result = await guildSettingsSchema.findOne({
+               const result = await prefixSchema.findOne({
                     guildID,
                })
 
-               let guildprefix = prefix
+               let guildPrefix = prefix
                if (result) {
-                    guildprefix = result.prefix
+                    guildPrefix = result.prefix
                }
 
-               prefixCache[`${guildID}`] = guildprefix
+               prefixCache[`${guildID}`] = guildPrefix
 
-               return guildprefix
+               return guildPrefix
           } finally {
                mongoose.connection.close()
 
@@ -90,11 +115,31 @@ module.exports.getPrefix = async (guildID) => {
 module.exports.createNumberCollector = (message, numMax, time) => {
      const filter = m => {
           return (
-               (parseInt(m.content) > 0 && parseInt(m.content) < numMax) &&
+               (parseInt(m.content) > 0 && parseInt(m.content) <= numMax) &&
                m.author.id === message.author.id
           )
      }
      return message.channel.createMessageCollector(filter, { time, max: 1 })
+}
+
+/**
+ * returns error embed with specified author, content, and optional commandName for help reference
+ * @param {User} author - embed author user
+ * @param {string} content - embed description
+ * @param {string} commandName - name of command where error occured
+ */
+module.exports.createErrorEmbed = (author, content, commandName = '\u200b') => {
+     return {
+          color: 'RED',
+          author: {
+               name: author.tag,
+               icon_url: author.avatarURL(),
+          },
+          description: content,
+          footer: {
+               text: `${prefix}help ${commandName} | view specific help`
+          }
+     }
 }
 
 /**
@@ -118,16 +163,16 @@ module.exports.displayEmbedError = (author, content, commandName = '\u200b') => 
 }
 
 /**
- * 
- * @param {Message} message 
- * @param {Guild} guild -  
- * @param {User} user 
+ * sends an embed detailing user's balance
+ * @param {Message} message - channel in which to display balance info
+ * @param {Guild} guild - user's guild, default message.guild
+ * @param {User} user - the target user, default message.author
  */
-module.exports.displayBal = async (message, guild = message.guild, user = message.author) => {
+ module.exports.displayBal = async (message, guild = message.guild, user = message.author) => {
      const guildID = guild.id
      const userID = user.id
 
-     const balance = await economy.getBal(guildID, userID)
+     const balance = await this.getBal(guildID, userID)
 
      message.channel.send({
           embed: {
@@ -146,26 +191,6 @@ module.exports.displayBal = async (message, guild = message.guild, user = messag
                ]
           }
      })
-}
-
-/**
- * returns error embed with specified author, content, and optional commandName for help reference
- * @param {User} author - embed author user
- * @param {string} content - embed description
- * @param {string} commandName - name of command where error occured
- */
-module.exports.createErrorEmbed = (author, content, commandName = '\u200b') => {
-     return {
-          color: 'RED',
-          author: {
-               name: author.tag,
-               icon_url: author.avatarURL(),
-          },
-          description: content,
-          footer: {
-               text: `${prefix}help ${commandName} | view specific help`
-          }
-     }
 }
 
 /**

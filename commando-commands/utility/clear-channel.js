@@ -1,4 +1,3 @@
-const { Message } = require('discord.js')
 const { Command } = require('discord.js-commando')
 
 module.exports = class ClearChannelCommand extends Command {
