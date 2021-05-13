@@ -2,9 +2,10 @@ const { cSymbol, prefix } = require('./config.json')
 const mongo = require('./mongo')
 const path = require('path')
 const fs = require('fs')
+const config = require('./config.json')
 
 const economyBalSchema = require('./schemas/economy-bal-sch')
-const prefixSchema = require('./schemas/prefix-sch')
+const guildSettingSchema = require('./schemas/guild-settings-sch')
 const { User, Guild, Message } = require('discord.js')
 
 const prefixCache = {} // guildID: [prefix]
@@ -52,6 +53,54 @@ module.exports.getMemberUserIdByMatch = (message, string) => {
           message.channel.send({ embed: this.createErrorEmbed(message.author, content, 'balance') })
           return 'endProcess'
      }
+}
+
+/**
+ * Set the prefix of a guild by id
+ * @param {CommandoMessage} guildID - the id of the guild
+ * @param {String} prefix - the new prefix
+ */
+ module.exports.setPrefix = async (guildID, prefix) => {
+     prefixCache[`${guildID}`] = prefix ? prefix : config.prefix
+     await mongo().then(async (mongoose) => {
+          try {
+               await guildSettingSchema.findOneAndUpdate({
+                    _id: guildID
+             ***REMOVED*** {
+                    _id: guildID,
+                    prefix
+             ***REMOVED*** {
+                    upsert: true
+               })
+          } finally {
+               mongoose.connection.close()
+          }
+     })
+     return prefixCache[`${guildID}`]
+}
+
+/**
+ * get the prefix of a guild by id
+ * @param {string} guildID - the id of the guild
+ */
+module.exports.getPrefix = async (guildID) => {
+     const cached = prefixCache[`${guildID}`]
+     if(cached !== undefined) {
+          return cached
+     } else await mongo().then(async (mongoose) => {
+          try {
+               console.log('Calling mongodb')
+               const result = await guildSettingSchema.findOne({
+                    _id: guildID,
+               })
+               if(result) {
+                    prefixCache[`${guildID}`] = result.prefix
+               }
+          } finally {
+               mongoose.connection.close()
+          }
+     })
+     return prefixCache[guildID]
 }
 
 /**
@@ -247,61 +296,6 @@ module.exports.getBal = async (guildID, userID) => {
 }
 
 /**
- * Set the prefix of a guild by id
- * @param {String} guildID - the id of the guild
- * @param {String} prefix - the new prefix
- */
-module.exports.setPrefix = async (guildID, prefix) => {
-     prefixCache[`${guildID}`] = prefix
-
-     await mongo().then(async (mongoose) => {
-          try {
-               await prefixSchema.findOneAndUpdate({
-                    _id: guildID
-             ***REMOVED*** {
-                    _id: guildID,
-                    prefix
-             ***REMOVED*** {
-                    upsert: true
-               })
-          } finally {
-               mongoose.connection.close()
-          }
-     })
-     return prefixCache[`${guildID}`]
-}
-
-/**
- * get the prefix of a guild by id
- * @param {string} guildID - the id of the guild
- */
-module.exports.getPrefix = async (guildID) => {
-     const cached = prefixCache[`${guildID}`]
-     if (cached) {
-          return cached
-     }
-     else await mongo().then(async (mongoose) => {
-          try {
-               const result = await prefixSchema.findOne({
-                    guildID,
-               })
-
-               let guildPrefix = prefix
-               if (result) {
-                    guildPrefix = result.prefix
-               }
-
-               prefixCache[`${guildID}`] = guildPrefix
-
-               return guildPrefix
-          } finally {
-               mongoose.connection.close()
-
-          }
-     })
-}
-
-/**
  * returns the currency symbol for the guild or the default currency symbol if none is present.
  * @param {string} _id - the id of the guild
  */
@@ -311,7 +305,7 @@ module.exports.getCurrencySymbol = async (_id) => {
 
      return await mongo().then(async (mongoose) => {
           try {
-               const result = await prefixSchema.findOne({
+               const result = await guildSettingSchema.findOne({
                     _id,
                })
 
@@ -336,7 +330,7 @@ module.exports.getCurrencySymbol = async (_id) => {
 module.exports.setCurrencySymbol = async (_id, currency) => {
      return await mongo().then(async (mongoose) => {
           try {
-               const result = await prefixSchema.findOneAndUpdate({
+               const result = await guildSettingSchema.findOneAndUpdate({
                     _id
              ***REMOVED*** {
                     _id,
