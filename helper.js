@@ -56,54 +56,6 @@ module.exports.getMemberUserIdByMatch = (message, string) => {
 }
 
 /**
- * Set the prefix of a guild by id
- * @param {CommandoMessage} guildID - the id of the guild
- * @param {String} prefix - the new prefix
- */
- module.exports.setPrefix = async (guildID, prefix) => {
-     prefixCache[`${guildID}`] = prefix ? prefix : config.prefix
-     await mongo().then(async (mongoose) => {
-          try {
-               await guildSettingSchema.findOneAndUpdate({
-                    _id: guildID
-               }, {
-                    _id: guildID,
-                    prefix
-               }, {
-                    upsert: true
-               })
-          } finally {
-               mongoose.connection.close()
-          }
-     })
-     return prefixCache[`${guildID}`]
-}
-
-/**
- * get the prefix of a guild by id
- * @param {string} guildID - the id of the guild
- */
-module.exports.getPrefix = async (guildID) => {
-     const cached = prefixCache[`${guildID}`]
-     if(cached !== undefined) {
-          return cached
-     } else await mongo().then(async (mongoose) => {
-          try {
-               console.log('Calling mongodb')
-               const result = await guildSettingSchema.findOne({
-                    _id: guildID,
-               })
-               if(result) {
-                    prefixCache[`${guildID}`] = result.prefix
-               }
-          } finally {
-               mongoose.connection.close()
-          }
-     })
-     return prefixCache[guildID]
-}
-
-/**
  * returns a message collector in message.channel that accepts one number greater than zero and less than the specified max
  * @param {Message} message - collector parent object, typically message (where the collector listens)
  * @param {number} numMax - total number of choices
@@ -293,6 +245,54 @@ module.exports.getBal = async (guildID, userID) => {
 
           }
      })
+}
+
+/**
+ * Set the prefix of a guild by id
+ * @param {CommandoMessage} guildID - the id of the guild
+ * @param {String} prefix - the new prefix
+ */
+module.exports.setPrefix = async (guildID, prefix) => {
+     prefixCache[`${guildID}`] = prefix ? prefix : config.prefix
+     await mongo().then(async (mongoose) => {
+          try {
+               await guildSettingSchema.findOneAndUpdate({
+                    _id: guildID
+               }, {
+                    _id: guildID,
+                    prefix
+               }, {
+                    upsert: true
+               })
+          } finally {
+               mongoose.connection.close()
+          }
+     })
+     return prefixCache[`${guildID}`]
+}
+
+/**
+ * get the prefix of a guild by id
+ * @param {string} guildID - the id of the guild
+ */
+module.exports.getPrefix = async (guildID) => {
+     const cached = prefixCache[`${guildID}`]
+     if(cached !== undefined) {
+          return cached
+     } else await mongo().then(async (mongoose) => {
+          try {
+               console.log('Calling mongodb')
+               const result = await guildSettingSchema.findOne({
+                    _id: guildID,
+               })
+               if(result) {
+                    prefixCache[`${guildID}`] = result.prefix
+               }
+          } finally {
+               mongoose.connection.close()
+          }
+     })
+     return prefixCache[guildID]
 }
 
 /**
