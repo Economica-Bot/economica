@@ -9,12 +9,15 @@ module.exports = class BalanceCommand extends Command {
                 'balance',
                 'b'
             ],
-            memberName: 'balance',
             group: 'economy',
+            memberName: 'balance',
             guildOnly: true,
             description: 'Returns balance in server currency',
+            details: 'View your balance or someone else\'s balance by specifying the user. This can be done with @mention, id, or simply typing part of their name.',
+            format: 'bal [@user | id | name]',
             examples: [
-                'bal [@user | id | name]',
+                'bal @QiNG-agar#0540',
+                'bal qing'
             ],
             args: [
                 {
