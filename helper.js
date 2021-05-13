@@ -333,7 +333,7 @@ module.exports.getCurrencySymbol = async (_id) => {
  * @param {string} _id - the id of the guild
  * @param {string} currency - the new currency emoji/symbol for the server
  */
-module.exports.updateCurrencySymbol = async (_id, currency) => {
+module.exports.setCurrencySymbol = async (_id, currency) => {
      return await mongo().then(async (mongoose) => {
           try {
                const result = await prefixSchema.findOneAndUpdate({
