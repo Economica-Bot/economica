@@ -5,9 +5,13 @@ const prefixSchema = mongoose.Schema(
      {
           _id: {
                type: String,
-               required: false
+               required: true
         ***REMOVED***
           prefix: {
+               type: String,
+               required: false
+        ***REMOVED***
+          currency: {
                type: String,
                required: false
           }

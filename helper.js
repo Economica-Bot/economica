@@ -9,6 +9,9 @@ const { User, Guild, Message } = require('discord.js')
 
 const prefixCache = {} // guildID: [prefix]
 const balanceCache = {} // guildID-UserID: [balance]
+const currencyCache = {} // guildID: [:emoji:]
+
+const def = 'default'
 
 /**
  * returns the user object of the message guild member with the specified id
@@ -42,68 +45,13 @@ module.exports.getMemberUserIdByMatch = (message, string) => {
           selectedMembers.size > 0 &&
           selectedMembers.size <= 10
      ) {
-          let result = []; selectedMembers.forEach(m => result.push(m.user.id))
+          let result = []; selectedMembers.forEach(m => result.push(m.user.id)) // @Adrastopoulos please keep this as returning id. Make a separate function getMemberUserTagById if desired.
           return result;
      } else {
           const content = `Woah, \`${selectedMembers.size.toString()}\` members found with those characters!\nTry being less broad with your search.`
           message.channel.send({ embed: this.createErrorEmbed(message.author, content, 'balance') })
           return 'endProcess'
      }
-}
-
-/**
- * Set the prefix of a guild by id
- * @param {String} guildID - the id of the guild
- * @param {String} prefix - the new prefix
- */
- module.exports.setPrefix = async (guildID, prefix) => {
-     prefixCache[`${guildID}`] = prefix
-
-     await mongo().then(async (mongoose) => {
-          try {
-               await prefixSchema.findOneAndUpdate({
-                    _id: guildID
-             ***REMOVED*** {
-                    _id: guildID,
-                    prefix
-             ***REMOVED*** {
-                    upsert: true
-               })
-          } finally {
-               mongoose.connection.close()
-          }
-     })
-     return prefixCache[`${guildID}`]
-}
-
-/**
- * get the prefix of a guild by id
- * @param {string} guildID - the id of the guild
- */
-module.exports.getPrefix = async (guildID) => {
-     const cached = prefixCache[`${guildID}`]
-     if (cached) {
-          return cached
-     }
-     else await mongo().then(async (mongoose) => {
-          try {
-               const result = await prefixSchema.findOne({
-                    guildID,
-               })
-
-               let guildPrefix = prefix
-               if (result) {
-                    guildPrefix = result.prefix
-               }
-
-               prefixCache[`${guildID}`] = guildPrefix
-
-               return guildPrefix
-          } finally {
-               mongoose.connection.close()
-
-          }
-     })
 }
 
 /**
@@ -143,24 +91,50 @@ module.exports.createErrorEmbed = (author, content, commandName = '\u200b') => {
 }
 
 /**
- * 
+ * creates an error embed object
  * @param {User} author - author of the embed
- * @param {string} content - description of the embed
+ * @param {string} description - description of the embed
  * @param {string} commandName - name of the command optional
  */
-module.exports.displayEmbedError = (author, content, commandName = '\u200b') => {
+module.exports.displayEmbedError = (author, description, commandName = '\u200b') => {
+     if (commandName === def) commandName = '\u200b'
      return {
           color: 'RED',
           author: {
                name: author.tag,
                icon_url: author.avatarURL(),
         ***REMOVED***
-          description: content,
+          description,
           footer: {
                text: `${prefix}help ${commandName} | view specific help`
           }
      }
 }
+/**
+ * creates an info embed object
+ * @param {User} author - author of the embed
+ * @param {string} description - description of the embed
+ * @param {string} footer - footer text of the embed optional
+ * @param {string} commandName - name of the command optional
+ */
+module.exports.displayEmbedInfo = (author, description, footer = def, commandName = def) => {
+     if (!commandName || commandName === def) commandName = '\u200b'
+     footer = footer === def ? `${prefix}help ${commandName} | view specific help` : footer
+     return {
+          color: 'BLUE',
+          author: {
+               name: author.tag,
+               icon_url: author.avatarURL()
+        ***REMOVED***
+          description,
+          footer: {
+               text: footer
+          }
+     }
+}
+
+
+// -- database -- //
 
 /**
  * sends an embed detailing user's balance
@@ -173,6 +147,9 @@ module.exports.displayEmbedError = (author, content, commandName = '\u200b') => 
      const userID = user.id
 
      const balance = await this.getBal(guildID, userID)
+     const tempSymbol = await this.getCurrencySymbol(guild.id)
+     
+     const cSymbol = tempSymbol ? tempSymbol : cSymbol
 
      message.channel.send({
           embed: {
@@ -265,6 +242,114 @@ module.exports.getBal = async (guildID, userID) => {
           } finally {
                mongoose.connection.close()
 
+          }
+     })
+}
+
+/**
+ * Set the prefix of a guild by id
+ * @param {String} guildID - the id of the guild
+ * @param {String} prefix - the new prefix
+ */
+module.exports.setPrefix = async (guildID, prefix) => {
+     prefixCache[`${guildID}`] = prefix
+
+     await mongo().then(async (mongoose) => {
+          try {
+               await prefixSchema.findOneAndUpdate({
+                    _id: guildID
+             ***REMOVED*** {
+                    _id: guildID,
+                    prefix
+             ***REMOVED*** {
+                    upsert: true
+               })
+          } finally {
+               mongoose.connection.close()
+          }
+     })
+     return prefixCache[`${guildID}`]
+}
+
+/**
+ * get the prefix of a guild by id
+ * @param {string} guildID - the id of the guild
+ */
+module.exports.getPrefix = async (guildID) => {
+     const cached = prefixCache[`${guildID}`]
+     if (cached) {
+          return cached
+     }
+     else await mongo().then(async (mongoose) => {
+          try {
+               const result = await prefixSchema.findOne({
+                    guildID,
+               })
+
+               let guildPrefix = prefix
+               if (result) {
+                    guildPrefix = result.prefix
+               }
+
+               prefixCache[`${guildID}`] = guildPrefix
+
+               return guildPrefix
+          } finally {
+               mongoose.connection.close()
+
+          }
+     })
+}
+
+/**
+ * returns the currency symbol for the guild or the default currency symbol if none is present.
+ * @param {string} _id - the id of the guild
+ */
+module.exports.getCurrencySymbol = async (_id) => {
+     const cached = currencyCache[_id]
+     if (cached) return cached
+
+     return await mongo().then(async (mongoose) => {
+          try {
+               const result = await prefixSchema.findOne({
+                    _id,
+               })
+
+               let currency = cSymbol
+               if (result && result.currency) {
+                    currency = result.currency
+               }
+
+               currencyCache[_id] = currency
+               return currency
+          } finally {
+               mongoose.connection.close()
+          }
+     })
+}
+
+/**
+ * finds and updates guild currency symbol, or creates a new mongo doc if none exists
+ * @param {string} _id - the id of the guild
+ * @param {string} currency - the new currency emoji/symbol for the server
+ */
+module.exports.updateCurrencySymbol = async (_id, currency) => {
+     return await mongo().then(async (mongoose) => {
+          try {
+               const result = await prefixSchema.findOneAndUpdate({
+                    _id
+             ***REMOVED*** {
+                    _id,
+                    currency
+             ***REMOVED*** {
+                    upsert: true,
+                    new: true
+               })
+
+               currencyCache[_id] = result.currency
+               return result.currency
+          } finally {
+               mongoose.connection.close()
           }
      })
 }
