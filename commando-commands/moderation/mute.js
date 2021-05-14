@@ -84,8 +84,13 @@ module.exports = class MuteCommand extends Command {
             if(!mutedRole) {
                 return message.reply('Please create a "muted" role!')
             }
-    
-            await member.send(`You have been muted in **${guild}** until **${expires}** for \`${reason}\``)
+            
+            let result = ''
+            try {
+                await member.send(`You have been muted in **${guild}** until **${expires}** for \`${reason}\``)
+            } catch {
+                result += `Could not dm ${member.user.tag}.`
+            }
             member.roles.add(mutedRole)
     
             message.say(`Muted **${member.user.tag}** for \`${reason}\`. They will be unmuted on **${expires.toLocaleString()}**`)

@@ -44,12 +44,16 @@ module.exports = class BanCommand extends Command {
      async run(message, { member, reason }) {
           const { guild, author: staff } = message
           if(member.bannable) {
-
-               await member.send(`You have been banned from **${guild}** for \`${reason}\``)
+               let result = ''
+               try {
+                    await member.send(`You have been banned from **${guild} for \`${reason}\``)
+               } catch {
+                    result += `Could not dm ${member.user.tag}.`
+               }
                member.ban({
                     reason: reason
                })
-               message.say(`Banned user ${member} for \`${reason}\``)
+               message.say(`${result}\nBanned user ${member} for \`${reason}\``)
 
                await mongo().then( async (mongoose) => {
                     try{
