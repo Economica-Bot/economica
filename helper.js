@@ -253,6 +253,9 @@ module.exports.getBal = async (guildID, userID) => {
  * @param {String} prefix - the new prefix
  */
 module.exports.setPrefix = async (guildID, prefix) => {
+     if(prefix.toLowerCase() === 'default') {
+          prefix = config.prefix
+     }
      prefixCache[`${guildID}`] = prefix ? prefix : config.prefix
      await mongo().then(async (mongoose) => {
           try {
