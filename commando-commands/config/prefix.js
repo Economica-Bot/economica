@@ -1,6 +1,6 @@
 const { Command } = require('discord.js-commando')
 const helper = require('../../helper')
-const { stripIndents, oneLine } = require('common-tags')
+const { oneLine } = require('common-tags')
 
 module.exports = class PrefixCommand extends Command {
     constructor(client) {
@@ -40,6 +40,7 @@ module.exports = class PrefixCommand extends Command {
             return message.say(`${message.guild.commandPrefix = await helper.getPrefix(message.guild.id)}`)
         } 
         
+        //sets a new prefix
         if(prefix == await helper.getPrefix(message.guild.id,)) {
             return message.say(`\`${prefix}\` is already the server prefix.`)
         } else {
