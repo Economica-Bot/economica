@@ -1,7 +1,7 @@
 const { Command } = require('discord.js-commando')
 const helper = require('../../helper')
 
-module.exports = class BalanceCommand extends Command {
+module.exports = class WorkCommand extends Command {
      constructor(client) {
           super(client, {
                name: 'work',
