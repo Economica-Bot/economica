@@ -29,16 +29,21 @@ module.exports = class BalanceCommand extends Command {
             ]
         })
     }
-    
+
     async run(message, { member }) {
         const { guild, author } = message;
         let user = member == 'self' ? author : message.mentions.users.first() || helper.getMemberUserById(message, member) || helper.getMemberUserIdByMatch(message, member);
+
+        if ( /* slightly messy but works just fine */
+            user === author || user === message.mentions.users.first() ||
+            user === helper.getMemberUserById(message, member)
+        ) return helper.displayBal(message, guild, user)
 
         if (user === 'endProcess') return;
 
         if (user.length === 1) return helper.displayBal(message, guild, helper.getMemberUserById(message, user[0]));
 
-        helper.createUserEmbedSelection(message, helper.getMemberUserIdByMatch(message, member))
+        helper.createMemberEmbedSelection(message, user) // make sure this [user] is an array and not individual array elements
 
         const collector = helper.createNumberCollector(message, user.length, 10000)
         collector.on('collect', m => {
