@@ -1,5 +1,5 @@
-const muteSchema = require('../schemas/mute-sch')
-const mongo = require('../mongo')
+const muteSchema = require('../../schemas/mute-sch')
+const mongo = require('../../mongo')
 
 module.exports = client => {
     const checkMutes = async () => {
@@ -35,7 +35,7 @@ module.exports = client => {
                             return role.name.toLowerCase() === 'muted'
                         })
                         member.roles.remove(mutedRole)
-                        console.log(`Unmuted <@${member.id}>`)
+                        console.log(`Unmuted ${userID} in server ${guild}`)
 
                         await muteSchema.updateMany(conditional, {
                             current: false,
@@ -48,7 +48,7 @@ module.exports = client => {
         })
 
         //checks for bans every 5 minutes
-        setTimeout(checkMutes, 1000 * 60 * 5)
+        setTimeout(checkMutes, 1000 * 3)
     }
     checkMutes()
 
