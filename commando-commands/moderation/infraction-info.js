@@ -16,10 +16,10 @@ module.exports = class InfractionInfoCommand extends Command {
             ],
             group: 'moderation',
             memberName: 'infractions',
-            guildOnly: 'true',
+            guildOnly: true,
             description: 'Displays information about a user\'s infractions',
             details: 'Checks a user\'s presence in the guild, and displays previous mutes, kicks, and bans. This command will work regardless of the user being a server member. Administrator only.',
-            format: 'infractions <@user | id>',
+            format: 'infractions <@user | id | name>',
             examples: [
                 'infractions @bob',
                 'infractions 796906750569611294'
@@ -34,7 +34,7 @@ module.exports = class InfractionInfoCommand extends Command {
             args: [
                 {
                     key: 'user',
-                    prompt: 'please @mention or provide the ID of a user',
+                    prompt: 'please @mention, name, or provide the id of a user.',
                     type: 'string'
                 }
             ]

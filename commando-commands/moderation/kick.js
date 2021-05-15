@@ -10,8 +10,10 @@ module.exports = class KickCommand extends Command {
             guildOnly: true,
             memberName: 'kick',
             description: 'Kicks a user',
+            format: 'kick <@user> [reason]',
             examples: [
-                'kick <@user> [reason]'
+                'kick @bob',
+                'kick @bob Spamming'
             ],
             clientPermissions: [
                 'KICK_MEMBERS'
@@ -24,7 +26,7 @@ module.exports = class KickCommand extends Command {
             args: [
                 {
                     key: 'member',
-                    prompt: 'please @mention a user',
+                    prompt: 'please @mention a user you wish to kick.',
                     type: 'member'
                 },
                 {

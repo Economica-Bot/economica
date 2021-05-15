@@ -1,4 +1,5 @@
 const { Command } = require('discord.js-commando')
+
 const mongo = require('../../mongo')
 const banSchema = require('../../schemas/ban-sch')
 
@@ -6,16 +7,15 @@ module.exports = class BanCommand extends Command {
      constructor(client) {
           super(client, {
                name: 'ban',
-               aliases: ['permaban'],
                group: 'moderation',
                guildOnly: true,
                memberName: 'ban',
                description: 'Bans a user',
                details: 'This command will ban a specified user and record details about the ban.',
+               format: 'ban <@user> [reason]',
                examples: [
-                    'ban <@user>',
-                    'ban @Bob',
-                    'ban @Bob Spamming'
+                    'ban @bob',
+                    'ban @bob Spamming'
                ],
                clientPermissions: [
                     'BAN_MEMBERS'
@@ -28,7 +28,7 @@ module.exports = class BanCommand extends Command {
                args: [
                     {
                          key: 'member',
-                         prompt: 'please @mention the member you wish to ban',
+                         prompt: 'please @mention the member you wish to ban.',
                          type: 'member'
                     },
                     {

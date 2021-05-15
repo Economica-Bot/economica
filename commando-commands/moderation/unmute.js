@@ -11,8 +11,8 @@ module.exports = class UnMuteCommand extends Command {
             memberName: 'unmute',
             description: 'Unmutes a user',
             details: 'This command requires a \`muted\` roles with respective permissions. The command only works on a current member of a server.',
+            format: 'unmute <@user>',
             examples: [
-                'unmute <@user>',
                 'unmute @Bob'
             ],
             clientPermissions: [
@@ -25,7 +25,7 @@ module.exports = class UnMuteCommand extends Command {
             args: [
                 {
                     key: 'member',
-                    prompt: 'please @mention the member you wish to unmute',
+                    prompt: 'please @mention the member you wish to unmute.',
                     type: 'member'
                 }
             ]
