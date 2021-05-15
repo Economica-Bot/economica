@@ -10,8 +10,10 @@ module.exports = class KickCommand extends Command {
             guildOnly: true,
             memberName: 'kick',
             description: 'Kicks a user',
+            format: 'kick <@user> [reason]',
             examples: [
-                'kick <@user> [reason]'
+                'kick @bob',
+                'kick @bob Spamming'
             ],
             clientPermissions: [
                 'KICK_MEMBERS'
@@ -24,7 +26,7 @@ module.exports = class KickCommand extends Command {
             args: [
                 {
                     key: 'member',
-                    prompt: 'please @mention a user',
+                    prompt: 'please @mention a user you wish to kick.',
                     type: 'member'
                 },
                 {
@@ -40,12 +42,16 @@ module.exports = class KickCommand extends Command {
     async run(message, { member, reason }) {
         const { guild, author: staff } = message
         if(member.kickable) {
-
-            await member.send(`You have been kicked from **${guild}** for \`${reason}\``)
+            let result = ''
+            try {
+                await member.send(`You have been kicked from **${guild}** for \`${reason}\``)
+            } catch {
+                result += `Could not dm ${member.user.tag}.`
+            }
             member.kick({
                 reason: reason
             })
-            message.say(`Kicked ${member.user.tag} for \`${reason}\``)
+            message.say(`${result}\nKicked ${member.user.tag} for \`${reason}\``)
 
             await mongo().then(async (mongoose) => {
                 try {
