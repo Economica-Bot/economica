@@ -39,9 +39,11 @@ module.exports = class LeaderBoardCommand extends Command {
                     })
                 let rank = 0
                 for(const balance of balances) {
+                    // console.log(balance)
                     rank++
+                    const user = await helper.getMemberUserById(message, balance.userID)
                     lbEmbed.addField(
-                        `**Rank ${rank}** | ${await helper.getMemberUserById(message, balance.userID).tag}`, `Balance: ${await helper.getCurrencySymbol(message.guild.id)}${await balance.balance}`
+                        `**Rank ${rank}** | ${user.tag}`, `Balance: ${await helper.getCurrencySymbol(message.guild.id)}${await balance.balance}`
                     )             
                 }
             } catch (err) {
