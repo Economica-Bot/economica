@@ -22,6 +22,12 @@ module.exports = class CurrencyCommand extends Command {
                     'currency :dollar:',
                     'currency'
                ],
+               clientPermissions: [
+                    'USE_EXTERNAL_EMOJIS'
+               ],
+               userPermissions: [
+                    'ADMINISTRATOR'
+               ],
                args: [
                     {
                          key: 'emoji',
@@ -29,14 +35,14 @@ module.exports = class CurrencyCommand extends Command {
                          type: 'string',
                          default: 'get'
                     }
-               ]
+               ],
           })
      }
 
      async run(message, {emoji}) {
           if (emoji === 'get') {
                const currency = await getCurrencySymbol(message.guild.id)
-               message.channel.send({ embed: displayEmbedInfo(message.author, `The currency symbol for this server is: ${currency}\n\nID:\`${currency}\``, `use ${prefix}${this.format} to change symbol.`)})
+               message.channel.send({ embed: displayEmbedInfo(message.author, `The currency symbol for this server is: ${currency}\n\nID: \`${currency}\``, `use ${prefix}${this.format} to change symbol.`)})
           } else {
                const currency = await setCurrencySymbol(message.guild.id, emoji)
                if (currency) return message.channel.send({ embed: displayEmbedInfo(message.author, `The currency symbol for this server has been set to ${currency}\n\nID: \`${currency}\``, `use ${prefix}${this.format} to change symbol again.`)})
