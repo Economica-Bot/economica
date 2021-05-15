@@ -11,7 +11,7 @@ module.exports = class MuteCommand extends Command {
             guildOnly: true,
             memberName: 'mute',
             description: 'Mutes a user',
-            details: 'This command requires a \`muted\` role with respective permissions. The length, if specified, must be in a format of minutes, hours, then days. This command only works on current member of your server. If a user leaves and comes back, the mute role will be automatically renewed.', 
+            details: 'This command requires a \`muted\` role (case INsensitive) with appropriate permissions. The length, if specified, must be in a format of minutes, hours, then days. This command only works on current member of your server. However, if a user leaves and comes back, the mute role will be automatically renewed.', 
             examples: [
                 'mute <@user> [length] [reason]',
                 'mute @Bob 10D',
@@ -29,12 +29,12 @@ module.exports = class MuteCommand extends Command {
             args: [
                 {
                     key: 'member',
-                    prompt: 'please @mention the member you wish to mute',
+                    prompt: 'please @mention the member you wish to mute.',
                     type: 'member'
               ***REMOVED***
                 {
                     key: 'args',
-                    prompt: 'Add a duration and a reason',
+                    prompt: 'please provide a duration and a reason',
                     type: 'string',
                     default: 'No reason provided'
               ***REMOVED***

@@ -1,5 +1,6 @@
-const Discord = require('discord.js')
 const { Command } = require('discord.js-commando')
+const Discord = require('discord.js')
+
 const mongo = require('../../mongo')
 const muteSchema = require('../../schemas/mute-sch')
 
@@ -10,10 +11,10 @@ module.exports = class MuteInfo extends Command {
             group: 'moderation',
             guildOnly: true,
             memberName: 'muteinfo',
-            description: 'Returns information about a muted user', 
-            details: 'The command will work regardless of the user being a member of the server or not.',
+            description: 'Returns the most recent mute information about a user', 
+            details: 'This command will work regardless of the user being a server member.',
+            format: 'muteinfo <@user | id>',
             examples: [
-                'muteinfo <@user | id>',
                 'muteinfo @Bob',
                 'muteinfo 796906750569611294'
             ],
@@ -27,7 +28,7 @@ module.exports = class MuteInfo extends Command {
             args: [
                 {
                     key: 'user',
-                    prompt: 'please @mention or provide the id of a user',
+                    prompt: 'please @mention, name, or provide the id of a user.',
                     type: 'string'
                 }
             ]

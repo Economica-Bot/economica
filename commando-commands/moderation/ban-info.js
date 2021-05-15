@@ -1,7 +1,10 @@
-const Discord = require('discord.js')
 const { Command } = require('discord.js-commando')
+const Discord = require('discord.js')
+
 const mongo = require('../../mongo')
 const banSchema = require('../../schemas/ban-sch')
+
+const { getMemberUserIdByMatch } = require('../../helper')
 
 module.exports = class BanInfo extends Command {
     constructor(client) {
@@ -9,12 +12,12 @@ module.exports = class BanInfo extends Command {
             name: 'baninfo',
             group: 'moderation',
             guildOnly: true,
-            memberName: 'ban info',
-            description: 'Returns ban information about a user', 
-            details: 'The command will work regardless of the user being a member of the server or not.',
+            memberName: 'baninfo',
+            description: 'Returns the most recent ban information about a user', 
+            details: 'This command will work regardless of the user being a server member.',
+            format: 'baninfo <@user | id | name>',
             examples: [
-                'baninfo <@user | id>',
-                'baninfo @Bob',
+                'baninfo @bob',
                 'baninfo 796906750569611294'
             ],
             clientPermissions: [
@@ -27,7 +30,7 @@ module.exports = class BanInfo extends Command {
             args: [
                 {
                     key: 'user',
-                    prompt: 'please @mention or provide the ID of a user',
+                    prompt: 'please @mention, name, or provide the id of a user.',
                     type: 'string'
                 }
             ]
@@ -37,7 +40,9 @@ module.exports = class BanInfo extends Command {
     async run(message, { user }) {
 
         //convert mention to id
-        const id = message.mentions.users.first() ? message.mentions.users.first().id : user
+        let id = message.mentions.users.first() ? message.mentions.users.first().id : user
+
+        if(typeof id != 'integer') id = getMemberUserIdByMatch(message, user) 
 
         const { guild } = message
         const member = guild.members.cache.get(id)
@@ -55,7 +60,7 @@ module.exports = class BanInfo extends Command {
                     .setAuthor(
                         `Ban information for ${member ? member.user.tag : id}`, member ? member.user.displayAvatarURL() : ''
                     )
-                    .addField('Server Member?', inDiscord ? 'True' : 'False')
+                    .addField('Server Member', inDiscord ? 'True' : 'False')
                     .setColor(12345678)
                         
                 if (result) {
