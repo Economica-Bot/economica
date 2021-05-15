@@ -30,7 +30,7 @@ module.exports.getMemberUserById = (message, id) => {
 
 /**
  * returns the id of the message guild member whose username or nickname contains the specified string
- * @param {Message} message - parent object of guild, typically message
+ * @param {Message} message - object that contains guild property
  * @param {string} string - string to validate for username match
  */
 module.exports.getMemberUserIdByMatch = (message, string) => {
@@ -53,6 +53,31 @@ module.exports.getMemberUserIdByMatch = (message, string) => {
           message.channel.send({ embed: this.createErrorEmbed(message.author, content, 'balance') })
           return 'endProcess'
      }
+}
+
+/**
+ * Sends an embed to prompt a selection from a list of members
+ * @param {Message} message - message object from caller command
+ * @param {array} content - array pf user id's
+ */
+module.exports.createMemberEmbedSelection = (message, content) => {
+     let list = ''
+     content.forEach(u => {
+          list = `${list}\`${content.indexOf(u) + 1}\` - <@!${u}>\n`
+     })
+     const description = `\`${content.length}\` users found. Please type a specific user's key below:\n\n${list}`
+
+     message.channel.send({ embed: {
+          author: {
+               name: message.author.tag,
+               icon_url: message.author.avatarURL()
+        ***REMOVED***
+          color: 'BLUE',
+          description,
+          footer: {
+               text: 'Type the number corresponding to the user you wish to select.\nNot the user\'s you\'re looking for? Try an @mention.'
+          }
+     }})
 }
 
 /**
@@ -283,6 +308,9 @@ module.exports.getBal = async (guildID, userID) => {
  * @param {String} prefix - the new prefix
  */
 module.exports.setPrefix = async (guildID, prefix) => {
+     if(prefix.toLowerCase() === 'default') {
+          prefix = config.prefix
+     }
      prefixCache[`${guildID}`] = prefix ? prefix : config.prefix
      await mongo().then(async (mongoose) => {
           try {

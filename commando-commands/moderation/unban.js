@@ -7,10 +7,10 @@ module.exports = class unBanCommand extends Command {
         super(client, {
             name: 'unban',
             group: 'moderation',
-            guildOnly: true,
             memberName: 'unban',
+            guildOnly: true,
             description: 'Unbans a user',
-            details: 'This command will unban a specified user.',
+            format: 'unban <id>',
             examples: [ 
                 'unban 796906750569611294' 
             ],
@@ -20,10 +20,11 @@ module.exports = class unBanCommand extends Command {
             userPermissions: [
                 'BAN_MEMBERS'
             ],
+            argsCount: 1,
             args: [
                 {
                     key: 'userID',
-                    prompt: 'please enter the I.D. of the user you wish to unban',
+                    prompt: 'please enter the ID of the user you wish to unban.',
                     type: 'string'
                 }
             ]

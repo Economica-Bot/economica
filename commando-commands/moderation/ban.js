@@ -1,4 +1,5 @@
 const { Command } = require('discord.js-commando')
+
 const mongo = require('../../mongo')
 const banSchema = require('../../schemas/ban-sch')
 
@@ -6,16 +7,15 @@ module.exports = class BanCommand extends Command {
      constructor(client) {
           super(client, {
                name: 'ban',
-               aliases: ['permaban'],
                group: 'moderation',
                guildOnly: true,
                memberName: 'ban',
                description: 'Bans a user',
                details: 'This command will ban a specified user and record details about the ban.',
+               format: 'ban <@user> [reason]',
                examples: [
-                    'ban <@user>',
-                    'ban @Bob',
-                    'ban @Bob Spamming'
+                    'ban @bob',
+                    'ban @bob Spamming'
                ],
                clientPermissions: [
                     'BAN_MEMBERS'
@@ -28,7 +28,7 @@ module.exports = class BanCommand extends Command {
                args: [
                     {
                          key: 'member',
-                         prompt: 'please @mention the member you wish to ban',
+                         prompt: 'please @mention the member you wish to ban.',
                          type: 'member'
                   ***REMOVED***
                     {
@@ -44,12 +44,16 @@ module.exports = class BanCommand extends Command {
      async run(message, { member, reason }) {
           const { guild, author: staff } = message
           if(member.bannable) {
-
-               await member.send(`You have been banned from **${guild}** for \`${reason}\``)
+               let result = ''
+               try {
+                    await member.send(`You have been banned from **${guild} for \`${reason}\``)
+               } catch {
+                    result += `Could not dm ${member.user.tag}.`
+               }
                member.ban({
                     reason: reason
                })
-               message.say(`Banned user ${member} for \`${reason}\``)
+               message.say(`${result}\nBanned user ${member} for \`${reason}\``)
 
                await mongo().then( async (mongoose) => {
                     try{
