@@ -92,6 +92,36 @@ module.exports.createErrorEmbed = (author, content, commandName = '\u200b') => {
 }
 
 /**
+ * returns a success embed object
+ * @param {User} author - the author of the embed
+ * @param {string} content - embed description
+ * @param {string} footer - [optional] emped footer (default no footer)
+ */
+module.exports.createSuccessEmbed = (author, content, footer = def) => {
+     if (!footer === def) {
+          return {
+               color: 'GREEN',
+               author: {
+                    name: author.tag,
+                    icon_url: author.avatarURL()
+               },
+               description: content,
+               footer: {
+                    text: footer
+               }
+          }
+     }
+     return {
+          color: 'GREEN',
+          author: {
+               name: author.tag,
+               icon_url: author.avatarURL()
+          },
+          description: content
+     }
+}
+
+/**
  * creates an error embed object
  * @param {User} author - author of the embed
  * @param {string} description - description of the embed
@@ -143,13 +173,13 @@ module.exports.displayEmbedInfo = (author, description, footer = def, commandNam
  * @param {Guild} guild - user's guild, default message.guild
  * @param {User} user - the target user, default message.author
  */
- module.exports.displayBal = async (message, guild = message.guild, user = message.author) => {
+module.exports.displayBal = async (message, guild = message.guild, user = message.author) => {
      const guildID = guild.id
      const userID = user.id
 
      const balance = await this.getBal(guildID, userID)
      const tempSymbol = await this.getCurrencySymbol(guild.id)
-     
+
      const cSymbol = tempSymbol ? tempSymbol : cSymbol
 
      message.channel.send({
@@ -277,7 +307,7 @@ module.exports.setPrefix = async (guildID, prefix) => {
  */
 module.exports.getPrefix = async (guildID) => {
      const cached = prefixCache[`${guildID}`]
-     if(cached !== undefined) {
+     if (cached !== undefined) {
           return cached
      } else await mongo().then(async (mongoose) => {
           try {
@@ -285,7 +315,7 @@ module.exports.getPrefix = async (guildID) => {
                const result = await guildSettingSchema.findOne({
                     _id: guildID,
                })
-               if(result) {
+               if (result) {
                     prefixCache[`${guildID}`] = result.prefix
                }
           } finally {
