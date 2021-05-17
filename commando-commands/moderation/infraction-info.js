@@ -49,8 +49,15 @@ module.exports = class InfractionInfoCommand extends Command {
         const { guild } = message
         const member = guild.members.cache.get(id)
 
+        if (typeof id == 'number') {
+            id = helper.getUserIdByMatch(message, user).id
+        }
+
         //checks if the user is a server member
         const inDiscord = !!member
+        if(!inDiscord && !parseInt(id)) {
+            return helper.errorEmbed(message, `${user} is not in this server! Please use their ID.`)
+        }
 
         await mongo().then(async (mongoose) => {
 
@@ -59,7 +66,7 @@ module.exports = class InfractionInfoCommand extends Command {
                 const muteResults = await muteSchema.find().sort({ createdAt: -1 })
                 const kickResults = await kickSchema.find().sort({ createdAt: -1 })
                 const banResults = await banSchema.find().sort({ createdAt: -1 })
-             
+
                 let infractionEmbed = new Discord.MessageEmbed()
                     .setAuthor(
                         `Infraction information for ${member ? member.user.tag : id}`,
@@ -68,33 +75,33 @@ module.exports = class InfractionInfoCommand extends Command {
                     .addField('Server Member', inDiscord ? 'True' : 'False')
                     .setColor(15105570)
 
-                for(const muteResult of muteResults) {
-                    infractionEmbed 
+                for (const muteResult of muteResults) {
+                    infractionEmbed
                         .addField(
                             'Muted',
                             `Muted on ${new Date(muteResult.createdAt).toLocaleDateString()} by ${muteResult.staffTag} for \`${muteResult.reason}\``
                         )
                 }
-                for(const kickResult of kickResults) {
-                    infractionEmbed 
+                for (const kickResult of kickResults) {
+                    infractionEmbed
                         .addField(
                             'Kicked',
                             `Kicked on ${new Date(kickResult.createdAt).toLocaleDateString()} by ${kickResult.staffTag} for \`${kickResult.reason}\``
                         )
                 }
-                for(const banResult of banResults) {
-                    infractionEmbed 
+                for (const banResult of banResults) {
+                    infractionEmbed
                         .addField(
                             'Banned',
                             `Banned on ${new Date(banResult.createdAt).toLocaleDateString()} by ${banResult.staffTag} for \`${banResult.reason}\``
                         )
                 }
                 message.say(infractionEmbed)
-                
+
             } catch (err) {
-                    console.log(err)
-                    mongoose.connection.close()
-            }    
+                console.log(err)
+                mongoose.connection.close()
+            }
         })
     }
 }

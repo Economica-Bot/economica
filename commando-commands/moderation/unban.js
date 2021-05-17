@@ -11,8 +11,8 @@ module.exports = class unBanCommand extends Command {
             guildOnly: true,
             description: 'Unbans a user',
             format: 'unban <id>',
-            examples: [ 
-                'unban 796906750569611294' 
+            examples: [
+                'unban 796906750569611294'
             ],
             clientPermissions: [
                 'BAN_MEMBERS'
@@ -28,17 +28,17 @@ module.exports = class unBanCommand extends Command {
                     type: 'string'
                 }
             ]
-        }) 
+        })
     }
 
     async run(message, { userID }) {
         const { guild } = message
 
-        await mongo().then( async (mongoose) => {
+        await mongo().then(async (mongoose) => {
 
             const bannedUser = (await guild.fetchBans()).get(userID)
 
-            if(bannedUser) {
+            if (bannedUser) {
                 try {
                     const result = await banSchema.updateMany({
                         guildID: guild.id,
@@ -50,10 +50,10 @@ module.exports = class unBanCommand extends Command {
                         expired: true,
                     })
 
-                    if(result) {
+                    if (result) {
                         message.say(`Unbanned user ${userID}`)
                         console.log(`Unbanned ${userID} in server ${guild}`)
-                    } 
+                    }
                 } finally {
                     mongoose.connection.close()
                 }

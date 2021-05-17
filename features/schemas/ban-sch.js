@@ -1,27 +1,27 @@
 const mongoose = require('mongoose')
 
 const reqString = {
-    type: String, 
+    type: String,
     required: true
 }
 
 const banSchema = mongoose.Schema({
-        userID: reqString,
-        guildID: reqString,
-        reason: reqString,
-        staffID: reqString,
-        staffTag: reqString,
-        current: {
-            type: Boolean, 
-            required: true,
-      ***REMOVED***
-        expired: {
-            type: Boolean,
-            required: true,
-      ***REMOVED***
-  ***REMOVED*** 
+    userID: reqString,
+    guildID: reqString,
+    reason: reqString,
+    staffID: reqString,
+    staffTag: reqString,
+    current: {
+        type: Boolean,
+        required: true,
+  ***REMOVED***
+    expired: {
+        type: Boolean,
+        required: true,
+  ***REMOVED***
+},
     {
-    timestamps: true
+        timestamps: true
     }
 )
 

@@ -41,13 +41,14 @@ module.exports = class KickCommand extends Command {
 
     async run(message, { member, reason }) {
         const { guild, author: staff } = message
-        if(member.kickable) {
+        if (member.kickable) {
             let result = ''
             try {
                 await member.send(`You have been kicked from **${guild}** for \`${reason}\``)
             } catch {
                 result += `Could not dm ${member.user.tag}.`
             }
+            
             member.kick({
                 reason: reason
             })

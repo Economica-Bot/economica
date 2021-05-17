@@ -4,6 +4,8 @@ const Discord = require('discord.js')
 const mongo = require('../../features/mongo')
 const kickSchema = require('../../features/schemas/kick-sch')
 
+const helper = require('../../features/helper')
+
 module.exports = class KickInfo extends Command {
     constructor(client) {
         super(client, {
@@ -43,26 +45,35 @@ module.exports = class KickInfo extends Command {
         const { guild } = message
         const member = guild.members.cache.get(id)
 
+        if (typeof id == 'number') {
+            id = helper.getUserIdByMatch(message, user).id
+        }
+
         //checks if the member is a server member
         const inDiscord = !!member
+
+        // If the user is not in the Discord, check if ID is a number
+        if(!inDiscord && !parseInt(id)) {
+            return helper.errorEmbed(message, `${user} is not in this server! Please use their ID.`)
+        }
 
         await mongo().then(async (mongoose) => {
 
             try {
                 //find newest kick schema
-                const result = await kickSchema.findOne().sort({ createdAt: -1})
+                const result = await kickSchema.findOne().sort({ createdAt: -1 })
 
                 let kickEmbed = new Discord.MessageEmbed()
                     .setAuthor(`Kick information for ${member ? member.user.tag : id}`, member ? member.user.displayAvatarURL() : '')
                     .addField('Server Member', inDiscord ? 'True' : 'False')
                     .setColor(15105570)
 
-                if(result && !inDiscord) {
+                if (result && !inDiscord) {
                     kickEmbed
                         .addField('Kicked on', `${new Date(result.createdAt)}`)
                         .addField('Kicked by', `<@${result.staffID}>`)
                         .addField('Kicked for', `${result.reason}`)
-                } 
+                }
                 message.say(kickEmbed)
             } finally {
                 mongoose.connection.close()

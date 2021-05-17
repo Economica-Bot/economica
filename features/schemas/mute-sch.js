@@ -1,27 +1,27 @@
 const mongoose = require('mongoose')
 
 const reqString = {
-    type: String, 
+    type: String,
     required: true
 }
 
 const muteSchema = mongoose.Schema({
-        userID: reqString,
-        guildID: reqString,
-        reason: reqString,
-        staffID: reqString,
-        staffTag: reqString,
-        expires: {
-            type: Date,
-            required: true
-      ***REMOVED***
-        current: {
-            type: Boolean, 
-            required: true,
-      ***REMOVED***
-  ***REMOVED*** 
+    userID: reqString,
+    guildID: reqString,
+    reason: reqString,
+    staffID: reqString,
+    staffTag: reqString,
+    expires: {
+        type: Date,
+        required: true
+  ***REMOVED***
+    current: {
+        type: Boolean,
+        required: true,
+  ***REMOVED***
+},
     {
-    timestamps: true
+        timestamps: true
     }
 )
 

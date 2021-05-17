@@ -33,9 +33,9 @@ module.exports = class UnMuteCommand extends Command {
     }
 
     async run(message, { member }) {
-        
+
         const { guild } = message
-        
+
         await mongo().then(async (mongoose) => {
             try {
 
@@ -49,7 +49,7 @@ module.exports = class UnMuteCommand extends Command {
                     return mute.current === true
                 })
 
-                if(!currentlyMuted.length) {
+                if (!currentlyMuted.length) {
                     return message.reply('That user is not muted')
                 }
 
@@ -65,10 +65,10 @@ module.exports = class UnMuteCommand extends Command {
                     return role.name.toLowerCase() === 'muted'
                 })
 
-                if(result) {
+                if (result) {
                     member.roles.remove(mutedRole)
                     console.log(`Manually unmuted ${member.id} in server ${guild}.`)
-                    if(result) message.say(`Unmuted user <@${member.id}>`)
+                    if (result) message.say(`Unmuted user <@${member.id}>`)
                 } else {
                     message.say(`<@${member.id}> could not be unmuted.`)
                 }

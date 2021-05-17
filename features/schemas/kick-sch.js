@@ -6,12 +6,12 @@ const reqString = {
 }
 
 const kickSchema = mongoose.Schema({
-        userID: reqString,
-        guildID: reqString,
-        reason: reqString,
-        staffID: reqString,
-        staffTag: reqString,
-  ***REMOVED*** 
+    userID: reqString,
+    guildID: reqString,
+    reason: reqString,
+    staffID: reqString,
+    staffTag: reqString,
+},
     {
         timestamps: true
     }
