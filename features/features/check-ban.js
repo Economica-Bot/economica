@@ -1,5 +1,5 @@
-const banSchema = require('../../schemas/ban-sch')
-const mongo = require('../../mongo')
+const banSchema = require('../../features/schemas/ban-sch')
+const mongo = require('../mongo')
 
 module.exports = client => {
     const checkBans = async () => {
@@ -9,7 +9,7 @@ module.exports = client => {
             expired: true
         }
 
-        await mongo().then(async (mongoose) => {  
+        await mongo().then(async (mongoose) => {
             try {
                 var results = await banSchema.find(conditional)
             } catch {
@@ -17,8 +17,8 @@ module.exports = client => {
             }
 
             //Unban expired yet currently banned users
-            if(results && results.length) {
-                for(const result of results) {
+            if (results && results.length) {
+                for (const result of results) {
 
                     const { guildID, userID } = result
                     const guild = client.guilds.cache.get(guildID)
@@ -26,9 +26,9 @@ module.exports = client => {
                     try {
                         const bannedUser = (await guild.fetchBans()).get(userID)
 
-                        if(bannedUser) {
+                        if (bannedUser) {
                             console.log(`${userID} is currently banned.`)
-                            guild.fetchBans().then( bans => {
+                            guild.fetchBans().then(bans => {
                                 guild.members.unban(userID)
                                 console.log(`Unbanned <@${userID}>`)
                             })
@@ -40,7 +40,7 @@ module.exports = client => {
                         mongoose.connection.close()
                     }
                 }
-            } 
+            }
         })
 
         //checks for bans every 5 minutes

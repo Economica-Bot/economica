@@ -1,5 +1,5 @@
-const muteSchema = require('../../schemas/mute-sch')
-const mongo = require('../../mongo')
+const muteSchema = require('../../features/schemas/mute-sch')
+const mongo = require('../mongo')
 
 module.exports = client => {
     const checkMutes = async () => {
@@ -13,16 +13,16 @@ module.exports = client => {
             current: true
         }
 
-        await mongo().then(async (mongoose) => { 
+        await mongo().then(async (mongoose) => {
 
             try {
                 var results = await muteSchema.find(conditional)
             } catch (e) {
                 console.log(e)
-            }  
+            }
 
             //Unmute currently muted users whose mute has expired 
-            if(results && results.length) {
+            if (results && results.length) {
                 for (const result of results) {
 
                     const { guildID, userID } = result
@@ -30,7 +30,7 @@ module.exports = client => {
 
                     try {
                         const member = (await guild.members.fetch()).get(userID)
-    
+
                         const mutedRole = guild.roles.cache.find(role => {
                             return role.name.toLowerCase() === 'muted'
                         })
@@ -42,9 +42,9 @@ module.exports = client => {
                         })
                     } finally {
                         mongoose.connection.close()
-                    }  
-                } 
-            }  
+                    }
+                }
+            }
         })
 
         //checks for bans every 5 minutes
@@ -56,17 +56,17 @@ module.exports = client => {
     client.on('guildMemberAdd', async member => {
         const { guild, id } = member
         const currentMute = await muteSchema.findOne({
-            userID: id, 
+            userID: id,
             guildID: guild.id,
             current: true
         })
 
-        if(currentMute) {
+        if (currentMute) {
             const role = guild.roles.cache.find(role => {
                 return role.name.toLowerCase() === 'muted'
             })
 
-            if(role) {
+            if (role) {
                 member.roles.add(role)
                 console.log(`User ${member.id} rejoined ${guild} and was muted.`)
             }
