@@ -1,5 +1,5 @@
 const { Command } = require('discord.js-commando')
-const { getCurrencySymbol, displayEmbedInfo, updateCurrencySymbol } = require('../../helper')
+const { getCurrencySymbol, displayEmbedInfo, setCurrencySymbol } = require('../../features/helper')
 const { prefix } = require('../../config.json')
 const BalanceCommand = require('./bal')
 

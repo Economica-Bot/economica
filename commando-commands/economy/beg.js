@@ -4,19 +4,18 @@ const helper = require('../../features/helper')
 module.exports = class BalanceCommand extends Command {
      constructor(client) {
           super(client, {
-               name: 'work',
+               name: 'beg',
                aliases: [
-                    'w'
+                    'pls'
                ],
                group: 'economy',
-               memberName: 'work',
+               memberName: 'beg',
                guildOnly: true,
-               description: 'Earn cash money.',
-               details: 'Work to increase your cash balance.',
-               format: 'work',
+               description: 'Possibly earn cash money',
+               details: 'Beg to possibly increase your cash balance',
+               format: 'beg',
                examples: [
-                    'work',
-                    'w'
+                    'beg'
                ],
                argsCount: 0
           })
@@ -25,9 +24,8 @@ module.exports = class BalanceCommand extends Command {
      async run(message) {
           const income = await helper.getIncome(message.guild.id, 'work')
           const min = income[0]; const max = income[1]
-          console.log(min, max)
-          const amount = Math.floor((Math.random() * (max - min + 1)) + min)
 
+          const amount = Math.floor((Math.random() * (max - min + 1)) + min)
           const currencySymbol = await helper.getCurrencySymbol(message.guild.id)
 
           const embed = helper.createSuccessEmbed(message.author, `${currencySymbol} ${amount}`)

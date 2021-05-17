@@ -1,8 +1,8 @@
 const { Command } = require('discord.js-commando')
 const Discord = require('discord.js')
 
-const mongo = require('../../mongo')
-const muteSchema = require('../../schemas/mute-sch')
+const mongo = require('../../features/mongo')
+const muteSchema = require('../../features/schemas/mute-sch')
 
 module.exports = class MuteInfo extends Command {
     constructor(client) {

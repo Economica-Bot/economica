@@ -1,6 +1,6 @@
 const { Command, CommandFormatError } = require('discord.js-commando')
-const mongo = require('../../mongo')
-const muteSchema = require('../../schemas/mute-sch')
+const mongo = require('../../features/mongo')
+const muteSchema = require('../../features/schemas/mute-sch')
 const ms = require('ms')
 
 module.exports = class MuteCommand extends Command {

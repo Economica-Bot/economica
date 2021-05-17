@@ -1,6 +1,6 @@
 const { Command } = require('discord.js-commando')
-const mongo = require('../../mongo')
-const kickSchema = require('../../schemas/kick-sch')
+const mongo = require('../../features/mongo')
+const kickSchema = require('../../features/schemas/kick-sch')
 
 module.exports = class KickCommand extends Command {
     constructor(client) {

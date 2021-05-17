@@ -1,5 +1,5 @@
-const banSchema = require('../../schemas/ban-sch')
-const mongo = require('../../mongo')
+const banSchema = require('../schemas/ban-sch')
+const mongo = require('../mongo')
 
 module.exports = client => {
     const checkBans = async () => {

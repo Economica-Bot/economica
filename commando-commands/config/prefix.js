@@ -1,5 +1,5 @@
 const { Command } = require('discord.js-commando')
-const helper = require('../../helper')
+const helper = require('../../features/helper')
 const { oneLine } = require('common-tags')
 
 module.exports = class PrefixCommand extends Command {

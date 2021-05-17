@@ -1,5 +1,5 @@
 const { Command } = require('discord.js-commando')
-const helper = require('../../helper')
+const helper = require('../../features/helper')
 
 module.exports = class BalanceCommand extends Command {
     constructor(client) {

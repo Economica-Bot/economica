@@ -1,10 +1,10 @@
 const { Command } = require('discord.js-commando')
 const Discord = require('discord.js')
 
-const mongo = require('../../mongo')
-const muteSchema = require('../../schemas/mute-sch')
-const kickSchema = require('../../schemas/kick-sch')
-const banSchema = require('../../schemas/ban-sch')
+const mongo = require('../../features/mongo')
+const muteSchema = require('../../features/schemas/mute-sch')
+const kickSchema = require('../../features/schemas/kick-sch')
+const banSchema = require('../../features/schemas/ban-sch')
 
 
 module.exports = class InfractionInfoCommand extends Command {

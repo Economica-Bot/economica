@@ -1,7 +1,7 @@
 const { Command } = require('discord.js-commando')
 
-const mongo = require('../../mongo')
-const banSchema = require('../../schemas/ban-sch')
+const mongo = require('../../features/mongo')
+const banSchema = require('../../features/schemas/ban-sch')
 
 module.exports = class BanCommand extends Command {
      constructor(client) {

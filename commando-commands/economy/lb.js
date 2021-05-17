@@ -1,10 +1,10 @@
 const { Command } = require('discord.js-commando')
 const Discord = require('discord.js')
 
-const helper = require('../../helper')
+const helper = require('../../features/helper')
 
-const mongo = require('../../mongo')
-const economyBalSchema = require('../../schemas/economy-bal-sch')
+const mongo = require('../../features/mongo')
+const economyBalSchema = require('../../features/schemas/economy-bal-sch')
 
 module.exports = class LeaderBoardCommand extends Command {
     constructor(client) {

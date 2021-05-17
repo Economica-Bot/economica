@@ -1,5 +1,5 @@
-const muteSchema = require('../../schemas/mute-sch')
-const mongo = require('../../mongo')
+const muteSchema = require('../schemas/mute-sch')
+const mongo = require('../mongo')
 
 module.exports = client => {
     const checkMutes = async () => {

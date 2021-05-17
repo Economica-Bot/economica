@@ -31,7 +31,7 @@ client.on('ready', async () => {
 
      console.log('The client is ready!')
           
-     const mongo = require('./mongo')
+     const mongo = require('./features/mongo')
 
      await mongo().then(mongoose => {
           try {

@@ -1,10 +1,10 @@
 const { Command } = require('discord.js-commando')
 const Discord = require('discord.js')
 
-const mongo = require('../../mongo')
-const banSchema = require('../../schemas/ban-sch')
+const mongo = require('../../features/mongo')
+const banSchema = require('../../features/schemas/ban-sch')
 
-const { getMemberUserIdByMatch } = require('../../helper')
+const { getMemberUserIdByMatch } = require('../../features/helper')
 
 module.exports = class BanInfo extends Command {
     constructor(client) {
