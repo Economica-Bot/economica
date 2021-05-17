@@ -18,13 +18,13 @@ const def = 'default'
  * @param {Message} message - The command message.
  * @param {string} id - User id used to retrieve member object.
  */
-module.exports.getMemberByUserId = (message, id) => {
-    const member = message.guild.members.cache.get(id)
-    if (
-        member != undefined
-    ) {
-        return member
-    }
+module.exports.getUserById = (message, id) => {
+     const member = message.guild.members.cache.get(id)
+     if (
+          member != undefined
+     ) {
+          return member.user // please keep as returning a user, not a member {@QiNG-agar}
+     }
 }
 
 /**
