@@ -1,5 +1,5 @@
 const { Command } = require('discord.js-commando')
-const helper = require('../../helper')
+const helper = require('../../features/helper')
 
 module.exports = class BalanceCommand extends Command {
     constructor(client) {
@@ -7,7 +7,7 @@ module.exports = class BalanceCommand extends Command {
             name: 'bal',
             aliases: [
                 'balance',
-                'b'
+                'b',
             ],
             group: 'economy',
             memberName: 'balance',
@@ -17,41 +17,49 @@ module.exports = class BalanceCommand extends Command {
             format: 'bal [@user | id | name]',
             examples: [
                 'bal @QiNG-agar#0540',
-                'bal qing'
+                'bal qing',
             ],
             args: [
                 {
-                    key: 'member',
+                    key: 'user',
                     prompt: 'please @mention, name, or provide the id of a user.',
                     type: 'string',
-                    default: 'self'
-                }
-            ]
+                    default: '',
+              ***REMOVED***
+            ],
         })
     }
 
-    async run(message, { member }) {
-        const { guild, author } = message;
-        let user = member == 'self' ? author : message.mentions.users.first() || helper.getMemberUserById(message, member) || helper.getMemberUserIdByMatch(message, member);
-
-        if ( /* slightly messy but works just fine */
-            user === author || user === message.mentions.users.first() ||
-            user === helper.getMemberUserById(message, member)
-        ) return helper.displayBal(message, guild, user)
-
-        if (user === 'endProcess') return;
-
-        if (user.length === 1) return helper.displayBal(message, guild, helper.getMemberUserById(message, user[0]));
-
-        helper.createMemberEmbedSelection(message, user) // make sure this [user] is an array and not individual array elements
-
-        const collector = helper.createNumberCollector(message, user.length, 10000)
-        collector.on('collect', m => {
-            user = helper.getMemberUserById(message, user[parseInt(m.content) - 1])
-        })
-        collector.on('end', c => {
-            if (c.size === 0) return message.channel.send(':hourglass: Time ran out (10s).')
-            helper.displayBal(message, guild, user)
-        })
+    async run(message, { user }) {
+        const { guild, author } = message
+        user = user ?  
+            message.mentions.users.first() || 
+            helper.getMemberByUserId(message, user) || 
+            helper.getUserIdByMatch(message, user) :
+            author
+        if (user === 'noUserFound') {
+            return
+        } 
+    
+        // If a single member is found    
+        else if (!(user instanceof Array)) {
+            return helper.displayBal(message, guild, user)
+        } 
+        
+        // If multiple members are found
+        else {
+            helper.memberSelectEmbed(message, user) 
+            const collector = helper.createNumberCollector(message, user.length, 10000)
+            collector.on('collect', (m) => {
+                user = helper.getMemberByUserId(message, user[parseInt(m.content) - 1])
+            })
+            collector.on('end', (c) => {
+                if (c.size === 0) { 
+                    return message.channel.send(':hourglass: Time ran out (10s).')
+                } else {
+                    helper.displayBal(message, guild, user)
+                }
+            })
+        }
     }
 }
