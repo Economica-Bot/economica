@@ -1,8 +1,8 @@
 const { Command } = require('discord.js-commando')
 const Discord = require('discord.js')
 
-const mongo = require('../../mongo')
-const muteSchema = require('../../schemas/mute-sch')
+const mongo = require('../../features/mongo')
+const muteSchema = require('../../features/schemas/mute-sch')
 
 module.exports = class MuteInfo extends Command {
     constructor(client) {
@@ -11,7 +11,7 @@ module.exports = class MuteInfo extends Command {
             group: 'moderation',
             guildOnly: true,
             memberName: 'muteinfo',
-            description: 'Returns the most recent mute information about a user', 
+            description: 'Returns the most recent mute information about a user',
             details: 'This command will work regardless of the user being a server member.',
             format: 'muteinfo <@user | id>',
             examples: [
@@ -40,19 +40,26 @@ module.exports = class MuteInfo extends Command {
 
         //convert mention to id
         const id = message.mentions.users.first() ? message.mentions.users.first().id : user
-        
+
         const { guild } = message
         const member = guild.members.cache.get(id)
 
+        if (typeof id == 'number') {
+            id = helper.getUserIdByMatch(message, user).id
+        }
+
         //checks if the member is a server member
         const inDiscord = !!member
+        if(!inDiscord && !parseInt(id)) {
+            return helper.errorEmbed(message, `${user} is not in this server! Please use their ID.`)
+        }
 
         await mongo().then(async (mongoose) => {
 
             try {
                 //find newest mute schema
-                const result = await muteSchema.findOne().sort({ createdAt: -1})
-                
+                const result = await muteSchema.findOne().sort({ createdAt: -1 })
+
                 let muteEmbed = new Discord.MessageEmbed()
                     .setAuthor(`Mute information for ${member ? member.user.tag : id}`, member ? member.user.displayAvatarURL() : '')
                     .addField('Server Member', inDiscord ? 'True' : 'False')
@@ -60,7 +67,7 @@ module.exports = class MuteInfo extends Command {
 
                 if (result) {
                     muteEmbed.addField('Mute Status', result.current ? 'True' : 'False')
-                    if(result.current) {
+                    if (result.current) {
                         const expirdate = new Date(result.expires)
 
                         muteEmbed
