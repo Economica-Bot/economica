@@ -27,9 +27,6 @@ module.exports = class LeaderBoardCommand extends Command {
     async run(message, args) {
 
         await mongo().then(async (mongoose) => {
-            let lbEmbed = new Discord.MessageEmbed()
-                .setAuthor(`${message.guild}'s Leaderboard`, `${this.client.user.displayAvatarURL()}`)
-                .setColor(111111)
             try {
                 const balances = await economyBalSchema
                     .find({
@@ -46,6 +43,7 @@ module.exports = class LeaderBoardCommand extends Command {
 
                 loop1:
                     while (true) {
+                        
                         //if(balCounter + 1 >= balances.length) break
                         embeds.push(
                             new Discord.MessageEmbed()

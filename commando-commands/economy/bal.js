@@ -31,35 +31,26 @@ module.exports = class BalanceCommand extends Command {
     }
 
     async run(message, { user }) {
-        const { guild, author } = message
-        user = user ?  
-            message.mentions.users.first() || 
-            helper.getUserById(message, user) || 
-            helper.getUserIdByMatch(message, user) :
-            author
-        if (user === 'noUserFound') {
+        const { guild } = message
+        let users = await helper.findUser(message, user)
+        if (users === 'noUserFound') {
             return
         } 
     
         // If user is not an array   
-        else if (!Array.isArray(user)) {
-            console.log('by id', user)
-            return helper.displayBal(message, guild, user)
+        else if (!Array.isArray(users)) {
+            return helper.displayBal(message, guild, users)
         } 
 
         // if there is only one user in the array (from match)
-        else if (user.length === 1 && Array.isArray(user)) {
-            user = helper.getUserById(message, user[0]).user
-            console.log('by match single', user)
-            helper.displayBal(message, guild, helper.getUserById(message, user))
+        else if (users.length === 1) {
+            const user = message.guild.members.cache.get(users[0]).user
+            return helper.displayBal(message, guild, user)
         }
 
         // If multiple members are found
         else {
-            console.log('by match mult', user)
-            const res = await helper.registerMemberSelection(message, user, 10000, 'user')
-            console.log('res', res)
-            helper.displayBal(message, guild, helper.getUserById(message, user[parseInt(res) - 1]))
+            await helper.memberSelectEmbed(message, users, 10000, 'bal')
         }
     }
 }

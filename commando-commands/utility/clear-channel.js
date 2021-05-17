@@ -1,5 +1,7 @@
 const { Command } = require('discord.js-commando')
 
+const helper = require('../../features/helper')
+
 module.exports = class ClearChannelCommand extends Command {
     constructor(client) {
         super(client, {
@@ -34,17 +36,6 @@ module.exports = class ClearChannelCommand extends Command {
     }
 
     async run(message, { msgCount }) {
-
-        if(msgCount > 100 || msgCount < 2) {
-            return message.channel.send(`Invalid Length: \`${msgCount}\` out of bounds.`)
-        }
-
-        await message.channel.bulkDelete(msgCount)
-
-        await message.channel.send(`Deleted ${msgCount} messages.`).then((message) => {
-            message.delete({
-                timeout: 2000
-            })
-        })
+        helper.deleteMessages(message, msgCount)
     }
 }
