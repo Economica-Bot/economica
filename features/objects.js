@@ -15,6 +15,8 @@ const AppendixTypes = {
      }
 }
 
-module.exports.Appendix = () => {
+function Appendix () {
      this.content = 'sup'
 }
+
+module.exports = Appendix

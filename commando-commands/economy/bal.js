@@ -34,32 +34,32 @@ module.exports = class BalanceCommand extends Command {
         const { guild, author } = message
         user = user ?  
             message.mentions.users.first() || 
-            helper.getMemberByUserId(message, user) || 
+            helper.getUserById(message, user) || 
             helper.getUserIdByMatch(message, user) :
             author
         if (user === 'noUserFound') {
             return
         } 
     
-        // If a single member is found    
-        else if (!(user instanceof Array)) {
+        // If user is not an array   
+        else if (!Array.isArray(user)) {
+            console.log('by id', user)
             return helper.displayBal(message, guild, user)
         } 
-        
+
+        // if there is only one user in the array (from match)
+        else if (user.length === 1 && Array.isArray(user)) {
+            user = helper.getUserById(message, user[0]).user
+            console.log('by match single', user)
+            helper.displayBal(message, guild, helper.getUserById(message, user))
+        }
+
         // If multiple members are found
         else {
-            helper.memberSelectEmbed(message, user) 
-            const collector = helper.createNumberCollector(message, user.length, 10000)
-            collector.on('collect', (m) => {
-                user = helper.getMemberByUserId(message, user[parseInt(m.content) - 1])
-            })
-            collector.on('end', (c) => {
-                if (c.size === 0) { 
-                    return message.channel.send(':hourglass: Time ran out (10s).')
-                } else {
-                    helper.displayBal(message, guild, user)
-                }
-            })
+            console.log('by match mult', user)
+            const res = await helper.registerMemberSelection(message, user, 10000, 'user')
+            console.log('res', res)
+            helper.displayBal(message, guild, helper.getUserById(message, user[parseInt(res) - 1]))
         }
     }
 }
