@@ -6,10 +6,12 @@ const config = require('../config.json')
 
 const economyBalSchema = require('./schemas/economy-bal-sch')
 const guildSettingSchema = require('./schemas/guild-settings-sch')
+const incomeSchema = require('./schemas/income-sch')
 
-const prefixCache = {} // guildID: [prefix]
-const balanceCache = {} // guildID-UserID: [balance]
-const currencyCache = {} // guildID: [:emoji:]
+let prefixCache = {} // guildID: [prefix]
+let balanceCache = {} // guildID-UserID: [balance]
+let currencyCache = {} // guildID: [:emoji:]
+let incomeCache = {} // guildID-type: { min, max } 
 
 const def = 'default'
 
@@ -22,7 +24,20 @@ module.exports.getMemberById = (message, id) => {
     try {
         return message.guild.members.cache.get(id)
     } catch (err) {
-        console.log(err)
+        // console.log(err) - enable when testing, else clutters the console (sometimes the error is intended in .bal)
+    }
+}
+
+/**
+ * Returns the user object of the message guild with the specified id.
+ * @param {Message} message - The command message.
+ * @param {String} id - User id used to retrieve user object.
+ */
+module.exports.getUserById = (message, id) => {
+    try {
+        return message.guild.members.cache.get(id).user
+    } catch (err) {
+        // console.log(err)
     }
 }
 
@@ -37,12 +52,12 @@ module.exports.getUserIdByMatch = (message, query) => {
 
     const selectedMembers = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(query) || m.displayName.toLowerCase().includes(query))
     if (selectedMembers.size == 0) {
-        const content = `No members with \`${query.substr(0, 32)}\` in their user or nick found.\n\nTry mentioning this person or using their ID instead.`
+        const content = `No members with \`${query.length > 32 ? `${query.substr(0, 32)}...` : query}\` in their user or nick found.\n\nTry mentioning this person or using their ID instead.`
         this.errorEmbed(message, content, 'balance')
         return 'noUserFound'
     } else if (
         selectedMembers.size > 0 &&
-        selectedMembers.size <= 10
+        selectedMembers.size < 10
     ) {
         let result = []
         selectedMembers.forEach(m => result.push(m.user.id))
@@ -58,9 +73,9 @@ module.exports.findUser = (message, user) => {
     const { author } = message
     let users = user ?
         message.mentions.users.first() ||
-        this.getMemberById(message, user) ||
+        this.getUserById(message, user) ||
         this.getUserIdByMatch(message, user) :
-    author
+        author
     return users
 }
 
@@ -114,7 +129,7 @@ module.exports.memberSelectEmbed = (message, users, time, type) => {
     collector.on('end', async collected => {
         if (!userFound) {
             await this.deleteMessages(message, collected.size + 2)
-            this.errorEmbed(message, `:hourglass: Time ran out! ${time/1000} sec.`, 'bal')
+            this.errorEmbed(message, `:hourglass: Time ran out! ${time / 1000} sec.`, 'bal')
         }
     })
 }
@@ -419,6 +434,85 @@ module.exports.setCurrencySymbol = async (_id, currency) => {
 
             currencyCache[_id] = result.currency
             return result.currency
+        } finally {
+            mongoose.connection.close()
+        }
+    })
+}
+
+/**
+ * updates the min and max payout for the specified income command
+ * @param {string} _id - the id of the guild
+ * @param {string} type - the type of income command (work, beg, crime, etc -- SEE economica/features/schemas/income-sch.js)
+ * @param {number} min - min payout
+ * @param {number} max - max payout
+ */
+module.exports.setIncome = async (_id, type, min, max) => {
+    return await mongo().then(async (mongoose) => {
+        // if (!incomeSchema[type]) return 'invalidType'
+        try {
+            const result = await incomeSchema.findOneAndUpdate({
+                _id
+          ***REMOVED*** {
+                [type]: {
+                    min,
+                    max
+                }
+          ***REMOVED*** {
+                upsert: true,
+                new: true
+            })
+
+            incomeCache[`${_id}-${type}`] = { min: result[type].min, max: result[type].max }
+            console.log(incomeCache)
+            return { min: result[type].min, max: result[type].max }
+        } finally {
+            mongoose.connection.close()
+        }
+    })
+}
+
+/**
+ * returns the specified income command's min and max payout values as an object { min, max }
+ * @param {string} _id - the id of the guild
+ * @param {string} type - the type of income command (work, beg, crime, etc -- SEE economica/features/schemas/income-sch.js) 
+ */
+module.exports.getIncome = async (_id, type) => {
+    return await mongo().then(async (mongoose) => {
+        try {
+            const result = await incomeSchema.findOne({
+                _id,
+            })
+
+            console.log(result)
+
+            const _default = config.income[type]
+            let ref = _default
+            
+            let properties = {
+                min: ref.min,
+                max: ref.max,
+                cooldown: ref.cooldown,
+                chance: ref.chance,
+                minFine: ref.minFine,
+                maxFine: ref.maxFine
+            }
+
+            if (result) {
+                const _new = result[type]
+                ref = _new
+                properties = {
+                    min: ref.min,
+                    max: ref.max,
+                    cooldown: ref.cooldown,
+                    chance: ref.chance,
+                    minFine: ref.minFine,
+                    maxFine: ref.maxFine
+                }
+            }
+
+            console.log(properties)
+            return properties
         } finally {
             mongoose.connection.close()
         }

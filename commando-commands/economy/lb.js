@@ -36,7 +36,7 @@ module.exports = class LeaderBoardCommand extends Command {
                         balance: -1
                     })
 
-                const currencySymbol = await helper.getCurrencySymbol()
+                const currencySymbol = await helper.getCurrencySymbol(message.guild.id)
                 let embeds = []
                 let rank = 1
                 let balCounter = 0

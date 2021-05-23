@@ -1,7 +1,7 @@
 const { Command } = require('discord.js-commando')
 const helper = require('../../features/helper')
-
-//const { Appendix } = require('../../features/objects')
+let Appendix = require('../../features/objects')
+const incomeSchema = require('../../features/schemas/income-sch')
 
 module.exports = class BalanceCommand extends Command {
      constructor(client) {
@@ -44,11 +44,12 @@ module.exports = class BalanceCommand extends Command {
      }
 
      async run(message, {cmd, min, max}) {
+          // if (!incomeSchema[cmd]) return helper.errorEmbed(message, `\`${cmd}\` is not a valid income command`, 'work')
           const prefix = await helper.getPrefix(message.guild.id)
           const currency = await helper.getCurrencySymbol(message.guild.id)
           
-          //let appendix = new Appendix
-          //console.log(appendix.content)
+          let appendix = new Appendix()
+          console.log(appendix.content)
 
           if (min < 0) {
                min = 0
@@ -67,9 +68,7 @@ module.exports = class BalanceCommand extends Command {
 
           //console.log(appendix.content)
 
-          const embed = helper.displayEmbedInfo(message.author, `Updated \`${prefix}${cmd}\`\n\nMin: ${currency}${min}\nMax: ${currency}${max}`, 'default', 'setpay')
-
-          message.channel.send({ embed })
+          helper.infoEmbed(message, `Updated \`${prefix}${cmd}\`\n\nMin: ${currency}${min}\nMax: ${currency}${max}`, 'default', 'setpay')
 
           helper.setIncome(message.guild.id, cmd, min, max)
      }

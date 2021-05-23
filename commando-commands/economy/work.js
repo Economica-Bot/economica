@@ -5,9 +5,6 @@ module.exports = class WorkCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'work',
-            aliases: [
-                'w'
-            ],
             group: 'economy',
             memberName: 'work',
             guildOnly: true,
@@ -15,18 +12,18 @@ module.exports = class WorkCommand extends Command {
             details: 'Work to increase your cash balance.',
             format: 'work',
             examples: [
-                'work',
-                'w'
+                'work'
             ],
             argsCount: 0
         })
     }
 
     async run(message) {
-        const min = 100; const max = 1000;
+        const range = await helper.getIncome(message.guild.id, 'work')
+        const min = range.min; const max = range.max
         const amount = Math.floor((Math.random() * (max - min + 1)) + min)
         const currencySymbol = await helper.getCurrencySymbol(message.guild.id)
         helper.changeBal(message.guild.id, message.author.id, amount)
-        helper.successEmbed(message, `${currencySymbol} ${amount}`)
+        helper.successEmbed(message, `You worked and earned ${currencySymbol}${amount}!`)
     }
 }

@@ -15,8 +15,17 @@ const AppendixTypes = {
      }
 }
 
-function Appendix () {
-     this.content = 'sup'
+// My module
+function Appendix() {
+     this.content = '\n'
+
+     this.addError = (value) => {
+          this.content = `${this.content}\n${AppendixTypes.error.icon} ${value}`
+     }
 }
 
-module.exports = Appendix
+/* Appendix.prototype.foo = function foo() {
+     console.log(this.bar);
+}; */
+
+module.exports = Appendix;
