@@ -66,7 +66,7 @@ module.exports = class CurrencyCommand extends Command {
             const currency = await helper.setCurrencySymbol(message.guild.id, emoji)
             return helper.successEmbed(
                 message, 
-                `${message.guild}'s currency sumbol set to ${currency}\n\nID: \`${currency}\``, 
+                `${message.guild}'s currency symbol set to ${currency}\n\nID: \`${currency}\``, 
                 `Use ${message.guild.commandPrefix}${this.format} to change the symbol again.`
             )
         }
