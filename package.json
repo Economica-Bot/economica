@@ -10,7 +10,8 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "discord.js": "^12.5.1",
+        "discord-buttons": "^2.4.1",
+        "discord.js": "^12.5.3",
         "discord.js-commando": "^0.12.3",
         "discord.js-pagination": "^1.0.3",
         "mongoose": "^5.12.3",
