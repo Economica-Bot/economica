@@ -18,7 +18,8 @@ client.registry
     .registerDefaultGroups()
     .registerDefaultCommands({
         prefix: false,
-        unknownCommand: false
+        unknownCommand: false,
+        help: false
     })
     .registerGroups([
         ['config', 'Config & Setup'],

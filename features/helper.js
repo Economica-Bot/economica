@@ -44,7 +44,7 @@ module.exports.getUserById = (message, id) => {
 /**
  * Returns the id of the message guild member whose username or nickname contains the specified query.
  * @param {Message} message - The command message.
- * @param {String} string - Used to identify user(s).
+ * @param {String} query - Used to identify user(s).
  */
 module.exports.getUserIdByMatch = (message, query) => {
     const { guild } = message
@@ -63,7 +63,7 @@ module.exports.getUserIdByMatch = (message, query) => {
         selectedMembers.forEach(m => result.push(m.user.id))
         return result
     } else {
-        const content = `Woah, \`${selectedMembers.size.toString()}\` members found with those characters!\n\nTry being less broad with your search.`
+        const content = `\`${selectedMembers.size.toString()}\` members found with those characters!\n\nTry being less broad with your search.`
         this.errorEmbed(message, content, 'balance')
         return 'noUserFound'
     }
@@ -102,7 +102,7 @@ module.exports.memberSelectEmbed = (message, users, time, type) => {
             color: 'BLUE',
             description,
             footer: {
-                text: 'Type the number corresponding to the user you wish to select.\nNot the users you\'re looking for? Try an @mention.'
+                text: 'Not the users you\'re looking for? Try an @mention.'
             }
         }
     })

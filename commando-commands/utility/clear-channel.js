@@ -14,6 +14,7 @@ module.exports = class ClearChannelCommand extends Command {
             group: 'utility',
             description: 'Clears channel',
             details: 'Deletes a number of messages in a channel. If not specified, deletes all messages <=2 Weeks old.',
+            format: 'clear [length]',
             examples: [
                 'clear [length]'
             ],
