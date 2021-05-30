@@ -223,8 +223,29 @@ module.exports.infoEmbed = (message, description, footer = 'default', commandNam
     })
 }
 
+/**
+ * returns a random integer value within the specified range [min, max]. Inclusive
+ * @param {number} min - min/start value in range
+ * @param {number} max - max/end value in range
+ */
+module.exports.intInRange = (min, max) => {
+    return Math.floor((Math.random() * (max - min + 1)) + min)
+}
+
+/**
+ * returns a substring from 0 to maxLength if it is longer than maxLength. Appends '...' to the end if cut
+ * @param {string} str - the string to cut
+ * @param {number} maxLength - the length of the substring (default=32)
+ */
+module.exports.cut = (str, maxLength = 32) => {
+    if (maxLength < 0 || maxLength > 2000) throw new Error(`Helper Error: ${maxLength} is less than 0 or greater than 2000! helper.cut: Function`)
+    if (!typeof str === 'string') throw new Error(`Helper Error: ${str} is not a string! helper.cut: Function`)
+    if (str.length <= maxLength) return str
+    return str.substr(0, 32).concat('...')
+}
+
 //
-// database:
+// async:
 //
 
 /**
@@ -366,7 +387,7 @@ module.exports.setPrefix = async (guildID, prefix) => {
  */
 module.exports.getPrefix = async (guildID) => {
     const cached = prefixCache[`${guildID}`]
-    if (cached !== undefined) {
+    if (cached) {
         return cached
     } else await mongo().then(async (mongoose) => {
         try {
@@ -401,6 +422,7 @@ module.exports.getCurrencySymbol = async (_id) => {
                 _id,
             })
 
+            // set currency as the default symbol unless a guild-specific symbol exists in db
             let currency = cSymbol
             if (result && result.currency) {
                 currency = result.currency
@@ -449,7 +471,6 @@ module.exports.setCurrencySymbol = async (_id, currency) => {
  */
 module.exports.setIncome = async (_id, type, min, max) => {
     return await mongo().then(async (mongoose) => {
-        // if (!incomeSchema[type]) return 'invalidType'
         try {
             const result = await incomeSchema.findOneAndUpdate({
                 _id
@@ -464,7 +485,7 @@ module.exports.setIncome = async (_id, type, min, max) => {
             })
 
             incomeCache[`${_id}-${type}`] = { min: result[type].min, max: result[type].max }
-            console.log(incomeCache)
+            // console.log(incomeCache)
             return { min: result[type].min, max: result[type].max }
         } finally {
             mongoose.connection.close()
@@ -477,18 +498,17 @@ module.exports.setIncome = async (_id, type, min, max) => {
  * @param {string} _id - the id of the guild
  * @param {string} type - the type of income command (work, beg, crime, etc -- SEE economica/features/schemas/income-sch.js) 
  */
-module.exports.getIncome = async (_id, type) => {
+module.exports.getIncomeStats = async (_id, type) => {
     return await mongo().then(async (mongoose) => {
         try {
             const result = await incomeSchema.findOne({
                 _id,
             })
 
-            console.log(result)
-
             const _default = config.income[type]
             let ref = _default
-            
+
+            // default properties
             let properties = {
                 min: ref.min,
                 max: ref.max,
@@ -498,6 +518,7 @@ module.exports.getIncome = async (_id, type) => {
                 maxFine: ref.maxFine
             }
 
+            // if there is a document in db, update properties to those fields
             if (result) {
                 const _new = result[type]
                 ref = _new
@@ -511,7 +532,33 @@ module.exports.getIncome = async (_id, type) => {
                 }
             }
 
+            // console.log(properties)
+            return properties
+        } finally {
+            mongoose.connection.close()
+        }
+    })
+}
+
+/**
+ * returns the user's properties of the specified command
+ * @param {string} guildID - the id of the guild
+ * @param {string} userID - the id of the user
+ * @param {string} type - the command name
+ */
+module.exports.getUserCommandStats = (guildID, userID, type) => {
+    return await mongo().then(async (mongoose) => {
+        try {
+            const result = await economyBalSchema.findOne({
+                guildID,
+                userID
+            })
+
+            const properties = (result) ? result.commands[type] : config.uCommandStats[type]
+
+            console.log(result)
             console.log(properties)
+
             return properties
         } finally {
             mongoose.connection.close()

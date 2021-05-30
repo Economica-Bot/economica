@@ -15,17 +15,56 @@ const AppendixTypes = {
      }
 }
 
-// My module
+// see setpay.js for appendix usage example
 function Appendix() {
-     this.content = '\n'
+     let initialized = false
+     this.content = ''
 
+     /**
+      * internal function
+      * @param {string} value - value param of parent function
+      * @param {string} type - type of appendix field
+      */
+     const addField = (value, type) => {
+          if (!AppendixTypes[type]) throw new Error(`Appendix Error: no field type '${type}' exists`)
+          if (!initialized) {
+               this.content = `\n${this.content}`
+               initialized = true
+          }
+          this.content = `${this.content}\n${AppendixTypes[type].icon} ${value}`
+     }
+
+     /**
+      * adds an error appendix field
+      * @param {string} value - the content of the appendix field
+      */
      this.addError = (value) => {
-          this.content = `${this.content}\n${AppendixTypes.error.icon} ${value}`
+          addField(value, 'error')
+     }
+
+     /**
+      * adds a success appendix field
+      * @param {string} value - the content of the appendix field
+      */
+     this.addSuccess = (value) => {
+          addField(value, 'success')
+     }
+
+     /**
+      * adds an info appendix field
+      * @param {string} value - the content of the appendix field
+      */
+     this.addInfo = (value) => {
+          addField(value, 'info')
+     }
+
+     /**
+      * adds a warning appendix field
+      * @param {string} value - the content of the appendix field
+      */
+     this.addWarning = (value) => {
+          addField(value, 'warning')
      }
 }
-
-/* Appendix.prototype.foo = function foo() {
-     console.log(this.bar);
-}; */
 
 module.exports = Appendix;

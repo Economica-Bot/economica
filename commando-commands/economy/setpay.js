@@ -1,7 +1,7 @@
 const { Command } = require('discord.js-commando')
 const helper = require('../../features/helper')
 let Appendix = require('../../features/objects')
-const incomeSchema = require('../../features/schemas/income-sch')
+const { income } = require('../../config.json')
 
 module.exports = class BalanceCommand extends Command {
      constructor(client) {
@@ -44,29 +44,27 @@ module.exports = class BalanceCommand extends Command {
      }
 
      async run(message, {cmd, min, max}) {
-          // if (!incomeSchema[cmd]) return helper.errorEmbed(message, `\`${cmd}\` is not a valid income command`, 'work')
+          if (!income[cmd]) return helper.errorEmbed(message, `\`${helper.cut(cmd)}\` is not a valid income command.\n\nIncome commands: \`${(Object.getOwnPropertyNames(income)).join(`\`, \``)}\``)
           const prefix = await helper.getPrefix(message.guild.id)
           const currency = await helper.getCurrencySymbol(message.guild.id)
           
-          let appendix = new Appendix()
-          console.log(appendix.content)
+          /* let appendix = new Appendix() */ // disabled appendix for now, clutters up the embed unecessarily
 
           if (min < 0) {
                min = 0
-               //appendix.addError('Min value was less than 0')
+               /* appendix.addWarning('Min value was less than 0') */
           }
           if (max < 0) {
                max = 0 
-               //appendix.addError('Max value was less than 0')
+               /* appendix.addWarning('Max value was less than 0') */
           }
           if (min > max) {
                const tempmax = max
                max = min
                min = tempmax
-               //appendix.addError('Min value was greater than Max value')
+               /* appendix.addWarning('Min value should come before Max value') */
           }
 
-          //console.log(appendix.content)
 
           helper.infoEmbed(message, `Updated \`${prefix}${cmd}\`\n\nMin: ${currency}${min}\nMax: ${currency}${max}`, 'default', 'setpay')
 

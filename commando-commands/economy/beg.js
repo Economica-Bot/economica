@@ -1,7 +1,7 @@
 const { Command } = require('discord.js-commando')
 const helper = require('../../features/helper')
 
-module.exports = class BalanceCommand extends Command {
+module.exports = class BegCommand extends Command {
      constructor(client) {
           super(client, {
                name: 'beg',
@@ -22,15 +22,13 @@ module.exports = class BalanceCommand extends Command {
      }
 
      async run(message) {
-          const income = await helper.getIncome(message.guild.id, 'work')
-          const min = income[0]; const max = income[1]
-
-          const amount = Math.floor((Math.random() * (max - min + 1)) + min)
+          const properties = await helper.getIncomeStats(message.guild.id, 'beg')
           const currencySymbol = await helper.getCurrencySymbol(message.guild.id)
 
-          const embed = helper.createSuccessEmbed(message.author, `${currencySymbol} ${amount}`)
-          message.channel.send({ embed })
+          const min = properties.min; const max = properties.max
+          const amount = helper.intInRange(min, max)
 
-          helper.addBal(message.guild.id, message.author.id, amount)
+          helper.changeBal(message.guild.id, message.author.id, amount)
+          helper.successEmbed(message, `You worked and earned ${currencySymbol}${amount}!`)
      }
 }
