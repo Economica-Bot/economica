@@ -546,7 +546,7 @@ module.exports.getIncomeStats = async (_id, type) => {
  * @param {string} userID - the id of the user
  * @param {string} type - the command name
  */
-module.exports.getUserCommandStats = (guildID, userID, type) => {
+module.exports.getUserCommandStats = async (guildID, userID, type) => {
     return await mongo().then(async (mongoose) => {
         try {
             const result = await economyBalSchema.findOne({
@@ -560,6 +560,34 @@ module.exports.getUserCommandStats = (guildID, userID, type) => {
             console.log(properties)
 
             return properties
+        } finally {
+            mongoose.connection.close()
+        }
+    })
+}
+/**
+ * 
+ * @param {string} guildID - the id of the guild
+ * @param {string} userID - the id of the user
+ * @param {array} properties - the object of properties for the corresponding object. Set as 'default' for default values
+ */
+module.exports.editUserCommandProperties = async (guildID, userID, type, properties) => {
+    const inhetitedProperties = await this.getUserCommandStats[type]
+    // for each property, if its value is 'default' or undefined (empty), set it to its current db value (effectively not changing it), else, set it to the provided property.
+    for (const property in properties) property = property && !property === 'default' ? property : inhetitedProperties[Object.keys(inhetitedProperties)[properties.indexOf(property)]] || undefined
+    // convert array properties to object
+    // TODO
+
+    return await mongo().then(async (mongoose) => {
+        try {
+            const result = await economyBalSchema.findOneAndUpdate({
+                guildID,
+                userID
+          ***REMOVED*** {
+                commands: {
+                    [type]: properties
+                }
+            })
         } finally {
             mongoose.connection.close()
         }
