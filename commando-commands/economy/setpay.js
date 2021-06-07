@@ -68,6 +68,6 @@ module.exports = class BalanceCommand extends Command {
 
           helper.infoEmbed(message, `Updated \`${prefix}${cmd}\`\n\nMin: ${currency}${min}\nMax: ${currency}${max}`, 'default', 'setpay')
 
-          helper.setIncome(message.guild.id, cmd, min, max)
+          helper.setCommandStats(message.guild.id, cmd, { min, max} )
      }
 }
