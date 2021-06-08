@@ -22,7 +22,7 @@ module.exports = class BegCommand extends Command {
      }
 
      async run(message) {
-          const properties = await helper.getIncomeStats(message.guild.id, 'beg')
+          const properties = await helper.getCommandStats(message.guild.id, 'beg')
           const currencySymbol = await helper.getCurrencySymbol(message.guild.id)
 
           const min = properties.min; const max = properties.max

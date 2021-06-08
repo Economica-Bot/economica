@@ -21,7 +21,7 @@ module.exports = class WorkCommand extends Command {
     async run(message) {
         const currencySymbol = await helper.getCurrencySymbol(message.guild.id)
 
-        const properties = await helper.getIncomeStats(message.guild.id, 'work')
+        const properties = await helper.getCommandStats(message.guild.id, 'work')
         const uProperties = await helper.getUserCommandStats(message.guild.id, message.author.id, 'work')
 
         if ((Date.now() - uProperties.timestamp) > properties.cooldown) {

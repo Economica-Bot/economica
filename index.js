@@ -17,6 +17,8 @@ const client = new CommandoClient({
     intents: allIntents
 })
 
+module.exports = client
+
 client.registry
     .registerDefaultTypes()
     .registerDefaultGroups()

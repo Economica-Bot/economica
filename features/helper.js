@@ -3,15 +3,17 @@ const { User, Guild, Message } = require('discord.js')
 const { cSymbol, prefix } = require('../config.json')
 const mongo = require('./mongo')
 const config = require('../config.json')
+const client = require('../index') // the client, if needed
 
 const economyBalSchema = require('./schemas/economy-bal-sch')
 const guildSettingSchema = require('./schemas/guild-settings-sch')
 const incomeSchema = require('./schemas/income-sch')
 
-let prefixCache = {} // guildID: [prefix]
-let balanceCache = {} // guildID-UserID: [balance]
-let currencyCache = {} // guildID: [:emoji:]
-let incomeCache = {} // guildID-type: { min, max } 
+let prefixCache = {} // cache[guildID]
+let balanceCache = {} // cache[guildID][userID]
+let currencyCache = {} // cache[guildID]
+let incomeCache = {} // cache[guildID][type]
+let uCommandStatsCache = {} // cache[guildID][userID][type]
 
 const def = 'default'
 
@@ -244,6 +246,28 @@ module.exports.cut = (str, maxLength = 32) => {
     return str.substr(0, 32).concat('...')
 }
 
+/**
+ * removes objects' fields whose value(s) match any element of v
+ * @param {object} obj - the object to be trimmed
+ * @param {array} v - the value or array of value(s) that will be filtered from obj
+ */
+module.exports.trimObj = (obj, v) => {
+    if (!v instanceof Array) {
+        v = [v]
+    }
+
+    for (e in obj) {
+        if (v.includes(obj[e])) {
+            console.log('trimObj', e)
+            delete obj[`${e}`]
+        }
+    }
+
+    console.log('trimobjobj', obj)
+
+    return obj
+}
+
 //
 // async:
 //
@@ -306,7 +330,7 @@ module.exports.changeBal = async (guildID, userID, balance) => {
             })
 
             // console.log('RESULT BAL:', result.balance)
-            balanceCache[`${guildID}-${userID}`] = result.balance
+            balanceCache[`${guildID}`] = { [userID]: result.balance }
             return result.balance
         } finally {
             mongoose.connection.close()
@@ -320,7 +344,7 @@ module.exports.changeBal = async (guildID, userID, balance) => {
  * @param {string} userID - User id.
  */
 module.exports.getBal = async (guildID, userID) => {
-    const cached = balanceCache[`${guildID}-${userID}`] + 1
+    const cached = balanceCache[`${guildID}`]?.[userID] + 1
     if (cached) {
         return cached - 1
     }
@@ -332,7 +356,6 @@ module.exports.getBal = async (guildID, userID) => {
                 userID,
             })
 
-            // console.log('Result: ', result)
             let balance = 0
             if (result) {
                 balance = result.balance
@@ -344,7 +367,7 @@ module.exports.getBal = async (guildID, userID) => {
                 }).save()
             }
 
-            balanceCache[`${guildID}-${userID}`] = balance
+            balanceCache[`${guildID}`] = { [userID]: balance }
             return balance
         } finally {
             mongoose.connection.close()
@@ -395,9 +418,9 @@ module.exports.getPrefix = async (guildID) => {
                 _id: guildID,
             })
 
-            if (result) {
+            if (result?.prefix) {
                 prefixCache[`${guildID}`] = result.prefix
-            }
+            } else prefixCache[guildID] = config.prefix // if no stored prefix, return the global default
         } finally {
             mongoose.connection.close()
         }
@@ -466,27 +489,30 @@ module.exports.setCurrencySymbol = async (_id, currency) => {
  * updates the min and max payout for the specified income command
  * @param {string} _id - the id of the guild
  * @param {string} type - the type of income command (work, beg, crime, etc -- SEE economica/features/schemas/income-sch.js)
- * @param {number} min - min payout
- * @param {number} max - max payout
+ * @param {object} properties - an object of properties for the command
  */
-module.exports.setIncome = async (_id, type, min, max) => {
+module.exports.setCommandStats = async (_id, type, properties) => {
+
+    // db properties, global default properties, and object in which updated properties will be stored
+    const inheritedProperties = await this.getCommandStats(_id, type, false, false)
+    const defaultProperties = config.income[type]
+
+    properties = { ...inheritedProperties, ...properties }
+    this.trimObj(properties, [undefined, null]) // if a property is undefined or null, do not store it in db
+
     return await mongo().then(async (mongoose) => {
         try {
-            const result = await incomeSchema.findOneAndUpdate({
+            await incomeSchema.findOneAndUpdate({
                 _id
           ***REMOVED*** {
-                [type]: {
-                    min,
-                    max
-                }
+                [type]: properties
           ***REMOVED*** {
                 upsert: true,
                 new: true
             })
 
-            incomeCache[`${_id}-${type}`] = { min: result[type].min, max: result[type].max }
-            // console.log(incomeCache)
-            return { min: result[type].min, max: result[type].max }
+            // allows cache to be accessed as incomeCache[_id][type]
+            incomeCache[`${_id}`] = { [type]: { ...defaultProperties, ...properties } } // if a property is not in db, store its default value in the cache
         } finally {
             mongoose.connection.close()
         }
@@ -497,45 +523,31 @@ module.exports.setIncome = async (_id, type, min, max) => {
  * returns the specified income command's min and max payout values as an object { min, max }
  * @param {string} _id - the id of the guild
  * @param {string} type - the type of income command (work, beg, crime, etc -- SEE economica/features/schemas/income-sch.js) 
+ * @param {boolean} returnUndefined - whether to omit undefined fields or return their default value. Default: true (return defaults)
  */
-module.exports.getIncomeStats = async (_id, type) => {
+module.exports.getCommandStats = async (_id, type, returnUndefined = true, closeConnection = true) => {
+    const cached = incomeCache[`${_id}`]?.[`${type}`]
+    if (cached) return cached
     return await mongo().then(async (mongoose) => {
         try {
             const result = await incomeSchema.findOne({
                 _id,
             })
 
-            const _default = config.income[type]
-            let ref = _default
+            let properties = undefined
+            const defaultProperties = config.income[type] // global defaults
+            const inheritedProperties = result?.[type] // from db
 
-            // default properties
-            let properties = {
-                min: ref.min,
-                max: ref.max,
-                cooldown: ref.cooldown,
-                chance: ref.chance,
-                minFine: ref.minFine,
-                maxFine: ref.maxFine
+            if (returnUndefined !== false && inheritedProperties) {
+                properties = { ...defaultProperties, ...inheritedProperties } // merge objects with right-left precedence for same-key terms
             }
 
-            // if there is a document in db, update properties to those fields
-            if (result) {
-                const _new = result[type]
-                ref = _new
-                properties = {
-                    min: ref.min,
-                    max: ref.max,
-                    cooldown: ref.cooldown,
-                    chance: ref.chance,
-                    minFine: ref.minFine,
-                    maxFine: ref.maxFine
-                }
-            }
-
-            // console.log(properties)
+            properties = properties || inheritedProperties // return object: merged properties or the inherited properties only. Inherited properties will only be returned if returnUndefined is false.
             return properties
         } finally {
-            mongoose.connection.close()
+            if (closeConnection !== false) {
+                mongoose.connection.close()
+            } 
         }
     })
 }
@@ -546,7 +558,9 @@ module.exports.getIncomeStats = async (_id, type) => {
  * @param {string} userID - the id of the user
  * @param {string} type - the command name
  */
-module.exports.getUserCommandStats = async (guildID, userID, type) => {
+module.exports.getUserCommandStats = async (guildID, userID, type, closeConnection = true) => {
+    const cached = uCommandStatsCache[`${guildID}`]?.[userID]?.[type]
+    if (cached) return cached
     return await mongo().then(async (mongoose) => {
         try {
             const result = await economyBalSchema.findOne({
@@ -556,9 +570,6 @@ module.exports.getUserCommandStats = async (guildID, userID, type) => {
 
             const properties = (result) ? result.commands[type] : config.uCommandStats[type]
 
-            console.log(result)
-            console.log(properties)
-
             return properties
         } finally {
             mongoose.connection.close()
@@ -566,17 +577,22 @@ module.exports.getUserCommandStats = async (guildID, userID, type) => {
     })
 }
 /**
- * 
+ * updates all specified properties of the command type. Does not alter values that were not given.
  * @param {string} guildID - the id of the guild
  * @param {string} userID - the id of the user
- * @param {array} properties - the object of properties for the corresponding object. Set as 'default' for default values
+ * @param {array} properties - the object of properties for the corresponding object. Set as 'default' for default values. refer to the `commands` field of features/schemas/economy-bal-sch.js and its subfields for contents. All are optional.
  */
 module.exports.editUserCommandProperties = async (guildID, userID, type, properties) => {
-    const inhetitedProperties = await this.getUserCommandStats[type]
-    // for each property, if its value is 'default' or undefined (empty), set it to its current db value (effectively not changing it), else, set it to the provided property.
-    for (const property in properties) property = property && !property === 'default' ? property : inhetitedProperties[Object.keys(inhetitedProperties)[properties.indexOf(property)]] || undefined
-    // convert array properties to object
-    // TODO
+    const inheritedProperties = uCommandStatsCache[guildID][userID][type] || await this.getUserCommandStats(guildID, userID, type) // ?db properties
+    const defaultProperties = config.uCommandStats[type] // config.json global default properties
+    let tempProperties = {} // instantiated filtered properties object
+    // filter property origins: param (input) properties else db properties else default properties
+    for (const property in properties) {
+        tempProperties[property] = properties[property] ||
+            inheritedProperties && inheritedProperties[property] ? inheritedProperties[property] : defaultProperties[property] ||
+            defaultProperties[property] // final catch
+    }
+    properties = tempProperties
 
     return await mongo().then(async (mongoose) => {
         try {
