@@ -1,8 +1,11 @@
 const { CommandoClient } = require('discord.js-commando')
+const { Intents } = require('discord.js')
 
 const config = require('./config.json')
 const mongo = require('./features/mongo')
 const path = require('path')
+
+const allIntents = Intents.ALL
 
 const client = new CommandoClient({
     commandPrefix: config.prefix,
@@ -10,7 +13,8 @@ const client = new CommandoClient({
     owner: config.botAuth.admin_id,
     invite: 'https://discord.gg/R5jvSarddd',
     unknownCommandResponse: false,
-    fetchAllMembers: true
+    fetchAllMembers: true,
+    intents: allIntents
 })
 
 client.registry
