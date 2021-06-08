@@ -13,6 +13,8 @@ const client = new CommandoClient({
     fetchAllMembers: true
 })
 
+module.exports = client
+
 client.registry
     .registerDefaultTypes()
     .registerDefaultGroups()

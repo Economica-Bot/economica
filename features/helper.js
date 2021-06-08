@@ -3,6 +3,7 @@ const { User, Guild, Message } = require('discord.js')
 const { cSymbol, prefix } = require('../config.json')
 const mongo = require('./mongo')
 const config = require('../config.json')
+const client = require('../index') // the client, if needed
 
 const economyBalSchema = require('./schemas/economy-bal-sch')
 const guildSettingSchema = require('./schemas/guild-settings-sch')
