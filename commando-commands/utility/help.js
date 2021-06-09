@@ -1,6 +1,8 @@
 const { MessageEmbed } = require('discord.js')
 const { Command } = require('discord.js-commando')
 
+const helper = require('../../features/helper')
+
 module.exports = class HelpCommand extends Command {
     constructor(client) {
         super(client, {
@@ -86,8 +88,7 @@ module.exports = class HelpCommand extends Command {
 
                 message.say(helpEmbed)
             } else {
-                console.log('test')
-                message.reply(`Command \`${args.command}\` not found.`)
+                helper.errorEmbed(message, `Command \`${args.command}\` not found.`, 'help')
             } 
         }
     }
