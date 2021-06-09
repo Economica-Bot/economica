@@ -4,7 +4,7 @@ module.exports = class EchoCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'echo',
-            group: 'utility',
+            group: 'util',
             memberName: 'echo',
             description: 'Echo arguments',
         })

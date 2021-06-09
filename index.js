@@ -30,7 +30,6 @@ client.registry
     .registerGroups([
         ['config', 'Config & Setup'],
         ['economy', 'Economy'],
-        ['utility', 'Utility'],
         ['moderation', 'Moderation']
     ])
     .registerCommandsIn(path.join(__dirname, 'commando-commands'))
