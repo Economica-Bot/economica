@@ -12,7 +12,8 @@ module.exports = class HelpCommand extends Command {
             guildOnly: true,
             group: 'util',
             description: 'Lists available commands, or detailed information about a specific command.',
-            details: 'The command query must match the command or one of its aliases. If there is no command input, all available commands will be listed.',            format: 'help [command]',
+            details: 'The command query must match the command or one of its aliases. If there is no command input, all available commands will be listed.',            
+            format: 'help [command]',
             examples: [
                 'help',
                 'help ping'
@@ -43,6 +44,10 @@ module.exports = class HelpCommand extends Command {
                 for(const command of group[1].commands) {
                     commandList += `\`${command[1].name}\`, `
                 }
+
+                //remove extraneous comma & space
+                commandList = commandList.substring(0, commandList.length - 2)
+
                 helpEmbed.addField(
                     group[1].name,
                     commandList,
