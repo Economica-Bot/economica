@@ -35,10 +35,10 @@ module.exports = class HelpCommand extends Command {
         if(!args.command) {       
             let helpEmbed = new MessageEmbed()
             .setColor('YELLOW')
-            .setTitle('Commands')
+            .setTitle('Economica Commands')
+            .setThumbnail(this.client.user.displayAvatarURL())
 
             let commandList = ''
-            
             for(const group of groups) {
                 for(const command of group[1].commands) {
                     commandList += `\`${command[1].name}\`, `
@@ -56,8 +56,9 @@ module.exports = class HelpCommand extends Command {
             if (commands.length === 1) {
                 let helpEmbed = new MessageEmbed()
                 .setTitle(`${commands[0].name}`)
+                .setThumbnail(this.client.user.displayAvatarURL())
                 .setDescription(
-                    `**${commands[0].description}**\n${commands[0].details}`
+                    `**${commands[0].description}**\n${commands[0].details ? commands[0].details : ''}`
                 )
                 .setColor('YELLOW')
                 .setFooter(commands[0].guildOnly ? 'Only usable in servers.' : '')
