@@ -21,16 +21,11 @@ module.exports = client
 
 client.registry
     .registerDefaultTypes()
-    .registerDefaultGroups()
-    .registerDefaultCommands({
-        prefix: false,
-        unknownCommand: false,
-        help: false
-    })
     .registerGroups([
-        ['config', 'Config & Setup'],
+        ['moderation', 'Moderation'],
         ['economy', 'Economy'],
-        ['moderation', 'Moderation']
+        ['util', 'Utility'],
+        ['config', 'Config & Setup']
     ])
     .registerCommandsIn(path.join(__dirname, 'commando-commands'))
 
