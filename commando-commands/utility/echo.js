@@ -6,13 +6,26 @@ module.exports = class EchoCommand extends Command {
             name: 'echo',
             group: 'util',
             memberName: 'echo',
-            description: 'Echo arguments',
+            description: 'Repeats a message',
+            details: 'If the last word in the message is \`true\`, the echo will be within an embed.',
+            format: 'echo <message> [true]',
+            examples: [
+                'echo Economica',
+                'echo Economica true'
+            ],
+            args: [
+                {
+                    key: 'args',
+                    prompt: 'Please enter a message to be echoed.',
+                    type: 'string'
+              ***REMOVED***
+            ]
         })
     }
 
     async run(message, args) {
-        if (args.endsWith('--embed') || args.endsWith('--e')) {
-            args = args.substr(0, args.indexOf('--embed'));
+        console.log(args.args)
+        if (args.args.endsWith('true')) {
             return message.channel.send({
                 embed: {
                     color: '#2c2f33',
@@ -20,10 +33,11 @@ module.exports = class EchoCommand extends Command {
                         name: message.author.tag,
                         icon_url: message.author.avatarURL(),
                   ***REMOVED***
-                    description: args
+                    description: args.args.substring(0, args.args.length - 4)
                 }
             })
         }
-        return message.channel.send(args);
+
+        return message.channel.send(args.args);
     }
 }
