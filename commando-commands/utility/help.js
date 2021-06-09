@@ -10,9 +10,9 @@ module.exports = class HelpCommand extends Command {
             ],
             memberName: 'help',
             guildOnly: true,
-            group: 'utility',
+            group: 'util',
             description: 'Lists available commands, or detailed information about a specific command.',
-            details: 'The command query may be a substring of an entire command name. If there is no command input, all available commands will be listed.',            format: 'help [command]',
+            details: 'The command query must match the command or one of its aliases. If there is no command input, all available commands will be listed.',            format: 'help [command]',
             examples: [
                 'help',
                 'help ping'
@@ -30,31 +30,59 @@ module.exports = class HelpCommand extends Command {
 
     async run(message, args) {
         const groups = this.client.registry.groups
-        const commands = this.client.registry.findCommands(args.command, false, message)
+        const commands = this.client.registry.findCommands(args.command, true, message)
         const showAll = args.command && args.command.toLowerCase() === 'all'
-        if (args.command && !showAll) {
+        if(!args.command) {       
+            let helpEmbed = new MessageEmbed()
+            .setColor('YELLOW')
+            .setTitle('Commands')
+
+            let commandList = ''
+            
+            for(const group of groups) {
+                for(const command of group[1].commands) {
+                    commandList += `\`${command[1].name}\`, `
+                }
+                helpEmbed.addField(
+                    group[1].name,
+                    commandList,
+                    true
+                )
+                commandList = ''
+            }
+
+            message.say(helpEmbed)
+        } else if (args.command && !showAll) {
             if (commands.length === 1) {
-                let helpDesc = ''
-                if (commands[0].aliases) helpDesc += `${commands[0].aliases}`
-                if (commands[0].description) helpDesc += `\n${commands[0].description}`
-                if (commands[0].details) helpDesc += `\n${commands[0].details}`
-                if (commands[0].format) helpDesc += `\n${commands[0].format}`
-                if (commands[0].examples) helpDesc += `\n${commands[0].examples}`
-                if (commands[0].guildOnly) helpDesc += `\nOnly usable in servers.`
-
-
                 let helpEmbed = new MessageEmbed()
                 .setTitle(`${commands[0].name}`)
                 .setDescription(
-                    helpDesc
+                    `**${commands[0].description}**\n${commands[0].details}`
+                )
+                .setColor('YELLOW')
+                .setFooter(commands[0].guildOnly ? 'Only usable in servers.' : '')
+
+                if (commands[0].aliases.length) helpEmbed.addField(
+                    'Aliases',
+                    `\`${commands[0].aliases.toString().split(',').join('\n')}\``,
+                    true,
+                )
+                if (commands[0].format) helpEmbed.addField(
+                    'Format',
+                    `\`${commands[0].format}\``,
+                    true,
+                )
+                if (commands[0].examples) helpEmbed.addField(
+                    'Examples',
+                    `\`${commands[0].examples.toString().split(',').join('\n')}\``,
+                    true,
                 )
 
                 message.say(helpEmbed)
-            } else if (commands.length > 1) {
-                message.reply(`${commands.length} commands found. Please be more specific.`)
+            } else {
+                console.log('test')
+                message.reply(`Command \`${args.command}\` not found.`)
             } 
-        } else {
-            message.reply(`Command ${args[0]} not found.`)
         }
     }
 } 
