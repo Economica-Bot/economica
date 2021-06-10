@@ -1,6 +1,5 @@
 const { Command } = require('discord.js-commando')
 const Discord = require('discord.js')
-const paginationEmbed = require('discord.js-pagination')
 
 const helper = require('../../features/helper')
 
@@ -24,8 +23,7 @@ module.exports = class LeaderBoardCommand extends Command {
         })
     }
 
-    async run(message, args) {
-
+    async run(message) {
         await mongo().then(async (mongoose) => {
             try {
                 const balances = await economyBalSchema
@@ -49,14 +47,13 @@ module.exports = class LeaderBoardCommand extends Command {
                             new Discord.MessageEmbed()
                                 .setAuthor(`${message.guild}'s Leaderboard`, `${this.client.user.displayAvatarURL()}`)
                                 .setColor(111111)
+                                .setFooter(`Page ${embeds.length + 1}`)
                         )
 
                         // Fill the length of each page.
                         for(let i = 0; i < 8; i++) {
                             try {
-                                embeds[embeds.length-1].addField(`#${rank} ${message.guild.members.cache.get(balances[balCounter].userID).user.tag}`, `${currencySymbol}${balances[balCounter].balance}`)
-                                rank++
-                                balCounter++  
+                                embeds[embeds.length-1].addField(`#${rank++} ${message.guild.members.cache.get(balances[balCounter].userID).user.tag}`, `${currencySymbol}${balances[balCounter++].balance}`)
                             } catch (err) {
                                 balCounter++
                                 console.log(err)
@@ -66,8 +63,49 @@ module.exports = class LeaderBoardCommand extends Command {
                             if(balCounter >= balances.length) break loop1
                         }
                     }
-                
-                paginationEmbed(message, embeds, ['⏪', '⏩'], 30000)
+
+                const row = new Discord.MessageActionRow()
+                .addComponents(
+                    new Discord.MessageButton()
+                        .setCustomID('previous_page')
+                        .setLabel('Previous')
+                        .setStyle('SECONDARY')   
+                )    
+                .addComponents(
+                        new Discord.MessageButton()
+                            .setCustomID('next_page')
+                            .setLabel('Next')
+                            .setStyle('PRIMARY')
+                )   
+
+                await message.channel.send({
+                    embed: embeds[0],
+                    components: [row]
+                })
+
+                let i = 0
+                this.client.on('interaction', async interaction => {
+                    if(interaction.componentType === 'BUTTON' && interaction.guildID === message.guild.id) {
+                        if(i < embeds.length - 1 && i >= 0 && interaction.customID === 'next_page') {
+                            interaction.update({ 
+                                embeds: [embeds[++i]] 
+                            }).catch(err => {
+                                console.err(err)
+                            })
+                        } else if(i > 0 && i < embeds.length && interaction.customID === 'previous_page') {
+                            interaction.update({ 
+                                embeds: [embeds[--i]] 
+                            }).catch(err => {
+                                console.log(err)
+                            })
+                        } else {
+                            interaction.reply('Out of bounds.').then(
+                                setTimeout(() => interaction.deleteReply(), 2000)
+                            )
+                        }
+                    }
+                })
+
             } catch (err) {
                 console.log(err)
             } finally {
