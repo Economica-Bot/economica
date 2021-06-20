@@ -543,6 +543,7 @@ module.exports.getCommandStats = async (_id, type, returnUndefined = true, close
             }
 
             properties = properties || inheritedProperties // return object: merged properties or the inherited properties only. Inherited properties will only be returned if returnUndefined is false.
+            if (properties) incomeCache[_id] = { [type]: properties } // only cache properties if returnUndefined is true (properties would not be undefined)
             return properties
         } finally {
             if (closeConnection !== false) {
@@ -558,7 +559,7 @@ module.exports.getCommandStats = async (_id, type, returnUndefined = true, close
  * @param {string} userID - the id of the user
  * @param {string} type - the command name
  */
-module.exports.getUserCommandStats = async (guildID, userID, type, closeConnection = true) => {
+module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefined = true, closeConnection = true) => {
     const cached = uCommandStatsCache[`${guildID}`]?.[userID]?.[type]
     if (cached) return cached
     return await mongo().then(async (mongoose) => {
@@ -568,8 +569,16 @@ module.exports.getUserCommandStats = async (guildID, userID, type, closeConnecti
                 userID
             })
 
-            const properties = (result) ? result.commands[type] : config.uCommandStats[type]
+            let properties = undefined
+            const defaultProperties = config.uCommandStats[type]
+            const inheritedProperties = result?.[type]
+            
+            if (returnUndefined !== false && inheritedProperties) {
+                properties = { ...defaultProperties, ...inheritedProperties }
+            }
 
+            properties = properties || inheritedProperties
+            if (properties) uCommandStatsCache[guildID] = { [userID]: { [type]: properties } }
             return properties
         } finally {
             mongoose.connection.close()
