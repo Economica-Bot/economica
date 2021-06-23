@@ -524,6 +524,7 @@ module.exports.setCommandStats = async (_id, type, properties) => {
  * @param {string} _id - the id of the guild
  * @param {string} type - the type of income command (work, beg, crime, etc -- SEE economica/features/schemas/income-sch.js) 
  * @param {boolean} returnUndefined - whether to omit undefined fields or return their default value. Default: true (return defaults)
+ * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  */
 module.exports.getCommandStats = async (_id, type, returnUndefined = true, closeConnection = true) => {
     const cached = incomeCache[`${_id}`]?.[`${type}`]
@@ -558,6 +559,8 @@ module.exports.getCommandStats = async (_id, type, returnUndefined = true, close
  * @param {string} guildID - the id of the guild
  * @param {string} userID - the id of the user
  * @param {string} type - the command name
+ * @param {boolean} returnUndefined - whether to omit undefined fields or return their default value. Default: true (return defaults)
+ * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  */
 module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefined = true, closeConnection = true) => {
     const cached = uCommandStatsCache[`${guildID}`]?.[userID]?.[type]
@@ -581,7 +584,9 @@ module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefin
             if (properties) uCommandStatsCache[guildID] = { [userID]: { [type]: properties } }
             return properties
         } finally {
-            mongoose.connection.close()
+            if (closeConnection !== false) {
+                mongoose.connection.close()
+            }
         }
     })
 }
@@ -591,17 +596,11 @@ module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefin
  * @param {string} userID - the id of the user
  * @param {array} properties - the object of properties for the corresponding object. Set as 'default' for default values. refer to the `commands` field of features/schemas/economy-bal-sch.js and its subfields for contents. All are optional.
  */
-module.exports.editUserCommandProperties = async (guildID, userID, type, properties) => {
-    const inheritedProperties = uCommandStatsCache[guildID][userID][type] || await this.getUserCommandStats(guildID, userID, type) // ?db properties
-    const defaultProperties = config.uCommandStats[type] // config.json global default properties
-    let tempProperties = {} // instantiated filtered properties object
-    // filter property origins: param (input) properties else db properties else default properties
-    for (const property in properties) {
-        tempProperties[property] = properties[property] ||
-            inheritedProperties && inheritedProperties[property] ? inheritedProperties[property] : defaultProperties[property] ||
-            defaultProperties[property] // final catch
-    }
-    properties = tempProperties
+module.exports.setUserCommandProperties = async (guildID, userID, type, properties) => {
+    const inheritedProperties = await this.getUserCommandStats(_id, type, false, false)
+    const defaultProperties = config.income[type]
+    properties = { ...inheritedProperties, ...properties }
+    this.trimObj(properties, [undefined, null]) // trim object for db
 
     return await mongo().then(async (mongoose) => {
         try {
@@ -612,7 +611,12 @@ module.exports.editUserCommandProperties = async (guildID, userID, type, propert
                 commands: {
                     [type]: properties
                 }
+          ***REMOVED*** {
+                upsert: true,
+                new: true
             })
+
+            uCommandStatsCache[guildID] = { [userID]: { [type]: { ...defaultProperties, ...properties } } } // do not trim cached object
         } finally {
             mongoose.connection.close()
         }
