@@ -27,7 +27,7 @@ client.registry
         ['util', 'Utility'],
         ['config', 'Config & Setup']
     ])
-    .registerCommandsIn(path.join(__dirname, 'commando-commands'))
+    .registerCommandsIn(path.join(__dirname, 'commands'))
 
 client.on('ready', async () => {
 
