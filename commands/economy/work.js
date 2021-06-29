@@ -30,7 +30,7 @@ module.exports = class WorkCommand extends Command {
         const usedWhen = now.getTime()
 
         if ((usedWhen - uProperties.timestamp) < properties.cooldown) {
-            return helper.errorEmbed(message, `:hourglass: You need to wait ${ms(properties.cooldown - (Date.now() - uProperties.timestamp))}`) // RIP the command if user is speedy
+            return helper.errorEmbed(message, `:hourglass: You need to wait ${ms(properties.cooldown - (Date.now() - uProperties.timestamp))}`, this.memberName) // RIP the command if user is speedy
         }
 
         // reset the timestamp when used

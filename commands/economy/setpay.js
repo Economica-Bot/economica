@@ -43,7 +43,7 @@ module.exports = class BalanceCommand extends Command {
      }
 
      async run(message, {cmd, min, max}) {
-          if (!income[cmd]) return helper.errorEmbed(message, `\`${helper.cut(cmd)}\` is not a valid income command.\n\nIncome commands: \`${(Object.getOwnPropertyNames(income)).join(`\`, \``)}\``)
+          if (!income[cmd]) return helper.errorEmbed(message, `\`${helper.cut(cmd)}\` is not a valid income command.\n\nIncome commands: \`${(Object.getOwnPropertyNames(income)).join(`\`, \``)}\``, this.memberName)
           const prefix = await helper.getPrefix(message.guild.id)
           const currency = await helper.getCurrencySymbol(message.guild.id)
 
@@ -60,7 +60,7 @@ module.exports = class BalanceCommand extends Command {
           }
 
 
-          helper.infoEmbed(message, `Updated \`${prefix}${cmd}\`\n\nMin: ${currency}${min}\nMax: ${currency}${max}`, 'default', 'setpay')
+          helper.infoEmbed(message, `Updated \`${prefix}${cmd}\`\n\nMin: ${currency}${min}\nMax: ${currency}${max}`, 'default', this.memberName)
           helper.setCommandStats(message.guild.id, cmd, { min, max })
      }
 }

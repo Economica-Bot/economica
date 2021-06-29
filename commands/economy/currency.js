@@ -48,7 +48,7 @@ module.exports = class CurrencyCommand extends Command {
                 message, 
                 `The currency symbol is: ${currency}\n\nID: \`${currency}\``, 
                 `use ${message.guild.commandPrefix}${this.format} to change symbol.`,
-                this.name
+                this.memberName
             )
         }
 
@@ -57,7 +57,7 @@ module.exports = class CurrencyCommand extends Command {
             return helper.errorEmbed(
                 message, 
                 `\`${emoji}\` is already the server currency symbol.`, 
-                this.name
+                this.memberName
             )
         }
 
