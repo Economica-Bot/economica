@@ -55,21 +55,16 @@ module.exports = class BalanceCommand extends Command {
         const prefix = await helper.getPrefix(message.guild.id)
         const currency = await helper.getCurrencySymbol(message.guild.id)
 
-        /* let appendix = new Appendix() */ // disabled appendix for now, clutters up the embed unecessarily
-
         if (minFine < 0) {
             minFine = 0
-            /* appendix.addWarning('Min value was less than 0') */
         }
         if (maxFine < 0) {
             maxFine = 0
-            /* appendix.addWarning('Max value was less than 0') */
         }
         if (minFine > maxFine) {
             const tempmax = maxFine
             maxFine = minFine
             minFine = tempmax
-            /* appendix.addWarning('Min value should come before Max value') */
         }
 
 

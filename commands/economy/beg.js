@@ -39,7 +39,7 @@ module.exports = class BegCommand extends Command {
           // reset the timestamp when used
           helper.setUserCommandStats(guild.id, author.id, 'beg', { timestamp: usedWhen })
 
-          if ((Math.random() * 100) > properties.chance) {
+          if ((Math.random() * 100) < properties.chance) {
                return helper.errorEmbed(message, 'You begged but nobody gave you anything', this.memberName)
           }
 

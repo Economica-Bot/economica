@@ -29,6 +29,8 @@ module.exports = class BegCommand extends Command {
         const now = new Date
         const usedWhen = now.getTime()
 
+        console.log('crime', properties)
+
         if ((usedWhen - uProperties.timestamp) < properties.cooldown) {
             return helper.errorEmbed(message, `:hourglass: You need to wait ${ms(properties.cooldown - (Date.now() - uProperties.timestamp))}`, this.memberName) // RIP the command if user is speedy
         }
@@ -36,7 +38,7 @@ module.exports = class BegCommand extends Command {
         // reset the timestamp when used
         helper.setUserCommandStats(guild.id, author.id, 'crime', { timestamp: usedWhen })
 
-        if ((Math.random() * 100) > properties.chance) {
+        if ((Math.random() * 100) < properties.chance) {
             const fineAmount = helper.intInRange(properties.minFine, properties.maxFine)
             helper.changeBal(guild.id, author.id, (fineAmount * -1))
             return helper.errorEmbed(message, `You were caught and fined ${currencySymbol}${fineAmount}`, this.memberName)
