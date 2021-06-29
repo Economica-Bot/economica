@@ -46,27 +46,21 @@ module.exports = class BalanceCommand extends Command {
           if (!income[cmd]) return helper.errorEmbed(message, `\`${helper.cut(cmd)}\` is not a valid income command.\n\nIncome commands: \`${(Object.getOwnPropertyNames(income)).join(`\`, \``)}\``)
           const prefix = await helper.getPrefix(message.guild.id)
           const currency = await helper.getCurrencySymbol(message.guild.id)
-          
-          /* let appendix = new Appendix() */ // disabled appendix for now, clutters up the embed unecessarily
 
           if (min < 0) {
                min = 0
-               /* appendix.addWarning('Min value was less than 0') */
           }
           if (max < 0) {
-               max = 0 
-               /* appendix.addWarning('Max value was less than 0') */
+               max = 0
           }
           if (min > max) {
                const tempmax = max
                max = min
                min = tempmax
-               /* appendix.addWarning('Min value should come before Max value') */
           }
 
 
           helper.infoEmbed(message, `Updated \`${prefix}${cmd}\`\n\nMin: ${currency}${min}\nMax: ${currency}${max}`, 'default', 'setpay')
-
           helper.setCommandStats(message.guild.id, cmd, { min, max })
      }
 }

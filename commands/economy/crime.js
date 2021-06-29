@@ -29,9 +29,6 @@ module.exports = class BegCommand extends Command {
         const now = new Date
         const usedWhen = now.getTime()
 
-        console.log(usedWhen - uProperties.timestamp)
-        console.log(properties.cooldown)
-
         if ((usedWhen - uProperties.timestamp) < 5000 /* properties.cooldown */) {
             return helper.errorEmbed(message, `:hourglass: You need to wait ${ms(properties.cooldown - (Date.now() - uProperties.timestamp))}`) // RIP the command if user is speedy
         }
