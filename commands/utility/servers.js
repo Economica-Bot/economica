@@ -10,7 +10,7 @@ module.exports = class ServersCommand extends Command {
                 'listserver',
                 'serverlist'
             ],
-            group: 'utility',
+            group: 'util',
             memberName: 'servers',
             guildOnly: true,
             description: `Returns a list of servers that Economica is apart of.`,

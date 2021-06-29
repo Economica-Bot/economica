@@ -3,7 +3,6 @@ const { User, Guild, Message } = require('discord.js')
 const { cSymbol, prefix } = require('../config.json')
 const mongo = require('./mongo')
 const config = require('../config.json')
-const client = require('../index') // the client, if needed
 
 const economyBalSchema = require('./schemas/economy-bal-sch')
 const guildSettingSchema = require('./schemas/guild-settings-sch')
@@ -14,8 +13,6 @@ let balanceCache = {} // cache[guildID][userID]
 let currencyCache = {} // cache[guildID]
 let incomeCache = {} // cache[guildID][type]
 let uCommandStatsCache = {} // cache[guildID][userID][type]
-
-const def = 'default'
 
 /**
  * Returns the member object of the message guild with the specified id.

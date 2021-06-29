@@ -6,6 +6,8 @@ const muteSchema = require('../../features/schemas/mute-sch')
 const kickSchema = require('../../features/schemas/kick-sch')
 const banSchema = require('../../features/schemas/ban-sch')
 
+const helper = require('../../features/helper')
+
 
 module.exports = class InfractionInfoCommand extends Command {
     constructor(client) {

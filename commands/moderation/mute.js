@@ -30,12 +30,12 @@ module.exports = class MuteCommand extends Command {
             args: [
                 {
                     key: 'member',
-                    prompt: 'please @mention the member you wish to mute.',
+                    prompt: 'Please @mention the member you wish to mute.',
                     type: 'member'
               ***REMOVED***
                 {
                     key: 'args',
-                    prompt: 'please provide a duration and a reason',
+                    prompt: 'Please provide a duration and a reason',
                     type: 'string',
                     default: 'No reason provided'
               ***REMOVED***
