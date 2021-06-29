@@ -8,10 +8,9 @@ module.exports = class BalanceCommand extends Command {
           super(client, {
                name: 'setpay',
                aliases: [
-                    'setincome',
-                    'set-income',
-                    'income-set',
                     'set-pay',
+                    'pay-range',
+                    'set-pay-range'
                ],
                group: 'economy',
                memberName: 'setpay',
@@ -68,6 +67,6 @@ module.exports = class BalanceCommand extends Command {
 
           helper.infoEmbed(message, `Updated \`${prefix}${cmd}\`\n\nMin: ${currency}${min}\nMax: ${currency}${max}`, 'default', 'setpay')
 
-          helper.setCommandStats(message.guild.id, cmd, { min, max} )
+          helper.setCommandStats(message.guild.id, cmd, { min, max })
      }
 }
