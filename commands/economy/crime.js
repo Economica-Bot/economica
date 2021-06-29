@@ -11,7 +11,7 @@ module.exports = class BegCommand extends Command {
             guildOnly: true,
             description: 'Possibly earn cash money',
             details: 'Commit a crime to increase your cash balance with risk of fine',
-            format: 'crime',
+            format: '',
             examples: [
                 'crime'
             ],

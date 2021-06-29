@@ -14,7 +14,7 @@ module.exports = class BalanceCommand extends Command {
             guildOnly: true,
             description: 'Returns balance in server currency',
             details: 'View your balance or someone else\'s balance by specifying the user. This can be done with @mention, id, or simply typing part of their name.',
-            format: 'bal [@user | id | name]',
+            format: '[@user | id | name]',
             examples: [
                 'bal @QiNG-agar#0540',
                 'bal qing',

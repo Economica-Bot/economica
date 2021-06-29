@@ -17,7 +17,7 @@ module.exports = class CurrencyCommand extends Command {
             guildOnly: true,
             description: 'Returns or updates the guild currency symbol',
             details: 'View this server\'s currency symbol or pass an emoji to replace the current symbol.',
-            format: 'currency [:emoji:]',
+            format: '[emoji | character(s)]',
             examples: [
                 'currency :dollar:',
                 'currency'

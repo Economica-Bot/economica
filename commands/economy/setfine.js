@@ -16,7 +16,7 @@ module.exports = class BalanceCommand extends Command {
             guildOnly: true,
             description: 'Set the min and max fine for a fineable income command.',
             details: 'Set the minimum and maximum extremes of a fineable income command\'s fine range.',
-            format: 'setpay <cmd> <min> <max>',
+            format: 'setfine <cmd> <minFine> <maxFine>',
             examples: [
                 'setfine crime 100 500',
                 'fine-range crime 200 1000'

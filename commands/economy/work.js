@@ -11,7 +11,7 @@ module.exports = class WorkCommand extends Command {
             guildOnly: true,
             description: 'Earn cash money.',
             details: 'Work to increase your cash balance.',
-            format: 'work',
+            format: '',
             examples: [
                 'work'
             ],

@@ -19,7 +19,7 @@ module.exports = class LeaderBoardCommand extends Command {
             guildOnly: true,
             description: 'Returns leader board',
             details: 'View top balances.',
-            format: 'lb'
+            format: ''
         })
     }
 

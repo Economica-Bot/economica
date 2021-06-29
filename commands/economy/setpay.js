@@ -17,7 +17,7 @@ module.exports = class BalanceCommand extends Command {
                guildOnly: true,
                description: 'Set the min and max profit for an income command.',
                details: 'Set the minimum and maximum extremes of an income command\'s profit range.',
-               format: 'setpay <cmd> <min> <max>',
+               format: '<cmd> <min> <max>',
                examples: [
                     'setpay work 100 500',
                     'set-income crime 200 1000'
