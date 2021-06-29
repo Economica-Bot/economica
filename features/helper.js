@@ -258,12 +258,9 @@ module.exports.trimObj = (obj, v) => {
 
     for (e in obj) {
         if (v.includes(obj[e])) {
-            console.log('trimObj', e)
             delete obj[`${e}`]
         }
     }
-
-    console.log('trimobjobj', obj)
 
     return obj
 }
@@ -537,7 +534,7 @@ module.exports.getCommandStats = async (_id, type, returnUndefined = true, close
 
             let properties = undefined
             const defaultProperties = config.income[type] // global defaults
-            const inheritedProperties = result?.[type] // from db
+            const inheritedProperties = this.trimObj(result?.[type], [undefined, null]) // from db
 
             if (returnUndefined !== false && inheritedProperties) {
                 properties = { ...defaultProperties, ...inheritedProperties } // merge objects with right-left precedence for same-key terms
@@ -545,6 +542,7 @@ module.exports.getCommandStats = async (_id, type, returnUndefined = true, close
 
             properties = properties || inheritedProperties // return object: merged properties or the inherited properties only. Inherited properties will only be returned if returnUndefined is false.
             if (properties) incomeCache[_id] = { [type]: properties } // only cache properties if returnUndefined is true (properties would not be undefined)
+            console.log(properties)
             return properties
         } finally {
             if (closeConnection !== false) {
@@ -573,10 +571,10 @@ module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefin
             })
 
             let properties = undefined
-            const defaultProperties = config.uCommandStats[type]
-            const inheritedProperties = result?.[type]
+            const defaultProperties = config.uCommandStats[type];
+            const inheritedProperties = result?.[type];
             
-            if (returnUndefined !== false && inheritedProperties) {
+            if (returnUndefined !== false) {
                 properties = { ...defaultProperties, ...inheritedProperties }
             }
 
@@ -594,10 +592,11 @@ module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefin
  * updates all specified properties of the command type. Does not alter values that were not given.
  * @param {string} guildID - the id of the guild
  * @param {string} userID - the id of the user
+ * @param {string} type - the specific command
  * @param {array} properties - the object of properties for the corresponding object. Set as 'default' for default values. refer to the `commands` field of features/schemas/economy-bal-sch.js and its subfields for contents. All are optional.
  */
-module.exports.setUserCommandProperties = async (guildID, userID, type, properties) => {
-    const inheritedProperties = await this.getUserCommandStats(_id, type, false, false)
+module.exports.setUserCommandStats = async (guildID, userID, type, properties) => {
+    const inheritedProperties = await this.getUserCommandStats(guildID, userID, type, false, false)
     const defaultProperties = config.income[type]
     properties = { ...inheritedProperties, ...properties }
     this.trimObj(properties, [undefined, null]) // trim object for db
