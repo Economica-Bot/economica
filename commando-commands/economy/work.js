@@ -1,5 +1,6 @@
 const { Command } = require('discord.js-commando')
 const helper = require('../../features/helper')
+const ms = require('ms')
 
 module.exports = class WorkCommand extends Command {
     constructor(client) {
@@ -19,17 +20,25 @@ module.exports = class WorkCommand extends Command {
     }
 
     async run(message) {
+        const { guild, author } = message
         const currencySymbol = await helper.getCurrencySymbol(message.guild.id)
 
         const properties = await helper.getCommandStats(message.guild.id, 'work')
-        const uProperties = await helper.getUserCommandStats(message.guild.id, message.author.id, 'work')
+        const uProperties = await helper.getUserCommandStats(guild.id, author.id, 'work')
 
-        if ((Date.now() - uProperties.timestamp) > properties.cooldown) {
-            // TODO
+        const now = new Date
+        const usedWhen = now.getTime()
+
+        if ((usedWhen - uProperties.timestamp) < 5000 /* properties.cooldown */) {
+            return helper.errorEmbed(message, `:hourglass: You need to wait ${ms(properties.cooldown - (Date.now() - uProperties.timestamp))}`) // RIP the command if user is speedy
         }
+
+        // reset the timestamp when used
+        helper.setUserCommandStats(guild.id, author.id, 'work', { timestamp: usedWhen })
+
         const min = properties.min; const max = properties.max
         const amount = helper.intInRange(min, max)
-        
+
         helper.changeBal(message.guild.id, message.author.id, amount)
         helper.successEmbed(message, `You worked and earned ${currencySymbol}${amount}!`)
     }
