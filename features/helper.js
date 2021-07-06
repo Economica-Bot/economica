@@ -237,8 +237,8 @@ module.exports.intInRange = (min, max) => {
  * @param {number} maxLength - the length of the substring (default=32)
  */
 module.exports.cut = (str, maxLength = 32) => {
-    if (maxLength < 0 || maxLength > 2000) throw new Error(`Helper Error: ${maxLength} is less than 0 or greater than 2000! helper.cut: Function`)
-    if (!typeof str === 'string') throw new Error(`Helper Error: ${str} is not a string! helper.cut: Function`)
+    if (maxLength < 0 || maxLength > 2000) throw new Error(`util Error: ${maxLength} is less than 0 or greater than 2000! util.cut: Function`)
+    if (!typeof str === 'string') throw new Error(`util Error: ${str} is not a string! util.cut: Function`)
     if (str.length <= maxLength) return str
     return str.substr(0, 32).concat('...')
 }

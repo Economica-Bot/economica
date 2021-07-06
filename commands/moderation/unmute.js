@@ -68,9 +68,9 @@ module.exports = class UnMuteCommand extends Command {
                 if (result) {
                     member.roles.remove(mutedRole)
                     console.log(`Manually unmuted ${member.id} in server ${guild}.`)
-                    if (result) message.say(`Unmuted user <@${member.id}>`)
+                    if (result) message.channel.send(`Unmuted user ${member.user.tag}`)
                 } else {
-                    message.say(`<@${member.id}> could not be unmuted.`)
+                    message.channel.send(`<@${member.id}> could not be unmuted.`)
                 }
             } finally {
                 mongoose.connection.close()
