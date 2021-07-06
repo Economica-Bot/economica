@@ -24,13 +24,13 @@ module.exports = client => {
                     const guild = client.guilds.cache.get(guildID)
 
                     try {
-                        const bannedUser = (await guild.fetchBans()).get(userID)
+                        const bannedUser = (await guild.bans.fetch()).get(userID)
 
                         if (bannedUser) {
                             console.log(`${userID} is currently banned.`)
-                            guild.fetchBans().then(bans => {
+                            guild.bans.fetch().then(bans => {
                                 guild.members.unban(userID)
-                                console.log(`Unbanned <@${userID}>`)
+                                console.log(`Unbanned ${userID} in DB in server ${guild.name}`)
                             })
                             await banSchema.updateMany(conditional, {
                                 current: false,

@@ -33,11 +33,8 @@ module.exports = class unBanCommand extends Command {
 
     async run(message, { userID }) {
         const { guild } = message
-
         await mongo().then(async (mongoose) => {
-
-            const bannedUser = (await guild.fetchBans()).get(userID)
-
+            const bannedUser = (await guild.bans.fetch()).get(userID)
             if (bannedUser) {
                 try {
                     const result = await banSchema.updateMany({

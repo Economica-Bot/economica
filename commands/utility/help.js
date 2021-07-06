@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js')
 const { Command } = require('discord.js-commando')
 
-const helper = require('../../features/helper')
+const util = require('../../features/util')
 
 module.exports = class HelpCommand extends Command {
     constructor(client) {
@@ -31,15 +31,16 @@ module.exports = class HelpCommand extends Command {
         })
     }
 
-    async run(message, args) {
+    async run(message, { command }) {
         const groups = this.client.registry.groups
-        const commands = this.client.registry.findCommands(args.command, true, message)
-        const showAll = args.command && args.command.toLowerCase() === 'all'
-        if(!args.command) {       
-            let helpEmbed = new MessageEmbed()
-            .setColor('YELLOW')
-            .setTitle('Economica Commands')
-            .setThumbnail(this.client.user.displayAvatarURL())
+        const commands = this.client.registry.findCommands(command, true, message)
+        const showAll = command && command.toLowerCase() === 'all'
+        if(!command) {       
+            let helpEmbed = util.embedify(
+                'YELLOW',
+                'Economica Commands',
+                this.client.user.displayAvatarURL()
+            )
 
             let commandList = ''
             for(const group of groups) {
@@ -57,19 +58,17 @@ module.exports = class HelpCommand extends Command {
                 )
                 commandList = ''
             }
-
-            message.say(helpEmbed)
-        } else if (args.command && !showAll) {
+            message.channel.send({ embed: helpEmbed })
+        } else if (command && !showAll) {
             if (commands.length === 1) {
-                let helpEmbed = new MessageEmbed()
-                .setTitle(`${commands[0].name}`)
-                .setThumbnail(this.client.user.displayAvatarURL())
-                .setDescription(
-                    `**${commands[0].description}**\n${commands[0].details ? commands[0].details : ''}`
+                const commandPrefix = message.guild.commandPrefix
+                let helpEmbed = util.embedify(
+                    'YELLOW',
+                    `${commands[0].name}`,
+                    this.client.user.displayAvatarURL(),
+                    `**${commands[0].description}**\n${commands[0].details ? commands[0].details : ''}`,
+                    commands[0].guildOnly ? 'Only usable in servers.' : ''
                 )
-                .setColor('YELLOW')
-                .setFooter(commands[0].guildOnly ? 'Only usable in servers.' : '')
-
                 if (commands[0].aliases.length) helpEmbed.addField(
                     'Aliases',
                     `\`${commands[0].aliases.toString().split(',').join('\n')}\``,
@@ -82,14 +81,20 @@ module.exports = class HelpCommand extends Command {
                 )
                 if (commands[0].examples) helpEmbed.addField(
                     'Examples',
-                    `\`${commands[0].examples.toString().split(',').join('\n')}\``,
+                    `\`${commands[0].examples.toString().split(',').join(`\n`)}\``,
                     true,
                 )
-
-                message.say(helpEmbed)
+                
+                message.channel.send({ embed: helpEmbed })
             } else {
-                helper.errorEmbed(message, `Command \`${args.command}\` not found.`, 'help')
-            } 
+                message.channel.send({ embed: util.embedify(
+                    'RED', 
+                    message.author.username, 
+                    message.author.displayAvatarURL(), 
+                    `Command \`${command}\` not found`
+                    )
+                }) 
+            }
         }
     }
 } 

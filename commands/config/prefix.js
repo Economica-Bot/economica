@@ -1,5 +1,5 @@
 const { Command } = require('discord.js-commando')
-const helper = require('../../features/helper')
+const util = require('../../features/util')
 const { oneLine } = require('common-tags')
 
 module.exports = class PrefixCommand extends Command {
@@ -12,13 +12,15 @@ module.exports = class PrefixCommand extends Command {
             guildOnly: true,
             memberName: 'prefix',
             group: 'config',
-            description: 'Sets the server prefix',
+            description: 'Returns or updates Economica\'s prefix',
             details: oneLine`
-            If no prefix is entered, current server prefix will be shown.
-            If the prefix is "default", the server prefix will be set to the bot's default prefix \`.\``,
+            If no prefix is entered, Economica\'s prefix will be shown.
+            If the prefix is "default", the server prefix will be set to the default prefix.
+            Max length is 8 characters.`,
             format: 'prefix [prefix]',
             examples: [
-                'prefix <prefix>',
+                'prefix .',
+                'prefix'
             ],
             argsCount: 1,
             args: [
@@ -34,34 +36,35 @@ module.exports = class PrefixCommand extends Command {
     }
 
     async run(message, { prefix }) {
+        let color, description, footer
+        const currPrefix = await util.getPrefix(message.guild.id)
 
         //outputs the current prefix
         if (!prefix) {
-            return helper.infoEmbed(
-                message, 
-                `The prefix is: \`${message.guild.commandPrefix = await helper.getPrefix(message.guild.id)}\``, 
-                `use ${prefix}${this.format} to change prefix.`, 
-                this.name
-            )        
+            color = 'BLURPLE',
+            description = `The command prefix is: \`${currPrefix}\``,
+            footer = `use ${message.guild.commandPrefix}${prefix}${this.format} to change prefix`
         }
 
         //errors if the new prefix is the same
-        if (prefix === await helper.getPrefix(message.guild.id)) {
-            return helper.errorEmbed(
-                message, 
-                `\`${prefix}\` is already the server prefix.`, 
-                this.name
-            )
+        else if (prefix === currPrefix) {
+            color = 'RED',
+            description = `\`${prefix}\` is already the command prefix.` 
         }
         
         //sets a new prefix 
         else {
-            message.guild.commandPrefix = prefix
-            return helper.successEmbed(
-                message, 
-                `${message.guild}'s command prefix set to \`${await helper.setPrefix(message.guild.id, prefix)}\`.`, 
-                `Use ${message.guild.commandPrefix}${this.format} to change the prefix again.`
-            )
+            color = 'GREEN'
+            description = `Command prefix set to \`${await util.setPrefix(message, prefix)}\``
         }
+
+        message.channel.send({ embed: util.embedify(
+            color, 
+            this.client.user.username, 
+            this.client.user.displayAvatarURL(),
+            description,
+            footer
+            )
+        })
     }
 }

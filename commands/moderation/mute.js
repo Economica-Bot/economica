@@ -2,6 +2,8 @@ const { Command } = require('discord.js-commando')
 
 const mongo = require('../../features/mongo')
 const muteSchema = require('../../features/schemas/mute-sch')
+
+const { oneLine } = require('common-tags')
 const ms = require('ms')
 
 module.exports = class MuteCommand extends Command {
@@ -12,7 +14,10 @@ module.exports = class MuteCommand extends Command {
             guildOnly: true,
             memberName: 'mute',
             description: 'Mutes a user',
-            details: 'This command requires a \`muted\` role (case INsensitive) with appropriate permissions. The length, if specified, must be in a format of minutes, hours, then days. This command only works on current member of your server. However, if a user leaves and comes back, the mute role will be automatically renewed.',
+            details: oneLine`This command requires a \`muted\` role (case INsensitive) with appropriate permissions. 
+                            The length, if specified, must be in a format of minutes, hours, then days. 
+                            This command only works on current member of your server. 
+                            However, if a user leaves and comes back, the mute role will be automatically renewed.`,
             examples: [
                 'mute <@user> [length] [reason]',
                 'mute @Bob 10D',

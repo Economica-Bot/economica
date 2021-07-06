@@ -1,6 +1,6 @@
 const { Command } = require('discord.js-commando')
 
-const helper = require('../../features/helper')
+const util = require('../../features/util')
 
 module.exports = class ClearChannelCommand extends Command {
     constructor(client) {
@@ -37,6 +37,6 @@ module.exports = class ClearChannelCommand extends Command {
     }
 
     async run(message, { msgCount }) {
-        helper.deleteMessages(message, msgCount)
+        util.deleteMessages(message, msgCount)
     }
 }
