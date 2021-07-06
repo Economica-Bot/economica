@@ -22,13 +22,14 @@ module.exports = class IncomeConfigCommand extends Command {
             memberName: 'setpay',
             guildOnly: true,
             description: 'Configure an income command',
-            details: oneLine`The specified income command will return a value between the minimum and 
+            details: oneLine`After entering a valid income command, a series of prompts will be displayed.
+                            The specified income command will return a value between the minimum and 
                             maximum parameters - these values must be nonnegative. 
                             The cooldown time is in ms (1000 per second).`,
-            format: 'setpay <cmd> <...properties>',
+            format: 'configure <cmd> <...properties>',
             examples: [
-                'configure work 100 500',
-                'set-income crime 200 1000 30000 100 2000 3000'
+                'configure work ...',
+                'set-income crime ...'
             ],
             argsPromptLimit: 0,
             argsCount: 3,

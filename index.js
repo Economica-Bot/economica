@@ -13,6 +13,7 @@ const client = new CommandoClient({
     owner: config.botAuth.admin_id,
     invite: 'https://discord.gg/R5jvSarddd',
     unknownCommandResponse: false,
+    disableEveryone: false,
     fetchAllMembers: true,
     intents: allIntents
 })
@@ -24,6 +25,7 @@ client.registry
     .registerGroups([
         ['moderation', 'Moderation'],
         ['economy', 'Economy'],
+        ['income', 'Income'],
         ['util', 'Utility'],
         ['config', 'Config & Setup']
     ])
@@ -43,8 +45,10 @@ client.on('ready', async () => {
 
     const checkMutes = require('./features/features/check-mute')
     const checkBans = require('./features/features/check-ban')
+    const util = require('./features/util')
     checkMutes(client)
     checkBans(client)
+    util.initPrefix(client)
 })
 
 if (config.useAltToken == true) {
