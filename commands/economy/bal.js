@@ -1,5 +1,5 @@
 const { Command } = require('discord.js-commando')
-const helper = require('../../features/helper')
+const util = require('../../features/util')
 
 module.exports = class BalanceCommand extends Command {
     constructor(client) {
@@ -31,26 +31,27 @@ module.exports = class BalanceCommand extends Command {
     }
 
     async run(message, { user }) {
-        const { guild } = message
-        let users = await helper.findUser(message, user)
-        if (users === 'noUserFound') {
-            return
-        } 
-    
-        // If user is not an array   
-        else if (!Array.isArray(users)) {
-            return helper.displayBal(message, guild, users)
-        } 
-
-        // if there is only one user in the array (from match)
-        else if (users.length === 1) {
-            const user = message.guild.members.cache.get(users[0]).user
-            return helper.displayBal(message, guild, user)
+        const { author, guild } = message
+        let id
+        if(user) {
+            id = await util.getUserID(message, user)    
+            if (id === 'noMemberFound') {
+                return 
+            }
+        } else {
+            id = author.id
         }
 
-        // If multiple members are found
-        else {
-            await helper.memberSelectEmbed(message, users, 10000, 'bal')
-        }
+        user = guild.members.cache.get(id).user
+        const cSymbol = await util.getCurrencySymbol(guild.id)
+        const { balance, rank } = await util.getBal(guild.id, user.id)
+        message.channel.send({ embed: util.embedify(
+            'GOLD',
+            user.username, 
+            user.avatarURL(),
+            `Balance: ${cSymbol}${balance}`,
+            `🏆 Rank ${rank}`
+            )
+        })
     }
 }

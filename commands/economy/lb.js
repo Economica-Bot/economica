@@ -1,7 +1,7 @@
 const { Command } = require('discord.js-commando')
 const Discord = require('discord.js')
 
-const helper = require('../../features/helper')
+const util = require('../../features/util')
 
 const mongo = require('../../features/mongo')
 const economyBalSchema = require('../../features/schemas/economy-bal-sch')
@@ -34,10 +34,11 @@ module.exports = class LeaderBoardCommand extends Command {
                         balance: -1
                     })
 
-                const currencySymbol = await helper.getCurrencySymbol(message.guild.id)
+                const currencySymbol = await util.getCurrencySymbol(message.guild.id)
                 let embeds = []
                 let rank = 1
                 let balCounter = 0
+                let pageCount = Math.ceil(balances.length / 8)
 
                 loop1:
                     while (true) {
@@ -45,9 +46,9 @@ module.exports = class LeaderBoardCommand extends Command {
                         //if(balCounter + 1 >= balances.length) break
                         embeds.push(
                             new Discord.MessageEmbed()
-                                .setAuthor(`${message.guild}'s Leaderboard`, `${this.client.user.displayAvatarURL()}`)
+                                .setAuthor(`${message.guild}'s Leaderboard`, `${message.guild.iconURL()}`)
                                 .setColor(111111)
-                                .setFooter(`Page ${embeds.length + 1}`)
+                                .setFooter(`Page ${embeds.length + 1} / ${pageCount}`)
                         )
 
                         // Fill the length of each page.
@@ -69,45 +70,129 @@ module.exports = class LeaderBoardCommand extends Command {
                     new Discord.MessageButton()
                         .setCustomID('previous_page')
                         .setLabel('Previous')
-                        .setStyle('SECONDARY')   
+                        .setStyle('SECONDARY')  
+                        .setDisabled(true) 
                 )    
                 .addComponents(
-                        new Discord.MessageButton()
-                            .setCustomID('next_page')
-                            .setLabel('Next')
-                            .setStyle('PRIMARY')
+                    new Discord.MessageButton()
+                        .setCustomID('next_page')
+                        .setLabel('Next')
+                        .setStyle('PRIMARY')
+                        .setDisabled(embeds.length > 1 ? false : true)
                 )   
 
-                await message.channel.send({
+                const interactee = await message.channel.send({
                     embed: embeds[0],
                     components: [row]
                 })
 
-                let i = 0
+                let page = 0
                 this.client.on('interaction', async interaction => {
-                    if(interaction.componentType === 'BUTTON' && interaction.guildID === message.guild.id) {
-                        if(i < embeds.length - 1 && i >= 0 && interaction.customID === 'next_page') {
-                            interaction.update({ 
-                                embeds: [embeds[++i]] 
-                            }).catch(err => {
-                                console.err(err)
-                            })
-                        } else if(i > 0 && i < embeds.length && interaction.customID === 'previous_page') {
-                            interaction.update({ 
-                                embeds: [embeds[--i]] 
-                            }).catch(err => {
-                                console.log(err)
-                            })
-                        } else {
-                            interaction.reply('Out of bounds.').then(
-                                setTimeout(() => interaction.deleteReply(), 2000)
-                            )
-                        }
-                    }
+                    if(interaction.componentType === 'BUTTON' && interaction.message.id === interactee.id) {
+                        if(page < embeds.length - 1 && page >= 0 && interaction.customID === 'next_page') {
+                            page++
+                            if(page == embeds.length - 1) {
+                                const row = new Discord.MessageActionRow()
+                                    .addComponents(
+                                        new Discord.MessageButton()
+                                            .setCustomID('previous_page')
+                                            .setLabel('Previous')
+                                            .setStyle('SECONDARY')  
+                                            .setDisabled(false) 
+                                    )     
+                                    .addComponents(
+                                        new Discord.MessageButton()
+                                            .setCustomID('next_page')
+                                            .setLabel('Next')
+                                            .setStyle('PRIMARY')
+                                            .setDisabled(true)
+                                    )  
+
+                                interaction.update({
+                                    embeds: [embeds[page]],
+                                    components: [row]
+                                }).catch(err => {
+                                    console.error(err)
+                                })
+                            } else {
+                                const row = new Discord.MessageActionRow()
+                                    .addComponents(
+                                        new Discord.MessageButton()
+                                            .setCustomID('previous_page')
+                                            .setLabel('Previous')
+                                            .setStyle('SECONDARY')  
+                                            .setDisabled(false) 
+                                    )     
+                                    .addComponents(
+                                        new Discord.MessageButton()
+                                            .setCustomID('next_page')
+                                            .setLabel('Next')
+                                            .setStyle('PRIMARY')
+                                            .setDisabled(false)
+                                    ) 
+
+                                interaction.update({ 
+                                    embeds: [embeds[page]],
+                                    components: [row]
+                                }).catch(err => {
+                                    console.error(err)
+                                })
+                            }
+
+                        } else if(page > 0 && page < embeds.length && interaction.customID === 'previous_page') {
+                            page--
+                            if(page === 0) {
+                                const row = new Discord.MessageActionRow()
+                                    .addComponents(
+                                        new Discord.MessageButton()
+                                            .setCustomID('previous_page')
+                                            .setLabel('Previous')
+                                            .setStyle('SECONDARY')   
+                                            .setDisabled(true)
+                                    )    
+                                    .addComponents(
+                                        new Discord.MessageButton()
+                                            .setCustomID('next_page')
+                                            .setLabel('Next')
+                                            .setStyle('PRIMARY')
+                                            .setDisabled(false)
+                                    )   
+                                interaction.update({
+                                    embeds: [embeds[page]],
+                                    components: [row]
+                                }).catch(err => {
+                                    console.error(err)
+                                })
+                            } else {
+                                const row = new Discord.MessageActionRow()
+                                    .addComponents(
+                                        new Discord.MessageButton()
+                                            .setCustomID('previous_page')
+                                            .setLabel('Previous')
+                                            .setStyle('SECONDARY')  
+                                            .setDisabled(false) 
+                                    )     
+                                    .addComponents(
+                                        new Discord.MessageButton()
+                                            .setCustomID('next_page')
+                                            .setLabel('Next')
+                                            .setStyle('PRIMARY')
+                                            .setDisabled(false)
+                                    ) 
+                                    
+                                interaction.update({ 
+                                    embeds: [embeds[page]],
+                                    components: [row]
+                                }).catch(err => {
+                                    console.error(err)
+                                })
+                            }
+                        } 
+                    } 
                 })
 
             } catch (err) {
-                console.log(err)
+                console.error(err)
             } finally {
                 mongoose.connection.close()
             }

@@ -1,7 +1,6 @@
 const { Command } = require('discord.js-commando')
-
-const helper = require('../../features/helper')
-const { prefix } = require('../../config.json')
+const util = require('../../features/util')
+const { oneLine } = require('common-tags')
 
 module.exports = class CurrencyCommand extends Command {
     constructor(client) {
@@ -16,8 +15,10 @@ module.exports = class CurrencyCommand extends Command {
             memberName: 'currency',
             guildOnly: true,
             description: 'Returns or updates the guild currency symbol',
-            details: 'View this server\'s currency symbol or pass an emoji to replace the current symbol.',
-            format: 'currency [:emoji:]',
+            details: oneLine`
+            If no symbol is entered, The current currency symbol will be shown.
+            If the symbol is "default", the currency will be set to the default currency.`,
+            format: 'currency [symbol]',
             examples: [
                 'currency :dollar:',
                 'currency'
@@ -30,8 +31,8 @@ module.exports = class CurrencyCommand extends Command {
             ],
             args: [
                 {
-                    key: 'emoji',
-                    prompt: 'Please specify an emoji.',
+                    key: 'currency',
+                    prompt: 'Please specify a currency symbol.',
                     type: 'string',
                     default: ''
                 }
@@ -39,36 +40,37 @@ module.exports = class CurrencyCommand extends Command {
         })
     }
 
-    async run(message, { emoji }) {
+    async run(message, { currency }) {
+        let color, description, footer
+        const currCurrencySymbol = await util.getCurrencySymbol(message.guild.id)
 
-        // Outputs the current currency symbol
-        if (!emoji) {
-            const currency = await helper.getCurrencySymbol(message.guild.id)
-            return helper.infoEmbed(
-                message, 
-                `The currency symbol is: ${currency}\n\nID: \`${currency}\``, 
-                `use ${message.guild.commandPrefix}${this.format} to change symbol.`,
-                this.name
-            )
+        //outputs the current currency symbol
+        if (!currency) {
+            color = 'BLURPLE'
+            description = `The currency symbol is: ${currCurrencySymbol}`
+            footer = `use ${message.guild.commandPrefix}${this.format} to change currency symbol`
         }
 
         // Errors if the new symbol is the same
-        if (emoji === await helper.getCurrencySymbol(message.guild.id)) {
-            return helper.errorEmbed(
-                message, 
-                `\`${emoji}\` is already the server currency symbol.`, 
-                this.name
-            )
+        else if (currency === currCurrencySymbol) {
+            color = 'RED'
+            description = `${currency} is already the server currency symbol.`
         }
 
         // Sets a new currency symbol
         else {
-            const currency = await helper.setCurrencySymbol(message.guild.id, emoji)
-            return helper.successEmbed(
-                message, 
-                `${message.guild}'s currency symbol set to ${currency}\n\nID: \`${currency}\``, 
-                `Use ${message.guild.commandPrefix}${this.format} to change the symbol again.`
-            )
+            color = 'GREEN'
+            description = `Currency symbol set to ${await util.setCurrencySymbol(message.guild.id, currency)}`
+            footer = currency
         }
+
+        message.channel.send({ embed: util.embedify(
+            color,
+            message.guild.name, 
+            message.guild.iconURL(),
+            description, 
+            footer
+            )
+        })
     }
 }
