@@ -6,7 +6,7 @@ module.exports = class BegCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'crime',
-            group: 'economy',
+            group: 'income',
             memberName: 'crime',
             guildOnly: true,
             description: 'Possibly earn cash money',
