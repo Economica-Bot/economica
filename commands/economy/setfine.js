@@ -1,5 +1,5 @@
 const { Command } = require('discord.js-commando')
-const helper = require('../../features/helper')
+const util = require('../../features/util')
 const { income } = require('../../config.json')
 
 module.exports = class BalanceCommand extends Command {
@@ -42,7 +42,7 @@ module.exports = class BalanceCommand extends Command {
     }
 
     async run(message, { cmd, minFine, maxFine }) {
-        if (!income[cmd]) return helper.errorEmbed(message, `\`${helper.cut(cmd)}\` is not an income command.\n\nIncome commands: \`${(Object.getOwnPropertyNames(income)).join(`\`, \``)}\``, this.memberName)
+        if (!income[cmd]) return util.errorEmbed(message, `\`${util.cut(cmd)}\` is not an income command.\n\nIncome commands: \`${(Object.getOwnPropertyNames(income)).join(`\`, \``)}\``, this.memberName)
         if (!income[cmd]?.minFine && !income[cmd]?.maxFine) {
             let fineableCmds = []
             for (const property in income) {
@@ -50,10 +50,10 @@ module.exports = class BalanceCommand extends Command {
                     fineableCmds.push(property)
                 }
             }
-            return helper.errorEmbed(message, `\`${helper.cut(cmd)}\` is not a fineable income command.\n\nFineable income commands: \`${fineableCmds.join(`\`, \``)}\``, this.memberName)
+            return util.errorEmbed(message, `\`${util.cut(cmd)}\` is not a fineable income command.\n\nFineable income commands: \`${fineableCmds.join(`\`, \``)}\``, this.memberName)
         }
-        const prefix = await helper.getPrefix(message.guild.id)
-        const currency = await helper.getCurrencySymbol(message.guild.id)
+        const prefix = await util.getPrefix(message.guild.id)
+        const currency = await util.getCurrencySymbol(message.guild.id)
 
         if (minFine < 0) {
             minFine = 0
@@ -68,7 +68,7 @@ module.exports = class BalanceCommand extends Command {
         }
 
 
-        helper.infoEmbed(message, `Updated \`${prefix}${cmd}\`\n\nMinFine: ${currency}${minFine}\nMaxFine: ${currency}${maxFine}`, 'default', this.memberName)
-        helper.setCommandStats(message.guild.id, cmd, { minFine, maxFine })
+        util.infoEmbed(message, `Updated \`${prefix}${cmd}\`\n\nMinFine: ${currency}${minFine}\nMaxFine: ${currency}${maxFine}`, 'default', this.memberName)
+        util.setCommandStats(message.guild.id, cmd, { minFine, maxFine })
     }
 }

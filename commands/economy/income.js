@@ -1,5 +1,5 @@
 const { Command } = require('discord.js-commando')
-const helper = require('../../features/helper')
+const util = require('../../features/util')
 const { income } = require('../../config.json')
 const ms = require('ms')
 
@@ -29,10 +29,10 @@ module.exports = class BalanceCommand extends Command {
     async run(message) {
         let properties = {}
         let msg = []
-        const cSymbol = helper.getCurrencySymbol(message.guild.id)
+        const cSymbol = util.getCurrencySymbol(message.guild.id)
         for (const command in income) {
             msg[command] = `__${command}__\n`
-            properties[command] = await helper.getCommandStats(message.guild.id, `${command}`)
+            properties[command] = await util.getCommandStats(message.guild.id, `${command}`)
             msg[command] = `${msg[command]}Min: ${cSymbol}${properties[command].min}\n`
             msg[command] = `${msg[command]}Max: ${cSymbol}${properties[command].max}\n`
             msg[command] = `${msg[command]}Cooldown: ${ms(properties[command].cooldown)}\n`
@@ -43,6 +43,6 @@ module.exports = class BalanceCommand extends Command {
 
 
 
-        helper.infoEmbed(message, `${msg.join(`\n`)}`, 'default', this.memberName)
+        util.infoEmbed(message, `${msg.join(`\n`)}`, 'default', this.memberName)
     }
 }

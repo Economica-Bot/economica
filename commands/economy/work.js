@@ -1,5 +1,5 @@
 const { Command } = require('discord.js-commando')
-const helper = require('../../features/helper')
+const util = require('../../features/util')
 const ms = require('ms')
 
 module.exports = class WorkCommand extends Command {
@@ -21,25 +21,25 @@ module.exports = class WorkCommand extends Command {
 
     async run(message) {
         const { guild, author } = message
-        const currencySymbol = await helper.getCurrencySymbol(message.guild.id)
+        const currencySymbol = await util.getCurrencySymbol(message.guild.id)
 
-        const properties = await helper.getCommandStats(message.guild.id, 'work')
-        const uProperties = await helper.getUserCommandStats(guild.id, author.id, 'work')
+        const properties = await util.getCommandStats(message.guild.id, 'work')
+        const uProperties = await util.getUserCommandStats(guild.id, author.id, 'work')
 
         const now = new Date
         const usedWhen = now.getTime()
 
         if ((usedWhen - uProperties.timestamp) < properties.cooldown) {
-            return helper.errorEmbed(message, `:hourglass: You need to wait ${ms(properties.cooldown - (Date.now() - uProperties.timestamp))}`, this.memberName) // RIP the command if user is speedy
+            return util.errorEmbed(message, `:hourglass: You need to wait ${ms(properties.cooldown - (Date.now() - uProperties.timestamp))}`, this.memberName) // RIP the command if user is speedy
         }
 
         // reset the timestamp when used
-        helper.setUserCommandStats(guild.id, author.id, 'work', { timestamp: usedWhen })
+        util.setUserCommandStats(guild.id, author.id, 'work', { timestamp: usedWhen })
 
         const min = properties.min; const max = properties.max
-        const amount = helper.intInRange(min, max)
+        const amount = util.intInRange(min, max)
 
-        helper.changeBal(message.guild.id, message.author.id, amount)
-        helper.successEmbed(message, `You worked and earned ${currencySymbol}${amount}!`)
+        util.changeBal(message.guild.id, message.author.id, amount)
+        util.successEmbed(message, `You worked and earned ${currencySymbol}${amount}!`)
     }
 }

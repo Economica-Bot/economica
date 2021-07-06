@@ -1,5 +1,5 @@
 const { Command } = require('discord.js-commando')
-const helper = require('../../features/helper')
+const util = require('../../features/util')
 const ms = require('ms')
 
 module.exports = class BegCommand extends Command {
@@ -24,29 +24,29 @@ module.exports = class BegCommand extends Command {
 
      async run(message) {
           const { guild, author } = message
-          const currencySymbol = await helper.getCurrencySymbol(message.guild.id)
+          const currencySymbol = await util.getCurrencySymbol(message.guild.id)
 
-          const properties = await helper.getCommandStats(message.guild.id, 'beg')
-          const uProperties = await helper.getUserCommandStats(guild.id, author.id, 'beg')
+          const properties = await util.getCommandStats(message.guild.id, 'beg')
+          const uProperties = await util.getUserCommandStats(guild.id, author.id, 'beg')
 
           const now = new Date
           const usedWhen = now.getTime()
 
           if ((usedWhen - uProperties.timestamp) < properties.cooldown) {
-               return helper.errorEmbed(message, `:hourglass: You need to wait ${ms(properties.cooldown - (Date.now() - uProperties.timestamp))}`, this.memberName) // RIP the command if user is speedy
+               return util.errorEmbed(message, `:hourglass: You need to wait ${ms(properties.cooldown - (Date.now() - uProperties.timestamp))}`, this.memberName) // RIP the command if user is speedy
           }
 
           // reset the timestamp when used
-          helper.setUserCommandStats(guild.id, author.id, 'beg', { timestamp: usedWhen })
+          util.setUserCommandStats(guild.id, author.id, 'beg', { timestamp: usedWhen })
 
           if ((Math.random() * 100) < properties.chance) {
-               return helper.errorEmbed(message, 'You begged but nobody gave you anything', this.memberName)
+               return util.errorEmbed(message, 'You begged but nobody gave you anything', this.memberName)
           }
 
           const min = properties.min; const max = properties.max
-          const amount = helper.intInRange(min, max)
+          const amount = util.intInRange(min, max)
 
-          helper.changeBal(message.guild.id, message.author.id, amount)
-          helper.successEmbed(message, `You begged and earned ${currencySymbol}${amount}!`)
+          util.changeBal(message.guild.id, message.author.id, amount)
+          util.successEmbed(message, `You begged and earned ${currencySymbol}${amount}!`)
      }
 }

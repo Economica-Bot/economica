@@ -1,5 +1,5 @@
 const { Command } = require('discord.js-commando')
-const helper = require('../../features/helper')
+const util = require('../../features/util')
 let Appendix = require('../../features/objects')
 const { income } = require('../../config.json')
 const ms = require('ms')
@@ -44,9 +44,9 @@ module.exports = class BalanceCommand extends Command {
     }
 
     async run(message, { cmd, cooldown }) {
-        if (!income[cmd]) return helper.errorEmbed(message, `\`${helper.cut(cmd)}\` is not a valid income command.\n\nIncome commands: \`${(Object.getOwnPropertyNames(income)).join(`\`, \``)}\``, this.memberName)
-        const prefix = await helper.getPrefix(message.guild.id)
-        const currency = await helper.getCurrencySymbol(message.guild.id)
+        if (!income[cmd]) return util.errorEmbed(message, `\`${util.cut(cmd)}\` is not a valid income command.\n\nIncome commands: \`${(Object.getOwnPropertyNames(income)).join(`\`, \``)}\``, this.memberName)
+        const prefix = await util.getPrefix(message.guild.id)
+        const currency = await util.getCurrencySymbol(message.guild.id)
 
         if (!typeof +cooldown != 'number') {
             cooldown = ms(cooldown)
@@ -60,7 +60,7 @@ module.exports = class BalanceCommand extends Command {
         } // one week
 
 
-        helper.infoEmbed(message, `Updated \`${prefix}${cmd}\`\n\nCooldown: ${currency}${ms(cooldown)}`, 'default', this.memberName)
-        helper.setCommandStats(message.guild.id, cmd, { cooldown })
+        util.infoEmbed(message, `Updated \`${prefix}${cmd}\`\n\nCooldown: ${currency}${ms(cooldown)}`, 'default', this.memberName)
+        util.setCommandStats(message.guild.id, cmd, { cooldown })
     }
 }

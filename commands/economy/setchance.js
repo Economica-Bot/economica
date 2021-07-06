@@ -1,5 +1,5 @@
 const { Command } = require('discord.js-commando')
-const helper = require('../../features/helper')
+const util = require('../../features/util')
 const { income } = require('../../config.json')
 
 module.exports = class BalanceCommand extends Command {
@@ -39,7 +39,7 @@ module.exports = class BalanceCommand extends Command {
     }
 
     async run(message, { cmd, chance }) {
-        if (!income[cmd]) return helper.errorEmbed(message, `\`${helper.cut(cmd)}\` is not an income command.\n\nIncome commands: \`${(Object.getOwnPropertyNames(income)).join(`\`, \``)}\``, this.memberName)
+        if (!income[cmd]) return util.errorEmbed(message, `\`${util.cut(cmd)}\` is not an income command.\n\nIncome commands: \`${(Object.getOwnPropertyNames(income)).join(`\`, \``)}\``, this.memberName)
         if (!income[cmd]?.chance) {
             let chanceableCmds = []
             for (const property in income) {
@@ -47,15 +47,15 @@ module.exports = class BalanceCommand extends Command {
                     chanceableCmds.push(property)
                 }
             }
-            return helper.errorEmbed(message, `\`${helper.cut(cmd)}\` is not a chanceable income command.\n\nChanceable income commands: \`${chanceableCmds.join(`\`, \``)}\``, this.memberName)
+            return util.errorEmbed(message, `\`${util.cut(cmd)}\` is not a chanceable income command.\n\nChanceable income commands: \`${chanceableCmds.join(`\`, \``)}\``, this.memberName)
         }
-        const prefix = await helper.getPrefix(message.guild.id)
+        const prefix = await util.getPrefix(message.guild.id)
 
         if (!typeof +chance !== 'number') {
             if (chance.endsWith('%')) {
                 chance = +(chance.substr(0, chance.indexOf('%')))
             } else {
-                helper.errorEmbed(message, '<chance> must be a number.', this.memberName)
+                util.errorEmbed(message, '<chance> must be a number.', this.memberName)
             }
         }
 
@@ -68,7 +68,7 @@ module.exports = class BalanceCommand extends Command {
 
         console.log(chance)
 
-        helper.infoEmbed(message, `Updated \`${prefix}${cmd}\`\n\nFail Chance: ${chance}%`, 'default', this.memberName)
-        helper.setCommandStats(message.guild.id, cmd, { chance })
+        util.infoEmbed(message, `Updated \`${prefix}${cmd}\`\n\nFail Chance: ${chance}%`, 'default', this.memberName)
+        util.setCommandStats(message.guild.id, cmd, { chance })
     }
 }

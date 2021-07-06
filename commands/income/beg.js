@@ -25,7 +25,7 @@ module.exports = class BegCommand extends Command {
           const properties = await util.getPayout(message.guild.id, 'beg')
           const currencySymbol = await util.getCurrencySymbol(message.guild.id)
           const min = properties.min; const max = properties.max
-          const amount = helper.intInRange(min, max)
+          const amount = util.intInRange(min, max)
           util.changeBal(message.guild.id, message.author.id, amount)
           message.channel.send({ embed: util.embedify(
                'GREEN',

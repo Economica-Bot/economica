@@ -1,5 +1,5 @@
 const { Command } = require('discord.js-commando')
-const helper = require('../../features/helper')
+const util = require('../../features/util')
 const ms = require('ms')
 
 module.exports = class BegCommand extends Command {
@@ -21,10 +21,10 @@ module.exports = class BegCommand extends Command {
 
     async run(message) {
         const { guild, author } = message
-        const currencySymbol = await helper.getCurrencySymbol(message.guild.id)
+        const currencySymbol = await util.getCurrencySymbol(message.guild.id)
 
-        const properties = await helper.getCommandStats(message.guild.id, 'crime')
-        const uProperties = await helper.getUserCommandStats(guild.id, author.id, 'crime')
+        const properties = await util.getCommandStats(message.guild.id, 'crime')
+        const uProperties = await util.getUserCommandStats(guild.id, author.id, 'crime')
 
         const now = new Date
         const usedWhen = now.getTime()
@@ -32,22 +32,22 @@ module.exports = class BegCommand extends Command {
         console.log('crime', properties)
 
         if ((usedWhen - uProperties.timestamp) < properties.cooldown) {
-            return helper.errorEmbed(message, `:hourglass: You need to wait ${ms(properties.cooldown - (Date.now() - uProperties.timestamp))}`, this.memberName) // RIP the command if user is speedy
+            return util.errorEmbed(message, `:hourglass: You need to wait ${ms(properties.cooldown - (Date.now() - uProperties.timestamp))}`, this.memberName) // RIP the command if user is speedy
         }
 
         // reset the timestamp when used
-        helper.setUserCommandStats(guild.id, author.id, 'crime', { timestamp: usedWhen })
+        util.setUserCommandStats(guild.id, author.id, 'crime', { timestamp: usedWhen })
 
         if ((Math.random() * 100) < properties.chance) {
-            const fineAmount = helper.intInRange(properties.minFine, properties.maxFine)
-            helper.changeBal(guild.id, author.id, (fineAmount * -1))
-            return helper.errorEmbed(message, `You were caught and fined ${currencySymbol}${fineAmount}`, this.memberName)
+            const fineAmount = util.intInRange(properties.minFine, properties.maxFine)
+            util.changeBal(guild.id, author.id, (fineAmount * -1))
+            return util.errorEmbed(message, `You were caught and fined ${currencySymbol}${fineAmount}`, this.memberName)
         }
 
         const min = properties.min; const max = properties.max
-        const amount = helper.intInRange(min, max)
+        const amount = util.intInRange(min, max)
 
-        helper.changeBal(message.guild.id, message.author.id, amount)
-        helper.successEmbed(message, `You committed a crime and earned ${currencySymbol}${amount}!`)
+        util.changeBal(message.guild.id, message.author.id, amount)
+        util.successEmbed(message, `You committed a crime and earned ${currencySymbol}${amount}!`)
     }
 }
