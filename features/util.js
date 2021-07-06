@@ -81,6 +81,16 @@ module.exports.getUserID = async (message, query) => {
     })
 }
 
+module.exports.findUser = (message, user) => {
+    const { author } = message
+    let users = user ?
+        message.mentions.users.first() ||
+        this.getUserById(message, user) ||
+        this.getUserIdByMatch(message, user) :
+        author
+    return users
+}
+
 /**
  * Sends an embed to prompt a selection from a list of members.
  * @param {Message} message - The command message.
@@ -135,6 +145,131 @@ module.exports.memberSelectEmbed = async (message, members, time) => {
                 })
             }
         })
+    })
+}
+
+/**
+ * Returns the member object of the message guild with the specified id.
+ * @param {Message} message - The command message.
+ * @param {String} id - User id used to retrieve member object.
+ */
+ module.exports.getMemberById = (message, id) => {
+    try {
+        return message.guild.members.cache.get(id)
+    } catch (err) {
+        // console.log(err) - enable when testing, else clutters the console (sometimes the error is intended in .bal)
+    }
+}
+
+/**
+ * Returns the user object of the message guild with the specified id.
+ * @param {Message} message - The command message.
+ * @param {String} id - User id used to retrieve user object.
+ */
+module.exports.getUserById = (message, id) => {
+    try {
+        return message.guild.members.cache.get(id).user
+    } catch (err) {
+        // console.log(err)
+    }
+}
+
+/**
+ * Returns the id of the message guild member whose username or nickname contains the specified query.
+ * @param {Message} message - The command message.
+ * @param {String} query - Used to identify user(s).
+ */
+module.exports.getUserIdByMatch = (message, query) => {
+    const { guild } = message
+    query = query.toLowerCase()
+
+    const selectedMembers = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(query) || m.displayName.toLowerCase().includes(query))
+    if (selectedMembers.size == 0) {
+        const content = `No members with \`${query.length > 32 ? `${query.substr(0, 32)}...` : query}\` in their user or nick found.\n\nTry mentioning this person or using their ID instead.`
+        this.errorEmbed(message, content, 'balance')
+        return 'noUserFound'
+    } else if (
+        selectedMembers.size > 0 &&
+        selectedMembers.size < 10
+    ) {
+        let result = []
+        selectedMembers.forEach(m => result.push(m.user.id))
+        return result
+    } else {
+        const content = `\`${selectedMembers.size.toString()}\` members found with those characters!\n\nTry being less broad with your search.`
+        this.errorEmbed(message, content, 'balance')
+        return 'noUserFound'
+    }
+}
+
+/**
+ * Sends a success embed.
+ * @param {Message} message - The command message.
+ * @param {string} description - Embed content.
+ * @param {string} [footer] - The embed footer.
+ */
+ module.exports.successEmbed = (message, description, footer = '') => {
+    return message.channel.send({
+        embed: {
+            color: 'GREEN',
+            author: {
+                name: message.author.username,
+                icon_url: message.author.avatarURL()
+          ***REMOVED***
+            description,
+            footer: {
+                text: footer
+            }
+        }
+    })
+}
+
+/**
+ * Sends an error embed. 
+ * @param {Message} message - The command message.
+ * @param {string} description - Embed content.
+ * @param {string} [commandName] - The command name. 
+ */
+module.exports.errorEmbed = (message, description, commandName = '\u200b') => {
+    const footer = `\`${message.guild.commandPrefix}help ${commandName}\` • View specific help.`
+    if (!commandName) footer = ''
+    message.channel.send({
+        embed: {
+            color: 'RED',
+            author: {
+                name: message.author.username,
+                icon_url: message.author.avatarURL(),
+          ***REMOVED***
+            description,
+            footer: {
+                text: footer
+            }
+        }
+    })
+}
+
+/**
+ * Sends an info embed. 
+ * @param {Message} message - The command message.
+ * @param {string} description - Embed content.
+ * @param {string} [footer='default'] - The embed's footer. 
+ * @param {string} [commandName] - Command name, used in default footer. 
+ */
+module.exports.infoEmbed = (message, description, footer = 'default', commandName) => {
+    footer = footer === 'default' ? `\`${message.guild.commandPrefix}help ${commandName}\` • View specific help.` : footer
+    if (!commandName) footer = ''
+    message.channel.send({
+        embed: {
+            color: 'BLUE',
+            author: {
+                name: message.author.username,
+                icon_url: message.author.avatarURL(),
+          ***REMOVED***
+            description,
+            footer: {
+                text: footer
+            }
+        }
     })
 }
 
@@ -200,6 +335,40 @@ module.exports.cut = (str, maxLength = 32) => {
     if (!typeof str === 'string') throw new Error(`util Error: ${str} is not a string! util.cut: Function`)
     if (str.length <= maxLength) return str
     return str.substr(0, 32).concat('...')
+}
+
+/**
+ * Sends a balance embed.
+ * @param {Message} message - The command message.
+ * @param {Guild} [guild] - The user's guild, default message.guild.
+ * @param {User} [user] - A target user, default message.author.
+ */
+ module.exports.displayBal = async (message, guild = message.guild, user = message.author) => {
+    const guildID = guild.id
+    const userID = user.id
+
+    const balance = await this.getBal(guildID, userID)
+    const tempSymbol = await this.getCurrencySymbol(guild.id)
+
+    const cSymbol = tempSymbol ? tempSymbol : cSymbol
+
+    message.channel.send({
+        embed: {
+            color: 'BLUE',
+            author: {
+                name: user.username,
+                icon_url: user.avatarURL()
+          ***REMOVED***
+            description: `:trophy: Guild Rank: 0`,
+            fields: [
+                {
+                    name: 'Balance',
+                    value: `${cSymbol}${balance}`,
+                    inline: true
+                }
+            ]
+        }
+    })
 }
 
 /**
@@ -441,6 +610,25 @@ module.exports.setCurrencySymbol = async (guildID, currency) => {
 }
 
 /**
+ * removes objects' fields whose value(s) match any element of v
+ * @param {object} obj - the object to be trimmed
+ * @param {array} v - the value or array of value(s) that will be filtered from obj
+ */
+ module.exports.trimObj = (obj, v) => {
+    if (!v instanceof Array) {
+        v = [v]
+    }
+
+    for (e in obj) {
+        if (v.includes(obj[e])) {
+            delete obj[`${e}`]
+        }
+    }
+
+    return obj
+}
+
+/**
  * updates the min and max payout for the specified income command
  * @param {string} _id - the id of the guild
  * @param {string} type - the type of income command (work, beg, crime, etc -- SEE economica/features/schemas/income-sch.js)
@@ -505,6 +693,77 @@ module.exports.getCommandStats = async (_id, type, returnUndefined = true) => {
 
             properties = properties || inheritedProperties 
             return properties
+        } finally {
+            mongoose.connection.close()
+        }
+    })
+}
+
+/**
+ * returns the user's properties of the specified command
+ * @param {string} guildID - the id of the guild
+ * @param {string} userID - the id of the user
+ * @param {string} type - the command name
+ * @param {boolean} returnUndefined - whether to omit undefined fields or return their default value. Default: true (return defaults)
+ * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
+ */
+module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefined = true, closeConnection = true) => {
+    const cached = uCommandStatsCache[`${guildID}`]?.[userID]?.[type]
+    if (cached) return cached
+    return await mongo().then(async (mongoose) => {
+        try {
+            const result = await economyBalSchema.findOne({
+                guildID,
+                userID
+            })
+
+            let properties = undefined
+            const defaultProperties = config.uCommandStats[type];
+            const inheritedProperties = result?.[type];
+            
+            if (returnUndefined !== false) {
+                properties = { ...defaultProperties, ...inheritedProperties }
+            }
+
+            properties = properties || inheritedProperties
+            if (properties) uCommandStatsCache[guildID] = { [userID]: { [type]: properties } }
+            return properties
+        } finally {
+            if (closeConnection !== false) {
+                mongoose.connection.close()
+            }
+        }
+    })
+}
+
+/**
+ * updates all specified properties of the command type. Does not alter values that were not given.
+ * @param {string} guildID - the id of the guild
+ * @param {string} userID - the id of the user
+ * @param {string} type - the specific command
+ * @param {array} properties - the object of properties for the corresponding object. Set as 'default' for default values. refer to the `commands` field of features/schemas/economy-bal-sch.js and its subfields for contents. All are optional.
+ */
+ module.exports.setUserCommandStats = async (guildID, userID, type, properties) => {
+    const inheritedProperties = await this.getUserCommandStats(guildID, userID, type, false, false)
+    const defaultProperties = config.income[type]
+    properties = { ...inheritedProperties, ...properties }
+    this.trimObj(properties, [undefined, null]) // trim object for db
+
+    return await mongo().then(async (mongoose) => {
+        try {
+            const result = await economyBalSchema.findOneAndUpdate({
+                guildID,
+                userID
+          ***REMOVED*** {
+                commands: {
+                    [type]: properties
+                }
+          ***REMOVED*** {
+                upsert: true,
+                new: true
+            })
+
+            uCommandStatsCache[guildID] = { [userID]: { [type]: { ...defaultProperties, ...properties } } } // do not trim cached object
         } finally {
             mongoose.connection.close()
         }
