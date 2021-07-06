@@ -19,7 +19,7 @@ module.exports = class WorkCommand extends Command {
     }
 
     async run(message) {
-        const payout = await util.getPayout(message.guild.id, 'work')
+        const payout = await util.getCommandStats(message.guild.id, 'work')
         const currencySymbol = await util.getCurrencySymbol(message.guild.id)
         const amount = util.intInRange(payout.min, payout.max)
         util.changeBal(message.guild.id, message.author.id, amount)

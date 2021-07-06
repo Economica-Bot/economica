@@ -7,6 +7,7 @@ const kickSchema = require('../../features/schemas/kick-sch')
 const banSchema = require('../../features/schemas/ban-sch')
 
 const util = require('../../features/util')
+const { oneLine } = require('common-tags')
 
 
 module.exports = class InfractionInfoCommand extends Command {
@@ -32,6 +33,7 @@ module.exports = class InfractionInfoCommand extends Command {
             userPermissions: [
                 'ADMINISTRATOR'
             ],
+            argsPromptLimit: 0,
             argsCount: 1,
             args: [
                 {

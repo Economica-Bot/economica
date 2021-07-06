@@ -13,10 +13,9 @@ module.exports = class PrefixCommand extends Command {
             memberName: 'prefix',
             group: 'config',
             description: 'Returns or updates Economica\'s prefix',
-            details: oneLine`
-            If no prefix is entered, Economica\'s prefix will be shown.
-            If the prefix is "default", the server prefix will be set to the default prefix.
-            Max length is 8 characters.`,
+            details: oneLine`If no prefix is entered, Economica\'s prefix will be shown.
+                            If the prefix is "default", the server prefix will be set to the default prefix.
+                            Max length is 8 characters.`,
             format: 'prefix [prefix]',
             examples: [
                 'prefix .',

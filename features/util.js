@@ -449,7 +449,7 @@ module.exports.setCurrencySymbol = async (guildID, currency) => {
 module.exports.setCommandStats = async (_id, type, properties) => {
 
     // db properties, global default properties, and object in which updated properties will be stored
-    const inheritedProperties = await this.getPayout(_id, type, false)
+    const inheritedProperties = await this.getCommandStats(_id, type, false)
     const defaultProperties = config.income[type]
 
     properties = { ...inheritedProperties, ...properties }
@@ -487,7 +487,7 @@ module.exports.setCommandStats = async (_id, type, properties) => {
  * @param {boolean} returnUndefined - whether to omit undefined fields or return their default value. Default: true (return defaults)
  * @returns {payout} minimum, maximum | merged properties or the inherited properties only. Inherited properties will only be returned if returnUndefined is false.
  */
-module.exports.getPayout = async (_id, type, returnUndefined = true) => {
+module.exports.getCommandStats = async (_id, type, returnUndefined = true) => {
     const cached = incomeCache[`${_id}`]?.[`${type}`]
     if (cached) return cached
     return await mongo().then(async (mongoose) => {
