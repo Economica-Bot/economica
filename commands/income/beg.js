@@ -4,12 +4,12 @@ const util = require('../../features/util')
 module.exports = class BegCommand extends Command {
      constructor(client) {
           super(client, {
-               name: 'beg',
+               name: 'beg2',
                aliases: [
-                    'pls'
+                    'pls2'
                ],
                group: 'income',
-               memberName: 'beg',
+               memberName: 'beg2',
                guildOnly: true,
                description: 'Possibly earn cash money',
                details: 'Beg to possibly increase your cash balance',

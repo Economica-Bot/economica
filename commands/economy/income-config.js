@@ -11,15 +11,12 @@ const { oneLine } = require('common-tags')
 module.exports = class IncomeConfigCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'configure',
+            name: 'config',
             aliases: [
-                'setincome',
-                'set-income',
-                'income-set',
-                'set-pay',
+                'configure'
             ],
             group: 'economy',
-            memberName: 'setpay',
+            memberName: 'configure',
             guildOnly: true,
             description: 'Configure an income command',
             details: oneLine`After entering a valid income command, a series of prompts will be displayed.

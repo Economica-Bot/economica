@@ -4,9 +4,9 @@ const util = require('../../features/util')
 module.exports = class WorkCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'work',
+            name: 'work2',
             group: 'income',
-            memberName: 'work',
+            memberName: 'work2',
             guildOnly: true,
             description: 'Earn cash money.',
             details: 'Work to increase your cash balance.',
