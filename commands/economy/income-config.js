@@ -69,7 +69,7 @@ module.exports = class IncomeConfigCommand extends Command {
         const filter = msg => msg.author.id === message.author.id
         const collector = new MessageCollector(message.channel, filter, {
             max: properties.length,
-            time: 1000 * 15
+            time: 1000 * 30
         })
         let counter = 0
         message.channel.send(properties[counter++][0])
@@ -84,9 +84,9 @@ module.exports = class IncomeConfigCommand extends Command {
         collector.on('end', async collected => {
             counter = 0
             collected.forEach((property) => {
-                properties[counter][1] = parseInt(property.content)
-                message.channel.send(`${properties[counter++][0]}: ${property.content}`)
+                properties[counter++][1] = parseInt(property.content)
             })
+
             for (let i = 0; i < properties.length; i++) {
                 obj[properties[i][0]] = properties[i][1]
             }
