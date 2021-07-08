@@ -18,7 +18,7 @@ module.exports = class CreateListingCommand extends Command {
             guildOnly: true,
             description: 'Create a server market listing.',
             details: '\`INDEV\`',
-            format: '[item price description]',
+            format: '<item> <price> <description>',
             examples: [
                 'createlisting house 1000 A lovely place to call home'
             ],
