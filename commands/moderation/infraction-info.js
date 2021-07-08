@@ -1,5 +1,5 @@
 const { Command } = require('discord.js-commando')
-const { MessageActionRow, MessageButton, Message } = require('discord.js')
+const { MessageActionRow, MessageButton } = require('discord.js')
 
 const mongo = require('../../features/mongo')
 const muteSchema = require('../../features/schemas/mute-sch')
