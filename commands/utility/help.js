@@ -39,7 +39,9 @@ module.exports = class HelpCommand extends Command {
             let helpEmbed = util.embedify(
                 'YELLOW',
                 'Economica Commands',
-                this.client.user.displayAvatarURL()
+                this.client.user.displayAvatarURL(),
+                '',
+                `Prefix: ${message.guild.commandPrefix}`
             )
 
             let commandList = ''
@@ -61,7 +63,6 @@ module.exports = class HelpCommand extends Command {
             message.channel.send({ embed: helpEmbed })
         } else if (command && !showAll) {
             if (commands.length === 1) {
-                const commandPrefix = message.guild.commandPrefix
                 let helpEmbed = util.embedify(
                     'YELLOW',
                     `${commands[0].name}`,

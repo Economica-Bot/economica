@@ -27,22 +27,28 @@ module.exports = class BalanceCommand extends Command {
     }
 
     async run(message) {
-        let properties = {}
-        let msg = []
-        const cSymbol = util.getCurrencySymbol(message.guild.id)
+        const cSymbol = await util.getCurrencySymbol(message.guild.id)
+
+        let incomeEmbed = util.embedify(
+            'BLURPLE',
+            `${message.guild.name}'s Income Commands`,
+            message.guild.iconURL()
+        )
         for (const command in income) {
-            msg[command] = `__${command}__\n`
+            let description = ''; let properties = {}
             properties[command] = await util.getCommandStats(message.guild.id, `${command}`)
-            msg[command] = `${msg[command]}Min: ${cSymbol}${properties[command].min}\n`
-            msg[command] = `${msg[command]}Max: ${cSymbol}${properties[command].max}\n`
-            msg[command] = `${msg[command]}Cooldown: ${ms(properties[command].cooldown)}\n`
-            if (properties[command].chance) msg[command] = `${msg[command]}Fail Chance: ${properties[command].chance}%\n`
-            if (properties[command].minFine) msg[command] = `${msg[command]}minFine: ${cSymbol}${properties[command].minFine}\n`
-            if (properties[command].maxFine) msg[command] = `${msg[command]}maxFine: ${cSymbol}${properties[command].maxFine}\n`
+            description += `Min: ${cSymbol}${properties[command].min}\n`
+            description += `Max: ${cSymbol}${properties[command].max}\n`
+            description += `Cooldown: ${ms(properties[command].cooldown)}\n`
+            if (properties[command].chance) description += `Fail Chance: ${properties[command].chance}%\n`
+            if (properties[command].minFine) description += `minFine: ${cSymbol}${properties[command].minFine}\n`
+            if (properties[command].maxFine) description += `maxFine: ${cSymbol}${properties[command].maxFine}\n`
+            incomeEmbed.addField(
+                `__${command}__`,
+                description
+            )
         }
 
-
-
-        util.infoEmbed(message, `${msg.join(`\n`)}`, 'default', this.memberName)
+        message.channel.send({ embed: incomeEmbed })
     }
 }

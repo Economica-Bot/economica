@@ -17,9 +17,7 @@ module.exports = class LeaderBoardCommand extends Command {
             group: 'economy',
             memberName: 'leaderboard',
             guildOnly: true,
-            description: 'Returns leader board',
-            details: 'View top balances.',
-            format: ''
+            description: 'View top user balances',
         })
     }
 
@@ -35,10 +33,13 @@ module.exports = class LeaderBoardCommand extends Command {
                     })
 
                 const currencySymbol = await util.getCurrencySymbol(message.guild.id)
+                
+                //amount of entries per page
+                let entries = 10
                 let embeds = []
                 let rank = 1
                 let balCounter = 0
-                let pageCount = Math.ceil(balances.length / 8)
+                let pageCount = Math.ceil(balances.length / entries)
 
                 loop1:
                     while (true) {
@@ -52,7 +53,7 @@ module.exports = class LeaderBoardCommand extends Command {
                         )
 
                         // Fill the length of each page.
-                        for(let i = 0; i < 8; i++) {
+                        for(let i = 0; i < entries; i++) {
                             try {
                                 embeds[embeds.length-1].addField(`#${rank++} ${message.guild.members.cache.get(balances[balCounter].userID).user.tag}`, `${currencySymbol}${balances[balCounter++].balance}`)
                             } catch (err) {

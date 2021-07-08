@@ -432,7 +432,7 @@ module.exports.getBal = async (guildID, userID) => {
  * Changes a user's balance.
  * @param {string} guildID - Guild id.
  * @param {string} userID - User id.
- * @param {number} balance - The value to be added to the user's balance.
+ * @param {Number} balance - The value to be added to the user's balance.
  */
 module.exports.changeBal = async (guildID, userID, balance) => {
     return await mongo().then(async (mongoose) => {
@@ -566,7 +566,7 @@ module.exports.getCurrencySymbol = async (guildID) => {
     const cached = currencyCache[guildID]
     if (cached) {
         return cached
-    } else await mongo().then(async (mongoose) => {
+    } else return await mongo().then(async (mongoose) => {
         try {
             const result = await guildSettingSchema.findOne({
                 _id: guildID,
@@ -580,14 +580,13 @@ module.exports.getCurrencySymbol = async (guildID) => {
             }
 
             currencyCache[guildID] = currency
+            return currencyCache[guildID]
         } catch (err) {
             console.error(err)
         } finally {
             mongoose.connection.close()
         }
     })
-
-    return currencyCache[guildID]
 }
 
 /**
