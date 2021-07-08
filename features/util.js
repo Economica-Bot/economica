@@ -1,5 +1,6 @@
 const { User, Guild, Message, MessageEmbed, GuildMember } = require('discord.js')
 const { Client, CommandoMessage } = require('discord.js-commando')
+const ms = require('ms')
 
 const config = require('../config.json')
 const mongo = require('./mongo')
@@ -23,23 +24,23 @@ module.exports.getUserID = async (message, query) => {
     return new Promise((resolve, reject) => {
         let id = ''
         const { guild } = message
-        
+
         //Mention
-        if(message.mentions.users.first()) {
+        if (message.mentions.users.first()) {
             resolve(id = message.mentions.users.first().id)
             return
         }
 
         //ID 
-        if(parseInt(query)) {
-            if(guild.members.cache.get(query)) {
+        if (parseInt(query)) {
+            if (guild.members.cache.get(query)) {
                 resolve(query)
                 return
             } else {
                 resolve('noIDMemberFound')
                 return
             }
-        } 
+        }
 
         //Query
         query = query.toLowerCase()
@@ -47,18 +48,18 @@ module.exports.getUserID = async (message, query) => {
         if (selectedMembers.size == 0) {
             message.channel.send({
                 embed: this.embedify(
-                    'RED', 
-                    message.author.username, 
-                    message.author.displayAvatarURL(), 
+                    'RED',
+                    message.author.username,
+                    message.author.displayAvatarURL(),
                     `No members with \`${query.length > 32 ? `${query.substr(0, 32)}...` : query}\` in their user or nick found.`,
                     'Try using a mention or an id.'
                 )
             })
             resolve('noMemberFound')
             return
-        } else if(selectedMembers.size == 1) { 
+        } else if (selectedMembers.size == 1) {
             resolve(selectedMembers.values().next().value.user.id)
-        } else if ( selectedMembers.size > 1 && selectedMembers.size <= 10 ) {
+        } else if (selectedMembers.size > 1 && selectedMembers.size <= 10) {
             let result = []
             selectedMembers.forEach(m => result.push(m.user.id))
             this.memberSelectEmbed(message, result, 10000).then(member => {
@@ -68,9 +69,9 @@ module.exports.getUserID = async (message, query) => {
         } else {
             message.channel.send({
                 embed: this.embedify(
-                    'RED', 
-                    message.author.username, 
-                    message.author.displayAvatarURL(), 
+                    'RED',
+                    message.author.username,
+                    message.author.displayAvatarURL(),
                     `\`${selectedMembers.size.toString()}\` members found!`,
                     'Try being less broad with your search.'
                 )
@@ -135,13 +136,14 @@ module.exports.memberSelectEmbed = async (message, members, time) => {
 
         collector.on('end', async collected => {
             if (!memberFound) {
-                message.channel.send({ embed: 
-                    this.embedify(
-                        'RED', 
-                        message.author.username, 
-                        message.author.displayAvatarURL(), 
-                        `:hourglass: Time ran out! ${time / 1000} sec.`
-                    ) 
+                message.channel.send({
+                    embed:
+                        this.embedify(
+                            'RED',
+                            message.author.username,
+                            message.author.displayAvatarURL(),
+                            `:hourglass: Time ran out! ${time / 1000} sec.`
+                        )
                 })
             }
         })
@@ -153,7 +155,7 @@ module.exports.memberSelectEmbed = async (message, members, time) => {
  * @param {Message} message - The command message.
  * @param {String} id - User id used to retrieve member object.
  */
- module.exports.getMemberById = (message, id) => {
+module.exports.getMemberById = (message, id) => {
     try {
         return message.guild.members.cache.get(id)
     } catch (err) {
@@ -208,7 +210,7 @@ module.exports.getUserIdByMatch = (message, query) => {
  * @param {string} description - Embed content.
  * @param {string} [footer] - The embed footer.
  */
- module.exports.successEmbed = (message, description, footer = '') => {
+module.exports.successEmbed = (message, description, footer = '') => {
     return message.channel.send({
         embed: {
             color: 'GREEN',
@@ -286,7 +288,7 @@ module.exports.deleteMessages = async (message, msgCount) => {
     }
 
     await message.channel.bulkDelete(msgCount).catch((err) => {
-        message.channel.send({embed: this.embedify('RED', message.author, message.author.displayAvatarURL(), `${err}`) }).then((message) => {
+        message.channel.send({ embed: this.embedify('RED', message.author, message.author.displayAvatarURL(), `${err}`) }).then((message) => {
             setTimeout(() => message.delete(), 4000)
         })
     })
@@ -305,13 +307,14 @@ module.exports.deleteMessages = async (message, msgCount) => {
  * @param {string} [footer] - Embed footer.
  * @returns {MessageEmbed} Message embed.
  */
-module.exports.embedify = (color, title, icon_url, description = '', footer = '') => {
+module.exports.embedify = (color = 'DEFAULT', title = false, icon_url = false, description = false, footer = false) => {
     const embed = new MessageEmbed()
         .setColor(color)
-        .setAuthor(title, icon_url)
-    
-    if (description.length > 0) embed.setDescription(description)
-    if (footer.length > 0) embed.setFooter(footer)
+    if (title && icon_url) embed.setAuthor(title, icon_url) // else if:
+    if (title && !icon_url) embed.setAuthor(title) // else if:
+    if (!title && icon_url) embed.setAuthor(' ', icon_url)
+    if (description) embed.setDescription(description)
+    if (footer) embed.setFooter(footer)
 
     return embed
 }
@@ -338,12 +341,20 @@ module.exports.cut = (str, maxLength = 32) => {
 }
 
 /**
+ * returns the current date in ms
+ */
+module.exports.now = () => {
+    const now = new Date
+    return now.getTime()
+}
+
+/**
  * Sends a balance embed.
  * @param {Message} message - The command message.
  * @param {Guild} [guild] - The user's guild, default message.guild.
  * @param {User} [user] - A target user, default message.author.
  */
- module.exports.displayBal = async (message, guild = message.guild, user = message.author) => {
+module.exports.displayBal = async (message, guild = message.guild, user = message.author) => {
     const guildID = guild.id
     const userID = user.id
 
@@ -383,20 +394,20 @@ module.exports.cut = (str, maxLength = 32) => {
  * @param {string} userID - User id.
  * @returns {Promise<balRank>} balance, rank
  */
- module.exports.getBal = async (guildID, userID) => {
+module.exports.getBal = async (guildID, userID) => {
     return await mongo().then(async (mongoose) => {
         try {
             const balances = await economyBalSchema.find({ guildID }).sort({ balance: -1 })
-            let rank = 0 
+            let rank = 0
             let balance = 0
             if (balances.length) {
-                for(let rankIndex = 0; rankIndex < balances.length; rankIndex++) {
-                    if(balances[rankIndex].userID === userID) {
+                for (let rankIndex = 0; rankIndex < balances.length; rankIndex++) {
+                    if (balances[rankIndex].userID === userID) {
                         rank = rankIndex + 1
                         break
                     }
                 }
-                if(balances[rank - 1]) {
+                if (balances[rank - 1]) {
                     balance = balances[rank - 1].balance
                 } else {
                     await new economyBalSchema({
@@ -406,9 +417,9 @@ module.exports.cut = (str, maxLength = 32) => {
                     }).save()
                     rank = balances.length + 1
                 }
-            } 
+            }
             return balanceRank = {
-                balance, 
+                balance,
                 rank
             }
         } finally {
@@ -458,13 +469,13 @@ module.exports.initPrefix = (client) => {
 
         //prefix
         const guilds = client.guilds.cache.map(guild => guild.id)
-        for(const guild of guilds) {
+        for (const guild of guilds) {
             await mongo().then(async (mongoose) => {
                 try {
                     const result = await guildSettingSchema.findOne({
                         _id: guild,
                     })
-                    
+
                     if (result?.prefix) {
                         prefixCache[guild] = result.prefix
                     } else prefixCache[guild] = config.prefix // if no stored prefix, return the global default
@@ -485,7 +496,7 @@ module.exports.initPrefix = (client) => {
  * @param {string} guildID - Guild id.
  * @returns {string} prefix 
  */
- module.exports.getPrefix = async (guildID) => {
+module.exports.getPrefix = async (guildID) => {
     const cached = prefixCache[guildID]
     if (cached) {
         return cached
@@ -500,7 +511,7 @@ module.exports.initPrefix = (client) => {
                 prefix = result.prefix
             } else {
                 prefix = config.prefix //def
-            } 
+            }
 
             prefixCache[guildID] = prefix
         } catch (err) {
@@ -543,7 +554,7 @@ module.exports.setPrefix = async (message, prefix) => {
         }
     })
 
-    return prefixCache[guildID] = prefix 
+    return prefixCache[guildID] = prefix
 }
 
 /**
@@ -561,7 +572,7 @@ module.exports.getCurrencySymbol = async (guildID) => {
                 _id: guildID,
             })
 
-            let currency 
+            let currency
             if (result?.currency) {
                 currency = result.currency
             } else {
@@ -586,7 +597,7 @@ module.exports.getCurrencySymbol = async (guildID) => {
  * @returns {string} New currency symbol
  */
 module.exports.setCurrencySymbol = async (guildID, currency) => {
-    if(currency.toLowerCase() === 'default') {
+    if (currency.toLowerCase() === 'default') {
         currency = config.cSymbol
     }
 
@@ -614,7 +625,7 @@ module.exports.setCurrencySymbol = async (guildID, currency) => {
  * @param {object} obj - the object to be trimmed
  * @param {array} v - the value or array of value(s) that will be filtered from obj
  */
- module.exports.trimObj = (obj, v) => {
+module.exports.trimObj = (obj, v) => {
     if (!v instanceof Array) {
         v = [v]
     }
@@ -673,9 +684,10 @@ module.exports.setCommandStats = async (_id, type, properties) => {
  * @param {string} _id - the id of the guild
  * @param {string} type - the type of income command (work, beg, crime, etc -- SEE economica/features/schemas/income-sch.js) 
  * @param {boolean} returnUndefined - whether to omit undefined fields or return their default value. Default: true (return defaults)
- * @returns {payout} minimum, maximum | merged properties or the inherited properties only. Inherited properties will only be returned if returnUndefined is false.
+ * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
+ * @returns {properties} all properties of the command object in db | merged properties or the inherited properties only. Unspecified/blank db values will be returned as default values if returnUndefined is true. Else, they will return undefined.
  */
-module.exports.getCommandStats = async (_id, type, returnUndefined = true) => {
+module.exports.getCommandStats = async (_id, type, returnUndefined = true, closeConnection = true) => {
     const cached = incomeCache[`${_id}`]?.[`${type}`]
     if (cached) return cached
     return await mongo().then(async (mongoose) => {
@@ -691,10 +703,12 @@ module.exports.getCommandStats = async (_id, type, returnUndefined = true) => {
                 properties = { ...defaultProperties, ...inheritedProperties } // merge objects with right-left precedence for same-key terms
             }
 
-            properties = properties || inheritedProperties 
+            properties = properties || inheritedProperties
             return properties
         } finally {
-            mongoose.connection.close()
+            if (closeConnection !== false) {
+                mongoose.connection.close()
+            }
         }
     })
 }
@@ -706,6 +720,7 @@ module.exports.getCommandStats = async (_id, type, returnUndefined = true) => {
  * @param {string} type - the command name
  * @param {boolean} returnUndefined - whether to omit undefined fields or return their default value. Default: true (return defaults)
  * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
+ * @returns {uProperties} all properties of the user object's command field in db | merged properties or the inherited properties only. Unspecified/blank db values will be returned as default values if returnUndefined is true. Else, they will return undefined.
  */
 module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefined = true, closeConnection = true) => {
     const cached = uCommandStatsCache[`${guildID}`]?.[userID]?.[type]
@@ -720,11 +735,13 @@ module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefin
             let properties = undefined
             const defaultProperties = config.uCommandStats[type];
             const inheritedProperties = result?.[type];
-            
+
+            // if we want undefined values to return as default values, merge default values and db values
             if (returnUndefined !== false) {
                 properties = { ...defaultProperties, ...inheritedProperties }
             }
 
+            // if we don't want undefined values to return as default values, return only the inherited values without merge (this will return undefined or null for missing values)
             properties = properties || inheritedProperties
             if (properties) uCommandStatsCache[guildID] = { [userID]: { [type]: properties } }
             return properties
@@ -741,9 +758,9 @@ module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefin
  * @param {string} guildID - the id of the guild
  * @param {string} userID - the id of the user
  * @param {string} type - the specific command
- * @param {array} properties - the object of properties for the corresponding object. Set as 'default' for default values. refer to the `commands` field of features/schemas/economy-bal-sch.js and its subfields for contents. All are optional.
+ * @param {object} properties - the object of properties for the corresponding object. Set as 'default' for default values. refer to the `commands` field of features/schemas/economy-bal-sch.js and its subfields for contents. All are optional.
  */
- module.exports.setUserCommandStats = async (guildID, userID, type, properties) => {
+module.exports.setUserCommandStats = async (guildID, userID, type, properties) => {
     const inheritedProperties = await this.getUserCommandStats(guildID, userID, type, false, false)
     const defaultProperties = config.income[type]
     properties = { ...inheritedProperties, ...properties }
@@ -768,4 +785,30 @@ module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefin
             mongoose.connection.close()
         }
     })
+}
+
+/**
+ * returns true if the cooldown is up for the user using the income command and false if it is not
+ * @param {Message} message - the command message. Use false if you wish to return a boolean
+ * @param {string} properties - the command properties
+ * @param {string} uProperties - the user object's command fields' properties
+ * @returns {boolean} `isCooldownUp` — boolean
+ */
+module.exports.isCooldown = (message, properties, uProperties) => {
+    const { cooldown } = properties
+    const { timestamp } = uProperties
+    const now = new Date()
+
+    if (now.getTime() - timestamp < cooldown) {
+        if (message !== false) {
+                message.channel.send({ embed: this.embedify(
+                'GREY',
+                message.author.name,
+                message.author.avatarURL(),
+                `:hourglass: You need to wait ${ms(cooldown - (now.getTime() - timestamp))} before using this income command again!`,
+                `Cooldown: ${ms(cooldown)}`
+            )})
+        }
+        return false
+    } else return true
 }
