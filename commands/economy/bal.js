@@ -49,7 +49,7 @@ module.exports = class BalanceCommand extends Command {
             'GOLD',
             user.username, 
             user.avatarURL(),
-            `Balance: ${cSymbol}${balance}`,
+            `Balance: ${cSymbol}${balance.toLocaleString()}`,
             `🏆 Rank ${rank}`
             )
         })
