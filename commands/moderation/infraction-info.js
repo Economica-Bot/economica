@@ -5,6 +5,7 @@ const mongo = require('../../features/mongo')
 const muteSchema = require('../../features/schemas/mute-sch')
 const kickSchema = require('../../features/schemas/kick-sch')
 const banSchema = require('../../features/schemas/ban-sch')
+const warnSchema = require('../../features/schemas/warn-sch')
 
 const util = require('../../features/util')
 const { oneLine } = require('common-tags')
@@ -40,7 +41,7 @@ module.exports = class InfractionInfoCommand extends Command {
             args: [
                 {
                     key: 'user',
-                    prompt: 'please @mention, name, or provide the id of a user.',
+                    prompt: 'Please @mention, name, or provide the id of a user.',
                     type: 'string'
                 }
             ]
@@ -48,11 +49,12 @@ module.exports = class InfractionInfoCommand extends Command {
     }
 
     async run(message, { user }) {
+        const { guild } = message
         let id = await util.getUserID(message, user)
         if(id === 'noMemberFound') return
         let member = null
         if(id != 'noIDMemberFound') {
-            member = await message.guild.members.fetch(id)
+            member = await guild.members.fetch(id)
         } else {
             id = user
         }
@@ -61,7 +63,7 @@ module.exports = class InfractionInfoCommand extends Command {
         const inDiscord = !!member
         if(!inDiscord && !parseInt(user)) {
             message.channel.send({ embed: 
-                util.embedify('RED', message.guild.name, message.guild.iconURL(), `\`${user}\` is not in this server! Please use their ID.`)
+                util.embedify('RED', guild.name, guild.iconURL(), `\`${user}\` is not in this server! Please use their ID.`)
             })
             return 
         }
@@ -70,48 +72,62 @@ module.exports = class InfractionInfoCommand extends Command {
 
             //find latest infraction data
             try {
-                const muteResults = await muteSchema.find({ userID: `${id}`, guildID: `${message.guild.id}` }).sort({ createdAt: -1 })
-                const kickResults = await kickSchema.find({ userID: `${id}`, guildID: `${message.guild.id}` }).sort({ createdAt: -1 })
-                const banResults = await banSchema.find({ userID: `${id}`, guildID: `${message.guild.id}` }).sort({ createdAt: -1 })
+                const warnResults = await warnSchema.find({ userID: `${id}`, guildID: `${guild.id}` }).sort({ createdAt: -1 })
+                const muteResults = await muteSchema.find({ userID: `${id}`, guildID: `${guild.id}` }).sort({ createdAt: -1 })
+                const kickResults = await kickSchema.find({ userID: `${id}`, guildID: `${guild.id}` }).sort({ createdAt: -1 })
+                const banResults = await banSchema.find({ userID: `${id}`, guildID: `${guild.id}` }).sort({ createdAt: -1 })
                 let infractionEmbed = util.embedify(
                     'BLURPLE', 
-                    `Infraction information for ${member ? member.user.tag : id}`, 
+                    `${member ? member.user.tag : id}'s Infractions`, 
                     member ? member.user.displayAvatarURL() : '',
                     '',
-                    `Server Member? ${inDiscord.toString().toUpperCase()}`
+                    `${inDiscord ? `Server Member | Joined ${new Date(member.joinedTimestamp).toLocaleString()}` : 'Not a Server Member'}`
                 )
                 
-                if(muteResults.length && muteResults[0].current) {
+                if(muteResults[0]?.active) {
                     infractionEmbed.addField(
                         'Currently Muted',
                         `\`${muteResults[0].reason}\``
                     )
-                } if(banResults.length && banResults[0].current) {
+                } if(banResults[0]?.active) {
                     infractionEmbed.addField(
                         'Currently Banned',
                         `\`${banResults[0].reason}\``
                     )
                 }
+
                 infractionEmbed.addFields([
                     {
+                        name: 'Warned',
+                        value: `\`${warnResults.length}\` times`,
+                        inline: true
+                  ***REMOVED***
+                    {
                         name :'Muted',
-                        value: `${muteResults.length} times`,
+                        value: `\`${muteResults.length}\` times`,
                         inline: true
                   ***REMOVED***
                     {
                         name: 'Kicked',
-                        value: `${kickResults.length} times`,
+                        value: `\`${kickResults.length}\` times`,
                         inline: true
                   ***REMOVED***
                     {
                         name: 'Banned',
-                        value: `${banResults.length} times`,
+                        value: `\`${banResults.length}\` times`,
                         inline: true
-                    }
+                  ***REMOVED***
                 ])
                 
                 const row = new MessageActionRow()
-                if(muteResults.length) {
+                if(warnResults.length) {
+                    row.addComponents(
+                        new MessageButton()
+                            .setCustomID('warn_button')
+                            .setLabel('Warns ⚠')
+                            .setStyle(1)
+                    )
+                } if(muteResults.length) {
                     row.addComponents(
                         new MessageButton()
                             .setCustomID('mute_button')
@@ -134,8 +150,7 @@ module.exports = class InfractionInfoCommand extends Command {
                     )
                 }
 
-                //Add current mute/kick/ban info
-
+                //Add current mute/kick/ban/warn info
                 const msg = {
                     embed: infractionEmbed, 
                 }
@@ -144,10 +159,27 @@ module.exports = class InfractionInfoCommand extends Command {
                 }
 
                 const interactee = await message.channel.send(msg)
-
                 this.client.on('interaction', async interaction => {
                     if(interaction.componentType === 'BUTTON' && interaction.message.id === interactee.id) {
-                        if(interaction.customID === 'mute_button') {
+                        if (interaction.customID === 'warn_button') {
+                            const warnEmbed = util.embedify(
+                                'BLURPLE',
+                                `Warns for ${member ? member.user.tag : id}`,
+                                member ? member.user.displayAvatarURL() : '',
+                            )
+                            for(const warnResult of warnResults) {
+                                warnEmbed.addField(
+                                    `Warned on ${new Date(warnResult.createdAt).toLocaleString()}`,
+                                    `Warned by \`${warnResult.staffTag}\` for \`${warnResult.reason}\``
+                                )
+                            }
+                            interaction.update({
+                                embeds: [warnEmbed],
+                                components: []
+                            }).catch(err => {
+                                //console.error(err)
+                            })
+                        } else if(interaction.customID === 'mute_button') {
                             const muteEmbed = util.embedify(
                                 'BLURPLE',
                                 `Mutes for ${member ? member.user.tag : id}`,
