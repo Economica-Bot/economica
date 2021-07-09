@@ -20,26 +20,24 @@ module.exports = class WorkCommand extends Command {
     }
 
     async run(message) {
-        const { guild, author } = message
-        const currencySymbol = await util.getCurrencySymbol(message.guild.id)
-
-        const properties = await util.getCommandStats(message.guild.id, 'work')
-        const uProperties = await util.getUserCommandStats(guild.id, author.id, 'work')
-
-        const now = new Date
-        const usedWhen = now.getTime()
-
-        if ((usedWhen - uProperties.timestamp) < properties.cooldown) {
-            return util.errorEmbed(message, `:hourglass: You need to wait ${ms(properties.cooldown - (Date.now() - uProperties.timestamp))}`, this.memberName) // RIP the command if user is speedy
+        try {
+            const properties = await util.getCommandStats(message.guild.id, 'work', true, false); console.log(properties)
+            const uProperties = await util.getUserCommandStats(message.guild.id, message.author.id, 'work', true, false); console.log(uProperties)
+            if (!util.isCooldown(message, properties, uProperties)) return
+            const currencySymbol = await util.getCurrencySymbol(message.guild.id, false)
+            const amount = util.intInRange(properties.min, properties.max)
+            message.channel.send({
+                embed: util.embedify(
+                    'GREEN',
+                    message.author.tag,
+                    message.author.displayAvatarURL(),
+                    `You worked and earned ${currencySymbol}${amount.toLocaleString()}!`
+                )
+            })
+            await util.changeBal(message.guild.id, message.author.id, amount, false)
+            await util.setUserCommandStats(message.guild.id, message.author.id, 'work', { timestamp: util.now() })
+        } catch(err) {
+            console.log(err)
         }
-
-        // reset the timestamp when used
-        util.setUserCommandStats(guild.id, author.id, 'work', { timestamp: usedWhen })
-
-        const min = properties.min; const max = properties.max
-        const amount = util.intInRange(min, max)
-
-        util.changeBal(message.guild.id, message.author.id, amount)
-        util.successEmbed(message, `You worked and earned ${currencySymbol}${amount}!`)
     }
 }

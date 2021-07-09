@@ -55,7 +55,7 @@ module.exports = class LeaderBoardCommand extends Command {
                         // Fill the length of each page.
                         for(let i = 0; i < entries; i++) {
                             try {
-                                embeds[embeds.length-1].addField(`#${rank++} ${message.guild.members.cache.get(balances[balCounter].userID).user.tag}`, `${currencySymbol}${balances[balCounter++].balance}`)
+                                embeds[embeds.length-1].addField(`#${rank++} ${message.guild.members.cache.get(balances[balCounter].userID).user.tag}`, `${currencySymbol}${(balances[balCounter++].balance).toLocaleString()}`)
                             } catch (err) {
                                 balCounter++
                                 console.log(err)
