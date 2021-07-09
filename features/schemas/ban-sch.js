@@ -5,24 +5,21 @@ const reqString = {
     required: true
 }
 
+const reqBoolean = {
+    type: Boolean, 
+    required: true
+}
+
 const banSchema = mongoose.Schema({
-    userID: reqString,
     guildID: reqString,
-    reason: reqString,
+    userID: reqString,
+    userTag: reqString,
     staffID: reqString,
     staffTag: reqString,
-    current: {
-        type: Boolean,
-        required: true,
-  ***REMOVED***
-    expired: {
-        type: Boolean,
-        required: true,
-  ***REMOVED***
-},
-    {
-        timestamps: true
-    }
-)
+    reason: reqString,
+    active: reqBoolean,
+}, {
+    timestamps: true
+})
 
 module.exports = mongoose.model('bans', banSchema)

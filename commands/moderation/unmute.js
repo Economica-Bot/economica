@@ -1,6 +1,10 @@
 const { Command } = require('discord.js-commando')
+
+const util = require('../../features/util')
 const mongo = require('../../features/mongo')
 const muteSchema = require('../../features/schemas/mute-sch')
+
+const { oneLine } = require('common-tags')
 
 module.exports = class UnMuteCommand extends Command {
     constructor(client) {
@@ -10,8 +14,9 @@ module.exports = class UnMuteCommand extends Command {
             guildOnly: true,
             memberName: 'unmute',
             description: 'Unmutes a user',
-            details: 'This command requires a \`muted\` roles with respective permissions. The command only works on a current member of a server.',
-            format: 'unmute <@user>',
+            details: oneLine`This command requires a \`muted\` roles with respective permissions. 
+                            This command only works on a current member of a server.`,
+            format: 'unmute <@user | id | name>',
             examples: [
                 'unmute @Bob'
             ],
@@ -24,41 +29,45 @@ module.exports = class UnMuteCommand extends Command {
             argsCount: 1,
             args: [
                 {
-                    key: 'member',
-                    prompt: 'please @mention the member you wish to unmute.',
-                    type: 'member'
+                    key: 'user',
+                    prompt: 'Please @mention, name, or provide the id of a user.',
+                    type: 'string'
                 }
             ]
         })
     }
 
-    async run(message, { member }) {
-
+    async run(message, { user }) {
         const { guild } = message
+        let id = await util.getUserID(message, user)
+        if(id === 'noMemberFound') return
+        let member
+        if(id != 'noIDMemberFound') {
+            member = await message.guild.members.fetch(id)
+        } else {
+            return
+        }
 
         await mongo().then(async (mongoose) => {
             try {
 
-                //Checks if there is an active mute 
-                const prevMutes = await muteSchema.find({
+                //Check if there is an active mute 
+                const activeMutes = await muteSchema.find({
                     userID: member.id,
-                    guildID: guild.id
-                })
+                    guildID: guild.id,
+                    active: true
+                })  
 
-                const currentlyMuted = prevMutes.filter(mute => {
-                    return mute.current === true
-                })
-
-                if (!currentlyMuted.length) {
+                if (!activeMutes.length) {
                     return message.reply('That user is not muted')
                 }
 
                 const result = await muteSchema.updateMany({
                     userID: member.id,
                     guildID: guild.id,
-                    current: true
+                    active: true
               ***REMOVED*** {
-                    current: false
+                    active: false
                 })
 
                 const mutedRole = guild.roles.cache.find(role => {
@@ -67,10 +76,9 @@ module.exports = class UnMuteCommand extends Command {
 
                 if (result) {
                     member.roles.remove(mutedRole)
-                    console.log(`Manually unmuted ${member.id} in server ${guild}.`)
-                    if (result) message.channel.send(`Unmuted user ${member.user.tag}`)
+                    message.channel.send(`Unmuted **${member.user.tag}**.`)
                 } else {
-                    message.channel.send(`<@${member.id}> could not be unmuted.`)
+                    message.channel.send(`**<@${member.id}>** could not be unmuted.`)
                 }
             } finally {
                 mongoose.connection.close()

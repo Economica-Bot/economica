@@ -1,5 +1,6 @@
 const { Command } = require('discord.js-commando')
 
+const util = require('../../features/util')
 const mongo = require('../../features/mongo')
 const muteSchema = require('../../features/schemas/mute-sch')
 
@@ -17,12 +18,12 @@ module.exports = class MuteCommand extends Command {
             details: oneLine`This command requires a \`muted\` role (case INsensitive) with appropriate permissions. 
                             The length, if specified, must be in a format of minutes, hours, then days. 
                             This command only works on current member of your server. 
-                            However, if a user leaves and comes back, the mute role will be automatically renewed.`,
-            format: '<@user> [length] [reason]',
+                            If a user leaves and comes back, the mute role will be automatically renewed.`,
+            format: '<@user | id | name> [length] [reason]',
             examples: [
-                'mute @Bob 10D',
-                'mute @Bob spamming',
-                'mute @Bob 5m ignoring rules'
+                'mute @Bob 1m2h3d',
+                'mute Bob spamming',
+                'mute 796906750569611294 5m ignoring rules'
             ],
             clientPermissions: [
                 'MUTE_MEMBERS'
@@ -34,9 +35,9 @@ module.exports = class MuteCommand extends Command {
             argsCount: 2,
             args: [
                 {
-                    key: 'member',
-                    prompt: 'Please @mention the member you wish to mute.',
-                    type: 'member'
+                    key: 'user',
+                    prompt: 'Please @mention, name, or provide the id of a user.',
+                    type: 'string'
               ***REMOVED***
                 {
                     key: 'args',
@@ -48,39 +49,47 @@ module.exports = class MuteCommand extends Command {
         })
     }
 
-    async run(message, { member, args }) {
-
+    async run(message, { user, args }) {
         const { guild, author: staff } = message
+        let id = await util.getUserID(message, user)
+        if(id === 'noMemberFound') return
+        let member
+        if(id != 'noIDMemberFound') {
+            member = await message.guild.members.fetch(id)
+        } else {
+            message.reply(`\`${user}\` is not a server member.`)
+            return
+        }
 
+        let reason, expires, permanent
         const args1 = args.split(" ")
 
-        //ensure that second argument is a date
+        //Check if second argument is a date
         let duration = ms(args1[0])
-
         if (duration) {
-            var expires = new Date(new Date().getTime() + duration)
-            var reason = args1.length > 1 ? args.substring(args.indexOf(' ') + 1) : 'No reason provided'
+            permanent = false
+            expires = new Date(new Date().getTime() + duration)
+            reason = args1.length > 1 ? args.substring(args.indexOf(' ') + 1) : 'No reason provided'
         }
-        //If second argument is not a date, mute is set to an arbitrary date, eons away
+
+        //If second argument is not a date, mute is set to permanent
         else {
-            var expires = new Date('January 1, 69420')
-            var reason = args1.length ? args : 'No reason provided'
+            permanent = true
+            reason = args1.length ? args : 'No reason provided'
         }
 
         await mongo().then(async (mongoose) => {
-
-            const prevMutes = await muteSchema.find({
+            
+            //test for active mute
+            const activeMutes = await muteSchema.find({
+                guildID: guild.id,
                 userID: member.id,
-                guildID: guild.id
+                active: true
             })
 
-            const currentlyMuted = prevMutes.filter(mute => {
-                return mute.current === true
-            })
-
-            //test for multiple active mutes
-            if (currentlyMuted.length) {
-                return message.reply('That user is already muted')
+            if (activeMutes.length) {
+                message.reply(`${member} is already muted.`)
+                return 
             }
 
             const mutedRole = guild.roles.cache.find(role => {
@@ -88,7 +97,8 @@ module.exports = class MuteCommand extends Command {
             })
 
             if (!mutedRole) {
-                return message.reply('Please create a "muted" role!')
+                message.reply('Please create a \`muted\` role!')
+                return 
             }
 
             let result = ''
@@ -97,21 +107,21 @@ module.exports = class MuteCommand extends Command {
             } catch {
                 result += `Could not dm ${member.user.tag}.`
             }
+
             member.roles.add(mutedRole)
-
-            message.say(`Muted **${member.user.tag}** for \`${reason}\`. They will be unmuted on **${expires.toLocaleString()}**`)
-
+            message.channel.send(`Muted **${member.user.tag}** for \`${reason}\`. ${expires ? `They will be unmuted on ${expires.toLocaleString()}` : ''}`)
             try {
                 await new muteSchema({
-                    userID: member.id,
                     guildID: guild.id,
-                    reason,
+                    userID: member.id,
+                    userTag: member.user.tag,
                     staffID: staff.id,
                     staffTag: staff.tag,
+                    reason,
+                    permanent, 
+                    active: true,
                     expires,
-                    current: true
                 }).save()
-                //console.log(`Mute Schema created: ${member.user.tag} in server ${guild} for "${reason}" until ${expires.toLocaleString()}`) 
             } finally {
                 mongoose.connection.close()
             }

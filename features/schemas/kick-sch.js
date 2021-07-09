@@ -6,15 +6,14 @@ const reqString = {
 }
 
 const kickSchema = mongoose.Schema({
-    userID: reqString,
     guildID: reqString,
-    reason: reqString,
+    userID: reqString,
+    userTag: reqString, 
     staffID: reqString,
     staffTag: reqString,
-},
-    {
-        timestamps: true
-    }
-)
+    reason: reqString,
+}, {
+    timestamps: true
+})
 
 module.exports = mongoose.model('kicks', kickSchema)
