@@ -15,7 +15,7 @@ module.exports = class IncomeConfigCommand extends Command {
             aliases: [
                 'configure'
             ],
-            group: 'economy',
+            group: 'income',
             memberName: 'configure',
             guildOnly: true,
             description: 'Configure an income command',
