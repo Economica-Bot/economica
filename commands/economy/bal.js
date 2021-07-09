@@ -43,7 +43,7 @@ module.exports = class BalanceCommand extends Command {
         }
 
         user = guild.members.cache.get(id).user
-        const cSymbol = await util.getCurrencySymbol(guild.id)
+        const cSymbol = await util.getCurrencySymbol(guild.id, false)
         const { balance, rank } = await util.getBal(guild.id, user.id)
         message.channel.send({ embed: util.embedify(
             'GOLD',
