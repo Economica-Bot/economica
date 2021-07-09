@@ -23,30 +23,32 @@ module.exports = class BegCommand extends Command {
      }
 
      async run(message) {
-          const { guild, author } = message
-          const currencySymbol = await util.getCurrencySymbol(message.guild.id)
-
-          const properties = await util.getCommandStats(message.guild.id, 'beg')
-          const uProperties = await util.getUserCommandStats(guild.id, author.id, 'beg')
-
-          const now = new Date
-          const usedWhen = now.getTime()
-
-          if ((usedWhen - uProperties.timestamp) < properties.cooldown) {
-               return util.errorEmbed(message, `:hourglass: You need to wait ${ms(properties.cooldown - (Date.now() - uProperties.timestamp))}`, this.memberName) // RIP the command if user is speedy
+          const properties = await util.getCommandStats(message.guild.id, 'beg', true, false)
+          const uProperties = await util.getUserCommandStats(message.guild.id, message.author.id, 'beg', true, false)
+          if (!util.isCooldown(message, properties, uProperties)) return // if cd is not up, end command
+          if (!util.isSuccess(properties)) {
+               message.channel.send({
+                    embed: util.embedify(
+                         'RED',
+                         message.author.tag,
+                         message.author.displayAvatarURL(),
+                         `You begged but got nothing :slight_frown:`
+                    )
+               })
+               return await util.setUserCommandStats(message.guild.id, message.author.id, 'beg', { timestamp: util.now() }, false) // if not successful, still reset the timestamp before ending the command
           }
-
-          // reset the timestamp when used
-          util.setUserCommandStats(guild.id, author.id, 'beg', { timestamp: usedWhen })
-
-          if ((Math.random() * 100) < properties.chance) {
-               return util.errorEmbed(message, 'You begged but nobody gave you anything', this.memberName)
-          }
-
-          const min = properties.min; const max = properties.max
+          const { min, max } = properties
           const amount = util.intInRange(min, max)
-
-          util.changeBal(message.guild.id, message.author.id, amount)
-          util.successEmbed(message, `You begged and earned ${currencySymbol}${amount}!`)
+          const cSymbol = await util.getCurrencySymbol(message.guild.id, false)
+          message.channel.send({
+               embed: util.embedify(
+                    'GREEN',
+                    message.author.tag,
+                    message.author.displayAvatarURL(),
+                    `You begged and earned ${cSymbol}${amount.toLocaleString()}!`
+               )
+          })
+          await util.setUserCommandStats(message.guild.id, message.author.id, 'beg', { timestamp: util.now() }, false) // reset timestamp
+          await util.changeBal(message.guild.id, message.author.id, amount) // +close mongo connection
      }
 }
