@@ -349,6 +349,50 @@ module.exports.now = () => {
 }
 
 /**
+ * returns true if the cooldown is up for the user using the income command and false if it is not
+ * @param {Message} message - the command message. Use false if you wish to return a boolean
+ * @param {object} properties - the command properties
+ * @param {object} uProperties - the user object's command fields' properties
+ * @returns {boolean} `isCooldownUp` — boolean
+ */
+module.exports.isCooldown = (message, properties, uProperties) => {
+    const { cooldown } = properties
+    const { timestamp } = uProperties
+    const now = new Date()
+
+    if (now.getTime() - timestamp < cooldown) {
+        if (message !== false) {
+                message.channel.send({ embed: this.embedify(
+                'GREY',
+                message.author.name,
+                message.author.avatarURL(),
+                `:hourglass: You need to wait ${ms(cooldown - (now.getTime() - timestamp))} before using this income command again!`,
+                `Cooldown: ${ms(cooldown)}`
+            )})
+        }
+        return false
+    } else return true
+}
+
+/**
+ * returns true if the outcome of the command is in the profit chance, false if it is in the fine chance
+ * @param {object} properties - the command properties
+ * @returns {boolean} `isSuccess` — boolean
+ */
+module.exports.isSuccess = (properties) => {
+    const { chance } = properties
+
+    if (this.intInRange(0, 100) > chance) return true
+
+    return false // if random less than chance
+}
+
+/*
+*
+*
+*/
+
+/**
  * Sends a balance embed.
  * @param {Message} message - The command message.
  * @param {Guild} [guild] - The user's guild, default message.guild.
@@ -374,7 +418,7 @@ module.exports.displayBal = async (message, guild = message.guild, user = messag
             fields: [
                 {
                     name: 'Balance',
-                    value: `${cSymbol}${balance}`,
+                    value: `${cSymbol}${balance.toLocaleString()}`,
                     inline: true
                 }
             ]
@@ -392,9 +436,10 @@ module.exports.displayBal = async (message, guild = message.guild, user = messag
  * Gets a user's balance and rank.
  * @param {string} guildID - Guild id.
  * @param {string} userID - User id.
+ * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  * @returns {Promise<balRank>} balance, rank
  */
-module.exports.getBal = async (guildID, userID) => {
+module.exports.getBal = async (guildID, userID, closeConnection = true) => {
     return await mongo().then(async (mongoose) => {
         try {
             const balances = await economyBalSchema.find({ guildID }).sort({ balance: -1 })
@@ -423,7 +468,7 @@ module.exports.getBal = async (guildID, userID) => {
                 rank
             }
         } finally {
-            mongoose.connection.close()
+            if (closeConnection !== false) mongoose.connection.close()
         }
     })
 }
@@ -433,8 +478,9 @@ module.exports.getBal = async (guildID, userID) => {
  * @param {string} guildID - Guild id.
  * @param {string} userID - User id.
  * @param {Number} balance - The value to be added to the user's balance.
+ * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  */
-module.exports.changeBal = async (guildID, userID, balance) => {
+module.exports.changeBal = async (guildID, userID, balance, closeConnection = true) => {
     return await mongo().then(async (mongoose) => {
         try {
             const result = await economyBalSchema.findOneAndUpdate({
@@ -454,7 +500,7 @@ module.exports.changeBal = async (guildID, userID, balance) => {
             balanceCache[`${guildID}`] = { [userID]: result.balance }
             return result.balance
         } finally {
-            mongoose.connection.close()
+            if (closeConnection !== false) mongoose.connection.close()
         }
     })
 }
@@ -464,7 +510,7 @@ module.exports.changeBal = async (guildID, userID, balance) => {
  * @param {Client} client - The bot client.
  */
 
-module.exports.initPrefix = (client) => {
+module.exports.initPrefix = (client, closeConnection = true) => {
     const initPrefix = async () => {
 
         //prefix
@@ -480,7 +526,7 @@ module.exports.initPrefix = (client) => {
                         prefixCache[guild] = result.prefix
                     } else prefixCache[guild] = config.prefix // if no stored prefix, return the global default
                 } finally {
-                    mongoose.connection.close()
+                    if (closeConnection !== false) mongoose.connection.close()
                 }
             })
 
@@ -496,7 +542,7 @@ module.exports.initPrefix = (client) => {
  * @param {string} guildID - Guild id.
  * @returns {string} prefix 
  */
-module.exports.getPrefix = async (guildID) => {
+module.exports.getPrefix = async (guildID, closeConnection = true) => {
     const cached = prefixCache[guildID]
     if (cached) {
         return cached
@@ -517,7 +563,7 @@ module.exports.getPrefix = async (guildID) => {
         } catch (err) {
             console.error(err)
         } finally {
-            mongoose.connection.close()
+            if (closeConnection !== false) mongoose.connection.close()
         }
     })
 
@@ -530,7 +576,7 @@ module.exports.getPrefix = async (guildID) => {
  * @param {string} prefix - New prefix.
  * @returns {string} New prefix
  */
-module.exports.setPrefix = async (message, prefix) => {
+module.exports.setPrefix = async (message, prefix, closeConnection = true) => {
     const guildID = message.guild.id
     if (prefix.toLowerCase() === 'default') {
         message.guild.commandPrefix = prefix = config.prefix
@@ -550,7 +596,7 @@ module.exports.setPrefix = async (message, prefix) => {
                 new: true
             })
         } finally {
-            mongoose.connection.close()
+            if (closeConnection !== false) mongoose.connection.close()
         }
     })
 
@@ -560,9 +606,10 @@ module.exports.setPrefix = async (message, prefix) => {
 /**
  * Gets currency symbol.
  * @param {string} guildID - Guild id.
+ * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  * @returns {string} Guild currency symbol
  */
-module.exports.getCurrencySymbol = async (guildID) => {
+module.exports.getCurrencySymbol = async (guildID, closeConnection = true) => {
     const cached = currencyCache[guildID]
     if (cached) {
         return cached
@@ -584,7 +631,7 @@ module.exports.getCurrencySymbol = async (guildID) => {
         } catch (err) {
             console.error(err)
         } finally {
-            mongoose.connection.close()
+            if (closeConnection !== false) mongoose.connection.close()
         }
     })
 }
@@ -593,9 +640,10 @@ module.exports.getCurrencySymbol = async (guildID) => {
  * Sets currency symbol.
  * @param {string} _id - Guild id.
  * @param {string} currency - New currency symbol.
+ * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  * @returns {string} New currency symbol
  */
-module.exports.setCurrencySymbol = async (guildID, currency) => {
+module.exports.setCurrencySymbol = async (guildID, currency, closeConnection = true) => {
     if (currency.toLowerCase() === 'default') {
         currency = config.cSymbol
     }
@@ -612,7 +660,7 @@ module.exports.setCurrencySymbol = async (guildID, currency) => {
                 new: true
             })
         } finally {
-            mongoose.connection.close()
+            if (closeConnection !== false) mongoose.connection.close()
         }
     })
 
@@ -644,7 +692,7 @@ module.exports.trimObj = (obj, v) => {
  * @param {string} type - the type of income command (work, beg, crime, etc -- SEE economica/features/schemas/income-sch.js)
  * @param {object} properties - an object of properties for the command
  */
-module.exports.setCommandStats = async (_id, type, properties) => {
+module.exports.setCommandStats = async (_id, type, properties, closeConnection = true) => {
 
     // db properties, global default properties, and object in which updated properties will be stored
     const inheritedProperties = await this.getCommandStats(_id, type, false)
@@ -667,7 +715,7 @@ module.exports.setCommandStats = async (_id, type, properties) => {
             // allows cache to be accessed as incomeCache[_id][type]
             incomeCache[`${_id}`] = { [type]: { ...defaultProperties, ...properties } } // if a property is not in db, store its default value in the cache
         } finally {
-            mongoose.connection.close()
+            if (closeConnection !== false) mongoose.connection.close()
         }
     })
 }
@@ -758,8 +806,9 @@ module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefin
  * @param {string} userID - the id of the user
  * @param {string} type - the specific command
  * @param {object} properties - the object of properties for the corresponding object. Set as 'default' for default values. refer to the `commands` field of features/schemas/economy-bal-sch.js and its subfields for contents. All are optional.
+ * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  */
-module.exports.setUserCommandStats = async (guildID, userID, type, properties) => {
+module.exports.setUserCommandStats = async (guildID, userID, type, properties, closeConnection = true) => {
     const inheritedProperties = await this.getUserCommandStats(guildID, userID, type, false, false)
     const defaultProperties = config.income[type]
     properties = { ...inheritedProperties, ...properties }
@@ -781,33 +830,7 @@ module.exports.setUserCommandStats = async (guildID, userID, type, properties) =
 
             uCommandStatsCache[guildID] = { [userID]: { [type]: { ...defaultProperties, ...properties } } } // do not trim cached object
         } finally {
-            mongoose.connection.close()
+            if (closeConnection !== false) mongoose.connection.close()
         }
     })
-}
-
-/**
- * returns true if the cooldown is up for the user using the income command and false if it is not
- * @param {Message} message - the command message. Use false if you wish to return a boolean
- * @param {string} properties - the command properties
- * @param {string} uProperties - the user object's command fields' properties
- * @returns {boolean} `isCooldownUp` — boolean
- */
-module.exports.isCooldown = (message, properties, uProperties) => {
-    const { cooldown } = properties
-    const { timestamp } = uProperties
-    const now = new Date()
-
-    if (now.getTime() - timestamp < cooldown) {
-        if (message !== false) {
-                message.channel.send({ embed: this.embedify(
-                'GREY',
-                message.author.name,
-                message.author.avatarURL(),
-                `:hourglass: You need to wait ${ms(cooldown - (now.getTime() - timestamp))} before using this income command again!`,
-                `Cooldown: ${ms(cooldown)}`
-            )})
-        }
-        return false
-    } else return true
 }
