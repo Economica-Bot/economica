@@ -7,7 +7,6 @@ module.exports = class PingCommand extends Command {
             group: 'util',
             memberName: 'ping',
             description: "Returns the latency of the bot's connection.",
-            format: 'ping'
         })
     }
 

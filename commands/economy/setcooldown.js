@@ -23,9 +23,9 @@ module.exports = class BalanceCommand extends Command {
             details: 'Set the minimum required time interval between usages of an income command.',
             format: '<cmd> <duration>',
             examples: [
-                'setcooldown 30m',
-                'set-cd 1d',
-                'cooldown-time 60000'
+                'setcooldown  work 30m',
+                'set-cd beg 1d',
+                'cooldown-time crime 60000'
             ],
             argsPromptLimit: 0,
             argsCount: 2,

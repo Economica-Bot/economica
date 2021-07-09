@@ -18,8 +18,8 @@ module.exports = class MuteCommand extends Command {
                             The length, if specified, must be in a format of minutes, hours, then days. 
                             This command only works on current member of your server. 
                             However, if a user leaves and comes back, the mute role will be automatically renewed.`,
+            format: '<@user> [length] [reason]',
             examples: [
-                'mute <@user> [length] [reason]',
                 'mute @Bob 10D',
                 'mute @Bob spamming',
                 'mute @Bob 5m ignoring rules'

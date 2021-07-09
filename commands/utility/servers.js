@@ -33,6 +33,6 @@ module.exports = class ServersCommand extends Command {
                 }
             )
         })
-        message.say(serversEmbed)
+        message.channel.send({ embed: serversEmbed })
     }
 }

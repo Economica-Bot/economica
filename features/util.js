@@ -750,7 +750,7 @@ module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefin
 
     return await mongo().then(async (mongoose) => {
         try {
-            const result = await economyBalSchema.findOneAndUpdate({
+            await economyBalSchema.findOneAndUpdate({
                 guildID,
                 userID
           ***REMOVED*** {

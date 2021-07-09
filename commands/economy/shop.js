@@ -24,7 +24,8 @@ module.exports = class ShopCommand extends Command {
         await mongo().then(async (mongoose) => {
             try {
                 const listings = await marketItemSchema.find({
-                    guildID: message.guild.id
+                    guildID: message.guild.id,
+                    active: true
                 })
                 .sort({
                     price: -1
@@ -35,13 +36,17 @@ module.exports = class ShopCommand extends Command {
                     guild.name, 
                     guild.iconURL()
                 )
-
+                
+                let i = 0
                 for(const listing of listings) {
+                    i++
                     shopEmbed.addField(
                         `${currencySymbol}${listing.price}: \`${listing.item}\``,
                         `${listing.description}`
                     )
                 }
+
+                shopEmbed.setDescription(`There are \`${i}\` listings.`)
 
                 message.channel.send({ embed: shopEmbed })
             } catch (err) {
