@@ -44,10 +44,8 @@ client.on('ready', async () => {
     })
 
     const checkMutes = require('./features/features/check-mute')
-    const checkBans = require('./features/features/check-ban')
     const util = require('./features/util')
     checkMutes(client)
-    checkBans(client)
     util.initPrefix(client)
 })
 

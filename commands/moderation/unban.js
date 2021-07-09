@@ -10,7 +10,7 @@ module.exports = class unBanCommand extends Command {
             memberName: 'unban',
             guildOnly: true,
             description: 'Unbans a user',
-            format: 'unban <id>',
+            format: '<id>',
             examples: [
                 'unban 796906750569611294'
             ],
@@ -24,7 +24,7 @@ module.exports = class unBanCommand extends Command {
             args: [
                 {
                     key: 'userID',
-                    prompt: 'please enter the ID of the user you wish to unban.',
+                    prompt: 'Please enter the ID of the user you wish to unban.',
                     type: 'string'
                 }
             ]
@@ -37,25 +37,27 @@ module.exports = class unBanCommand extends Command {
             const bannedUser = (await guild.bans.fetch()).get(userID)
             if (bannedUser) {
                 try {
-                    const result = await banSchema.updateMany({
+                    const results = await banSchema.updateMany({
                         guildID: guild.id,
-                        userID: userID,
-                        current: true,
-                        expired: false,
+                        userID,
+                        active: true,
                   ***REMOVED*** {
-                        current: true,
-                        expired: true,
+                        active: false,
                     })
 
-                    if (result) {
-                        message.say(`Unbanned user ${userID}`)
-                        console.log(`Unbanned ${userID} in server ${guild}`)
+                    const bannedUser = (await guild.bans.fetch()).get(userID)
+                    if (bannedUser) {
+                        guild.bans.fetch().then(bans => {
+                            guild.members.unban(userID)
+                            console.log(`Unbanned ${userID} in server ${guild.name}`)
+                            message.channel.send(`Unbanned user \`${userID}\``)
+                        })
                     }
                 } finally {
                     mongoose.connection.close()
                 }
             } else {
-                message.say(`Could not find user ${userID}`)
+                message.say(`Could not find user \`${userID}\`. Please use a valid ID.`)
             }
         })
     }

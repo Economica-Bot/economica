@@ -1,5 +1,6 @@
 const { Command } = require('discord.js-commando')
 
+const util = require('../../features/util')
 const mongo = require('../../features/mongo')
 const banSchema = require('../../features/schemas/ban-sch')
 
@@ -12,7 +13,7 @@ module.exports = class BanCommand extends Command {
             memberName: 'ban',
             description: 'Bans a user',
             details: 'This command will ban a specified user and record details about the ban.',
-            format: 'ban <@user> [reason]',
+            format: '<@user | id | name> [reason]',
             examples: [
                 'ban @bob',
                 'ban @bob Spamming'
@@ -27,13 +28,13 @@ module.exports = class BanCommand extends Command {
             argsCount: 2,
             args: [
                 {
-                    key: 'member',
-                    prompt: 'please @mention the member you wish to ban.',
-                    type: 'member'
+                    key: 'user',
+                    prompt: 'Please @mention, name, or provide the id of a user.',
+                    type: 'string'
               ***REMOVED***
                 {
                     key: 'reason',
-                    prompt: 'please provide a reason for this ban',
+                    prompt: 'Please provide a reason.',
                     type: 'string',
                     default: 'No reason provided'
                 }
@@ -41,8 +42,18 @@ module.exports = class BanCommand extends Command {
         })
     }
 
-    async run(message, { member, reason }) {
+    async run(message, { user, reason }) {
         const { guild, author: staff } = message
+        let id = await util.getUserID(message, user)
+        if(id === 'noMemberFound') return
+        let member
+        if(id != 'noIDMemberFound') {
+            member = await message.guild.members.fetch(id)
+        } else {
+            message.reply(`\`${user}\` is not a server member.`)
+            return
+        }
+
         if (member.bannable) {
             let result = ''
             try {
@@ -59,15 +70,14 @@ module.exports = class BanCommand extends Command {
             await mongo().then(async (mongoose) => {
                 try {
                     await new banSchema({
-                        userID: member.id,
                         guildID: guild.id,
-                        reason,
+                        userID: member.id,
+                        userTag: member.user.tag, 
                         staffID: staff.id,
                         staffTag: staff.tag,
-                        current: true,
-                        expired: false,
+                        reason,
+                        active: true,
                     }).save()
-                    //console.log(`Ban Schema created: ${member.user.tag} in server ${guild} for "${reason}"`)
                 } finally {
                     mongoose.connection.close()
                 }
