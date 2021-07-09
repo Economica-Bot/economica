@@ -3,6 +3,7 @@ const mongo = require('../../features/mongo')
 const marketItemSchema = require('../../features/schemas/market-item-sch')
 const util = require('../../features/util')
 const { oneLine } = require('common-tags')
+const inventorySchema = require('../../features/schemas/inventory-sch')
 
 module.exports = class BuyItemCommand extends Command {
     constructor(client) {
@@ -13,7 +14,7 @@ module.exports = class BuyItemCommand extends Command {
             guildOnly: true, 
             description: 'Purchase an item from the market.',
             details: oneLine`Upon purchase, a role with the name of the item will be added to your profile.
-                            You can only buy 1x item. Case sEnSiTiVe. Refer to \`shop\` for item names.`,
+                            You can only buy 1x item. Case sEnSiTiVe. Refer to \`shop\` for item names. \`INDEV\``,
             format: '<item>',
             examples: [
                 'buy house'
@@ -31,37 +32,60 @@ module.exports = class BuyItemCommand extends Command {
 
     async run(message, { item }) {
         const { author, guild } = message
-        const member = await guild.members.fetch(author)
         const currencySymbol = await util.getCurrencySymbol(guild.id)
-        let price, roleID, found = true
+        let price, description, exit = false
         await mongo().then(async (mongoose) => {
-            try {
-                const listing = await marketItemSchema.findOne({ guildID: guild.id, item })
-                if(!listing) {
-                    found = false
+            try {    
+                const inventory = await inventorySchema.findOne({ 
+                    userID: author.id, 
+                    guildID: guild.id, 
+                })
+
+                const owned = inventory?.inventory.find(i => {
+                    return i.item === item
+                })
+
+                if(owned) {
+                    message.channel.send(`You already have a \`${item}\`.`)
+                    exit = true
+                    mongoose.connection.close()
                     return
                 }
+                
+                const listing = await marketItemSchema.findOne({ guildID: guild.id, item })
+                if(!listing) {
+                    message.channel.send(`\`${item}\` not found in market.`)
+                    exit = true
+                    mongoose.connection.close()
+                    return
+                }
+
                 price = listing.price
-                roleID = listing.roleID
+                description = listing.description
+
+                await inventorySchema.findOneAndUpdate({ 
+                    userID: author.id, 
+                    guildID: guild.id 
+              ***REMOVED*** {
+                    $push: {
+                        inventory: {
+                            item, 
+                            price, 
+                            description
+                        }
+                    }
+              ***REMOVED*** {
+                    upsert: true, 
+                    new: true
+                })
             } catch(err) {  
                 console.error(err)
             } finally {
                 mongoose.connection.close()
             }
         })
-        if(!found) {
-            message.channel.send(`Could not find \`${item}\` in db.`)
-            return
-        }
-        const itemRole = await guild.roles.cache.find(role => role?.id === roleID)
-        if(!itemRole) {
-            message.channel.send(`Could not find role for ${role}`)
-            return
-        }
-        if(!member.roles.cache.has(roleID)) {
-            member.roles.add(itemRole, `Purchased ${item}`)
-        } else {
-            message.channel.send(`You already have a \`${item}\``)
+
+        if(exit) {
             return
         }
         util.changeBal(guild.id, author.id, (-price) )

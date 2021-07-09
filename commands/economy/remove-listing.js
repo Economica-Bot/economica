@@ -33,14 +33,23 @@ module.exports = class RemoveListingCommand extends Command {
 
     async run(message, { item }) {
         const { guild, author } = message
-        let found = true
+        let exit = false
         await mongo().then(async (mongoose) => {
             try {
-                const listing = await marketItemSchema.findOne({ userID: author.id, item })
-                if (listing) {
-                    await listing.delete()
-                } else {
-                    found = false
+                const listing = await marketItemSchema.findOneAndUpdate({ 
+                    guildID: guild.id, 
+                    userID: author.id, 
+                    item, 
+                    active: true 
+              ***REMOVED*** {
+                    active: false
+                })
+                
+                if (!listing) {
+                    message.channel.send(`Could not find ${item} as an active listing under your id.`)
+                    exit = true
+                    mongoose.connection.close()
+                    return
                 }
             } catch(err) {  
                 console.error(err)
@@ -49,8 +58,8 @@ module.exports = class RemoveListingCommand extends Command {
             }
         })
 
-        if(!found) {
-            message.channel.send(`Could not find ${item} under your id.`)
+        if(exit) {
+            return
         } 
 
         message.channel.send({ embed: util.embedify(

@@ -1,8 +1,9 @@
 const { Command } = require('discord.js-commando')
-const mongo = require('../../features/mongo')
-const marketItemSchema = require('../../features/schemas/market-item-sch')
-const util = require('../../features/util')
 const { oneLine } = require('common-tags')
+
+const mongo = require('../../features/mongo')
+const util = require('../../features/util')
+const inventorySchema = require('../../features/schemas/inventory-sch')
 
 module.exports = class SellItemCommand extends Command {
     constructor(client) {
@@ -13,7 +14,8 @@ module.exports = class SellItemCommand extends Command {
             guildOnly: true, 
             description: 'Sell an item for cash.',
             details: oneLine`The item you wish to sell must be in your inventory. 
-                            The item resale value depends on your level. \`INDEV\``,
+                            The item resale value depends on your level. 
+                            Case sEnSiTiVe. \`INDEV\``,
             format: '<item>',
             examples: [
                 'sell house'
@@ -31,38 +33,50 @@ module.exports = class SellItemCommand extends Command {
 
     async run(message, { item }) {
         const { author, guild } = message
-        const member = await guild.members.fetch(author)
         const currencySymbol = await util.getCurrencySymbol(guild.id)
-        let price, roleID, found = true
+        let price, exit = false
         await mongo().then(async (mongoose) => {
             try { 
-                const listing = await marketItemSchema.findOne({ guildID: guild.id, item })
-                if(!listing) {
-                    found = false
+                const inventory = await inventorySchema.findOne({
+                    userID: author.id, 
+                    guildID: guild.id,
+                })
+
+                const owned = inventory?.inventory.find(i => {
+                    return i.item === item
+                })
+
+                if(!owned) {
+                    message.channel.send(`You do not own a \`${item}\`.`)
+                    exit = true
+                    mongoose.connection.close()
+                    return
                 }
-                price = listing?.price
-                roleID = listing?.roleID
+
+                price = owned.price
+
+                await inventorySchema.findOneAndUpdate({
+                    userID: author.id, 
+                    guildID: guild.id
+              ***REMOVED*** {
+                    $pull: {
+                        inventory: {
+                            item
+                        }
+                    }
+                })
+
             } catch(err) {
                 console.error(err)
             } finally {
                 mongoose.connection.close()
             }
         })
-        if(!found) {
-            message.channel.send(`Could not find \`${item}\` in db.`)
+
+        if(exit) {
             return
-        }
-        const itemRole = await guild.roles.cache.find(role => role.id === roleID)
-        if(!itemRole) {
-            message.channel.send(`Could not find role ${item}`)
-            return
-        }
-        if(member.roles.cache.has(roleID)) {
-            member.roles.remove(itemRole, `Sold ${item} `)
-        } else {
-            message.channel.send(`You don't have a ${item}!`)
-            return
-        }
+        }        
+
         util.changeBal(guild.id, author.id, price)
         message.channel.send({ embed:
             util.embedify(

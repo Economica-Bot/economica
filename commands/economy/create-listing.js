@@ -54,21 +54,15 @@ module.exports = class CreateListingCommand extends Command {
             ) })
         }
 
-        const itemRole = await guild.roles.create({
-            reason: `Created listing ${item} for ${price}, ${description}`,
-            name: `${item}`,
-            color: 'RANDOM'
-        })
-
         await mongo().then(async (mongoose) => {
             try {
                 await new marketItemSchema({
                     userID: author.id, 
                     guildID: guild.id, 
-                    roleID: itemRole.id, 
                     item, 
                     price,
-                    description 
+                    description, 
+                    active: true
                 }).save()
             } catch(err) {
                 console.error(err)
@@ -85,11 +79,13 @@ module.exports = class CreateListingCommand extends Command {
             ).addFields([
                 {
                     name: 'Price',
-                    value: `${price}`
+                    value: `${price}`,
+                    inLine: true
               ***REMOVED*** 
                 {
                     name: 'Description',
-                    value: `${description}`
+                    value: `${description}`,
+                    inLine: true
                 }
             ]) 
         })
