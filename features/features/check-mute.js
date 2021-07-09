@@ -3,10 +3,9 @@ const mongo = require('../mongo')
 
 module.exports = client => {
     const checkMutes = async () => {
-
         const now = new Date()
-
         const conditional = {
+            permanent: false, 
             expires: {
                 $lt: now
           ***REMOVED***
@@ -14,29 +13,25 @@ module.exports = client => {
         }
 
         await mongo().then(async (mongoose) => {
-
             try {
                 var results = await muteSchema.find(conditional)
-            } catch (e) {
-                console.log(e)
+            } catch(err) {
+                console.error(err)
             }
 
             //Unmute currently muted users whose mute has expired 
             if (results && results.length) {
                 for (const result of results) {
-
-                    const { guildID, userID } = result
+                    const { guildID, userID, userTag } = result
                     const guild = client.guilds.cache.get(guildID)
-
                     try {
                         const member = (await guild.members.fetch()).get(userID)
-
                         const mutedRole = guild.roles.cache.find(role => {
                             return role.name.toLowerCase() === 'muted'
                         })
-                        member.roles.remove(mutedRole)
-                        console.log(`Unmuted ${userID} in server ${guild}`)
 
+                        member.roles.remove(mutedRole)
+                        console.log(`Unmuted ${userTag} in db for server ${guild}`)
                         await muteSchema.updateMany(conditional, {
                             current: false,
                         })
@@ -47,17 +42,18 @@ module.exports = client => {
             }
         })
 
-        //checks for bans every 5 minutes
-        setTimeout(checkMutes, 1000 * 3)
+        //checks for mutes every 5 minutes
+        setTimeout(checkMutes, 1000 * 5)
     }
+
     checkMutes()
 
     //checks if joining member currently muted
     client.on('guildMemberAdd', async member => {
         const { guild, id } = member
         const currentMute = await muteSchema.findOne({
-            userID: id,
             guildID: guild.id,
+            userID: id,
             current: true
         })
 
@@ -68,7 +64,7 @@ module.exports = client => {
 
             if (role) {
                 member.roles.add(role)
-                console.log(`User ${member.id} rejoined ${guild} and was muted.`)
+                console.log(`User ${member.tag} rejoined ${guild} and was muted.`)
             }
         }
     })

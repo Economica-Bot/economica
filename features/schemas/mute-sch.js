@@ -5,24 +5,26 @@ const reqString = {
     required: true
 }
 
+const reqBoolean = {
+    type: Boolean, 
+    required: true
+}
+
 const muteSchema = mongoose.Schema({
-    userID: reqString,
     guildID: reqString,
-    reason: reqString,
+    userID: reqString,
+    userTag: reqString,
     staffID: reqString,
     staffTag: reqString,
+    reason: reqString,
+    permanent: reqBoolean,
+    active: reqBoolean,
     expires: {
         type: Date,
-        required: true
+        required: false
   ***REMOVED***
-    current: {
-        type: Boolean,
-        required: true,
-  ***REMOVED***
-},
-    {
-        timestamps: true
-    }
-)
+}, {
+    timestamps: true
+})
 
 module.exports = mongoose.model('mutes', muteSchema)
