@@ -4,12 +4,15 @@ const num = {
      type: Number,
      required: false
 }
+
+const reqString = {
+    type: String, 
+    required: true
+}
+
 const incomeSchema = mongoose.Schema(
      {
-          _id: {
-               type: String,
-               required: true
-        ***REMOVED***
+          _id: reqString,
           work: {
                min: num,
                max: num,

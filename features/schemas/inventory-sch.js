@@ -9,10 +9,8 @@ const inventorySchema = mongoose.Schema({
     userID: reqString, 
     guildID: reqString, 
     inventory: []
-}, 
-{
+}, {
     timeStamps: true
-}
-)
+})
 
 module.exports = mongoose.model('Inventory', inventorySchema)

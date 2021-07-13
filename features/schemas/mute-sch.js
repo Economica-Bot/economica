@@ -10,6 +10,11 @@ const reqBoolean = {
     required: true
 }
 
+const date = {
+    type: Date, 
+    required: false
+}
+
 const muteSchema = mongoose.Schema({
     guildID: reqString,
     userID: reqString,
@@ -19,10 +24,7 @@ const muteSchema = mongoose.Schema({
     reason: reqString,
     permanent: reqBoolean,
     active: reqBoolean,
-    expires: {
-        type: Date,
-        required: false
-  ***REMOVED***
+    expires: date,
 }, {
     timestamps: true
 })

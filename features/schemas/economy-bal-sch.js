@@ -1,5 +1,15 @@
 const mongoose = require('mongoose')
 
+const reqString = {
+    type: String, 
+    required: true
+}
+
+const reqNumber = {
+    type: Number, 
+    required: true
+}
+
 // retrieve user-specific stats for a command
 commandParams = {
     // when the user last used the command
@@ -9,18 +19,9 @@ commandParams = {
 
 const economyBalSchema = mongoose.Schema(
     {
-        guildID: {
-            type: String,
-            required: true
-      ***REMOVED***
-        userID: {
-            type: String,
-            required: true
-      ***REMOVED***
-        balance: {
-            type: Number,
-            required: true
-      ***REMOVED***
+        guildID: reqString,
+        userID: reqString,
+        balance: reqNumber,
         commands: {
             work: commandParams,
             beg: commandParams,

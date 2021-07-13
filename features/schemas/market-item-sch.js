@@ -10,21 +10,20 @@ const reqNumber = {
     required: true
 }
 
+const reqBoolean = {
+    type: Boolean, 
+    required: true
+}
+
 const marketItemSchema = mongoose.Schema({
     userID: reqString, 
     guildID: reqString,
     item: reqString, 
-    price: {
-        type: Number, 
-        required: true
-  ***REMOVED***
+    price: reqNumber,
     description: reqString,
-    active: {
-        type: Boolean,
-        required: true
-    }
+    active: reqBoolean
 }, {
     timeStamps: true
-} )
+})
 
-module.exports = mongoose.model('shop items', marketItemSchema)
+module.exports = mongoose.model('market', marketItemSchema)
