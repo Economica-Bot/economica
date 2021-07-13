@@ -25,11 +25,19 @@ client.registry
     .registerGroups([
         ['moderation', 'Moderation'],
         ['economy', 'Economy'],
+        ['market', 'Market'],
+        ['market (archaic)', 'Archaic Market - Cannot Use'],
+        ['shop', 'Shop'],
         ['income', 'Income'],
         ['util', 'Utility'],
         ['config', 'Config & Setup']
     ])
-    .registerCommandsIn(path.join(__dirname, 'commands'))
+    .registerCommandsIn(
+        path.join(__dirname, 'commands'), 
+    )
+    .registerCommandsIn(
+        path.join(__dirname, 'commands/economy')
+    )
 
 client.on('ready', async () => {
 
