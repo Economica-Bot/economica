@@ -88,6 +88,12 @@ module.exports = class IncomeConfigCommand extends Command {
         message.channel.send({ embed: configEmbed })
         message.channel.send(properties[counter++][0])
         collector.on('collect', msg => {
+            if(!parseInt(msg)) {
+                msg.reply(`${msg.content} is not a number!`)
+                exit = true
+                collector.stop()
+                return
+            }
             if (counter < properties.length) {
                 msg.channel.send(properties[counter++][0])
             }
@@ -98,12 +104,6 @@ module.exports = class IncomeConfigCommand extends Command {
         collector.on('end', async collected => {
             counter = 0
             collected.every((property) => {
-                if(!parseInt(property)) {
-                    message.reply(`${property} is not a number!`)
-                    exit = true
-                    return false
-                }
-
                 properties[counter++][1] = parseInt(property.content)
                 return true
             })
