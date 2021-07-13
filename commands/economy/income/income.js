@@ -1,6 +1,6 @@
 const { Command } = require('discord.js-commando')
-const util = require('../../features/util')
-const { income } = require('../../config.json')
+const util = require('../../../features/util')
+const { income } = require('../../../config.json')
 const ms = require('ms')
 
 module.exports = class BalanceCommand extends Command {
@@ -12,15 +12,11 @@ module.exports = class BalanceCommand extends Command {
                 'list-income',
                 'income-info',
             ],
-            group: 'economy',
+            group: 'income',
             memberName: 'income',
             guildOnly: true,
             description: 'View all income commands and their settings.',
             details: 'View the profit range, fine range, cooldown, fine chance, and more of all income commands in this guild.',
-            format: '',
-            examples: [
-                'income'
-            ],
             argsPromptLimit: 0,
             argsCount: 0
         })
