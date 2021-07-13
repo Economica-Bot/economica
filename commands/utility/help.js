@@ -23,7 +23,7 @@ module.exports = class HelpCommand extends Command {
             args: [
                 {
                     key: 'command',
-                    prompt: 'please enter a command that you would like help with.',
+                    prompt: 'Please enter a command that you would like help with.',
                     type: 'string',
                     default: ''
                 }
@@ -55,7 +55,9 @@ module.exports = class HelpCommand extends Command {
 
                 helpEmbed.addField(
                     group[1].name,
-                    commandList,
+                    
+                    //incase a group doesn't have any commands
+                    `${commandList ? commandList : 'No commands'}`,
                     true
                 )
                 commandList = ''
