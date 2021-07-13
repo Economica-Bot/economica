@@ -18,7 +18,7 @@ module.exports = class CurrencyCommand extends Command {
             details: oneLine`
             If no symbol is entered, The current currency symbol will be shown.
             If the symbol is "default", the currency will be set to the default currency.`,
-            format: 'currency [symbol]',
+            format: '[symbol]',
             examples: [
                 'currency :dollar:',
                 'currency'

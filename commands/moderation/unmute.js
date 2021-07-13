@@ -16,7 +16,7 @@ module.exports = class UnMuteCommand extends Command {
             description: 'Unmutes a user',
             details: oneLine`This command requires a \`muted\` roles with respective permissions. 
                             This command only works on a current member of a server.`,
-            format: 'unmute <@user | id | name>',
+            format: '<@user | id | name>',
             examples: [
                 'unmute @Bob'
             ],

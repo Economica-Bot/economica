@@ -1,5 +1,6 @@
 const { Command } = require('discord.js-commando')
 const util = require('../../features/util')
+const { oneLine } = require('common-tags')
 
 module.exports = class BalanceCommand extends Command {
     constructor(client) {
@@ -12,9 +13,10 @@ module.exports = class BalanceCommand extends Command {
             group: 'economy',
             memberName: 'balance',
             guildOnly: true,
-            description: 'Returns balance in server currency',
-            details: 'View your balance or someone else\'s balance by specifying the user. This can be done with @mention, id, or simply typing part of their name.',
-            format: '[@user | id | name]',
+            description: 'View balance.',
+            details: oneLine`View your balance or someone else's balance by specifying the user. 
+                            This can be done with @mention, id, or simply typing part of their name.`,
+            format: '[@mention | id | name]',
             examples: [
                 'bal @QiNG-agar#0540',
                 'bal qing',
@@ -22,7 +24,7 @@ module.exports = class BalanceCommand extends Command {
             args: [
                 {
                     key: 'user',
-                    prompt: 'please @mention, name, or provide the id of a user.',
+                    prompt: 'Please @mention, name, or provide the id of a user.',
                     type: 'string',
                     default: '',
               ***REMOVED***

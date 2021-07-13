@@ -15,7 +15,7 @@ module.exports = class HelpCommand extends Command {
             group: 'util',
             description: 'Lists available commands, or detailed information about a specific command.',
             details: 'The command query must match the command or one of its aliases. If there is no command input, all available commands will be listed.',            
-            format: 'help [command]',
+            format: '[command]',
             examples: [
                 'help',
                 'help ping'

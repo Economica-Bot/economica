@@ -16,7 +16,7 @@ module.exports = class MarketCommand extends Command {
             memberName: 'market',
             description: 'Buy and sell items on the market.',
             details: oneLine`The market is a user powered, per-server bartering system. 
-                            Stock, tax, fees, and experience are soon to be implemented.`
+                            Stock, tax, fees, and experience are soon to be implemented.`,
         })
     }
 

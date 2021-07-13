@@ -8,7 +8,7 @@ module.exports = class EchoCommand extends Command {
             memberName: 'echo',
             description: 'Repeats a message',
             details: 'If the last word in the message is \`true\`, the echo will be within an embed.',
-            format: 'echo <message> [true]',
+            format: '<message> [true]',
             examples: [
                 'echo Economica',
                 'echo Economica true'

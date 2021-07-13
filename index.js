@@ -52,11 +52,9 @@ client.on('ready', async () => {
     })
 
     const checkMutes = require('./features/features/check-mute')
-    const util = require('./features/util')
+    const { initPrefix } = require('./features/util')
     checkMutes(client)
-    util.initPrefix(client)
+    initPrefix(client)
 })
 
-if (config.useAltToken == true) {
-    client.login(config.alt_token)
-} else client.login(config.token)
+client.login(config.useAltToken ? config.alt_token : config.token)
