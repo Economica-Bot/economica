@@ -41,19 +41,30 @@ module.exports = class ListingCommand extends Command {
 
     async run(message, { param, args }) {
         const { guild, author } = message
+        let id
+        if(args) {
+            id = await util.getUserID(message, args)    
+            if (id === 'noMemberFound') {
+                return 
+            }
+        } else {
+            id = author.id
+        }
+
+        const user = guild.members.cache.get(id).user
         const currencySymbol = await util.getCurrencySymbol(guild.id)
         let exit = false
         if(param === 'view') {
             let listingsEmbed = util.embedify(
                 'BLURPLE',
-                author.tag, 
-                author.displayAvatarURL()
+                user.tag, 
+                user.displayAvatarURL()
             )
             await mongo().then(async (mongoose) => {
                 try {    
                     const listings = await marketItemSchema.find({
                         guildID: guild.id,
-                        userID: author.id
+                        userID: id
                     })
     
                     let i = 0, j = 0
@@ -68,7 +79,7 @@ module.exports = class ListingCommand extends Command {
                         }
                     }
     
-                    listingsEmbed.setDescription(`You've made \`${i}\` listings, \`${j}\` of which are active.`)
+                    listingsEmbed.setDescription(`\`${i}\` listings, \`${j}\` of which are active.`)
                 } catch(err) {
                     console.error(err)
                 } finally {
@@ -84,7 +95,7 @@ module.exports = class ListingCommand extends Command {
                     'RED',
                     message.author.username, 
                     message.author.displayAvatarURL(),
-                    'The parameter is incorrect or missing.\nFormat: \`<item> <price> <description>\`',
+                    'The parameter is incorrect or missing.\nFormat: \`listing create <item> <price> <description>\`',
                     'Please name the item you wish to sell, price, and a description.'
                 ) })
 
