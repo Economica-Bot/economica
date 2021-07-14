@@ -1,7 +1,7 @@
-const { MessageEmbed } = require('discord.js')
 const { Command } = require('discord.js-commando')
 
 const util = require('../../features/util')
+const { oneLine } = require('common-tags')
 
 module.exports = class HelpCommand extends Command {
     constructor(client) {
@@ -14,7 +14,8 @@ module.exports = class HelpCommand extends Command {
             guildOnly: true,
             group: 'util',
             description: 'Lists available commands, or detailed information about a specific command.',
-            details: 'The command query must match the command or one of its aliases. If there is no command input, all available commands will be listed.',            
+            details: oneLine`The command query must match the command or one of its aliases. 
+                            If there is no command input, all available commands will be listed.`,            
             format: '[command]',
             examples: [
                 'help',
