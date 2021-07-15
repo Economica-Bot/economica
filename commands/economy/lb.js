@@ -58,6 +58,7 @@ module.exports = class LeaderBoardCommand extends Command {
                                 embeds[embeds.length-1].addField(`#${rank++} ${message.guild.members.cache.get(balances[balCounter].userID).user.tag}`, `${currencySymbol}${(balances[balCounter++].balance).toLocaleString()}`)
                             } catch (err) {
                                 balCounter++
+                                embeds[0].setDescription(`\`0\` users on leaderboard.`)
                                 console.log(err)
                             }
 
