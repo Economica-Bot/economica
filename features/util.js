@@ -31,16 +31,11 @@ module.exports.getUserID = async (message, query) => {
             return
         }
 
-        //ID 
-        if (parseInt(query)) {
-            if (guild.members.cache.get(query)) {
-                resolve(query)
-                return
-            } else {
-                resolve('noIDMemberFound')
-                return
-            }
-        }
+        //ID
+        if (guild.members.cache.get(query)) {
+            resolve(query)
+            return
+        } 
 
         //Query
         query = query.toLowerCase()
@@ -78,7 +73,7 @@ module.exports.getUserID = async (message, query) => {
             })
             resolve('noMemberFound')
             return
-        }
+        } 
     })
 }
 

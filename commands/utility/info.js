@@ -50,7 +50,7 @@ module.exports = class InfoCommand extends Command {
 
         for(const command of cmdGroup[0].commands) {
             infoEmbed.addField(
-                `__**${command[1].name}**__ - *${command[1].description}*`,
+                `__**${command[1].name}**__ - *${command[1].description ? command[1].description : 'No description.'}*`,
                 //If no format, only command name is used
                 `**Usage**: \`${command[1].name}${command[1].format ? ` ${command[1].format}` : ''}\`\n>>> ${command[1].details ? command[1].details : 'No details.'}\n\n`
             )
