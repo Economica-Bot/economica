@@ -43,6 +43,25 @@ module.exports = class PurgeEconomyCommand extends Command {
                     })
                     message.channel.send(`Deleted ${author.username}'s inventory.`)
                 } else if(content === 'market') {
+                    let econManagerRole = guild.roles.cache.find(role => {
+                        return role.name.toLowerCase() === 'economy manager'
+                    })
+        
+                    if(!econManagerRole) {
+                        message.reply('Please create an \`Economy Manager\` role!')
+                        return
+                    }
+        
+                    if(!message.member.roles.cache.has(econManagerRole.id)) {
+                        message.channel.send({ embed: util.embedify(
+                            'RED',
+                            message.author.username, 
+                            message.author.displayAvatarURL(),
+                            `You must have the <@&${econManagerRole.id}> role.`
+                        )} )
+        
+                        return
+                    }
                     const removed = await marketItemSch.deleteMany({
                         guildID: guild.id
                     })

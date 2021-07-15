@@ -79,7 +79,7 @@ module.exports = class ListingCommand extends Command {
                         }
                     }
     
-                    listingsEmbed.setDescription(`\`${i}\` listings, \`${j}\` of which are active.`)
+                    listingsEmbed.setDescription(`You have \`${i}\` listings, \`${j}\` of which are active.`)
                 } catch(err) {
                     console.error(err)
                 } finally {
@@ -90,18 +90,6 @@ module.exports = class ListingCommand extends Command {
             message.channel.send({ embed: listingsEmbed })
             return
         } else if(param === 'create') {
-            if(!args) {
-                message.channel.send({ embed: util.embedify(
-                    'RED',
-                    message.author.username, 
-                    message.author.displayAvatarURL(),
-                    'The parameter is incorrect or missing.\nFormat: \`listing create <item> <price> <description>\`',
-                    'Please name the item you wish to sell, price, and a description.'
-                ) })
-
-                return
-            }
-
             let item, price, description
             args = args.split(' ')
             item = args[0]
@@ -178,26 +166,6 @@ module.exports = class ListingCommand extends Command {
 
             return
         } else if (param === 'delete') {
-            let econManagerRole = guild.roles.cache.find(role => {
-                return role.name.toLowerCase() === 'economy manager'
-            })
-
-            if(!econManagerRole) {
-                message.reply('Please create an \`Economy Manager\` role!')
-                return
-            }
-
-            if(!message.member.roles.cache.has(econManagerRole.id)) {
-                message.channel.send({ embed: util.embedify(
-                    'RED',
-                    message.author.username, 
-                    message.author.displayAvatarURL(),
-                    `You must have the <@&${econManagerRole.id}> role.`
-                )} )
-
-                return
-            }
-            
             let item = args
             let footer = ''
             await mongo().then(async (mongoose) => {
@@ -348,6 +316,16 @@ module.exports = class ListingCommand extends Command {
 
             return
         } else {
+            if (!param) {
+                message.channel.send({ embed: util.embedify(
+                    'RED',
+                    message.author.username, 
+                    message.author.displayAvatarURL(),
+                    `You need to provide an argument!\n\nYou may be searching for \`listings\` or \`listing view\``,
+                    `Format: \`${this.format}\``
+                )} )
+                return
+            }
             message.channel.send({ embed: util.embedify(
                 'RED',
                 message.author.username, 
