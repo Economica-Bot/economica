@@ -362,13 +362,15 @@ module.exports.isCooldown = (message, properties, uProperties) => {
 
     if (now.getTime() - timestamp < cooldown) {
         if (message !== false) {
-                message.channel.send({ embed: this.embedify(
-                'GREY',
-                message.author.name,
-                message.author.avatarURL(),
-                `:hourglass: You need to wait ${ms(cooldown - (now.getTime() - timestamp))} before using this income command again!`,
-                `Cooldown: ${ms(cooldown)}`
-            )})
+            message.channel.send({
+                embed: this.embedify(
+                    'GREY',
+                    message.author.name,
+                    message.author.avatarURL(),
+                    `:hourglass: You need to wait ${ms(cooldown - (now.getTime() - timestamp))} before using this income command again!`,
+                    `Cooldown: ${ms(cooldown)}`
+                )
+            })
         }
         return false
     } else return true
@@ -385,6 +387,85 @@ module.exports.isSuccess = (properties) => {
     if (this.intInRange(0, 100) > chance) return true
 
     return false // if random less than chance
+}
+
+/**
+ * turns string into argument array
+ * @param {string} string - the string to be argified
+ * @param {number} maxArgs - the number of arguments to be included in the array
+ */
+module.exports.argify = (string, maxArgs = false) => {
+    string = string.split(' ')
+    if (+maxArgs) {
+        while (string.length > +maxArgs) {
+            string.pop()
+        }
+    }
+    return string
+}
+
+/**
+ * attempt to parse a value as a duration (time) using ms
+ * @param {*} p - the value to parse
+ * @returns {number|undefined} `ms(+p)|undefined` — parsed duration in ms or undefined
+ */
+module.exports.parseDuration = (p) => +p ? +p : ms(p) ? ms(p) : undefined
+
+/**
+ * attempt to parse a value as a percentage
+ * @param {*} p - the value to parse
+ * @returns {number|undefined} `+p|undefined`
+ */
+module.exports.parsePercentage = (p) => p.toString().endsWith('%') ? 0 <= +p.substr(0, p.length) <= 100 ? +p.substr(0, p.length) : undefined : +p ? 0 <= +p <= 1 ? +p * 100 : 0 <= +p <= 100 ? +p : undefined : undefined
+
+/**
+ * fix properties of an income command
+ * @param {object} properties - the command properties
+ * @returns {object} `properties` — fixed command properties
+ */
+module.exports.fixIncome = (properties) => {
+    properties['min'] = Math.abs(properties['min'])
+    properties['max'] = Math.abs(properties['max'])
+
+    if (properties.minFine && properties.maxFine) {
+        properties['minFine'] = Math.abs(properties['minFine'])
+        properties['maxFine'] = Math.abs(properties['maxFine'])
+    }
+    if (properties['min'] > properties['max']) {
+        const tempmin = properties['min']
+        properties['min'] = properties['max']
+        properties['max'] = tempmin
+    }
+    if (properties['cooldown'] < 10000) properties['cooldown'] = 10000
+    if (properties.minFine && properties.maxFine) {
+        if (properties['minFine'] > properties['maxFine']) {
+            const tempmin = properties['minFine']
+            properties['minFine'] = properties['maxFine']
+            properties['maxFine'] = tempmin
+        }
+    }
+
+    return properties
+}
+
+/**
+ * beautifies the income command value for embed display (DO NOT USE BEFORE SETTING STATS IN DB!!)
+ * @param {object} properties - the command properties
+ * @param {string} cSymbol - the currency symbol
+ * @returns {object} `properties` — beautified command properties
+ */
+module.exports.beautifyIncome = (properties, cSymbol) => {
+    properties['cooldown'] = ms(properties['cooldown'])
+    properties.min = `${cSymbol}${properties.min}`
+    properties.max = `${cSymbol}${properties.max}`
+
+    if (properties.chance) properties['chance'] = `${(properties['chance'])}%`
+    if (properties.minFine && properties.maxFine) {
+        properties.minFine = `${cSymbol}${properties.minFine}`
+        properties.maxFine = `${cSymbol}${properties.maxFine}`
+    }
+
+    return properties
 }
 
 /*
@@ -691,6 +772,7 @@ module.exports.trimObj = (obj, v) => {
  * @param {string} _id - the id of the guild
  * @param {string} type - the type of income command (work, beg, crime, etc -- SEE economica/features/schemas/income-sch.js)
  * @param {object} properties - an object of properties for the command
+ * @param {boolean} closeConnection - whether or not to close the mongodb connection (default: true)
  */
 module.exports.setCommandStats = async (_id, type, properties, closeConnection = true) => {
 
