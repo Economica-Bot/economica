@@ -14,8 +14,6 @@ module.exports = class IncomeConfigCommand extends Command {
         super(client, {
             name: 'setincome',
             aliases: [
-                'config',
-                'config-income',
                 'set-income'
             ],
             group: 'income',
@@ -28,8 +26,8 @@ module.exports = class IncomeConfigCommand extends Command {
                             The cooldown time is in ms (1000 per second).`,
             format: '<cmd> [shorthand]',
             examples: [
-                'work',
-                'crime 100 500 10m 60% 200 1000'
+                'setincome work',
+                'setincome crime 100 500 10m 60% 200 1000'
             ],
             argsPromptLimit: 0,
             argsCount: 3,
@@ -49,7 +47,7 @@ module.exports = class IncomeConfigCommand extends Command {
     }
 
     async run(message, { cmd, fields }) {
-        let econManagerRole = guild.roles.cache.find(role => {
+        let econManagerRole = message.guild.roles.cache.find(role => {
             return role.name.toLowerCase() === 'economy manager'
         })
 
@@ -68,7 +66,7 @@ module.exports = class IncomeConfigCommand extends Command {
 
             return
         }
-        
+
         if (cmd.group.id !== 'income') {
             const incomeGroup = this.client.registry.groups.get('income')
             let incomeCommandList = []

@@ -41,6 +41,26 @@ module.exports = class IncomeConfigCommand extends Command {
     }
 
     async run(message, { cmd }) {
+        let econManagerRole = message.guild.roles.cache.find(role => {
+            return role.name.toLowerCase() === 'economy manager'
+        })
+
+        if(!econManagerRole) {
+            message.reply('Please create an \`Economy Manager\` role!')
+            return
+        }
+
+        if(!message.member.roles.cache.has(econManagerRole.id)) {
+            message.channel.send({ embed: util.embedify(
+                'RED',
+                message.author.username, 
+                message.author.displayAvatarURL(),
+                `You must have the <@&${econManagerRole.id}> role.`
+            )} )
+
+            return
+        }
+        
         if (cmd.group.id !== 'income') {
             const incomeGroup = this.client.registry.groups.get('income')
             let incomeCommandList = []
