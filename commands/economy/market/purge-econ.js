@@ -37,11 +37,10 @@ module.exports = class PurgeEconomyCommand extends Command {
         await mongo().then(async (mongoose) => {
             try {
                 if(content === 'inventory') {
-                    await inventorySch.findOneAndDelete({
-                        userID: author.id, 
+                    const inventories = await inventorySch.deleteMany({
                         guildID: guild.id
                     })
-                    message.channel.send(`Deleted ${author.username}'s inventory.`)
+                    message.reply(`Deleted all inventories. \`${inventories.n}\` removed.`)
                 } else if(content === 'market') {
                     let econManagerRole = guild.roles.cache.find(role => {
                         return role.name.toLowerCase() === 'economy manager'

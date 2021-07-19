@@ -5,7 +5,7 @@ const ms = require('ms')
 const config = require('../config.json')
 const mongo = require('./mongo')
 
-const economyBalSchema = require('./schemas/economy-bal-sch')
+const economySchema = require('./schemas/economy-sch')
 const guildSettingSchema = require('./schemas/guild-settings-sch')
 const incomeSchema = require('./schemas/income-sch')
 
@@ -389,7 +389,7 @@ module.exports.isSuccess = (properties) => {
  * @param {string} string - the string to be argified
  * @param {number} maxArgs - the number of arguments to be included in the array
  */
-module.exports.argify = (string, maxArgs = false) => {
+ module.exports.argify = (string, maxArgs = false) => {
     string = string.split(' ')
     if (+maxArgs) {
         while (string.length > +maxArgs) {
@@ -402,16 +402,20 @@ module.exports.argify = (string, maxArgs = false) => {
 /**
  * attempt to parse a value as a duration (time) using ms
  * @param {*} p - the value to parse
- * @returns {number|undefined} `ms(+p)|undefined` — parsed duration in ms or undefined
+ * @returns {Number|undefined} `ms(+p)|undefined` — parsed duration in ms or undefined
  */
-module.exports.parseDuration = (p) => +p ? +p : ms(p) ? ms(p) : undefined
+module.exports.parseDuration = (p) => {
+    +p ? +p : ms(p) ? ms(p) : undefined
+}
 
 /**
  * attempt to parse a value as a percentage
  * @param {*} p - the value to parse
- * @returns {number|undefined} `+p|undefined`
+ * @returns {Number|undefined} 
  */
-module.exports.parsePercentage = (p) => p.toString().endsWith('%') ? 0 <= +p.substr(0, p.length) <= 100 ? +p.substr(0, p.length) : undefined : +p ? 0 <= +p <= 1 ? +p * 100 : 0 <= +p <= 100 ? +p : undefined : undefined
+module.exports.parsePercentage = (p) => {
+    return parseFloat(p) / 100.0
+}
 
 /**
  * fix properties of an income command
@@ -503,8 +507,10 @@ module.exports.displayBal = async (message, guild = message.guild, user = messag
 }
 
 /**
- * @typedef {Object} balRank
- * @property {Number} balance
+ * @typedef {Object} econInfo
+ * @property {Number} wallet
+ * @property {Number} treasury
+ * @property {Number} networth
  * @property {Number} rank 
  */
 
@@ -513,70 +519,80 @@ module.exports.displayBal = async (message, guild = message.guild, user = messag
  * @param {string} guildID - Guild id.
  * @param {string} userID - User id.
  * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
- * @returns {Promise<balRank>} balance, rank
+ * @returns {Promise<econInfo>} wallet, treasury, networth, rank
  */
-module.exports.getBal = async (guildID, userID, closeConnection = true) => {
-    return await mongo().then(async (mongoose) => {
+module.exports.getEconInfo = async (guildID, userID, closeConnection = true) => {
+    let rank = 0, wallet = 0, treasury = 0, networth = 0
+    await mongo().then(async (mongoose) => {
         try {
-            const balances = await economyBalSchema.find({ guildID }).sort({ balance: -1 })
-            let rank = 0
-            let balance = 0
+            const balances = await economySchema.find({ guildID }).sort({ networth: -1 })
             if (balances.length) {
                 for (let rankIndex = 0; rankIndex < balances.length; rankIndex++) {
-                    if (balances[rankIndex].userID === userID) {
-                        rank = rankIndex + 1
-                        break
-                    }
+                    rank = balances[rankIndex].userID === userID ? rankIndex + 1 : rank++
                 }
+
                 if (balances[rank - 1]) {
-                    balance = balances[rank - 1].balance
-                } else {
-                    await new economyBalSchema({
-                        guildID,
-                        userID,
-                        balance
-                    }).save()
-                    rank = balances.length + 1
+                    wallet = balances[rank - 1].wallet
+                    treasury = balances[rank - 1].treasury
+                    networth = balances[rank - 1].networth
                 }
-            }
-            return balanceRank = {
-                balance,
-                rank
+            } else {
+                await new economySchema({
+                    guildID,
+                    userID,
+                    wallet, 
+                    treasury, 
+                    networth
+                }).save()
             }
         } finally {
-            if (closeConnection !== false) mongoose.connection.close()
+            if(closeConnection) mongoose.connection.close()
         }
     })
+
+    return econInfo = {
+        wallet, 
+        treasury, 
+        networth,
+        rank
+    }
 }
 
 /**
- * Changes a user's balance.
+ * Changes a user's cash.
  * @param {string} guildID - Guild id.
  * @param {string} userID - User id.
- * @param {Number} balance - The value to be added to the user's balance.
+ * @param {Number} amount - The value to be added to the user's cash.
  * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
+ * @returns {Number} Cash remaining in account.
  */
-module.exports.changeBal = async (guildID, userID, balance, closeConnection = true) => {
+module.exports.setEconInfo = async (guildID, userID, wallet, treasury, networth, closeConnection = true) => {
     return await mongo().then(async (mongoose) => {
         try {
-            const result = await economyBalSchema.findOneAndUpdate({
-                guildID,
-                userID,
+            
+            //init 
+            await this.getEconInfo(guildID, userID, false)
+
+            const result = await economySchema.findOneAndUpdate({
+                guildID, 
+                userID, 
           ***REMOVED*** {
                 guildID,
                 userID,
                 $inc: {
-                    balance
+                    wallet,
+                    treasury,
+                    networth 
                 }
           ***REMOVED*** {
                 upsert: true,
                 new: true
             })
 
-            balanceCache[`${guildID}`] = { [userID]: result.balance }
-            return result.balance
+            balanceCache[`${guildID}`] = { [userID]: result.networth }
+            return result.networth
         } finally {
-            if (closeConnection !== false) mongoose.connection.close()
+            if (closeConnection) mongoose.connection.close()
         }
     })
 }
@@ -602,7 +618,7 @@ module.exports.initPrefix = (client, closeConnection = true) => {
                         prefixCache[guild] = result.prefix
                     } else prefixCache[guild] = config.prefix // if no stored prefix, return the global default
                 } finally {
-                    if (closeConnection !== false) mongoose.connection.close()
+                    if (closeConnection) mongoose.connection.close()
                 }
             })
 
@@ -830,7 +846,7 @@ module.exports.getCommandStats = async (_id, type, returnUndefined = true, close
             properties = properties || inheritedProperties
             return properties
         } finally {
-            if (closeConnection !== false) {
+            if (closeConnection) {
                 mongoose.connection.close()
             }
         }
@@ -839,11 +855,11 @@ module.exports.getCommandStats = async (_id, type, returnUndefined = true, close
 
 /**
  * returns the user's properties of the specified command
- * @param {string} guildID - the id of the guild
- * @param {string} userID - the id of the user
- * @param {string} type - the command name
- * @param {boolean} returnUndefined - whether to omit undefined fields or return their default value. Default: true (return defaults)
- * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
+ * @param {String} guildID - the id of the guild
+ * @param {String} userID - the id of the user
+ * @param {String} type - the command name
+ * @param {Boolean} returnUndefined - whether to omit undefined fields or return their default value. Default: true (return defaults)
+ * @param {Boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  * @returns {uProperties} all properties of the user object's command field in db | merged properties or the inherited properties only. Unspecified/blank db values will be returned as default values if returnUndefined is true. Else, they will return undefined.
  */
 module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefined = true, closeConnection = true) => {
@@ -851,7 +867,7 @@ module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefin
     if (cached) return cached
     return await mongo().then(async (mongoose) => {
         try {
-            const result = await economyBalSchema.findOne({
+            const result = await economySchema.findOne({
                 guildID,
                 userID
             })
@@ -870,7 +886,7 @@ module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefin
             if (properties) uCommandStatsCache[guildID] = { [userID]: { [type]: properties } }
             return properties
         } finally {
-            if (closeConnection !== false) {
+            if (closeConnection) {
                 mongoose.connection.close()
             }
         }
@@ -882,7 +898,7 @@ module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefin
  * @param {string} guildID - the id of the guild
  * @param {string} userID - the id of the user
  * @param {string} type - the specific command
- * @param {object} properties - the object of properties for the corresponding object. Set as 'default' for default values. refer to the `commands` field of features/schemas/economy-bal-sch.js and its subfields for contents. All are optional.
+ * @param {object} properties - the object of properties for the corresponding object. Set as 'default' for default values. refer to the `commands` field of features/schemas/economy-sch.js and its subfields for contents. All are optional.
  * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  */
 module.exports.setUserCommandStats = async (guildID, userID, type, properties, closeConnection = true) => {
@@ -893,7 +909,11 @@ module.exports.setUserCommandStats = async (guildID, userID, type, properties, c
 
     return await mongo().then(async (mongoose) => {
         try {
-            await economyBalSchema.findOneAndUpdate({
+            
+            //init
+            await this.getEconInfo(guildID, userID, false)
+
+            await economySchema.findOneAndUpdate({
                 guildID,
                 userID
           ***REMOVED*** {

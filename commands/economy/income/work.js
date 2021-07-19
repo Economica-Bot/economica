@@ -30,7 +30,7 @@ module.exports = class WorkCommand extends Command {
                     `You worked and earned ${currencySymbol}${amount.toLocaleString()}!`
                 )
             })
-            await util.changeBal(message.guild.id, message.author.id, amount, false)
+            await util.setEconInfo(message.guild.id, message.author.id, amount, 0, amount, false)
             await util.setUserCommandStats(message.guild.id, message.author.id, 'work', { timestamp: util.now() })
         } catch(err) {
             console.log(err)

@@ -77,7 +77,7 @@ module.exports = class SellItemCommand extends Command {
             return
         }        
 
-        util.changeBal(guild.id, author.id, price)
+        util.setEconInfo(guild.id, author.id, price, 0, price)
         message.channel.send({ embed:
             util.embedify(
                 'GREEN',

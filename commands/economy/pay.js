@@ -9,6 +9,7 @@ module.exports = class PayCommand extends Command {
             memberName: 'pay',
             guildOnly: true, 
             description: 'Pay server currency to other users.',
+            details: 'Amount must be in your cash balance.',
             format: '<@mention | id | name>',
             examples: [
                 'pay @Adrastopoulos#2753',
@@ -23,7 +24,7 @@ module.exports = class PayCommand extends Command {
                 {
                     key: 'amount',
                     prompt: 'Please enter an amount more than zero you wish to pay the user.',
-                    type: 'float',
+                    type: 'integer',
                     validate: number => number > 0
                 }
             ]
@@ -39,19 +40,19 @@ module.exports = class PayCommand extends Command {
 
         user = guild.members.cache.get(id).user
         const cSymbol = await util.getCurrencySymbol(guild.id, false)
-        const { balance } = await util.getBal(guild.id, author.id)
-        if(balance < amount) {
+        const { wallet } = await util.getEconInfo(guild.id, author.id)
+        if(wallet < amount) {
             message.channel.send({ embed: util.embedify(
                 'RED',
                 message.author.username,
                 message.author.displayAvatarURL(),
-                `Insufficient balance: ${cSymbol}${balance}`
+                `Insufficient wallet: ${cSymbol}${wallet}`
             ) })
             return
         }
 
-        await util.changeBal(guild.id, author.id, (-amount))
-        await util.changeBal(guild.id, user.id, amount)
+        await util.setEconInfo(guild.id, author.id, -amount, 0, -amount, false)
+        await util.setEconInfo(guild.id, user.id, amount, 0, amount)
         message.channel.send({ embed: util.embedify(
             'GREEN',
             message.author.username, 

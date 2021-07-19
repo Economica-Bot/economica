@@ -41,20 +41,21 @@ module.exports = class ListingCommand extends Command {
 
     async run(message, { param, args }) {
         const { guild, author } = message
-        let id
-        if(args) {
-            id = await util.getUserID(message, args)    
-            if (id === 'noMemberFound') {
-                return 
-            }
-        } else {
-            id = author.id
-        }
-
-        const user = guild.members.cache.get(id).user
         const currencySymbol = await util.getCurrencySymbol(guild.id)
         let exit = false
         if(param === 'view') {
+            let id
+            if(args) {
+                id = await util.getUserID(message, args)    
+                if (id === 'noMemberFound') {
+                    return 
+                }
+            } else {
+                id = author.id
+            }
+
+            const user = guild.members.cache.get(id).user
+
             let listingsEmbed = util.embedify(
                 'BLURPLE',
                 user.tag, 
@@ -95,6 +96,11 @@ module.exports = class ListingCommand extends Command {
             item = args[0]
             if(parseInt(args[1])) {
                 price = parseInt(args[1])
+                
+                if(price < 1) {
+                    message.reply(`Invalid price: ${currencySymbol}${price}.`)
+                    return
+                }
                 description = args[2] ? args.slice(2).join(' ') : 'No description'
             } else {
                 message.channel.send({ embed: util.embedify(

@@ -46,14 +46,31 @@ module.exports = class BalanceCommand extends Command {
 
         user = guild.members.cache.get(id).user
         const cSymbol = await util.getCurrencySymbol(guild.id, false)
-        const { balance, rank } = await util.getBal(guild.id, user.id)
-        message.channel.send({ embed: util.embedify(
+        const { wallet, treasury, networth, rank } = await util.getEconInfo(guild.id, id)
+        const balEmbed =  util.embedify(
             'GOLD',
             user.username, 
             user.avatarURL(),
-            `Balance: ${cSymbol}${balance.toLocaleString()}`,
+            '',
             `🏆 Rank ${rank}`
-            )
-        })
+            ).addFields([
+                {
+                    name: 'Wallet',
+                    value: `${cSymbol}${wallet.toLocaleString()}`,
+                    inline: true
+              ***REMOVED***
+                {
+                    name: 'Treasury',
+                    value: `${cSymbol}${treasury.toLocaleString()}`,
+                    inline: true
+              ***REMOVED***
+                {
+                    name: 'Net Worth',
+                    value: `${cSymbol}${networth.toLocaleString()}`,
+                    inline: true
+                }
+            ])
+        
+        message.channel.send({ embed: balEmbed })
     }
 }

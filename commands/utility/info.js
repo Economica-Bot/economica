@@ -10,6 +10,9 @@ module.exports = class InfoCommand extends Command {
             guildOnly: false, 
             memberName: 'information',
             description: 'Send an embed about Economica in a specified channel.',
+            userPermissions: [
+                'ADMINISTRATOR'
+            ],
             args: [
                 {
                     key: 'group',

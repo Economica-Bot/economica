@@ -31,7 +31,7 @@ module.exports = class CrimeCommand extends Command {
                     `You were caught commiting a crime and fined ${cSymbol}${fineAmount.toLocaleString()}`
                 )
             })
-            await util.changeBal(message.guild.id, message.author.id, fineAmount * -1, false) // subtract fine from bal
+            await util.setEconInfo(message.guild.id, message.author.id, -fineAmount, 0, -fineAmount, false) // subtract fine from wallet
             return await util.setUserCommandStats(message.guild.id, message.author.id, 'crime', { timestamp: util.now() }, false) // if not successful, still reset the timestamp before ending the command
         }
         const amount = util.intInRange(min, max)
@@ -44,6 +44,6 @@ module.exports = class CrimeCommand extends Command {
             )
         })
         await util.setUserCommandStats(message.guild.id, message.author.id, 'crime', { timestamp: util.now() }, false) // reset timestamp
-        await util.changeBal(message.guild.id, message.author.id, amount) // +close mongo connection
+        await util.setEconInfo(message.guild.id, message.author.id, amount, 0, amount) // +close mongo connection
     }
 }

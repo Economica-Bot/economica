@@ -4,6 +4,7 @@ const marketItemSchema = require('../../../features/schemas/market-item-sch')
 const util = require('../../../features/util')
 const { oneLine } = require('common-tags')
 const inventorySchema = require('../../../features/schemas/inventory-sch')
+const economySch = require('../../../features/schemas/economy-sch')
 
 module.exports = class BuyItemCommand extends Command {
     constructor(client) {
@@ -63,6 +64,19 @@ module.exports = class BuyItemCommand extends Command {
                 price = listing.price
                 description = listing.description
 
+                const econInfo = await util.getEconInfo(guild.id, author.id, false)
+                if(econInfo.wallet < price) {
+                    message.channel.send({ embed: util.embedify(
+                        'RED',
+                        message.author.username, 
+                        message.author.displayAvatarURL(),
+                        `Insufficient funds!\nYour wallet: ${currencySymbol}${econInfo.wallet} | Price of \`${item}\`: ${currencySymbol}${price} `
+                    ) })
+                    exit = true
+                    mongoose.connection.close()
+                    return
+                }
+
                 await inventorySchema.findOneAndUpdate({ 
                     userID: author.id, 
                     guildID: guild.id 
@@ -88,7 +102,7 @@ module.exports = class BuyItemCommand extends Command {
         if(exit) {
             return
         }
-        util.changeBal(guild.id, author.id, (-price) )
+        util.setEconInfo(guild.id, author.id, -price, 0, -price)
         message.channel.send({ embed: util.embedify(
             'GREEN',
             message.author.username, 

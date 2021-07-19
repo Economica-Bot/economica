@@ -17,11 +17,13 @@ commandParams = {
     timestamp: { type: Number}
 }
 
-const economyBalSchema = mongoose.Schema(
+const econSchema = mongoose.Schema(
     {
         guildID: reqString,
         userID: reqString,
-        balance: reqNumber,
+        wallet: reqNumber,
+        treasury: reqNumber,
+        networth: reqNumber, 
         commands: {
             work: commandParams,
             beg: commandParams,
@@ -30,4 +32,4 @@ const economyBalSchema = mongoose.Schema(
     }
 )
 
-module.exports = mongoose.model('Economy', economyBalSchema)
+module.exports = mongoose.model('Economy', econSchema)

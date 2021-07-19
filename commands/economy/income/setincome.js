@@ -24,7 +24,7 @@ module.exports = class IncomeConfigCommand extends Command {
                             The specified income command will return a value between the minimum and 
                             maximum parameters - these values must be nonnegative. 
                             The cooldown time is in ms (1000 per second).`,
-            format: '<cmd> [shorthand]',
+            format: '<cmd> [fields...]',
             examples: [
                 'setincome work',
                 'setincome crime 100 500 10m 60% 200 1000'
@@ -36,11 +36,12 @@ module.exports = class IncomeConfigCommand extends Command {
                     key: 'cmd',
                     prompt: 'Please specify the desired income command.',
                     type: 'command'
-              ***REMOVED*** {
+              ***REMOVED*** 
+                {
                     key: 'fields',
                     prompt: 'Please specify the fields',
                     type: 'string',
-                    default: 'all'
+                    default: ''
                 }
             ]
         })
@@ -92,67 +93,60 @@ module.exports = class IncomeConfigCommand extends Command {
         }
 
         let dbProperties = await util.getCommandStats(message.guild.id, cmd.name, true, false) // properties from db
+        console.log(dbProperties)
         const properties = Object.entries(dbProperties) // same values as the variable you were using @Adrastopoulos
+        console.log(properties)
         const cSymbol = await util.getCurrencySymbol(message.guild.id, false)
 
-        try {
-            if (fields !== 'all') {
-                let c = 0
-                const tempFields = fields // retain original untrimmed fields
-                fields = util.argify(fields, properties.length)
+        if (fields) {
+            let c = 0
+            const tempFields = fields // retain original untrimmed fields
+            fields = util.argify(fields, properties.length)
 
-                if (fields.length !== Object.keys(config.income[cmd.name]).length) { // ensure the correct number of fields were provided
-                    const dispProperties = Object.keys(config.income[cmd.name])
-                    return util.errorEmbed(message, `You've included an incorrect number of fields (\`${util.argify(tempFields).length}\`).\nCorrect format: \`${cmd.name} [${dispProperties.join('|skip] [')}|skip]\``, this.name)
-                }
-
-                console.log('fields', fields)
-                for (let f in fields) { // loop thru all fields and validate them
-                    console.log(fields[f])
-                    f = fields[f]
-                    const tempf = f
-                    if (f !== 'skip') {
-                        if (['min', 'max', 'minFine', 'maxFine'].includes(Object.keys(dbProperties)[c])) {
-                            f = parseInt(f)
-                            if (isNaN(tempf)) return message.reply(`\`${tempf}\` is invalid. \`${properties[c][0]}\` must be a number!`)
-                        } else if (['cooldown'].includes(Object.keys(dbProperties)[c])) {
-                            f = util.parseDuration(f)
-                            if (!f) return message.reply(`\`${tempf}\` is invalid. \`${properties[c][0]}\` must be a number or duration!`)
-                        } else if (['chance'].includes(Object.keys(dbProperties)[c])) {
-                            f = util.parsePercentage(f)
-                            if (!f) return message.reply(`\`${tempf}\` is invalid. \`${properties[c][0]}\` must be a number or percentage!`)
-                        } else {
-                            return message.reply(`Something went wrong :bug: There doesn't seem to be a property named \`${properties[c][0]}\`. Please contact us here: ${config.discord}`)
-                        }
-                    } else f = dbProperties[properties[c][0]]
-                    dbProperties[properties[c][0]] = f
-                    console.log(dbProperties)
-                    c++
-                }
-
-                delete dbProperties['$init'] // destroy this random property. Easier than ignoring it in embed by loop
-
-                dbProperties = util.fixIncome(dbProperties)
-
-                await util.setCommandStats(message.guild.id, cmd.name, util.trimObj(dbProperties, [undefined, null]), true)
-
-                dbProperties = util.beautifyIncome(dbProperties, cSymbol)
-
-                const incomeEmbed = util.embedify(
-                    'GREEN',
-                    `Updated ${cmd.name}`,
-                    this.client.user.displayAvatarURL()
-                )
-
-                for (const property in dbProperties) {
-                    incomeEmbed.addField(`${property}`, `${dbProperties[property]}`, true)
-                }
-
-                return message.channel.send({ embed: incomeEmbed })
+            if (fields.length !== Object.keys(config.income[cmd.name]).length) { // ensure the correct number of fields were provided
+                const dispProperties = Object.keys(config.income[cmd.name])
+                return util.errorEmbed(message, `You've included an incorrect number of fields (\`${util.argify(tempFields).length}\`).\nCorrect format: \`${cmd.name} [${dispProperties.join('|skip] [')}|skip]\``, this.name)
             }
-        } catch (e) {
-            console.log(e)
-            return message.reply('Something went wrong :bug:')
+
+            console.log('fields', fields)
+            for (let f in fields) { // loop thru all fields and validate them
+                f = fields[f]
+                const tempf = f
+                if (f !== 'skip') {
+                    if (['min', 'max', 'minFine', 'maxFine'].includes(Object.keys(dbProperties)[c])) {
+                        f = parseInt(f)
+                        if (isNaN(tempf)) return message.reply(`\`${tempf}\` is invalid. \`${properties[c][0]}\` must be a number!`)
+                    } else if (['cooldown'].includes(Object.keys(dbProperties)[c])) {
+                        //f = util.parseDuration(f)
+                        f = parseInt(f) || Date.parse(f)
+                        if (!f) return message.reply(`\`${tempf}\` is invalid. \`${properties[c][0]}\` must be a number or duration!`)
+                    } else if (['chance'].includes(Object.keys(dbProperties)[c])) {
+                        //f = util.parsePercentage(f)
+                        f = parseFloat(f)
+                        if (!f) return message.reply(`\`${tempf}\` is invalid. \`${properties[c][0]}\` must be a number or percentage!`)
+                    } else {
+                        return message.reply(`Something went wrong :bug: There doesn't seem to be a property named \`${properties[c][0]}\`. Please contact us here: ${config.discord}`)
+                    }
+                } 
+                c++
+            }
+
+            delete dbProperties['$init'] // destroy this random property. Easier than ignoring it in embed by loop
+            dbProperties = util.fixIncome(dbProperties)
+            await util.setCommandStats(message.guild.id, cmd.name, util.trimObj(dbProperties, [undefined, null]))
+            dbProperties = util.beautifyIncome(dbProperties, cSymbol)
+            const incomeEmbed = util.embedify(
+                'GREEN',
+                `Updated ${cmd.name}`,
+                this.client.user.displayAvatarURL()
+            )
+
+            for (const property in dbProperties) {
+                incomeEmbed.addField(`${property}`, `${dbProperties[property]}`, true)
+            }
+
+            message.channel.send({ embed: incomeEmbed })
+            return
         }
 
         const filter = msg => msg.author.id === message.author.id
@@ -167,6 +161,7 @@ module.exports = class IncomeConfigCommand extends Command {
             this.client.user.displayAvatarURL(),
             'Current properties:'
         )
+
         for (const property of properties) {
             if (property[0] !== '$init') {
                 configEmbed.addField(
@@ -176,28 +171,29 @@ module.exports = class IncomeConfigCommand extends Command {
                 )
             }
         }
+
         message.channel.send({ embed: configEmbed })
         message.channel.send(`Please define \`${properties[counter++][0]}\`. Type 'skip' to skip.`)
         collector.on('collect', msg => {
             const tempmsg = msg.content
-            if (msg.content !== 'skip') {
-                if (msg.content !== 'skip') {
-                    if (['min', 'max', 'minFine', 'maxFine'].includes(Object.keys(dbProperties)[counter - 1])) {
-                        msg.content = parseInt(msg.content)
-                        if (isNaN(tempmsg)) return message.reply(`\`${tempmsg}\` is invalid. \`${properties[counter - 1][0]}\` must be a number!`)
-                    } else if (['cooldown'].includes(Object.keys(dbProperties)[counter - 1])) {
-                        msg.content = util.parseDuration(msg.content)
-                        if (!msg.content) return message.reply(`\`${tempmsg}\` is invalid. \`${properties[counter - 1][0]}\` must be a number or duration!`)
-                    } else if (['chance'].includes(Object.keys(dbProperties)[counter - 1])) {
-                        msg.content = util.parsePercentage(msg.content)
-                        if (!msg.content) return message.reply(`\`${tempmsg}\` is invalid. \`${properties[counter - 1][0]}\` must be a number or percentage!`)
-                    } else {
-                        return message.reply(`Something went wrong :bug: There doesn't seem to be a property named \`${properties[counter - 1][0]}\`. Please contact us here: ${config.discord}`)
-                    }
-                } else msg.content = dbProperties[properties[counter - 1][0]]
+            if (msg.content === 'skip') {
+                msg.content = dbProperties[properties[counter - 1][0]]
                 dbProperties[properties[counter - 1][0]] = msg.content
-                console.log(dbProperties)
+                console.log(dbProperties)                
+            } else if (['min', 'max', 'minFine', 'maxFine'].includes(Object.keys(dbProperties)[counter - 1])) {
+                msg.content = parseInt(msg.content)
+                if (isNaN(tempmsg)) return message.reply(`\`${tempmsg}\` is invalid. \`${properties[counter - 1][0]}\` must be a number!`)
+            } else if (['cooldown'].includes(Object.keys(dbProperties)[counter - 1])) {
+                msg.content = parseInt(msg.content) || Date.parse(msg.content)
+                if (!msg.content) return message.reply(`\`${tempmsg}\` is invalid. \`${properties[counter - 1][0]}\` must be a number or duration!`)
+            } else if (['chance'].includes(Object.keys(dbProperties)[counter - 1])) {
+                //msg.content = util.parsePercentage(msg.content) 
+                msg.content = parseFloat(msg.content) / 100.0
+                if (!msg.content) return message.reply(`\`${tempmsg}\` is invalid. \`${properties[counter - 1][0]}\` must be a number or percentage!`)
+            } else {
+                return message.reply(`Something went wrong :bug: There doesn't seem to be a property named \`${properties[counter - 1][0]}\`. Please contact us here: ${config.discord}`)
             }
+
             if (counter < Object.keys(config.income[cmd.name]).length) {
                 msg.channel.send(`Please define \`${properties[counter++][0]}\`. Type 'skip' to skip.`)
             }
