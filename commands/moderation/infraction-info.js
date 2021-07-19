@@ -30,9 +30,6 @@ module.exports = class InfractionInfoCommand extends Command {
                 'infractions @bob',
                 'infractions 796906750569611294'
             ],
-            clientPermissions: [
-                'ADMINISTRATOR'
-            ],
             userPermissions: [
                 'ADMINISTRATOR'
             ],
