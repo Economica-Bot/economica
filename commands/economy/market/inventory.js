@@ -8,6 +8,9 @@ module.exports = class InventoryCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'inventory',
+            aliases: [
+                'inv'
+            ],
             group: 'market',
             memberName: 'inventory',
             guildOnly: true, 

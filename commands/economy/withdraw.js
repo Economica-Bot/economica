@@ -48,7 +48,7 @@ module.exports = class DepositCommand extends Command {
                         'GREEN',
                         message.author.username, 
                         message.author.displayAvatarURL(),
-                        `Retrieved ${cSymbol}${amount} from the treasury.`
+                        `Retrieved ${cSymbol}${amount.toLocaleString()} from the treasury.`
                     )})
                 }
             } else if(amount === 'all') {

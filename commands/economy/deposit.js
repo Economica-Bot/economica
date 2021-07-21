@@ -49,7 +49,7 @@ module.exports = class DepositCommand extends Command {
                         'GREEN',
                         message.author.username, 
                         message.author.displayAvatarURL(),
-                        `Deposited ${cSymbol}${amount} into your treasury.`
+                        `Deposited ${cSymbol}${amount.toLocaleString()} to the treasury.`
                     )})
                 }
             } else if(amount === 'all') {
@@ -61,13 +61,13 @@ module.exports = class DepositCommand extends Command {
                         'GREEN',
                         message.author.username, 
                         message.author.displayAvatarURL(),
-                        `Deposited ${cSymbol}${wallet.toLocaleString()} into your treasury.`
+                        `Deposited ${cSymbol}${wallet.toLocaleString()} to the treasury.`
                     )})
                 }
             } else {
                 message.reply(`Invalid amount! Must be \`${this.name} ${this.format}\``)
             }
-
+            
             mongoose.connection.close()
         })
     }
