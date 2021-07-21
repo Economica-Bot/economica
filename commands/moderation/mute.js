@@ -89,6 +89,7 @@ module.exports = class MuteCommand extends Command {
 
             if (activeMutes.length) {
                 message.reply(`${member} is already muted.`)
+                mongoose.connection.close()
                 return 
             }
 
@@ -101,15 +102,28 @@ module.exports = class MuteCommand extends Command {
                 return 
             }
 
-            let result = ''
+            let result
             try {
-                await member.send(`You have been muted in **${guild}** until **${expires}** for \`${reason}\``)
-            } catch {
-                result += `Could not dm ${member.user.tag}.`
+                await member.send({ embed: util.embedify(
+                    'RED',
+                    guild.name, 
+                    guild.iconURL(),
+                    `You have been **muted** ${duration ? `for ${ms(duration)}` : 'permanently.'}\nReason: \`${reason}\``
+                ) })
+            } catch(err) {
+                result = `Could not dm ${member.user.tag}.\n${err}`
             }
 
             member.roles.add(mutedRole)
-            message.channel.send(`Muted **${member.user.tag}** for \`${reason}\`. ${expires ? `They will be unmuted on ${expires.toLocaleString()}` : ''}`)
+            message.channel.send({ embed: util.embedify(
+                'GREEN',
+                member.user.tag, 
+                member.user.displayAvatarURL(),
+                `**Muted** ${duration ? `for ${ms(duration)}` : 'permanently.'}\nReason: \`${reason}\``,
+                result
+            ) })
+
+            //message.channel.send(`Muted **${member.user.tag}** for \`${reason}\`. ${expires ? `They will be unmuted on ${expires.toLocaleString()}` : ''}`)
             try {
                 await new muteSchema({
                     guildID: guild.id,

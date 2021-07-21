@@ -9,15 +9,11 @@ module.exports = client => {
             expires: {
                 $lt: now
           ***REMOVED***
-            current: true
+            active: true
         }
 
         await mongo().then(async (mongoose) => {
-            try {
-                var results = await muteSchema.find(conditional)
-            } catch(err) {
-                console.error(err)
-            }
+            const results = await muteSchema.find(conditional)
 
             //Unmute currently muted users whose mute has expired 
             if (results && results.length) {
@@ -33,7 +29,7 @@ module.exports = client => {
                         member.roles.remove(mutedRole)
                         console.log(`Unmuted ${userTag} in db for server ${guild}`)
                         await muteSchema.updateMany(conditional, {
-                            current: false,
+                            active: false,
                         })
                     } finally {
                         mongoose.connection.close()
@@ -54,7 +50,7 @@ module.exports = client => {
         const currentMute = await muteSchema.findOne({
             guildID: guild.id,
             userID: id,
-            current: true
+            active: true
         })
 
         if (currentMute) {
