@@ -2,9 +2,12 @@ const { Command } = require('discord.js-commando')
 const Discord = require('discord.js')
 
 const util = require('../../features/util')
+const { oneLine } = require('common-tags')
 
 const mongo = require('../../features/mongo')
 const econSchema = require('../../features/schemas/economy-sch')
+
+
 
 module.exports = class LeaderBoardCommand extends Command {
     constructor(client) {
@@ -17,11 +20,33 @@ module.exports = class LeaderBoardCommand extends Command {
             group: 'economy',
             memberName: 'leaderboard',
             guildOnly: true,
-            description: 'View top user balances',
+            description: 'View top users in the economy.',
+            details: oneLine`The default type is networth. 
+                            Valid types are wallet, treasury, and networth.`,
+            format: '[wallet | teasury | networth]',
+            args: [
+                {
+                    key: 'type',
+                    prompt: 'Please enter the leaderboard type.',
+                    type: 'string',
+                    default: 'networth'
+                }
+            ]
         })
     }
 
-    async run(message) {
+    async run(message, { type }) {
+        if(!['wallet', 'treasury', 'networth'].includes(type)) {
+            message.channel.send({ embed: util.embedify(
+                'RED',
+                message.author.username, 
+                message.author.displayAvatarURL(),
+                `Invalid argument: \`${type}\``,
+                `Format: \`${this.format}\``
+            ) })
+            return
+        }
+
         await mongo().then(async (mongoose) => {
             try {
                 const balances = await econSchema
@@ -29,7 +54,7 @@ module.exports = class LeaderBoardCommand extends Command {
                         guildID: message.guild.id
                     })
                     .sort({
-                        networth: -1
+                        [type]: -1
                     })
 
                 const currencySymbol = await util.getCurrencySymbol(message.guild.id)
@@ -47,7 +72,7 @@ module.exports = class LeaderBoardCommand extends Command {
                         //if(balCounter + 1 >= balances.length) break
                         embeds.push(
                             new Discord.MessageEmbed()
-                                .setAuthor(`${message.guild}'s Leaderboard`, `${message.guild.iconURL()}`)
+                                .setAuthor(`${message.guild}'s ${type[0].toUpperCase() + type.substring(1)} Leaderboard`, `${message.guild.iconURL()}`)
                                 .setColor(111111)
                                 .setFooter(`Page ${embeds.length + 1} / ${pageCount}`)
                         )
@@ -55,7 +80,7 @@ module.exports = class LeaderBoardCommand extends Command {
                         // Fill the length of each page.
                         for(let i = 0; i < entries; i++) {
                             try {
-                                embeds[embeds.length-1].addField(`#${rank++} ${message.guild.members.cache.get(balances[balCounter].userID).user.tag}`, `${currencySymbol}${(balances[balCounter++].networth).toLocaleString()}`)
+                                embeds[embeds.length-1].addField(`#${rank++} ${message.guild.members.cache.get(balances[balCounter].userID).user.tag}`, `${currencySymbol}${balances[balCounter++][type]}`)
                             } catch (err) {
                                 balCounter++
                                 embeds[0].setDescription(`\`0\` users on leaderboard.`)
