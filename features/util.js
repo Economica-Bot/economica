@@ -19,28 +19,27 @@ let uCommandStatsCache = {} // cache[guildID][userID][type]
  * Returns the id of the message guild member.
  * @param {Message} message - The command message.
  * @param {String} query - Used to identify user(s). May be a mention, id, or query. Case INsensitive.
+ * @param {Boolean} returnMsg - Return not found
  */
-module.exports.getUserID = async (message, query) => {
-    return new Promise((resolve, reject) => {
-        let id = ''
-        const { guild } = message
+module.exports.getUserID = async (message, query, returnMsg = true) => {
+    let id = ''
+    const { guild } = message
 
-        //Mention
-        if (message.mentions.users.first()) {
-            resolve(id = message.mentions.users.first().id)
-            return
-        }
+    //Mention
+    if (message.mentions.users.first()) {
+        return id = message.mentions.users.first().id
+    }
 
-        //ID
-        if (guild.members.cache.get(query)) {
-            resolve(query)
-            return
-        } 
+    //ID
+    if (guild.members.cache.get(query)) {
+        return query
+    } 
 
-        //Query
-        query = query.toLowerCase()
-        const selectedMembers = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(query) || m.displayName.toLowerCase().includes(query))
-        if (selectedMembers.size == 0) {
+    //Query
+    query = query.toLowerCase()
+    const selectedMembers = guild.members.cache.filter(m => m.user.username.toLowerCase().includes(query) || m.displayName.toLowerCase().includes(query))
+    if (selectedMembers.size == 0) {
+        if(returnMsg) {
             message.channel.send({
                 embed: this.embedify(
                     'RED',
@@ -50,18 +49,19 @@ module.exports.getUserID = async (message, query) => {
                     'Try using a mention or an id.'
                 )
             })
-            resolve('noMemberFound')
-            return
-        } else if (selectedMembers.size == 1) {
-            resolve(selectedMembers.values().next().value.user.id)
-        } else if (selectedMembers.size > 1 && selectedMembers.size <= 10) {
-            let result = []
-            selectedMembers.forEach(m => result.push(m.user.id))
-            this.memberSelectEmbed(message, result, 10000).then(member => {
-                resolve(member.user.id)
-                return
-            })
-        } else {
+        }
+
+        return 'noMemberFound'
+    } else if (selectedMembers.size == 1) {
+        return selectedMembers.values().next().value.user.id
+    } else if (selectedMembers.size > 1 && selectedMembers.size <= 10) {
+        let result = []
+        selectedMembers.forEach(m => result.push(m.user.id))
+        this.memberSelectEmbed(message, result, 10000).then(member => {
+            return member.user.id
+        })
+    } else {
+        if(returnMsg) {
             message.channel.send({
                 embed: this.embedify(
                     'RED',
@@ -71,10 +71,10 @@ module.exports.getUserID = async (message, query) => {
                     'Try being less broad with your search.'
                 )
             })
-            resolve('noMemberFound')
-            return
-        } 
-    })
+        }
+    
+        return 'noMemberFound'
+    } 
 }
 
 module.exports.findUser = (message, user) => {
@@ -98,7 +98,7 @@ module.exports.memberSelectEmbed = async (message, members, time) => {
     return new Promise((resolve, reject) => {
         let list = ''
         members.forEach(u => {
-            list = `${list}\`${members.indexOf(u) + 1}\` - <@!${u}>\n`
+            list += `\`${members.indexOf(u) + 1}\` - <@!${u}>\n`
         })
 
         message.channel.send({
@@ -521,34 +521,31 @@ module.exports.displayBal = async (message, guild = message.guild, user = messag
  * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  * @returns {Promise<econInfo>} wallet, treasury, networth, rank
  */
-module.exports.getEconInfo = async (guildID, userID, closeConnection = true) => {
-    let rank = 0, wallet = 0, treasury = 0, networth = 0
-    await mongo().then(async (mongoose) => {
-        try {
-            const balances = await economySchema.find({ guildID }).sort({ networth: -1 })
-            if (balances.length) {
-                for (let rankIndex = 0; rankIndex < balances.length; rankIndex++) {
-                    rank = balances[rankIndex].userID === userID ? rankIndex + 1 : rank++
-                }
-
-                if (balances[rank - 1]) {
-                    wallet = balances[rank - 1].wallet
-                    treasury = balances[rank - 1].treasury
-                    networth = balances[rank - 1].networth
-                }
-            } else {
-                await new economySchema({
-                    guildID,
-                    userID,
-                    wallet, 
-                    treasury, 
-                    networth
-                }).save()
-            }
-        } finally {
-            if(closeConnection) mongoose.connection.close()
+module.exports.getEconInfo = async (guildID, userID) => {
+    let rank = 0, wallet = 0, treasury = 0, networth = 0, found = false
+    const balances = await economySchema.find({ guildID }).sort({ networth: -1 })
+    if (balances.length) {
+        for (let rankIndex = 0; rankIndex < balances.length; rankIndex++) {
+            rank = balances[rankIndex].userID === userID ? rankIndex + 1 : rank++
         }
-    })
+
+        if (balances[rank - 1]) {
+            found = true
+            wallet = balances[rank - 1].wallet
+            treasury = balances[rank - 1].treasury
+            networth = balances[rank - 1].networth
+        }
+    }
+
+    if(!found) {
+        await new economySchema({
+            guildID,
+            userID,
+            wallet, 
+            treasury, 
+            networth
+        }).save()
+    }
 
     return econInfo = {
         wallet, 
@@ -567,34 +564,25 @@ module.exports.getEconInfo = async (guildID, userID, closeConnection = true) => 
  * @returns {Number} Cash remaining in account.
  */
 module.exports.setEconInfo = async (guildID, userID, wallet, treasury, networth, closeConnection = true) => {
-    return await mongo().then(async (mongoose) => {
-        try {
-            
-            //init 
-            await this.getEconInfo(guildID, userID, false)
-
-            const result = await economySchema.findOneAndUpdate({
-                guildID, 
-                userID, 
-          ***REMOVED*** {
-                guildID,
-                userID,
-                $inc: {
-                    wallet,
-                    treasury,
-                    networth 
-                }
-          ***REMOVED*** {
-                upsert: true,
-                new: true
-            })
-
-            balanceCache[`${guildID}`] = { [userID]: result.networth }
-            return result.networth
-        } finally {
-            if (closeConnection) mongoose.connection.close()
+    await this.getEconInfo(guildID, userID)
+    const result = await economySchema.findOneAndUpdate({
+        guildID, 
+        userID, 
+  ***REMOVED*** {
+        guildID,
+        userID,
+        $inc: {
+            wallet,
+            treasury,
+            networth 
         }
+  ***REMOVED*** {
+        upsert: true,
+        new: true
     })
+
+    balanceCache[`${guildID}`] = { [userID]: result.networth }
+    return result.networth
 }
 
 /**
@@ -602,25 +590,19 @@ module.exports.setEconInfo = async (guildID, userID, wallet, treasury, networth,
  * @param {Client} client - The bot client.
  */
 
-module.exports.initPrefix = (client, closeConnection = true) => {
+module.exports.initPrefix = (client) => {
     const initPrefix = async () => {
 
         //prefix
         const guilds = client.guilds.cache.map(guild => guild.id)
         for (const guild of guilds) {
-            await mongo().then(async (mongoose) => {
-                try {
-                    const result = await guildSettingSchema.findOne({
-                        _id: guild,
-                    })
-
-                    if (result?.prefix) {
-                        prefixCache[guild] = result.prefix
-                    } else prefixCache[guild] = config.prefix // if no stored prefix, return the global default
-                } finally {
-                    if (closeConnection) mongoose.connection.close()
-                }
+            const result = await guildSettingSchema.findOne({
+                _id: guild,
             })
+
+            if (result?.prefix) {
+                prefixCache[guild] = result.prefix
+            } else prefixCache[guild] = config.prefix // if no stored prefix, return the global default
 
             console.log(`Guild: ${guild} \nPrefix: ${client.guilds.cache.get(guild).commandPrefix = prefixCache[guild]}`)
         }
@@ -634,30 +616,23 @@ module.exports.initPrefix = (client, closeConnection = true) => {
  * @param {string} guildID - Guild id.
  * @returns {string} prefix 
  */
-module.exports.getPrefix = async (guildID, closeConnection = true) => {
-    const cached = prefixCache[guildID]
-    if (cached) {
-        return cached
-    } else await mongo().then(async (mongoose) => {
-        try {
-            const result = await guildSettingSchema.findOne({
-                _id: guildID,
-            })
+module.exports.getPrefix = async (guildID) => {
+    if (prefixCache[guildID]) {
+        return prefixCache[guildID]
+    } else {
+        const result = await guildSettingSchema.findOne({
+            _id: guildID,
+        })
 
-            let prefix
-            if (result?.prefix) {
-                prefix = result.prefix
-            } else {
-                prefix = config.prefix //def
-            }
-
-            prefixCache[guildID] = prefix
-        } catch (err) {
-            console.error(err)
-        } finally {
-            if (closeConnection !== false) mongoose.connection.close()
+        let prefix
+        if (result?.prefix) {
+            prefix = result.prefix
+        } else {
+            prefix = config.prefix //def
         }
-    })
+
+        prefixCache[guildID] = prefix
+    }
 
     return prefixCache[guildID]
 }
@@ -668,7 +643,7 @@ module.exports.getPrefix = async (guildID, closeConnection = true) => {
  * @param {string} prefix - New prefix.
  * @returns {string} New prefix
  */
-module.exports.setPrefix = async (message, prefix, closeConnection = true) => {
+module.exports.setPrefix = async (message, prefix) => {
     const guildID = message.guild.id
     if (prefix.toLowerCase() === 'default') {
         message.guild.commandPrefix = prefix = config.prefix
@@ -676,20 +651,14 @@ module.exports.setPrefix = async (message, prefix, closeConnection = true) => {
         message.guild.commandPrefix = prefix
     }
 
-    await mongo().then(async (mongoose) => {
-        try {
-            await guildSettingSchema.findOneAndUpdate({
-                _id: guildID
-          ***REMOVED*** {
-                _id: guildID,
-                prefix
-          ***REMOVED*** {
-                upsert: true,
-                new: true
-            })
-        } finally {
-            if (closeConnection !== false) mongoose.connection.close()
-        }
+    await guildSettingSchema.findOneAndUpdate({
+        _id: guildID
+  ***REMOVED*** {
+        _id: guildID,
+        prefix
+  ***REMOVED*** {
+        upsert: true,
+        new: true
     })
 
     return prefixCache[guildID] = prefix
@@ -698,62 +667,48 @@ module.exports.setPrefix = async (message, prefix, closeConnection = true) => {
 /**
  * Gets currency symbol.
  * @param {string} guildID - Guild id.
- * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  * @returns {string} Guild currency symbol
  */
-module.exports.getCurrencySymbol = async (guildID, closeConnection = true) => {
+module.exports.getCurrencySymbol = async (guildID) => {
     const cached = currencyCache[guildID]
     if (cached) {
         return cached
-    } else return await mongo().then(async (mongoose) => {
-        try {
-            const result = await guildSettingSchema.findOne({
-                _id: guildID,
-            })
+    } else {
+        const result = await guildSettingSchema.findOne({
+            _id: guildID,
+        })
 
-            let currency
-            if (result?.currency) {
-                currency = result.currency
-            } else {
-                currency = config.cSymbol //def
-            }
-
-            currencyCache[guildID] = currency
-            return currencyCache[guildID]
-        } catch (err) {
-            console.error(err)
-        } finally {
-            if (closeConnection !== false) mongoose.connection.close()
+        let currency
+        if (result?.currency) {
+            currency = result.currency
+        } else {
+            currency = config.cSymbol //def
         }
-    })
+
+        currencyCache[guildID] = currency
+        return currencyCache[guildID]
+    }
 }
 
 /**
  * Sets currency symbol.
  * @param {string} _id - Guild id.
  * @param {string} currency - New currency symbol.
- * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  * @returns {string} New currency symbol
  */
-module.exports.setCurrencySymbol = async (guildID, currency, closeConnection = true) => {
+module.exports.setCurrencySymbol = async (guildID, currency) => {
     if (currency.toLowerCase() === 'default') {
         currency = config.cSymbol
     }
 
-    await mongo().then(async (mongoose) => {
-        try {
-            await guildSettingSchema.findOneAndUpdate({
-                _id: guildID
-          ***REMOVED*** {
-                _id: guildID,
-                currency
-          ***REMOVED*** {
-                upsert: true,
-                new: true
-            })
-        } finally {
-            if (closeConnection !== false) mongoose.connection.close()
-        }
+    await guildSettingSchema.findOneAndUpdate({
+        _id: guildID
+  ***REMOVED*** {
+        _id: guildID,
+        currency
+  ***REMOVED*** {
+        upsert: true,
+        new: true
     })
 
     return currencyCache[guildID] = currency
@@ -783,9 +738,8 @@ module.exports.trimObj = (obj, v) => {
  * @param {string} _id - the id of the guild
  * @param {string} type - the type of income command (work, beg, crime, etc -- SEE economica/features/schemas/income-sch.js)
  * @param {object} properties - an object of properties for the command
- * @param {boolean} closeConnection - whether or not to close the mongodb connection (default: true)
  */
-module.exports.setCommandStats = async (_id, type, properties, closeConnection = true) => {
+module.exports.setCommandStats = async (_id, type, properties) => {
 
     // db properties, global default properties, and object in which updated properties will be stored
     const inheritedProperties = await this.getCommandStats(_id, type, false)
@@ -794,23 +748,17 @@ module.exports.setCommandStats = async (_id, type, properties, closeConnection =
     properties = { ...inheritedProperties, ...properties }
     this.trimObj(properties, [undefined, null]) // if a property is undefined or null, do not store it in db
 
-    return await mongo().then(async (mongoose) => {
-        try {
-            await incomeSchema.findOneAndUpdate({
-                _id
-          ***REMOVED*** {
-                [type]: properties
-          ***REMOVED*** {
-                upsert: true,
-                new: true
-            })
-
-            // allows cache to be accessed as incomeCache[_id][type]
-            incomeCache[`${_id}`] = { [type]: { ...defaultProperties, ...properties } } // if a property is not in db, store its default value in the cache
-        } finally {
-            if (closeConnection !== false) mongoose.connection.close()
-        }
+    await incomeSchema.findOneAndUpdate({
+        _id
+  ***REMOVED*** {
+        [type]: properties
+  ***REMOVED*** {
+        upsert: true,
+        new: true
     })
+
+    // allows cache to be accessed as incomeCache[_id][type]
+    incomeCache[`${_id}`] = { [type]: { ...defaultProperties, ...properties } } // if a property is not in db, store its default value in the cache
 }
 
 /**
@@ -824,33 +772,26 @@ module.exports.setCommandStats = async (_id, type, properties, closeConnection =
  * @param {string} _id - the id of the guild
  * @param {string} type - the type of income command (work, beg, crime, etc -- SEE economica/features/schemas/income-sch.js) 
  * @param {boolean} returnUndefined - whether to omit undefined fields or return their default value. Default: true (return defaults)
- * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  * @returns {properties} all properties of the command object in db | merged properties or the inherited properties only. Unspecified/blank db values will be returned as default values if returnUndefined is true. Else, they will return undefined.
  */
-module.exports.getCommandStats = async (_id, type, returnUndefined = true, closeConnection = true) => {
-    const cached = incomeCache[`${_id}`]?.[`${type}`]
-    if (cached) return cached
-    return await mongo().then(async (mongoose) => {
-        try {
-            const result = await incomeSchema.findOne({
-                _id,
-            })
+module.exports.getCommandStats = async (_id, type, returnUndefined = true) => {
+    if (incomeCache[`${_id}`]?.[`${type}`]) {
+        return incomeCache[`${_id}`]?.[`${type}`]
+    }
 
-            let properties
-            const defaultProperties = config.income[type] // global defaults
-            const inheritedProperties = result?.[type] // from db
-            if (returnUndefined && inheritedProperties) {
-                properties = { ...defaultProperties, ...inheritedProperties } // merge objects with right-left precedence for same-key terms
-            }
-
-            properties = properties || inheritedProperties
-            return properties
-        } finally {
-            if (closeConnection) {
-                mongoose.connection.close()
-            }
-        }
+    const result = await incomeSchema.findOne({
+        _id,
     })
+
+    let properties
+    const defaultProperties = config.income[type] // global defaults
+    const inheritedProperties = result?.[type] // from db
+    if (returnUndefined && inheritedProperties) {
+        properties = { ...defaultProperties, ...inheritedProperties } // merge objects with right-left precedence for same-key terms
+    }
+
+    properties = properties || inheritedProperties
+    return properties
 }
 
 /**
@@ -859,38 +800,29 @@ module.exports.getCommandStats = async (_id, type, returnUndefined = true, close
  * @param {String} userID - the id of the user
  * @param {String} type - the command name
  * @param {Boolean} returnUndefined - whether to omit undefined fields or return their default value. Default: true (return defaults)
- * @param {Boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  * @returns {uProperties} all properties of the user object's command field in db | merged properties or the inherited properties only. Unspecified/blank db values will be returned as default values if returnUndefined is true. Else, they will return undefined.
  */
 module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefined = true, closeConnection = true) => {
     const cached = uCommandStatsCache[`${guildID}`]?.[userID]?.[type]
     if (cached) return cached
-    return await mongo().then(async (mongoose) => {
-        try {
-            const result = await economySchema.findOne({
-                guildID,
-                userID
-            })
-
-            let properties = undefined
-            const defaultProperties = config.uCommandStats[type];
-            const inheritedProperties = result?.[type];
-
-            // if we want undefined values to return as default values, merge default values and db values
-            if (returnUndefined !== false) {
-                properties = { ...defaultProperties, ...inheritedProperties }
-            }
-
-            // if we don't want undefined values to return as default values, return only the inherited values without merge (this will return undefined or null for missing values)
-            properties = properties || inheritedProperties
-            if (properties) uCommandStatsCache[guildID] = { [userID]: { [type]: properties } }
-            return properties
-        } finally {
-            if (closeConnection) {
-                mongoose.connection.close()
-            }
-        }
+    const result = await economySchema.findOne({
+        guildID,
+        userID
     })
+
+    let properties = undefined
+    const defaultProperties = config.uCommandStats[type];
+    const inheritedProperties = result?.[type];
+
+    // if we want undefined values to return as default values, merge default values and db values
+    if (returnUndefined !== false) {
+        properties = { ...defaultProperties, ...inheritedProperties }
+    }
+
+    // if we don't want undefined values to return as default values, return only the inherited values without merge (this will return undefined or null for missing values)
+    properties = properties || inheritedProperties
+    if (properties) uCommandStatsCache[guildID] = { [userID]: { [type]: properties } }
+    return properties
 }
 
 /**
@@ -899,35 +831,26 @@ module.exports.getUserCommandStats = async (guildID, userID, type, returnUndefin
  * @param {string} userID - the id of the user
  * @param {string} type - the specific command
  * @param {object} properties - the object of properties for the corresponding object. Set as 'default' for default values. refer to the `commands` field of features/schemas/economy-sch.js and its subfields for contents. All are optional.
- * @param {boolean} closeConnection - whether to close the mongo connection or not. Default: true (close connection)
  */
-module.exports.setUserCommandStats = async (guildID, userID, type, properties, closeConnection = true) => {
+module.exports.setUserCommandStats = async (guildID, userID, type, properties) => {
     const inheritedProperties = await this.getUserCommandStats(guildID, userID, type, false, false)
     const defaultProperties = config.income[type]
     properties = { ...inheritedProperties, ...properties }
     this.trimObj(properties, [undefined, null]) // trim object for db
 
-    return await mongo().then(async (mongoose) => {
-        try {
-            
-            //init
-            await this.getEconInfo(guildID, userID, false)
-
-            await economySchema.findOneAndUpdate({
-                guildID,
-                userID
-          ***REMOVED*** {
-                commands: {
-                    [type]: properties
-                }
-          ***REMOVED*** {
-                upsert: true,
-                new: true
-            })
-
-            uCommandStatsCache[guildID] = { [userID]: { [type]: { ...defaultProperties, ...properties } } } // do not trim cached object
-        } finally {
-            if (closeConnection !== false) mongoose.connection.close()
+    //init
+    await this.getEconInfo(guildID, userID)
+    await economySchema.findOneAndUpdate({
+        guildID,
+        userID
+  ***REMOVED*** {
+        commands: {
+            [type]: properties
         }
+  ***REMOVED*** {
+        upsert: true,
+        new: true
     })
+
+    uCommandStatsCache[guildID] = { [userID]: { [type]: { ...defaultProperties, ...properties } } } // do not trim cached object
 }

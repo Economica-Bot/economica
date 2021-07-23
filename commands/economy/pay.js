@@ -32,46 +32,43 @@ module.exports = class PayCommand extends Command {
 
     async run(message, { user, amount }) {
         const { guild, author } = message
-        let id = await util.getUserID(message, user)
+        let color = 'GREEN', description = '', id = await util.getUserID(message, user)
         if(id === 'noMemberFound') {
             return
         } 
 
         user = guild.members.cache.get(id).user
-        const cSymbol = await util.getCurrencySymbol(guild.id, false)
+        const cSymbol = await util.getCurrencySymbol(guild.id)
         const { wallet } = await util.getEconInfo(guild.id, author.id)
         if(parseInt(amount)) {
             amount = parseInt(amount)
-            if(wallet < amount) {
-                message.channel.send({ embed: util.embedify(
-                    'RED',
-                    message.author.username,
-                    message.author.displayAvatarURL(),
-                    `Insufficient wallet: ${cSymbol}${wallet}`
-                ) })
+            if(amount < 1 || wallet < amount) {
+                color = 'RED'
+                description = `Invalid amount: \`${amount}\`\nInsufficient wallet: ${cSymbol}${wallet.toLocaleString()}`
             } else {
-                await util.setEconInfo(guild.id, author.id, -amount, 0, -amount, false)
+                description = `Paid ${user.username} ${cSymbol}${amount}`
+                await util.setEconInfo(guild.id, author.id, -amount, 0, -amount)
                 await util.setEconInfo(guild.id, user.id, amount, 0, amount)
-                message.channel.send({ embed: util.embedify(
-                    'GREEN',
-                    message.author.username, 
-                    message.author.displayAvatarURL(),
-                    `Paid ${user.username} ${cSymbol}${amount}`
-                ) })
             }
         } else if(amount === 'all') {
             if(wallet < 1) {
-                message.reply(`Invalid amount! Current wallet: ${cSymbol}${wallet}`)
+                color = 'RED'
+                description = `Invalid amount! Current wallet: ${cSymbol}${wallet.toLocaleString()}` 
             } else {
-                await util.setEconInfo(guild.id, author.id, -wallet, 0, -wallet, false)
+                description = `Paid ${user.username} ${cSymbol}${wallet.toLocaleString()}`
+                await util.setEconInfo(guild.id, author.id, -wallet, 0, -wallet)
                 await util.setEconInfo(guild.id, user.id, wallet, 0, wallet)
-                message.channel.send({ embed: util.embedify(
-                    'GREEN',
-                    message.author.username, 
-                    message.author.displayAvatarURL(),
-                    `Paid ${user.username} ${cSymbol}${wallet}`
-                ) })
             }
+        } else {
+            color = 'RED'
+            description = `Invalid amount: \`${amount}\`\nFormat: \`${this.format}\``
         }
+
+        message.channel.send({ embed: util.embedify(
+            color, 
+            message.author.username, 
+            message.author.displayAvatarURL(),
+            description
+        ) })
     }
 }

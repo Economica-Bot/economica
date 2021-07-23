@@ -1,8 +1,9 @@
 const { Command } = require('discord.js-commando')
+
 const util = require('../../../features/util')
-const mongo = require('../../../features/mongo')
 const marketItemSchema = require('../../../features/schemas/market-item-sch')
 const inventorySch = require('../../../features/schemas/inventory-sch')
+
 const { oneLine } = require('common-tags')
 
 module.exports = class ListingCommand extends Command {
@@ -42,7 +43,6 @@ module.exports = class ListingCommand extends Command {
     async run(message, { param, args }) {
         const { guild, author } = message
         const currencySymbol = await util.getCurrencySymbol(guild.id)
-        let exit = false
         if(param === 'view') {
             let id
             if(args) {
@@ -55,39 +55,30 @@ module.exports = class ListingCommand extends Command {
             }
 
             const user = guild.members.cache.get(id).user
-
             let listingsEmbed = util.embedify(
                 'BLURPLE',
                 user.tag, 
                 user.displayAvatarURL()
             )
-            await mongo().then(async (mongoose) => {
-                try {    
-                    const listings = await marketItemSchema.find({
-                        guildID: guild.id,
-                        userID: id
-                    })
-    
-                    let i = 0, j = 0
-                    if(listings) {
-                        for(const listing of listings) {
-                            i++
-                            if(listing.active) j++
-                            listingsEmbed.addField(
-                                `${currencySymbol}${listing.price} | \`${listing.item}\``,
-                                `${listing.description} | ${listing.active ? 'Listing **active**' : 'Listing **inactive**'}` 
-                            )
-                        }
-                    }
-    
-                    listingsEmbed.setDescription(`You have \`${i}\` listings, \`${j}\` of which are active.`)
-                } catch(err) {
-                    console.error(err)
-                } finally {
-                    mongoose.connection.close()
-                }
+            
+            const listings = await marketItemSchema.find({
+                guildID: guild.id,
+                userID: id
             })
 
+            let i = 0, j = 0
+            if(listings) {
+                for(const listing of listings) {
+                    i++
+                    if(listing.active) j++
+                    listingsEmbed.addField(
+                        `${currencySymbol}${listing.price} | \`${listing.item}\``,
+                        `${listing.description} | ${listing.active ? 'Listing **active**' : 'Listing **inactive**'}` 
+                    )
+                }
+            }
+
+            listingsEmbed.setDescription(`You have \`${i}\` listings, \`${j}\` of which are active.`)
             message.channel.send({ embed: listingsEmbed })
             return
         } else if(param === 'create') {
@@ -98,58 +89,52 @@ module.exports = class ListingCommand extends Command {
                 price = parseInt(args[1])
                 
                 if(price < 1) {
-                    message.reply(`Invalid price: ${currencySymbol}${price}.`)
+                    message.channel.send({ embed: util.embedify(
+                        'RED',
+                        message.author.username, 
+                        message.author.displayAvatarURL(),
+                        `Invalid price: ${currencySymbol}${price}.`
+                    ) })
+
                     return
                 }
                 description = args[2] ? args.slice(2).join(' ') : 'No description'
             } else {
                 message.channel.send({ embed: util.embedify(
                     'RED',
-                    message.author.tag, 
+                    message.author.username, 
                     message.author.displayAvatarURL(),
                     args[1] ? `\`${args[1]}\` must be a number!` : 'Please provide a price!'
                 ) })
+
                 return
             }
 
-            await mongo().then(async (mongoose) => {
-                try {
-                    const listing = await marketItemSchema.findOne({
-                        guildID: guild.id, 
-                        item
-                    })
-
-                    if(listing) {
-                        message.channel.send({ embed: util.embedify(
-                            'RED',
-                            message.author.tag, 
-                            message.author.displayAvatarURL(),
-                            `\`${item}\` is already registered!`,
-                            'Please use a different name.'
-                        ) })
-                        exit = true
-                        mongoose.connection.close()
-                        return
-                    }
-
-                    await new marketItemSchema({
-                        userID: author.id, 
-                        guildID: guild.id, 
-                        item, 
-                        price,
-                        description, 
-                        active: true
-                    }).save()
-                } catch(err) {
-                    console.error(err)
-                } finally {
-                    mongoose.connection.close()
-                }
+            const listing = await marketItemSchema.findOne({
+                guildID: guild.id, 
+                item
             })
 
-            if(exit) {
+            if(listing) {
+                message.channel.send({ embed: util.embedify(
+                    'RED',
+                    message.author.username, 
+                    message.author.displayAvatarURL(),
+                    `\`${item}\` is already registered!`,
+                    'Please use a different name.'
+                ) })
+
                 return
             }
+
+            await new marketItemSchema({
+                userID: author.id, 
+                guildID: guild.id, 
+                item, 
+                price,
+                description, 
+                active: true
+            }).save()
     
             message.channel.send({ embed: util.embedify(
                 'GREEN',
@@ -173,57 +158,41 @@ module.exports = class ListingCommand extends Command {
             return
         } else if (param === 'delete') {
             let item = args
-            let footer = ''
-            await mongo().then(async (mongoose) => {
-                try {
-                    const listing = await marketItemSchema.findOneAndDelete({
-                        guildID: guild.id, 
-                        item
-                    })
-    
-                    if(!listing) {
-                        message.channel.send({ embed: util.embedify(
-                            'RED',
-                            message.author.tag, 
-                            message.author.displayAvatarURL(),
-                            `Could not find \`${item}\`.`
-                        ) })
-                        exit = true
-                        return
-                    }
-
-                    const items = await inventorySch.updateMany({
-                        guildID: guild.id, 
-                        "inventory.item": item
-                  ***REMOVED*** {
-                        $pull: {
-                            inventory: {
-                                item
-                            }
-                        }
-                    })
-
-                    if(items) { 
-                        footer = `${items.n} items were removed.`
-                    }               
-                } catch(err) {
-                    console.error(err)
-                } finally {
-                    mongoose.connection.close()
-                }
+            const listing = await marketItemSchema.findOneAndDelete({
+                guildID: guild.id, 
+                item
             })
 
-            if(exit) {
+            if(!listing) {
+                message.channel.send({ embed: util.embedify(
+                    'RED',
+                    message.author.username, 
+                    message.author.displayAvatarURL(),
+                    `Could not find \`${item}\`.`
+                ) })
+
                 return
             }
 
+            const items = await inventorySch.updateMany({
+                guildID: guild.id, 
+                "inventory.item": item
+          ***REMOVED*** {
+                $pull: {
+                    inventory: {
+                        item
+                    }
+                }
+            })         
+
             message.channel.send({ embed: util.embedify(
                 'GREEN',
-                message.author.tag, 
+                message.author.username, 
                 message.author.displayAvatarURL(),
                 `Successfully deleted \`${item}\` from market DB.`,
-                footer
+                items ? `${items.n} items removed.` : ''
             ) })
+            
             return
         } else if (param === 'enable') {
             let item = args
@@ -231,43 +200,31 @@ module.exports = class ListingCommand extends Command {
                 message.reply('Please name the listing you wish to enable.')
                 return
             }
-            await mongo().then(async (mongoose) => {
-                try {
-                    const listing = await marketItemSchema.findOneAndUpdate({ 
-                        guildID: guild.id, 
-                        userID: author.id, 
-                        item, 
-                        active: false 
-                  ***REMOVED*** {
-                        active: true
-                    })
-                    
-                    if (!listing) {
-                        message.channel.send({ embed: util.embedify(
-                            'RED',
-                            message.author.tag, 
-                            message.author.displayAvatarURL(),
-                            `Could not find \`${item}\` as an inactive listing under your id.`,
-                            'Check your listings with *viewlistings*. Case Senstive'
-                        ) })
-                        exit = true
-                        mongoose.connection.close()
-                        return
-                    }
-                } catch(err) {  
-                    console.error(err)
-                } finally {
-                    mongoose.connection.close()
-                }
-            })
 
-            if(exit) {
+            const listing = await marketItemSchema.findOneAndUpdate({ 
+                guildID: guild.id, 
+                userID: author.id, 
+                item, 
+                active: false 
+          ***REMOVED*** {
+                active: true
+            })
+            
+            if (!listing) {
+                message.channel.send({ embed: util.embedify(
+                    'RED',
+                    message.author.username, 
+                    message.author.displayAvatarURL(),
+                    `Could not find \`${item}\` as an inactive listing under your id.`,
+                    'Check your listings with *viewlistings*. Case Senstive'
+                ) })
+
                 return
-            } 
+            }
 
             message.channel.send({ embed: util.embedify(
                 'GREEN',
-                message.author.tag, 
+                message.author.username, 
                 message.author.displayAvatarURL(),
                 `Successfully enabled \`${item}\` on the market.`
             ) })    
@@ -279,43 +236,31 @@ module.exports = class ListingCommand extends Command {
                 message.reply('Please name the listing you wish to disable.')
                 return
             }
-            await mongo().then(async (mongoose) => {
-                try {
-                    const listing = await marketItemSchema.findOneAndUpdate({ 
-                        guildID: guild.id, 
-                        userID: author.id, 
-                        item, 
-                        active: true 
-                  ***REMOVED*** {
-                        active: false
-                    })
-                    
-                    if (!listing) {
-                        message.channel.send({ embed: util.embedify(
-                            'RED',
-                            message.author.tag, 
-                            message.author.displayAvatarURL(),
-                            `Could not find \`${item}\` as an active listing under your id.`,
-                            'Check your listings with *viewlistings*. Case Senstive'
-                        ) })
-                        exit = true
-                        mongoose.connection.close()
-                        return
-                    }
-                } catch(err) {  
-                    console.error(err)
-                } finally {
-                    mongoose.connection.close()
-                }
-            })
 
-            if(exit) {
+            const listing = await marketItemSchema.findOneAndUpdate({ 
+                guildID: guild.id, 
+                userID: author.id, 
+                item, 
+                active: true 
+          ***REMOVED*** {
+                active: false
+            })
+            
+            if (!listing) {
+                message.channel.send({ embed: util.embedify(
+                    'RED',
+                    message.author.username, 
+                    message.author.displayAvatarURL(),
+                    `Could not find \`${item}\` as an active listing under your id.`,
+                    'Check your listings with *viewlistings*. Case Senstive'
+                ) })
+                
                 return
-            } 
+            }
 
             message.channel.send({ embed: util.embedify(
                 'GREEN',
-                message.author.tag, 
+                message.author.username, 
                 message.author.displayAvatarURL(),
                 `Successfully disabled \`${item}\` on the market.`
             ) })    
@@ -332,12 +277,12 @@ module.exports = class ListingCommand extends Command {
                 )} )
                 return
             }
+            
             message.channel.send({ embed: util.embedify(
                 'RED',
                 message.author.username, 
                 message.author.displayAvatarURL(),
-                `Invalid argument: \`${param}\``,
-                `Format: \`${this.format}\``
+                `Invalid argument: \`${param}\`\nFormat: \`${this.format}\``,
             )} )
         }
     }

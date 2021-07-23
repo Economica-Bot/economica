@@ -31,44 +31,36 @@ module.exports = class DepositCommand extends Command {
 
     async run(message, { amount }) {
         const { guild, author } = message
+        let color = 'GREEN', description = ''
         const cSymbol = await util.getCurrencySymbol(guild.id, false)
-        await mongo().then(async (mongoose) => {
-            const { wallet } = await util.getEconInfo(guild.id, author.id, false)
-            if(parseInt(amount)) {
-                amount = parseInt(amount)
-                if (amount < 1 || amount > wallet) {
-                    message.channel.send({ embed: util.embedify(
-                        'RED',
-                        message.author.username, 
-                        message.author.displayAvatarURL(),
-                        `Invalid amount! Current wallet: ${cSymbol}${wallet.toLocaleString()}`
-                    ) })
-                } else {
-                    await util.setEconInfo(guild.id, author.id, -amount, amount, 0, false)
-                    message.channel.send({ embed: util.embedify(
-                        'GREEN',
-                        message.author.username, 
-                        message.author.displayAvatarURL(),
-                        `Deposited ${cSymbol}${amount.toLocaleString()} to the treasury.`
-                    )})
-                }
-            } else if(amount === 'all') {
-                if (wallet < 1) {
-                    message.reply(`Invalid amount! Current wallet" ${cSymbol}${wallet.toLocaleString()}`) 
-                } else {
-                    await util.setEconInfo(guild.id, author.id, -wallet, wallet, 0, false)
-                    message.channel.send({ embed: util.embedify(
-                        'GREEN',
-                        message.author.username, 
-                        message.author.displayAvatarURL(),
-                        `Deposited ${cSymbol}${wallet.toLocaleString()} to the treasury.`
-                    )})
-                }
+        const { wallet } = await util.getEconInfo(guild.id, author.id, false)
+        if(parseInt(amount)) {
+            amount = parseInt(amount)
+            if (amount < 1 || amount > wallet) {
+                color = 'RED'
+                description = `Invalid amount: \`${amount}\`\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`
             } else {
-                message.reply(`Invalid amount! Must be \`${this.name} ${this.format}\``)
+                description = `Deposited ${cSymbol}${amount.toLocaleString()}`
+                await util.setEconInfo(guild.id, author.id, -amount, amount, 0, false)
             }
-            
-            mongoose.connection.close()
-        })
+        } else if(amount === 'all') {
+            if (wallet < 1) {
+                color = 'RED'
+                description = `Invalid amount! Current wallet: ${cSymbol}${wallet.toLocaleString()}`
+            } else {
+                description = `Deposited ${cSymbol}${wallet.toLocaleString()}`
+                await util.setEconInfo(guild.id, author.id, -wallet, wallet, 0, false)
+            }
+        } else {
+            color = 'RED'
+            description = `Invalid amount: \`${amount}\`\nFormat: \`${this.format}\``
+        }
+
+        message.channel.send({ embed: util.embedify(
+            color,
+            message.author.username, 
+            message.author.displayAvatarURL(),
+            description
+        ) })
     }
 }

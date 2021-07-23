@@ -1,8 +1,12 @@
 const { Command } = require('discord.js-commando')
-const { oneLine } = require('common-tags')
-const mongo = require('../../../features/mongo')
+
+const util = require('../../../features/util')
 const inventorySch = require('../../../features/schemas/inventory-sch')
 const marketItemSch = require('../../../features/schemas/market-item-sch')
+
+const { oneLine } = require('common-tags')
+const economySch = require('../../../features/schemas/economy-sch')
+
 
 module.exports = class PurgeEconomyCommand extends Command {
     constructor(client) {
@@ -14,7 +18,7 @@ module.exports = class PurgeEconomyCommand extends Command {
             description: 'Delete economy-related content on the server.',
             details:oneLine`Use at your own risk. There is no going back. 
                             Administrator only.`,
-            format: '<inventory | market>',
+            format: '<inventory | market | balance>',
             examples: [
                 'purge inventory'
             ],
@@ -33,46 +37,64 @@ module.exports = class PurgeEconomyCommand extends Command {
     }
 
     async run(message, { content }) {
-        const { author, guild } = message
-        await mongo().then(async (mongoose) => {
-            try {
-                if(content === 'inventory') {
-                    const inventories = await inventorySch.deleteMany({
-                        guildID: guild.id
-                    })
-                    message.reply(`Deleted all inventories. \`${inventories.n}\` removed.`)
-                } else if(content === 'market') {
-                    let econManagerRole = guild.roles.cache.find(role => {
-                        return role.name.toLowerCase() === 'economy manager'
-                    })
-        
-                    if(!econManagerRole) {
-                        message.reply('Please create an \`Economy Manager\` role!')
-                        return
-                    }
-        
-                    if(!message.member.roles.cache.has(econManagerRole.id)) {
-                        message.channel.send({ embed: util.embedify(
-                            'RED',
-                            message.author.username, 
-                            message.author.displayAvatarURL(),
-                            `You must have the <@&${econManagerRole.id}> role.`
-                        )} )
-        
-                        return
-                    }
-                    const removed = await marketItemSch.deleteMany({
-                        guildID: guild.id
-                    })
-                    message.channel.send(`Removed ${removed.n} listings.`)
-                } else {
-                    message.channel.send('Invalid param. Must be \`inventory\` or \`market\`.')
-                }
-            } catch(err) {
-                console.error(err)
-            } finally {
-                mongoose.connection.close()
-            }
+        const { guild } = message
+        const econManagerRole = guild.roles.cache.find(role => {
+            return role.name.toLowerCase() === 'economy manager'
         })
+
+        if(!econManagerRole) {
+            message.reply('Please create an \`Economy Manager\` role!')
+            return
+        }
+
+        if(!message.member.roles.cache.has(econManagerRole.id)) {
+            message.channel.send({ embed: util.embedify(
+                'RED',
+                message.author.username, 
+                message.author.displayAvatarURL(),
+                `You must have the <@&${econManagerRole.id}> role.`
+            )} )
+
+            return
+        }
+
+        if(content === 'inventory') {
+            const inventories = await inventorySch.deleteMany({
+                guildID: guild.id
+            })
+            message.channel.send({ embed: util.embedify(
+                'GREEN',
+                guild.name, 
+                guild.iconURL(),
+                `Deleted all inventories. \`${inventories.n}\` removed.`
+            ) })
+        } else if(content === 'market') {
+            const removed = await marketItemSch.deleteMany({
+                guildID: guild.id
+            })
+            message.channel.send({ embed: util.embedify(
+                'GREEN',
+                guild.name, 
+                guild.iconURL(),
+                `Deleted all market listings. \`${removed.n}\` removed.`
+            ) })
+        } else if(content === 'balance') {
+            const economies = await economySch.deleteMany({
+                guildID: guild.id
+            })
+            message.channel.send({ embed: util.embedify(
+                'GREEN',
+                guild.name, 
+                guild.iconURL(),
+                `Deleted all economy profiles. \`${economies.n}\` removed.`
+            ) })
+        } else {
+            message.channel.send({ embed: util.embedify(
+                'RED',
+                message.author.username, 
+                message.author.displayAvatarURL()
+                `Invalid param: \`${content}\`\nUsage: \`${this.format}\`.`
+            ) })
+        }
     }
 } 

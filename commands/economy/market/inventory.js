@@ -49,34 +49,27 @@ module.exports = class InventoryCommand extends Command {
         const currencySymbol = await util.getCurrencySymbol(guild.id)
         let inventoryEmbed = util.embedify(
             'BLURPLE',
-            user.tag, 
+            user.username, 
             user.displayAvatarURL(),
         ) 
-        await mongo().then(async (mongoose) => {
-            try {
-                const inventory = await inventorySchema.findOne({
-                    userID: user.id, 
-                    guildID: guild.id
-                }) 
+        
+        const inventory = await inventorySchema.findOne({
+            userID: user.id, 
+            guildID: guild.id
+        }) 
 
-                let i = 0
-                if(inventory) {
-                    for(const item of inventory.inventory) {
-                        i++
-                        inventoryEmbed.addField(
-                            `${currencySymbol}${item.price} | \`${item.item}\``, 
-                            `${item.description}`
-                        )
-                    }
-                }
-
-                inventoryEmbed.setDescription(`\`${i}\` Items`)
-            } catch(err) {
-                console.log(err)
-            } finally {
-                mongoose.connection.close()
+        let i = 0
+        if(inventory) {
+            for(const item of inventory.inventory) {
+                i++
+                inventoryEmbed.addField(
+                    `${currencySymbol}${item.price.toLocaleString()} | \`${item.item}\``, 
+                    `${item.description}`
+                )
             }
-        })
+        }
+
+        inventoryEmbed.setDescription(`\`${i}\` Items`)
 
         message.channel.send({ embed: inventoryEmbed })
     }

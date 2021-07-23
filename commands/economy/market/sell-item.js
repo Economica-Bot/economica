@@ -34,57 +34,41 @@ module.exports = class SellItemCommand extends Command {
     async run(message, { item }) {
         const { author, guild } = message
         const currencySymbol = await util.getCurrencySymbol(guild.id)
-        let price, exit = false
-        await mongo().then(async (mongoose) => {
-            try { 
-                const inventory = await inventorySchema.findOne({
-                    userID: author.id, 
-                    guildID: guild.id,
-                })
-
-                const owned = inventory?.inventory.find(i => {
-                    return i.item === item
-                })
-
-                if(!owned) {
-                    message.channel.send(`You do not own a \`${item}\`.`)
-                    exit = true
-                    mongoose.connection.close()
-                    return
-                }
-
-                price = owned.price
-
-                await inventorySchema.findOneAndUpdate({
-                    userID: author.id, 
-                    guildID: guild.id
-              ***REMOVED*** {
-                    $pull: {
-                        inventory: {
-                            item
-                        }
-                    }
-                })
-
-            } catch(err) {
-                console.error(err)
-            } finally {
-                mongoose.connection.close()
-            }
+        const inventory = await inventorySchema.findOne({
+            userID: author.id, 
+            guildID: guild.id,
         })
 
-        if(exit) {
-            return
-        }        
+        const owned = inventory?.inventory.find(i => {
+            return i.item === item
+        })
 
-        util.setEconInfo(guild.id, author.id, price, 0, price)
+        if(!owned) {
+            message.channel.send(`You do not own a \`${item}\`.`)
+            return
+        }
+
+        const price = owned.price
+
         message.channel.send({ embed:
             util.embedify(
                 'GREEN',
                 message.author.username, 
                 message.author.displayAvatarURL(),
-                `Successfully sold \`${item}\` for ${currencySymbol}${price}`
+                `Successfully sold \`${item}\` for ${currencySymbol}${price.toLocaleString()}`
             )
         })
+
+        util.setEconInfo(guild.id, author.id, price, 0, price)
+        await inventorySchema.findOneAndUpdate({
+            userID: author.id, 
+            guildID: guild.id
+      ***REMOVED*** {
+            $pull: {
+                inventory: {
+                    item
+                }
+            }
+        })     
     }
 }

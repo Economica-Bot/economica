@@ -31,43 +31,35 @@ module.exports = class DepositCommand extends Command {
     async run(message, { amount }) {
         const { guild, author } = message
         const cSymbol = await util.getCurrencySymbol(guild.id, false)
-        await mongo().then(async (mongoose) => {
-            const { treasury } = await util.getEconInfo(guild.id, author.id, false)
-            if(parseInt(amount)) {
-                amount = parseInt(amount)
-                if (amount < 1 || amount > treasury) {
-                    message.channel.send({ embed: util.embedify(
-                        'RED',
-                        message.author.username, 
-                        message.author.displayAvatarURL(),
-                        `Invalid amount! Current treasury: ${cSymbol}${treasury.toLocaleString()}`
-                    ) })
-                } else {
-                    await util.setEconInfo(guild.id, author.id, amount, -amount, 0, false)
-                    message.channel.send({ embed: util.embedify(
-                        'GREEN',
-                        message.author.username, 
-                        message.author.displayAvatarURL(),
-                        `Retrieved ${cSymbol}${amount.toLocaleString()} from the treasury.`
-                    )})
-                }
-            } else if(amount === 'all') {
-                if (treasury < 1) {
-                    message.reply(`Invalid amount! Current treasury: ${cSymbol}${treasury.toLocaleString()}`)
-                } else {
-                    await util.setEconInfo(guild.id, author.id, treasury, -treasury, 0, false)
-                    message.channel.send({ embed: util.embedify(
-                        'GREEN',
-                        message.author.username, 
-                        message.author.displayAvatarURL(),
-                        `Retrieved ${cSymbol}${treasury.toLocaleString()} from the treasury.`
-                    )})
-                }
+        const { treasury } = await util.getEconInfo(guild.id, author.id, false)
+        let description = '', color = 'GREEN' 
+        if(parseInt(amount)) {
+            amount = parseInt(amount)
+            if (amount < 1 || amount > treasury) {
+                color = 'RED'
+                description = `Invalid amount: \`${amount}\`\nCurrent treasury: ${cSymbol}${treasury.toLocaleString()}`
             } else {
-                message.reply(`Invalid amount! Must be \`${this.name} ${this.format}\``)
+                description = `Retrieved ${cSymbol}${amount.toLocaleString()}`
+                await util.setEconInfo(guild.id, author.id, amount, -amount, 0, false)
             }
+        } else if(amount === 'all') {
+            if (treasury < 1) {
+                color = 'RED',
+                description = `Invalid amount! Current treasury: ${cSymbol}${treasury.toLocaleString()}`
+            } else {
+                description = `Retrieved ${cSymbol}${treasury.toLocaleString()}`
+                await util.setEconInfo(guild.id, author.id, treasury, -treasury, 0, false)
+            }
+        } else {
+            color = 'RED'
+            description = `Invalid amount: \`${amount}\`\nFormat: \`${this.format}\``
+        }
 
-            mongoose.connection.close()
-        })
+        message.channel.send({ embed: util.embedify(
+            color, 
+            message.author.username, 
+            message.author.displayAvatarURL(),
+            description
+        ) })
     }
 }

@@ -45,7 +45,7 @@ module.exports = class BalanceCommand extends Command {
         }
 
         user = guild.members.cache.get(id).user
-        const cSymbol = await util.getCurrencySymbol(guild.id, false)
+        const cSymbol = await util.getCurrencySymbol(guild.id)
         const { wallet, treasury, networth, rank } = await util.getEconInfo(guild.id, id)
         const balEmbed =  util.embedify(
             'GOLD',
