@@ -2,8 +2,8 @@ const { CommandoClient } = require('discord.js-commando')
 const { Intents } = require('discord.js')
 
 const config = require('./config.json')
-const mongo = require('./features/mongo')
 const path = require('path')
+const mongo = require('./features/mongo')
 
 const allIntents = Intents.ALL
 
@@ -41,13 +41,8 @@ client.registry
 client.on('ready', async () => {
 
     console.log('The client is ready!')
-
-    await mongo().then(mongoose => {
-        try {
-            console.log('Connected to Mongo')
-        } finally {
-            mongoose.connection.close()
-        }
+    await mongo().then(async () => {
+        console.log('Connected to DB')
     })
 
     const checkMutes = require('./features/features/check-mute')
