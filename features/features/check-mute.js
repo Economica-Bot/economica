@@ -1,42 +1,36 @@
-const muteSchema = require('../../features/schemas/mute-sch')
+const infractionSch = require('../../features/schemas/infraction-sch')
 const mongo = require('../mongo')
 
 module.exports = client => {
     const checkMutes = async () => {
         const now = new Date()
         const conditional = {
+            type: "mute",
             permanent: false, 
+            active: true,
             expires: {
                 $lt: now
           ***REMOVED***
-            active: true
         }
 
-        await mongo().then(async (mongoose) => {
-            const results = await muteSchema.find(conditional)
+        const results = await infractionSch.find(conditional)
 
-            //Unmute currently muted users whose mute has expired 
-            if (results && results.length) {
-                for (const result of results) {
-                    const { guildID, userID, userTag } = result
-                    const guild = client.guilds.cache.get(guildID)
-                    try {
-                        const member = (await guild.members.fetch()).get(userID)
-                        const mutedRole = guild.roles.cache.find(role => {
-                            return role.name.toLowerCase() === 'muted'
-                        })
+        //Unmute currently muted users whose mute has expired 
+        if (results && results.length) {
+            for (const result of results) {
+                const { guildID, userID } = result
+                const guild = client.guilds.cache.get(guildID)
+                const member = (await guild.members.fetch()).get(userID)
+                const mutedRole = guild.roles.cache.find(role => {
+                    return role.name.toLowerCase() === 'muted'
+                })
 
-                        member.roles.remove(mutedRole)
-                        console.log(`Unmuted ${userTag} in db for server ${guild}`)
-                        await muteSchema.updateMany(conditional, {
-                            active: false,
-                        })
-                    } finally {
-                        mongoose.connection.close()
-                    }
-                }
+                member.roles.remove(mutedRole)
+                await infractionSch.updateMany(conditional, {
+                    active: false,
+                })
             }
-        })
+        }
 
         //checks for mutes every 5 minutes
         setTimeout(checkMutes, 1000 * 5)
@@ -47,10 +41,11 @@ module.exports = client => {
     //checks if joining member currently muted
     client.on('guildMemberAdd', async member => {
         const { guild, id } = member
-        const currentMute = await muteSchema.findOne({
+        const currentMute = await infractionSch.findOne({
             guildID: guild.id,
             userID: id,
-            active: true
+            type: "mute",
+            active: true    
         })
 
         if (currentMute) {
@@ -60,7 +55,6 @@ module.exports = client => {
 
             if (role) {
                 member.roles.add(role)
-                console.log(`User ${member.tag} rejoined ${guild} and was muted.`)
             }
         }
     })

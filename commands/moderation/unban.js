@@ -1,6 +1,7 @@
 const { Command } = require('discord.js-commando')
-const mongo = require('../../features/mongo')
-const banSchema = require('../../features/schemas/ban-sch')
+
+const util = require('../../features/util')
+const infractionSch = require('../../features/schemas/infraction-sch')
 
 module.exports = class unBanCommand extends Command {
     constructor(client) {
@@ -33,32 +34,35 @@ module.exports = class unBanCommand extends Command {
 
     async run(message, { userID }) {
         const { guild } = message
-        await mongo().then(async (mongoose) => {
-            const bannedUser = (await guild.bans.fetch()).get(userID)
-            if (bannedUser) {
-                try {
-                    const results = await banSchema.updateMany({
-                        guildID: guild.id,
-                        userID,
-                        active: true,
-                  ***REMOVED*** {
-                        active: false,
-                    })
+        const bannedUser = (await guild.bans.fetch()).get(userID)
+        let result
+        if(!bannedUser) {
+            message.channel.send({ embed: util.embedify(
+                'RED',
+                guild.name, 
+                guild.iconURL(),
+                `Could not find banned user \`${userID}\``,
+            ) })
 
-                    const bannedUser = (await guild.bans.fetch()).get(userID)
-                    if (bannedUser) {
-                        guild.bans.fetch().then(bans => {
-                            guild.members.unban(userID)
-                            console.log(`Unbanned ${userID} in server ${guild.name}`)
-                            message.channel.send(`Unbanned user \`${userID}\``)
-                        })
-                    }
-                } finally {
-                    mongoose.connection.close()
-                }
-            } else {
-                message.say(`Could not find user \`${userID}\`. Please use a valid ID.`)
-            }
+            return
+        }
+
+        message.channel.send({ embed: util.embedify(
+            'GREEN',
+            guild.name, 
+            guild.iconURL(),
+            `Unbanned \`${userID}\``, 
+        ) })
+
+        guild.members.unban(userID)
+
+        await infractionSch.updateMany({
+            guildID: guild.id,
+            userID,
+            type: "ban", 
+            active: true,
+      ***REMOVED*** {
+            active: false,
         })
     }
 }

@@ -1,8 +1,7 @@
 const { Command } = require('discord.js-commando')
 
 const util = require('../../features/util')
-const mongo = require('../../features/mongo')
-const muteSchema = require('../../features/schemas/mute-sch')
+const infractionSch = require('../../features/schemas/infraction-sch')
 
 const { oneLine } = require('common-tags')
 
@@ -21,7 +20,7 @@ module.exports = class UnMuteCommand extends Command {
                 'unmute @Bob'
             ],
             clientPermissions: [
-                'MUTE_MEMBERS'
+                'MANAGE_ROLES'
             ],
             userPermissions: [
                 'MUTE_MEMBERS'
@@ -39,50 +38,75 @@ module.exports = class UnMuteCommand extends Command {
 
     async run(message, { user }) {
         const { guild } = message
-        let id = await util.getUserID(message, user)
-        if(id === 'noMemberFound') return
-        let member
-        if(id != 'noIDMemberFound') {
+        let member, id = await util.getUserID(message, user)
+        if(id === 'noMemberFound') {
+            return
+        } if(id != 'noIDMemberFound') {
             member = await message.guild.members.fetch(id)
         } else {
+            message.channel.send({ embed: util.embedify(
+                'RED',
+                message.author.username, 
+                message.author.displayAvatarURL(),
+                `\`${user}\` is not a server member.`
+            ) })
+
+            return
+        }
+        
+        //Remove muted role
+        const mutedRole = guild.roles.cache.find(role => {
+            return role.name.toLowerCase() === 'muted'
+        })
+
+        if (!mutedRole) {
+            message.channel.send({ embed: util.embedify(
+                'RED',
+                message.author.username, 
+                message.author.displayAvatarURL(),
+                'Please create a `muted` role!',
+                'Case insensitive.'
+            ) })
+
+            return 
+        }
+        
+        member.roles.remove(mutedRole)
+
+        //Check if there is an active mute 
+        const activeMutes = await infractionSch.find({
+            userID: member.id,
+            guildID: guild.id,
+            type: "mute",
+            active: true
+        })  
+
+        if (!activeMutes.length) {
+            message.channel.send({ embed: util.embedify(
+                'RED',
+                member.user.tag, 
+                member.user.displayAvatarURL(),
+                `Could not find any active mutes for this user.`,
+                member.user.id
+            ) })
+
             return
         }
 
-        await mongo().then(async (mongoose) => {
-            try {
+        message.channel.send({ embed: util.embedify(
+            'GREEN',
+            guild.name, 
+            guild.iconURL(),
+            `Unmuted <@!${member.user.id}>`, 
+        ) })
 
-                //Check if there is an active mute 
-                const activeMutes = await muteSchema.find({
-                    userID: member.id,
-                    guildID: guild.id,
-                    active: true
-                })  
-
-                if (!activeMutes.length) {
-                    return message.reply('That user is not muted')
-                }
-
-                const result = await muteSchema.updateMany({
-                    userID: member.id,
-                    guildID: guild.id,
-                    active: true
-              ***REMOVED*** {
-                    active: false
-                })
-
-                const mutedRole = guild.roles.cache.find(role => {
-                    return role.name.toLowerCase() === 'muted'
-                })
-
-                if (result) {
-                    member.roles.remove(mutedRole)
-                    message.channel.send(`Unmuted **${member.user.tag}**.`)
-                } else {
-                    message.channel.send(`**<@${member.id}>** could not be unmuted.`)
-                }
-            } finally {
-                mongoose.connection.close()
-            }
+        await infractionSch.updateMany({
+            userID: member.id,
+            guildID: guild.id,
+            type: "mute",
+            active: true
+      ***REMOVED*** {
+            active: false
         })
     }
 }

@@ -1,8 +1,7 @@
 const { Command } = require('discord.js-commando')
 
 const util = require('../../features/util')
-const mongo = require('../../features/mongo')
-const warnSch = require('../../features/schemas/warn-sch')
+const infractionSch = require('../../features/schemas/infraction-sch')
 
 module.exports = class WarnCommand extends Command {
     constructor(client) {
@@ -43,33 +42,48 @@ module.exports = class WarnCommand extends Command {
 
     async run(message, { user, reason }) {
         const { guild, author: staff } = message
-        let id = await util.getUserID(message, user)
-        if(id === 'noMemberFound') return
-        let member
-        if(id != 'noIDMemberFound') {
+        let member, result, id = await util.getUserID(message, user)
+        if(id === 'noMemberFound') {
+            return
+        } if(id != 'noIDMemberFound') {
             member = await message.guild.members.fetch(id)
         } else {
-            message.reply(`\`${user}\` is not a server member.`)
+            message.channel.send({ embed: util.embedify(
+                'RED',
+                message.author.username, 
+                message.author.displayAvatarURL(),
+                `\`${user}\` is not a server member.`
+            ) })
+
             return
         }
 
-        message.channel.send(`Warned **${member.user.tag}** for \`${reason}\``)
-
-        await mongo().then(async (mongoose) => {
-            try {
-                await new warnSch({
-                    guildID: guild.id, 
-                    userID: member.id, 
-                    userTag: member.user.tag, 
-                    staffID: staff.id, 
-                    staffTag: staff.tag, 
-                    reason
-                }).save()
-            } catch(err) {
-                console.error(err)
-            } finally {
-                mongoose.connection.close()
-            }                              
+        //Kick, record, and send message    
+        await member.send({ embed: util.embedify(
+            'RED',
+            guild.name, 
+            guild.iconURL(),
+            `You have been **warned** for \`${reason}\`.`
+        ) }).catch((err) => {
+            result = `Could not dm ${member.user.tag}.\n\`${err}\``
         })
+
+        message.channel.send({ embed: util.embedify(
+            'GREEN',
+            `Warned ${member.user.tag}`, 
+            member.user.displayAvatarURL(),
+            `**Reason**: \`${reason}\``,
+            result ? result : member.user.id
+        ) })
+
+        await new infractionSch({
+            guildID: guild.id, 
+            userID: member.id, 
+            userTag: member.user.tag, 
+            staffID: staff.id, 
+            staffTag: staff.tag, 
+            type: this.name,
+            reason
+        }).save()
     }
 }
