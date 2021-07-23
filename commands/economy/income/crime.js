@@ -26,7 +26,7 @@ module.exports = class CrimeCommand extends Command {
             message.channel.send({
                 embed: util.embedify(
                     'RED',
-                    message.author.tag,
+                    message.author.username,
                     message.author.displayAvatarURL(),
                     `You were caught commiting a crime and fined ${cSymbol}${fineAmount.toLocaleString()}`
                 )
@@ -38,7 +38,7 @@ module.exports = class CrimeCommand extends Command {
         message.channel.send({
             embed: util.embedify(
                 'GREEN',
-                message.author.tag,
+                message.author.username,
                 message.author.displayAvatarURL(),
                 `You commited a crime and earned ${cSymbol}${amount.toLocaleString()}!`
             )

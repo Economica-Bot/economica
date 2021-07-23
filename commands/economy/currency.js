@@ -43,22 +43,14 @@ module.exports = class CurrencyCommand extends Command {
     async run(message, { currency }) {
         let color, description, footer
         const currCurrencySymbol = await util.getCurrencySymbol(message.guild.id)
-
-        //outputs the current currency symbol
         if (!currency) {
             color = 'BLURPLE'
             description = `The currency symbol is: ${currCurrencySymbol}`
             footer = `use ${message.guild.commandPrefix}${this.format} to change currency symbol`
-        }
-
-        // Errors if the new symbol is the same
-        else if (currency === currCurrencySymbol) {
+        } else if (currency === currCurrencySymbol) {
             color = 'RED'
             description = `${currency} is already the server currency symbol.`
-        }
-
-        // Sets a new currency symbol
-        else {
+        } else {
             color = 'GREEN'
             description = `Currency symbol set to ${await util.setCurrencySymbol(message.guild.id, currency)}`
             footer = currency

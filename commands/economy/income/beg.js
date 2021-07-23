@@ -31,7 +31,7 @@ module.exports = class BegCommand extends Command {
                message.channel.send({
                     embed: util.embedify(
                          'RED',
-                         message.author.tag,
+                         message.author.username,
                          message.author.displayAvatarURL(),
                          `You begged and received nothing. :slight_frown:`
                     )
@@ -44,7 +44,7 @@ module.exports = class BegCommand extends Command {
                message.channel.send({
                     embed: util.embedify(
                          'GREEN',
-                         message.author.tag,
+                         message.author.username,
                          message.author.displayAvatarURL(),
                          `You begged and earned ${cSymbol}${amount.toLocaleString()}!`
                     )

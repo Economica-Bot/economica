@@ -1,5 +1,7 @@
 const { Command } = require('discord.js-commando')
 
+const util = require('../../features/util')
+
 module.exports = class PingCommand extends Command {
     constructor(client) {
         super(client, {
@@ -11,6 +13,13 @@ module.exports = class PingCommand extends Command {
     }
 
     async run(message) {
-        message.channel.send(`Pong! \`${new Date().getTime() - message.createdTimestamp}ms\``)
+        message.channel.send('Pinging...').then(msg => {
+            msg.edit({ content: null, embed: util.embedify(
+                'GREEN',
+                message.author.username,
+                message.author.displayAvatarURL(),
+                `Pong! \`${msg.createdTimestamp - message.createdTimestamp}ms\``,
+            ) })
+        })
     }
 }

@@ -1,4 +1,6 @@
-const { Command } = require('discord.js-commando');
+const { Command } = require('discord.js-commando')
+
+const util = require('../../features/util')
 
 module.exports = class EchoCommand extends Command {
     constructor(client) {
@@ -15,7 +17,7 @@ module.exports = class EchoCommand extends Command {
             ],
             args: [
                 {
-                    key: 'args',
+                    key: 'message',
                     prompt: 'Please enter a message to be echoed.',
                     type: 'string'
               ***REMOVED***
@@ -23,21 +25,18 @@ module.exports = class EchoCommand extends Command {
         })
     }
 
-    async run(message, args) {
-        console.log(args.args)
-        if (args.args.endsWith('true')) {
-            return message.channel.send({
-                embed: {
-                    color: '#2c2f33',
-                    author: {
-                        name: message.author.tag,
-                        icon_url: message.author.avatarURL(),
-                  ***REMOVED***
-                    description: args.args.substring(0, args.args.length - 4)
-                }
-            })
+    async run(message, { text }) {
+        if (text.endsWith('true')) {
+            message.channel.send({ embed: util.embedify(
+                'BLURPLE',
+                message.author.username, 
+                message.author.displayAvatarURL(),
+                text.slice(-4)
+            ) })
+
+            return
         }
 
-        return message.channel.send(args.args);
+        message.channel.send(text)
     }
 }

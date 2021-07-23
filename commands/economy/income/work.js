@@ -25,7 +25,7 @@ module.exports = class WorkCommand extends Command {
             message.channel.send({
                 embed: util.embedify(
                     'GREEN',
-                    message.author.tag,
+                    message.author.username,
                     message.author.displayAvatarURL(),
                     `You worked and earned ${currencySymbol}${amount.toLocaleString()}!`
                 )

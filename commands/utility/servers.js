@@ -1,6 +1,8 @@
 const { Command } = require('discord.js-commando')
 const Discord = require('discord.js')
 
+const util = require('../../features/util')
+
 module.exports = class ServersCommand extends Command {
     constructor(client) {
         super(client, {
@@ -18,20 +20,21 @@ module.exports = class ServersCommand extends Command {
     }
 
     async run(message, args) {
-        let serversEmbed = new Discord.MessageEmbed()
-            .setTitle('Server List')
-            .setFooter('Wow, much numbers')
-            .setColor(1128456)
-            .setTimestamp()
+        let serverCount = 0, memberCount = 0, description = ''
 
         this.client.guilds.cache.forEach((guild) => {
-            serversEmbed.addFields(
-                {
-                    name:`**${guild}**`,
-                    value: `Member Count: \`${guild.memberCount}\``
-                }
-            )
+            serverCount++
+            memberCount += guild.memberCount 
+            description += `**${guild}** | \`${guild.memberCount.toLocaleString()}\` Members\n`
         })
-        message.channel.send({ embed: serversEmbed })
+
+
+        message.channel.send({ embed: util.embedify(
+            'BLURPLE',
+            'Server List',
+            this.client.user.displayAvatarURL(),
+            description,
+            `Servercount: ${serverCount.toLocaleString()} | Membercount: ${memberCount.toLocaleString()}`
+        ).setTimestamp() })
     }
 }

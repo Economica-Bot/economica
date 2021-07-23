@@ -17,8 +17,6 @@ module.exports = class BalanceCommand extends Command {
             guildOnly: true,
             description: 'View all income commands and their settings.',
             details: 'View the profit range, fine range, cooldown, fine chance, and more of all income commands in this guild.',
-            argsPromptLimit: 0,
-            argsCount: 0
         })
     }
 
