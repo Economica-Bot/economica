@@ -109,11 +109,7 @@ module.exports = class LeaderBoardCommand extends Command {
 
         let page = 0
         this.client.on('interaction', async interaction => {
-            if(interaction.user !== message.author) {
-                return
-            }
-            
-            if(interaction.componentType === 'BUTTON' && interaction.message.id === interactee.id) {
+            if(interaction.componentType === 'BUTTON' && interaction.message.id === interactee.id && interaction.user === message.author) {
                 if(page < embeds.length - 1 && page >= 0 && interaction.customID === 'next_page') {
                     page++
                     if(page == embeds.length - 1) {
