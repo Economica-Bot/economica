@@ -3,7 +3,7 @@ const util = require('../../../features/util')
 const { income } = require('../../../config.json')
 const ms = require('ms')
 
-module.exports = class BalanceCommand extends Command {
+module.exports = class IncomeCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'income',
@@ -21,25 +21,24 @@ module.exports = class BalanceCommand extends Command {
     }
 
     async run(message) {
-        const cSymbol = await util.getCurrencySymbol(message.guild.id)
-
         let incomeEmbed = util.embedify(
             'BLURPLE',
             `${message.guild.name}'s Income Commands`,
-            message.guild.iconURL()
+            message.guild.iconURL(),
+            'Use `setincome <cmd>` to configure income commands.'
         )
+
         for (const command in income) {
-            let description = ''; let properties = {}
-            properties[command] = await util.getCommandStats(message.guild.id, `${command}`)
-            description += `Min: ${cSymbol}${properties[command].min}\n`
-            description += `Max: ${cSymbol}${properties[command].max}\n`
-            description += `Cooldown: ${ms(properties[command].cooldown)}\n`
-            if (properties[command].chance) description += `Fail Chance: ${properties[command].chance}%\n`
-            if (properties[command].minFine) description += `minFine: ${cSymbol}${properties[command].minFine}\n`
-            if (properties[command].maxFine) description += `maxFine: ${cSymbol}${properties[command].maxFine}\n`
+            let properties = await util.getCommandStats(message.guild.id, command)
+            let description = '```'
+            for(const property in properties) {
+                description += `${property}: ${properties[property]}\n`
+            }
+
             incomeEmbed.addField(
                 `__${command}__`,
-                description
+                `${description}\`\`\``, 
+                true
             )
         }
 

@@ -38,8 +38,7 @@ module.exports = class LeaderBoardCommand extends Command {
                 'RED',
                 message.author.username, 
                 message.author.displayAvatarURL(),
-                `Invalid argument: \`${type}\``,
-                `Format: \`${this.format}\``
+                `Invalid argument: \`${type}\`\nFormat: \`${this.format}\``
             ) })
             return
         }
@@ -75,7 +74,7 @@ module.exports = class LeaderBoardCommand extends Command {
                 // Fill the length of each page.
                 for(let i = 0; i < entries; i++) {
                     try {
-                        embeds[embeds.length-1].addField(`#${rank++} ${message.guild.members.cache.get(balances[balCounter].userID).user.tag}`, `${currencySymbol}${balances[balCounter++][type]}`)
+                        embeds[embeds.length-1].addField(`#${rank++} ${message.guild.members.cache.get(balances[balCounter].userID).user.tag}`, `${currencySymbol}${balances[balCounter++][type].toLocaleString()}`)
                     } catch (err) {
                         balCounter++
                         embeds[0].setDescription(`\`0\` users on leaderboard.`)
@@ -110,6 +109,10 @@ module.exports = class LeaderBoardCommand extends Command {
 
         let page = 0
         this.client.on('interaction', async interaction => {
+            if(interaction.user !== message.author) {
+                return
+            }
+            
             if(interaction.componentType === 'BUTTON' && interaction.message.id === interactee.id) {
                 if(page < embeds.length - 1 && page >= 0 && interaction.customID === 'next_page') {
                     page++

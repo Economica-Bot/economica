@@ -44,9 +44,9 @@ module.exports = class PayCommand extends Command {
             amount = parseInt(amount)
             if(amount < 1 || wallet < amount) {
                 color = 'RED'
-                description = `Invalid amount: \`${amount}\`\nInsufficient wallet: ${cSymbol}${wallet.toLocaleString()}`
+                description = `Invalid amount: \`${amount.toLocaleString()}\`\nInsufficient wallet: ${cSymbol}${wallet.toLocaleString()}`
             } else {
-                description = `Paid ${user.username} ${cSymbol}${amount}`
+                description = `Paid ${user.username} ${cSymbol}${amount.toLocaleString()}`
                 await util.setEconInfo(guild.id, author.id, -amount, 0, -amount)
                 await util.setEconInfo(guild.id, user.id, amount, 0, amount)
             }
@@ -61,7 +61,7 @@ module.exports = class PayCommand extends Command {
             }
         } else {
             color = 'RED'
-            description = `Invalid amount: \`${amount}\`\nFormat: \`${this.format}\``
+            description = `Invalid amount: \`${amount.toLocaleString()}\`\nFormat: \`${this.format}\``
         }
 
         message.channel.send({ embed: util.embedify(

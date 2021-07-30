@@ -46,7 +46,6 @@ module.exports = class CurrencyCommand extends Command {
         if (!currency) {
             color = 'BLURPLE'
             description = `The currency symbol is: ${currCurrencySymbol}`
-            footer = `use ${message.guild.commandPrefix}${this.format} to change currency symbol`
         } else if (currency === currCurrencySymbol) {
             color = 'RED'
             description = `${currency} is already the server currency symbol.`

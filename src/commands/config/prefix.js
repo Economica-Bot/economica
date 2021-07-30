@@ -37,47 +37,24 @@ module.exports = class PrefixCommand extends Command {
     async run(message, { prefix }) {
         const { guild } = message
         let color, description, footer
-        const currPrefix = await util.getPrefix(message.guild.id)
+        const currPrefix = await util.getPrefix(guild.id)
 
         //outputs the current prefix
         if (!prefix) {
-            color = 'BLURPLE',
-                description = `The command prefix is: \`${currPrefix}\``,
-                footer = `use ${message.guild.commandPrefix}${prefix}${this.format} to change prefix`
+            color = 'BLURPLE'
+            description = `The command prefix is: \`${currPrefix}\``
         } else {
-            let econManagerRole = guild.roles.cache.find(role => {
-                return role.name.toLowerCase() === 'economy manager'
-            })
-
-            if (!econManagerRole) {
-                message.reply('Please create an \`Economy Manager\` role!')
-                return
+            //errors if the new prefix is the same
+            if (prefix === currPrefix) {
+                color = 'RED',
+                    description = `\`${prefix}\` is already the command prefix.`
             }
 
-            if (!message.member.roles.cache.has(econManagerRole.id)) {
-                message.channel.send({
-                    embed: util.embedify(
-                        'RED',
-                        message.author.username,
-                        message.author.displayAvatarURL(),
-                        `You must have the <@&${econManagerRole.id}> role.`
-                    )
-                })
-
-                return
+            //sets a new prefix 
+            else {
+                color = 'GREEN'
+                description = `Command prefix set to \`${await util.setPrefix(guild, prefix)}\``
             }
-        }
-
-        //errors if the new prefix is the same
-        if (prefix === currPrefix) {
-            color = 'RED',
-                description = `\`${prefix}\` is already the command prefix.`
-        }
-
-        //sets a new prefix 
-        else {
-            color = 'GREEN'
-            description = `Command prefix set to \`${await util.setPrefix(message, prefix)}\``
         }
 
         message.channel.send({

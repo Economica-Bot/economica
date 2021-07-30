@@ -22,6 +22,7 @@ module.exports = class ListingCommand extends Command {
                             but will lose them if the listing is deleted.
                             Only economy managers may delete listings.`,
             format: '<view | create | delete | enable | disable> [..args]',
+            argsSingleQuotes: true,
             args: [
                 {
                     key: 'param',
@@ -82,6 +83,7 @@ module.exports = class ListingCommand extends Command {
             message.channel.send({ embed: listingsEmbed })
             return
         } else if(param === 'create') {
+            console.log(typeof args)
             let item, price, description
             args = args.split(' ')
             item = args[0]

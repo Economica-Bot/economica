@@ -37,6 +37,22 @@ module.exports = class ClearChannelCommand extends Command {
     }
 
     async run(message, { msgCount }) {
-        util.deleteMessages(message, msgCount)
+        if (msgCount > 100 || msgCount < 2) {
+            message.channel.send(`Invalid Length: \`${msgCount}\` out of bounds.`).then((message) => {
+                setTimeout(() => message.delete(), 4000)
+            })
+    
+            return
+        }
+    
+        await message.channel.bulkDelete(msgCount).catch((err) => {
+            message.channel.send({ embed: this.embedify('RED', message.author, message.author.displayAvatarURL(), `${err}`) }).then((message) => {
+                setTimeout(() => message.delete(), 4000)
+            })
+        })
+    
+        message.channel.send({ embed: this.embedify('GREEN', message.author.username, message.author.displayAvatarURL(), `Deleted ${msgCount} messages.`) }).then((message) => {
+            setTimeout(() => message.delete(), 4000)
+        })
     }
 }
