@@ -91,7 +91,7 @@ module.exports = class InfractionInfoCommand extends Command {
         const row = new MessageActionRow()
         const infractionTypes = [
             {
-                type: 'warn', formal: 'Warned', logo: 'Warns ⚠', had: false
+                type: 'warn', formal: 'Warned', logo: 'Warns ⚠️', had: false
           ***REMOVED*** 
             {
                 type: 'mute', formal: 'Muted', logo: 'Mutes 🎤', had: false
@@ -157,7 +157,7 @@ module.exports = class InfractionInfoCommand extends Command {
 
         const interactee = await message.channel.send(msg)
         this.client.on('interaction', async interaction => {
-            if(interaction.componentType === 'BUTTON' && interaction.message.id === interactee.id) {
+            if(interaction.componentType === 'BUTTON' && interaction.message.id === interactee.id && interaction.user === message.author) {
                 let title = '', description = ''
                 infractions.forEach(infraction => {
                     if(infraction.type === interaction.customID) {
