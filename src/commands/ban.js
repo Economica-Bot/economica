@@ -16,13 +16,15 @@ module.exports = {
     ],
     global: true,
     async run(interaction) {
+        const guild = await client.guilds.cache.get(interaction.guild_id)
+        const member = await guild.members.cache.get(interaction.data.options[0].value)
+        const author = await guild.members.cache.get(interaction.member.user.id)
         let content = embed = result = null, reason = interaction.data.options[1]?.value ?? 'No reason provided'
-        const guild = await client.guilds.fetch(interaction.guild_id)
-        const member = await guild.members.fetch(interaction.data.options[0].value)
-        const author = await guild.members.fetch(interaction.member.user.id)
 
         if(!author.permissions.has('BAN_MEMBERS')) {
             embed = util.embedify('RED', interaction.member.user.username, '', `Missing Permission\n\`BAN_MEMBERS\``)
+        } else if (member === author) {
+            embed = util.embedify('RED', interaction.member.user.username, '', 'You cannot ban yourself!')
         } else if (member.permissions.has('BAN_MEMBERS') && !author.permissions.has('ADMINISTRATOR')) {
             embed = util.embedify('RED', interaction.member.user.username, '', `Missing Permission\n\`ADMINISTRATOR\``)
         } else if (member.permissions.has('ADMINISTRATOR')) {
@@ -44,8 +46,8 @@ module.exports = {
         await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
             type: 4,
             data: {
-            content,
-            embeds: [ embed ],
+                content,
+                embeds: [ embed ],
           ***REMOVED***
         }})
     }
