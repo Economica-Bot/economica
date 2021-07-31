@@ -1,8 +1,10 @@
 const Discord = require('discord.js')
+
 const fs = require('fs')
 const util = require('./util/util')
+const mongo = require('./util/mongo/mongo')
 
-const { alt_token, application_id, guild_id } = require('./config.json')
+require('dotenv').config()
 
 const client = new Discord.Client({
     intents: [
@@ -20,6 +22,7 @@ client.commands = new Discord.Collection()
 global.client = client
 global.Discord = Discord
 global.util = util
+global.mongo = mongo
 
 client.on('ready', async () => {
     console.log(`${client.user.tag} Ready`)
@@ -27,7 +30,7 @@ client.on('ready', async () => {
     const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
     for(const commandFile of commandFiles) {
         const command = require(`./commands/${commandFile}`)
-        client.api.applications(application_id).guilds(guild_id).commands.post({data: {
+        client.api.applications(process.env.APPLICATION_ID).guilds(process.env.GUILD_ID).commands.post({data: {
             name: command.name,
             description: command.description,
             options: command.options
@@ -36,6 +39,13 @@ client.on('ready', async () => {
         client.commands.set(command.name, command)
         console.log(`${command.name} command registered`)
     }
+
+    await mongo().then(async () => {
+        console.log('Connected to DB')
+    })
+
+    const checkMutes = require('./util/features/check-mute')
+    checkMutes(client)
 })
 
 client.ws.on('INTERACTION_CREATE', async interaction => {
@@ -52,4 +62,4 @@ client.ws.on('INTERACTION_CREATE', async interaction => {
     }   
 })
 
-client.login(alt_token)
+client.login(process.env.ECON_TOKEN)
