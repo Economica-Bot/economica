@@ -1,54 +1,55 @@
-const { CommandoClient } = require('discord.js-commando')
-const { Intents } = require('discord.js')
+const Discord = require('discord.js')
+const fs = require('fs')
+const util = require('./util/util')
 
-const config = require('./config.json')
-const path = require('path')
-const mongo = require('./features/mongo')
+const { alt_token, application_id, guild_id } = require('./config.json')
 
-const allIntents = Intents.ALL
-
-const client = new CommandoClient({
-    commandPrefix: config.prefix,
-    nonCommandEditable: false,
-    owner: config.botAuth.admin_id,
-    invite: 'https://discord.gg/R5jvSarddd',
-    unknownCommandResponse: false,
-    disableEveryone: false,
-    fetchAllMembers: true,
-    intents: allIntents
+const client = new Discord.Client({
+    intents: [
+        'GUILDS',
+        'GUILD_MESSAGES', 
+        'GUILD_BANS',
+        'GUILD_MEMBERS',
+        'GUILD_MESSAGES',
+        'DIRECT_MESSAGES',
+    ]
 })
 
-module.exports = client
+client.commands = new Discord.Collection()
 
-client.registry
-    .registerDefaultTypes()
-    .registerGroups([
-        ['moderation', 'Moderation'],
-        ['economy', 'Economy'],
-        ['market', 'Market'],
-        ['shop', 'Shop'],
-        ['income', 'Income'],
-        ['util', 'Utility'],
-        ['config', 'Config & Setup']
-    ])
-    .registerCommandsIn(
-        path.join(__dirname, 'commands'), 
-    )
-    .registerCommandsIn(
-        path.join(__dirname, 'commands/economy')
-    )
+global.client = client
+global.Discord = Discord
+global.util = util
 
 client.on('ready', async () => {
+    console.log(`${client.user.tag} Ready`)
 
-    console.log('The client is ready!')
-    await mongo().then(async () => {
-        console.log('Connected to DB')
-    })
+    const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
+    for(const commandFile of commandFiles) {
+        const command = require(`./commands/${commandFile}`)
+        client.api.applications(application_id).guilds(guild_id).commands.post({data: {
+            name: command.name,
+            description: command.description,
+            options: command.options
+        }})
 
-    const checkMutes = require('./features/features/check-mute')
-    const { initPrefix } = require('./features/util')
-    checkMutes(client)
-    initPrefix(client)
+        client.commands.set(command.name, command)
+        console.log(`${command.name} command registered`)
+    }
 })
 
-client.login(config.useAltToken ? config.alt_token : config.token)
+client.ws.on('INTERACTION_CREATE', async interaction => {
+    try {
+        client.commands.get(interaction.data.name).run(interaction)
+    } catch (err) {
+        console.error(err)
+        client.api.interactions(interaction.id, interation.token).callback.post({ data: {
+            type: 4, 
+            data: {
+                content: 'Error'
+            }
+        }})
+    }   
+})
+
+client.login(alt_token)

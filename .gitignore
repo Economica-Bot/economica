@@ -2,3 +2,5 @@
 node_modules
 txt
 commando-commands/utility/test.js
+.env
+config.json
