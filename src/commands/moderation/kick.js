@@ -15,18 +15,16 @@ module.exports = {
         }    
     ],
     global: true,
-    async run(interaction) {
-        let content = embed = result = null, reason = interaction.data.options[1]?.value ?? 'No reason provided'
-        const guild = await client.guilds.fetch(interaction.guild_id)
-        const member = await guild.members.fetch(interaction.data.options[0].value)
-        const author = await guild.members.fetch(interaction.member.user.id)
+    async run(interaction, guild, author, args) {
+        let content = embed = result = null, reason = args[1]?.value ?? 'No reason provided'
+        const member = await guild.members.cache.get(args[0].value)
 
         if(!author.permissions.has('KICK_MEMBERS')) {
-            embed = util.embedify('RED', interaction.member.user.username, '', `Missing Permission\n\`KICK_MEMBERS\``)
+            embed = util.embedify('RED', author.user.username, '', `Missing Permission\n\`KICK_MEMBERS\``)
         } else if (member.permissions.has('KICK_MEMBERS') && !author.permissions.has('ADMINISTRATOR')) {
-            embed = util.embedify('RED', interaction.member.user.username, '', `Missing Permission\n\`ADMINISTRATOR\``)
+            embed = util.embedify('RED', author.user.username, '', `Missing Permission\n\`ADMINISTRATOR\``)
         } else if (member.permissions.has('ADMINISTRATOR')) {
-            embed = util.embedify('RED', interaction.member.user.username, '', `Member is Not Bannable\n\`ADMINISTRATOR\``)
+            embed = util.embedify('RED', author.user.username, '', `Member is Not Bannable\n\`ADMINISTRATOR\``)
         } else {
             //Ban, record, and send message
             await member.send({ embeds: [ util.embedify('RED', guild.name, guild.iconURL(), `You have been **kicked** for \`${reason}\`.`) ] })

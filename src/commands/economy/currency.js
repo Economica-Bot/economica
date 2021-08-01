@@ -9,14 +9,9 @@ module.exports = {
             type: 3,
         }
     ],
-    async run(interaction) {
-        const guild = await client.guilds.cache.get(interaction.guild_id)
-        let color, description, footer, embed
-
+    async run(interaction, guild, author, args) {
+        let color, description, footer, embed, currency = args?.[0]?.value
         const currCurrencySymbol = await util.getCurrencySymbol(guild.id)
-        let currency = interaction.data.options?.[0]?.value
-
-
         if (!currency) {
             color = 'BLURPLE'
             description = `The currency symbol is: ${currCurrencySymbol}`

@@ -12,14 +12,12 @@ module.exports = {
         }
     ],
     format: '<amount | all>',
-    async run(interaction) {
-        const guild = await client.guilds.cache.get(interaction.guild_id)
-        const author = await guild.members.cache.get(interaction.member.user.id)
+    async run(interaction, guild, author, args) {
         let color = 'GREEN', description = '', embed
 
         const cSymbol = await util.getCurrencySymbol(guild.id)
         const { wallet } = await util.getEconInfo(guild.id, author.user.id)
-        const amount = interaction.data.options[0].value === 'all' ? wallet : parseInt(interaction.data.options[0].value)
+        const amount = args[0].value === 'all' ? wallet : parseInt(args[0].value)
 
         if(amount) {
             if (amount < 1 || amount > wallet) {

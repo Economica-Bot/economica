@@ -1,5 +1,8 @@
 module.exports = {
     name: 'bal',
+    aliases: [
+        'balance'
+    ],
     description: 'View a balance.',
     options: [
         {
@@ -9,10 +12,9 @@ module.exports = {
         }
     ], 
     global: true, 
-    async run(interaction) {
-        const guild = await client.guilds.fetch(interaction.guild_id)
-        const member = await guild.members.cache.get(interaction.data.options?.[0].value) 
-                    ?? await guild.members.cache.get(interaction.member.user.id)
+    async run(interaction, guild, author, args) {
+        const member = await guild.members.cache.get(args?.[0].value) 
+                    ?? await guild.members.cache.get(author.user.id)
 
         const cSymbol = await util.getCurrencySymbol(guild.id)
         const { wallet, treasury, networth, rank } = await util.getEconInfo(guild.id, member.user.id)
