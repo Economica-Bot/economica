@@ -1,6 +1,13 @@
+const ms = require('ms');
+
 const config = require('../config.json')
+
 const economySchema = require('../util/mongo/schemas/economy-sch')
 const guildSettingSchema = require('../util/mongo/schemas/guild-settings-sch')
+const incomeSchema = require('../util/mongo/schemas/income-sch')
+const infractionSchema = require('../util/mongo/schemas/infraction-sch')
+const inventorySchema = require('../util/mongo/schemas/inventory-sch')
+const marketItemSchema = require('../util/mongo/schemas/market-item-sch')
 
 /**
  * Returns a message embed object. 
@@ -131,4 +138,147 @@ module.exports.getEconInfo = async (guildID, userID) => {
     })
 
     return currency
+}
+
+/**
+ * Updates the min and max payout for the specified income command
+ * @param {string} guildID - Guild id. 
+ * @param {string} command - Income command.
+ * @param {object} properties - Command properties.
+ */
+ module.exports.setCommandStats = async (guildID, command, properties = {}) => {
+    await incomeSchema.findOneAndUpdate({
+        guildID
+  ***REMOVED*** {
+        $set: {
+            [command]: properties
+        }
+  ***REMOVED*** {
+        upsert: true,
+        new: true
+    }).exec()
+
+    return { command: properties }
+}
+
+/**
+ * Returns the specified income command's min and max payout values
+ * @param {string} guildID - The id of the guild.
+ * @param {string} command - The type of income command. 
+ * @returns {properties} Properties with config taking preference.
+ */
+module.exports.getCommandStats = async (guildID, command) => {
+    const result = await incomeSchema.findOne({
+        guildID,
+        [command]: {
+            $exists: true
+        } 
+    })
+
+    let properties = config.income[command]
+
+    for(const property in properties) {
+        if(result?.[command]?.[property]) {
+            properties[property] = result[command][property]
+        }
+    }
+
+    return properties
+}
+
+/**
+ * returns the user's properties of the specified command
+ * @param {String} guildID - Guild id.
+ * @param {String} userID - User id.
+ * @param {String} command - Command name.
+ * @returns {uProperties} Properties with config taking preference.
+ */
+module.exports.getUserCommandStats = async (guildID, userID, command) => {
+    let result = await economySchema.findOne({
+        guildID,
+        userID
+    })
+
+    result = result.commands?.[command]
+    let properties = config.uCommandStats?.[command]
+    for(const property in properties) {
+        if(result?.[property])
+        properties[property] = result[property]
+    }
+
+    return properties
+}
+
+/**
+ * Updates all specified properties of the command type. 
+ * @param {string} guildID - Guild id.
+ * @param {string} userID - User id.
+ * @param {string} type - Income command.
+ * @param {object} properties - Command properties
+ */
+module.exports.setUserCommandStats = async (guildID, userID, command, properties) => {
+    const key = `commands.${command}`
+    await economySchema.findOneAndUpdate({
+        guildID, 
+        userID
+  ***REMOVED*** {
+        $set: {
+            [key]: properties
+        }
+  ***REMOVED*** {
+        new: true,
+        upsert: true
+    })
+}
+
+/**
+ * @param {Number} min - min value in range
+ * @param {Number} max - max value in range
+ * @returns {Number} Random value between two inputs
+ */
+ module.exports.intInRange = (min, max) => {
+    return Math.ceil((Math.random() * (max - min)) + min)
+}
+
+/**
+ * Returns whether or not a command's cooldown is exhausted.
+ * @param {Message} interaction - Slash command interaction.
+ * @param {object} properties - Command properties
+ * @param {object} uProperties - User command properties
+ * @returns {boolean} 
+ */
+ module.exports.coolDown = async (interaction, properties, uProperties) => {
+    const { cooldown } = properties
+    const { timestamp } = uProperties
+    const now = new Date().getTime()
+    if (now - timestamp < cooldown) {
+        const embed = this.embedify(
+            'GREY',
+            interaction.member.user.username,
+            '',// interaction.member.user.displayAvatarURL(),
+            `:hourglass: You need to wait ${ms(cooldown - (now - timestamp))} before using this income command again!`,
+            `Cooldown: ${ms(cooldown)}`
+        )
+
+        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
+            type: 4,
+            data: {
+                embeds: [ embed ]
+            }
+        }})
+
+        return false
+    } else {
+        return true
+    }
+}
+
+/**
+ * Returns whether said income command is successful.
+ * @param {object} properties - the command properties
+ * @returns {boolean} `isSuccess` — boolean
+ */
+ module.exports.isSuccess = (properties) => {
+    const { chance } = properties
+    return this.intInRange(0, 100) < chance ? true : false
 }
