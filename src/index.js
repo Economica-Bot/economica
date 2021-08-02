@@ -5,6 +5,7 @@ const util = require('./util/util')
 const mongo = require('./util/mongo/mongo')
 
 require('dotenv').config()
+const config = require('./config.json')
 
 const client = new Discord.Client({
     intents: [
@@ -31,7 +32,7 @@ client.on('ready', async () => {
     for(const commandDirectory of commandDirectories) {
         const commandFiles = fs.readdirSync(`./commands/${commandDirectory}/`).filter(file => file.endsWith('js'))
         for(const commandFile of commandFiles) {
-            registerCommandFile(commandDirectory, commandFile)
+            client.registerCommandFile(commandDirectory, commandFile)
         }
     }
 
@@ -46,22 +47,22 @@ client.on('ready', async () => {
 client.ws.on('INTERACTION_CREATE', async interaction => {
     try {
         const command = client.commands.get(interaction.data.name) 
-                    || client.commands.find(cmd => cmd.aliases.some(u => u === interaction.data.name))
         const guild = await client.guilds.cache.get(interaction.guild_id)
         const author = await guild.members.cache.get(interaction.member.user.id)
         const args = interaction.data.options
-        const missingPermissions = command.permissions ? hasPermissions(author, command.permissions) : null
+        const missingPermissions = client.hasPermissions(author, command) 
         if(missingPermissions) {
             const embed = util.embedify(
                 'RED', 
                 author.user.username, 
                 author.user.displayAvatarURL(), 
-                `You are missing the ${missingPermissions.substring(0, missingPermissions.length - 2)} permission(s) to run this command.`
+                `You are missing the ${missingPermissions.join(', ')} permission(s) to run this command.`
             )
-            
-            say(interaction, null, embed, 64)
+
+            client.say(interaction, null, embed, 64)
             return
         }
+
         command.run(interaction, guild, author, args)
     } catch (err) {
         console.error(err)
@@ -76,7 +77,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => {
 
 client.login(process.env.ECON_TOKEN)
 
-const registerCommandFile = (commandDirectory, commandFile) => {
+client.registerCommandFile = (commandDirectory, commandFile) => {
     const command = require(`./commands/${commandDirectory}/${commandFile}`)
     client.api.applications(process.env.APPLICATION_ID).guilds(process.env.GUILD_ID).commands.post({data: {
         name: command.name,
@@ -84,32 +85,28 @@ const registerCommandFile = (commandDirectory, commandFile) => {
         options: command.options
     }})
 
-    if(command.aliases) {
-        for(const alias of command.aliases) {
-            client.api.applications(process.env.APPLICATION_ID).guilds(process.env.GUILD_ID).commands.post({data: {
-                name: alias,
-                description: command.description,
-                options: command.options
-            }})
-        }
-    }
-
     client.commands.set(command.name, command)
     console.log(`${command.name} command registered`)
 }
 
-const hasPermissions = (author, permissions) => {
-    let missingPermissions = ''
-    for(const permission of permissions) {
-        if(!author.permissions.has(permission)) {
-            missingPermissions += `\`${permission}\`, `     
+client.hasPermissions = (author, command) => {
+    let missingPermissions = []
+    if(command.permissions) {
+        for(const permission of command.permissions) {
+            if(!author.permissions.has(permission)) {
+                missingPermissions.push(`\`${permission}\``)     
+            }
         }
+    }
+
+    if(command.ownerOnly && !config.botAuth.admin_id.includes(author.user.id)) {
+        missingPermissions.push(`\`OWNER\``) 
     }
 
     return missingPermissions.length ? missingPermissions : null
 }
 
-const say = async (interaction, content = null, embed = null, flags = null) => {
+client.say = async (interaction, content = null, embed = null, flags = null) => {
     await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
         type: 4,
         data: {

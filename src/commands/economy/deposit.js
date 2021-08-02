@@ -2,16 +2,15 @@ module.exports = {
     name: 'deposit', 
     description: 'Deposit funds from your wallet to the treasury.',
     global: true, 
+    format: '<amount | all>',
     options: [
         {
             name: 'amount',
             description: 'Specify the amount you wish to deposit.',
             type: 3,
             required: true,
-            global: true
         }
     ],
-    format: '<amount | all>',
     async run(interaction, guild, author, args) {
         let color = 'GREEN', description = '', embed
 
@@ -25,11 +24,11 @@ module.exports = {
                 description = `Insufficient wallet: \`${amount}\`\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`
             } else {
                 description = `Deposited ${cSymbol}${amount.toLocaleString()}`
-                await util.setEconInfo(guild.id, author.user.id, -amount, amount, 0, false)
+                await util.setEconInfo(guild.id, author.user.id, -amount, amount, 0)
             }
         } else {
             color = 'RED'
-            description = `Invalid amount: \`${amount}\`\nFormat: \`${this.format}\``
+            description = `Invalid amount: \`${amount}\`\nFormat: \`${this.name} ${this.format}\``
         }
 
         embed = util.embedify(

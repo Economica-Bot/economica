@@ -1,9 +1,8 @@
 module.exports = {
-    name: 'bal',
-    aliases: [
-        'balance'
-    ],
+    name: 'balance',
     description: 'View a balance.',
+    global: true, 
+    format: '<user>',
     options: [
         {
             name: 'user',
@@ -11,7 +10,6 @@ module.exports = {
             type: 6
         }
     ], 
-    global: true, 
     async run(interaction, guild, author, args) {
         const member = await guild.members.cache.get(args?.[0].value) 
                     ?? await guild.members.cache.get(author.user.id)

@@ -1,8 +1,8 @@
 module.exports = {
     name: 'servers',
     description: `Get information about ${client.user.tag}'s servers`,
-    commandOptions: null, 
     global: true, 
+    commandOptions: null, 
     async run(interaction, guild, author, args) {
         let serverCount = 0, memberCount = 0, description = ''
         client.guilds.cache.forEach((guild) => {

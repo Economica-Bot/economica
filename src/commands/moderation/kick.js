@@ -1,6 +1,7 @@
 module.exports = {
     name: 'kick',
     description: 'Kicks a user',
+    global: true,
     options: [
         {
             name: 'user',
@@ -14,7 +15,6 @@ module.exports = {
             type: 3,
         }    
     ],
-    global: true,
     async run(interaction, guild, author, args) {
         let content = embed = result = null, reason = args[1]?.value ?? 'No reason provided'
         const member = await guild.members.cache.get(args[0].value)

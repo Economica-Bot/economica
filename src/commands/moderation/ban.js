@@ -20,14 +20,14 @@ module.exports = {
     global: true,
     async run(interaction, guild, author, args) {
         const member = await guild.members.cache.get(args[0].value)
-        let content = embed = result = null, reason = args[1]?.value ?? 'No reason provided'
-
-        console.log(member.bannable)
+        let content = embed = flags = result = null, reason = args[1]?.value ?? 'No reason provided'
 
         if (member === author) {
             embed = util.embedify('RED', 'ERROR', author.user.displayAvatarURL(), 'You cannot ban yourself!')
+            flags = 64
         } else if (!member.bannable) {
             embed = util.embedify('RED', 'ERROR', author.user.displayAvatarURL(), `<@!${member.user.id}> is not bannable.`)
+            flags = 64
         } else {
             //Ban, record, and send message
             await member.send({ embeds: [ util.embedify('RED', guild.name, guild.iconURL(), `You have been **banned** for \`${reason}\`.`) ] })
@@ -47,6 +47,7 @@ module.exports = {
             data: {
                 content,
                 embeds: [ embed ],
+                flags
           ***REMOVED***
         }})
     }
