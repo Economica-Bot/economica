@@ -45,6 +45,10 @@ client.on('ready', async () => {
 })
 
 client.ws.on('INTERACTION_CREATE', async interaction => {
+    if(interaction.type !== 2) {
+        return
+    }
+
     try {
         const command = client.commands.get(interaction.data.name) 
         const guild = await client.guilds.cache.get(interaction.guild_id)
@@ -69,7 +73,8 @@ client.ws.on('INTERACTION_CREATE', async interaction => {
         client.api.interactions(interaction.id, interaction.token).callback.post({ data: {
             type: 4, 
             data: {
-                content: `${err.message}`
+                content: `${err.message}`,
+                flags: 64
             }
         }})
     }   
