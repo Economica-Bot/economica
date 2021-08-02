@@ -25,6 +25,19 @@ global.Discord = Discord
 global.util = util
 global.mongo = mongo
 
+global.slashTypes = {
+    subcommand: 1,
+    subcommandGroup: 2,
+    string: 3,
+    integer: 4,
+    boolean: 5,
+    user: 6,
+    channel: 7,
+    role: 8,
+    mentionable: 9,
+    number: 10
+}
+
 client.on('ready', async () => {
     console.log(`${client.user.tag} Ready`)
 
