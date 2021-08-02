@@ -15,16 +15,19 @@ module.exports = {
             type: 3,
         }    
     ],
+    permissions: [ 
+        'KICK_MEMBERS'
+    ],
     async run(interaction, guild, author, args) {
         let content = embed = result = null, reason = args[1]?.value ?? 'No reason provided'
         const member = await guild.members.cache.get(args[0].value)
 
-        if(!author.permissions.has('KICK_MEMBERS')) {
-            embed = util.embedify('RED', author.user.username, '', `Missing Permission\n\`KICK_MEMBERS\``)
-        } else if (member.permissions.has('KICK_MEMBERS') && !author.permissions.has('ADMINISTRATOR')) {
-            embed = util.embedify('RED', author.user.username, '', `Missing Permission\n\`ADMINISTRATOR\``)
-        } else if (member.permissions.has('ADMINISTRATOR')) {
-            embed = util.embedify('RED', author.user.username, '', `Member is Not Bannable\n\`ADMINISTRATOR\``)
+        if (member === author) {
+            embed = util.embedify('RED', 'ERROR', author.user.displayAvatarURL(), 'You cannot kick yourself!')
+            flags = 64
+        } else if (!member.kickable) {
+            embed = util.embedify('RED', 'ERROR', author.user.displayAvatarURL(), `<@!${member.user.id}> is not kickable.`)
+            flags = 64
         } else {
             //Ban, record, and send message
             await member.send({ embeds: [ util.embedify('RED', guild.name, guild.iconURL(), `You have been **kicked** for \`${reason}\`.`) ] })
