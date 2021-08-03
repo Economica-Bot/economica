@@ -18,7 +18,7 @@ const marketItemSchema = require('../util/mongo/schemas/market-item-sch')
  * @param {string} [footer] - Embed footer.
  * @returns {MessageEmbed} Message embed.
  */
-module.exports.embedify = (color = 'DEFAULT', title = false, icon_url = false, description = false, footer = false) => {
+module.exports.embedify = (color = 'DEFAULT', title = null, icon_url = null, description = null, footer = null) => {
     const embed = new Discord.MessageEmbed().setColor(color)
     if (icon_url) embed.setAuthor(title, icon_url)
     else if (title) embed.setTitle(title) 
