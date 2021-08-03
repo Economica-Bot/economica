@@ -4,6 +4,7 @@ const econonomySchema = require('../../util/mongo/schemas/economy-sch')
 
 module.exports = {
     name: 'leaderboard', 
+    group: 'economy',
     description: 'View top users in the economy.',
     global: true, 
     format: '[wallet | treasury | networth]', 

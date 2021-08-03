@@ -1,6 +1,12 @@
 module.exports = {
     name: 'clear',
+    group: 'utility',
+    format: '[message count]',
     description: 'Deletes a number of messages in a channel. If not specified, deletes all messages <= 2 weeks old.',
+    global: true, 
+    permissions: [
+        'MANAGE_MESSAGES'
+    ],
     options: [
         {
             name: 'msgcount',
@@ -9,7 +15,6 @@ module.exports = {
             required: false, 
         }
     ],
-    global: true, 
     async run(interaction, guild, author, args) {
         let content = null, embed = null, msgCount = args?.[0].value ?? 100
         if (msgCount && msgCount > 100 || msgCount < 0) {

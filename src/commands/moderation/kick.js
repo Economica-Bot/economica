@@ -1,5 +1,6 @@
 module.exports = {
     name: 'kick',
+    group: 'moderation',
     description: 'Kicks a user',
     global: true,
     options: [

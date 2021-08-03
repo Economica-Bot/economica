@@ -1,6 +1,10 @@
 module.exports = {
     name: 'currency',
+    group: 'economy',
     description: 'View and update the currency symbol',
+    permissions: [
+        'ADMINISTRATOR'
+    ],
     global: true,
     options: [
         {

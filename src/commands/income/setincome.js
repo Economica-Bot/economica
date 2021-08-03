@@ -4,13 +4,16 @@ const incomeSchema = require('../../util/mongo/schemas/income-sch')
 
 module.exports = {
     name: 'setincome', 
+    group: 'income',
     description: 'Configure an income command.',
+    format: '<command> [...fields]',
     global: true, 
     options: [ 
         {
             name: 'income_command',
             description: 'Specify the desired income command.',
-            type: 3, 
+            type: 3, //STRING
+            required: true,
             choices: [ 
                 {
                     name: 'Work',
@@ -37,7 +40,6 @@ module.exports = {
                     value: 'craps'
                 }
             ],
-            required: true
       ***REMOVED*** 
         {
             name: 'min',

@@ -2,6 +2,7 @@ const { income } = require('../../config.json')
 
 module.exports = {
     name: 'income', 
+    group: 'income',
     description: 'View all income commands and their settings.',
     global: true, 
     options: null, 

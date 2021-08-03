@@ -1,5 +1,6 @@
 module.exports = {
     name: 'beg', 
+    group: 'income',
     description: 'Possibly earn wallet money', 
     global: true,
     options: null,

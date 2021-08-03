@@ -1,5 +1,6 @@
 module.exports = {
     name: 'coinflip',
+    group: 'income',
     description: 'Double the money in your wallet by flipping a coin.',
     global: true, 
     format: '<amount | all>',

@@ -1,8 +1,9 @@
 module.exports = {
     name: 'balance',
+    group: 'economy',
     description: 'View a balance.',
+    format: '[user]',
     global: true, 
-    format: '<user>',
     options: [
         {
             name: 'user',

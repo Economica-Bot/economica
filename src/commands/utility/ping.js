@@ -1,5 +1,6 @@
 module.exports = {
     name: 'ping',
+    group: 'utility',
     description: 'ping',
     commandOptions: null,
     global: true, 

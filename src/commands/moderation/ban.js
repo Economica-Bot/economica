@@ -1,6 +1,12 @@
 module.exports = {
     name: 'ban',
+    group: 'moderation',
     description: 'Bans a user',
+    format: '<user> [reason]',    
+    global: true,
+    permissions: [
+        'BAN_MEMBERS'
+    ],
     options: [
         {
             name: 'user',
@@ -14,10 +20,6 @@ module.exports = {
             type: 3,
         }    
     ],
-    permissions: [
-        'BAN_MEMBERS'
-    ],
-    global: true,
     async run(interaction, guild, author, args) {
         const member = await guild.members.cache.get(args[0].value)
         let content = embed = flags = result = null, reason = args[1]?.value ?? 'No reason provided'

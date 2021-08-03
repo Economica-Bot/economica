@@ -1,5 +1,6 @@
 module.exports = {
     name: 'reset',
+    group: 'utility',
     description: 'Resets all slash commands.', 
     global: true, 
     options: null,

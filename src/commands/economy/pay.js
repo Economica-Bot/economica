@@ -1,5 +1,6 @@
 module.exports = {
     name: 'pay', 
+    group: 'economy',
     description: 'Pay server currency to other users.',
     global: true, 
     format: '<user> <amount | all>',

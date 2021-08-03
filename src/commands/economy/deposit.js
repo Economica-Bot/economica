@@ -1,5 +1,6 @@
 module.exports = {
     name: 'deposit', 
+    group: 'economy',
     description: 'Deposit funds from your wallet to the treasury.',
     global: true, 
     format: '<amount | all>',

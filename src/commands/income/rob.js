@@ -1,5 +1,6 @@
 module.exports = {
     name: 'rob', 
+    group: 'income',
     description: 'Rob users. Steal up to the entire target\'s wallet',
     global: true, 
     format: '<user>',

@@ -1,5 +1,6 @@
 module.exports = {
     name: 'crime', 
+    group: 'income',
     description: 'Commit a crime to increase your wallet balance with risk of fine.',
     global: true, 
     options: null,

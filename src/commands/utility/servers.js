@@ -1,5 +1,6 @@
 module.exports = {
     name: 'servers',
+    group: 'utility',
     description: `Get information about ${client.user.tag}'s servers`,
     global: true, 
     commandOptions: null, 

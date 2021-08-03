@@ -1,5 +1,6 @@
 module.exports = {
     name: 'work',
+    group: 'income',
     description: 'Earn wallet money',
     global: true, 
     options: null, 

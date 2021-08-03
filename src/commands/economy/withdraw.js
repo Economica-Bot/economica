@@ -1,5 +1,6 @@
 module.exports = {
     name: 'withdraw',
+    group: 'economy',
     description: 'Withdraw funds from the treasury to your wallet.',
     global: true, 
     format: '<amount | all>',
@@ -16,7 +17,7 @@ module.exports = {
 
         const cSymbol = await util.getCurrencySymbol(guild.id)
         const { treasury } = await util.getEconInfo(guild.id, author.user.id)
-        const amount = args[0].value === 'all' ? wallet : parseInt(args[0].value)
+        const amount = args[0].value === 'all' ? treasury : parseInt(args[0].value)
 
         if(amount) {
             if (amount < 1 || amount > treasury) {
