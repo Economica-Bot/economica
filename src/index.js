@@ -1,5 +1,7 @@
 const Discord = require('discord.js')
 
+const { ApplicationCommandOptionType } = require('discord-api-types/v9')
+
 const fs = require('fs')
 const util = require('./util/util')
 const mongo = require('./util/mongo/mongo')
@@ -24,19 +26,7 @@ global.client = client
 global.Discord = Discord
 global.util = util
 global.mongo = mongo
-
-global.slashTypes = {
-    subcommand: 1,
-    subcommandGroup: 2,
-    string: 3,
-    integer: 4,
-    boolean: 5,
-    user: 6,
-    channel: 7,
-    role: 8,
-    mentionable: 9,
-    number: 10
-}
+global.ApplicationCommandOptionType = ApplicationCommandOptionType
 
 client.on('ready', async () => {
     console.log(`${client.user.tag} Ready`)
@@ -57,52 +47,36 @@ client.on('ready', async () => {
     checkMutes(client)
 })
 
-client.ws.on('INTERACTION_CREATE', async interaction => {
-    if(interaction.type !== 2) {
+client.on('interactionCreate', async interaction => {
+    if(!interaction.isCommand()) {
+        return
+    }
+    
+    const command = client.commands.get(interaction.commandName) 
+    const author = interaction.member
+    const guild = author.guild
+    const options = interaction.options
+    const missingPermissions = client.hasPermissions(author, command) 
+    if(missingPermissions) {
+        const embed = util.embedify(
+            'RED', 
+            author.user.username, 
+            author.user.displayAvatarURL(), 
+            `You are missing the ${missingPermissions.join(', ')} permission(s) to run this command.`
+        )
+
+        client.say(interaction, null, embed, 64)
         return
     }
 
-    try {
-        const command = client.commands.get(interaction.data.name) 
-        const guild = await client.guilds.cache.get(interaction.guild_id)
-        const author = await guild.members.cache.get(interaction.member.user.id)
-        const args = interaction.data.options
-        const missingPermissions = client.hasPermissions(author, command) 
-        if(missingPermissions) {
-            const embed = util.embedify(
-                'RED', 
-                author.user.username, 
-                author.user.displayAvatarURL(), 
-                `You are missing the ${missingPermissions.join(', ')} permission(s) to run this command.`
-            )
-
-            client.say(interaction, null, embed, 64)
-            return
-        }
-
-        command.run(interaction, guild, author, args)
-    } catch (err) {
-        console.error(err)
-        client.api.interactions(interaction.id, interaction.token).callback.post({ data: {
-            type: 4, 
-            data: {
-                content: `${err.message}`,
-                flags: 64
-            }
-        }})
-    }   
+    command.run(interaction, guild, author, options) 
 })
 
-client.login(process.env.ECON_TOKEN)
+client.login(process.env.ECON_ALPHA_TOKEN)
 
-client.registerCommandFile = (commandDirectory, commandFile) => {
+client.registerCommandFile = async (commandDirectory, commandFile) => {
     const command = require(`./commands/${commandDirectory}/${commandFile}`)
-    client.api.applications(process.env.APPLICATION_ID).guilds(process.env.GUILD_ID).commands.post({data: {
-        name: command.name,
-        description: command.description,
-        options: command.options
-    }})
-
+    client.guilds.cache.get(process.env.GUILD_ID).commands.create(command)
     client.commands.set(command.name, command)
     console.log(`${command.name} command registered`)
 }
