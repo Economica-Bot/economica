@@ -1,13 +1,14 @@
 const ms = require('ms');
+require('module-alias/register')
 
 const config = require('../config.json')
 
-const economySchema = require('../util/mongo/schemas/economy-sch')
-const guildSettingSchema = require('../util/mongo/schemas/guild-settings-sch')
-const incomeSchema = require('../util/mongo/schemas/income-sch')
-const infractionSchema = require('../util/mongo/schemas/infraction-sch')
-const inventorySchema = require('../util/mongo/schemas/inventory-sch')
-const marketItemSchema = require('../util/mongo/schemas/market-item-sch')
+const economySchema = require('@schemas/economy-sch')
+const guildSettingSchema = require('@schemas/guild-settings-sch')
+const incomeSchema = require('@schemas/income-sch')
+const infractionSchema = require('@schemas/infraction-sch')
+const inventorySchema = require('@schemas/inventory-sch')
+const marketItemSchema = require('@schemas/market-item-sch')
 
 /**
  * Returns a message embed object. 
@@ -260,12 +261,7 @@ module.exports.setUserCommandStats = async (guildID, userID, command, properties
             `Cooldown: ${ms(cooldown)}`
         )
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ embed ]
-            }
-        }})
+        interaction.reply({ embeds: [ embed ]})
 
         return false
     } else {

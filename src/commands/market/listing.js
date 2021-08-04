@@ -1,11 +1,13 @@
-const marketItemSchema = require('../../util/mongo/schemas/market-item-sch')
-const inventorySchema = require('../../util/mongo/schemas/inventory-sch')
+require('module-alias/register')
+
+const marketItemSchema = require('@schemas/market-item-sch')
+const inventorySchema = require('@schemas/inventory-sch')
 
 module.exports = {
     name: 'listing',
     group: 'market',
     description: 'Interact with the server market.',
-    format: '<view | create | delete | enable | disable> [...args]',
+    format: '<view | create | delete | enable | disable> [...options]',
     global: true, 
     options: [
         {
@@ -90,19 +92,21 @@ module.exports = {
             ]
         }
     ],
-    async run(interaction, guild, author, args) {
+    async run(interaction, guild, author, options) {
         const guildID = guild.id
         let color = 'BLURPLE', title = author.user.username, icon_url = author.user.displayAvatarURL(), description = '', footer = '' 
         const embed = new Discord.MessageEmbed()
         const currencySymbol = await util.getCurrencySymbol(guildID)
         
-        if(args[0].name === 'view') {
-            const member = await guild.members.cache.get(args?.[0].options?.[0].value) 
-                        ?? await guild.members.cache.get(author.user.id)
+        if(options._subcommand === 'view') {
+            const user = options._hoistedOptions?.[0]?.user 
+                        ?? author
+
+            title = user.username, icon_url = user.displayAvatarURL()
 
             const listings = await marketItemSchema.find({
                 guildID, 
-                userID: member.user.id
+                userID: user.id
             })
 
             let i = 0, j = 0
@@ -118,10 +122,10 @@ module.exports = {
             }
 
             description = `Total Listings: \`${i}\` | Active Listings: \`${j}\``
-        } else if(args[0].name === 'create') {
-            const item = args[0].options[0].value
-            const price = args[0].options[1].value
-            const desc = args[0].options[2]?.value ?? 'No description'
+        } else if(options._subcommand === 'create') {
+            const item = options._hoistedOptions[0].value
+            const price = options._hoistedOptions[1].value
+            const desc = options._hoistedOptions[2].value ?? 'No description'
 
             const listing = await marketItemSchema.findOne({ guildID, userID: author.user.id, item, active: true })
 
@@ -154,7 +158,7 @@ module.exports = {
                     }
                 ])
             }
-        } else if(args[0].name === 'delete') {
+        } else if(options._subcommand === 'delete') {
             const econManagerRole = guild.roles.cache.find(role => {
                 return role.name.toLowerCase() === 'economy manager'
             })
@@ -167,9 +171,9 @@ module.exports = {
                     color = 'RED',
                     description = `You must have the <@&${econManagerRole.id}> role.`
                 } else {
-                    const member = await guild.members.cache.get(args[0].options[0].value) 
-                    const item = args[0].options[1].value
-                    const listing = await marketItemSchema.findOneAndDelete({ guildID, userID: member.user.id, item })
+                    const user = options._hoistedOptions[0].user 
+                    const item = options._hoistedOptions[1].value
+                    const listing = await marketItemSchema.findOneAndDelete({ guildID, userID: user.id, item })
 
                     if(!listing) {
                         color = 'RED'
@@ -186,8 +190,8 @@ module.exports = {
                     }
                 }
             }
-        } else if(args[0].name === 'enable') {
-            const item = args[0].options[0].value
+        } else if(options._subcommand === 'enable') {
+            const item = options._hoistedOptions[0].value
 
             const listing = await marketItemSchema.findOneAndUpdate(
                 { guildID, userID: author.user.id, item, active: false },
@@ -202,8 +206,8 @@ module.exports = {
                 color = 'GREEN'
                 description = `Successfully enabled \`${item}\` on the market.`
             }
-        } else if(args[0].name === 'disable') {
-            const item = args[0].options[0].value
+        } else if(options._subcommand === 'disable') {
+            const item = options._hoistedOptions[0].value
 
             const listing = await marketItemSchema.findOneAndUpdate(
                 { guildID, userID: author.user.id, item, active: true },
@@ -228,12 +232,6 @@ module.exports = {
             .setFooter(footer)
             .setTimestamp()
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ embed ],
-          ***REMOVED***
-        }})
-
+        await interaction.reply({ embeds: [ embed ] })
     }
 }

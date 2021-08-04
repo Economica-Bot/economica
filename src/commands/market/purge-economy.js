@@ -1,6 +1,8 @@
-const economySchema = require('../../util/mongo/schemas/economy-sch')
-const marketItemSchema = require('../../util/mongo/schemas/market-item-sch')
-const inventorySchema = require('../../util/mongo/schemas/inventory-sch')
+require('module-alias/register')
+
+const economySchema = require('@schemas/economy-sch')
+const marketItemSchema = require('@schemas/market-item-sch')
+const inventorySchema = require('@schemas/inventory-sch')
 
 module.exports = {
     name: 'purge',
@@ -31,7 +33,7 @@ module.exports = {
             options: null
         }
     ],
-    async run(interaction, guild, author, args) {
+    async run(interaction, guild, author, options) {
         const guildID = guild.id
         let color = 'GREEN', title = author.user.username, icon_url = author.user.displayAvatarURL(), description = ''
         const econManagerRole = guild.roles.cache.find(role => {
@@ -46,19 +48,19 @@ module.exports = {
                 color = 'RED',
                 description = `You must have the <@&${econManagerRole.id}> role.`
             } else {
-                if(args[0].name === 'inventory') {
+                if(options._subcommand === 'inventory') {
                     const inventories = await inventorySchema.deleteMany({
                         guildID
                     })
 
                     description = `Deleted all inventories. \`${inventories.n}\` removed.`
-                } else if(args[0].name === 'market') {
+                } else if(options._subcommand === 'market') {
                     const removed = await marketItemSchema.deleteMany({
                         guildID
                     })
 
                     description = `Deleted all market listings. \`${removed.n}\` removed.`
-                } else if(args[0].name === 'balance') {
+                } else if(options._subcommand === 'balance') {
                     const economies = await economySchema.deleteMany({
                         guildID
                     })

@@ -1,6 +1,7 @@
+require('module-alias/register')
 const ms = require('ms')
 
-const incomeSchema = require('../../util/mongo/schemas/income-sch')
+const incomeSchema = require('@schemas/income-sch')
 
 module.exports = {
     name: 'setincome', 
@@ -72,19 +73,20 @@ module.exports = {
             type: 4,
       ***REMOVED***
     ],
-    async run(interaction, guild, author, args) {
+    async run(interaction, guild, author, options) {
         let econManagerRole = guild.roles.cache.find(role => {
             return role.name.toLowerCase() === 'economy manager'
         })
 
         if(!econManagerRole) {
-            await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                type: 4,
-                data: {
-                    content: 'Please create an \`Economy Manager\` role!',
-              ***REMOVED***
-            }})
+            embed = util.embedify(
+                'RED',
+                author.username, 
+                author.displayAvatarURL(),
+                'Please create an \`Economy Manager\` role!'
+            )
 
+            interaction.reply({ embeds: [ embed ]})
             return
         }
 
@@ -96,114 +98,77 @@ module.exports = {
                 `You must have the <@&${econManagerRole.id}> role.`
             )
 
-            await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                type: 4,
-                data: {
-                    embeds: [ embed ],
-              ***REMOVED***
-            }})
-
+            interaction.reply({ embeds: [ embed ]})
             return
         } 
 
-        let properties = Object.entries(await util.getCommandStats(guild.id, args[0].value))
+        let income_command = options._hoistedOptions[0].value
+        let properties = Object.entries(await util.getCommandStats(guild.id, income_command))
+        let fields = []
+        options._hoistedOptions.forEach(option => {
+            if(option.name !== 'income_command')
+            fields.push([option.name, option.value])
+        })
+
         const cSymbol = await util.getCurrencySymbol(guild.id)
         const incomeEmbed = util.embedify(
             'GREEN',
-            `Updated ${args[0].value}`,
+            `Updated ${income_command}`,
             client.user.displayAvatarURL()
         )
 
-        let fields = []
-        args.forEach(arg => {
-            if(arg.name !== 'income_command')
-            fields.push([arg.name, arg.value])
-        })
-
-        //If provided fields do not match command properties
-        if (fields.length !== properties.length) { 
-            embed = util.embedify(
-                'RED',
-                author.user.username, 
-                author.user.displayAvatarURL(),
-                `Incorrect number of fields: \`${args.length - 1}\`
-                Format: \`${this.name} ${args[0].value} [${properties.map(x => x[0]).join('] [')}]\``
-            ) 
-        
-            await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                type: 4,
-                data: {
-                    embeds: [ embed ],
-              ***REMOVED***
-            }})
-
-            return 
-        }
-
+        //Validate and transfer provided fields
         let description = ''
-        for (let i = 0; i < properties.length; i++) { 
-            if(['min', 'max', 'minFine', 'maxFine'].includes(properties[i][0])) { 
-                if(+fields[i][1]) {
-                    fields[i][1] = +fields[i][1]
-                    properties[i][1] = fields[i][1]
-                    incomeEmbed.addField(
-                        `${properties[i][0]}`,
-                        `${cSymbol}${fields[i][1]}`,
-                        true
-                    )
-                } 
-            } else if(['cooldown'].includes(properties[i][0])) { 
-                if(ms(fields[i][1])) {
-                    properties[i][1] = ms(fields[i][1])
-                    incomeEmbed.addField(
-                        `${properties[i][0]}`,
-                        `${ms(ms(fields[i][1]))}`,
-                        true
-                    )
-                } else {
-                    description += (`Invalid parameter: \`${fields[i][1]}\`\n\`${properties[i][0]}\` must be a time!`)
-                    return
-                }
-            } else if(['chance'].includes(properties[i][0])) { 
-                if(parseFloat(fields[i][1])) {
-                    fields[i][1] = parseFloat(fields[i][1])
-                    if(fields[i][1] < 1) {
-                        fields[i][1] *= 100
-                        properties[i][1] = fields[i][1]
+        properties.forEach(property => {
+            const field = fields.find(field => field[0] === property[0])
+            if(field) {
+                if (['cooldown'].includes(field[0])) {
+                    if(ms(field[1])) {
+                        property[1] = ms(field[1])
+                        incomeEmbed.addField(
+                            `${property[0]}`,
+                            `${ms(ms(property[1]))}`,
+                            true
+                        )
                     } else {
-                        properties[i][1] = fields[i][1] 
+                        description += (`Invalid parameter: \`${field[1]}\`\n\`${field[0]}\` must be a time!\n`)
                     }
-
+                } else if (['chance'].includes(field[0])) {
+                    if(parseFloat(field[1])) {
+                        property[1] = field[1] < 1 ? parseFloat(field[1]) * 100 : parseFloat(field[1])
+                        incomeEmbed.addField(
+                            `${property[0]}`,
+                            `${property[1]}%`,
+                            true
+                        )
+                    } else {
+                        description += (`Invalid parameter: \`${field[1]}\`\n\`${field[0]}\` must be a percentage!\n`)    
+                    }
+                } else {
+                    property[1] = +field[1]
                     incomeEmbed.addField(
-                        `${properties[i][0]}`,
-                        `${fields[i][1]}%`,
+                        `${property[0]}`,
+                        `${cSymbol}${property[1]}`,
                         true
                     )
-                } else {
-                    description += (`Invalid parameter: \`${fields[i][1]}\`\n\`${properties[i][0]}\` must be a percentage!`)
                 }
             }
-        }
-
+        })
+        
         incomeEmbed.setDescription(description)
-
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ incomeEmbed ],
-          ***REMOVED***
-        }})
-
+        
+        await interaction.reply({ embeds: [ incomeEmbed ], ephemeral: true })
+ 
         properties = Object.fromEntries(properties)
-            await incomeSchema.findOneAndUpdate({ 
-                guildID: guild.id 
-          ***REMOVED*** {
-                $set: {
-                    [args[0].value]: properties
-                }
-          ***REMOVED*** {
-                upsert: true,
-                new: true
-            }).exec()
+        await incomeSchema.findOneAndUpdate({ 
+            guildID: guild.id 
+      ***REMOVED*** {
+            $set: {
+                [args[0].value]: properties
+            }
+      ***REMOVED*** {
+            upsert: true,
+            new: true
+        }).exec()
     }
 }

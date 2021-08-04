@@ -1,4 +1,6 @@
-const inventorySchema = require('../../util/mongo/schemas/inventory-sch')
+require('module-alias/register')
+
+const inventorySchema = require('@schemas/inventory-sch')
 
 module.exports = {
     name: 'sell',
@@ -14,9 +16,9 @@ module.exports = {
             required: true
         }
     ],
-    async run(interaction, guild, author, args) {
+    async run(interaction, guild, author, options) {
         let color = 'BLURPLE', title = author.user.username, icon_url = author.user.displayAvatarURL(), description
-        const currencySymbol = await util.getCurrencySymbol(guild.id), item = args[0].value
+        const currencySymbol = await util.getCurrencySymbol(guild.id), item = options._hoistedOptions[0].value
         const inventory = await inventorySchema.findOne({ 
             userID: author.id, 
             guildID: guild.id, 
