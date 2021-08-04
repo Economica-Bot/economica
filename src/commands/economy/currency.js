@@ -13,8 +13,8 @@ module.exports = {
             type: 3,
         }
     ],
-    async run(interaction, guild, author, args) {
-        let color, description, footer, embed, currency = args?.[0]?.value
+    async run(interaction, guild, author, options) {
+        let color, description, footer, embed, currency = options._hoistedOptions?.[0]?.value
         const currCurrencySymbol = await util.getCurrencySymbol(guild.id)
         if (!currency) {
             color = 'BLURPLE'
@@ -35,12 +35,7 @@ module.exports = {
             description, 
             footer
         )
-
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ embed ],
-          ***REMOVED***
-        }})
+        
+        interaction.reply({ embeds: [ embed ] })
     }
 }

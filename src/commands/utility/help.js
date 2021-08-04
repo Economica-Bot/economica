@@ -11,8 +11,8 @@ module.exports = {
             type: 3, //STRING
         }
     ],
-    async run(interaction, guild, author, args) {
-        let embed, command = args?.[0].value
+    async run(interaction, guild, author, options) {
+        let embed, command = options._hoistedOptions?.[0]?.value
         if(!command) {       
             embed = util.embedify(
                 'YELLOW',
@@ -66,12 +66,6 @@ module.exports = {
             }               
         } 
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ embed ],
-                flags: 64 //EPHEMERAL
-          ***REMOVED***
-        }})
+        await interaction.reply({ embeds: [ embed ], flags: 64 })
     }
 }

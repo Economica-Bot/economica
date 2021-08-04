@@ -12,8 +12,8 @@ module.exports = {
             required: true
         }
     ], 
-    async run(interaction, guild, author, args) {
-        const member = await guild.members.cache.get(args[0].value)
+    async run(interaction, guild, author, options) {
+        const user = options._hoistedOptions[0].user
         const guildID = guild.id; const userID = author.id
         const properties = await util.getCommandStats(guildID, this.name)
         const uProperties = await util.getUserCommandStats(guildID, userID, this.name)
@@ -24,17 +24,17 @@ module.exports = {
 
         let color, description, amount
         const { minFine, maxFine } = properties
-        const { wallet } = await util.getEconInfo(guildID, member.user.id)
+        const { wallet } = await util.getEconInfo(guildID, user.id)
         const cSymbol = await util.getCurrencySymbol(guildID)
         if(wallet < 1) {
             color = 'RED',
-            description = `<@!${member.user.id}>\nInsufficient wallet: ${cSymbol}${wallet}`
+            description = `<@!${user.id}>\nInsufficient wallet: ${cSymbol}${wallet}`
         } else {
             if(util.isSuccess(properties)) {
                 amount = util.intInRange(0, wallet)
                 color = 'GREEN',
-                description = `You robbed <@!${member.user.id}> for a grand total of ${cSymbol}${amount.toLocaleString()}!`
-                await util.setEconInfo(guildID, member.user.id, -amount, 0, -amount)
+                description = `You robbed <@!${user.id}> for a grand total of ${cSymbol}${amount.toLocaleString()}!`
+                await util.setEconInfo(guildID, user.id, -amount, 0, -amount)
             } else {
                 amount = util.intInRange(minFine, maxFine)
                 color = 'RED',
@@ -53,11 +53,6 @@ module.exports = {
             description
         )
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ embed ],
-          ***REMOVED***
-        }})
+        await interaction.reply({ embeds: [ embed ]})
     }
 }

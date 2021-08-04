@@ -6,7 +6,7 @@ module.exports = {
     description: 'View all income commands and their settings.',
     global: true, 
     options: null, 
-    async run(interaction, guild, author, args) {
+    async run(interaction, guild, author, options) {
         const incomeEmbed = util.embedify(
             'BLURPLE',
             `${guild.name}'s Income Commands`,
@@ -28,11 +28,6 @@ module.exports = {
             )
         }
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ incomeEmbed ],
-          ***REMOVED***
-        }})
+        await interaction.reply({ embeds: [ incomeEmbed ] })
     }
 }

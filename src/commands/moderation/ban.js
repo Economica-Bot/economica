@@ -1,3 +1,7 @@
+require('module-alias/register')
+
+const infractionSchema = require('@schemas/infraction-sch')
+
 module.exports = {
     name: 'ban',
     group: 'moderation',
@@ -20,16 +24,16 @@ module.exports = {
             type: 3,
         }    
     ],
-    async run(interaction, guild, author, args) {
-        const member = await guild.members.cache.get(args[0].value)
-        let content = embed = flags = result = null, reason = args[1]?.value ?? 'No reason provided'
+    async run(interaction, guild, author, options) {
+        const member = options._hoistedOptions[0].member
+        let embed = result = null, ephemeral = false, reason = options._hoistedOptions[1]?.value ?? 'No reason provided'
 
-        if (member === author) {
+        if (member.user.id === author.user.id) {
             embed = util.embedify('RED', 'ERROR', author.user.displayAvatarURL(), 'You cannot ban yourself!')
-            flags = 64
+            ephemeral = true
         } else if (!member.bannable) {
             embed = util.embedify('RED', 'ERROR', author.user.displayAvatarURL(), `<@!${member.user.id}> is not bannable.`)
-            flags = 64
+            ephemeral = true
         } else {
             //Ban, record, and send message
             await member.send({ embeds: [ util.embedify('RED', guild.name, guild.iconURL(), `You have been **banned** for \`${reason}\`.`) ] })
@@ -42,15 +46,22 @@ module.exports = {
             member.ban({
                 reason
             })
+
+            await new infractionSchema({
+                guildID: guild.id,
+                userID: member.id,
+                userTag: member.user.tag, 
+                staffID: author.user.id,
+                staffTag: author.user.tag,
+                type: this.name,
+                reason,
+                active: true,
+            }).save()
         }
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                content,
-                embeds: [ embed ],
-                flags
-          ***REMOVED***
-        }})
+        await interaction.reply({ 
+            embeds: [ embed ],
+            ephemeral
+        })
     }
 }

@@ -5,9 +5,9 @@ module.exports = {
     global: true, 
     options: null,
     ownerOnly: true,
-    async run(interaction, guild, author, args) {
+    async run(interaction, guild, author, options) {
         client.guilds.cache.forEach(guild => {
-            client.guilds.cache.get(guild.id).commands.set([])
+            guild.commands.set([])
         })
 
         client.commands.set([])
@@ -17,12 +17,7 @@ module.exports = {
             author.user.displayAvatarURL(), 
             '\`RESET ALL SLASH COMMANDS\`'
         )
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ embed ],
-                flags: 64
-          ***REMOVED***
-        }})
+        
+        await interaction.reply({ embeds: [ embed ], ephemeral: true })
     }
 }

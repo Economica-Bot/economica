@@ -1,8 +1,15 @@
+require('module-alias/register')
+
+const infractionSchema = require('@schemas/infraction-sch')
+
 module.exports = {
     name: 'kick',
     group: 'moderation',
     description: 'Kicks a user',
     global: true,
+    permissions: [ 
+        'KICK_MEMBERS'
+    ],
     options: [
         {
             name: 'user',
@@ -16,21 +23,18 @@ module.exports = {
             type: 3,
         }    
     ],
-    permissions: [ 
-        'KICK_MEMBERS'
-    ],
-    async run(interaction, guild, author, args) {
-        let content = embed = result = null, reason = args[1]?.value ?? 'No reason provided'
-        const member = await guild.members.cache.get(args[0].value)
+    async run(interaction, guild, author, options) {
+        const member = option._hoistedOptions[0].member
+        let embed = flags = result = null, ephemeral = false, reason = options._hoistedOptions[1]?.value ?? 'No reason provided'
 
-        if (member === author) {
-            embed = util.embedify('RED', 'ERROR', author.user.displayAvatarURL(), 'You cannot kick yourself!')
-            flags = 64
+        if (member.user.id === author.user.id) {
+            embed = util.embedify('RED', author.user.username, author.user.displayAvatarURL(), 'You cannot kick yourself!')
+            ephemeral = true
         } else if (!member.kickable) {
-            embed = util.embedify('RED', 'ERROR', author.user.displayAvatarURL(), `<@!${member.user.id}> is not kickable.`)
-            flags = 64
+            embed = util.embedify('RED', author.user.username, author.user.displayAvatarURL(), `<@!${member.user.id}> is not kickable.`)
+            ephemeral = true
         } else {
-            //Ban, record, and send message
+            //Kick, record, and send message
             await member.send({ embeds: [ util.embedify('RED', guild.name, guild.iconURL(), `You have been **kicked** for \`${reason}\`.`) ] })
             .catch((err) => {
                 result = `Could not dm ${member.user.tag}.\n\`${err}\``
@@ -41,14 +45,21 @@ module.exports = {
             member.kick({
                 reason
             })
+
+            await new infractionSchema({
+                guildID: guild.id,
+                userID: member.id,
+                userTag: member.user.tag, 
+                staffID: author.user.id,
+                staffTag: author.user.tag,
+                type: this.name,
+                reason,
+            }).save()
         }
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-            content,
+        await interaction.update({ 
             embeds: [ embed ],
-          ***REMOVED***
-        }})
+            ephemeral
+        })
     }
 }

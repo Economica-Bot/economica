@@ -42,18 +42,19 @@ module.exports = {
             type: 7 //CHANNEL
         }
     ],
-    async run(interaction, guild, author, args) {
+    async run(interaction, guild, author, options) {
 
+        const group = options._hoistedOptions[0].value
         let commands = []
         client.commands.forEach(command => {
-            if(args[0].value === command.group) {
+            if(group === command.group) {
                 commands.push(command)
             }
         })
 
         const infoEmbed = util.embedify(
             'BLURPLE',
-            `${client.user.username} | ${args[0].value} Commands`, 
+            `${group} Commands`, 
             client.user.displayAvatarURL(),
         )
 
@@ -65,14 +66,25 @@ module.exports = {
             )
         }
 
-        const channel_id = args[1]?.value ?? interaction.channel_id
-        let color = 'GREEN', description = `Successfully sent information for **${args[0].value}** in <#${channel_id}>.`
+        const channel = options._hoistedOptions[1]?.channel ?? guild.channels.cache.get(interaction.channelId)
+        let color, description 
 
-        guild.channels.cache.get(channel_id).send({ embeds: [infoEmbed] })
-            .catch(error => {
+        if(channel.type !== 'GUILD_TEXT') {
+            color = 'RED',
+            description = 'Channel must be a text channel.'
+        } else {
+            if (channel.permissionsFor(guild.members.cache.get(client.user.id)).has('SEND_MESSAGES')) {
+                color = 'GREEN', description = `Successfully sent information for **${group}** in <#${channel.id}>.`
+                channel.send({ embeds: [infoEmbed] })
+                    .catch(error => {
+                        color = 'RED'
+                        description = error
+                    })
+            } else {
                 color = 'RED'
-                description = error
-            })
+                description = 'Missing permission `SEND_MESSAGES` in <#${channel_id}>'
+            }
+        }
 
         embed = util.embedify(
             color, 
@@ -81,12 +93,9 @@ module.exports = {
             description
         )
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ embed ],
-                flags: 64 //EPHEMERAL
-          ***REMOVED***
-        }})
+        await interaction.reply({ 
+            embeds: [ embed ], 
+            ephemeral: true 
+        })
     }
 }

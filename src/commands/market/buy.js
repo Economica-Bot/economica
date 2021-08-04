@@ -1,5 +1,7 @@
-const inventorySchema = require('../../util/mongo/schemas/inventory-sch')
-const marketItemSchema = require('../../util/mongo/schemas/market-item-sch')
+require('module-alias/register')
+
+const inventorySchema = require('@schemas/inventory-sch')
+const marketItemSchema = require('@schemas/market-item-sch')
 
 module.exports = {
     name: 'buy',
@@ -15,9 +17,9 @@ module.exports = {
             required: true
         }
     ],
-    async run(interaction, guild, author, args) {
+    async run(interaction, guild, author, options) {
         let color = 'BLURPLE', title = author.user.username, icon_url = author.user.displayAvatarURL(), description
-        const currencySymbol = await util.getCurrencySymbol(guild.id), item = args[0].value
+        const currencySymbol = await util.getCurrencySymbol(guild.id), item = options._hoistedOptions[0].value
         const inventory = await inventorySchema.findOne({ 
             userID: author.id, 
             guildID: guild.id, 
@@ -67,11 +69,6 @@ module.exports = {
         }
         
         const embed = util.embedify(color, title, icon_url, description)
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ embed ],
-          ***REMOVED***
-        }})
+        await interaction.reply({ embeds: [ embed ] })
     }
 }

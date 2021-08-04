@@ -11,13 +11,13 @@ module.exports = {
             type: 6
         }
     ], 
-    async run(interaction, guild, author, args) {
-        const member = await guild.members.cache.get(args?.[0].value) 
-                    ?? await guild.members.cache.get(author.user.id)
+    async run(interaction, guild, author, options) {
+        const user = options._hoistedOptions?.[0]?.user 
+                    ?? author.user
 
         const cSymbol = await util.getCurrencySymbol(guild.id)
-        const { wallet, treasury, networth, rank } = await util.getEconInfo(guild.id, member.user.id)
-        const balEmbed = util.embedify('GOLD', member.user.username, member.user.displayAvatarURL(), '', `🏆 Rank ${rank}`)
+        const { wallet, treasury, networth, rank } = await util.getEconInfo(guild.id, user.id)
+        const balEmbed = util.embedify('GOLD', user.username, user.displayAvatarURL(), '', `🏆 Rank ${rank}`)
             .addFields([
                 {
                     name: 'Wallet',
@@ -36,11 +36,6 @@ module.exports = {
                 }
             ])
 
-            await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-                type: 4,
-                data: {
-                embeds: [ balEmbed ],
-              ***REMOVED***
-            }})
+        interaction.reply({ embeds: [ balEmbed ]})
     }
 }
