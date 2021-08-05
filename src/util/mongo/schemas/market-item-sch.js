@@ -24,6 +24,8 @@ const marketItemSchema = mongoose.Schema({
     active: reqBoolean
 }, {
     timeStamps: true
+}, {
+    versionKey: false
 })
 
 module.exports = mongoose.model('market', marketItemSchema)

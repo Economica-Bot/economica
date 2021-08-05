@@ -46,6 +46,8 @@ const incomeSchema = mongoose.Schema({
           max: num,
           cooldown: num,
       }
-})
+}, {
+     versionKey: false
+ })
 
 module.exports = mongoose.model('Income', incomeSchema)

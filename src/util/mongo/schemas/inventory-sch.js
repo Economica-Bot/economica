@@ -11,6 +11,8 @@ const inventorySchema = mongoose.Schema({
     inventory: []
 }, {
     timeStamps: true
+}, {
+    versionKey: false
 })
 
 module.exports = mongoose.model('Inventory', inventorySchema)

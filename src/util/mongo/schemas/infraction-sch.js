@@ -37,6 +37,8 @@ const infractionSchema = mongoose.Schema({
     }
 }, {
     timestamps: true
+}, {
+    versionKey: false
 })
 
 module.exports = mongoose.model('Infractions', infractionSchema)

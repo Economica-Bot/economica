@@ -20,6 +20,8 @@ const transactionSchema = mongoose.Schema({
     networth: reqNumber,
 }, {
     timeStamps: true
+}, {
+    versionKey: false
 })
 
 module.exports = mongoose.model('Transactions', transactionSchema)

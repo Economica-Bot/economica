@@ -16,6 +16,8 @@ const guildSettingSchema = mongoose.Schema({
         type: String, 
         required: false
     }
+}, {
+    versionKey: false
 })
 
 module.exports = mongoose.model('Guild', guildSettingSchema)
