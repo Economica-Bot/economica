@@ -110,7 +110,6 @@ module.exports = {
             fields.push([option.name, option.value])
         })
 
-        const cSymbol = await util.getCurrencySymbol(guild.id)
         const incomeEmbed = util.embedify(
             'GREEN',
             `Updated ${income_command}`,
@@ -118,53 +117,41 @@ module.exports = {
         )
 
         //Validate and transfer provided fields
-        let description = ''
+        let description = '', updates = ''
         properties.forEach(property => {
             const field = fields.find(field => field[0] === property[0])
             if(field) {
                 if (['cooldown'].includes(field[0])) {
                     if(ms(field[1])) {
-                        property[1] = ms(field[1])
-                        incomeEmbed.addField(
-                            `${property[0]}`,
-                            `${ms(ms(property[1]))}`,
-                            true
-                        )
+                        property[1] = Math.abs(ms(field[1]))
+                        updates += `${property[0]}: ${ms(ms(property[1]))}ms\n`
                     } else {
                         description += (`Invalid parameter: \`${field[1]}\`\n\`${field[0]}\` must be a time!\n`)
                     }
                 } else if (['chance'].includes(field[0])) {
                     if(parseFloat(field[1])) {
-                        property[1] = field[1] < 1 ? parseFloat(field[1]) * 100 : parseFloat(field[1])
-                        incomeEmbed.addField(
-                            `${property[0]}`,
-                            `${property[1]}%`,
-                            true
-                        )
+                        property[1] = Math.abs(field[1] < 1 ? parseFloat(field[1]) * 100 : parseFloat(field[1]))
+                        updates += `${property[0]}: ${property[1]}%\n`
                     } else {
                         description += (`Invalid parameter: \`${field[1]}\`\n\`${field[0]}\` must be a percentage!\n`)    
                     }
                 } else {
-                    property[1] = +field[1]
-                    incomeEmbed.addField(
-                        `${property[0]}`,
-                        `${cSymbol}${property[1]}`,
-                        true
-                    )
+                    property[1] = Math.abs(+field[1])
+                    updates += `${property[0]}: ${property[1]}\n`
                 }
             }
         })
         
-        incomeEmbed.setDescription(description)
+        incomeEmbed.setDescription(`\`\`\`\n${updates}\n\`\`\`${description ? `\n${description}` : ''}`)
         
-        await interaction.reply({ embeds: [ incomeEmbed ], ephemeral: true })
+        await interaction.reply({ embeds: [ incomeEmbed ] })
  
         properties = Object.fromEntries(properties)
         await incomeSchema.findOneAndUpdate({ 
             guildID: guild.id 
       ***REMOVED*** {
             $set: {
-                [args[0].value]: properties
+                [income_command]: properties
             }
       ***REMOVED*** {
             upsert: true,

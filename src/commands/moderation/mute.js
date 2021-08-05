@@ -43,7 +43,7 @@ module.exports = {
             exit = true
         }
 
-        options.forEach(option => {
+        options._hoistedOptions.forEach(option => {
             if (option.name === 'user') {
                 member = option.member
             } else if(option.name === 'reason') {
@@ -128,7 +128,7 @@ module.exports = {
             footer ?? member.user.id
         )
 
-        await interaction.update({
+        await interaction.reply({
             embeds: [ embed ],
             ephemeral
         })

@@ -24,7 +24,7 @@ module.exports = {
         }    
     ],
     async run(interaction, guild, author, options) {
-        const member = option._hoistedOptions[0].member
+        const member = options._hoistedOptions[0].member
         let embed = flags = result = null, ephemeral = false, reason = options._hoistedOptions[1]?.value ?? 'No reason provided'
 
         if (member.user.id === author.user.id) {
@@ -57,7 +57,7 @@ module.exports = {
             }).save()
         }
 
-        await interaction.update({ 
+        await interaction.reply({ 
             embeds: [ embed ],
             ephemeral
         })

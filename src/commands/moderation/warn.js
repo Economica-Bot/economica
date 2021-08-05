@@ -51,7 +51,7 @@ module.exports = {
             }).save()
         }
 
-        await interaction.update({
+        await interaction.reply({
             embeds: [ embed ], 
             ephemeral
         })

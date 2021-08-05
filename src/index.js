@@ -76,7 +76,7 @@ client.login(process.env.ECON_ALPHA_TOKEN)
 
 client.registerCommandFile = async (commandDirectory, commandFile) => {
     const command = require(`./commands/${commandDirectory}/${commandFile}`)
-    client.guilds.cache.get(process.env.GUILD_ID).commands.create(command)
+    await client.guilds.cache.get(process.env.GUILD_ID).commands.create(command)
     client.commands.set(command.name, command)
     console.log(`${command.name} command registered`)
 }

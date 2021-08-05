@@ -96,7 +96,6 @@ module.exports = {
 
         client.on('interactionCreate', async interaction => {
             if(interaction.isButton() && interaction.message.id === msg.id && interaction.user.id === author.user.id) {
-                console.log(interaction)
                 if(page < embeds.length - 1 && page >= 0 && interaction.customId === 'next_page') {
                     page++
                     if(page == embeds.length - 1) {

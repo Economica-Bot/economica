@@ -5,7 +5,7 @@ const infractionSchema = require('@schemas/infraction-sch')
 module.exports = {
     name: 'ban',
     group: 'moderation',
-    description: 'Bans a user',
+    description: 'Ban a user.',
     format: '<user> [reason]',    
     global: true,
     permissions: [
@@ -29,10 +29,10 @@ module.exports = {
         let embed = result = null, ephemeral = false, reason = options._hoistedOptions[1]?.value ?? 'No reason provided'
 
         if (member.user.id === author.user.id) {
-            embed = util.embedify('RED', 'ERROR', author.user.displayAvatarURL(), 'You cannot ban yourself!')
+            embed = util.embedify('RED', author.user.username, author.user.displayAvatarURL(), 'You cannot ban yourself!')
             ephemeral = true
         } else if (!member.bannable) {
-            embed = util.embedify('RED', 'ERROR', author.user.displayAvatarURL(), `<@!${member.user.id}> is not bannable.`)
+            embed = util.embedify('RED', author.user.username, author.user.displayAvatarURL(), `<@!${member.user.id}> is not bannable.`)
             ephemeral = true
         } else {
             //Ban, record, and send message

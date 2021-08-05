@@ -1,7 +1,7 @@
 module.exports = {
     name: 'clear',
     group: 'utility',
-    format: '[message count]',
+    format: '[msgcount]',
     description: 'Deletes a number of messages in a channel. If not specified, deletes all messages <= 2 weeks old.',
     global: true, 
     permissions: [
@@ -16,11 +16,12 @@ module.exports = {
         }
     ],
     async run(interaction, guild, author, options) {
+        console.log(options._hoistedOptions)
         let embed = null, msgCount = options._hoistedOptions?.[0]?.value ?? 100
         if (msgCount && msgCount > 100 || msgCount < 0) {
             embed = util.embedify('RED', author.user.username, author.user.displayAvatarURL(), `Invalid Length: \`${msgCount}\` out of bounds.`)
         } else {
-            const channel = await client.channels.fetch(interaction.channel_id)
+            const channel = await client.channels.fetch(interaction.channelId)
     
             await channel.bulkDelete(msgCount)
                 .then((val) => {

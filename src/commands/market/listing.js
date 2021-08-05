@@ -148,7 +148,7 @@ module.exports = {
                 embed.addFields([
                     {
                         name: 'Price',
-                        value: price.toLocaleString(),
+                        value: `${currencySymbol}${price.toLocaleString()}`,
                         inLine: true
                   ***REMOVED***
                     {

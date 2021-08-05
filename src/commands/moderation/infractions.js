@@ -20,7 +20,9 @@ module.exports = {
         }
     ],
     async run(interaction, guild, author, options) {
-        const member = guild.members.cache.get(options._hoistedOptions[0].member)
+        await interaction.defer()
+
+        const member = options._hoistedOptions[0].member
 
         //find latest infraction data
         const infractions = await infractionSchema.find({
@@ -96,34 +98,33 @@ module.exports = {
 
         infractionEmbed.setDescription(description)    
 
-        const msg = await interaction.reply({ 
+        const msg = await interaction.editReply({ 
             embeds: [ infractionEmbed ],
             components: [ row ] 
         })
 
         client.on('interactionCreate', async interaction => {
-            if(interaction.isButton() && interaction.message.id === msg.id && interaction.user.id === author.user.id)
-            console.log(interaction)
-            let title = '', description = ''
-            infractions.forEach(infraction => {
-                if(infraction.type === interaction.data.custom_id) {
-                    const infractionType = infractionTypes.filter(infractionType => infractionType.type === infraction.type)[0]
-                    title = infractionType.logo
-                    description += `${infractionType.formal} by <@!${infraction.staffID}> for \`${infraction.reason}\` ${infraction.type === 'mute' ? `${infraction.permanent ? '| **Permanent**' : `until **${new Date(infraction.expires).toLocaleString()}**`}` : ''}\n`
-                }
-            })
-            
-            const specEmbed = util.embedify(
-                'BLURPLE',
-                `${member.user.tag} | ${title}`,
-                member.user.displayAvatarURL(),
-                description
-            )
+            if(interaction.isButton() && interaction.message.id === msg.id && interaction.user.id === author.user.id) {
+                let title = '', description = ''
+                infractions.forEach(infraction => {
+                    if(infraction.type === interaction.customId) {
+                        const infractionType = infractionTypes.filter(infractionType => infractionType.type === infraction.type)[0]
+                        title = infractionType.logo
+                        description += `${infractionType.formal} by <@!${infraction.staffID}> for \`${infraction.reason}\` ${infraction.type === 'mute' ? `${infraction.permanent ? '| **Permanent**' : `until **${new Date(infraction.expires).toLocaleString()}**`}` : ''}\n`
+                    }
+                })
+                
+                const specEmbed = util.embedify(
+                    'BLURPLE',
+                    `${member.user.tag} | ${title}`,
+                    member.user.displayAvatarURL(),
+                    description
+                )
 
-            await interaction.update({
-                embeds: [specEmbed],
-                components: []
-            })
+                await interaction.update({
+                    embeds: [specEmbed],
+                })
+            }
         })
     }
 }
