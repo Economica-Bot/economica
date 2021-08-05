@@ -51,7 +51,6 @@ client.on('interactionCreate', async interaction => {
     const guild = author.guild
     const options = interaction.options
     const permissible = client.permissible(author, guild, command)
-    console.log(permissible)
     if(permissible.length) {
         const embed = util.embedify(
             'RED', 
@@ -64,7 +63,14 @@ client.on('interactionCreate', async interaction => {
         return
     }
 
-    command.run(interaction, guild, author, options) 
+    command?.run(interaction, guild, author, options).catch(err => {
+        client.say(
+            interaction, 
+            null, 
+            util.embedify('RED', author.user.username, author.user.displayAvatarURL(), `\`\`\`js\n${err}\`\`\`\nYou've encountered an error.\nReport this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`), 
+            64
+        )
+    })
 })
 
 client.login(process.env.ECON_ALPHA_TOKEN)
@@ -85,7 +91,7 @@ client.registerCommands = async () => {
 
 client.permissible = (author, guild, command) => {
     let missingPermissions = [], missingRoles = [], permissible = ''
-    if(command.permissions) {
+    if(command?.permissions) {
         for(const permission of command.permissions) {
             if(!author.permissions.has(permission)) {
                 missingPermissions.push(`\`${permission}\``)     
@@ -93,7 +99,7 @@ client.permissible = (author, guild, command) => {
         }
     }
 
-    if(command.roles) {
+    if(command?.roles) {
         for(const role of command.roles) {
             const guildRole = guild.roles.cache.find(r => {
                 return r.name.toLowerCase() === role.toLowerCase()
@@ -107,7 +113,7 @@ client.permissible = (author, guild, command) => {
         }
     }
     
-    if(command.ownerOnly && !config.botAuth.admin_id.includes(author.user.id))
+    if(command?.ownerOnly && !config.botAuth.admin_id.includes(author.user.id))
         permissible += 'You must be an \`OWNER\` to run this command.\n'
 
     if(missingPermissions.length) 
