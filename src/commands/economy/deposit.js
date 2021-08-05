@@ -2,8 +2,8 @@ module.exports = {
     name: 'deposit', 
     group: 'economy',
     description: 'Deposit funds from your wallet to the treasury.',
-    global: true, 
     format: '<amount | all>',
+    global: true, 
     options: [
         {
             name: 'amount',
@@ -25,7 +25,7 @@ module.exports = {
                 description = `Insufficient wallet: ${cSymbol}${amount.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`
             } else {
                 description = `Deposited ${cSymbol}${amount.toLocaleString()}`
-                await util.setEconInfo(guild.id, author.user.id, -amount, amount, 0)
+                await util.transaction(guild.id, author.user.id, this.name, 'system', -amount, amount, 0)
             }
         } else {
             color = 'RED'

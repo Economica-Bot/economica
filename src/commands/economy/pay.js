@@ -32,8 +32,8 @@ module.exports = {
                 description = `Insufficient wallet: ${cSymbol}${amount.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`
             } else {
                 description = `Payed ${member.user.username} ${cSymbol}${amount.toLocaleString()}`
-                await util.setEconInfo(guild.id, author.user.id, -amount, 0, amount)
-                await util.setEconInfo(guild.id, member.user.id, amount, 0, amount)
+                await util.transaction(guild.id, author.user.id, this.name, `Payment to ${member.user.username}`, -amount, 0, amount)
+                await util.transaction(guild.id, member.user.id, this.name, `Payment from ${member.user.tag}`, amount, 0, amount)
             }
         } else {
             color = 'RED'

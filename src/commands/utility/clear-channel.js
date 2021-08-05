@@ -16,7 +16,6 @@ module.exports = {
         }
     ],
     async run(interaction, guild, author, options) {
-        console.log(options._hoistedOptions)
         let embed = null, msgCount = options._hoistedOptions?.[0]?.value ?? 100
         if (msgCount && msgCount > 100 || msgCount < 0) {
             embed = util.embedify('RED', author.user.username, author.user.displayAvatarURL(), `Invalid Length: \`${msgCount}\` out of bounds.`)

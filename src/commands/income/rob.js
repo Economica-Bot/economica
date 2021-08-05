@@ -34,7 +34,7 @@ module.exports = {
                 amount = util.intInRange(0, wallet)
                 color = 'GREEN',
                 description = `You robbed <@!${user.id}> for a grand total of ${cSymbol}${amount.toLocaleString()}!`
-                await util.setEconInfo(guildID, user.id, -amount, 0, -amount)
+                await util.transaction(guildID, user.id, this.name, `Robbed by <@!${author.user.id}>`, -amount, 0, -amount)
             } else {
                 amount = util.intInRange(minFine, maxFine)
                 color = 'RED',
@@ -42,7 +42,7 @@ module.exports = {
                 amount *= -1
             }
 
-            await util.setEconInfo(guildID, userID, amount, 0, amount)
+            await util.transaction(guildID, userID, this.name, `Attempted to rob <@!${user.id}>`, amount, 0, amount)
             await util.setUserCommandStats(guildID, userID, this.name, { timestamp: new Date().getTime() })
         }
 

@@ -9,6 +9,7 @@ const incomeSchema = require('@schemas/income-sch')
 const infractionSchema = require('@schemas/infraction-sch')
 const inventorySchema = require('@schemas/inventory-sch')
 const marketItemSchema = require('@schemas/market-item-sch')
+const transactionSchema = require('@schemas/transaction-sch')
 
 /**
  * Returns a message embed object. 
@@ -73,12 +74,14 @@ module.exports.getEconInfo = async (guildID, userID) => {
  * Changes a user's economy info.
  * @param {string} guildID - Guild id.
  * @param {string} userID - User id.
+ * @param {string} transaction_type - The transaction type.
+ * @param {string} memo - The transaction dispatcher.
  * @param {Number} wallet - The value to be added to the user's wallet.
  * @param {Number} treasury - The value to be added to the user's treasury.
  * @param {Number} networth - The value to be added to the user's networth.
  * @returns {Number} Networth.
  */
- module.exports.setEconInfo = async (guildID, userID, wallet, treasury, networth) => {
+ module.exports.transaction = async (guildID, userID, transaction_type, memo, wallet, treasury, networth) => {
     await this.getEconInfo(guildID, userID)
     const result = await economySchema.findOneAndUpdate({
         guildID, 
@@ -94,6 +97,33 @@ module.exports.getEconInfo = async (guildID, userID) => {
   ***REMOVED*** {
         upsert: true,
     })
+
+    await new transactionSchema({
+        guildID, 
+        userID, 
+        transaction_type, 
+        memo, 
+        wallet, 
+        treasury, 
+        networth
+    }).save()
+
+    const guildSetting = await guildSettingSchema.findOne({
+        guildID
+    })
+
+    const channelID = guildSetting?.transactionLogChannel
+
+    if(channelID) {
+        client.channels.cache.get(channelID).send({ embeds: [
+                util.embedify(
+                    'GOLD',
+                    userID, 
+                    '', 
+                    `${memo}\n${transaction_type}\nWallet: ${wallet}\nTreasury: ${treasury}\nNetworth: ${networth}`, 
+                ).setTimestamp()
+        ] })
+    }
 
     return result.networth
 }

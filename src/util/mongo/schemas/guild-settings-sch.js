@@ -7,15 +7,14 @@ const reqString = {
 
 const guildSettingSchema = mongoose.Schema({
     guildID: reqString,
-    prefix: {
-        type: String, 
-        required: false, 
-        default: '.'
-  ***REMOVED***
     currency: {
         type: String, 
         required: false, 
         default: '💵'
+  ***REMOVED***
+    transactionLogChannel: {
+        type: String, 
+        required: false
     }
 })
 

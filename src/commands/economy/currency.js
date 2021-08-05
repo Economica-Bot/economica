@@ -2,10 +2,10 @@ module.exports = {
     name: 'currency',
     group: 'economy',
     description: 'View and update the currency symbol',
+    global: true,
     permissions: [
         'ADMINISTRATOR'
     ],
-    global: true,
     options: [
         {
             name: 'currency',
@@ -14,7 +14,7 @@ module.exports = {
         }
     ],
     async run(interaction, guild, author, options) {
-        let color, description, footer, embed, currency = options._hoistedOptions?.[0]?.value
+        let color, description, footer, currency = options._hoistedOptions?.[0]?.value
         const currCurrencySymbol = await util.getCurrencySymbol(guild.id)
         if (!currency) {
             color = 'BLURPLE'
@@ -28,7 +28,7 @@ module.exports = {
             footer = currency
         }
 
-        embed = util.embedify(
+        const embed = util.embedify(
             color,
             guild.name, 
             guild.iconURL(),

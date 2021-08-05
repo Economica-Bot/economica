@@ -34,7 +34,7 @@ module.exports = {
         } else {
             const price = owned.price
             color = 'GREEN', description = `Successfully sold \`${item}\` for ${currencySymbol}${price.toLocaleString()}`
-            await util.setEconInfo(guild.id, author.id, price, 0, price)
+            await util.transaction(guild.id, author.id, this.name, `Sold \`${item}\``, price, 0, price)
             await inventorySchema.findOneAndUpdate({
                 userID: author.id, 
                 guildID: guild.id
