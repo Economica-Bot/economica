@@ -1,5 +1,3 @@
-
-
 const infractionSchema = require('@schemas/infraction-sch')
 
 module.exports = {

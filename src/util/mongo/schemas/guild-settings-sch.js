@@ -20,4 +20,4 @@ const guildSettingSchema = mongoose.Schema({
     versionKey: false
 })
 
-module.exports = mongoose.model('Guild', guildSettingSchema)
+module.exports = mongoose.model('guilds', guildSettingSchema)

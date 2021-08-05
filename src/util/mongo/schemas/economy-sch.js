@@ -31,4 +31,4 @@ const econSchema = mongoose.Schema({
     versionKey: false
 })
 
-module.exports = mongoose.model('Economy', econSchema)
+module.exports = mongoose.model('economies', econSchema)

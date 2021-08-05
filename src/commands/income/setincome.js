@@ -1,4 +1,3 @@
-
 const ms = require('ms')
 
 const incomeSchema = require('@schemas/income-sch')

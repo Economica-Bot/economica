@@ -28,4 +28,4 @@ const marketItemSchema = mongoose.Schema({
     versionKey: false
 })
 
-module.exports = mongoose.model('market', marketItemSchema)
+module.exports = mongoose.model('market_items', marketItemSchema)

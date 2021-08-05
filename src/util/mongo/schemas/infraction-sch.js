@@ -41,4 +41,4 @@ const infractionSchema = mongoose.Schema({
     versionKey: false
 })
 
-module.exports = mongoose.model('Infractions', infractionSchema)
+module.exports = mongoose.model('infractions', infractionSchema)

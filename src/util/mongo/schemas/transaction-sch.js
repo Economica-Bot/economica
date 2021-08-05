@@ -24,4 +24,4 @@ const transactionSchema = mongoose.Schema({
     versionKey: false
 })
 
-module.exports = mongoose.model('Transactions', transactionSchema)
+module.exports = mongoose.model('transactions', transactionSchema)

@@ -15,4 +15,4 @@ const inventorySchema = mongoose.Schema({
     versionKey: false
 })
 
-module.exports = mongoose.model('Inventory', inventorySchema)
+module.exports = mongoose.model('inventories', inventorySchema)

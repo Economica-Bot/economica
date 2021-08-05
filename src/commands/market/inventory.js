@@ -1,5 +1,3 @@
-
-
 const inventorySchema = require('@schemas/inventory-sch')
 
 module.exports = {

@@ -90,7 +90,6 @@ client.registerCommands = async () => {
     }
 }
 
-
 client.permissible = (author, guild, command) => {
     let missingPermissions = [], missingRoles = [], permissible = ''
     if(command?.permissions) {
@@ -108,7 +107,7 @@ client.permissible = (author, guild, command) => {
             })
 
             if(!guildRole) {
-                permissible += `Please create an \`${role}\` role. Case insensitive.\n`
+                permissible += `Please create a(n) \`${role}\` role. Case insensitive.\n`
             } else if(!author.roles.cache.has(guildRole.id)) {
                 missingRoles.push(`<@&${guildRole.id}>`)
             }
@@ -119,10 +118,10 @@ client.permissible = (author, guild, command) => {
         permissible += 'You must be an \`OWNER\` to run this command.\n'
 
     if(missingPermissions.length) 
-        permissible += `You are missing the ${missingPermissions.join(', ')} permission(s) to run this command.`
+        permissible += `You are missing the ${missingPermissions.join(', ')} permission(s) to run this command.\n`
 
     if(missingRoles.length)
-        permissible += `You are missing the ${missingRoles.join(', ')} roles(s) to run this command.`
+        permissible += `You are missing the ${missingRoles.join(', ')} role(s) to run this command.\n`
 
     return permissible
 }

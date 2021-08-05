@@ -1,7 +1,6 @@
-
+const ms = require("ms")
 
 const infractionSchema = require('@schemas/infraction-sch')
-const ms = require("ms")
 
 module.exports = {
     name: 'mute',

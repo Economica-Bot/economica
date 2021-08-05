@@ -1,5 +1,3 @@
-
-
 const econonomySchema = require('@schemas/economy-sch')
 
 module.exports = {

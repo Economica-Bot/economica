@@ -50,4 +50,4 @@ const incomeSchema = mongoose.Schema({
      versionKey: false
  })
 
-module.exports = mongoose.model('Income', incomeSchema)
+module.exports = mongoose.model('incomes', incomeSchema)
