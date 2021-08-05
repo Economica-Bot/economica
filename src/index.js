@@ -59,17 +59,21 @@ client.on('interactionCreate', async interaction => {
             permissible
         )
 
-        client.say(interaction, null, embed, 64)
+        interaction.reply({ embeds: [ embed ], flags: 64 })
         return
     }
 
     command?.run(interaction, guild, author, options).catch(err => {
-        client.say(
-            interaction, 
-            null, 
-            util.embedify('RED', author.user.username, author.user.displayAvatarURL(), `\`\`\`js\n${err}\`\`\`\nYou've encountered an error.\nReport this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`), 
-            64
+        const embed = util.embedify(
+            'RED', 
+            author.user.username, 
+            author.user.displayAvatarURL(), 
+            `\`\`\`js\n${err}\`\`\`
+            You've encountered an error.
+            Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`
         )
+
+        interaction.reply({ embeds: [ embed ], flags: 64 })
     })
 })
 
@@ -123,15 +127,4 @@ client.permissible = (author, guild, command) => {
         permissible += `You are missing the ${missingRoles.join(', ')} roles(s) to run this command.`
 
     return permissible
-}
-
-client.say = async (interaction, content = null, embed = null, flags = null) => {
-    await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-        type: 4,
-        data: {
-            content,
-            embeds: [ embed ], 
-            flags
-      ***REMOVED***
-    }})
 }
