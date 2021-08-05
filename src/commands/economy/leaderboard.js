@@ -1,4 +1,4 @@
-require('module-alias/register')
+
 
 const econonomySchema = require('@schemas/economy-sch')
 

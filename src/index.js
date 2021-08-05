@@ -1,13 +1,11 @@
 const Discord = require('discord.js')
-
 const { ApplicationCommandOptionType } = require('discord-api-types/v9')
-
 const fs = require('fs')
 const util = require('./util/util')
 const mongo = require('./util/mongo/mongo')
+const config = require('./config.json')
 
 require('dotenv').config()
-const config = require('./config.json')
 
 const client = new Discord.Client({
     intents: [
@@ -59,7 +57,7 @@ client.on('interactionCreate', async interaction => {
             permissible
         )
 
-        interaction.reply({ embeds: [ embed ], flags: 64 })
+        interaction.reply({ embeds: [ embed ], ephemeral: true})
         return
     }
 
@@ -73,7 +71,7 @@ client.on('interactionCreate', async interaction => {
             Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`
         )
 
-        interaction.reply({ embeds: [ embed ], flags: 64 })
+        interaction.reply({ embeds: [ embed ], ephemeral: true })
     })
 })
 

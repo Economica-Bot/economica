@@ -1,4 +1,4 @@
-require('module-alias/register')
+
 const ms = require('ms')
 
 const incomeSchema = require('@schemas/income-sch')

@@ -1,8 +1,7 @@
 const ms = require('ms');
-require('module-alias/register')
-
 const config = require('../config.json')
 
+require('module-alias/register')
 const economySchema = require('@schemas/economy-sch')
 const guildSettingSchema = require('@schemas/guild-settings-sch')
 const incomeSchema = require('@schemas/income-sch')
@@ -145,7 +144,9 @@ module.exports.getEconInfo = async (guildID, userID) => {
                     }
                 ])
                 .setTimestamp()
-        ] })
+        ] }).catch(err => {
+            console.log(err.message)
+        })
     }
 
     return result.networth
@@ -167,29 +168,6 @@ module.exports.getEconInfo = async (guildID, userID) => {
     } else {
         currency = config.cSymbol //def
     }
-
-    return currency
-}
-
-/**
- * Sets currency symbol.
- * @param {string} guildID - Guild id.
- * @param {string} currency - New currency symbol.
- * @returns {string} New currency symbol
- */
- module.exports.setCurrencySymbol = async (guildID, currency) => {
-    if (currency.toLowerCase() === 'default') {
-        currency = config.cSymbol
-    }
-
-    await guildSettingSchema.findOneAndUpdate({
-        guildID
-  ***REMOVED*** {
-        currency
-  ***REMOVED*** {
-        upsert: true,
-        new: true
-    })
 
     return currency
 }

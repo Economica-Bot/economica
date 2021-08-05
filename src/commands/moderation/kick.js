@@ -1,4 +1,4 @@
-require('module-alias/register')
+
 
 const infractionSchema = require('@schemas/infraction-sch')
 
@@ -25,7 +25,7 @@ module.exports = {
     ],
     async run(interaction, guild, author, options) {
         const member = options._hoistedOptions[0].member
-        let embed = flags = result = null, ephemeral = false, reason = options._hoistedOptions[1]?.value ?? 'No reason provided'
+        let embed = result = null, ephemeral = false, reason = options._hoistedOptions[1]?.value ?? 'No reason provided'
 
         if (member.user.id === author.user.id) {
             embed = util.embedify('RED', author.user.username, author.user.displayAvatarURL(), 'You cannot kick yourself!')
@@ -57,9 +57,6 @@ module.exports = {
             }).save()
         }
 
-        await interaction.reply({ 
-            embeds: [ embed ],
-            ephemeral
-        })
+        await interaction.reply({ embeds: [ embed ], ephemeral })
     }
 }

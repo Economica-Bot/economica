@@ -1,4 +1,4 @@
-require('module-alias/register')
+
 
 const inventorySchema = require('@schemas/inventory-sch')
 

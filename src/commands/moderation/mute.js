@@ -1,4 +1,4 @@
-require('module-alias/register')
+
 
 const infractionSchema = require('@schemas/infraction-sch')
 const ms = require("ms")

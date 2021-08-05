@@ -1,4 +1,4 @@
-require('module-alias/register')
+
 
 const economySchema = require('@schemas/economy-sch')
 const marketItemSchema = require('@schemas/market-item-sch')
