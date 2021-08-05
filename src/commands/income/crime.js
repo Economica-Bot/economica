@@ -35,7 +35,7 @@ module.exports = {
 
         await interaction.reply({ embeds: [ embed ]})
 
-        await util.transaction(guildID, userID, this.name, 'system', amount, 0, amount) 
+        await util.transaction(guildID, userID, this.name, '`system`', amount, 0, amount) 
         await util.setUserCommandStats(guildID, userID, this.name, { timestamp: new Date().getTime() })
     }
 }

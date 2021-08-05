@@ -35,7 +35,7 @@ module.exports = {
                 description = `You flipped a coin and earned ${cSymbol}${amount.toLocaleString()}`
             }
 
-            util.transaction(guild.id, author.id, this.name, 'system', amount, 0, amount)
+            util.transaction(guild.id, author.id, this.name, '`system`', amount, 0, amount)
         } 
 
         embed = util.embedify(

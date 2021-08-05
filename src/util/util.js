@@ -98,7 +98,7 @@ module.exports.getEconInfo = async (guildID, userID) => {
         upsert: true,
     })
 
-    await new transactionSchema({
+    const transaction = await new transactionSchema({
         guildID, 
         userID, 
         transaction_type, 
@@ -115,13 +115,36 @@ module.exports.getEconInfo = async (guildID, userID) => {
     const channelID = guildSetting?.transactionLogChannel
 
     if(channelID) {
-        client.channels.cache.get(channelID).send({ embeds: [
+        const cSymbol = await this.getCurrencySymbol(guildID)
+        const channel = client.channels.cache.get(channelID)
+        const guild = channel.guild
+        const description = 
+        `Transaction for <@!${userID}>\nType: \`${transaction_type}\` | ${memo}`
+        channel.send({ embeds: [
                 util.embedify(
                     'GOLD',
-                    userID, 
-                    '', 
-                    `${memo}\n${transaction_type}\nWallet: ${wallet}\nTreasury: ${treasury}\nNetworth: ${networth}`, 
-                ).setTimestamp()
+                    `${transaction._id}`, 
+                    guild.iconURL(), 
+                    description, 
+                )
+                .addFields([
+                    {
+                        name: '__**Wallet**__',
+                        value: `${cSymbol}${wallet.toLocaleString()}`,
+                        inline: true
+                  ***REMOVED***
+                    {
+                        name: '__**Treasury**__',
+                        value: `${cSymbol}${treasury.toLocaleString()}`,
+                        inline: true
+                  ***REMOVED***
+                    {
+                        name: '__**Networth**__',
+                        value: `${cSymbol}${networth.toLocaleString()}`,
+                        inline: true
+                    }
+                ])
+                .setTimestamp()
         ] })
     }
 

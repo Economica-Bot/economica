@@ -25,7 +25,7 @@ module.exports = {
                 description = `Insufficient wallet: ${cSymbol}${amount.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`
             } else {
                 description = `Deposited ${cSymbol}${amount.toLocaleString()}`
-                await util.transaction(guild.id, author.user.id, this.name, 'system', -amount, amount, 0)
+                await util.transaction(guild.id, author.user.id, this.name, '`system`', -amount, amount, 0)
             }
         } else {
             color = 'RED'

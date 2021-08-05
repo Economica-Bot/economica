@@ -116,6 +116,8 @@ module.exports = {
                 }
             }
         })
+
+        if(!updates.length) updates = 'No parameters updated'
         
         incomeEmbed.setDescription(`\`\`\`\n${updates}\n\`\`\`${description ? `\n${description}` : ''}`)
         

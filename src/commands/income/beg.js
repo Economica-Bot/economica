@@ -19,7 +19,7 @@ module.exports = {
         } else {
             const { min, max } = properties
             const amount = util.intInRange(min, max)
-            await util.transaction(guildID, userID, this.name, 'system', amount, 0, amount) 
+            await util.transaction(guildID, userID, this.name, '`system`', amount, 0, amount) 
             const cSymbol = await util.getCurrencySymbol(guild.id)
             color = 'GREEN'
             description = `You begged and earned ${cSymbol}${amount.toLocaleString()}!`

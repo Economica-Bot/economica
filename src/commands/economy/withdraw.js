@@ -25,7 +25,7 @@ module.exports = {
                 description = `Insufficient treasury: ${cSymbol}${amount.toLocaleString()}\nCurrent treasury: ${cSymbol}${treasury.toLocaleString()}`
             } else {
                 description = `Withdrew ${cSymbol}${amount.toLocaleString()}`
-                await util.transaction(guild.id, author.user.id, this.name, 'system', amount, -amount, 0)
+                await util.transaction(guild.id, author.user.id, this.name, '`system`', amount, -amount, 0)
             }
         } else {
             color = 'RED'
