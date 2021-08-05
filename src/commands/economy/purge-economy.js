@@ -111,7 +111,7 @@ module.exports = {
                     guildID, 
                     userID: user.id
                 }).then(result => {
-                    description = `Deleted ${user.username}'s inventory data. \`${result.inventory.length}\` items removed.`
+                    description = `Deleted inventory data for <@!${user.id}>`
                 })
             }
         } else if(options._group === 'market') {
