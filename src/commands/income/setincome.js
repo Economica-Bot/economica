@@ -38,10 +38,6 @@ module.exports = {
                     name: 'Coin Flip', 
                     value: 'coinflip'
               ***REMOVED***
-                {
-                    name: 'Craps',
-                    value: 'craps'
-                }
             ],
       ***REMOVED*** 
         {

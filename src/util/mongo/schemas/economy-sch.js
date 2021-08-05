@@ -25,7 +25,6 @@ const econSchema = mongoose.Schema({
         crime: commandParams,
         rob: commandParams,
         coinflip: commandParams,
-        craps: commandParams
     }
 }, {
     versionKey: false

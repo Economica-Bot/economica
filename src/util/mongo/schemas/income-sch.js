@@ -41,11 +41,6 @@ const incomeSchema = mongoose.Schema({
           cooldown: num, 
           chance: num
     ***REMOVED*** 
-      craps: {
-          min: num,
-          max: num,
-          cooldown: num,
-      }
 }, {
      versionKey: false
  })
