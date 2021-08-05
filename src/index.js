@@ -31,13 +31,7 @@ global.ApplicationCommandOptionType = ApplicationCommandOptionType
 client.on('ready', async () => {
     console.log(`${client.user.tag} Ready`)
 
-    const commandDirectories = fs.readdirSync('./commands')
-    for(const commandDirectory of commandDirectories) {
-        const commandFiles = fs.readdirSync(`./commands/${commandDirectory}/`).filter(file => file.endsWith('js'))
-        for(const commandFile of commandFiles) {
-            client.registerCommandFile(commandDirectory, commandFile)
-        }
-    }
+    client.registerCommands()
 
     await mongo().then(async () => {
         console.log('Connected to DB')
@@ -56,13 +50,14 @@ client.on('interactionCreate', async interaction => {
     const author = interaction.member
     const guild = author.guild
     const options = interaction.options
-    const missingPermissions = client.hasPermissions(author, command) 
-    if(missingPermissions) {
+    const permissible = client.permissible(author, guild, command)
+    console.log(permissible)
+    if(permissible.length) {
         const embed = util.embedify(
             'RED', 
             author.user.username, 
             author.user.displayAvatarURL(), 
-            `You are missing the ${missingPermissions.join(', ')} permission(s) to run this command.`
+            permissible
         )
 
         client.say(interaction, null, embed, 64)
@@ -74,15 +69,22 @@ client.on('interactionCreate', async interaction => {
 
 client.login(process.env.ECON_ALPHA_TOKEN)
 
-client.registerCommandFile = async (commandDirectory, commandFile) => {
-    const command = require(`./commands/${commandDirectory}/${commandFile}`)
-    await client.guilds.cache.get(process.env.GUILD_ID).commands.create(command)
-    client.commands.set(command.name, command)
-    console.log(`${command.name} command registered`)
+client.registerCommands = async () => {
+    const commandDirectories = fs.readdirSync('./commands')
+    for(const commandDirectory of commandDirectories) {
+        const commandFiles = fs.readdirSync(`./commands/${commandDirectory}/`).filter(file => file.endsWith('js'))
+        for(const commandFile of commandFiles) {
+            const command = require(`./commands/${commandDirectory}/${commandFile}`)
+            await client.guilds.cache.get(process.env.GUILD_ID).commands.create(command)
+            client.commands.set(command.name, command)
+            console.log(`${command.name} command registered`)
+        }
+    }
 }
 
-client.hasPermissions = (author, command) => {
-    let missingPermissions = []
+
+client.permissible = (author, guild, command) => {
+    let missingPermissions = [], missingRoles = [], permissible = ''
     if(command.permissions) {
         for(const permission of command.permissions) {
             if(!author.permissions.has(permission)) {
@@ -91,11 +93,30 @@ client.hasPermissions = (author, command) => {
         }
     }
 
-    if(command.ownerOnly && !config.botAuth.admin_id.includes(author.user.id)) {
-        missingPermissions.push(`\`OWNER\``) 
-    }
+    if(command.roles) {
+        for(const role of command.roles) {
+            const guildRole = guild.roles.cache.find(r => {
+                return r.name.toLowerCase() === role.toLowerCase()
+            })
 
-    return missingPermissions.length ? missingPermissions : null
+            if(!guildRole) {
+                permissible += `Please create an \`${role}\` role.\n`
+            } else if(!author.roles.cache.has(guildRole.id)) {
+                missingRoles.push(`\`${guildRole.name}\``)
+            }
+        }
+    }
+    
+    if(command.ownerOnly && !config.botAuth.admin_id.includes(author.user.id))
+        permissible += 'You must be an \`OWNER\` to run this command.\n'
+
+    if(missingPermissions.length) 
+        permissible += `You are missing the ${missingPermissions.join(', ')} permission(s) to run this command.`
+
+    if(missingRoles.length)
+        permissible += `You are missing the ${missingRoles.join(', ')} roles(s) to run this command.`
+
+    return permissible
 }
 
 client.say = async (interaction, content = null, embed = null, flags = null) => {
