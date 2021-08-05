@@ -1,3 +1,5 @@
+const guildSettingSchema = require('@schemas/guild-settings-sch')
+
 module.exports = {
     name: 'currency',
     group: 'economy',
@@ -8,24 +10,52 @@ module.exports = {
     ],
     options: [
         {
-            name: 'currency',
-            description: 'Specify a currency symbol.',
-            type: 3,
+            name: 'set',
+            description: 'Set the currency symbol.',
+            type: 1,
+            options: [
+                {
+                    name: 'symbol', 
+                    description: 'Specify a symbol.',
+                    type: 3,
+                    required: true
+                }
+            ]
+      ***REMOVED***
+        {
+            name: 'reset',
+            description: 'Reset the currency symbol.',
+            type: 1, 
+            options: null
         }
     ],
     async run(interaction, guild, author, options) {
-        let color, description, footer, currency = options._hoistedOptions?.[0]?.value
-        const currCurrencySymbol = await util.getCurrencySymbol(guild.id)
-        if (!currency) {
-            color = 'BLURPLE'
-            description = `The currency symbol is: ${currCurrencySymbol}`
-        } else if (currency === currCurrencySymbol) {
-            color = 'RED'
-            description = `${currency} is already the server currency symbol.`
-        } else {
-            color = 'GREEN'
-            description = `Currency symbol set to ${await util.setCurrencySymbol(guild.id, currency)}`
-            footer = currency
+        let color, description, footer
+        if(options._subcommand === 'set') {
+            const currency = options._hoistedOptions[0].value
+            await guildSettingSchema.findOneAndUpdate({
+                guildID: guild.id
+          ***REMOVED*** {
+                currency
+          ***REMOVED*** {
+                upsert: true,
+                new: true
+            }).then(() => {
+                color = 'GREEN'
+                description = `Currency symbol set to ${currency}`
+                footer = currency
+            })
+        } else if(options._subcommand === 'reset') {
+            await guildSettingSchema.findOneAndUpdate({
+                guildID: guild.id
+          ***REMOVED*** {
+                $unset: {
+                    currency: ''
+                }
+            }).then(() => {
+                color = 'GREEN', 
+                description = 'Reset the currency symbol.'
+            })
         }
 
         const embed = util.embedify(
