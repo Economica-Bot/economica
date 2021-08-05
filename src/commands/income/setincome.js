@@ -9,6 +9,9 @@ module.exports = {
     description: 'Configure an income command.',
     format: '<command> [...fields]',
     global: true, 
+    roles: [
+        'ECONOMY MANAGER'
+    ],
     options: [ 
         {
             name: 'income_command',
@@ -74,34 +77,6 @@ module.exports = {
       ***REMOVED***
     ],
     async run(interaction, guild, author, options) {
-        let econManagerRole = guild.roles.cache.find(role => {
-            return role.name.toLowerCase() === 'economy manager'
-        })
-
-        if(!econManagerRole) {
-            embed = util.embedify(
-                'RED',
-                author.username, 
-                author.displayAvatarURL(),
-                'Please create an \`Economy Manager\` role!'
-            )
-
-            interaction.reply({ embeds: [ embed ]})
-            return
-        }
-
-        if(!author.roles.cache.has(econManagerRole.id)) {
-            embed = util.embedify(
-                'RED',
-                author.username, 
-                author.displayAvatarURL(),
-                `You must have the <@&${econManagerRole.id}> role.`
-            )
-
-            interaction.reply({ embeds: [ embed ]})
-            return
-        } 
-
         let income_command = options._hoistedOptions[0].value
         let properties = Object.entries(await util.getCommandStats(guild.id, income_command))
         let fields = []

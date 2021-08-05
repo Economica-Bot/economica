@@ -9,6 +9,9 @@ module.exports = {
     description: 'Interact with the server market.',
     format: '<view | create | delete | enable | disable> [...options]',
     global: true, 
+    roles: [
+        'ECONOMY MANAGER'
+    ],
     options: [
         {
             name: 'view', 
@@ -159,36 +162,22 @@ module.exports = {
                 ])
             }
         } else if(options._subcommand === 'delete') {
-            const econManagerRole = guild.roles.cache.find(role => {
-                return role.name.toLowerCase() === 'economy manager'
-            })
-    
-            if(!econManagerRole) {
-                color = 'RED'
-                description = 'Please create an \`Economy Manager\` role!'
-            } else {
-                if(!author.roles.cache.has(econManagerRole.id)) {
-                    color = 'RED',
-                    description = `You must have the <@&${econManagerRole.id}> role.`
-                } else {
-                    const user = options._hoistedOptions[0].user 
-                    const item = options._hoistedOptions[1].value
-                    const listing = await marketItemSchema.findOneAndDelete({ guildID, userID: user.id, item })
+            const user = options._hoistedOptions[0].user 
+            const item = options._hoistedOptions[1].value
+            const listing = await marketItemSchema.findOneAndDelete({ guildID, userID: user.id, item })
 
-                    if(!listing) {
-                        color = 'RED'
-                        description = `Could not find \`${item}\``
-                    } else {
-                        const items = await inventorySchema.updateMany(
-                            { guildID, "inventory.item": item },
-                            { $pull: { inventory: { item } } }
-                        )
-        
-                        color = 'GREEN'
-                        description = `Successfully deleted \`${item}\` from market DB.`
-                        footer = item ? `${items.n} items removed.` : ''
-                    }
-                }
+            if(!listing) {
+                color = 'RED'
+                description = `Could not find \`${item}\``
+            } else {
+                const items = await inventorySchema.updateMany(
+                    { guildID, "inventory.item": item },
+                    { $pull: { inventory: { item } } }
+                )
+
+                color = 'GREEN'
+                description = `Successfully deleted \`${item}\` from market DB.`
+                footer = item ? `${items.n} items removed.` : ''
             }
         } else if(options._subcommand === 'enable') {
             const item = options._hoistedOptions[0].value

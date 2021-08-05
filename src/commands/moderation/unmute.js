@@ -8,6 +8,9 @@ module.exports = {
     description: 'Unmute a user.',
     format: '<user>',
     global: true, 
+    roles: [
+        'muted'
+    ],
     permissions: [
         'MUTE_MEMBERS'
     ],
@@ -26,18 +29,6 @@ module.exports = {
         const mutedRole = guild.roles.cache.find(role => {
             return role.name.toLowerCase() === 'muted'
         })
-
-        if(!mutedRole) {
-            interaction.reply({ embeds: [ util.embedify(
-                'RED',
-                message.author.username, 
-                message.author.displayAvatarURL(),
-                'Please create a `muted` role!',
-                'Case insensitive.'
-            ) ]})
-
-            return 
-        }
 
         member.roles.remove(mutedRole)
 

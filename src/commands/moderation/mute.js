@@ -8,6 +8,9 @@ module.exports = {
     group: 'moderation',
     description: 'Mutes a user.',
     format: '<user> [length] [reason]',
+    roles: [
+        'muted'
+    ],
     permissions: [
         'MUTE_MEMBERS'
     ],
@@ -36,12 +39,6 @@ module.exports = {
         const mutedRole = guild.roles.cache.find(role => {
             return role.name.toLowerCase() === 'muted'
         })
-
-        if (!mutedRole) {
-            color = 'RED'
-            description += 'Please create a `muted` role! | `Case insensitive.`\n'
-            exit = true
-        }
 
         options._hoistedOptions.forEach(option => {
             if (option.name === 'user') {
