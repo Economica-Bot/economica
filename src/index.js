@@ -100,9 +100,9 @@ client.permissible = (author, guild, command) => {
             })
 
             if(!guildRole) {
-                permissible += `Please create an \`${role}\` role.\n`
+                permissible += `Please create an \`${role}\` role. Case insensitive.\n`
             } else if(!author.roles.cache.has(guildRole.id)) {
-                missingRoles.push(`\`${guildRole.name}\``)
+                missingRoles.push(`<@&${guildRole.id}>`)
             }
         }
     }
