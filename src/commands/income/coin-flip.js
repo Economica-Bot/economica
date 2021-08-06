@@ -1,5 +1,6 @@
 module.exports = {
     name: 'coinflip',
+    group: 'income',
     description: 'Double the money in your wallet by flipping a coin.',
     global: true, 
     format: '<amount | all>',
@@ -11,7 +12,7 @@ module.exports = {
             required: true, 
         }
     ], 
-    async run(interaction, guild, author, args) {
+    async run(interaction, guild, author, options) {
         const properties = await util.getCommandStats(guild.id, this.name)
         const uProperties = await util.getUserCommandStats(guild.id, author.id, this.name)
         const { wallet } = await util.getEconInfo(guild.id, author.id)
@@ -21,7 +22,7 @@ module.exports = {
         }
 
         let color = 'RED', description = '', embed
-        let amount = args[0].value === 'all' ? wallet : parseInt(args[0].value)
+        let amount = options._hoistedOptions[0].value === 'all' ? wallet : parseInt(options._hoistedOptions[0].value)
         const cSymbol = await util.getCurrencySymbol(guild.id)
         if(wallet < 1 || wallet < amount) {
             description = `Insufficient wallet: ${cSymbol}${wallet.toLocaleString()}`
@@ -34,7 +35,7 @@ module.exports = {
                 description = `You flipped a coin and earned ${cSymbol}${amount.toLocaleString()}`
             }
 
-            util.setEconInfo(guild.id, author.id, amount, 0, amount)
+            util.transaction(guild.id, author.id, this.name, '`system`', amount, 0, amount)
         } 
 
         embed = util.embedify(
@@ -44,12 +45,7 @@ module.exports = {
             description
         )
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ embed ],
-          ***REMOVED***
-        }})
+        await interaction.reply({ embeds: [ embed ]})
 
         await util.setUserCommandStats(guild.id, author.id, this.name, { timestamp: new Date().getTime() })
     }

@@ -41,11 +41,8 @@ const incomeSchema = mongoose.Schema({
           cooldown: num, 
           chance: num
     ***REMOVED*** 
-      craps: {
-          min: num,
-          max: num,
-          cooldown: num,
-      }
-})
+}, {
+     versionKey: false
+ })
 
-module.exports = mongoose.model('Income', incomeSchema)
+module.exports = mongoose.model('incomes', incomeSchema)

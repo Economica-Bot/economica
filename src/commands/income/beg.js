@@ -1,12 +1,13 @@
 module.exports = {
     name: 'beg', 
+    group: 'income',
     description: 'Possibly earn wallet money', 
     global: true,
     options: null,
-    async run(interaction, guild, author, args) {
+    async run(interaction, guild, author, options) {
         const guildID = guild.id, userID = author.id
         const properties = await util.getCommandStats(guildID, this.name)
-        const uProperties = await util.getUserCommandStats(guildID, userID, 'beg')
+        const uProperties = await util.getUserCommandStats(guildID, userID, this.name)
         if (!await util.coolDown(interaction, properties, uProperties)) {
             return
         }
@@ -18,7 +19,7 @@ module.exports = {
         } else {
             const { min, max } = properties
             const amount = util.intInRange(min, max)
-            await util.setEconInfo(guildID, userID, amount, 0, amount) 
+            await util.transaction(guildID, userID, this.name, '`system`', amount, 0, amount) 
             const cSymbol = await util.getCurrencySymbol(guild.id)
             color = 'GREEN'
             description = `You begged and earned ${cSymbol}${amount.toLocaleString()}!`
@@ -31,12 +32,7 @@ module.exports = {
             description
         ) 
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ embed ],
-          ***REMOVED***
-        }})
+        await interaction.reply({ embeds: [ embed ]})
 
         await util.setUserCommandStats(guildID, userID, this.name, { timestamp: new Date().getTime() }) 
     }

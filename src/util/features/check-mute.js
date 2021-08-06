@@ -1,4 +1,6 @@
-const infractionSch = require('../mongo/schemas/infraction-sch')
+
+
+const infractionSchema = require('@schemas/infraction-sch')
 
 module.exports = client => {
     const checkMutes = async () => {
@@ -12,7 +14,7 @@ module.exports = client => {
           ***REMOVED***
         }
 
-        const results = await infractionSch.find(conditional)
+        const results = await infractionSchema.find(conditional)
 
         //Unmute currently muted users whose mute has expired 
         if (results && results.length) {
@@ -25,7 +27,7 @@ module.exports = client => {
                 })
 
                 member.roles.remove(mutedRole)
-                await infractionSch.updateMany(conditional, {
+                await infractionSchema.updateMany(conditional, {
                     active: false,
                 })
             }
@@ -40,7 +42,7 @@ module.exports = client => {
     //checks if joining member currently muted
     client.on('guildMemberAdd', async member => {
         const { guild, id } = member
-        const currentMute = await infractionSch.findOne({
+        const currentMute = await infractionSchema.findOne({
             guildID: guild.id,
             userID: id,
             type: "mute",

@@ -1,42 +1,71 @@
+const guildSettingSchema = require('@schemas/guild-settings-sch')
+
 module.exports = {
     name: 'currency',
+    group: 'economy',
     description: 'View and update the currency symbol',
     global: true,
+    permissions: [
+        'ADMINISTRATOR'
+    ],
     options: [
         {
-            name: 'currency',
-            description: 'Specify a currency symbol.',
-            type: 3,
+            name: 'set',
+            description: 'Set the currency symbol.',
+            type: 1,
+            options: [
+                {
+                    name: 'symbol', 
+                    description: 'Specify a symbol.',
+                    type: 3,
+                    required: true
+                }
+            ]
+      ***REMOVED***
+        {
+            name: 'reset',
+            description: 'Reset the currency symbol.',
+            type: 1, 
+            options: null
         }
     ],
-    async run(interaction, guild, author, args) {
-        let color, description, footer, embed, currency = args?.[0]?.value
-        const currCurrencySymbol = await util.getCurrencySymbol(guild.id)
-        if (!currency) {
-            color = 'BLURPLE'
-            description = `The currency symbol is: ${currCurrencySymbol}`
-        } else if (currency === currCurrencySymbol) {
-            color = 'RED'
-            description = `${currency} is already the server currency symbol.`
-        } else {
-            color = 'GREEN'
-            description = `Currency symbol set to ${await util.setCurrencySymbol(guild.id, currency)}`
-            footer = currency
+    async run(interaction, guild, author, options) {
+        let color, description, footer
+        if(options._subcommand === 'set') {
+            const currency = options._hoistedOptions[0].value
+            await guildSettingSchema.findOneAndUpdate({
+                guildID: guild.id
+          ***REMOVED*** {
+                currency
+          ***REMOVED*** {
+                upsert: true,
+                new: true
+            }).then(() => {
+                color = 'GREEN'
+                description = `Currency symbol set to ${currency}`
+                footer = currency
+            })
+        } else if(options._subcommand === 'reset') {
+            await guildSettingSchema.findOneAndUpdate({
+                guildID: guild.id
+          ***REMOVED*** {
+                $unset: {
+                    currency: ''
+                }
+            }).then(() => {
+                color = 'GREEN', 
+                description = 'Reset the currency symbol.'
+            })
         }
 
-        embed = util.embedify(
+        const embed = util.embedify(
             color,
             guild.name, 
             guild.iconURL(),
             description, 
             footer
         )
-
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ embed ],
-          ***REMOVED***
-        }})
+        
+        interaction.reply({ embeds: [ embed ] })
     }
 }

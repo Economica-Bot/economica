@@ -25,8 +25,9 @@ const econSchema = mongoose.Schema({
         crime: commandParams,
         rob: commandParams,
         coinflip: commandParams,
-        craps: commandParams
     }
+}, {
+    versionKey: false
 })
 
-module.exports = mongoose.model('Economy', econSchema)
+module.exports = mongoose.model('economies', econSchema)

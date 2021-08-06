@@ -23,7 +23,8 @@ const marketItemSchema = mongoose.Schema({
     description: reqString,
     active: reqBoolean
 }, {
-    timeStamps: true
+    timestamps: true,
+    versionKey: false
 })
 
-module.exports = mongoose.model('market', marketItemSchema)
+module.exports = mongoose.model('market_items', marketItemSchema)

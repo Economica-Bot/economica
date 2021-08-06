@@ -10,7 +10,8 @@ const inventorySchema = mongoose.Schema({
     guildID: reqString, 
     inventory: []
 }, {
-    timeStamps: true
+    timestamps: true,
+    versionKey: false
 })
 
-module.exports = mongoose.model('Inventory', inventorySchema)
+module.exports = mongoose.model('inventories', inventorySchema)

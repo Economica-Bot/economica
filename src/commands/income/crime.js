@@ -1,9 +1,10 @@
 module.exports = {
     name: 'crime', 
+    group: 'income',
     description: 'Commit a crime to increase your wallet balance with risk of fine.',
     global: true, 
     options: null,
-    async run(interaction, guild, author, args) {
+    async run(interaction, guild, author, options) {
         const guildID = guild.id, userID = author.id
         const properties = await util.getCommandStats(guildID, this.name)
         const uProperties = await util.getUserCommandStats(guildID, userID, this.name)
@@ -32,14 +33,9 @@ module.exports = {
             description
         ) 
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ embed ],
-          ***REMOVED***
-        }})
+        await interaction.reply({ embeds: [ embed ]})
 
-        await util.setEconInfo(guildID, userID, amount, 0, amount) 
+        await util.transaction(guildID, userID, this.name, '`system`', amount, 0, amount) 
         await util.setUserCommandStats(guildID, userID, this.name, { timestamp: new Date().getTime() })
     }
 }

@@ -1,9 +1,10 @@
 module.exports = {
     name: 'servers',
+    group: 'utility',
     description: `Get information about ${client.user.tag}'s servers`,
     global: true, 
     commandOptions: null, 
-    async run(interaction, guild, author, args) {
+    async run(interaction, guild, author, options) {
         let serverCount = 0, memberCount = 0, description = ''
         client.guilds.cache.forEach((guild) => {
             serverCount++
@@ -12,12 +13,7 @@ module.exports = {
         })
 
         const embed = util.embedify('GREEN', 'Server List', client.user.displayAvatarURL(), description)
-        client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-              embeds: [ embed ],
-              flags: '64' //ephemeral
-          ***REMOVED***
-        }})
+        
+        await interaction.reply({ embeds: [ embed ], ephemeral: true })
     }
 }

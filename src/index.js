@@ -1,12 +1,11 @@
 const Discord = require('discord.js')
 const { ApplicationCommandOptionType } = require('discord-api-types/v9')
-
 const fs = require('fs')
 const util = require('./util/util')
 const mongo = require('./util/mongo/mongo')
+const config = require('./config.json')
 
 require('dotenv').config()
-const config = require('./config.json')
 
 const client = new Discord.Client({
     intents: [
@@ -25,21 +24,14 @@ global.client = client
 global.Discord = Discord
 global.util = util
 global.mongo = mongo
-
-global.apiTypes = ApplicationCommandOptionType
+global.ApplicationCommandOptionType = ApplicationCommandOptionType
 
 client.on('ready', async () => {
     console.log(`${client.user.tag} Ready`)
 
-    const commandDirectories = fs.readdirSync('./commands')
-    for(const commandDirectory of commandDirectories) {
-        const commandFiles = fs.readdirSync(`./commands/${commandDirectory}/`).filter(file => file.endsWith('js'))
-        for(const commandFile of commandFiles) {
-            client.registerCommandFile(commandDirectory, commandFile)
-        }
-    }
+    client.registerCommands()
 
-    await mongo().then(async () => {
+    await mongo().then(() => {
         console.log('Connected to DB')
     })
 
@@ -47,59 +39,64 @@ client.on('ready', async () => {
     checkMutes(client)
 })
 
-client.ws.on('INTERACTION_CREATE', async interaction => {
-    if(interaction.type !== 2) {
+client.on('interactionCreate', async interaction => {
+    if(!interaction.isCommand()) {
+        return
+    }
+    
+    const command = client.commands.get(interaction.commandName) 
+    const author = interaction.member
+    const guild = author.guild
+    const options = interaction.options
+    const permissible = client.permissible(author, guild, command)
+    if(permissible.length) {
+        const embed = util.embedify(
+            'RED', 
+            author.user.username, 
+            author.user.displayAvatarURL(), 
+            permissible
+        )
+
+        interaction.reply({ embeds: [ embed ], ephemeral: true})
         return
     }
 
-    try {
-        const command = client.commands.get(interaction.data.name) 
-        const guild = await client.guilds.cache.get(interaction.guild_id)
-        const author = await guild.members.cache.get(interaction.member.user.id)
-        const args = interaction.data.options
-        const missingPermissions = client.hasPermissions(author, command) 
-        if(missingPermissions) {
-            const embed = util.embedify(
-                'RED', 
-                author.user.username, 
-                author.user.displayAvatarURL(), 
-                `You are missing the ${missingPermissions.join(', ')} permission(s) to run this command.`
-            )
+    command?.run(interaction, guild, author, options).catch(err => {
+        const embed = util.embedify(
+            'RED', 
+            author.user.username, 
+            author.user.displayAvatarURL(), 
+            `\`\`\`js\n${err}\`\`\`
+            You've encountered an error.
+            Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`
+        )
 
-            client.say(interaction, null, embed, 64)
-            return
+        if(interaction.replied) {
+            interaction.followUp({ embeds: [ embed ], ephemeral: true })
+        } else {
+            interaction.reply({ embeds: [ embed ], ephemeral: true })
         }
-
-        command.run(interaction, guild, author, args)
-    } catch (err) {
-        console.error(err)
-        client.api.interactions(interaction.id, interaction.token).callback.post({ data: {
-            type: 4, 
-            data: {
-                content: `${err.message}`,
-                flags: 64
-            }
-        }})
-    }   
+    })
 })
 
-client.login(process.env.ECON_TOKEN)
+client.login(process.env.ECON_ALPHA_TOKEN)
 
-client.registerCommandFile = async (commandDirectory, commandFile) => {
-    const command = require(`./commands/${commandDirectory}/${commandFile}`)
-    await client.api.applications(process.env.APPLICATION_ID).guilds(process.env.GUILD_ID).commands.post({data: {
-        name: command.name,
-        description: command.description,
-        options: command.options
-    }})
-
-    client.commands.set(command.name, command)
-    console.log(`${command.name} command registered`)
+client.registerCommands = async () => {
+    const commandDirectories = fs.readdirSync('./commands')
+    for(const commandDirectory of commandDirectories) {
+        const commandFiles = fs.readdirSync(`./commands/${commandDirectory}/`).filter(file => file.endsWith('js'))
+        for(const commandFile of commandFiles) {
+            const command = require(`./commands/${commandDirectory}/${commandFile}`)
+            await client.guilds.cache.get(process.env.GUILD_ID).commands.create(command)
+            client.commands.set(command.name, command)
+            console.log(`${command.name} command registered`)
+        }
+    }
 }
 
-client.hasPermissions = (author, command) => {
-    let missingPermissions = []
-    if(command.permissions) {
+client.permissible = (author, guild, command) => {
+    let missingPermissions = [], missingRoles = [], permissible = ''
+    if(command?.permissions) {
         for(const permission of command.permissions) {
             if(!author.permissions.has(permission)) {
                 missingPermissions.push(`\`${permission}\``)     
@@ -107,20 +104,28 @@ client.hasPermissions = (author, command) => {
         }
     }
 
-    if(command.ownerOnly && !config.botAuth.admin_id.includes(author.user.id)) {
-        missingPermissions.push(`\`OWNER\``) 
+    if(command?.roles) {
+        for(const role of command.roles) {
+            const guildRole = guild.roles.cache.find(r => {
+                return r.name.toLowerCase() === role.toLowerCase()
+            })
+
+            if(!guildRole) {
+                permissible += `Please create a(n) \`${role}\` role. Case insensitive.\n`
+            } else if(!author.roles.cache.has(guildRole.id)) {
+                missingRoles.push(`<@&${guildRole.id}>`)
+            }
+        }
     }
+    
+    if(command?.ownerOnly && !config.botAuth.admin_id.includes(author.user.id))
+        permissible += 'You must be an \`OWNER\` to run this command.\n'
 
-    return missingPermissions.length ? missingPermissions : null
-}
+    if(missingPermissions.length) 
+        permissible += `You are missing the ${missingPermissions.join(', ')} permission(s) to run this command.\n`
 
-client.say = async (interaction, content = null, embed = null, flags = null) => {
-    await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-        type: 4,
-        data: {
-            content,
-            embeds: [ embed ], 
-            flags
-      ***REMOVED***
-    }})
+    if(missingRoles.length)
+        permissible += `You are missing the ${missingRoles.join(', ')} role(s) to run this command.\n`
+
+    return permissible
 }

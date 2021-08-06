@@ -4,7 +4,7 @@ module.exports = async () => {
     const options = {
         useUnifiedTopology: true, 
         useNewUrlParser: true, 
-        useFindAndModify: true
+        useFindAndModify: false
     }
 
     await mongoose.connect(process.env.MONGOPATH, options)

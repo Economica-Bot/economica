@@ -1,13 +1,14 @@
 const ms = require('ms');
-
 const config = require('../config.json')
 
-const economySchema = require('../util/mongo/schemas/economy-sch')
-const guildSettingSchema = require('../util/mongo/schemas/guild-settings-sch')
-const incomeSchema = require('../util/mongo/schemas/income-sch')
-const infractionSchema = require('../util/mongo/schemas/infraction-sch')
-const inventorySchema = require('../util/mongo/schemas/inventory-sch')
-const marketItemSchema = require('../util/mongo/schemas/market-item-sch')
+require('module-alias/register')
+const economySchema = require('@schemas/economy-sch')
+const guildSettingSchema = require('@schemas/guild-settings-sch')
+const incomeSchema = require('@schemas/income-sch')
+const infractionSchema = require('@schemas/infraction-sch')
+const inventorySchema = require('@schemas/inventory-sch')
+const marketItemSchema = require('@schemas/market-item-sch')
+const transactionSchema = require('@schemas/transaction-sch')
 
 /**
  * Returns a message embed object. 
@@ -18,7 +19,7 @@ const marketItemSchema = require('../util/mongo/schemas/market-item-sch')
  * @param {string} [footer] - Embed footer.
  * @returns {MessageEmbed} Message embed.
  */
-module.exports.embedify = (color = 'DEFAULT', title = false, icon_url = false, description = false, footer = false) => {
+module.exports.embedify = (color = 'DEFAULT', title = null, icon_url = null, description = null, footer = null) => {
     const embed = new Discord.MessageEmbed().setColor(color)
     if (icon_url) embed.setAuthor(title, icon_url)
     else if (title) embed.setTitle(title)
@@ -72,12 +73,14 @@ module.exports.getEconInfo = async (guildID, userID) => {
  * Changes a user's economy info.
  * @param {string} guildID - Guild id.
  * @param {string} userID - User id.
+ * @param {string} transaction_type - The transaction type.
+ * @param {string} memo - The transaction dispatcher.
  * @param {Number} wallet - The value to be added to the user's wallet.
  * @param {Number} treasury - The value to be added to the user's treasury.
  * @param {Number} networth - The value to be added to the user's networth.
  * @returns {Number} Networth.
  */
-module.exports.setEconInfo = async (guildID, userID, wallet, treasury, networth) => {
+ module.exports.transaction = async (guildID, userID, transaction_type, memo, wallet, treasury, networth) => {
     await this.getEconInfo(guildID, userID)
     const result = await economySchema.findOneAndUpdate({
         guildID,
@@ -93,6 +96,58 @@ module.exports.setEconInfo = async (guildID, userID, wallet, treasury, networth)
   ***REMOVED*** {
         upsert: true,
     })
+
+    const transaction = await new transactionSchema({
+        guildID, 
+        userID, 
+        transaction_type, 
+        memo, 
+        wallet, 
+        treasury, 
+        networth
+    }).save()
+
+    const guildSetting = await guildSettingSchema.findOne({
+        guildID
+    })
+
+    const channelID = guildSetting?.transactionLogChannel
+
+    if(channelID) {
+        const cSymbol = await this.getCurrencySymbol(guildID)
+        const channel = client.channels.cache.get(channelID)
+        const guild = channel.guild
+        const description = 
+        `Transaction for <@!${userID}>\nType: \`${transaction_type}\` | ${memo}`
+        channel.send({ embeds: [
+                util.embedify(
+                    'GOLD',
+                    `${transaction._id}`, 
+                    guild.iconURL(), 
+                    description, 
+                )
+                .addFields([
+                    {
+                        name: '__**Wallet**__',
+                        value: `${cSymbol}${wallet.toLocaleString()}`,
+                        inline: true
+                  ***REMOVED***
+                    {
+                        name: '__**Treasury**__',
+                        value: `${cSymbol}${treasury.toLocaleString()}`,
+                        inline: true
+                  ***REMOVED***
+                    {
+                        name: '__**Networth**__',
+                        value: `${cSymbol}${networth.toLocaleString()}`,
+                        inline: true
+                    }
+                ])
+                .setTimestamp()
+        ] }).catch(err => {
+            console.log(err.message)
+        })
+    }
 
     return result.networth
 }
@@ -113,29 +168,6 @@ module.exports.getCurrencySymbol = async (guildID) => {
     } else {
         currency = config.cSymbol //def
     }
-
-    return currency
-}
-
-/**
- * Sets currency symbol.
- * @param {string} guildID - Guild id.
- * @param {string} currency - New currency symbol.
- * @returns {string} New currency symbol
- */
-module.exports.setCurrencySymbol = async (guildID, currency) => {
-    if (currency.toLowerCase() === 'default') {
-        currency = config.cSymbol
-    }
-
-    await guildSettingSchema.findOneAndUpdate({
-        guildID
-  ***REMOVED*** {
-        currency
-  ***REMOVED*** {
-        upsert: true,
-        new: true
-    })
 
     return currency
 }
@@ -260,14 +292,7 @@ module.exports.coolDown = async (interaction, properties, uProperties) => {
             `Cooldown: ${ms(cooldown)}`
         )
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({
-            data: {
-                type: 4,
-                data: {
-                    embeds: [embed]
-                }
-            }
-        })
+        interaction.reply({ embeds: [ embed ]})
 
         return false
     } else {

@@ -1,8 +1,9 @@
 module.exports = {
     name: 'deposit', 
+    group: 'economy',
     description: 'Deposit funds from your wallet to the treasury.',
-    global: true, 
     format: '<amount | all>',
+    global: true, 
     options: [
         {
             name: 'amount',
@@ -11,20 +12,20 @@ module.exports = {
             required: true,
         }
     ],
-    async run(interaction, guild, author, args) {
+    async run(interaction, guild, author, options) {
         let color = 'GREEN', description = '', embed
 
         const cSymbol = await util.getCurrencySymbol(guild.id)
         const { wallet } = await util.getEconInfo(guild.id, author.user.id)
-        const amount = args[0].value === 'all' ? wallet : parseInt(args[0].value)
+        const amount = options._hoistedOptions[0].value === 'all' ? wallet : parseInt(options._hoistedOptions[0].value)
 
         if(amount) {
             if (amount < 1 || amount > wallet) {
                 color = 'RED'
-                description = `Insufficient wallet: \`${amount}\`\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`
+                description = `Insufficient wallet: ${cSymbol}${amount.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`
             } else {
                 description = `Deposited ${cSymbol}${amount.toLocaleString()}`
-                await util.setEconInfo(guild.id, author.user.id, -amount, amount, 0)
+                await util.transaction(guild.id, author.user.id, this.name, '`system`', -amount, amount, 0)
             }
         } else {
             color = 'RED'
@@ -38,11 +39,6 @@ module.exports = {
             description
         )
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
-            data: {
-                embeds: [ embed ],
-          ***REMOVED***
-        }})
+        interaction.reply({ embeds: [ embed ]})
     }
 }
