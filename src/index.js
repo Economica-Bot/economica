@@ -1,4 +1,5 @@
 const Discord = require('discord.js')
+const { ApplicationCommandOptionType } = require('discord-api-types/v9')
 
 const fs = require('fs')
 const util = require('./util/util')
@@ -25,18 +26,7 @@ global.Discord = Discord
 global.util = util
 global.mongo = mongo
 
-global.slashTypes = {
-    subcommand: 1,
-    subcommandGroup: 2,
-    string: 3,
-    integer: 4,
-    boolean: 5,
-    user: 6,
-    channel: 7,
-    role: 8,
-    mentionable: 9,
-    number: 10
-}
+global.apiTypes = ApplicationCommandOptionType
 
 client.on('ready', async () => {
     console.log(`${client.user.tag} Ready`)
@@ -95,9 +85,9 @@ client.ws.on('INTERACTION_CREATE', async interaction => {
 
 client.login(process.env.ECON_TOKEN)
 
-client.registerCommandFile = (commandDirectory, commandFile) => {
+client.registerCommandFile = async (commandDirectory, commandFile) => {
     const command = require(`./commands/${commandDirectory}/${commandFile}`)
-    client.api.applications(process.env.APPLICATION_ID).guilds(process.env.GUILD_ID).commands.post({data: {
+    await client.api.applications(process.env.APPLICATION_ID).guilds(process.env.GUILD_ID).commands.post({data: {
         name: command.name,
         description: command.description,
         options: command.options

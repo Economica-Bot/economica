@@ -21,7 +21,7 @@ const marketItemSchema = require('../util/mongo/schemas/market-item-sch')
 module.exports.embedify = (color = 'DEFAULT', title = false, icon_url = false, description = false, footer = false) => {
     const embed = new Discord.MessageEmbed().setColor(color)
     if (icon_url) embed.setAuthor(title, icon_url)
-    else if (title) embed.setTitle(title) 
+    else if (title) embed.setTitle(title)
     if (description) embed.setDescription(description)
     if (footer) embed.setFooter(footer)
 
@@ -50,19 +50,19 @@ module.exports.getEconInfo = async (guildID, userID) => {
         }
     }
 
-    if(!found) {
+    if (!found) {
         await new economySchema({
             guildID,
             userID,
-            wallet, 
-            treasury, 
+            wallet,
+            treasury,
             networth
         }).save()
     }
 
     return econInfo = {
-        wallet, 
-        treasury, 
+        wallet,
+        treasury,
         networth,
         rank
     }
@@ -77,18 +77,18 @@ module.exports.getEconInfo = async (guildID, userID) => {
  * @param {Number} networth - The value to be added to the user's networth.
  * @returns {Number} Networth.
  */
- module.exports.setEconInfo = async (guildID, userID, wallet, treasury, networth) => {
+module.exports.setEconInfo = async (guildID, userID, wallet, treasury, networth) => {
     await this.getEconInfo(guildID, userID)
     const result = await economySchema.findOneAndUpdate({
-        guildID, 
-        userID, 
+        guildID,
+        userID,
   ***REMOVED*** {
         guildID,
         userID,
         $inc: {
             wallet,
             treasury,
-            networth 
+            networth
         }
   ***REMOVED*** {
         upsert: true,
@@ -102,7 +102,7 @@ module.exports.getEconInfo = async (guildID, userID) => {
  * @param {string} guildID - Guild id.
  * @returns {string} Guild currency symbol
  */
- module.exports.getCurrencySymbol = async (guildID) => {
+module.exports.getCurrencySymbol = async (guildID) => {
     const result = await guildSettingSchema.findOne({
         guildID,
     })
@@ -123,7 +123,7 @@ module.exports.getEconInfo = async (guildID, userID) => {
  * @param {string} currency - New currency symbol.
  * @returns {string} New currency symbol
  */
- module.exports.setCurrencySymbol = async (guildID, currency) => {
+module.exports.setCurrencySymbol = async (guildID, currency) => {
     if (currency.toLowerCase() === 'default') {
         currency = config.cSymbol
     }
@@ -146,7 +146,7 @@ module.exports.getEconInfo = async (guildID, userID) => {
  * @param {string} command - Income command.
  * @param {object} properties - Command properties.
  */
- module.exports.setCommandStats = async (guildID, command, properties = {}) => {
+module.exports.setCommandStats = async (guildID, command, properties = {}) => {
     await incomeSchema.findOneAndUpdate({
         guildID
   ***REMOVED*** {
@@ -172,13 +172,13 @@ module.exports.getCommandStats = async (guildID, command) => {
         guildID,
         [command]: {
             $exists: true
-        } 
+        }
     })
 
     let properties = config.income[command]
 
-    for(const property in properties) {
-        if(result?.[command]?.[property]) {
+    for (const property in properties) {
+        if (result?.[command]?.[property]) {
             properties[property] = result[command][property]
         }
     }
@@ -201,9 +201,9 @@ module.exports.getUserCommandStats = async (guildID, userID, command) => {
 
     result = result.commands?.[command]
     let properties = config.uCommandStats?.[command]
-    for(const property in properties) {
-        if(result?.[property])
-        properties[property] = result[property]
+    for (const property in properties) {
+        if (result?.[property])
+            properties[property] = result[property]
     }
 
     return properties
@@ -219,7 +219,7 @@ module.exports.getUserCommandStats = async (guildID, userID, command) => {
 module.exports.setUserCommandStats = async (guildID, userID, command, properties) => {
     const key = `commands.${command}`
     await economySchema.findOneAndUpdate({
-        guildID, 
+        guildID,
         userID
   ***REMOVED*** {
         $set: {
@@ -236,7 +236,7 @@ module.exports.setUserCommandStats = async (guildID, userID, command, properties
  * @param {Number} max - max value in range
  * @returns {Number} Random value between two inputs
  */
- module.exports.intInRange = (min, max) => {
+module.exports.intInRange = (min, max) => {
     return Math.ceil((Math.random() * (max - min)) + min)
 }
 
@@ -247,7 +247,7 @@ module.exports.setUserCommandStats = async (guildID, userID, command, properties
  * @param {object} uProperties - User command properties
  * @returns {boolean} 
  */
- module.exports.coolDown = async (interaction, properties, uProperties) => {
+module.exports.coolDown = async (interaction, properties, uProperties) => {
     const { cooldown } = properties
     const { timestamp } = uProperties
     const now = new Date().getTime()
@@ -260,12 +260,14 @@ module.exports.setUserCommandStats = async (guildID, userID, command, properties
             `Cooldown: ${ms(cooldown)}`
         )
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-            type: 4,
+        await client.api.interactions(interaction.id, interaction.token).callback.post({
             data: {
-                embeds: [ embed ]
+                type: 4,
+                data: {
+                    embeds: [embed]
+                }
             }
-        }})
+        })
 
         return false
     } else {
@@ -278,7 +280,50 @@ module.exports.setUserCommandStats = async (guildID, userID, command, properties
  * @param {object} properties - the command properties
  * @returns {boolean} `isSuccess` — boolean
  */
- module.exports.isSuccess = (properties) => {
+module.exports.isSuccess = (properties) => {
     const { chance } = properties
     return this.intInRange(0, 100) < chance ? true : false
+}
+
+module.exports.reply = async ({ id, token }, content, isEmbed = true) => {
+    try {
+        if (isEmbed === true) {
+            await client.api.interactions(id, token).callback.post({
+                data: {
+                    type: 4,
+                    data: {
+                        embeds: [
+                            content
+                        ]
+                    }
+                }
+            })
+        } else {
+            await client.api.interactions(id, token).callback.post({
+                data: {
+                    type: 4,
+                    data: {
+                        content
+                  ***REMOVED***
+                    allowedMentions: { 
+                        repliedUser: true // trying to ping the original message author
+                    }
+                }
+            })
+        }
+    } catch (err) {
+        console.log(err)
+        if (id && token) {
+            await client.api.interactions(id, token).callback.post({
+                data: {
+                    type: 4,
+                    data: {
+                        embeds: [
+                            this.embedify('WHITE', '', '', 'Something went wrong. [Contact Us](https://discord.gg/qNUeHy9TqS)')
+                        ]
+                    }
+                }
+            })
+        }
+    }
 }
