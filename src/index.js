@@ -31,7 +31,7 @@ client.on('ready', async () => {
 
     client.registerCommands()
 
-    await mongo().then(async () => {
+    await mongo().then(() => {
         console.log('Connected to DB')
     })
 
@@ -71,7 +71,11 @@ client.on('interactionCreate', async interaction => {
             Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`
         )
 
-        interaction.reply({ embeds: [ embed ], ephemeral: true })
+        if(interaction.replied) {
+            interaction.followUp({ embeds: [ embed ], ephemeral: true })
+        } else {
+            interaction.reply({ embeds: [ embed ], ephemeral: true })
+        }
     })
 })
 

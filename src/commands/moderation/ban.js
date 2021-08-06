@@ -12,7 +12,7 @@ module.exports = {
     options: [
         {
             name: 'user',
-            description: 'Name a user you wish to ban.',
+            description: 'Specify a user.',
             type: 6, 
             required: true
       ***REMOVED*** 
