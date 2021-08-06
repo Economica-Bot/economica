@@ -19,8 +19,7 @@ const transactionSchema = mongoose.Schema({
     treasury: reqNumber,
     networth: reqNumber,
 }, {
-    timeStamps: true
-}, {
+    timestamps: true,
     versionKey: false
 })
 

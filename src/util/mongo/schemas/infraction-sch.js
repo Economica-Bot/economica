@@ -36,8 +36,7 @@ const infractionSchema = mongoose.Schema({
         required: false,
     }
 }, {
-    timestamps: true
-}, {
+    timestamps: true,
     versionKey: false
 })
 

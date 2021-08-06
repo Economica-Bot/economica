@@ -23,8 +23,7 @@ const marketItemSchema = mongoose.Schema({
     description: reqString,
     active: reqBoolean
 }, {
-    timeStamps: true
-}, {
+    timestamps: true,
     versionKey: false
 })
 

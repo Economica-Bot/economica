@@ -10,8 +10,7 @@ const inventorySchema = mongoose.Schema({
     guildID: reqString, 
     inventory: []
 }, {
-    timeStamps: true
-}, {
+    timestamps: true,
     versionKey: false
 })
 
