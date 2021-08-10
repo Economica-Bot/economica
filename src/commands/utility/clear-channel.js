@@ -26,9 +26,6 @@ module.exports = {
                 .then((val) => {
                     embed = util.embedify('GREEN', author.user.username, author.user.displayAvatarURL(), `Deleted \`${val.size}\` messages.`) 
                 })
-                .catch((err) => {
-                    embed = util.embedify('RED', author.user.username, author.user.displayAvatarURL(), `\`\`\`js\n${err}\`\`\``)
-                })
         }
 
         await interaction.reply({ embeds: [ embed ], ephemeral: true })

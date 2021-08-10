@@ -7,11 +7,14 @@ module.exports = {
     group: 'moderation',
     description: 'Mutes a user.',
     format: '<user> [length] [reason]',
-    roles: [
-        'muted'
-    ],
     permissions: [
         'MUTE_MEMBERS'
+    ],
+    roles: [
+        {
+            name: 'MUTED',
+            required: false
+        }
     ],
     options: [
         {
@@ -23,7 +26,7 @@ module.exports = {
         {
             name: 'duration',
             description: 'Specify a duration.',
-            type: ApplicationCommandOptionType.String,
+            type: apiTypes.String,
       ***REMOVED***
         {
             name: 'reason',
@@ -42,6 +45,11 @@ module.exports = {
         options._hoistedOptions.forEach(option => {
             if (option.name === 'user') {
                 member = option.member
+                if (member.user.id === author.user.id) {
+                    embed = util.embedify('RED', author.user.username, author.user.displayAvatarURL(), 'You cannot mute yourself!')
+                    ephemeral = true
+                    exit = true
+                } 
             } else if(option.name === 'reason') {
                 reason = option.value
             } else if(option.name === 'duration') {
@@ -72,14 +80,17 @@ module.exports = {
             //Check for active mute
             const activeMutes = await infractionSchema.find({
                 guildID: guild.id,
-                userID: member.id,
+                userID: member.user.id,
                 type: this.name, 
                 active: true
             })
 
             if (activeMutes.length) {
                 color = 'RED'
+                title = member.user.tag, 
+                icon_url = member.user.displayAvatarURL(),
                 description += 'This user is already \`muted\`!\n'
+                member.user.id
             } else {
                 //Mute, record, and send message
                 await member.send({ embeds: [ util.embedify(
@@ -113,8 +124,6 @@ module.exports = {
                 footer ?? member.user.id
             }
         }
-
-            
 
         const embed = util.embedify(
             color,

@@ -9,7 +9,10 @@ module.exports = {
     format: '<command> [...fields]',
     global: true, 
     roles: [
-        'ECONOMY MANAGER'
+        {
+            name: 'ECONOMY MANAGER',
+            required: true
+        }
     ],
     options: [ 
         {
@@ -116,7 +119,7 @@ module.exports = {
         
         incomeEmbed.setDescription(`\`\`\`\n${updates}\n\`\`\`${description ? `\n${description}` : ''}`)
         
-        await interaction.reply({ embeds: [ incomeEmbed ] })
+        await interaction.reply({ embeds: [ incomeEmbed ], ephemeral: true })
  
         properties = Object.fromEntries(properties)
         await incomeSchema.findOneAndUpdate({ 

@@ -13,10 +13,10 @@ module.exports = {
         } 
 
         let color, description, amount
-        const { min, max, minFine, maxFine } = properties
+        const { min, max, minfine, maxfine } = properties
         const cSymbol = await util.getCurrencySymbol(guildID)
         if (!util.isSuccess(properties)) {
-            amount = util.intInRange(minFine, maxFine)
+            amount = util.intInRange(minfine, maxfine)
             color = 'RED'
             description = `You were caught commiting a crime and fined ${cSymbol}${amount.toLocaleString()}`
             amount *= -1

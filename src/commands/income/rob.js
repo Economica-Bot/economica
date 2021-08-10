@@ -23,7 +23,7 @@ module.exports = {
         }
 
         let color, description, amount
-        const { minFine, maxFine } = properties
+        const { minfine, maxfine } = properties
         const { wallet } = await util.getEconInfo(guildID, user.id)
         const cSymbol = await util.getCurrencySymbol(guildID)
         if(wallet < 1) {
@@ -36,7 +36,7 @@ module.exports = {
                 description = `You robbed <@!${user.id}> for a grand total of ${cSymbol}${amount.toLocaleString()}!`
                 await util.transaction(guildID, user.id, this.name, `Robbed by <@!${author.user.id}>`, -amount, 0, -amount)
             } else {
-                amount = util.intInRange(minFine, maxFine)
+                amount = util.intInRange(minfine, maxfine)
                 color = 'RED',
                 description = `You were caught robbing and fined ${cSymbol}${amount.toLocaleString()}`
                 amount *= -1

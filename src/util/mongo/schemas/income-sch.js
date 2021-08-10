@@ -28,14 +28,14 @@ const incomeSchema = mongoose.Schema({
           max: num,
           cooldown: num,
           chance: num,
-          minFine: num,
-          maxFine: num
+          minfine: num,
+          maxfine: num
    ***REMOVED***
      rob: {
           cooldown: num,
           chance: num,
-          minFine: num,
-          maxFine: num
+          minfine: num,
+          maxfine: num
     ***REMOVED***
       coinflip: {
           cooldown: num, 

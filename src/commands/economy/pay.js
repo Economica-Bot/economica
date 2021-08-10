@@ -26,7 +26,10 @@ module.exports = {
         const member = options._hoistedOptions[0].member
         const amount = options._hoistedOptions[1].value === 'all' ? wallet : parseInt(options._hoistedOptions[1].value)
 
-        if(amount) {
+        if (member.user.id === author.user.id) {
+            embed = util.embedify('RED', author.user.username, author.user.displayAvatarURL(), 'You cannot pay yourself!')
+            ephemeral = true
+        } else if(amount) {
             if (amount < 1 || amount > wallet) {
                 color = 'RED'
                 description = `Insufficient wallet: ${cSymbol}${amount.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`

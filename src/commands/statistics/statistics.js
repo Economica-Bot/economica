@@ -41,10 +41,14 @@ module.exports = {
             wallets.push(wallet)
             treasuries.push(treasury)
             networths.push(networth)
-            dates.push(transaction.createdAt.toLocaleString())
+            dates.push(transaction.createdAt.toLocaleDateString())
         }
 
-        
+        wallets.push(wallet)
+        treasuries.push(treasury)
+        networths.push(networth)
+        dates.push(new Date().toLocaleDateString())
+
         const data = {
             labels: dates, 
             datasets: [
@@ -97,6 +101,9 @@ module.exports = {
                         ticks: {
                             fontSize: 14,
                             fontColor: 'white',
+                            maxRotation: 0,
+                            minRotation: 0,
+                            maxTicksLimit: 5
                       ***REMOVED***
                         scaleLabel: {
                             display: true,
@@ -104,6 +111,9 @@ module.exports = {
                             fontSize: 14,
                             fontColor: 'white',
                       ***REMOVED***
+                        gridLines: {
+                            display: false
+                        }
                   ***REMOVED***
                 ],
                 yAxes: [
@@ -118,6 +128,9 @@ module.exports = {
                             fontSize: 16,
                             fontColor: 'white',
                       ***REMOVED***
+                        gridLines: {
+                            display: false
+                        }
                   ***REMOVED***
                 ],
           ***REMOVED***
@@ -132,16 +145,19 @@ module.exports = {
                 data,
                 options: opt
             })
-            .setWidth(800)
-            .setHeight(600)
+            .setWidth(600)
+            .setHeight(450)
             .setBackgroundColor('transparent')
 
         const url = await chart.getShortUrl()        
         const embed = util.embedify(
             'GOLD',
-            `Balance History for ${author.user.username}`, 
-            author.user.displayAvatarURL(),
-        ).setImage(url)
+            `Statistics for ${user.username}`, 
+            user.displayAvatarURL(),
+            `Total transactions: \`${transactions.length}\``
+        )
+        .setImage(url)
+        .setFooter(url)
 
         await interaction.reply({ embeds: [ embed ] })
     }

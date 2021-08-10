@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "discord-api-types": "^0.22.0",
-    "discord.js": "^13.0.0-dev.t1627992462.35fa3b3",
+    "discord.js": "^13.0.1",
     "dotenv": "^10.0.0",
     "module-alias": "^2.2.2",
     "mongoose": "^5.13.5",
