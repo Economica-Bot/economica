@@ -6,11 +6,14 @@ module.exports = {
     description: 'Unmute a user.',
     format: '<user>',
     global: true, 
-    roles: [
-        'muted'
-    ],
     permissions: [
         'MUTE_MEMBERS'
+    ],
+    roles: [
+        {
+            name: 'MUTED',
+            required: true
+        }
     ],
     options: [
         {

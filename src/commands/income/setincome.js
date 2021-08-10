@@ -9,7 +9,10 @@ module.exports = {
     format: '<command> [...fields]',
     global: true, 
     roles: [
-        'ECONOMY MANAGER'
+        {
+            name: 'ECONOMY MANAGER',
+            required: true
+        }
     ],
     options: [ 
         {

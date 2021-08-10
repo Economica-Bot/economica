@@ -12,7 +12,10 @@ module.exports = {
         'ADMINISTRATOR'
     ],
     roles: [
-        'ECONOMY MANAGER'
+        {
+            name: 'ECONOMY MANAGER',
+            required: true
+        }
     ],
     options: [
         {

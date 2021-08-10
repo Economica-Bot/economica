@@ -8,7 +8,10 @@ module.exports = {
     format: '<view | create | delete | enable | disable> [...options]',
     global: true, 
     roles: [
-        'ECONOMY MANAGER'
+        {
+            name: 'ECONOMY MANAGER',
+            required: true
+        }
     ],
     options: [
         {

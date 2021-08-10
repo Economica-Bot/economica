@@ -107,12 +107,12 @@ client.permissible = (author, guild, command) => {
     if(command?.roles) {
         for(const role of command.roles) {
             const guildRole = guild.roles.cache.find(r => {
-                return r.name.toLowerCase() === role.toLowerCase()
+                return r.name.toLowerCase() === role.name.toLowerCase()
             })
 
             if(!guildRole) {
-                permissible += `Please create a(n) \`${role}\` role. Case insensitive.\n`
-            } else if(!author.roles.cache.has(guildRole.id)) {
+                permissible += `Please create a(n) \`${role.name}\` role. Case insensitive.\n`
+            } else if(role.required && !author.roles.cache.has(guildRole.id)) {
                 missingRoles.push(`<@&${guildRole.id}>`)
             }
         }

@@ -7,11 +7,14 @@ module.exports = {
     group: 'moderation',
     description: 'Mutes a user.',
     format: '<user> [length] [reason]',
-    roles: [
-        'muted'
-    ],
     permissions: [
         'MUTE_MEMBERS'
+    ],
+    roles: [
+        {
+            name: 'MUTED',
+            required: false
+        }
     ],
     options: [
         {
@@ -113,8 +116,6 @@ module.exports = {
                 footer ?? member.user.id
             }
         }
-
-            
 
         const embed = util.embedify(
             color,
