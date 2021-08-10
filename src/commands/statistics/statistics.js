@@ -152,9 +152,9 @@ module.exports = {
         const url = await chart.getShortUrl()        
         const embed = util.embedify(
             'GOLD',
-            `Statistics for ${author.user.username}`, 
-            author.user.displayAvatarURL(),
-            `You've had \`${transactions.length}\` transactions`
+            `Statistics for ${user.username}`, 
+            user.displayAvatarURL(),
+            `Total transactions: \`${transactions.length}\``
         )
         .setImage(url)
         .setFooter(url)
