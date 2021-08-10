@@ -26,7 +26,7 @@ module.exports = {
         {
             name: 'duration',
             description: 'Specify a duration.',
-            type: ApplicationCommandOptionType.String,
+            type: apiTypes.String,
       ***REMOVED***
         {
             name: 'reason',

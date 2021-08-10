@@ -13,7 +13,7 @@ module.exports = {
         {
             name: 'user_id', 
             description: 'Specify the ID of a user to unban.',
-            type: ApplicationCommandOptionType.String,
+            type: apiTypes.String,
             required: true
         }
     ],

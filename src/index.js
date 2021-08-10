@@ -24,7 +24,7 @@ global.client = client
 global.Discord = Discord
 global.util = util
 global.mongo = mongo
-global.ApplicationCommandOptionType = ApplicationCommandOptionType
+global.apiTypes = ApplicationCommandOptionType
 
 client.on('ready', async () => {
     console.log(`${client.user.tag} Ready`)
