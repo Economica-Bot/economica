@@ -116,7 +116,7 @@ module.exports = {
         
         incomeEmbed.setDescription(`\`\`\`\n${updates}\n\`\`\`${description ? `\n${description}` : ''}`)
         
-        await interaction.reply({ embeds: [ incomeEmbed ] })
+        await interaction.reply({ embeds: [ incomeEmbed ], ephemeral: true })
  
         properties = Object.fromEntries(properties)
         await incomeSchema.findOneAndUpdate({ 
