@@ -30,7 +30,9 @@ module.exports = {
     ],
     async run(interaction, guild, author, options) {
 
-        await interaction.defer({ 
+        console.log(interaction)
+
+        await interaction.deferReply({ 
             ephemeral: true
         })
 

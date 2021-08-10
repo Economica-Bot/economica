@@ -12,7 +12,7 @@ module.exports = {
     roles: [
         {
             name: 'MUTED',
-            required: true
+            required: false
         }
     ],
     options: [

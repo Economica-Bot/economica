@@ -18,7 +18,7 @@ module.exports = {
         }
     ],
     async run(interaction, guild, author, options) {
-        await interaction.defer()
+        await interaction.deferReply()
 
         const member = options._hoistedOptions[0].member
 

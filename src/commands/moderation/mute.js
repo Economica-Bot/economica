@@ -80,14 +80,17 @@ module.exports = {
             //Check for active mute
             const activeMutes = await infractionSchema.find({
                 guildID: guild.id,
-                userID: member.id,
+                userID: member.user.id,
                 type: this.name, 
                 active: true
             })
 
             if (activeMutes.length) {
                 color = 'RED'
+                title = member.user.tag, 
+                icon_url = member.user.displayAvatarURL(),
                 description += 'This user is already \`muted\`!\n'
+                member.user.id
             } else {
                 //Mute, record, and send message
                 await member.send({ embeds: [ util.embedify(

@@ -10,7 +10,7 @@ module.exports = {
     roles: [
         {
             name: 'ECONOMY MANAGER',
-            required: true
+            required: false
         }
     ],
     options: [
@@ -98,16 +98,14 @@ module.exports = {
     ],
     async run(interaction, guild, author, options) {
         const guildID = guild.id
-        let color = 'BLURPLE', title = author.user.username, icon_url = author.user.displayAvatarURL(), description = '', footer = '' 
+        let color = 'BLURPLE', title = author.user.username, icon_url = author.user.displayAvatarURL(), description = '', footer = '', ephemeral = false 
         const embed = new Discord.MessageEmbed()
         const currencySymbol = await util.getCurrencySymbol(guildID)
         
         if(options._subcommand === 'view') {
             const user = options._hoistedOptions?.[0]?.user 
-                        ?? author
-
+                        ?? author.user
             title = user.username, icon_url = user.displayAvatarURL()
-
             const listings = await marketItemSchema.find({
                 guildID, 
                 userID: user.id
@@ -163,22 +161,31 @@ module.exports = {
                 ])
             }
         } else if(options._subcommand === 'delete') {
-            const user = options._hoistedOptions[0].user 
-            const item = options._hoistedOptions[1].value
-            const listing = await marketItemSchema.findOneAndDelete({ guildID, userID: user.id, item })
+            const econManagerRole = guild.roles.cache.find(r => {
+                return r.name.toLowerCase() === 'economy manager'
+            })
 
-            if(!listing) {
-                color = 'RED'
-                description = `Could not find \`${item}\``
+            if(!author.roles.cache.has(econManagerRole.id)) {
+                description = `You must have the <@&${econManagerRole.id}> role to delete a user's listings.`
+                ephemeral = true
             } else {
-                const items = await inventorySchema.updateMany(
-                    { guildID, "inventory.item": item },
-                    { $pull: { inventory: { item } } }
-                )
+                const user = options._hoistedOptions[0].user 
+                const item = options._hoistedOptions[1].value
+                const listing = await marketItemSchema.findOneAndDelete({ guildID, userID: user.id, item })
 
-                color = 'GREEN'
-                description = `Successfully deleted \`${item}\` from market DB.`
-                footer = item ? `${items.n} items removed.` : ''
+                if(!listing) {
+                    color = 'RED'
+                    description = `Could not find \`${item}\``
+                } else {
+                    const items = await inventorySchema.updateMany(
+                        { guildID, "inventory.item": item },
+                        { $pull: { inventory: { item } } }
+                    )
+
+                    color = 'GREEN'
+                    description = `Successfully deleted \`${item}\` from market DB.`
+                    footer = item ? `${items.n} items removed.` : ''
+                }
             }
         } else if(options._subcommand === 'enable') {
             const item = options._hoistedOptions[0].value
@@ -220,8 +227,7 @@ module.exports = {
             .setAuthor(title, icon_url)
             .setDescription(description)
             .setFooter(footer)
-            .setTimestamp()
 
-        await interaction.reply({ embeds: [ embed ] })
+        await interaction.reply({ embeds: [ embed ], ephemeral })
     }
 }

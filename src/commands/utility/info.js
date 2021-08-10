@@ -31,6 +31,10 @@ module.exports = {
                     value: 'moderation'
               ***REMOVED***
                 {
+                    name: 'Statistics',
+                    value: 'statistics'
+              ***REMOVED***
+                {
                     name: 'Utility',
                     value: 'utility'
                 }
@@ -43,7 +47,6 @@ module.exports = {
         }
     ],
     async run(interaction, guild, author, options) {
-
         const group = options._hoistedOptions[0].value
         let commands = []
         client.commands.forEach(command => {
@@ -54,7 +57,7 @@ module.exports = {
 
         const infoEmbed = util.embedify(
             'BLURPLE',
-            `${group} Commands`, 
+            `${group[0].toUpperCase() + group.substring(1, group.length)} Commands`, 
             client.user.displayAvatarURL(),
         )
 
@@ -73,17 +76,8 @@ module.exports = {
             color = 'RED',
             description = 'Channel must be a text channel.'
         } else {
-            if (channel.permissionsFor(guild.members.cache.get(client.user.id)).has('SEND_MESSAGES')) {
-                color = 'GREEN', description = `Successfully sent information for **${group}** in <#${channel.id}>.`
-                channel.send({ embeds: [infoEmbed] })
-                    .catch(error => {
-                        color = 'RED'
-                        description = error
-                    })
-            } else {
-                color = 'RED'
-                description = 'Missing permission `SEND_MESSAGES` in <#${channel_id}>'
-            }
+            color = 'GREEN', description = `Successfully sent information for **${group}** in <#${channel.id}>.`
+            channel.send({ embeds: [infoEmbed] })
         }
 
         embed = util.embedify(
