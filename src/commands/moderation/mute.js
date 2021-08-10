@@ -45,6 +45,11 @@ module.exports = {
         options._hoistedOptions.forEach(option => {
             if (option.name === 'user') {
                 member = option.member
+                if (member.user.id === author.user.id) {
+                    embed = util.embedify('RED', author.user.username, author.user.displayAvatarURL(), 'You cannot mute yourself!')
+                    ephemeral = true
+                    exit = true
+                } 
             } else if(option.name === 'reason') {
                 reason = option.value
             } else if(option.name === 'duration') {
