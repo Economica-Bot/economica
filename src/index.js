@@ -66,7 +66,7 @@ client.on('interactionCreate', async interaction => {
             'RED', 
             author.user.username, 
             author.user.displayAvatarURL(), 
-            `\`\`\`js\n${err}\`\`\`
+            `**Command**: \`${command.name}\`\n\`\`\`js\n${err}\`\`\`
             You've encountered an error.
             Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`
         )
