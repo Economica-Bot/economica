@@ -27,6 +27,7 @@ const globalCreateOptions = {
 module.exports = {
     name: 'item',
     description: 'Perform actions with the shop\'s items.',
+    group: 'shop',
     global: true,
     options: [
         {
@@ -106,13 +107,6 @@ module.exports = {
 
         console.log('group: ' + group, 'type: ' + type, 'args: ' + args)
 
-        await client.api.interactions(interaction.id, interaction.token).callback.post({
-            data: {
-                type: 4,
-                data: {
-                    embeds: [embed],
-              ***REMOVED***
-            }
-        })
+        await interaction.reply({ embeds: [embed] })
     }
 }
