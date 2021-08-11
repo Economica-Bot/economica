@@ -17,7 +17,7 @@ module.exports = {
         const uProperties = await util.getUserCommandStats(guild.id, author.id, this.name)
         const { wallet } = await util.getEconInfo(guild.id, author.id)
 
-        if(!util.coolDown(interaction, properties, uProperties)) {
+        if(!await util.coolDown(interaction, properties, uProperties)) {
             return
         }
 
