@@ -18,6 +18,7 @@ module.exports = {
                 'YELLOW',
                 `${client.user.username} Commands`,
                 client.user.displayAvatarURL(),
+                `Use \`help <cmd>\` to view specific information.`
             )
 
             let commands = [], groups = []

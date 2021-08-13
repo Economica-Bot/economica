@@ -35,6 +35,10 @@ module.exports = {
                     value: 'statistics'
               ***REMOVED***
                 {
+                    name: 'Shop',
+                    value: 'shop'
+              ***REMOVED***
+                {
                     name: 'Utility',
                     value: 'utility'
                 }
