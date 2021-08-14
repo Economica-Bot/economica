@@ -1,33 +1,36 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const reqString = {
-    type: String, 
-    required: true
-}
+  type: String,
+  required: true,
+};
 
 const reqNumber = {
-    type: Number, 
-    required: true,
-    default: 0
-}
+  type: Number,
+  required: true,
+  default: 0,
+};
 
-const commandParams = {}
+const commandParams = {};
 
-const econSchema = mongoose.Schema({
+const econSchema = mongoose.Schema(
+  {
     guildID: reqString,
     userID: reqString,
     wallet: reqNumber,
     treasury: reqNumber,
-    networth: reqNumber, 
+    networth: reqNumber,
     commands: {
-        work: commandParams,
-        beg: commandParams,
-        crime: commandParams,
-        rob: commandParams,
-        coinflip: commandParams,
-    }
-}, {
-    versionKey: false
-})
+      work: commandParams,
+      beg: commandParams,
+      crime: commandParams,
+      rob: commandParams,
+      coinflip: commandParams,
+  ***REMOVED***
+***REMOVED***
+  {
+    versionKey: false,
+  }
+);
 
-module.exports = mongoose.model('economies', econSchema)
+module.exports = mongoose.model('economies', econSchema);

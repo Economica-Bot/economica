@@ -1,26 +1,29 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const reqString = {
-    type: String, 
-    required: true
-}
+  type: String,
+  required: true,
+};
 
 const reqNumber = {
-    type: Number, 
-    required: true
-}
+  type: Number,
+  required: true,
+};
 
-const transactionSchema = mongoose.Schema({
+const transactionSchema = mongoose.Schema(
+  {
     guildID: reqString,
     userID: reqString,
-    transaction_type: reqString, 
+    transaction_type: reqString,
     memo: reqString,
-    wallet: reqNumber, 
+    wallet: reqNumber,
     treasury: reqNumber,
     networth: reqNumber,
-}, {
+***REMOVED***
+  {
     timestamps: true,
-    versionKey: false
-})
+    versionKey: false,
+  }
+);
 
-module.exports = mongoose.model('transactions', transactionSchema)
+module.exports = mongoose.model('transactions', transactionSchema);
