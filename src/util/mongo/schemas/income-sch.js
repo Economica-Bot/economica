@@ -1,48 +1,51 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const num = {
-     type: Number,
-     required: false
-}
+  type: Number,
+  required: false,
+};
 
 const reqString = {
-    type: String, 
-    required: true
-}
+  type: String,
+  required: true,
+};
 
-const incomeSchema = mongoose.Schema({
-     guildID: reqString,
-     work: {
-          min: num,
-          max: num,
-          cooldown: num
-   ***REMOVED***
-     beg: {
-          min: num,
-          max: num,
-          cooldown: num,
-          chance: num
-   ***REMOVED***
-     crime: {
-          min: num,
-          max: num,
-          cooldown: num,
-          chance: num,
-          minfine: num,
-          maxfine: num
-   ***REMOVED***
-     rob: {
-          cooldown: num,
-          chance: num,
-          minfine: num,
-          maxfine: num
-    ***REMOVED***
-      coinflip: {
-          cooldown: num, 
-          chance: num
-    ***REMOVED*** 
-}, {
-     versionKey: false
- })
+const incomeSchema = mongoose.Schema(
+  {
+    guildID: reqString,
+    work: {
+      min: num,
+      max: num,
+      cooldown: num,
+  ***REMOVED***
+    beg: {
+      min: num,
+      max: num,
+      cooldown: num,
+      chance: num,
+  ***REMOVED***
+    crime: {
+      min: num,
+      max: num,
+      cooldown: num,
+      chance: num,
+      minfine: num,
+      maxfine: num,
+  ***REMOVED***
+    rob: {
+      cooldown: num,
+      chance: num,
+      minfine: num,
+      maxfine: num,
+  ***REMOVED***
+    coinflip: {
+      cooldown: num,
+      chance: num,
+  ***REMOVED***
+***REMOVED***
+  {
+    versionKey: false,
+  }
+);
 
-module.exports = mongoose.model('incomes', incomeSchema)
+module.exports = mongoose.model('incomes', incomeSchema);
