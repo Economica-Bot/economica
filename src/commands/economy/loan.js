@@ -65,7 +65,7 @@ module.exports = {
       type: 1,
       options: [
         {
-          name: 'loan',
+          name: 'loan_id',
           description: 'Specify a loan.',
           type: 3,
           required: true,
@@ -78,7 +78,7 @@ module.exports = {
       type: 1,
       options: [
         {
-          name: 'loan',
+          name: 'loan_id',
           description: 'Specify a loan.',
           type: 3,
           required: true,
@@ -91,10 +91,14 @@ module.exports = {
       type: 1,
       options: [
         {
-          name: 'loan',
+          name: 'loan_id',
           description: 'Specify a loan.',
           type: 3,
-          required: false,
+      ***REMOVED***
+        {
+          name: 'user',
+          description: 'Specify a loan participator.',
+          type: 6,
       ***REMOVED***
       ],
   ***REMOVED***
@@ -183,20 +187,33 @@ module.exports = {
       if (author.roles.cache.has(econManagerRole.id)) {
         loan = await loanSchema.findOneAndDelete({
           _id,
+          pending: true,
         });
       } else {
         loan = await loanSchema.findOneAndDelete({
           _id,
           userID: author.user.id,
+          pending: true,
         });
       }
 
       if (loan) {
         color = 'GREEN';
-        description = `Successfully deleted loan.\nLoan ID: \`${loan._id}\``;
+        description = `Successfully canceled loan.\nLoan ID: \`${loan._id}\``;
+
+        //Refund
+        await util.transaction(
+          guildID,
+          loan.lenderID,
+          this.name,
+          `Loan to <@!${loan.borrowerID}> \`canceled\` | Loan ID: \`${loan._id}\``,
+          0, 
+          loan.principal, 
+          loan.principal
+        );
       } else {
         color = 'RED';
-        description = `Could not find loan with id \`${_id}\``;
+        description = `Could not find pending loan with id \`${_id}\``;
       }
     } else if (options._subcommand === 'accept') {
       const _id = options._hoistedOptions[0].value;
@@ -215,14 +232,15 @@ module.exports = {
         color = 'GREEN';
         description = `Successfully accepted loan.\nLoad ID: \`${loan._id}\``;
 
+        //Transfer funds
         await util.transaction(
-          guild.id,
+          guildID,
           author.user.id,
           this.name,
-          `Loan from <@!${member.user.id}> | Loan ID: \`${loan._id}\``,
-          principal,
+          `Loan from <@!${loan.lenderID}> \`accepted\` | Loan ID: \`${loan._id}\``,
+          loan.principal,
           0,
-          principal
+          loan.principal
         );
       } else {
         color = 'RED';
@@ -245,57 +263,112 @@ module.exports = {
       if (loan) {
         color = 'GREEN';
         description = `Successfully declined loan.\nLoan ID: \`${loan._id}\``;
+
+        //Refund
+        await util.transaction(
+          guildID,
+          loan.lenderID,
+          this.name,
+          `Loan to <@!${loan.borrowerID}> \`declined\` | Loan ID: \`${loan._id}\``,
+          0, 
+          loan.principal, 
+          loan.principal
+        );
       } else {
         color = 'RED';
         description = `Could not find loan with id \`${_id}\``;
       }
     } else if (options._subcommand === 'view') {
-      color = 'GREEN';
-      const outgoingLoans = await loanSchema.find({
-        guildID: guild.id,
-        lenderID: author.user.id,
-      });
+      //View all loans
+      if (!options._hoistedOptions.length) {
+        color = 'GREEN';
+        title = `Loans in ${guild.name}`;
+        icon_url = guild.iconURL();
 
-      const incomingLoans = await loanSchema.find({
-        guildID: guild.id,
-        borrowerID: author.user.id,
-      });
+        const loans = await loanSchema.find({
+          guildID,
+        });
 
-      for (const outgoingLoan of outgoingLoans) {
-        description += `Outgoing Loan \`${
-          outgoingLoan._id
-        }\`\nExpires ${outgoingLoan.expires.toLocaleString()}\nBorrower: <@!${
-          outgoingLoan.borrowerID
-        }>\nPending: \`${outgoingLoan.pending}\` | Active: \`${
-          outgoingLoan.active
-        }\` | Complete: \`${outgoingLoan.active}\`\nPrincipal: ${cSymbol}${
-          outgoingLoan.principal
-        } | Repayment: ${cSymbol}${outgoingLoan.repayment}`;
+        let n = 0;
+        for (const loan of loans) {
+          description += `Loan \`${
+            loan._id
+          }\` | ${loan.createdAt.toLocaleString()}\n`;
+          n++;
+        }
+
+        footer = `Total Loans: ${n}`;
       }
 
-      for (const incomingLoan of incomingLoans) {
-        description += `Outgoing Loan \`${
-          incomingLoan._id
-        }\`\nExpires ${incomingLoan.expires.toLocaleString()}\nBorrower: <@!${
-          incomingLoan.borrowerID
-        }>\nPending: \`${incomingLoan.pending}\` | Active: \`${
-          incomingLoan.active
-        }\` | Complete: \`${incomingLoan.active}\`\nPrincipal: ${cSymbol}${
-          incomingLoan.principal
-        } | Repayment: ${cSymbol}${incomingLoan.repayment}`;
+      //View loan by ID
+      else if (options._hoistedOptions[0].name === 'loan_id') {
+        color = 'GREEN';
+
+        const loan = await loanSchema.findOne({
+          guildID,
+          _id: options._hoistedOptions[0].value,
+        });
+
+        if (loan) {
+          description = `Loan \`${
+            loan._id
+          }\` | ${loan.createdAt.toLocaleString()}\nExpires ${loan.expires.toLocaleString()}\nBorrower: <@!${
+            loan.borrowerID
+          }>\nPending: \`${loan.pending}\` | Active: \`${
+            loan.active
+          }\` | Complete: \`${loan.complete}\`\nPrincipal: ${cSymbol}${
+            loan.principal
+          } | Repayment: ${cSymbol}${loan.repayment}`;
+        } else {
+          color = 'RED';
+          description = `Could not find loan with id \`${_id}\``;
+        }
       }
 
-      if (description.length === 0) {
-        description = `NO LOANS`;
+      //View loans by user
+      else if (options._hoistedOptions[0].name === 'user') {
+        const user = options._hoistedOptions[0].user;
+        const outgoingLoans = await loanSchema.find({
+          guildID: guild.id,
+          lenderID: user.id,
+        });
+
+        const incomingLoans = await loanSchema.find({
+          guildID: guild.id,
+          borrowerID: user.id,
+        });
+
+        for (const outgoingLoan of outgoingLoans) {
+          description += `Outgoing Loan \`${
+            outgoingLoan._id
+          }\`\nExpires ${outgoingLoan.expires.toLocaleString()}\nBorrower: <@!${
+            outgoingLoan.borrowerID
+          }>\nPending: \`${outgoingLoan.pending}\` | Active: \`${
+            outgoingLoan.active
+          }\` | Complete: \`${outgoingLoan.complete}\`\nPrincipal: ${cSymbol}${
+            outgoingLoan.principal
+          } | Repayment: ${cSymbol}${outgoingLoan.repayment}\n\n`;
+        }
+
+        for (const incomingLoan of incomingLoans) {
+          description += `Incoming Loan \`${
+            incomingLoan._id
+          }\`\nExpires ${incomingLoan.expires.toLocaleString()}\nBorrower: <@!${
+            incomingLoan.borrowerID
+          }>\nPending: \`${incomingLoan.pending}\` | Active: \`${
+            incomingLoan.active
+          }\` | Complete: \`${incomingLoan.complete}\`\nPrincipal: ${cSymbol}${
+            incomingLoan.principal
+          } | Repayment: ${cSymbol}${incomingLoan.repayment}\n\n`;
+        }
+
+        if (description.length === 0) {
+          description = `No loans found.`;
+        }
       }
     }
 
-    embed = util.embedify(
-      color,
-      author.user.username,
-      author.user.displayAvatarURL(),
-      description
-    );
+    embed = util.embedify(color, title, icon_url, description, footer);
 
     interaction.reply({ embeds: [embed] });
 ***REMOVED***

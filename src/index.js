@@ -37,6 +37,9 @@ client.on('ready', async () => {
 
   const checkMutes = require('./util/features/check-mute');
   checkMutes(client);
+
+  const checkLoans = require('./util/features/check-loan');
+  checkLoans();
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -62,7 +65,7 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   command?.run(interaction, guild, author, options).catch((err) => {
-    console.error(err)
+    console.error(err);
     const embed = util.embedify(
       'RED',
       author.user.username,
