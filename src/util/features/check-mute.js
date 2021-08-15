@@ -25,13 +25,14 @@ module.exports = (client) => {
         });
 
         member.roles.remove(mutedRole);
-        await infractionSchema.updateMany(conditional, {
-          active: false,
-        });
       }
+
+      await infractionSchema.updateMany(conditional, {
+        active: false,
+      });
     }
 
-    //checks for mutes every 5 minutes
+    //checks for mutes every 5 seconds
     setTimeout(checkMutes, 1000 * 5);
   };
 
