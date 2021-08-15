@@ -9,20 +9,20 @@ module.exports = {
   options: [
     {
       name: 'balance',
-      description: 'Balance',
+      description: 'The statistics for user balance.',
       type: 1,
       options: [
         {
           name: 'user',
           description: 'Specify a user.',
           type: 6,
-          required: true,
+          required: false,
       ***REMOVED***
       ],
   ***REMOVED***
   ],
   async run(interaction, guild, author, options) {
-    const user = options._hoistedOptions[0].user;
+    const user = options._hoistedOptions?.[0].user ?? author.user;
 
     const transactions = await transactionSchema.find({
       guildID: guild.id,
