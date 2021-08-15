@@ -35,6 +35,8 @@ module.exports = {
     const cSymbol = await util.getCurrencySymbol(guild.id);
     if (wallet < 1 || wallet < amount) {
       description = `Insufficient wallet: ${cSymbol}${wallet.toLocaleString()}`;
+    } else if ( amount < 1) {
+      description = `Invalid amount, must be above 0.`
     } else {
       if (!util.isSuccess(properties)) {
         description = `You flipped a coin and lost ${cSymbol}${amount.toLocaleString()}`;
