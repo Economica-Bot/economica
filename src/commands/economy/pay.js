@@ -21,7 +21,8 @@ module.exports = {
   async run(interaction, guild, author, options) {
     let color = 'GREEN',
       description = '',
-      embed;
+      embed,
+      ephemeral = false;
 
     const cSymbol = await util.getCurrencySymbol(guild.id);
     const { wallet } = await util.getEconInfo(guild.id, author.user.id);
@@ -38,6 +39,7 @@ module.exports = {
         author.user.displayAvatarURL(),
         'You cannot pay yourself!'
       );
+
       ephemeral = true;
     } else if (amount) {
       if (amount < 1 || amount > wallet) {
@@ -69,6 +71,7 @@ module.exports = {
     } else {
       color = 'RED';
       description = `Invalid amount: \`${amount}\`\nFormat: \`${this.name} ${this.format}\``;
+      ephemeral = true;
     }
 
     embed = util.embedify(
@@ -78,6 +81,6 @@ module.exports = {
       description
     );
 
-    interaction.reply({ embeds: [embed] });
+    interaction.reply({ embeds: [embed], ephemeral });
 ***REMOVED***
 };

@@ -15,7 +15,6 @@ module.exports = {
   ***REMOVED***
   ],
   async run(interaction, guild, author, options) {
-    let color, description;
     const commandDirectories = fs.readdirSync('./commands');
     for (const commandDirectory of commandDirectories) {
       const commandFiles = fs
@@ -29,23 +28,26 @@ module.exports = {
             .get(process.env.GUILD_ID)
             .commands.create(command);
           client.commands.set(command.name, command);
-          color = 'GREEN';
-          description = `Force loaded \`${command.name}\``;
-          break;
-        } else {
-          color = 'RED';
-          description = `Command \`${options._hoistedOptions[0].value}\` not found.`;
+          const embed = util.embedify(
+            'GREEN',
+            author.user.username,
+            author.user.displayAvatarURL(),
+            `Force loaded \`${command.name}\``
+          );
+
+          interaction.editReply({ embeds: [embed], ephemeral: true });
+          return;
         }
       }
     }
-
+    
     const embed = util.embedify(
-      color,
+      'RED',
       author.user.username,
       author.user.displayAvatarURL(),
-      description
+      `Command \`${options._hoistedOptions[0].value}\` not found.`
     );
 
-    interaction.editReply({ embeds: [embed], ephemeral: true });
+    interaction.reply({ embeds: [embed], ephemeral: true });
 ***REMOVED***
 };

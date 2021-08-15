@@ -62,6 +62,7 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   command?.run(interaction, guild, author, options).catch((err) => {
+    console.error(err)
     const embed = util.embedify(
       'RED',
       author.user.username,

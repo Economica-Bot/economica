@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 // required only if parent field exists
-const trueif = (parent) => this[parent] ? true : false
+const trueif = (parent) => (this[parent] ? true : false);
 
-const marketItemSchema = mongoose.Schema({
+const shopItemSchema = mongoose.Schema({
   guildID: {
     type: String,
     required: true,
@@ -65,4 +65,4 @@ const marketItemSchema = mongoose.Schema({
 ***REMOVED***
 });
 
-module.exports = mongoose.model('shop', shopItemSchema)
+module.exports = mongoose.model('shop', shopItemSchema);

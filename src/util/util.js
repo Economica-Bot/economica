@@ -7,6 +7,7 @@ const guildSettingSchema = require('@schemas/guild-settings-sch');
 const incomeSchema = require('@schemas/income-sch');
 const infractionSchema = require('@schemas/infraction-sch');
 const inventorySchema = require('@schemas/inventory-sch');
+const loanSchema = require('@schemas/loan-sch');
 const marketItemSchema = require('@schemas/market-item-sch');
 const transactionSchema = require('@schemas/transaction-sch');
 

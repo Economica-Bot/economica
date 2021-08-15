@@ -29,8 +29,6 @@ module.exports = {
   ***REMOVED***
   ],
   async run(interaction, guild, author, options) {
-    console.log(interaction);
-
     await interaction.deferReply({
       ephemeral: true,
     });

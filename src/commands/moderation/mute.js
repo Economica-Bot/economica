@@ -60,6 +60,7 @@ module.exports = {
             author.user.displayAvatarURL(),
             'You cannot mute yourself!'
           );
+
           ephemeral = true;
           exit = true;
         }
@@ -70,7 +71,7 @@ module.exports = {
         if (duration) {
           if (duration < 0) {
             color = 'RED';
-            description += `Invalid Duration: \`${option.value}\`\nDuration must be more than \`0\`.\n`;
+            description += `Invalid duration: \`${option.value}\`\nDuration must be more than \`0\`.\n`;
             ephemeral = true;
             exit = true;
           } else {
@@ -79,7 +80,7 @@ module.exports = {
           }
         } else {
           color = 'RED';
-          description += `Invalid Duration: \`${option.value}\`\nExamples: \`\`\`2 hours\n1h\n1m\n20m10s\n100\`\`\`\n`;
+          description += `Invalid duration: \`${option.value}\`\nExamples: \`\`\`2 hours\n1h\n1m\n20m10s\n100\`\`\`\n`;
           footer = 'Number is measured in ms';
           ephemeral = true;
           exit = true;
