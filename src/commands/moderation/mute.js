@@ -7,7 +7,7 @@ module.exports = {
   group: 'moderation',
   description: 'Mutes a user.',
   format: '<user> [length] [reason]',
-  permissions: ['MUTE_MEMBERS'],
+  permissions: ['MUTE_MEMBERS', 'MANAGE_ROLES'],
   roles: [
     {
       name: 'MUTED',
@@ -50,45 +50,49 @@ module.exports = {
       return role.name.toLowerCase() === 'muted';
     });
 
-    options._hoistedOptions.forEach((option) => {
-      if (option.name === 'user') {
-        member = option.member;
-        if (member.user.id === author.user.id) {
-          embed = util.embedify(
-            'RED',
-            author.user.username,
-            author.user.displayAvatarURL(),
-            'You cannot mute yourself!'
-          );
+    const clientMember = await guild.members.cache.get(client.user.id);
 
-          ephemeral = true;
-          exit = true;
-        }
-      } else if (option.name === 'reason') {
-        reason = option.value;
-      } else if (option.name === 'duration') {
-        duration = ms(option.value);
-        if (duration) {
-          if (duration < 0) {
+    if (clientMember.roles.highest.position < mutedRole.position) {
+      color = 'RED';
+      description = `The ${mutedRole} role is above my highest role!`;
+      exit = true;
+    } else {
+      options._hoistedOptions.forEach((option) => {
+        if (option.name === 'user') {
+          member = option.member;
+          if (member.user.id === author.user.id) {
             color = 'RED';
-            description += `Invalid duration: \`${option.value}\`\nDuration must be more than \`0\`.\n`;
+            description = 'You cannot mute yourself!';
+
             ephemeral = true;
             exit = true;
-          } else {
-            expires = new Date(new Date().getTime() + duration);
-            permanent = false;
           }
-        } else {
-          color = 'RED';
-          description += `Invalid duration: \`${option.value}\`\nExamples: \`\`\`2 hours\n1h\n1m\n20m10s\n100\`\`\`\n`;
-          footer = 'Number is measured in ms';
-          ephemeral = true;
-          exit = true;
+        } else if (option.name === 'reason') {
+          reason = option.value;
+        } else if (option.name === 'duration') {
+          duration = ms(option.value);
+          if (duration) {
+            if (duration < 0) {
+              color = 'RED';
+              description += `Invalid duration: \`${option.value}\`\nDuration must be more than \`0\`.\n`;
+              ephemeral = true;
+              exit = true;
+            } else {
+              expires = new Date(new Date().getTime() + duration);
+              permanent = false;
+            }
+          } else {
+            color = 'RED';
+            description += `Invalid duration: \`${option.value}\`\nExamples: \`\`\`2 hours\n1h\n1m\n20m10s\n100\`\`\`\n`;
+            footer = 'Number is measured in ms';
+            ephemeral = true;
+            exit = true;
+          }
         }
-      }
-    });
+      });
 
-    reason = reason ?? 'No reason provided';
+      reason = reason ?? 'No reason provided';
+    }
 
     if (!exit) {
       //Check for active mute

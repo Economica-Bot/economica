@@ -6,7 +6,7 @@ module.exports = {
   description: 'Unmute a user.',
   format: '<user>',
   global: true,
-  permissions: ['MUTE_MEMBERS'],
+  permissions: ['MUTE_MEMBERS', 'MANAGE_ROLES'],
   roles: [
     {
       name: 'MUTED',
@@ -28,6 +28,23 @@ module.exports = {
     const mutedRole = guild.roles.cache.find((role) => {
       return role.name.toLowerCase() === 'muted';
     });
+
+    const clientMember = await guild.members.cache.get(client.user.id);
+
+    if (clientMember.roles.highest.position < mutedRole.position) {
+      interaction.reply({
+        embeds: [
+          util.embedify(
+            'RED',
+            author.user.username,
+            author.user.displayAvatarURL(),
+            `The ${mutedRole} role is above my highest role!`
+          ),
+        ],
+      });
+
+      return
+    }
 
     member.roles.remove(mutedRole);
 

@@ -24,7 +24,11 @@ module.exports = (client) => {
           return role.name.toLowerCase() === 'muted';
         });
 
-        member.roles.remove(mutedRole);
+        const clientMember = await guild.members.cache.get(client.user.id);
+
+        if(clientMember.roles.highest.position > mutedRole.position) {
+          member.roles.remove(mutedRole);
+        }
       }
 
       await infractionSchema.updateMany(conditional, {
