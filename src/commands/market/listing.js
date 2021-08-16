@@ -215,8 +215,8 @@ module.exports = {
 
       if (!listing) {
         color = 'RED';
-        (description = `Could not find \`${item}\` as an inactive listing under your id.`),
-          (footer = 'Check your listings with `listing view`.');
+        description = `Could not find \`${item}\` as an inactive listing under your id.`;
+        footer = 'Check your listings with `listing view`.';
       } else {
         color = 'GREEN';
         description = `Successfully enabled \`${item}\` on the market.`;
@@ -231,8 +231,8 @@ module.exports = {
 
       if (!listing) {
         color = 'RED';
-        (description = `Could not find \`${item}\` as an active listing under your id.`),
-          (footer = 'Check your listings with `listing view`.');
+        description = `Could not find \`${item}\` as an active listing under your id.`;
+        footer = 'Check your listings with `listing view`.';
       } else {
         color = 'GREEN';
         description = `Successfully disabled \`${item}\` on the market.`;

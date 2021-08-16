@@ -21,7 +21,7 @@ module.exports = {
           value: 'treasury',
       ***REMOVED***
         {
-          name: 'total',
+          name: 'Total',
           value: 'total',
       ***REMOVED***
       ],
