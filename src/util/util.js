@@ -314,6 +314,8 @@ module.exports.getCommandStats = async (guildID, command) => {
  * @returns {uProperties} Properties with config taking preference.
  */
 module.exports.getUserCommandStats = async (guildID, userID, command) => {
+  //Init
+  await this.getEconInfo(guildID, userID);
   let result = await economySchema.findOne({
     guildID,
     userID,
