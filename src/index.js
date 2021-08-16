@@ -28,50 +28,48 @@ global.mongo = mongo;
 global.apiTypes = ApplicationCommandOptionType;
 
 client.on('ready', async () => {
-  console.log(`${client.user.tag} Ready`);
+    console.log(`${client.user.tag} Ready`)
 
-  client.registerCommands();
+    client.registerCommands()
 
-  await mongo().then(() => {
-    console.log('Connected to DB');
-  });
+    await mongo().then(() => {
+        console.log('Connected to DB')
+    })
 
-  const checkMutes = require('./util/features/check-mute');
-  checkMutes(client);
+    const checkMutes = require('./util/features/check-mute')
+    checkMutes(client)
+})
 
-  const checkLoans = require('./util/features/check-loan');
-  checkLoans();
-});
+client.on('interactionCreate', async interaction => {
+    if(!interaction.isCommand()) {
+        return
+    }
+    
+    const command = client.commands.get(interaction.commandName) 
+    const author = interaction.member
+    const guild = author.guild
+    const options = interaction.options
+    let values = {}; if (options) for (o in options) values[`${o.name}`] = o.value // and object of option-name keys for option values.
 
-client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isCommand()) {
-    return;
-  }
+    const permissible = client.permissible(author, guild, command)
+    if(permissible.length) {
+        const embed = util.embedify(
+            'RED', 
+            author.user.username, 
+            author.user.displayAvatarURL(), 
+            permissible
+        )
 
-  const command = client.commands.get(interaction.commandName);
-  const author = interaction.member;
-  const guild = author.guild;
-  const options = interaction.options;
-  const permissible = await client.permissible(author, guild, command);
-  if (permissible.length) {
-    const embed = util.embedify(
-      'RED',
-      author.user.username,
-      author.user.displayAvatarURL(),
-      permissible
-    );
+        interaction.reply({ embeds: [ embed ], ephemeral: true})
+        return
+    }
 
-    interaction.reply({ embeds: [embed], ephemeral: true });
-    return;
-  }
-
-  command?.run(interaction, guild, author, options).catch((err) => {
-    console.error(err);
-    const embed = util.embedify(
-      'RED',
-      author.user.username,
-      author.user.displayAvatarURL(),
-      `**Command**: \`${command.name}\`\n\`\`\`js\n${err}\`\`\`
+    command?.run(interaction, guild, author, options).catch(err => {
+        const embed = util.embedify(
+            'RED', 
+            author.user.username, 
+            author.user.displayAvatarURL(), 
+            `**Command**: \`${command.name}\`\n\`\`\`js\n${err}\`\`\`
             You've encountered an error.
             Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`
     );
@@ -119,14 +117,19 @@ client.permissible = async (author, guild, command) => {
         break;
       }
     }
-  }
-
-  if (guildSettings?.commands) {
-    for (const commandSetting of guildSettings?.commands) {
-      if (commandSetting?.command === command.name && !commandSetting?.enabled) {
-        permissible += `This command is disabled.\n`;
-        break;
-      }
+    console.log(`================================================================
+                         ECONOMICA
+                 all commands registered.
+================================================================`)
+}
+client.permissible = (author, guild, command) => {
+    let missingPermissions = [], missingRoles = [], permissible = ''
+    if(command?.permissions) {
+        for(const permission of command.permissions) {
+            if(!author.permissions.has(permission)) {
+                missingPermissions.push(`\`${permission}\``)     
+            }
+        }
     }
   }
 

@@ -13,25 +13,29 @@ module.exports = {
       type: 3,
       choices: [
         {
-          name: 'Wallet',
-          value: 'wallet',
-      ***REMOVED***
-        {
-          name: 'Treasury',
-          value: 'treasury',
-      ***REMOVED***
-        {
-          name: 'Total',
-          value: 'total',
-      ***REMOVED***
-      ],
-      required: true,
-  ***REMOVED***
-  ],
-  async run(interaction, guild, author, options) {
-    await interaction.deferReply({
-      ephemeral: true,
-    });
+            name: 'type', 
+            description: 'Specify the leaderboard type.',
+            type: 3,
+            choices: [
+                {
+                    name: 'Wallet',
+                    value: 'wallet'
+              ***REMOVED***
+                {
+                    name: 'Treasury', 
+                    value: 'treasury'
+              ***REMOVED***
+                {
+                    name: 'Networth', 
+                    value: 'networth'
+                }
+            ],
+            required: true
+        }
+    ],
+    async run(interaction, guild, author, options) {
+
+        // console.log(interaction)
 
     const currencySymbol = await util.getCurrencySymbol(guild.id),
       type = options._hoistedOptions[0].value;
