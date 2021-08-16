@@ -140,9 +140,7 @@ module.exports = {
                 ? `${
                     infraction.permanent
                       ? '| **Permanent**'
-                      : `until **${new Date(
-                          infraction.expires
-                        ).toLocaleString()}**`
+                      : `until **${infraction.expires.toLocaleString()}**`
                   }`
                 : ''
             }\n`;

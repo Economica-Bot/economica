@@ -17,6 +17,10 @@ const guildSettingSchema = mongoose.Schema(
       type: String,
       required: false,
   ***REMOVED***
+    infractionLogChannel: {
+      type: String,
+      required: false,
+  ***REMOVED***
 ***REMOVED***
   {
     versionKey: false,

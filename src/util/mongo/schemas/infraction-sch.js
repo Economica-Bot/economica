@@ -19,9 +19,7 @@ const infractionSchema = mongoose.Schema(
   {
     guildID: reqString,
     userID: reqString,
-    userTag: reqString,
     staffID: reqString,
-    staffTag: reqString,
     type: reqString,
     reason: reqString,
     permanent: {

@@ -1,5 +1,3 @@
-const infractionSchema = require('@schemas/infraction-sch');
-
 module.exports = {
   name: 'ban',
   group: 'moderation',
@@ -71,16 +69,14 @@ module.exports = {
         reason,
       });
 
-      await new infractionSchema({
-        guildID: guild.id,
-        userID: member.id,
-        userTag: member.user.tag,
-        staffID: author.user.id,
-        staffTag: author.user.tag,
-        type: this.name,
+      await util.infraction(
+        guild.id,
+        member.id,
+        author.user.id,
+        this.name,
         reason,
-        active: true,
-      }).save();
+        true
+      );
     }
 
     await interaction.reply({

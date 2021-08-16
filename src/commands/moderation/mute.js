@@ -126,18 +126,16 @@ module.exports = {
 
         member.roles.add(mutedRole);
 
-        await new infractionSchema({
-          guildID: guild.id,
-          userID: member.id,
-          userTag: member.user.tag,
-          staffID: author.user.id,
-          staffTag: author.user.tag,
-          type: this.name,
+        await util.infraction(
+          guild.id,
+          member.id,
+          author.user.id,
+          this.name,
           reason,
           permanent,
-          active: true,
-          expires,
-        }).save();
+          true,
+          expires
+        );
 
         (color = 'GREEN'), (title = `Muted ${member.user.tag}`);
         icon_url = member.user.displayAvatarURL();
