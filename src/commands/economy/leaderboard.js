@@ -5,7 +5,7 @@ module.exports = {
   group: 'economy',
   description: 'View top users in the economy.',
   global: true,
-  format: '[wallet | treasury | networth]',
+  format: '[wallet | treasury | total]',
   options: [
     {
       name: 'type',
@@ -21,8 +21,8 @@ module.exports = {
           value: 'treasury',
       ***REMOVED***
         {
-          name: 'Networth',
-          value: 'networth',
+          name: 'total',
+          value: 'total',
       ***REMOVED***
       ],
       required: true,

@@ -15,7 +15,7 @@ module.exports = {
     const user = options._hoistedOptions?.[0]?.user ?? author.user;
 
     const cSymbol = await util.getCurrencySymbol(guild.id);
-    const { wallet, treasury, networth, rank } = await util.getEconInfo(
+    const { wallet, treasury, total, rank } = await util.getEconInfo(
       guild.id,
       user.id
     );
@@ -39,8 +39,8 @@ module.exports = {
           inline: true,
       ***REMOVED***
         {
-          name: 'Net Worth',
-          value: `${cSymbol}${networth.toLocaleString()}`,
+          name: 'Total',
+          value: `${cSymbol}${total.toLocaleString()}`,
           inline: true,
       ***REMOVED***
       ]);

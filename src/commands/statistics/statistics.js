@@ -22,7 +22,7 @@ module.exports = {
   ***REMOVED***
   ],
   async run(interaction, guild, author, options) {
-    const user = options._hoistedOptions?.[0].user ?? author.user;
+    const user = options._hoistedOptions[0]?.user ?? author.user;
 
     const transactions = await transactionSchema.find({
       guildID: guild.id,
@@ -31,27 +31,27 @@ module.exports = {
 
     let wallet = 0,
       treasury = 0,
-      networth = 0;
+      total = 0;
     const wallets = [],
       treasuries = [],
-      networths = [],
+      totals = [],
       dates = [];
     wallets.push(wallet);
     treasuries.push(treasury);
-    networths.push(networth);
+    totals.push(total);
     for (const transaction of transactions) {
       wallet += transaction.wallet;
       treasury += transaction.treasury;
-      networth += transaction.networth;
+      total += transaction.total;
       wallets.push(wallet);
       treasuries.push(treasury);
-      networths.push(networth);
+      totals.push(total);
       dates.push(transaction.createdAt.toLocaleDateString());
     }
 
     wallets.push(wallet);
     treasuries.push(treasury);
-    networths.push(networth);
+    totals.push(total);
     dates.push(new Date().toLocaleDateString());
 
     const data = {
@@ -76,8 +76,8 @@ module.exports = {
           pointRadius: 0,
       ***REMOVED***
         {
-          label: 'Networth',
-          data: networths,
+          label: 'Total',
+          data: totals,
           borderColor: 'rgb(255, 205, 86)',
           backgroundColor: 'rgba(255, 205, 86, .5)',
           borderWidth: '3',

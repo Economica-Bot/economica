@@ -18,7 +18,7 @@ const transactionSchema = mongoose.Schema(
     memo: reqString,
     wallet: reqNumber,
     treasury: reqNumber,
-    networth: reqNumber,
+    total: reqNumber,
 ***REMOVED***
   {
     timestamps: true,

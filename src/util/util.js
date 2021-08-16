@@ -40,15 +40,15 @@ module.exports.embedify = (
  * Gets a user's economy information.
  * @param {string} guildID - Guild id.
  * @param {string} userID - User id.
- * @returns {Promise<econInfo>} wallet, treasury, networth, rank
+ * @returns {Promise<econInfo>} wallet, treasury, total, rank
  */
 module.exports.getEconInfo = async (guildID, userID) => {
   let rank = 0,
     wallet = 0,
     treasury = 0,
-    networth = 0,
+    total = 0,
     found = false;
-  const balances = await economySchema.find({ guildID }).sort({ networth: -1 });
+  const balances = await economySchema.find({ guildID }).sort({ total: -1 });
   if (balances.length) {
     for (let rankIndex = 0; rankIndex < balances.length; rankIndex++) {
       rank = balances[rankIndex].userID === userID ? rankIndex + 1 : rank++;
@@ -58,7 +58,7 @@ module.exports.getEconInfo = async (guildID, userID) => {
       found = true;
       wallet = balances[rank - 1].wallet;
       treasury = balances[rank - 1].treasury;
-      networth = balances[rank - 1].networth;
+      total = balances[rank - 1].total;
     }
   }
 
@@ -68,14 +68,14 @@ module.exports.getEconInfo = async (guildID, userID) => {
       userID,
       wallet,
       treasury,
-      networth,
+      total,
     }).save();
   }
 
   return (econInfo = {
     wallet,
     treasury,
-    networth,
+    total,
     rank,
   });
 };
@@ -88,8 +88,8 @@ module.exports.getEconInfo = async (guildID, userID) => {
  * @param {string} memo - The transaction dispatcher.
  * @param {Number} wallet - The value to be added to the user's wallet.
  * @param {Number} treasury - The value to be added to the user's treasury.
- * @param {Number} networth - The value to be added to the user's networth.
- * @returns {Number} Networth.
+ * @param {Number} total - The value to be added to the user's total.
+ * @returns {Number} total.
  */
 module.exports.transaction = async (
   guildID,
@@ -98,8 +98,9 @@ module.exports.transaction = async (
   memo,
   wallet,
   treasury,
-  networth
+  total
 ) => {
+  //Init
   await this.getEconInfo(guildID, userID);
   const result = await economySchema.findOneAndUpdate(
     {
@@ -112,10 +113,11 @@ module.exports.transaction = async (
       $inc: {
         wallet,
         treasury,
-        networth,
+        total,
     ***REMOVED***
   ***REMOVED***
     {
+      new: true,
       upsert: true,
     }
   );
@@ -127,7 +129,7 @@ module.exports.transaction = async (
     memo,
     wallet,
     treasury,
-    networth,
+    total,
   }).save();
 
   const guildSetting = await guildSettingSchema.findOne({
@@ -163,8 +165,8 @@ module.exports.transaction = async (
                 inline: true,
             ***REMOVED***
               {
-                name: '__**Networth**__',
-                value: `${cSymbol}${networth.toLocaleString()}`,
+                name: '__**Total**__',
+                value: `${cSymbol}${total.toLocaleString()}`,
                 inline: true,
             ***REMOVED***
             ])
@@ -176,7 +178,60 @@ module.exports.transaction = async (
       });
   }
 
-  return result.networth;
+  return result.total;
+};
+
+/**
+ * Record an infraction.
+ * @param {String} guildID - Guild id.
+ * @param {String} userID - User id.
+ * @param {String} staffID - Staff id.
+ * @param {String} type - The punishment for the infraction.
+ * @param {String} reason - The reason for the punishment.
+ */
+module.exports.infraction = async (
+  guildID,
+  userID,
+  staffID,
+  type,
+  reason,
+  permanent,
+  active,
+  expires
+) => {
+  const infraction = await new infractionSchema({
+    guildID,
+    userID,
+    staffID,
+    type,
+    reason,
+    permanent,
+    active,
+    expires,
+  }).save();
+
+  const guildSetting = await guildSettingSchema.findOne({
+    guildID,
+  });
+
+  const channelID = guildSetting?.infractionLogChannel;
+
+  if (channelID) {
+    const channel = client.channels.cache.get(channelID);
+    const guild = channel.guild;
+    const description = `Infraction for <@!${userID}> | Executed by <@!${staffID}>\nType: \`${type}\`\n${reason}`;
+    channel
+      .send({
+        embeds: [
+          util
+            .embedify('RED', `${infraction._id}`, guild.iconURL(), description)
+            .setTimestamp(),
+        ],
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }
 };
 
 /**
@@ -201,9 +256,9 @@ module.exports.getCurrencySymbol = async (guildID) => {
 
 /**
  * Updates the min and max payout for the specified income command
- * @param {string} guildID - Guild id.
- * @param {string} command - Income command.
- * @param {object} properties - Command properties.
+ * @param {String} guildID - Guild id.
+ * @param {String} command - Income command.
+ * @param {Object} properties - Command properties.
  */
 module.exports.setCommandStats = async (guildID, command, properties = {}) => {
   await incomeSchema

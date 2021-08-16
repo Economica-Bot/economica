@@ -19,7 +19,7 @@ const econSchema = mongoose.Schema(
     userID: reqString,
     wallet: reqNumber,
     treasury: reqNumber,
-    networth: reqNumber,
+    total: reqNumber,
     commands: {
       work: commandParams,
       beg: commandParams,
