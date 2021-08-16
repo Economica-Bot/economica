@@ -230,7 +230,7 @@ module.exports = {
 
       if (loan) {
         color = 'GREEN';
-        description = `Successfully accepted loan.\nLoad ID: \`${loan._id}\``;
+        description = `Successfully accepted loan.\nLoan ID: \`${loan._id}\``;
 
         //Transfer funds
         await util.transaction(
