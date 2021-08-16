@@ -12,6 +12,6 @@ module.exports = {
       `There are currently \`0\` items in the ${guild.name} shop.\nAsk an admin to add some!`
     );
 
-    await interaction.reply({ embeds: [embed] });
-***REMOVED***
-};
+        await interaction.reply({ embeds: [embed] })
+    }
+}
