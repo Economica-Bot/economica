@@ -49,10 +49,11 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   const command = client.commands.get(interaction.commandName);
+  const channel = interaction.channel;
   const author = interaction.member;
   const guild = author.guild;
   const options = interaction.options;
-  const permissible = await client.permissible(author, guild, command);
+  const permissible = await client.permissible(author, guild, channel, command);
   if (permissible.length) {
     const embed = util.embedify(
       'RED',
@@ -103,7 +104,7 @@ client.registerCommands = async () => {
   }
 };
 
-client.permissible = async (author, guild, command) => {
+client.permissible = async (author, guild, channel, command) => {
   let missingPermissions = [],
     missingRoles = [],
     permissible = '';
@@ -114,7 +115,7 @@ client.permissible = async (author, guild, command) => {
 
   if (guildSettings?.modules) {
     for (const moduleSetting of guildSettings?.modules) {
-      if (moduleSetting?.module === command?.group && !moduleSetting?.enabled) {
+      if (moduleSetting?.module === command?.group && moduleSetting?.disabled) {
         permissible += `This command module is disabled.\n`;
         break;
       }
@@ -123,9 +124,18 @@ client.permissible = async (author, guild, command) => {
 
   if (guildSettings?.commands) {
     for (const commandSetting of guildSettings?.commands) {
-      if (commandSetting?.command === command.name && !commandSetting?.enabled) {
-        permissible += `This command is disabled.\n`;
-        break;
+      if (commandSetting?.command === command?.name) {
+        for (const channelSetting of commandSetting?.channels) {
+          if (channelSetting?.channel === channel.id && channelSetting?.disabled) {
+            permissible += `This command is disabled in this channel.\n`;
+            break;
+          }
+        }
+
+        if (commandSetting?.disabled) {
+          permissible += `This command is disabled.\n`;
+          break;
+        }
       }
     }
   }

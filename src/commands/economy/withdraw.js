@@ -23,8 +23,8 @@ module.exports = {
       options._hoistedOptions[0].value === 'all'
         ? treasury
         : parseInt(options._hoistedOptions[0].value);
-
-    if (amount) {
+    
+    if (amount || amount === 0) {
       if (amount < 1 || amount > treasury) {
         color = 'RED';
         description = `Insufficient treasury: ${cSymbol}${amount.toLocaleString()}\nCurrent treasury: ${cSymbol}${treasury.toLocaleString()}`;
