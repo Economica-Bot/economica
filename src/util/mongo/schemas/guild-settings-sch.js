@@ -8,6 +8,8 @@ const reqString = {
 const guildSettingSchema = mongoose.Schema(
   {
     guildID: reqString,
+    modules: [],
+    commands: [],
     currency: {
       type: String,
       required: false,

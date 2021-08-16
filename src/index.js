@@ -4,6 +4,7 @@ const fs = require('fs');
 const util = require('./util/util');
 const mongo = require('./util/mongo/mongo');
 const config = require('./config.json');
+const guildSettingsSchema = require('@schemas/guild-settings-sch');
 
 require('dotenv').config();
 
@@ -51,7 +52,7 @@ client.on('interactionCreate', async (interaction) => {
   const author = interaction.member;
   const guild = author.guild;
   const options = interaction.options;
-  const permissible = client.permissible(author, guild, command);
+  const permissible = await client.permissible(author, guild, command);
   if (permissible.length) {
     const embed = util.embedify(
       'RED',
@@ -102,10 +103,33 @@ client.registerCommands = async () => {
   }
 };
 
-client.permissible = (author, guild, command) => {
+client.permissible = async (author, guild, command) => {
   let missingPermissions = [],
     missingRoles = [],
     permissible = '';
+
+  const guildSettings = await guildSettingsSchema.findOne({
+    guildID: guild.id,
+  });
+
+  if (guildSettings?.modules) {
+    for (const moduleSetting of guildSettings?.modules) {
+      if (moduleSetting?.module === command?.group && !moduleSetting?.enabled) {
+        permissible += `This command module is disabled.\n`;
+        break;
+      }
+    }
+  }
+
+  if (guildSettings?.commands) {
+    for (const commandSetting of guildSettings?.commands) {
+      if (commandSetting?.command === command.name && !commandSetting?.enabled) {
+        permissible += `This command is disabled.\n`;
+        break;
+      }
+    }
+  }
+
   if (command?.permissions) {
     for (const permission of command.permissions) {
       if (!author.permissions.has(permission)) {
