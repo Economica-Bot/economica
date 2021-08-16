@@ -353,8 +353,8 @@ module.exports = {
         for (const incomingLoan of incomingLoans) {
           description += `Incoming Loan \`${
             incomingLoan._id
-          }\`\nExpires ${incomingLoan.expires.toLocaleString()}\nBorrower: <@!${
-            incomingLoan.borrowerID
+          }\`\nExpires ${incomingLoan.expires.toLocaleString()}\nLender: <@!${
+            incomingLoan.lenderID
           }>\nPending: \`${incomingLoan.pending}\` | Active: \`${
             incomingLoan.active
           }\` | Complete: \`${incomingLoan.complete}\`\nPrincipal: ${cSymbol}${
