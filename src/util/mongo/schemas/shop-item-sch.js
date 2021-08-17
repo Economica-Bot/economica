@@ -15,6 +15,7 @@ const shopItemSchema = mongoose.Schema({
   description: { type: String, required: false },
   expiresOnTimestamp: { type: Date, required: false }, // when the item will be de-activated in the shop
   stockLeft: { type: Number, required: false }, // how many instances of the item can be purchased before it is de-activated in the shop
+  isInventoryItem: { type: Boolean, required: false },
   requirements: {
     requiredRolesArray: { type: Array, required: false },
     // isEveryRoleRequired: { type: Boolean, required: false }, // when true, buyer must have all required roles to purchase. When false, buyer must have at least one required role to purchase.
