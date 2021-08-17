@@ -27,12 +27,8 @@ global.util = util;
 global.mongo = mongo;
 global.apiTypes = ApplicationCommandOptionType;
 
-let guild
-
 client.on('ready', async () => {
   console.log(`${client.user.tag} Ready`);
-  guild = await client.guilds.cache.get(process.env.GUILD_ID) // fetch guild once instead of for each command
-  console.log(`fetched guild ${guild.name}`)
 
   client.registerCommands();
 
@@ -70,26 +66,12 @@ client.on('interactionCreate', async (interaction) => {
     return;
   }
 
-  command?.run(interaction, guild, author, options).catch((err) => {
-    console.error(err);
-    const embed = util.embedify(
-      'RED',
-      author.user.username,
-      author.user.displayAvatarURL(),
-      `**Command**: \`${command.name}\`\n\`\`\`js\n${err}\`\`\`
-            You've encountered an error.
-            Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`
-    );
-
-    if (interaction.replied) {
-      interaction.followUp({ embeds: [embed], ephemeral: true });
-    } else {
-      interaction.reply({ embeds: [embed], ephemeral: true });
-    }
+  command?.run(interaction, guild, author, options).catch((error) => {
+    client.error(interaction, command, error);
   });
 });
 
-client.login(process.env.ECON_ALPHA_TOKEN);
+client.login(process.env.ECON_TOKEN);
 
 client.registerCommands = () => {
   const commandDirectories = fs.readdirSync('./commands');
@@ -194,4 +176,22 @@ client.permissible = async (author, guild, channel, command) => {
   }
 
   return permissible;
+};
+
+client.error = async (interaction, command, error) => {
+  console.error(err);
+  const embed = util.embedify(
+    'RED',
+    author.user.username,
+    author.user.displayAvatarURL(),
+    `**Command**: \`${command.name}\`\n\`\`\`js\n${error}\`\`\`
+            You've encountered an error.
+            Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`
+  );
+
+  if (interaction.replied) {
+    interaction.followUp({ embeds: [embed], ephemeral: true });
+  } else {
+    interaction.reply({ embeds: [embed], ephemeral: true });
+  }
 };
