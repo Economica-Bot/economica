@@ -10,7 +10,7 @@ module.exports = {
           'GOLD',
           client.user.username,
           client.user.displayAvatarURL(),
-          `Invite link: __Public Soon__`
+          `Invite link: __[Click Here](${process.env.INVITE_LINK} 'Invite Economica')__`
         ),
       ],
     });
