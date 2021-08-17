@@ -3,6 +3,7 @@ module.exports = {
   group: 'utility',
   description: 'Gets the invite link for Economica.',
   options: null,
+  disabled: true,
   async run(interaction) {
     interaction.reply({
       embeds: [
