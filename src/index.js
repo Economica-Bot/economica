@@ -27,8 +27,12 @@ global.util = util;
 global.mongo = mongo;
 global.apiTypes = ApplicationCommandOptionType;
 
+let guild
+
 client.on('ready', async () => {
   console.log(`${client.user.tag} Ready`);
+  guild = await client.guilds.cache.get(process.env.GUILD_ID) // fetch guild once instead of for each command
+  console.log(`fetched guild ${guild.name}`)
 
   client.registerCommands();
 
@@ -87,7 +91,7 @@ client.on('interactionCreate', async (interaction) => {
 
 client.login(process.env.ECON_ALPHA_TOKEN);
 
-client.registerCommands = async () => {
+client.registerCommands = () => {
   const commandDirectories = fs.readdirSync('./commands');
   for (const commandDirectory of commandDirectories) {
     const commandFiles = fs
@@ -95,9 +99,7 @@ client.registerCommands = async () => {
       .filter((file) => file.endsWith('js'));
     for (const commandFile of commandFiles) {
       const command = require(`./commands/${commandDirectory}/${commandFile}`);
-      await client.guilds.cache
-        .get(process.env.GUILD_ID)
-        .commands.create(command);
+      guild.commands.create(command);
       client.commands.set(command.name, command);
       console.log(`${command.name} command registered`);
     }
