@@ -73,7 +73,8 @@ client.on('interactionCreate', async (interaction) => {
 
 client.login(process.env.ECON_TOKEN);
 
-client.registerCommands = () => {
+client.registerCommands = async () => {
+  const commands= []
   const commandDirectories = fs.readdirSync('./commands');
   for (const commandDirectory of commandDirectories) {
     const commandFiles = fs
@@ -82,9 +83,13 @@ client.registerCommands = () => {
     for (const commandFile of commandFiles) {
       const command = require(`./commands/${commandDirectory}/${commandFile}`);
       client.commands.set(command.name, command);
-      console.log(`${command.name} command registered`);
+      commands.push(command)
     }
   }
+
+  //await client.application.commands.set(ApplicationCommandOptionData) //Global
+  await (await client.guilds.fetch(process.env.GUILD_ID)).commands.set(commands);
+  console.log('Commands registered')
 };
 
 client.permissible = async (author, guild, channel, command) => {
