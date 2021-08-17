@@ -27,12 +27,8 @@ global.util = util;
 global.mongo = mongo;
 global.apiTypes = ApplicationCommandOptionType;
 
-let guild
-
 client.on('ready', async () => {
   console.log(`${client.user.tag} Ready`);
-  guild = await client.guilds.cache.get(process.env.GUILD_ID) // fetch guild once instead of for each command
-  console.log(`fetched guild ${guild.name}`)
 
   client.registerCommands();
 
