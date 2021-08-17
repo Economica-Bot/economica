@@ -74,7 +74,7 @@ client.on('interactionCreate', async (interaction) => {
 client.login(process.env.ECON_TOKEN);
 
 client.registerCommands = async () => {
-  const commands= []
+  const commands = [];
   const commandDirectories = fs.readdirSync('./commands');
   for (const commandDirectory of commandDirectories) {
     const commandFiles = fs
@@ -83,13 +83,15 @@ client.registerCommands = async () => {
     for (const commandFile of commandFiles) {
       const command = require(`./commands/${commandDirectory}/${commandFile}`);
       client.commands.set(command.name, command);
-      commands.push(command)
+      commands.push(command);
     }
   }
 
   //await client.application.commands.set(ApplicationCommandOptionData) //Global
-  await (await client.guilds.fetch(process.env.GUILD_ID)).commands.set(commands);
-  console.log('Commands registered')
+  await (
+    await client.guilds.fetch(process.env.GUILD_ID)
+  ).commands.set(commands);
+  console.log('Commands registered');
 };
 
 client.permissible = async (author, guild, channel, command) => {
@@ -159,8 +161,13 @@ client.permissible = async (author, guild, channel, command) => {
     }
   }
 
-  if (command?.ownerOnly && !config.botAuth.admin_id.includes(author.user.id))
+  if (command?.ownerOnly && !config.botAuth.admin_id.includes(author.user.id)) {
     permissible += 'You must be an `OWNER` to run this command.\n';
+  }
+
+  if (command?.disabled) {
+    description += 'This command is disabled.\n';
+  }
 
   if (missingClientPermissions.length) {
     permissible += `I am missing the ${missingClientPermissions.join(
