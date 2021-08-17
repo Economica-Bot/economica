@@ -85,7 +85,7 @@ module.exports = {
           $push: {
             modules: {
               module: module,
-              enabled: options._subcommand === 'enable' ? true : false,
+              disabled: options._subcommand === 'enable' ? false : true,
           ***REMOVED***
         ***REMOVED***
         }

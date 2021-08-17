@@ -21,6 +21,12 @@ module.exports = {
           type: 3,
           required: true,
       ***REMOVED***
+        {
+          name: 'channel',
+          description: 'Specify a channel.',
+          type: 'CHANNEL',
+          required: false,
+      ***REMOVED***
       ],
   ***REMOVED***
     {
@@ -33,6 +39,12 @@ module.exports = {
           description: 'Specify a command.',
           type: 3,
           required: true,
+      ***REMOVED***
+        {
+          name: 'channel',
+          description: 'Specify a channel.',
+          type: 'CHANNEL',
+          required: false,
       ***REMOVED***
       ],
   ***REMOVED***
@@ -53,7 +65,7 @@ module.exports = {
       for (const commandFile of commandFiles) {
         const command = require(`../../commands/${commandDirectory}/${commandFile}`);
         if (options._hoistedOptions[0].value === command.name) {
-          if(!command.untoggleable) {
+          if (!command.untoggleable) {
             cmd = command.name;
           }
           break;
@@ -82,24 +94,77 @@ module.exports = {
           upsert: true,
         }
       );
-      await guildSettingSchema.findOneAndUpdate(
-        {
-          guildID,
-      ***REMOVED***
-        {
-          $push: {
-            commands: {
-              command: cmd,
-              enabled: options._subcommand === 'enable' ? true : false,
+      if (options._hoistedOptions[1]) {
+        const channel = options._hoistedOptions[1].channel;
+        if (!channel.isText()) {
+          color = 'RED';
+          description = `\`${channel.name}\` is not a text channel.`;
+        } else {
+          await guildSettingSchema.findOneAndUpdate(
+            { guildID },
+            {
+              $push: {
+                commands: {
+                  command: cmd,
+                  channels: []
+              ***REMOVED***
+            ***REMOVED***
+            }
+          );
+
+          await guildSettingSchema.findOneAndUpdate(
+            { guildID, 'commands.command': cmd },
+            {
+              $push: {
+                'commands.$.channels': {
+                  channel: channel.id,
+                  disabled: options._subcommand === 'enable' ? false : true,
+              ***REMOVED***
+            ***REMOVED***
+            }
+          );
+        }
+
+        description = `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
+          1,
+          options._subcommand.length
+        )}d command \`${cmd}\` in <#${channel.id}>`;
+      } else {
+        await guildSettingSchema.findOneAndUpdate(
+          {
+            guildID,
+        ***REMOVED***
+          {
+            $pull: {
+              commands: {
+                command: cmd,
+            ***REMOVED***
           ***REMOVED***
         ***REMOVED***
-        }
-      );
+          {
+            new: true,
+            upsert: true,
+          }
+        );
+        await guildSettingSchema.findOneAndUpdate(
+          {
+            guildID,
+        ***REMOVED***
+          {
+            $push: {
+              commands: {
+                command: cmd,
+                disabled: options._subcommand === 'enable' ? false : true,
+            ***REMOVED***
+          ***REMOVED***
+          }
+        );
 
-      description = `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
-        1,
-        options._subcommand.length
-      )}d command \`${cmd}\``;
+        description = `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
+          1,
+          options._subcommand.length
+        )}d command \`${cmd}\``;
+      }
     }
 
     const embed = util.embedify(color, title, icon_url, description, footer);

@@ -32,7 +32,7 @@ module.exports = {
     let color, description;
     if (options._subcommand === 'set') {
       const channel = options._hoistedOptions[0].channel;
-      if (channel.type !== 'GUILD_TEXT') {
+      if (!channel.isText()) {
         color = 'RED';
         description = `\`${channel.name}\` is not a text channel.`;
       } else {
@@ -67,7 +67,8 @@ module.exports = {
           }
         )
         .then(() => {
-          (color = 'GREEN'), (description = `Removed transaction log.`);
+          color = 'GREEN';
+          description = `Removed transaction log.`;
         });
     }
 

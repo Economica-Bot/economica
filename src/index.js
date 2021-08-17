@@ -36,9 +36,24 @@ client.on('ready', async () => {
         console.log('Connected to DB')
     })
 
-    const checkMutes = require('./util/features/check-mute')
-    checkMutes(client)
-})
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isCommand()) {
+    return;
+  }
+
+  const command = client.commands.get(interaction.commandName);
+  const channel = interaction.channel;
+  const author = interaction.member;
+  const guild = author.guild;
+  const options = interaction.options;
+  const permissible = await client.permissible(author, guild, channel, command);
+  if (permissible.length) {
+    const embed = util.embedify(
+      'RED',
+      author.user.username,
+      author.user.displayAvatarURL(),
+      permissible
+    );
 
 client.on('interactionCreate', async interaction => {
     if(!interaction.isCommand()) {
@@ -101,8 +116,9 @@ client.registerCommands = async () => {
   }
 };
 
-client.permissible = async (author, guild, command) => {
-  let missingPermissions = [],
+client.permissible = async (author, guild, channel, command) => {
+  let missingClientPermissions = [],
+    missingUserPermissions = [],
     missingRoles = [],
     permissible = '';
 
@@ -112,31 +128,43 @@ client.permissible = async (author, guild, command) => {
 
   if (guildSettings?.modules) {
     for (const moduleSetting of guildSettings?.modules) {
-      if (moduleSetting?.module === command?.group && !moduleSetting?.enabled) {
+      if (moduleSetting?.module === command?.group && moduleSetting?.disabled) {
         permissible += `This command module is disabled.\n`;
         break;
       }
     }
-    console.log(`================================================================
-                         ECONOMICA
-                 all commands registered.
-================================================================`)
-}
-client.permissible = (author, guild, command) => {
-    let missingPermissions = [], missingRoles = [], permissible = ''
-    if(command?.permissions) {
-        for(const permission of command.permissions) {
-            if(!author.permissions.has(permission)) {
-                missingPermissions.push(`\`${permission}\``)     
-            }
+  }
+
+  if (guildSettings?.commands) {
+    for (const commandSetting of guildSettings?.commands) {
+      if (commandSetting?.command === command?.name) {
+        for (const channelSetting of commandSetting?.channels) {
+          if (
+            channelSetting?.channel === channel.id &&
+            channelSetting?.disabled
+          ) {
+            permissible += `This command is disabled in this channel.\n`;
+            break;
+          }
         }
+
+        if (commandSetting?.disabled) {
+          permissible += `This command is disabled.\n`;
+          break;
+        }
+      }
     }
   }
 
+  const clientMember = await guild.members.cache.get(client.user.id);
+
   if (command?.permissions) {
     for (const permission of command.permissions) {
-      if (!author.permissions.has(permission)) {
-        missingPermissions.push(`\`${permission}\``);
+      if (!clientMember.permissionsIn(channel).has(permission)) {
+        missingClientPermissions.push(`\`${permission}\``);
+      }
+      if (!author.permissionsIn(channel).has(permission)) {
+        missingUserPermissions.push(`\`${permission}\``);
       }
     }
   }
@@ -158,15 +186,23 @@ client.permissible = (author, guild, command) => {
   if (command?.ownerOnly && !config.botAuth.admin_id.includes(author.user.id))
     permissible += 'You must be an `OWNER` to run this command.\n';
 
-  if (missingPermissions.length)
-    permissible += `You are missing the ${missingPermissions.join(
+  if (missingClientPermissions.length) {
+    permissible += `I am missing the ${missingClientPermissions.join(
       ', '
     )} permission(s) to run this command.\n`;
+  }
 
-  if (missingRoles.length)
+  if (missingUserPermissions.length) {
+    permissible += `You are missing the ${missingUserPermissions.join(
+      ', '
+    )} permission(s) to run this command.\n`;
+  }
+
+  if (missingRoles.length) {
     permissible += `You are missing the ${missingRoles.join(
       ', '
     )} role(s) to run this command.\n`;
+  }
 
   return permissible;
 };

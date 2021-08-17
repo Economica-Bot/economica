@@ -1,6 +1,7 @@
 const ms = require('ms');
 
 const loanSchema = require('@schemas/loan-sch');
+const { isValidObjectId } = require('mongoose');
 
 module.exports = {
   name: 'loan',
@@ -175,7 +176,15 @@ module.exports = {
       );
 
       color = 'GREEN';
-      description = `Successfully created a loan.\nLoan ID: \`${loan._id}\`\n\`\`\`\n${loan}\`\`\``;
+      description = `Successfully created a loan.\nLoan \`${
+        loan._id
+      }\` | ${loan.createdAt.toLocaleString()}\nExpires ${loan.expires.toLocaleString()}\nBorrower: <@!${
+        loan.borrowerID
+      }>\nPending: \`${loan.pending}\` | Active: \`${
+        loan.active
+      }\` | Complete: \`${loan.complete}\`\nPrincipal: ${cSymbol}${
+        loan.principal
+      } | Repayment: ${cSymbol}${loan.repayment}`;
     } else if (options._subcommand === 'cancel') {
       const _id = options._hoistedOptions[0].value;
 
@@ -207,76 +216,89 @@ module.exports = {
           loan.lenderID,
           this.name,
           `Loan to <@!${loan.borrowerID}> \`canceled\` | Loan ID: \`${loan._id}\``,
-          0, 
-          loan.principal, 
+          0,
+          loan.principal,
           loan.principal
         );
       } else {
         color = 'RED';
-        description = `Could not find pending loan with id \`${_id}\``;
+        description = `Could not find pending loan with ID \`${_id}\``;
       }
     } else if (options._subcommand === 'accept') {
       const _id = options._hoistedOptions[0].value;
-      const loan = await loanSchema.findOneAndUpdate(
-        {
-          _id,
-          borrowerID: author.user.id,
-          pending: true,
-      ***REMOVED***
-        {
-          pending: false,
-        }
-      );
 
-      if (loan) {
-        color = 'GREEN';
-        description = `Successfully accepted loan.\nLoan ID: \`${loan._id}\``;
-
-        //Transfer funds
-        await util.transaction(
-          guildID,
-          author.user.id,
-          this.name,
-          `Loan from <@!${loan.lenderID}> \`accepted\` | Loan ID: \`${loan._id}\``,
-          loan.principal,
-          0,
-          loan.principal
+      //Validate ID
+      if (isValidObjectId(_id)) {
+        const loan = await loanSchema.findOneAndUpdate(
+          {
+            _id,
+            borrowerID: author.user.id,
+            pending: true,
+        ***REMOVED***
+          {
+            pending: false,
+          }
         );
+
+        if (loan) {
+          color = 'GREEN';
+          description = `Successfully accepted loan.\nLoan ID: \`${loan._id}\``;
+
+          //Transfer funds
+          await util.transaction(
+            guildID,
+            author.user.id,
+            this.name,
+            `Loan from <@!${loan.lenderID}> \`accepted\` | Loan ID: \`${loan._id}\``,
+            loan.principal,
+            0,
+            loan.principal
+          );
+        } else {
+          color = 'RED';
+          description = `Could not find loan with ID \`${_id}\``;
+        }
       } else {
         color = 'RED';
-        description = `Could not find loan with id \`${_id}\``;
+        description = `Invalid loan ID: \`${_id}\``;
       }
     } else if (options._subcommand === 'decline') {
       const _id = options._hoistedOptions[0].value;
-      const loan = await loanSchema.findOneAndUpdate(
-        {
-          _id,
-          borrowerID: author.user.id,
-          pending: true,
-      ***REMOVED***
-        {
-          pending: false,
-          active: false,
-        }
-      );
-
-      if (loan) {
-        color = 'GREEN';
-        description = `Successfully declined loan.\nLoan ID: \`${loan._id}\``;
-
-        //Refund
-        await util.transaction(
-          guildID,
-          loan.lenderID,
-          this.name,
-          `Loan to <@!${loan.borrowerID}> \`declined\` | Loan ID: \`${loan._id}\``,
-          0, 
-          loan.principal, 
-          loan.principal
+      //Validate ID
+      if (isValidObjectId(_id)) {
+        const loan = await loanSchema.findOneAndUpdate(
+          {
+            _id,
+            borrowerID: author.user.id,
+            pending: true,
+        ***REMOVED***
+          {
+            pending: false,
+            active: false,
+          }
         );
+
+        if (loan) {
+          color = 'GREEN';
+          description = `Successfully declined loan.\nLoan ID: \`${loan._id}\``;
+
+          //Refund
+          await util.transaction(
+            guildID,
+            loan.lenderID,
+            this.name,
+            `Loan to <@!${loan.borrowerID}> \`declined\` | Loan ID: \`${loan._id}\``,
+            0,
+            loan.principal,
+            loan.principal
+          );
+        } else {
+          color = 'RED';
+          description = `Could not find loan with id \`${_id}\``;
+        }
       } else {
         color = 'RED';
-        description = `Could not find loan with id \`${_id}\``;
+        description = `Invalid loan ID: \`${_id}\``;
       }
     } else if (options._subcommand === 'view') {
       //View all loans

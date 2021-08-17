@@ -146,19 +146,8 @@ module.exports = {
       ],
   ***REMOVED***
   ],
-  async run(interaction, guild, author, args) {
-    // restructure
-    const group = args[0];
-    const type = args[0].options;
-
-    let tempArgs = {};
-    for (arg in args[0].otpions[0].options) {
-      tempArgs[`${arg.name}`] = arg.value;
-    }
-
-    args = tempArgs;
-
-    console.log('group: ' + group, 'type: ' + type, 'args: ' + args);
+  async run(interaction, guild, author, options) {
+    console.log(options._hoistedOptions)
 
     await interaction.reply({ embeds: [embed] });
 ***REMOVED***
