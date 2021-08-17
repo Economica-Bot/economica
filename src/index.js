@@ -99,7 +99,6 @@ client.registerCommands = () => {
       .filter((file) => file.endsWith('js'));
     for (const commandFile of commandFiles) {
       const command = require(`./commands/${commandDirectory}/${commandFile}`);
-      guild.commands.create(command);
       client.commands.set(command.name, command);
       console.log(`${command.name} command registered`);
     }
