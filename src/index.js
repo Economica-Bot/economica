@@ -27,14 +27,25 @@ global.util = util;
 global.mongo = mongo;
 global.apiTypes = ApplicationCommandOptionType;
 
+let guild
+
 client.on('ready', async () => {
-    console.log(`${client.user.tag} Ready`)
+  console.log(`${client.user.tag} Ready`);
+  guild = await client.guilds.cache.get(process.env.GUILD_ID) // fetch guild once instead of for each command
+  console.log(`fetched guild ${guild.name}`)
 
-    client.registerCommands()
+  client.registerCommands();
 
-    await mongo().then(() => {
-        console.log('Connected to DB')
-    })
+  await mongo().then(() => {
+    console.log('Connected to DB');
+  });
+
+  const checkMutes = require('./util/features/check-mute');
+  checkMutes(client);
+
+  const checkLoans = require('./util/features/check-loan');
+  checkLoans();
+});
 
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isCommand()) {
@@ -55,36 +66,17 @@ client.on('interactionCreate', async (interaction) => {
       permissible
     );
 
-client.on('interactionCreate', async interaction => {
-    if(!interaction.isCommand()) {
-        return
-    }
-    
-    const command = client.commands.get(interaction.commandName) 
-    const author = interaction.member
-    const guild = author.guild
-    const options = interaction.options
-    let values = {}; if (options) for (o in options) values[`${o.name}`] = o.value // and object of option-name keys for option values.
+    interaction.reply({ embeds: [embed], ephemeral: true });
+    return;
+  }
 
-    const permissible = client.permissible(author, guild, command)
-    if(permissible.length) {
-        const embed = util.embedify(
-            'RED', 
-            author.user.username, 
-            author.user.displayAvatarURL(), 
-            permissible
-        )
-
-        interaction.reply({ embeds: [ embed ], ephemeral: true})
-        return
-    }
-
-    command?.run(interaction, guild, author, options).catch(err => {
-        const embed = util.embedify(
-            'RED', 
-            author.user.username, 
-            author.user.displayAvatarURL(), 
-            `**Command**: \`${command.name}\`\n\`\`\`js\n${err}\`\`\`
+  command?.run(interaction, guild, author, options).catch((err) => {
+    console.error(err);
+    const embed = util.embedify(
+      'RED',
+      author.user.username,
+      author.user.displayAvatarURL(),
+      `**Command**: \`${command.name}\`\n\`\`\`js\n${err}\`\`\`
             You've encountered an error.
             Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`
     );
@@ -99,7 +91,7 @@ client.on('interactionCreate', async interaction => {
 
 client.login(process.env.ECON_ALPHA_TOKEN);
 
-client.registerCommands = async () => {
+client.registerCommands = () => {
   const commandDirectories = fs.readdirSync('./commands');
   for (const commandDirectory of commandDirectories) {
     const commandFiles = fs
@@ -107,9 +99,7 @@ client.registerCommands = async () => {
       .filter((file) => file.endsWith('js'));
     for (const commandFile of commandFiles) {
       const command = require(`./commands/${commandDirectory}/${commandFile}`);
-      await client.guilds.cache
-        .get(process.env.GUILD_ID)
-        .commands.create(command);
+      guild.commands.create(command);
       client.commands.set(command.name, command);
       console.log(`${command.name} command registered`);
     }
