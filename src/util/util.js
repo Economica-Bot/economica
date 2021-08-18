@@ -3,7 +3,7 @@ const config = require('../config.json');
 
 require('module-alias/register');
 const economySchema = require('@schemas/economy-sch');
-const guildSettingSchema = require('@schemas/guild-settings-sch');
+const guildSettingsSchema = require('@schemas/guild-settings-sch');
 const incomeSchema = require('@schemas/income-sch');
 const infractionSchema = require('@schemas/infraction-sch');
 const inventorySchema = require('@schemas/inventory-sch');
@@ -132,7 +132,7 @@ module.exports.transaction = async (
     total,
   }).save();
 
-  const guildSetting = await guildSettingSchema.findOne({
+  const guildSetting = await guildSettingsSchema.findOne({
     guildID,
   });
 
@@ -210,7 +210,7 @@ module.exports.infraction = async (
     expires,
   }).save();
 
-  const guildSetting = await guildSettingSchema.findOne({
+  const guildSetting = await guildSettingsSchema.findOne({
     guildID,
   });
 
@@ -240,7 +240,7 @@ module.exports.infraction = async (
  * @returns {string} Guild currency symbol
  */
 module.exports.getCurrencySymbol = async (guildID) => {
-  const result = await guildSettingSchema.findOne({
+  const result = await guildSettingsSchema.findOne({
     guildID,
   });
 
@@ -401,11 +401,37 @@ module.exports.coolDown = async (interaction, properties, uProperties) => {
 };
 
 /**
- * Returns whether said income command is successful.
- * @param {object} properties - the command properties
- * @returns {boolean} `isSuccess` — boolean
+ * Returns whether income command is successful.
+ * @param {Object} properties - the command properties
+ * @returns {Boolean} `isSuccess` — boolean
  */
 module.exports.isSuccess = (properties) => {
   const { chance } = properties;
   return this.intInRange(0, 100) < chance ? true : false;
+};
+
+/**
+ * Initialize guild settings.
+ * @param {Discord.Guild} guild
+ * @returns
+ */
+module.exports.initGuildSettings = async (guild) => {
+  const guildSettings = await guildSettingsSchema.findOneAndUpdate(
+    {
+      guildID: guild.id,
+  ***REMOVED***
+    {
+      modules: [],
+      commands: [],
+      currency: null,
+      transactionLogChannel: null,
+      infractionLogChannel: null,
+  ***REMOVED***
+    {
+      upsert: true,
+      new: true,
+    }
+  );
+
+  return guildSettings;
 };
