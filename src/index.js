@@ -98,6 +98,7 @@ client.permissible = async (author, guild, channel, command) => {
   let missingClientPermissions = [],
     missingUserPermissions = [],
     missingRoles = [],
+    disabledRoles = [],
     permissible = '';
 
   const guildSettings = await guildSettingsSchema.findOne({
@@ -107,7 +108,7 @@ client.permissible = async (author, guild, channel, command) => {
   if (guildSettings?.modules) {
     for (const moduleSetting of guildSettings?.modules) {
       if (moduleSetting?.module === command?.group && moduleSetting?.disabled) {
-        permissible += `This command module is disabled.\n`;
+        permissible += `The \`${moduleSetting.module}\` command module is disabled.\n`;
         break;
       }
     }
@@ -116,13 +117,26 @@ client.permissible = async (author, guild, channel, command) => {
   if (guildSettings?.commands) {
     for (const commandSetting of guildSettings?.commands) {
       if (commandSetting?.command === command?.name) {
-        for (const channelSetting of commandSetting?.channels) {
-          if (
-            channelSetting?.channel === channel.id &&
-            channelSetting?.disabled
-          ) {
-            permissible += `This command is disabled in this channel.\n`;
-            break;
+        if (commandSetting?.channels) {
+          for (const channelSetting of commandSetting?.channels) {
+            if (
+              channelSetting?.channel === channel.id &&
+              channelSetting?.disabled
+            ) {
+              permissible += `This command is disabled in <#${channelSetting.channel}>.\n`;
+              break;
+            }
+          }
+        }
+
+        if (commandSetting?.roles) {
+          for (const roleSetting of commandSetting?.roles) {
+            if (
+              author.roles.cache.has(roleSetting?.role) &&
+              roleSetting?.disabled
+            ) {
+              disabledRoles.push(`<@&${roleSetting.role}>`);
+            }
           }
         }
 
@@ -187,15 +201,21 @@ client.permissible = async (author, guild, channel, command) => {
     )} role(s) to run this command.\n`;
   }
 
+  if (disabledRoles.length) {
+    permissible += `This command is disabled for the ${disabledRoles.join(
+      ', '
+    )} role(s).\n`;
+  }
+
   return permissible;
 };
 
 client.error = async (interaction, command, error) => {
-  console.error(err);
+  console.error(error);
   const embed = util.embedify(
     'RED',
-    author.user.username,
-    author.user.displayAvatarURL(),
+    interaction.member.user.username,
+    interaction.member.user.displayAvatarURL(),
     `**Command**: \`${command.name}\`\n\`\`\`js\n${error}\`\`\`
             You've encountered an error.
             Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`

@@ -27,6 +27,12 @@ module.exports = {
           type: 'CHANNEL',
           required: false,
       ***REMOVED***
+        {
+          name: 'role',
+          description: 'Specify a role.',
+          type: 'ROLE',
+          required: false,
+      ***REMOVED***
       ],
   ***REMOVED***
     {
@@ -44,6 +50,12 @@ module.exports = {
           name: 'channel',
           description: 'Specify a channel.',
           type: 'CHANNEL',
+          required: false,
+      ***REMOVED***
+        {
+          name: 'role',
+          description: 'Specify a role.',
+          type: 'ROLE',
           required: false,
       ***REMOVED***
       ],
@@ -78,7 +90,7 @@ module.exports = {
       description = `Command \`${options._hoistedOptions[0].value}\` not found or cannot be toggled.`;
       footer = 'Use help for a list of commands.';
     } else {
-      await guildSettingSchema.findOneAndUpdate(
+      const guildSettings = await guildSettingSchema.findOneAndUpdate(
         {
           guildID,
       ***REMOVED***
@@ -90,86 +102,95 @@ module.exports = {
         ***REMOVED***
       ***REMOVED***
         {
-          new: true,
           upsert: true,
         }
       );
-      if (options._hoistedOptions[1]) {
-        const channel = options._hoistedOptions[1].channel;
+
+      const commandSettings = guildSettings.commands.find(
+        (c) => c.command === cmd
+      ) ?? {
+        command: cmd,
+      };
+
+      let channel, role;
+      options._hoistedOptions.forEach((option) => {
+        if (option.channel) {
+          channel = option.channel;
+        } else if (option.role) {
+          role = option.role;
+        }
+      });
+
+      //Enable or disable a channel for a command
+      if (channel) {
         if (!channel.isText()) {
           color = 'RED';
-          description = `\`${channel.name}\` is not a text channel.`;
+          description += `\`${channel.name}\` is not a text channel.\n`;
         } else {
-          await guildSettingSchema.findOneAndUpdate(
-            { guildID },
-            {
-              $push: {
-                commands: {
-                  command: cmd,
-                  channels: []
-              ***REMOVED***
-            ***REMOVED***
-            }
-          );
-
-          await guildSettingSchema.findOneAndUpdate(
-            { guildID, 'commands.command': cmd },
-            {
-              $push: {
-                'commands.$.channels': {
-                  channel: channel.id,
-                  disabled: options._subcommand === 'enable' ? false : true,
-              ***REMOVED***
-            ***REMOVED***
-            }
-          );
+          if (!commandSettings.channels) {
+            commandSettings.channels = [];
+          }
+          if (commandSettings.channels.find((c) => c.channel === channel.id)) {
+            commandSettings.channels.find((c) => c.channel === channel.id).disabled =
+              options._subcommand === 'disable' ? true : false;
+          } else {
+            commandSettings.channels.push({
+              channel: channel.id,
+              disabled: options._subcommand === 'disable' ? true : false,
+            });
+          }
+          description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
+            1,
+            options._subcommand.length
+          )}d command \`${cmd}\` in <#${channel.id}>\n`;
         }
+      }
 
-        description = `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
+      //Enable or disable a role for a command
+      if (role) {
+        if (!commandSettings.roles) {
+          commandSettings.roles = [];
+        }
+        if (commandSettings.roles.find((r) => r.role === role.id)) {
+          commandSettings.roles.find((r) => r.role === role.id).disabled =
+            options._subcommand === 'disable' ? true : false;
+        } else {
+          commandSettings.roles.push({
+            role: role.id,
+            disabled: options._subcommand === 'disable' ? true : false,
+          });
+        }
+        description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
           1,
           options._subcommand.length
-        )}d command \`${cmd}\` in <#${channel.id}>`;
-      } else {
-        await guildSettingSchema.findOneAndUpdate(
-          {
-            guildID,
-        ***REMOVED***
-          {
-            $pull: {
-              commands: {
-                command: cmd,
-            ***REMOVED***
-          ***REMOVED***
-        ***REMOVED***
-          {
-            new: true,
-            upsert: true,
-          }
-        );
-        await guildSettingSchema.findOneAndUpdate(
-          {
-            guildID,
-        ***REMOVED***
-          {
-            $push: {
-              commands: {
-                command: cmd,
-                disabled: options._subcommand === 'enable' ? false : true,
-            ***REMOVED***
-          ***REMOVED***
-          }
-        );
+        )}d command \`${cmd}\` for <@&${role.id}>\n`;
+      }
 
-        description = `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
+      //Enable or disable a command
+      if (!role && !channel) {
+        commandSettings.disabled =
+          options._subcommand === 'disable' ? true : false;
+        description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
           1,
           options._subcommand.length
         )}d command \`${cmd}\``;
       }
+
+      await guildSettingSchema.findOneAndUpdate(
+        { guildID },
+        {
+          $push: {
+            commands: {
+              ...commandSettings,
+          ***REMOVED***
+        ***REMOVED***
+        }
+      );
     }
 
     const embed = util.embedify(color, title, icon_url, description, footer);
 
-    interaction.reply({ embeds: [embed], ephemeral: true });
+    interaction.reply({ embeds: [embed] });
     return;
 ***REMOVED***
 };
