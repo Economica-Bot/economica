@@ -221,7 +221,7 @@ client.error = async (interaction, command, error) => {
             Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`
   );
 
-  if (interaction.replied) {
+  if (interaction.replied || interaction.deferred) {
     interaction.followUp({ embeds: [embed], ephemeral: true });
   } else {
     interaction.reply({ embeds: [embed], ephemeral: true });
