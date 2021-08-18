@@ -188,41 +188,46 @@ module.exports = {
     } else if (options._subcommand === 'cancel') {
       const _id = options._hoistedOptions[0].value;
 
-      const econManagerRole = guild.roles.cache.find((r) => {
-        return r.name.toLowerCase() === 'economy manager';
-      });
-
-      let loan;
-      if (author.roles.cache.has(econManagerRole.id)) {
-        loan = await loanSchema.findOneAndDelete({
-          _id,
-          pending: true,
+      if (isValidObjectId(_id)) {
+        const econManagerRole = guild.roles.cache.find((r) => {
+          return r.name.toLowerCase() === 'economy manager';
         });
-      } else {
-        loan = await loanSchema.findOneAndDelete({
-          _id,
-          userID: author.user.id,
-          pending: true,
-        });
-      }
 
-      if (loan) {
-        color = 'GREEN';
-        description = `Successfully canceled loan.\nLoan ID: \`${loan._id}\``;
+        let loan;
+        if (author.roles.cache.has(econManagerRole.id)) {
+          loan = await loanSchema.findOneAndDelete({
+            _id,
+            pending: true,
+          });
+        } else {
+          loan = await loanSchema.findOneAndDelete({
+            _id,
+            userID: author.user.id,
+            pending: true,
+          });
+        }
 
-        //Refund
-        await util.transaction(
-          guildID,
-          loan.lenderID,
-          this.name,
-          `Loan to <@!${loan.borrowerID}> \`canceled\` | Loan ID: \`${loan._id}\``,
-          0,
-          loan.principal,
-          loan.principal
-        );
+        if (loan) {
+          color = 'GREEN';
+          description = `Successfully canceled loan.\nLoan ID: \`${loan._id}\``;
+
+          //Refund
+          await util.transaction(
+            guildID,
+            loan.lenderID,
+            this.name,
+            `Loan to <@!${loan.borrowerID}> \`canceled\` | Loan ID: \`${loan._id}\``,
+            0,
+            loan.principal,
+            loan.principal
+          );
+        } else {
+          color = 'RED';
+          description = `Could not find pending loan with ID \`${_id}\``;
+        }
       } else {
         color = 'RED';
-        description = `Could not find pending loan with ID \`${_id}\``;
+        description = `Invalid loan ID: \`${_id}\``;
       }
     } else if (options._subcommand === 'accept') {
       const _id = options._hoistedOptions[0].value;
