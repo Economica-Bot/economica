@@ -66,9 +66,14 @@ client.on('interactionCreate', async (interaction) => {
     return;
   }
 
-  command?.run(interaction, guild, author, options).catch((error) => {
+  try {
+    await command?.run(interaction, guild, author, options);
+  } catch (error) {
     client.error(interaction, command, error);
-  });
+  }
+  // command?.run(interaction, guild, author, options).catch((error) => {
+  //   client.error(interaction, command, error);
+  // });
 });
 
 client.login(process.env.ECON_TOKEN);
@@ -210,18 +215,33 @@ client.permissible = async (author, guild, channel, command) => {
   return permissible;
 };
 
-client.error = async (interaction, command, error) => {
-  console.error(error);
-  const embed = util.embedify(
-    'RED',
-    interaction.member.user.username,
-    interaction.member.user.displayAvatarURL(),
-    `**Command**: \`${command.name}\`\n\`\`\`js\n${error}\`\`\`
-            You've encountered an error.
-            Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`
-  );
+process.on('unhandledRejection', (error) => {
+  client.error(error);
+});
 
-  if (interaction.replied || interaction.deferred) {
+process.on('uncaughtException', (error) => {
+  client.error(error);
+});
+
+client.error = async (error, interaction = null, command = null) => {
+  let description, title, icon_url;
+  if (interaction) {
+    title = interaction.member.user.username;
+    icon_url = interaction.member.user.displayAvatarURL();
+    description = `**Command**: \`${command.name}\`\n\`\`\`js\n${error}\`\`\`
+    You've encountered an error.
+    Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`;
+  } else {
+    title = error.name;
+    icon_url = client.user.displayAvatarURL();
+    description = `\`\`\`js\n${error.message}\`\`\``;
+  }
+
+  const embed = util.embedify('RED', title, icon_url, description);
+
+  client.channels.cache.get(process.env.BOT_LOG_ID).send({ embeds: [embed] });
+
+  if ((interaction && interaction.replied) || interaction.deferred) {
     interaction.followUp({ embeds: [embed], ephemeral: true });
   } else {
     interaction.reply({ embeds: [embed], ephemeral: true });
