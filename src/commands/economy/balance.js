@@ -45,6 +45,6 @@ module.exports = {
       ***REMOVED***
       ]);
 
-    interaction.reply({ embeds: [balEmbed] });
+    await interaction.reply({ embeds: [balEmbed] });
 ***REMOVED***
 };

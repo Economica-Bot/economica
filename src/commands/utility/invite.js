@@ -5,7 +5,7 @@ module.exports = {
   options: null,
   disabled: true,
   async run(interaction) {
-    interaction.reply({
+    await interaction.reply({
       embeds: [
         util.embedify(
           'GOLD',

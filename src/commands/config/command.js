@@ -190,7 +190,7 @@ module.exports = {
 
     const embed = util.embedify(color, title, icon_url, description, footer);
 
-    interaction.reply({ embeds: [embed] });
+    await interaction.reply({ embeds: [embed] });
     return;
 ***REMOVED***
 };

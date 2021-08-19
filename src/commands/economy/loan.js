@@ -143,7 +143,7 @@ module.exports = {
 
       //Exit if invalid parameter
       if (color === 'RED') {
-        interaction.reply({
+        await interaction.reply({
           embeds: [util.embedify(color, title, icon_url, description, footer)],
           ephemeral: true,
         });
@@ -269,6 +269,7 @@ module.exports = {
       }
     } else if (options._subcommand === 'decline') {
       const _id = options._hoistedOptions[0].value;
+
       //Validate ID
       if (isValidObjectId(_id)) {
         const loan = await loanSchema.findOneAndUpdate(
@@ -329,32 +330,39 @@ module.exports = {
 
       //View loan by ID
       else if (options._hoistedOptions[0].name === 'loan_id') {
+        const _id = options._hoistedOptions[0].value;
         color = 'GREEN';
 
-        const loan = await loanSchema.findOne({
-          guildID,
-          _id: options._hoistedOptions[0].value,
-        });
+        if (isValidObjectId(_id)) {
+          const loan = await loanSchema.findOne({
+            guildID,
+            _id: options._hoistedOptions[0].value,
+          });
 
-        if (loan) {
-          description = `Loan \`${
-            loan._id
-          }\` | ${loan.createdAt.toLocaleString()}\nExpires ${loan.expires.toLocaleString()}\nBorrower: <@!${
-            loan.borrowerID
-          }>\nPending: \`${loan.pending}\` | Active: \`${
-            loan.active
-          }\` | Complete: \`${loan.complete}\`\nPrincipal: ${cSymbol}${
-            loan.principal
-          } | Repayment: ${cSymbol}${loan.repayment}`;
+          if (loan) {
+            description = `Loan \`${
+              loan._id
+            }\` | ${loan.createdAt.toLocaleString()}\nExpires ${loan.expires.toLocaleString()}\nBorrower: <@!${
+              loan.borrowerID
+            }>\nPending: \`${loan.pending}\` | Active: \`${
+              loan.active
+            }\` | Complete: \`${loan.complete}\`\nPrincipal: ${cSymbol}${
+              loan.principal
+            } | Repayment: ${cSymbol}${loan.repayment}`;
+          } else {
+            color = 'RED';
+            description = `Could not find loan with id \`${_id}\``;
+          }
         } else {
           color = 'RED';
-          description = `Could not find loan with id \`${_id}\``;
+          description = `Invalid loan ID: \`${_id}\``;
         }
       }
 
       //View loans by user
       else if (options._hoistedOptions[0].name === 'user') {
         const user = options._hoistedOptions[0].user;
+
         const outgoingLoans = await loanSchema.find({
           guildID: guild.id,
           lenderID: user.id,
@@ -397,6 +405,6 @@ module.exports = {
 
     embed = util.embedify(color, title, icon_url, description, footer);
 
-    interaction.reply({ embeds: [embed] });
+    await interaction.reply({ embeds: [embed] });
 ***REMOVED***
 };

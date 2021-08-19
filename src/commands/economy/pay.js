@@ -81,6 +81,6 @@ module.exports = {
       description
     );
 
-    interaction.reply({ embeds: [embed], ephemeral });
+    await interaction.reply({ embeds: [embed], ephemeral });
 ***REMOVED***
 };

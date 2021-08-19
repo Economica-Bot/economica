@@ -254,7 +254,7 @@ module.exports = {
         description = `Deleted \`${infractions.n}\` infractions.`;
       }
 
-      interaction.editReply({
+      await interaction.editReply({
         embeds: [
           util.embedify(
             color,

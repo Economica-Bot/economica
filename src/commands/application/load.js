@@ -35,12 +35,12 @@ module.exports = {
             `Force loaded \`${command.name}\``
           );
 
-          interaction.editReply({ embeds: [embed], ephemeral: true });
+          await interaction.editReply({ embeds: [embed], ephemeral: true });
           return;
         }
       }
     }
-    
+
     const embed = util.embedify(
       'RED',
       author.user.username,
@@ -48,6 +48,6 @@ module.exports = {
       `Command \`${options._hoistedOptions[0].value}\` not found.`
     );
 
-    interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed], ephemeral: true });
 ***REMOVED***
 };

@@ -2,10 +2,10 @@ module.exports = {
   name: 'ping',
   group: 'utility',
   description: 'ping',
-  commandOptions: null,
+  options: null,
   global: true,
   async run(interaction, guild, author, options) {
-    interaction.reply({
+    await interaction.reply({
       embeds: [
         util.embedify(
           'GREEN',
