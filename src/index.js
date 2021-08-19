@@ -66,14 +66,9 @@ client.on('interactionCreate', async (interaction) => {
     return;
   }
 
-  try {
-    await command?.run(interaction, guild, author, options);
-  } catch (error) {
-    client.error(interaction, command, error);
-  }
-  // command?.run(interaction, guild, author, options).catch((error) => {
-  //   client.error(interaction, command, error);
-  // });
+  await command
+    ?.run(interaction, guild, author, options)
+    .catch((error) => client.error(error, interaction, command));
 });
 
 client.login(process.env.ECON_TOKEN);
@@ -231,19 +226,18 @@ client.error = async (error, interaction = null, command = null) => {
     description = `**Command**: \`${command.name}\`\n\`\`\`js\n${error}\`\`\`
     You've encountered an error.
     Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`;
-  } else {
-    title = error.name;
-    icon_url = client.user.displayAvatarURL();
-    description = `\`\`\`js\n${error.message}\`\`\``;
+    const embed = util.embedify('RED', title, icon_url, description);
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({ embeds: [embed], ephemeral: true });
+    } else {
+      await interaction.reply({ embeds: [embed], ephemeral: true });
+    }
   }
+
+  title = error.name;
+  icon_url = client.user.displayAvatarURL();
+  description = `\`\`\`js\n${error.stack}\`\`\``;
 
   const embed = util.embedify('RED', title, icon_url, description);
-
   client.channels.cache.get(process.env.BOT_LOG_ID).send({ embeds: [embed] });
-
-  if ((interaction && interaction.replied) || interaction.deferred) {
-    interaction.followUp({ embeds: [embed], ephemeral: true });
-  } else {
-    interaction.reply({ embeds: [embed], ephemeral: true });
-  }
 };
