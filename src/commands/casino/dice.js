@@ -19,24 +19,25 @@ module.exports = {
     ],
     async run(interaction, guild, author, options) {
         let color = 'GREEN', title = author.user.username, icon_url = author.user.displayAvatarURL(), description
-        const bet = options._hoistedOptions[0].value
+        let bet = options._hoistedOptions[0].value
         const number = options._hoistedOptions[1].value;
         const cSymbol = await util.getCurrencySymbol(guild.id)
         const { wallet } = await util.getEconInfo(guild.id, author.user.id)
         if(number < 0 || number > 6) {
             color = 'RED'
-            description = `Invalid value: \`${number}\``
+            description = `Invalid value: \`${number.toLocaleString()}\``
         } else if(bet < 0 || bet > wallet) {
             color = 'RED', 
-            description = `Insufficient wallet: ${cSymbol}${bet}`
+            description = `Insufficient wallet: ${cSymbol}${wallet.toLocaleString()}`
         } else {
-            const diceRoll = Math.floor(Math.rand() * 6 + 1);
+            const diceRoll = Math.floor(Math.random() * 6 + 1);
+            description += `The dice landed on \`${diceRoll}\`\n`
             if(number === diceRoll) {
                 bet*=4
-                description = `You rolled a dice and won ${cSymbol}${(bet).toLocaleString()}`
+                description += `You won ${cSymbol}${(bet).toLocaleString()}`
             } else {
                 color = 'RED', 
-                description = `You rolled a dice and lost ${cSymbol}${bet.toLocaleString()}`
+                description += `You lost ${cSymbol}${bet.toLocaleString()}`
                 bet*=-1
             }
 
