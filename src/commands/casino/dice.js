@@ -18,7 +18,7 @@ module.exports = {
       ***REMOVED***
     ],
     async run(interaction, guild, author, options) {
-        let color = 'GREEN', title = author.user.username, icon_url = author.user.displayAvatarURL(), description
+        let color = 'GREEN', title = author.user.username, icon_url = author.user.displayAvatarURL(), description = ''
         let bet = options._hoistedOptions[0].value
         const number = options._hoistedOptions[1].value;
         const cSymbol = await util.getCurrencySymbol(guild.id)
