@@ -69,7 +69,7 @@ module.exports = {
       ***REMOVED***
         {
           name: 'split',
-          description: 'Bet on two vertically/horzontally adjacent numbers.',
+          description: 'Bet on two vertically/horizontally adjacent numbers.',
           type: 'SUB_COMMAND',
           options: [
             number_one,
@@ -281,38 +281,63 @@ module.exports = {
       title = author.user.username,
       icon_url = author.user.displayAvatarURL(),
       description = '';
-    let bet = options._hoistedOptions[0].value;
-    const number = options._hoistedOptions[1].value;
     const cSymbol = await util.getCurrencySymbol(guild.id);
     const { wallet } = await util.getEconInfo(guild.id, author.user.id);
-    if (number < 0 || number > 36) {
-      color = 'RED';
-      description = `Invalid value: \`${number}\``;
-    } else if (bet < 0 || bet > wallet) {
-      (color = 'RED'),
-        (description = `Insufficient wallet: ${cSymbol}${wallet.toLocaleString()}`);
-    } else {
-      const ballPocket = Math.floor(Math.random() * 37);
-      description += `The ball landed on \`${ballPocket}\`\n`;
+    const ballPocket = await Math.floor(Math.random() * 36 + 1)
+    const nums = []
+    for(const option of options._hoistedOptions) {
+      if([num_one, num_two, num_three, num_four, num_five, num_six].includes(option.name)) {
+        if (option.value < 0 || option.value > 36) {
+          color = 'RED';
+          description += `Invalid \`${option.name}\`: \`${option.value}\`\n`;
+        } else {
+          nums.push({name: option.name, value: option.value})
+        }
+      }
+
+      if (option.name === 'bet') {
+        if (bet < 0 || bet > wallet) {
+          (color = 'RED'),
+            (description += `Insufficient wallet: ${cSymbol}${wallet.toLocaleString()}\n`);
+        } else {
+          bet = option.value
+        }
+      }
+    }
+
+    if(description.length) {
+      interaction.reply({ embeds: [util.embedify(color, title, icon_url, description)] })
+      return
+    }
+
+    if(options._group === 'inside') {
+      if(options._subcommand === 'single') {
+        description += `The ball landed on \`${ballPocket}\`\n`;
       if (number === ballPocket) {
         bet *= 4;
         description += `You won ${cSymbol}${bet.toLocaleString()}`;
-      } else {
-        (color = 'RED'),
-          (description += `You lost ${cSymbol}${bet.toLocaleString()}`);
-        bet *= -1;
+        } else {
+          (color = 'RED'),
+            (description += `You lost ${cSymbol}${bet.toLocaleString()}`);
+          bet *= -1;
+        }
+      } else if(options._subcommand === 'split') {
+        if(Math.abs(number_one - number_two) <= 1 || Math.abs(number_one - number_two) === 3) {
+          
+        }
       }
+    } 
 
-      await util.transaction(
-        guild.id,
-        author.user.id,
-        this.name,
-        description,
-        bet,
-        0,
-        bet
-      );
-    }
+
+    await util.transaction(
+      guild.id,
+      author.user.id,
+      this.name,
+      description,
+      bet,
+      0,
+      bet
+    );
 
     await interaction.reply({
       embeds: [util.embedify(color, title, icon_url, description)],
