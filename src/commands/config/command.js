@@ -1,74 +1,142 @@
 const fs = require('fs');
-
+const ms = require('ms');
 const guildSettingSchema = require('@schemas/guild-settings-sch');
 
 module.exports = {
   name: 'command',
   group: 'config',
   untoggleable: true,
-  description: 'Enable or disable a command.',
+  description: 'Manage commands.',
   global: true,
   permissions: ['ADMINISTRATOR'],
   options: [
     {
-      name: 'enable',
-      description: 'Enable a command.',
-      type: 1,
+      name: 'permission',
+      description: 'Manage command permissions.',
+      type: 2,
       options: [
         {
-          name: 'command',
-          description: 'Specify a command.',
-          type: 3,
-          required: true,
+          name: 'enable',
+          description: 'Enable a command.',
+          type: 1,
+          options: [
+            {
+              name: 'command',
+              description: 'Specify a command.',
+              type: 3,
+              required: true,
+          ***REMOVED***
+            {
+              name: 'channel',
+              description: 'Specify a channel.',
+              type: 'CHANNEL',
+              required: false,
+          ***REMOVED***
+            {
+              name: 'role',
+              description: 'Specify a role.',
+              type: 'ROLE',
+              required: false,
+          ***REMOVED***
+          ],
       ***REMOVED***
         {
-          name: 'channel',
-          description: 'Specify a channel.',
-          type: 'CHANNEL',
-          required: false,
+          name: 'disable',
+          description: 'Disable a command.',
+          type: 1,
+          options: [
+            {
+              name: 'command',
+              description: 'Specify a command.',
+              type: 3,
+              required: true,
+          ***REMOVED***
+            {
+              name: 'channel',
+              description: 'Specify a channel.',
+              type: 'CHANNEL',
+              required: false,
+          ***REMOVED***
+            {
+              name: 'role',
+              description: 'Specify a role.',
+              type: 'ROLE',
+              required: false,
+          ***REMOVED***
+          ],
       ***REMOVED***
         {
-          name: 'role',
-          description: 'Specify a role.',
-          type: 'ROLE',
-          required: false,
+          name: 'reset',
+          description: 'Reset a command.',
+          type: 1,
+          options: [
+            {
+              name: 'command',
+              description: 'Specify a command.',
+              type: 3,
+              required: true,
+          ***REMOVED***
+          ],
       ***REMOVED***
       ],
   ***REMOVED***
     {
-      name: 'disable',
-      description: 'Disable a command.',
-      type: 1,
+      name: 'config',
+      description: 'Configure a command.',
+      type: 2,
       options: [
+        //module
         {
-          name: 'command',
-          description: 'Specify a command.',
-          type: 3,
-          required: true,
-      ***REMOVED***
-        {
-          name: 'channel',
-          description: 'Specify a channel.',
-          type: 'CHANNEL',
-          required: false,
-      ***REMOVED***
-        {
-          name: 'role',
-          description: 'Specify a role.',
-          type: 'ROLE',
-          required: false,
+          name: 'income_command',
+          description: 'Configure an income command.',
+          type: 1,
+          options: [
+            {
+              name: 'command',
+              description: 'Specify an income command.',
+              type: 3,
+              required: true,
+          ***REMOVED***
+            {
+              name: 'min',
+              description: 'Specify the minimum income for this command.',
+              type: 4,
+          ***REMOVED***
+            {
+              name: 'max',
+              description: 'Specify the maximum income for this command.',
+              type: 4,
+          ***REMOVED***
+            {
+              name: 'chance',
+              description: 'Specify the chance for this command.',
+              type: 3,
+          ***REMOVED***
+            {
+              name: 'minfine',
+              description: 'Specify the minimum fine for this command.',
+              type: 4,
+          ***REMOVED***
+            {
+              name: 'maxfine',
+              description: 'Specify the maximum fine for this command.',
+              type: 4,
+          ***REMOVED***
+          ],
       ***REMOVED***
       ],
   ***REMOVED***
   ],
   async run(interaction, guild, author, options) {
+    console.log(options);
     let color = 'GREEN',
       title = author.user.username,
       icon_url = author.user.displayAvatarURL(),
       description = '',
       footer = '',
-      cmd,
       guildID = guild.id;
+    let cmd;
+
     const commandDirectories = fs.readdirSync('./commands');
     for (const commandDirectory of commandDirectories) {
       const commandFiles = fs
@@ -77,17 +145,21 @@ module.exports = {
       for (const commandFile of commandFiles) {
         const command = require(`../../commands/${commandDirectory}/${commandFile}`);
         if (options._hoistedOptions[0].value === command.name) {
-          if (!command.untoggleable) {
-            cmd = command.name;
-          }
-          break;
+          cmd = command;
         }
       }
     }
 
-    if (!cmd) {
+    if (
+      !cmd?.untoggleable ||
+      (options._subcommand === 'income_command' && cmd.group !== 'income')
+    ) {
       color = 'RED';
-      description = `Command \`${options._hoistedOptions[0].value}\` not found or cannot be toggled.`;
+      description = `Command \`${options._hoistedOptions[0].value}\` ${
+        options._subcommand === 'income_command'
+          ? `is not an income command`
+          : `is not found or cannot be toggled`
+      }.`;
       footer = 'Use help for a list of commands.';
     } else {
       const guildSettings = await guildSettingSchema.findOneAndUpdate(
@@ -97,7 +169,7 @@ module.exports = {
         {
           $pull: {
             commands: {
-              command: cmd,
+              command: cmd.name,
           ***REMOVED***
         ***REMOVED***
       ***REMOVED***
@@ -106,23 +178,17 @@ module.exports = {
         }
       );
 
-      const commandSettings = guildSettings.commands.find(
-        (c) => c.command === cmd
+      let commandSettings = guildSettings.commands.find(
+        (c) => c.command === cmd.name
       ) ?? {
-        command: cmd,
+        command: cmd.name,
       };
 
-      let channel, role;
-      options._hoistedOptions.forEach((option) => {
-        if (option.channel) {
-          channel = option.channel;
-        } else if (option.role) {
-          role = option.role;
-        }
-      });
-
       //Enable or disable a channel for a command
-      if (channel) {
+      if (options._hoistedOptions.find((option) => option.name === 'channel')) {
+        const channel = options._hoistedOptions.find(
+          (option) => option.name === 'channel'
+        );
         if (!channel.isText()) {
           color = 'RED';
           description += `\`${channel.name}\` is not a text channel.\n`;
@@ -131,8 +197,9 @@ module.exports = {
             commandSettings.channels = [];
           }
           if (commandSettings.channels.find((c) => c.channel === channel.id)) {
-            commandSettings.channels.find((c) => c.channel === channel.id).disabled =
-              options._subcommand === 'disable' ? true : false;
+            commandSettings.channels.find(
+              (c) => c.channel === channel.id
+            ).disabled = options._subcommand === 'disable' ? true : false;
           } else {
             commandSettings.channels.push({
               channel: channel.id,
@@ -147,7 +214,10 @@ module.exports = {
       }
 
       //Enable or disable a role for a command
-      if (role) {
+      if (options._hoistedOptions.find((option) => option.name === 'role')) {
+        const role = options._hoistedOptions.find(
+          (option) => option.name === 'role'
+        );
         if (!commandSettings.roles) {
           commandSettings.roles = [];
         }
@@ -166,8 +236,22 @@ module.exports = {
         )}d command \`${cmd}\` for <@&${role.id}>\n`;
       }
 
+      //Add a cooldown to a command
+      if (
+        options._hoistedOptions.find((option) => option.name === 'cooldown')
+      ) {
+        const cooldown = ms(
+          options._hoistedOptions.find((option) => option.name === 'cooldown')
+        );
+        commandSettings.cooldown = cooldown;
+        description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
+          1,
+          options._subcommand.length
+        )}d cooldown of \`${ms(cooldown)}\` for command \`${cmd}\`\n`;
+      }
+
       //Enable or disable a command
-      if (!role && !channel) {
+      if (options._hoistedOptions.length === 1) {
         commandSettings.disabled =
           options._subcommand === 'disable' ? true : false;
         description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
@@ -176,16 +260,93 @@ module.exports = {
         )}d command \`${cmd}\``;
       }
 
-      await guildSettingSchema.findOneAndUpdate(
-        { guildID },
-        {
-          $push: {
-            commands: {
-              ...commandSettings,
+      //Add income command settings. see ./config.js
+      //     let income_command = options._hoistedOptions[0].value;
+      //   let properties = Object.entries(
+      //     await util.getCommandStats(guild.id, income_command)
+      //   );
+      //   let fields = [];
+      //   options._hoistedOptions.forEach((option) => {
+      //     if (option.name !== 'income_command')
+      //       fields.push([option.name, option.value]);
+      //   });
+
+      //   const incomeEmbed = util.embedify(
+      //     'GREEN',
+      //     `Updated ${income_command}`,
+      //     client.user.displayAvatarURL()
+      //   );
+
+      //   //Validate and transfer provided fields
+      //   let description = '',
+      //     updates = '';
+      //   properties.forEach((property) => {
+      //     const field = fields.find((field) => field[0] === property[0]);
+      //     if (field) {
+      //       if (['cooldown'].includes(field[0])) {
+      //         if (ms(field[1])) {
+      //           property[1] = Math.abs(ms(field[1]));
+      //           updates += `${property[0]}: ${ms(ms(property[1]))}ms\n`;
+      //         } else {
+      //           description += `Invalid parameter: \`${field[1]}\`\n\`${field[0]}\` must be a time!\n`;
+      //         }
+      //       } else if (['chance'].includes(field[0])) {
+      //         if (parseFloat(field[1])) {
+      //           property[1] = Math.abs(
+      //             field[1] < 1 ? parseFloat(field[1]) * 100 : parseFloat(field[1])
+      //           );
+      //           updates += `${property[0]}: ${property[1]}%\n`;
+      //         } else {
+      //           description += `Invalid parameter: \`${field[1]}\`\n\`${field[0]}\` must be a percentage!\n`;
+      //         }
+      //       } else {
+      //         property[1] = Math.abs(+field[1]);
+      //         updates += `${property[0]}: ${property[1]}\n`;
+      //       }
+      //     }
+      //   });
+
+      //   if (!updates.length) updates = 'No parameters updated';
+
+      //   incomeEmbed.setDescription(
+      //     `\`\`\`\n${updates}\n\`\`\`${description ? `\n${description}` : ''}`
+      //   );
+
+      //   await interaction.reply({ embeds: [incomeEmbed], ephemeral: true });
+
+      //   properties = Object.fromEntries(properties);
+      //   await incomeSchema
+      //     .findOneAndUpdate(
+      //       {
+      //         guildID: guild.id,
+      //     ***REMOVED***
+      //       {
+      //         $set: {
+      //           [income_command]: properties,
+      //       ***REMOVED***
+      //     ***REMOVED***
+      //       {
+      //         upsert: true,
+      //         new: true,
+      //       }
+      //     )
+      //     .exec();
+      // },
+
+      if (options._subcommand !== 'reset') {
+        await guildSettingSchema.findOneAndUpdate(
+          { guildID },
+          {
+            $push: {
+              commands: {
+                ...commandSettings,
+            ***REMOVED***
           ***REMOVED***
-        ***REMOVED***
-        }
-      );
+          }
+        );
+      } else {
+        description += `Reset command \`${cmd}\``;
+      }
     }
 
     const embed = util.embedify(color, title, icon_url, description, footer);
