@@ -2,7 +2,7 @@ const ms = require('ms');
 const config = require('../config.json');
 
 require('module-alias/register');
-const economySchema = require('@schemas/economy-sch');
+const econSchema = require('@schemas/economy-sch');
 const guildSettingsSchema = require('@schemas/guild-settings-sch');
 const incomeSchema = require('@schemas/income-sch');
 const infractionSchema = require('@schemas/infraction-sch');
@@ -48,7 +48,7 @@ module.exports.getEconInfo = async (guildID, userID) => {
     treasury = 0,
     total = 0,
     found = false;
-  const balances = await economySchema.find({ guildID }).sort({ total: -1 });
+  const balances = await econSchema.find({ guildID }).sort({ total: -1 });
   if (balances.length) {
     for (let rankIndex = 0; rankIndex < balances.length; rankIndex++) {
       rank = balances[rankIndex].userID === userID ? rankIndex + 1 : rank++;
@@ -63,7 +63,7 @@ module.exports.getEconInfo = async (guildID, userID) => {
   }
 
   if (!found) {
-    await new economySchema({
+    await new econSchema({
       guildID,
       userID,
       wallet,
@@ -102,7 +102,7 @@ module.exports.transaction = async (
 ) => {
   //Init
   await this.getEconInfo(guildID, userID);
-  const result = await economySchema.findOneAndUpdate(
+  const result = await econSchema.findOneAndUpdate(
     {
       guildID,
       userID,
@@ -143,39 +143,30 @@ module.exports.transaction = async (
     const channel = client.channels.cache.get(channelID);
     const guild = channel.guild;
     const description = `Transaction for <@!${userID}>\nType: \`${transaction_type}\` | ${memo}`;
-    channel
-      .send({
-        embeds: [
-          util
-            .embedify(
-              'GOLD',
-              `${transaction._id}`,
-              guild.iconURL(),
-              description
-            )
-            .addFields([
-              {
-                name: '__**Wallet**__',
-                value: `${cSymbol}${wallet.toLocaleString()}`,
-                inline: true,
-            ***REMOVED***
-              {
-                name: '__**Treasury**__',
-                value: `${cSymbol}${treasury.toLocaleString()}`,
-                inline: true,
-            ***REMOVED***
-              {
-                name: '__**Total**__',
-                value: `${cSymbol}${total.toLocaleString()}`,
-                inline: true,
-            ***REMOVED***
-            ])
-            .setTimestamp(),
-        ],
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
+    channel.send({
+      embeds: [
+        util
+          .embedify('GOLD', `${transaction._id}`, guild.iconURL(), description)
+          .addFields([
+            {
+              name: '__**Wallet**__',
+              value: `${cSymbol}${wallet.toLocaleString()}`,
+              inline: true,
+          ***REMOVED***
+            {
+              name: '__**Treasury**__',
+              value: `${cSymbol}${treasury.toLocaleString()}`,
+              inline: true,
+          ***REMOVED***
+            {
+              name: '__**Total**__',
+              value: `${cSymbol}${total.toLocaleString()}`,
+              inline: true,
+          ***REMOVED***
+          ])
+          .setTimestamp(),
+      ],
+    });
   }
 
   return result.total;
@@ -220,17 +211,13 @@ module.exports.infraction = async (
     const channel = client.channels.cache.get(channelID);
     const guild = channel.guild;
     const description = `Infraction for <@!${userID}> | Executed by <@!${staffID}>\nType: \`${type}\`\n${reason}`;
-    channel
-      .send({
-        embeds: [
-          util
-            .embedify('RED', `${infraction._id}`, guild.iconURL(), description)
-            .setTimestamp(),
-        ],
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
+    channel.send({
+      embeds: [
+        util
+          .embedify('RED', `${infraction._id}`, guild.iconURL(), description)
+          .setTimestamp(),
+      ],
+    });
   }
 };
 
@@ -260,23 +247,34 @@ module.exports.getCurrencySymbol = async (guildID) => {
  * @param {String} command - Income command.
  * @param {Object} properties - Command properties.
  */
-module.exports.setCommandStats = async (guildID, command, properties = {}) => {
-  await incomeSchema
-    .findOneAndUpdate(
-      {
-        guildID,
-    ***REMOVED***
-      {
-        $set: {
-          [command]: properties,
+module.exports.setCommandStats = async (guildID, properties) => {
+  await guildSettingsSchema.findOneAndUpdate(
+    { guildID },
+    {
+      $pull: {
+        commands: {
+          command: properties.command,
       ***REMOVED***
     ***REMOVED***
-      {
-        upsert: true,
-        new: true,
-      }
-    )
-    .exec();
+  ***REMOVED***
+    {
+      upsert: true,
+    }
+  );
+
+  await guildSettingsSchema.findOneAndUpdate(
+    { guildID },
+    {
+      $push: {
+        commands: {
+          ...properties,
+      ***REMOVED***
+    ***REMOVED***
+  ***REMOVED***
+    {
+      upsert: true,
+    }
+  );
 
   return { command: properties };
 };
@@ -288,18 +286,17 @@ module.exports.setCommandStats = async (guildID, command, properties = {}) => {
  * @returns {properties} Properties with config taking preference.
  */
 module.exports.getCommandStats = async (guildID, command) => {
-  const result = await incomeSchema.findOne({
+  let result = await guildSettingsSchema.findOne({
     guildID,
-    [command]: {
-      $exists: true,
-  ***REMOVED***
   });
 
-  let properties = config.income[command];
+  result = result.commands.find((c) => c.command === command);
+
+  let properties = config.commands[command] || config.commands['default'];
 
   for (const property in properties) {
-    if (result?.[command]?.[property]) {
-      properties[property] = result[command][property];
+    if (result?.[property]) {
+      properties[property] = result[property];
     }
   }
 
@@ -311,18 +308,22 @@ module.exports.getCommandStats = async (guildID, command) => {
  * @param {String} guildID - Guild id.
  * @param {String} userID - User id.
  * @param {String} command - Command name.
- * @returns {uProperties} Properties with config taking preference.
+ * @returns {uProperties} Command properties.
  */
 module.exports.getUserCommandStats = async (guildID, userID, command) => {
   //Init
   await this.getEconInfo(guildID, userID);
-  let result = await economySchema.findOne({
+
+  let result = await econSchema.findOne({
     guildID,
     userID,
   });
 
-  result = result.commands?.[command];
-  let properties = config.uCommandStats?.[command];
+  let properties = {
+    timestamp: 0,
+  };
+
+  result = result.commands.find((c) => c.command === command);
   for (const property in properties) {
     if (result?.[property]) properties[property] = result[property];
   }
@@ -337,25 +338,31 @@ module.exports.getUserCommandStats = async (guildID, userID, command) => {
  * @param {string} type - Income command.
  * @param {object} properties - Command properties
  */
-module.exports.setUserCommandStats = async (
-  guildID,
-  userID,
-  command,
-  properties
-) => {
-  const key = `commands.${command}`;
-  await economySchema.findOneAndUpdate(
+module.exports.setUserCommandStats = async (guildID, userID, properties) => {
+  await econSchema.findOneAndUpdate(
+    { guildID, userID },
     {
-      guildID,
-      userID,
-  ***REMOVED***
-    {
-      $set: {
-        [key]: properties,
+      $pull: {
+        commands: {
+          command: properties.command,
+      ***REMOVED***
     ***REMOVED***
   ***REMOVED***
     {
-      new: true,
+      upsert: true,
+    }
+  );
+
+  await econSchema.findOneAndUpdate(
+    { guildID, userID },
+    {
+      $push: {
+        commands: {
+          ...properties,
+      ***REMOVED***
+    ***REMOVED***
+  ***REMOVED***
+    {
       upsert: true,
     }
   );
@@ -368,36 +375,6 @@ module.exports.setUserCommandStats = async (
  */
 module.exports.intInRange = (min, max) => {
   return Math.ceil(Math.random() * (max - min) + min);
-};
-
-/**
- * Returns whether or not a command's cooldown is exhausted.
- * @param {Message} interaction - Slash command interaction.
- * @param {object} properties - Command properties
- * @param {object} uProperties - User command properties
- * @returns {boolean}
- */
-module.exports.coolDown = async (interaction, properties, uProperties) => {
-  const { cooldown } = properties;
-  const { timestamp } = uProperties;
-  const now = new Date().getTime();
-  if (now - timestamp < cooldown) {
-    const embed = this.embedify(
-      'GREY',
-      interaction.member.user.username,
-      '', // interaction.member.user.displayAvatarURL(),
-      `:hourglass: You need to wait ${ms(
-        cooldown - (now - timestamp)
-      )} before using this income command again!`,
-      `Cooldown: ${ms(cooldown)}`
-    );
-
-    interaction.reply({ embeds: [embed] });
-
-    return false;
-  } else {
-    return true;
-  }
 };
 
 /**

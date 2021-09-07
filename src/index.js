@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const { ApplicationCommandOptionType } = require('discord-api-types/v9');
 const fs = require('fs');
+const ms = require('ms')
 const util = require('./util/util');
 const mongo = require('./util/mongo/mongo');
 const config = require('./config.json');
@@ -53,6 +54,8 @@ client.on('interactionCreate', async (interaction) => {
   const author = interaction.member;
   const guild = author.guild;
   const options = interaction.options;
+
+  //Check permission
   const permissible = await client.permissible(author, guild, channel, command);
   if (permissible.length) {
     const embed = util.embedify(
@@ -65,6 +68,18 @@ client.on('interactionCreate', async (interaction) => {
     interaction.reply({ embeds: [embed], ephemeral: true });
     return;
   }
+
+  //Check cooldown
+  if (!(await client.coolDown(interaction))) {
+    return;
+  }
+
+  const properties = {
+    command: interaction.command.name,
+    timestamp: new Date().getTime(),
+  };
+
+  await util.setUserCommandStats(guild.id, author.user.id, properties);
 
   await command
     ?.run(interaction, guild, author, options)
@@ -208,6 +223,38 @@ client.permissible = async (author, guild, channel, command) => {
   }
 
   return permissible;
+};
+
+client.coolDown = async (interaction) => {
+  const properties = await util.getCommandStats(
+    interaction.guild.id,
+    interaction.command.name
+  );
+  const uProperties = await util.getUserCommandStats(
+    interaction.guild.id,
+    interaction.user.id,
+    interaction.command.name
+  );
+  const { cooldown } = properties;
+  const { timestamp } = uProperties;
+  const now = new Date().getTime();
+  if (now - timestamp < cooldown) {
+    const embed = util.embedify(
+      'GREY',
+      interaction.member.user.username,
+      '', // interaction.member.user.displayAvatarURL(),
+      `:hourglass: You need to wait ${ms(
+        cooldown - (now - timestamp)
+      )} before using this command again!`,
+      `Cooldown: ${ms(cooldown)}`
+    );
+
+    interaction.reply({ embeds: [embed], ephemeral: true });
+
+    return false;
+  } else {
+    return true;
+  }
 };
 
 process.on('unhandledRejection', (error) => {
