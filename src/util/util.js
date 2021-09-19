@@ -10,6 +10,7 @@ const inventorySchema = require('@schemas/inventory-sch');
 const loanSchema = require('@schemas/loan-sch');
 const marketItemSchema = require('@schemas/market-item-sch');
 const transactionSchema = require('@schemas/transaction-sch');
+const shopItemSchema = require('@schemas/shop-item-sch');
 
 /**
  * Returns a message embed object.
@@ -34,6 +35,16 @@ module.exports.embedify = (
   if (footer) embed.setFooter(footer);
 
   return embed;
+};
+
+module.exports.error = (description, title = 'Input Error') => {
+  return {
+    embeds: [{
+      color: 'RED',
+      title,
+      description
+    }], ephemeral: true
+  };
 };
 
 /**
@@ -362,6 +373,19 @@ module.exports.setUserCommandStats = async (
 };
 
 /**
+ * Get all shop item objects in a guild
+ * @param {string} guildID - the id of the target guild
+ * @returns {array} item objects array
+ */
+module.exports.getShopItems = async (
+  guildID
+) => {
+  return await shopItemSchema.find({
+    guildID
+  })
+}
+
+/**
  * @param {Number} min - min value in range
  * @param {Number} max - max value in range
  * @returns {Number} Random value between two inputs
@@ -409,3 +433,75 @@ module.exports.isSuccess = (properties) => {
   const { chance } = properties;
   return this.intInRange(0, 100) < chance ? true : false;
 };
+
+/**
+ * cuts a string if longer than n and appends '...' to the end.
+ * @param {string} str - the string to cut
+ * @param {number} n - the size which a string must exceed to be cut
+ * @param {boolean} rev - whether the string should be cut in reverse (trim the front excess off)
+ * @returns {string} `str.substr(0, rev? -n : n)`
+ */
+module.exports.cut = (str, n = 50, rev = false) => {
+  return str.length <= n ?
+    str.substr(0, rev ? -n : n) :
+    `${str.substr(0, rev ? -n : n)}...`;
+};
+
+/**
+ * Deletes properties containing specified values from an object.
+ * @param {object} o - The object to trim
+ * @param {array} exclValues - the values to trim off (delete properties with this)
+ * @param {boolean} doIteratedTrim - whether to recursively iterate through properties of an object and trim.
+ * @returns `o` - trimmed object
+ */
+module.exports.trimObj = async (o, exclValues = [undefined, null, [], {}, ""], doIteratedTrim = false) => {
+  const iterateTrim = (obj) => {
+    Object.keys(obj).forEach(k => {
+      kname = k
+      k = obj[k]
+      if (k instanceof Object) {
+        iterateTrim(k)
+      } else {
+        if (exclValues.includes(obj[kname])) delete obj[kname];
+      }
+    })
+  }
+
+  if (doIteratedTrim === true) {
+    iterateTrim(o)
+  } else {
+    for (p in o) {
+      if (exclValues.includes(p)) delete o[p]
+    }
+  }
+
+  return o;
+}
+
+/**
+ * Format numbers!
+ * @param {number} num - number to format
+ * @returns {string} formatted number
+ */
+module.exports.num = (num) => {
+  let pow10 = 1
+  let degree = null;
+
+  if (num/1000000000000 > 1) {
+    pow10 = 12
+    degree = 'T'
+  } else if (num/1000000000 > 1) {
+    pow10 = 9
+    degree = 'B'
+  } else if (num/1000000 > 1) {
+    pow10 = 6
+    degree = 'M'
+  } else if (num/1000 > 1) {
+    pow10 = 3
+    degree = 'K'
+  } 
+
+  if (degree) {
+    return `${num / (Math.pow(10, pow10)).toFixed(2)}${degree}`
+  } else return num // string
+}
