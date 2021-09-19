@@ -1,21 +1,20 @@
 const mongoose = require('mongoose');
 
-// required only if parent field exists
-const trueif = (parent) => (this[parent] ? true : false);
-
 const shopItemSchema = mongoose.Schema({
+  _id: { type: String, required: true },
   guildID: {
     type: String,
     required: true,
 ***REMOVED***
-  userID: { type: String, required: true },
-  createdOnTimestamp: { type: Date, required: true }, // when the item was created
+  createdOnTimestamp: { type: Number, required: true }, // when the item was created
   name: { type: String, required: true },
   price: { type: Number, required: true },
   description: { type: String, required: false },
-  expiresOnTimestamp: { type: Date, required: false }, // when the item will be de-activated in the shop
+  expiresOnTimestamp: { type: Number, required: false }, // when the item will be de-activated in the shop
   stockLeft: { type: Number, required: false }, // how many instances of the item can be purchased before it is de-activated in the shop
   isInventoryItem: { type: Boolean, required: false },
+  rolesGivenArray: { type: Array, required: false },
+  rolesRemovedArray: { type: Array, required: false },
   requirements: {
     requiredRolesArray: { type: Array, required: false },
     // isEveryRoleRequired: { type: Boolean, required: false }, // when true, buyer must have all required roles to purchase. When false, buyer must have at least one required role to purchase.
@@ -24,22 +23,13 @@ const shopItemSchema = mongoose.Schema({
 ***REMOVED***
   type: {
     type: String,
-    required: true,
-    // options: Role, Generator, Inventory
+    // options: typeGenerator (null/und = basic)
 ***REMOVED***
   data: {
-    typeRole: {
-      rolesGivenArray: { type: Array, required: false },
-      rolesRemovedArray: { type: Array, required: false },
-      roleTemporaryExpirationTime: { type: Number, required: false }, // how long until the role(s) should be removed from the purchaser
-  ***REMOVED***
     typeGenerator: {
-      generatorPeriod: { type: Number, required: trueif(typeGenerator) }, // interval after which the owner of the generator receives income
-      generatorIncomeAmount: { type: Number, required: trueif(typeGenerator) },
+      generatorPeriod: { type: Number, required: false }, // interval after which the owner of the generator receives income
+      generatorIncomeAmount: { type: Number, required: false },
       isIncomeDeposited: { type: Boolean, required: false }, // deposit the income to bank (true) or keep it as cash (false)
-  ***REMOVED***
-    typeInventory: {
-      inventoryMaxQuantity: { type: Number, required: false }, // the maximum amount of this item one purchaser can have in their inventory
   ***REMOVED***
 ***REMOVED***
   special: {
@@ -47,23 +37,30 @@ const shopItemSchema = mongoose.Schema({
     gift: {
       giftMoneyAmount: { type: Number, required: false },
       giftItemsContentArray: { type: Array, required: false }, // items in the gift
-      giftClaimExpiration: { type: Date, required: trueif(gift) }, // how long until the gift can no longer be claimed
+      giftClaimExpiration: { type: Date, required: false }, // how long until the gift can no longer be claimed
   ***REMOVED***
     incomeMultiplier: {
-      multiplier: { type: Number, required: trueif(incomeMultiplier) },
-      multiplierExpiration: { type: Date, required: trueif(incomeMultiplier) },
+      multiplier: { type: Number, required: false },
+      multiplierExpiration: { type: Date, required: false },
   ***REMOVED***
     changeNameColor: {
       anyColor: { type: Boolean, required: false }, // can the purchaser decide the color?
-      colorRoleHex: { type: String, required: !trueif(anyColor) }, // the specific color hex if the purchaser cannot decide the color
+      colorRoleHex: { type: String, required: false }, // the specific color hex if the purchaser cannot decide the color
       colorRoleExpiration: { type: Date, required: false },
   ***REMOVED***
 ***REMOVED***
-  amount: {
-    type: Number,
-    required: false,
-    // not to be set on shop-item creation, only on purchase (stack items in inventory)
-***REMOVED***
+  amountGiven: { type: Number, required: true, default: 1 }
 });
+
+/* 
+  middleware validation check
+  we are intercepting the new schema before it is sent to db
+  and recursively trimming off several falsy values (the defaults can be found in util)
+  from iterated object properties using the trimObj. function I created.
+  in 'pre' middleware, this refers to the schema object.
+*/
+shopItemSchema.pre('validate', async () => {
+  console.log('schema: ' + this)
+})
 
 module.exports = mongoose.model('shop', shopItemSchema);
