@@ -13,6 +13,10 @@ module.exports = {
       required: true,
       choices: [
         {
+          name: 'Configuration',
+          value: 'config',
+      ***REMOVED***
+        {
           name: 'Economy',
           value: 'economy',
       ***REMOVED***
@@ -29,12 +33,12 @@ module.exports = {
           value: 'moderation',
       ***REMOVED***
         {
-          name: 'Statistics',
-          value: 'statistics',
-      ***REMOVED***
-        {
           name: 'Shop',
           value: 'shop',
+      ***REMOVED***
+        {
+          name: 'Statistics',
+          value: 'statistics',
       ***REMOVED***
         {
           name: 'Utility',

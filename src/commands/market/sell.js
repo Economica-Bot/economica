@@ -62,15 +62,7 @@ module.exports = {
     }
 
     const embed = util.embedify(color, title, icon_url, description);
-    await client.api
-      .interactions(interaction.id, interaction.token)
-      .callback.post({
-        data: {
-          type: 4,
-          data: {
-            embeds: [embed],
-        ***REMOVED***
-      ***REMOVED***
-      });
+    
+    await interaction.reply({ embeds: [embed] });
 ***REMOVED***
 };
