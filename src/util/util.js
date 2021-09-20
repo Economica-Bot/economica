@@ -39,11 +39,14 @@ module.exports.embedify = (
 
 module.exports.error = (description, title = 'Input Error') => {
   return {
-    embeds: [{
-      color: 'RED',
-      title,
-      description
-    }], ephemeral: true
+    embeds: [
+      {
+        color: 'RED',
+        title,
+        description,
+    ***REMOVED***
+    ],
+    ephemeral: true,
   };
 };
 
@@ -384,13 +387,11 @@ module.exports.setUserCommandStats = async (guildID, userID, properties) => {
  * @param {string} guildID - the id of the target guild
  * @returns {array} item objects array
  */
-module.exports.getShopItems = async (
-  guildID
-) => {
+module.exports.getShopItems = async (guildID) => {
   return await shopItemSchema.find({
-    guildID
-  })
-}
+    guildID,
+  });
+};
 
 /**
  * @param {Number} min - min value in range
@@ -445,9 +446,9 @@ module.exports.initGuildSettings = async (guild) => {
  * @returns {string} `str.substr(0, rev? -n : n)`
  */
 module.exports.cut = (str, n = 50, rev = false) => {
-  return str.length <= n ?
-    str.substr(0, rev ? -n : n) :
-    `${str.substr(0, rev ? -n : n)}...`;
+  return str.length <= n
+    ? str.substr(0, rev ? -n : n)
+    : `${str.substr(0, rev ? -n : n)}...`;
 };
 
 /**
@@ -457,29 +458,33 @@ module.exports.cut = (str, n = 50, rev = false) => {
  * @param {boolean} doIteratedTrim - whether to recursively iterate through properties of an object and trim.
  * @returns `o` - trimmed object
  */
-module.exports.trimObj = async (o, exclValues = [undefined, null, [], {}, ""], doIteratedTrim = false) => {
+module.exports.trimObj = async (
+  o,
+  exclValues = [undefined, null, [], {}, ''],
+  doIteratedTrim = false
+) => {
   const iterateTrim = (obj) => {
-    Object.keys(obj).forEach(k => {
-      kname = k
-      k = obj[k]
+    Object.keys(obj).forEach((k) => {
+      kname = k;
+      k = obj[k];
       if (k instanceof Object) {
-        iterateTrim(k)
+        iterateTrim(k);
       } else {
         if (exclValues.includes(obj[kname])) delete obj[kname];
       }
-    })
-  }
+    });
+  };
 
   if (doIteratedTrim === true) {
-    iterateTrim(o)
+    iterateTrim(o);
   } else {
     for (p in o) {
-      if (exclValues.includes(p)) delete o[p]
+      if (exclValues.includes(p)) delete o[p];
     }
   }
 
   return o;
-}
+};
 
 /**
  * Format numbers!
@@ -487,24 +492,24 @@ module.exports.trimObj = async (o, exclValues = [undefined, null, [], {}, ""], d
  * @returns {string} formatted number
  */
 module.exports.num = (num) => {
-  let pow10 = 1
+  let pow10 = 1;
   let degree = null;
 
-  if (num/1000000000000 > 1) {
-    pow10 = 12
-    degree = 'T'
-  } else if (num/1000000000 > 1) {
-    pow10 = 9
-    degree = 'B'
-  } else if (num/1000000 > 1) {
-    pow10 = 6
-    degree = 'M'
-  } else if (num/1000 > 1) {
-    pow10 = 3
-    degree = 'K'
-  } 
+  if (num / 1000000000000 > 1) {
+    pow10 = 12;
+    degree = 'T';
+  } else if (num / 1000000000 > 1) {
+    pow10 = 9;
+    degree = 'B';
+  } else if (num / 1000000 > 1) {
+    pow10 = 6;
+    degree = 'M';
+  } else if (num / 1000 > 1) {
+    pow10 = 3;
+    degree = 'K';
+  }
 
   if (degree) {
-    return `${num / (Math.pow(10, pow10)).toFixed(2)}${degree}`
-  } else return num // string
-}
+    return `${num / Math.pow(10, pow10).toFixed(2)}${degree}`;
+  } else return num; // string
+};

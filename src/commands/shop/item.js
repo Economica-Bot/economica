@@ -1,5 +1,5 @@
 const ms = require('ms');
-const shopItemSchema = require('@schemas/shop-item-sch')
+const shopItemSchema = require('@schemas/shop-item-sch');
 
 const globalCreateOptions = {
   required: [
@@ -95,9 +95,9 @@ module.exports = {
           name: 'name',
           description: 'The name of the item to be purchased.',
           type: apiTypes.String,
-          required: true
-        }
-      ]
+          required: true,
+      ***REMOVED***
+      ],
   ***REMOVED***
     {
       name: 'delete',
@@ -108,9 +108,9 @@ module.exports = {
           name: 'name',
           description: 'The name of the item to be deleted',
           type: apiTypes.String,
-          required: true
-        }
-      ]
+          required: true,
+      ***REMOVED***
+      ],
   ***REMOVED***
     {
       name: 'view',
@@ -121,10 +121,11 @@ module.exports = {
           name: 'name',
           description: 'The name of the item to view',
           type: apiTypes.String,
-          required: true
-        }
-      ]
-  ***REMOVED*** {
+          required: true,
+      ***REMOVED***
+      ],
+  ***REMOVED***
+    {
       name: 'create',
       description: 'Create a new shop item.',
       type: apiTypes.SubcommandGroup,
@@ -174,7 +175,7 @@ module.exports = {
     const { _group, _subcommand, _hoistedOptions } = options;
 
     options = {};
-    _hoistedOptions.forEach(o => {
+    _hoistedOptions.forEach((o) => {
       options[o.name] = o.value;
     });
 
@@ -183,191 +184,346 @@ module.exports = {
       // global options for item creation
 
       // global required options
-      if (!(options.name.length <= 200)) return await interaction.reply(util.error('`name` must be 200 characters or less.'));
-      if (await shopItemSchema.findOne({ name: { $regex: new RegExp(options.name, "i") } })) return await interaction.reply(util.error(`An item with \`name\` "${options.name}" already exists.`))
-      if (options.name.includes(',')) return await interaction.reply(util.error('`name` must not contain commas.'));
-      if (!(options.price >= 0)) return await interaction.reply(util.error('`price` must be 0 or greater.'))
+      if (!(options.name.length <= 200))
+        return await interaction.reply(
+          util.error('`name` must be 200 characters or less.')
+        );
+      if (
+        await shopItemSchema.findOne({
+          name: { $regex: new RegExp(options.name, 'i') },
+        })
+      )
+        return await interaction.reply(
+          util.error(`An item with \`name\` "${options.name}" already exists.`)
+        );
+      if (options.name.includes(','))
+        return await interaction.reply(
+          util.error('`name` must not contain commas.')
+        );
+      if (!(options.price >= 0))
+        return await interaction.reply(
+          util.error('`price` must be 0 or greater.')
+        );
 
       // global optional options
-      if (options.description && !(options.description?.length <= 400)) return await interaction.reply(util.error('`description` must be 400 characters or less.'));
+      if (options.description && !(options.description?.length <= 400))
+        return await interaction.reply(
+          util.error('`description` must be 400 characters or less.')
+        );
       if (options.duration) {
-        if (!(ms(options.duration))) return await interaction.reply(util.error('`duration` must be a parseable duration value (5000, 5s, 5m, etc...) and greater than 0.'));
-        options.duration = + options.duration;
+        if (!ms(options.duration))
+          return await interaction.reply(
+            util.error(
+              '`duration` must be a parseable duration value (5000, 5s, 5m, etc...) and greater than 0.'
+            )
+          );
+        options.duration = +options.duration;
       }
-      if (options.stock && !(options.stock >= 0)) return await interaction.reply(util.error('`stock` must be 0 or greater.'));
+      if (options.stock && !(options.stock >= 0))
+        return await interaction.reply(
+          util.error('`stock` must be 0 or greater.')
+        );
       if (options.role_given) {
         const role_given = await guild.roles.cache.get(options.role_given);
-        if (clientMember.roles.highest.rawPosition <= role_given.rawPosition) return await interaction.reply(util.error('`role_given` is higher than the bot\'s highest role and cannot be added.')); // role is too high!
-        if (role_given.managed) return await interaction.reply(util.error('`role_given` cannot be a bot role (integration-managed).')); // role can't be added
-      };
+        if (clientMember.roles.highest.rawPosition <= role_given.rawPosition)
+          return await interaction.reply(
+            util.error(
+              "`role_given` is higher than the bot's highest role and cannot be added."
+            )
+          ); // role is too high!
+        if (role_given.managed)
+          return await interaction.reply(
+            util.error(
+              '`role_given` cannot be a bot role (integration-managed).'
+            )
+          ); // role can't be added
+      }
       if (options.role_removed) {
         const role_removed = await guild.roles.cache.get(options.role_removed);
-        if (clientMember.roles.highest.rawPosition <= role_removed.rawPosition) return await interaction.reply(util.error('`role_removed` is higher than the bot\'s highest role and cannot be removed.')); // role is too high!
-        if (role_removed.managed) return await interaction.reply(util.error('`role_removed` cannot be a bot role (integration-managed).')); // role can't be added
-      };
+        if (clientMember.roles.highest.rawPosition <= role_removed.rawPosition)
+          return await interaction.reply(
+            util.error(
+              "`role_removed` is higher than the bot's highest role and cannot be removed."
+            )
+          ); // role is too high!
+        if (role_removed.managed)
+          return await interaction.reply(
+            util.error(
+              '`role_removed` cannot be a bot role (integration-managed).'
+            )
+          ); // role can't be added
+      }
       let requiredItemsArray = [];
       if (options.required_items) {
-        for (item of (`,${options.required_items},`.replace(/[\s,]+/g, ',').split(','))); {
+        for (item of `,${options.required_items},`
+          .replace(/[\s,]+/g, ',')
+          .split(','));
+        {
           if (
             !(await shopItemSchema.findOne({
               guildID: guild.id,
               name: {
-                $regex: new RegExp(item, "i")
-              }
+                $regex: new RegExp(item, 'i'),
+            ***REMOVED***
             }))
             // string is not an item in the shop
-          ) { 
-            return await interaction.reply(util.error(`Could not find item "${item}" in shop!\n\n\`required_items\` must be a valid shop item name or list of valid shop item names separated by comma(s) \`,\``));
+          ) {
+            return await interaction.reply(
+              util.error(
+                `Could not find item "${item}" in shop!\n\n\`required_items\` must be a valid shop item name or list of valid shop item names separated by comma(s) \`,\``
+              )
+            );
           } else {
             requiredItemsArray.push(item);
           }
-        };
-      };
-      if (options.required_balance && !(options.required_balance >= options.price)) return await interaction.reply(util.error(`\`required_balance\` must be greater than \`price\` (${options.price}).`));
+        }
+      }
+      if (
+        options.required_balance &&
+        !(options.required_balance >= options.price)
+      )
+        return await interaction.reply(
+          util.error(
+            `\`required_balance\` must be greater than \`price\` (${options.price}).`
+          )
+        );
       // type<Type> validation
       if (_subcommand !== 'basic') {
-        if (_subcommand === 'generator') { // typeGenerator
-          if (!ms(options.generator_period)) return await interaction.reply(util.error('`generator_period` must be a parseable duration value (5000, 5s, 5m, etc...) and greater than 0.'));
-          if (!(options.generator_amount > 0)) return await interaction.reply(util.error('`generator_amount` must be greater than 0.'));
-          options.generator_period = + options.generator_period || +ms(options.generator_period); // parseInt
+        if (_subcommand === 'generator') {
+          // typeGenerator
+          if (!ms(options.generator_period))
+            return await interaction.reply(
+              util.error(
+                '`generator_period` must be a parseable duration value (5000, 5s, 5m, etc...) and greater than 0.'
+              )
+            );
+          if (!(options.generator_amount > 0))
+            return await interaction.reply(
+              util.error('`generator_amount` must be greater than 0.')
+            );
+          options.generator_period =
+            +options.generator_period || +ms(options.generator_period); // parseInt
 
-          if (!(
-            await shopItemSchema.findOne({
+          if (
+            !(await shopItemSchema.findOne({
               guildID: guild.id,
               name: {
-                $regex: new RegExp(options.name, "i")
-              }
-            })
-          )) await new shopItemSchema(await util.trimObj({ // omit undefined/null properties
-            _id: `${options.name.toUpperCase()}${Date.now()}`,
-            guildID: guild.id,
-            createdOnTimestamp: new Date,
-            name: options.name,
-            price: options.price,
-            description: options.description,
-            duration: options.duration,
-            expiresOnTimestamp: options.duration ? Date.now() + options.duration : undefined,
-            stockLeft: options.stock,
-            isInventoryItem: options.is_inventory_item,
-            rolesGivenArray: [options.role_given],
-            rolesRemovedArray: [options.role_removed],
-            requirements: {
-              requiredRolesArray: [options.required_role],
-              requiredInventoryItemsArray: requiredItemsArray,
-              requiredBalance: options.required_balance
-          ***REMOVED***
-            data: {
-              typeGenerator: {
-                generatorPeriod: options.generator_period,
-                generatorIncomeAmount: options.generator_amount,
-                isIncomeDeposited: options.deposit_income
-              }
-            }
-        ***REMOVED*** [undefined, null, [], {}, ""], true))
-            .save()
-        };
+                $regex: new RegExp(options.name, 'i'),
+            ***REMOVED***
+            }))
+          )
+            await new shopItemSchema(
+              await util.trimObj(
+                {
+                  // omit undefined/null properties
+                  _id: `${options.name.toUpperCase()}${Date.now()}`,
+                  guildID: guild.id,
+                  createdOnTimestamp: new Date(),
+                  name: options.name,
+                  price: options.price,
+                  description: options.description,
+                  duration: options.duration,
+                  expiresOnTimestamp: options.duration
+                    ? Date.now() + options.duration
+                    : undefined,
+                  stockLeft: options.stock,
+                  isInventoryItem: options.is_inventory_item,
+                  rolesGivenArray: [options.role_given],
+                  rolesRemovedArray: [options.role_removed],
+                  requirements: {
+                    requiredRolesArray: [options.required_role],
+                    requiredInventoryItemsArray: requiredItemsArray,
+                    requiredBalance: options.required_balance,
+                ***REMOVED***
+                  data: {
+                    typeGenerator: {
+                      generatorPeriod: options.generator_period,
+                      generatorIncomeAmount: options.generator_amount,
+                      isIncomeDeposited: options.deposit_income,
+                  ***REMOVED***
+                ***REMOVED***
+              ***REMOVED***
+                [undefined, null, [], {}, ''],
+                true
+              )
+            ).save();
+        }
       } else {
-        if (!(
-          await shopItemSchema.findOne({
+        if (
+          !(await shopItemSchema.findOne({
             guildID: guild.id,
             name: {
-              $regex: new RegExp(options.name, "i")
-            }
-          })
-        )) await new shopItemSchema(await util.trimObj({ // omit undefined/null properties
-          _id: `${options.name.toUpperCase()}${Date.now()}`,
-          guildID: guild.id,
-          createdOnTimestamp: new Date,
-          name: options.name,
-          price: options.price,
-          description: options.description,
-          duration: options.duration,
-          expiresOnTimestamp: options.duration ? Date.now() + options.duration : undefined,
-          stockLeft: options.stock,
-          isInventoryItem: options.is_inventory_item,
-          rolesGivenArray: [options.role_given],
-          rolesRemovedArray: [options.role_removed],
-          requirements: {
-            requiredRolesArray: [options.required_role],
-            requiredInventoryItemsArray: requiredItemsArray,
-            requiredBalance: options.required_balance
-        ***REMOVED***
-      ***REMOVED*** [undefined, null, [], {}, ""], true))
-          .save()
-      };
+              $regex: new RegExp(options.name, 'i'),
+          ***REMOVED***
+          }))
+        )
+          await new shopItemSchema(
+            await util.trimObj(
+              {
+                // omit undefined/null properties
+                _id: `${options.name.toUpperCase()}${Date.now()}`,
+                guildID: guild.id,
+                createdOnTimestamp: new Date(),
+                name: options.name,
+                price: options.price,
+                description: options.description,
+                duration: options.duration,
+                expiresOnTimestamp: options.duration
+                  ? Date.now() + options.duration
+                  : undefined,
+                stockLeft: options.stock,
+                isInventoryItem: options.is_inventory_item,
+                rolesGivenArray: [options.role_given],
+                rolesRemovedArray: [options.role_removed],
+                requirements: {
+                  requiredRolesArray: [options.required_role],
+                  requiredInventoryItemsArray: requiredItemsArray,
+                  requiredBalance: options.required_balance,
+              ***REMOVED***
+            ***REMOVED***
+              [undefined, null, [], {}, ''],
+              true
+            )
+          ).save();
+      }
 
       let description = ``;
-      _hoistedOptions.forEach(o => {
+      _hoistedOptions.forEach((o) => {
         const thisEntry = `${o.name}: ${o.value}`;
         description = `${description}${thisEntry}\n`;
       });
       await interaction.reply({
-        embeds: [{
-          color: 'BLUE',
-          title: `item ${_group} ${_subcommand} request sent to DB with info:`,
-          description: `\`\`\`${description}\`\`\``
-        }]
+        embeds: [
+          {
+            color: 'BLUE',
+            title: `item ${_group} ${_subcommand} request sent to DB with info:`,
+            description: `\`\`\`${description}\`\`\``,
+        ***REMOVED***
+        ],
       });
     } else if (_subcommand === 'view') {
       const item = await shopItemSchema.findOne({
         guildID: guild.id,
         name: {
-          $regex: new RegExp(options.name, "i")
-        }
-      })
-      const currencySymbol = await util.getCurrencySymbol(guild.id)
+          $regex: new RegExp(options.name, 'i'),
+      ***REMOVED***
+      });
+      const currencySymbol = await util.getCurrencySymbol(guild.id);
 
       let embed = new Discord.MessageEmbed();
-      embed.setColor("BLUE")
-      embed.setAuthor(author.user.username, author.user.displayAvatarURL())
-      embed.setTitle(item.name)
-      embed.setDescription(item.description || 'A very interesting item.')
+      embed.setColor('BLUE');
+      embed.setAuthor(author.user.username, author.user.displayAvatarURL());
+      embed.setTitle(item.name);
+      embed.setDescription(item.description || 'A very interesting item.');
 
-      embed.addField('Price', `${currencySymbol}${item.price > 0 ? item.price.toLocaleString() : 'Free'}`, true)
-      const createdAt = new Date(item.createdOnTimestamp)
-      embed.addField('Date Created', `${createdAt.toUTCString()}`, true)
-      embed.addField('Type', `${item.type === 'typeGenerator' ? 'Generator' : 'Basic'}`, false)
-      embed.addField('Stock Remaining', `${item.stockLeft?.toLocaleString() || 'Infinite'}`, true)
-      embed.addField('Role Given', `${item.rolesGivenArray?.[0]? '<@&' + item.rolesGivenArray?.[0] + '>' : 'None'}`, true)
-      embed.addField('Role Removed', `${item.rolesRemovedArray?.[0]? '<@&' + item.rolesRemovedArray?.[0] + '>' : 'None'}`, true)
-      embed.addField('Role Required', `${item.requiredRolesArray?.[0]? '<@&' + item.requiredRolesArray?.[0] + '>' : 'None'}`, true)
-      embed.addField('Minimum Balance', `${currencySymbol}${item.requiredBalance?.toLocaleString() || '0'}`, true)
-      embed.addField('Items Required', `${item.requiredInventoryItemsArray.join(', ') || 'None'}`, false)
+      embed.addField(
+        'Price',
+        `${currencySymbol}${
+          item.price > 0 ? item.price.toLocaleString() : 'Free'
+        }`,
+        true
+      );
+      const createdAt = new Date(item.createdOnTimestamp);
+      embed.addField('Date Created', `${createdAt.toUTCString()}`, true);
+      embed.addField(
+        'Type',
+        `${item.type === 'typeGenerator' ? 'Generator' : 'Basic'}`,
+        false
+      );
+      embed.addField(
+        'Stock Remaining',
+        `${item.stockLeft?.toLocaleString() || 'Infinite'}`,
+        true
+      );
+      embed.addField(
+        'Role Given',
+        `${
+          item.rolesGivenArray?.[0]
+            ? '<@&' + item.rolesGivenArray?.[0] + '>'
+            : 'None'
+        }`,
+        true
+      );
+      embed.addField(
+        'Role Removed',
+        `${
+          item.rolesRemovedArray?.[0]
+            ? '<@&' + item.rolesRemovedArray?.[0] + '>'
+            : 'None'
+        }`,
+        true
+      );
+      embed.addField(
+        'Role Required',
+        `${
+          item.requiredRolesArray?.[0]
+            ? '<@&' + item.requiredRolesArray?.[0] + '>'
+            : 'None'
+        }`,
+        true
+      );
+      embed.addField(
+        'Minimum Balance',
+        `${currencySymbol}${item.requiredBalance?.toLocaleString() || '0'}`,
+        true
+      );
+      embed.addField(
+        'Items Required',
+        `${item.requiredInventoryItemsArray.join(', ') || 'None'}`,
+        false
+      );
 
       if (item.type === 'typeGenerator') {
-        embed.addField('Generator Period', `${ms(item.generator_period)}`, true)
-        embed.addField('Generator Amount', `${currencySymbol}${item.generator_amount}`, true)
-        embed.addField('Income Deposited?', `${item.isIncomeDeposited !== undefined ? item.isIncomeDeposited : true}`, true)
+        embed.addField(
+          'Generator Period',
+          `${ms(item.generator_period)}`,
+          true
+        );
+        embed.addField(
+          'Generator Amount',
+          `${currencySymbol}${item.generator_amount}`,
+          true
+        );
+        embed.addField(
+          'Income Deposited?',
+          `${
+            item.isIncomeDeposited !== undefined ? item.isIncomeDeposited : true
+          }`,
+          true
+        );
       }
 
-      await interaction.reply({ embeds: [embed] })
+      await interaction.reply({ embeds: [embed] });
     } else if (_subcommand === 'delete') {
       if (
         await shopItemSchema.findOne({
           guildID: guild.id,
           name: {
-            $regex: new RegExp(options.name, "i")
-          }
+            $regex: new RegExp(options.name, 'i'),
+        ***REMOVED***
         })
       ) {
         await shopItemSchema.deleteOne({
           guildID: guild.id,
           name: {
-            $regex: new RegExp(options.name, "i") // case-insensitive search
-          }
-        })
+            $regex: new RegExp(options.name, 'i'), // case-insensitive search
+        ***REMOVED***
+        });
 
         let embed = new Discord.MessageEmbed();
-        embed.setColor("GREEN")
-        embed.setAuthor(author.user.username, author.user.displayAvatarURL())
-        embed.setDescription(`Successfully deleted item with \`name\` ${options.name}`)
+        embed.setColor('GREEN');
+        embed.setAuthor(author.user.username, author.user.displayAvatarURL());
+        embed.setDescription(
+          `Successfully deleted item with \`name\` ${options.name}`
+        );
 
-        await interaction.reply({ embeds: [embed] })
+        await interaction.reply({ embeds: [embed] });
       } else {
-        interaction.reply(util.error(`No item found with \`name\` "${options.name}"`))
+        interaction.reply(
+          util.error(`No item found with \`name\` "${options.name}"`)
+        );
       }
     } else if (_subcommand === 'buy') {
-      
     }
 ***REMOVED***
 };
