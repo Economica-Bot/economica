@@ -10,49 +10,79 @@ module.exports = {
     {
       name: 'balance',
       description: 'The statistics for user balance.',
-      type: 1,
+      type: 2,
       options: [
         {
           name: 'user',
           description: 'Specify a user.',
-          type: 6,
-          required: false,
+          type: 1,
+          options: [
+            {
+              name: 'user', 
+              description: 'Specify a user.', 
+              type: 3, 
+              required: true
+            }
+          ],
       ***REMOVED***
+        {
+          name: 'total', 
+          description: 'View total balance trend.', 
+          type: 1, 
+        }
       ],
   ***REMOVED***
   ],
   async run(interaction, guild, author, options) {
-    const user = options._hoistedOptions[0]?.user ?? author.user;
-
-    const transactions = await transactionSchema.find({
-      guildID: guild.id,
-      userID: user.id,
-    });
-
-    let wallet = 0,
-      treasury = 0,
-      total = 0;
-    const wallets = [],
-      treasuries = [],
-      totals = [],
-      dates = [];
+    let wallet = 0, treasury = 0, total = 0; 
+    const wallets = [], treasuries = [], totals = [], dates = [];
+    
+    //Init
     wallets.push(wallet);
     treasuries.push(treasury);
     totals.push(total);
-    for (const transaction of transactions) {
-      wallet += transaction.wallet;
-      treasury += transaction.treasury;
-      total += transaction.total;
-      wallets.push(wallet);
-      treasuries.push(treasury);
-      totals.push(total);
-      dates.push(transaction.createdAt.toLocaleDateString());
+    
+    if(options.group === 'balance') {
+      if(options._subcommand === 'user') {
+        const user = options._hoistedOptions[0]?.user ?? author.user;
+        const transactions = await transactionSchema.find({
+          guildID: guild.id,
+          userID: user.id,
+        });
+        for (const transaction of transactions) {
+          wallet += transaction.wallet;
+          treasury += transaction.treasury;
+          total += transaction.total;
+          wallets.push(wallet);
+          treasuries.push(treasury);
+          totals.push(total);
+          dates.push(transaction.createdAt.toLocaleDateString());
+        } 
+  
+        //Current vals
+        wallets.push(wallet);
+        treasuries.push(treasury);
+        totals.push(total);
+        dates.push(new Date().toLocaleDateString());
+  
+      } else if(options._subcommand === 'total') {
+        const transactions = transactionSchema.find({ guildID: guild.id });
+        for (const transaction of transactions) {
+          wallet += transaction.wallet;
+          treasury += transaction.treasury;
+          total += transaction.total;
+          wallets.push(wallet);
+          treasuries.push(treasury);
+          totals.push(total);
+          dates.push(transaction.createdAt.toLocaleDateString());
+        } 
+  
+        wallets.push(wallet);
+        treasuries.push(treasury);
+        totals.push(total);
+        dates.push(new Date().toLocaleDateString());
+      }
     }
-
-    wallets.push(wallet);
-    treasuries.push(treasury);
-    totals.push(total);
-    dates.push(new Date().toLocaleDateString());
 
     const data = {
       labels: dates,
