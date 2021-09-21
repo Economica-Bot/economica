@@ -20,7 +20,7 @@ module.exports = {
             {
               name: 'user', 
               description: 'Specify a user.', 
-              type: 3, 
+              type: 'USER', 
               required: true
             }
           ],
@@ -34,7 +34,7 @@ module.exports = {
   ***REMOVED***
   ],
   async run(interaction, guild, author, options) {
-    let wallet = 0, treasury = 0, total = 0; 
+    let wallet = 0, treasury = 0, total = 0, transactions = [];
     const wallets = [], treasuries = [], totals = [], dates = [];
     
     //Init
@@ -42,10 +42,10 @@ module.exports = {
     treasuries.push(treasury);
     totals.push(total);
     
-    if(options.group === 'balance') {
+    if(options._group === 'balance') {
       if(options._subcommand === 'user') {
         const user = options._hoistedOptions[0]?.user ?? author.user;
-        const transactions = await transactionSchema.find({
+        transactions = await transactionSchema.find({
           guildID: guild.id,
           userID: user.id,
         });
@@ -66,7 +66,7 @@ module.exports = {
         dates.push(new Date().toLocaleDateString());
   
       } else if(options._subcommand === 'total') {
-        const transactions = transactionSchema.find({ guildID: guild.id });
+        transactions = await transactionSchema.find({ guildID: guild.id });
         for (const transaction of transactions) {
           wallet += transaction.wallet;
           treasury += transaction.treasury;
@@ -120,7 +120,7 @@ module.exports = {
     const opt = {
       title: {
         display: true,
-        text: `${user.username}`,
+        text: 'Balance',
         fontSize: 20,
         fontColor: 'white',
     ***REMOVED***
@@ -187,8 +187,8 @@ module.exports = {
     const embed = util
       .embedify(
         'GOLD',
-        `Statistics for ${user.username}`,
-        user.displayAvatarURL(),
+        'Balance Statistics',
+        guild.iconURL(),
         `Total transactions: \`${transactions.length}\``
       )
       .setImage(url)
