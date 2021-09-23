@@ -5,7 +5,7 @@ module.exports = {
   options: null,
   ownerOnly: true, 
   async run(interaction, guild, author, options) {
-    const guildSettings = await util.initGuildSettings(guild);
-    await interaction.reply(`Init \`\`\`${guildSettings.toString()}\`\`\``);
+    const settings = await util.initGuildSettings(guild);
+    await interaction.reply(`Init \`\`\`${settings.toString()}\`\`\``);
 ***REMOVED***
 };

@@ -1,4 +1,5 @@
-const { income } = require('../../config.json');
+const { commands } = require('../../config.json');
+const incomeSchema = require('@schemas/income-sch');
 
 module.exports = {
   name: 'income',
@@ -11,18 +12,25 @@ module.exports = {
       'BLURPLE',
       `${guild.name}'s Income Commands`,
       guild.iconURL(),
-      'Use `setincome <cmd>` to configure income commands.'
+      'Use `command config <income_command>` to configure income commands.'
     );
 
-    for (const command in income) {
-      let properties = await util.getCommandStats(guild.id, command);
-      let description = '```';
-      for (const property in properties) {
-        description += `${property}: ${properties[property]}\n`;
+    let incomeCommands = (await incomeSchema.findOne({ guildID: guild.id }))
+      .incomeCommands;
+
+    incomeCommands.forEach((command) => {
+      let description = '';
+      for (const property in command) {
+        if (property !== 'command')
+          description += `${property}: ${command[property]}\n`;
       }
 
-      incomeEmbed.addField(`__${command}__`, `${description}\`\`\``, true);
-    }
+      incomeEmbed.addField(
+        `__${command.command}__`,
+        `\`\`\`${description}\`\`\``,
+        true
+      );
+    });
 
     await interaction.reply({ embeds: [incomeEmbed] });
 ***REMOVED***

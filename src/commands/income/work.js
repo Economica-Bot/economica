@@ -8,14 +8,6 @@ module.exports = {
     const guildID = guild.id,
       userID = author.id;
     const properties = await util.getCommandStats(guildID, this.name);
-    const uProperties = await util.getUserCommandStats(
-      guildID,
-      userID,
-      this.name
-    );
-    if (!(await util.coolDown(interaction, properties, uProperties))) {
-      return;
-    }
 
     const currencySymbol = await util.getCurrencySymbol(guildID);
     const amount = util.intInRange(properties.min, properties.max);
@@ -37,8 +29,5 @@ module.exports = {
       0,
       amount
     );
-    await util.setUserCommandStats(guildID, userID, this.name, {
-      timestamp: new Date().getTime(),
-    });
 ***REMOVED***
 };

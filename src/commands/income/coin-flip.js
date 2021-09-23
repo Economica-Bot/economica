@@ -14,17 +14,7 @@ module.exports = {
   ],
   async run(interaction, guild, author, options) {
     const properties = await util.getCommandStats(guild.id, this.name);
-    const uProperties = await util.getUserCommandStats(
-      guild.id,
-      author.id,
-      this.name
-    );
     const { wallet } = await util.getEconInfo(guild.id, author.id);
-
-    if (!(await util.coolDown(interaction, properties, uProperties))) {
-      return;
-    }
-
     let color = 'RED',
       description = '',
       embed;
@@ -65,9 +55,5 @@ module.exports = {
     );
 
     await interaction.reply({ embeds: [embed] });
-
-    await util.setUserCommandStats(guild.id, author.id, this.name, {
-      timestamp: new Date().getTime(),
-    });
 ***REMOVED***
 };

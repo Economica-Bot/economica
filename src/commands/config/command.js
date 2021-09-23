@@ -1,6 +1,7 @@
 const fs = require('fs');
 const ms = require('ms');
 const guildSettingSchema = require('@schemas/guild-settings-sch');
+const incomeSchema = require('@schemas/income-sch');
 
 module.exports = {
   name: 'command',
@@ -38,6 +39,12 @@ module.exports = {
               type: 'ROLE',
               required: false,
           ***REMOVED***
+            {
+              name: 'cooldown',
+              description: 'Specify a cooldown.',
+              type: 3,
+              required: false,
+          ***REMOVED***
           ],
       ***REMOVED***
         {
@@ -61,6 +68,12 @@ module.exports = {
               name: 'role',
               description: 'Specify a role.',
               type: 'ROLE',
+              required: false,
+          ***REMOVED***
+            {
+              name: 'cooldown',
+              description: 'Specify a cooldown.',
+              type: 3,
               required: false,
           ***REMOVED***
           ],
@@ -128,7 +141,6 @@ module.exports = {
   ***REMOVED***
   ],
   async run(interaction, guild, author, options) {
-    console.log(options);
     let color = 'GREEN',
       title = author.user.username,
       icon_url = author.user.displayAvatarURL(),
@@ -151,17 +163,14 @@ module.exports = {
     }
 
     if (
-      !cmd?.untoggleable ||
+      !cmd ||
+      cmd?.untoggleable ||
       (options._subcommand === 'income_command' && cmd.group !== 'income')
     ) {
       color = 'RED';
-      description = `Command \`${options._hoistedOptions[0].value}\` ${
-        options._subcommand === 'income_command'
-          ? `is not an income command`
-          : `is not found or cannot be toggled`
-      }.`;
+      description = `Command \`${options._hoistedOptions[0].value}\` is not found or cannot be toggled`;
       footer = 'Use help for a list of commands.';
-    } else {
+    } else if (options._group === 'permission') {
       const guildSettings = await guildSettingSchema.findOneAndUpdate(
         {
           guildID,
@@ -186,9 +195,9 @@ module.exports = {
 
       //Enable or disable a channel for a command
       if (options._hoistedOptions.find((option) => option.name === 'channel')) {
-        const channel = options._hoistedOptions.find(
-          (option) => option.name === 'channel'
-        );
+        const channel = await options._hoistedOptions.find((option) => {
+          return option.name === 'channel';
+        }).channel;
         if (!channel.isText()) {
           color = 'RED';
           description += `\`${channel.name}\` is not a text channel.\n`;
@@ -209,15 +218,15 @@ module.exports = {
           description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
             1,
             options._subcommand.length
-          )}d command \`${cmd}\` in <#${channel.id}>\n`;
+          )}d command \`${cmd.name}\` in <#${channel.id}>\n`;
         }
       }
 
       //Enable or disable a role for a command
       if (options._hoistedOptions.find((option) => option.name === 'role')) {
-        const role = options._hoistedOptions.find(
-          (option) => option.name === 'role'
-        );
+        const role = options._hoistedOptions.find((option) => {
+          return option.name === 'role';
+        }).role;
         if (!commandSettings.roles) {
           commandSettings.roles = [];
         }
@@ -233,7 +242,7 @@ module.exports = {
         description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
           1,
           options._subcommand.length
-        )}d command \`${cmd}\` for <@&${role.id}>\n`;
+        )}d command \`${cmd.name}\` for <@&${role.id}>\n`;
       }
 
       //Add a cooldown to a command
@@ -241,13 +250,16 @@ module.exports = {
         options._hoistedOptions.find((option) => option.name === 'cooldown')
       ) {
         const cooldown = ms(
-          options._hoistedOptions.find((option) => option.name === 'cooldown')
+          options._hoistedOptions.find((option) => {
+            return option.name === 'cooldown';
+          }).value
         );
+
         commandSettings.cooldown = cooldown;
         description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
           1,
           options._subcommand.length
-        )}d cooldown of \`${ms(cooldown)}\` for command \`${cmd}\`\n`;
+        )}d cooldown of \`${ms(cooldown)}\` for command \`${cmd.name}\`\n`;
       }
 
       //Enable or disable a command
@@ -257,81 +269,8 @@ module.exports = {
         description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
           1,
           options._subcommand.length
-        )}d command \`${cmd}\``;
+        )}d command \`${cmd.name}\``;
       }
-
-      //Add income command settings. see ./config.js
-      //     let income_command = options._hoistedOptions[0].value;
-      //   let properties = Object.entries(
-      //     await util.getCommandStats(guild.id, income_command)
-      //   );
-      //   let fields = [];
-      //   options._hoistedOptions.forEach((option) => {
-      //     if (option.name !== 'income_command')
-      //       fields.push([option.name, option.value]);
-      //   });
-
-      //   const incomeEmbed = util.embedify(
-      //     'GREEN',
-      //     `Updated ${income_command}`,
-      //     client.user.displayAvatarURL()
-      //   );
-
-      //   //Validate and transfer provided fields
-      //   let description = '',
-      //     updates = '';
-      //   properties.forEach((property) => {
-      //     const field = fields.find((field) => field[0] === property[0]);
-      //     if (field) {
-      //       if (['cooldown'].includes(field[0])) {
-      //         if (ms(field[1])) {
-      //           property[1] = Math.abs(ms(field[1]));
-      //           updates += `${property[0]}: ${ms(ms(property[1]))}ms\n`;
-      //         } else {
-      //           description += `Invalid parameter: \`${field[1]}\`\n\`${field[0]}\` must be a time!\n`;
-      //         }
-      //       } else if (['chance'].includes(field[0])) {
-      //         if (parseFloat(field[1])) {
-      //           property[1] = Math.abs(
-      //             field[1] < 1 ? parseFloat(field[1]) * 100 : parseFloat(field[1])
-      //           );
-      //           updates += `${property[0]}: ${property[1]}%\n`;
-      //         } else {
-      //           description += `Invalid parameter: \`${field[1]}\`\n\`${field[0]}\` must be a percentage!\n`;
-      //         }
-      //       } else {
-      //         property[1] = Math.abs(+field[1]);
-      //         updates += `${property[0]}: ${property[1]}\n`;
-      //       }
-      //     }
-      //   });
-
-      //   if (!updates.length) updates = 'No parameters updated';
-
-      //   incomeEmbed.setDescription(
-      //     `\`\`\`\n${updates}\n\`\`\`${description ? `\n${description}` : ''}`
-      //   );
-
-      //   await interaction.reply({ embeds: [incomeEmbed], ephemeral: true });
-
-      //   properties = Object.fromEntries(properties);
-      //   await incomeSchema
-      //     .findOneAndUpdate(
-      //       {
-      //         guildID: guild.id,
-      //     ***REMOVED***
-      //       {
-      //         $set: {
-      //           [income_command]: properties,
-      //       ***REMOVED***
-      //     ***REMOVED***
-      //       {
-      //         upsert: true,
-      //         new: true,
-      //       }
-      //     )
-      //     .exec();
-      // },
 
       if (options._subcommand !== 'reset') {
         await guildSettingSchema.findOneAndUpdate(
@@ -347,11 +286,98 @@ module.exports = {
       } else {
         description += `Reset command \`${cmd}\``;
       }
+    } else if (options._group === 'config') {
+      if (options._subcommand === 'income_command' && cmd.group !== 'income') {
+        description = `Command \`${options._hoistedOptions[0].value}\` is not an income command`;
+      } else {
+        let income_command = options._hoistedOptions[0].value;
+        let properties = await incomeSchema
+          .findOneAndUpdate(
+            {
+              guildID: guild.id,
+          ***REMOVED***
+            {
+              $pull: {
+                incomeCommands: {
+                  command: cmd.name,
+              ***REMOVED***
+            ***REMOVED***
+          ***REMOVED***
+            {
+              upsert: true,
+              new: true,
+            }
+          )
+          .exec();
+        let fields = [];
+        options._hoistedOptions.forEach((option) => {
+          if (option.name !== 'income_command')
+            fields.push([option.name, option.value]);
+        });
+
+        color = 'GREEN';
+        description = `Updated ${income_command}`;
+
+        //Validate and transfer provided fields
+        updates = '';
+        properties.forEach((property) => {
+          const field = fields.find((field) => field[0] === property[0]);
+          if (field) {
+            if (['cooldown'].includes(field[0])) {
+              if (ms(field[1])) {
+                property[1] = Math.abs(ms(field[1]));
+                updates += `${property[0]}: ${ms(ms(property[1]))}ms\n`;
+              } else {
+                description += `Invalid parameter: \`${field[1]}\`\n\`${field[0]}\` must be a time!\n`;
+              }
+            } else if (['chance'].includes(field[0])) {
+              if (parseFloat(field[1])) {
+                property[1] = Math.abs(
+                  field[1] < 1
+                    ? parseFloat(field[1]) * 100
+                    : parseFloat(field[1])
+                );
+                updates += `${property[0]}: ${property[1]}%\n`;
+              } else {
+                description += `Invalid parameter: \`${field[1]}\`\n\`${field[0]}\` must be a percentage!\n`;
+              }
+            } else {
+              property[1] = Math.abs(+field[1]);
+              updates += `${property[0]}: ${property[1]}\n`;
+            }
+          }
+        });
+
+        if (!updates.length) updates = 'No parameters updated';
+
+        description = `\`\`\`\n${updates}\n\`\`\`${
+          description ? `\n${description}` : ''
+        }`;
+        properties = Object.fromEntries(properties);
+        properties.work = cmd.name;
+        await incomeSchema
+          .findOneAndUpdate(
+            {
+              guildID: guild.id,
+          ***REMOVED***
+            {
+              $push: {
+                incomeCommands: {
+                  ...properties,
+              ***REMOVED***
+            ***REMOVED***
+          ***REMOVED***
+            {
+              upsert: true,
+              new: true,
+            }
+          )
+          .exec();
+      }
     }
 
     const embed = util.embedify(color, title, icon_url, description, footer);
 
     await interaction.reply({ embeds: [embed] });
-    return;
 ***REMOVED***
 };
