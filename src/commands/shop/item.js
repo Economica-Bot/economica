@@ -366,8 +366,6 @@ module.exports = {
       } else {
         interaction.reply(util.error(`No item found with \`name\` "${options.name}"`))
       }
-    } else if (_subcommand === 'buy') {
-      
-    }
+    } 
 ***REMOVED***
 };
