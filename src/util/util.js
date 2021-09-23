@@ -304,7 +304,9 @@ module.exports.getCommandStats = async (guildID, command) => {
     guildID,
   });
 
-  result = result.commands.find((c) => c.command === command);
+  result = result.commands.find((c) => {
+    return c.command === command;
+  });
 
   let properties = config.commands[command] || config.commands['default'];
 
@@ -435,7 +437,30 @@ module.exports.initGuildSettings = async (guild) => {
     }
   );
 
-  return guildSettings;
+  const incomeCommands = [];
+  for (const incomeCommand in config.commands) {
+    if (incomeCommand !== 'default') {
+      incomeCommands.push({
+        ...{ command: incomeCommand },
+        ...config.commands[incomeCommand],
+      });
+    }
+  }
+
+  const incomeSettings = await incomeSchema.findOneAndUpdate(
+    {
+      guildID: guild.id,
+  ***REMOVED***
+    {
+      incomeCommands,
+  ***REMOVED***
+    {
+      upsert: true,
+      new: true,
+    }
+  );
+
+  return guildSettings, incomeSettings;
 };
 
 /**

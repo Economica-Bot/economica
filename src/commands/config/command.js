@@ -291,27 +291,28 @@ module.exports = {
         description = `Command \`${options._hoistedOptions[0].value}\` is not an income command`;
       } else {
         let income_command = options._hoistedOptions[0].value;
-        let properties = await incomeSchema
-          .findOneAndUpdate(
-            {
-              guildID: guild.id,
-          ***REMOVED***
-            {
-              $pull: {
-                incomeCommands: {
-                  command: cmd.name,
-              ***REMOVED***
+        let properties = await incomeSchema.findOneAndUpdate(
+          {
+            guildID: guild.id,
+        ***REMOVED***
+          {
+            $pull: {
+              incomeCommands: {
+                command: cmd.name,
             ***REMOVED***
           ***REMOVED***
-            {
-              upsert: true,
-              new: true,
-            }
-          )
-          .exec();
+          }
+        );
+
+        properties = Object.entries(
+          properties.incomeCommands.find((o) => {
+            return o.command === cmd.name;
+          })
+        );
+
         let fields = [];
         options._hoistedOptions.forEach((option) => {
-          if (option.name !== 'income_command')
+          if (option.name !== 'command')
             fields.push([option.name, option.value]);
         });
 
@@ -354,7 +355,6 @@ module.exports = {
           description ? `\n${description}` : ''
         }`;
         properties = Object.fromEntries(properties);
-        properties.work = cmd.name;
         await incomeSchema
           .findOneAndUpdate(
             {
