@@ -29,9 +29,7 @@ global.mongo = mongo;
 global.apiTypes = ApplicationCommandOptionType;
 
 client.on('ready', async () => {
-  console.log(`${client.user.tag} Ready`);
-
-  client.registerCommands();
+  await client.registerCommands();
 
   await mongo().then(() => {
     console.log('Connected to DB');
@@ -39,9 +37,10 @@ client.on('ready', async () => {
 
   const checkMutes = require('./util/features/check-mute');
   checkMutes(client);
-
   const checkLoans = require('./util/features/check-loan');
   checkLoans();
+
+  console.log(`${client.user.tag} Ready`);
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -226,18 +225,24 @@ client.permissible = async (author, guild, channel, command) => {
 };
 
 client.coolDown = async (interaction) => {
-  const properties = await util.getCommandStats(
-    interaction.guild.id,
-    interaction.command.name
-  );
+  const result = await guildSettingsSchema.findOne({
+    guildID: interaction.guild.id,
+  });
+
+  properties = result.commands.find((c) => {
+    return c.command === interaction.command.name;
+  });
+
   const uProperties = await util.getUserCommandStats(
     interaction.guild.id,
     interaction.user.id,
     interaction.command.name
   );
-  const { cooldown } = properties;
+
+  const { cooldown } = properties || config.commands['default'];
   const { timestamp } = uProperties;
   const now = new Date().getTime();
+
   if (now - timestamp < cooldown) {
     const embed = util.embedify(
       'GREY',
