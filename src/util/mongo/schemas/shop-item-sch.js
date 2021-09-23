@@ -6,7 +6,8 @@ const shopItemSchema = mongoose.Schema({
     type: String,
     required: true,
 ***REMOVED***
-  createdOnTimestamp: { type: Number, required: true }, // when the item was created
+  createdOnTimestamp: { type: Number, required: false }, // when the item was created
+  lastEditedOnTimestamp: { type: Number, required: false }, // last editeed time
   name: { type: String, required: true },
   price: { type: Number, required: true },
   description: { type: String, required: false },
@@ -49,7 +50,7 @@ const shopItemSchema = mongoose.Schema({
       colorRoleExpiration: { type: Date, required: false },
   ***REMOVED***
 ***REMOVED***
-  amountGiven: { type: Number, required: true, default: 1 }
+  amountGiven: { type: Number, required: true, default: 1 },
 });
 
 /* 
@@ -59,8 +60,25 @@ const shopItemSchema = mongoose.Schema({
   from iterated object properties using the trimObj. function I created.
   in 'pre' middleware, this refers to the schema object.
 */
-shopItemSchema.pre('validate', async () => {
-  console.log('schema: ' + this)
+shopItemSchema.pre('save', function (next) {
+  let item = this
+
+  // set the creation and lastEdited dates if not specified in schema object construction
+  if (!item.createdOnTimestamp) item.createdOnTimestamp = Date.now()
+  item.lastEditedOnTimestamp = Date.now()
+
+  console.log(item)
+
+  // temp values
+  if (true) { // true will be replaced with `item.expiresOnTimestamp`
+    util.wait(10000).then(() => { // 10000 will be replaced with `item.expiresOnTimestamp`
+      console.log(`item ${item.name} has expired!`) // entire function will be replaced with `shopItemSchema.deleteOne(...)`
+    })
+  }
+
+  // trim the object's properties:
+  // item = util.trimObj(item, undefined, true) // iterated trim
+  next();
 })
 
 module.exports = mongoose.model('shop', shopItemSchema);
