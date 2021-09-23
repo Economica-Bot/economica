@@ -487,21 +487,32 @@ module.exports.num = (num) => {
   let pow10 = 1
   let degree = null;
 
-  if (num/1000000000000 > 1) {
+  if (num / 1000000000000 > 1) {
     pow10 = 12
     degree = 'T'
-  } else if (num/1000000000 > 1) {
+  } else if (num / 1000000000 > 1) {
     pow10 = 9
     degree = 'B'
-  } else if (num/1000000 > 1) {
+  } else if (num / 1000000 > 1) {
     pow10 = 6
     degree = 'M'
-  } else if (num/1000 > 1) {
+  } else if (num / 1000 > 1) {
     pow10 = 3
     degree = 'K'
-  } 
+  }
 
   if (degree) {
     return `${num / (Math.pow(10, pow10)).toFixed(2)}${degree}`
   } else return num // string
+}
+
+/**
+ * Waits to perform actions for a given numbero of milliseconds.
+ * @param {number} time - the time in ms after which callback is executed
+ * @returns {Promise} callback
+ */
+module.exports.wait = (time) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, time)
+  })
 }
