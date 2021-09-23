@@ -21,8 +21,8 @@ module.exports = {
           value: 'treasury',
       ***REMOVED***
         {
-          name: 'Total',
-          value: 'total',
+          name: 'Networth',
+          value: 'networth',
       ***REMOVED***
       ],
       required: true,

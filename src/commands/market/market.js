@@ -32,15 +32,6 @@ module.exports = {
 
     shopEmbed.setDescription(`There are \`${i}\` listings.`);
 
-    await client.api
-      .interactions(interaction.id, interaction.token)
-      .callback.post({
-        data: {
-          type: 4,
-          data: {
-            embeds: [shopEmbed],
-        ***REMOVED***
-      ***REMOVED***
-      });
+    await interaction.reply({ embeds: [embed] });
 ***REMOVED***
 };

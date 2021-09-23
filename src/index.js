@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const { ApplicationCommandOptionType } = require('discord-api-types/v9');
 const fs = require('fs');
+const ms = require('ms');
 const util = require('./util/util');
 const mongo = require('./util/mongo/mongo');
 const config = require('./config.json');
@@ -28,9 +29,7 @@ global.mongo = mongo;
 global.apiTypes = ApplicationCommandOptionType;
 
 client.on('ready', async () => {
-  console.log(`${client.user.tag} Ready`);
-
-  client.registerCommands();
+  await client.registerCommands();
 
   await mongo().then(() => {
     console.log('Connected to DB');
@@ -38,9 +37,10 @@ client.on('ready', async () => {
 
   const checkMutes = require('./util/features/check-mute');
   checkMutes(client);
-
   const checkLoans = require('./util/features/check-loan');
   checkLoans();
+
+  console.log(`${client.user.tag} Ready`);
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -53,12 +53,8 @@ client.on('interactionCreate', async (interaction) => {
   const author = interaction.member;
   const guild = author.guild;
   const options = interaction.options;
-  let fops = {}; // fops.<name> (fops stands for 'Formatted Options')
-  options._hoistedOptions.forEach(o => {
-    fops[o.name] = o.value;
-  });
-  const clientMember = guild.members.cache.get(interaction.client.user.id); // Allows access to client roles, nickname, etc...
-  console.log(clientMember)
+
+  //Check permission
   const permissible = await client.permissible(author, guild, channel, command);
   if (permissible.length) {
     const embed = util.embedify(
@@ -72,26 +68,24 @@ client.on('interactionCreate', async (interaction) => {
     return;
   }
 
-  command?.run(interaction, guild, author, options, clientMember).catch((err) => {
-    console.error(err);
-    const embed = util.embedify(
-      'RED',
-      author.user.username,
-      author.user.displayAvatarURL(),
-      `**Command**: \`${command.name}\`\n\`\`\`js\n${err}\`\`\`
-            You've encountered an error.
-            Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](https://discord.gg/Fu6EMmcgAk).`
-    );
+  //Check cooldown
+  if (!(await client.coolDown(interaction))) {
+    return;
+  }
 
-    if (interaction.replied) {
-      interaction.followUp({ embeds: [embed], ephemeral: true });
-    } else {
-      interaction.reply({ embeds: [embed], ephemeral: true });
-    }
-  });
+  const properties = {
+    command: interaction.command.name,
+    timestamp: new Date().getTime(),
+  };
+
+  await util.setUserCommandStats(guild.id, author.user.id, properties);
+
+  await command
+    ?.run(interaction, guild, author, options)
+    .catch((error) => client.error(error, interaction, command));
 });
 
-client.login(process.env.ECON_ALPHA_TOKEN);
+client.login(process.env.ECON_TOKEN);
 
 client.registerCommands = async () => {
   const commands = [];
@@ -118,6 +112,7 @@ client.permissible = async (author, guild, channel, command) => {
   let missingClientPermissions = [],
     missingUserPermissions = [],
     missingRoles = [],
+    disabledRoles = [],
     permissible = '';
 
   const guildSettings = await guildSettingsSchema.findOne({
@@ -127,7 +122,7 @@ client.permissible = async (author, guild, channel, command) => {
   if (guildSettings?.modules) {
     for (const moduleSetting of guildSettings?.modules) {
       if (moduleSetting?.module === command?.group && moduleSetting?.disabled) {
-        permissible += `This command module is disabled.\n`;
+        permissible += `The \`${moduleSetting.module}\` command module is disabled.\n`;
         break;
       }
     }
@@ -136,13 +131,26 @@ client.permissible = async (author, guild, channel, command) => {
   if (guildSettings?.commands) {
     for (const commandSetting of guildSettings?.commands) {
       if (commandSetting?.command === command?.name) {
-        for (const channelSetting of commandSetting?.channels) {
-          if (
-            channelSetting?.channel === channel.id &&
-            channelSetting?.disabled
-          ) {
-            permissible += `This command is disabled in this channel.\n`;
-            break;
+        if (commandSetting?.channels) {
+          for (const channelSetting of commandSetting?.channels) {
+            if (
+              channelSetting?.channel === channel.id &&
+              channelSetting?.disabled
+            ) {
+              permissible += `This command is disabled in <#${channelSetting.channel}>.\n`;
+              break;
+            }
+          }
+        }
+
+        if (commandSetting?.roles) {
+          for (const roleSetting of commandSetting?.roles) {
+            if (
+              author.roles.cache.has(roleSetting?.role) &&
+              roleSetting?.disabled
+            ) {
+              disabledRoles.push(`<@&${roleSetting.role}>`);
+            }
           }
         }
 
@@ -181,8 +189,13 @@ client.permissible = async (author, guild, channel, command) => {
     }
   }
 
-  if (command?.ownerOnly && !config.botAuth.admin_id.includes(author.user.id))
+  if (command?.ownerOnly && !config.botAuth.admin_id.includes(author.user.id)) {
     permissible += 'You must be an `OWNER` to run this command.\n';
+  }
+
+  if (command?.disabled) {
+    description += 'This command is disabled.\n';
+  }
 
   if (missingClientPermissions.length) {
     permissible += `I am missing the ${missingClientPermissions.join(
@@ -202,5 +215,81 @@ client.permissible = async (author, guild, channel, command) => {
     )} role(s) to run this command.\n`;
   }
 
+  if (disabledRoles.length) {
+    permissible += `This command is disabled for the ${disabledRoles.join(
+      ', '
+    )} role(s).\n`;
+  }
+
   return permissible;
+};
+
+client.coolDown = async (interaction) => {
+  const result = await guildSettingsSchema.findOne({
+    guildID: interaction.guild.id,
+  });
+
+  properties = result.commands.find((c) => {
+    return c.command === interaction.command.name;
+  });
+
+  const uProperties = await util.getUserCommandStats(
+    interaction.guild.id,
+    interaction.user.id,
+    interaction.command.name
+  );
+
+  const { cooldown } = properties || config.commands['default'];
+  const { timestamp } = uProperties;
+  const now = new Date().getTime();
+
+  if (now - timestamp < cooldown) {
+    const embed = util.embedify(
+      'GREY',
+      interaction.member.user.username,
+      '', // interaction.member.user.displayAvatarURL(),
+      `:hourglass: You need to wait ${ms(
+        cooldown - (now - timestamp)
+      )} before using this command again!`,
+      `Cooldown: ${ms(cooldown)}`
+    );
+
+    interaction.reply({ embeds: [embed], ephemeral: true });
+
+    return false;
+  } else {
+    return true;
+  }
+};
+
+process.on('unhandledRejection', (error) => {
+  client.error(error);
+});
+
+process.on('uncaughtException', (error) => {
+  client.error(error);
+});
+
+client.error = async (error, interaction = null, command = null) => {
+  let description, title, icon_url;
+  if (interaction) {
+    title = interaction.member.user.username;
+    icon_url = interaction.member.user.displayAvatarURL();
+    description = `**Command**: \`${command.name}\`\n\`\`\`js\n${error}\`\`\`
+    You've encountered an error.
+    Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](${process.env.DISCORD}).`;
+    const embed = util.embedify('RED', title, icon_url, description);
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({ embeds: [embed], ephemeral: true });
+    } else {
+      await interaction.reply({ embeds: [embed], ephemeral: true });
+    }
+  }
+
+  title = error.name;
+  icon_url = client.user.displayAvatarURL();
+  description = `\`\`\`js\n${error.stack}\`\`\``;
+
+  const embed = util.embedify('RED', title, icon_url, description);
+  client.channels.cache.get(process.env.BOT_LOG_ID).send({ embeds: [embed] });
 };

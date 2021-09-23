@@ -62,25 +62,17 @@ module.exports = {
       footer = 'Use help for a list of command modules.';
     } else {
       await guildSettingSchema.findOneAndUpdate(
-        {
-          guildID,
-      ***REMOVED***
+        { guildID },
         {
           $pull: {
             modules: {
               module: module,
           ***REMOVED***
         ***REMOVED***
-      ***REMOVED***
-        {
-          new: true,
-          upsert: true,
         }
       );
       await guildSettingSchema.findOneAndUpdate(
-        {
-          guildID,
-      ***REMOVED***
+        { guildID },
         {
           $push: {
             modules: {
@@ -99,7 +91,7 @@ module.exports = {
 
     const embed = util.embedify(color, title, icon_url, description, footer);
 
-    interaction.reply({ embeds: [embed], ephemeral: true });
+    interaction.reply({ embeds: [embed] });
     return;
 ***REMOVED***
 };
