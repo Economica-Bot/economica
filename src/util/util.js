@@ -294,10 +294,10 @@ module.exports.setCommandStats = async (guildID, properties) => {
 };
 
 /**
- * Returns the specified income command's min and max payout values
+ * Returns the specified command's permission properties
  * @param {string} guildID - The id of the guild.
  * @param {string} command - The type of income command.
- * @returns {properties} Properties with config taking preference.
+ * @returns {properties}
  */
 module.exports.getCommandStats = async (guildID, command) => {
   let result = await guildSettingsSchema.findOne({
@@ -308,6 +308,8 @@ module.exports.getCommandStats = async (guildID, command) => {
     return c.command === command;
   });
 
+  console.log(result);
+
   let properties = config.commands[command] || config.commands['default'];
 
   for (const property in properties) {
@@ -317,6 +319,26 @@ module.exports.getCommandStats = async (guildID, command) => {
   }
 
   return properties;
+};
+
+/**
+ * Returns the specified income command's properties
+ * @param {string} guildID - The id of the guild.
+ * @param {string} command - The type of income command.
+ * @returns {properties}
+ */
+module.exports.getIncomeCommandStats = async (guildID, command) => {
+  const incomeCommands = (
+    await incomeSchema.findOne({
+      guildID,
+    })
+  ).incomeCommands;
+
+  const cmd = incomeCommands.find((cmd) => {
+    return cmd.command === command;
+  });
+
+  return cmd;
 };
 
 /**
@@ -521,23 +543,23 @@ module.exports.num = (num) => {
   let degree = null;
 
   if (num / 1000000000000 > 1) {
-    pow10 = 12
-    degree = 'T'
+    pow10 = 12;
+    degree = 'T';
   } else if (num / 1000000000 > 1) {
-    pow10 = 9
-    degree = 'B'
+    pow10 = 9;
+    degree = 'B';
   } else if (num / 1000000 > 1) {
-    pow10 = 6
-    degree = 'M'
+    pow10 = 6;
+    degree = 'M';
   } else if (num / 1000 > 1) {
-    pow10 = 3
-    degree = 'K'
+    pow10 = 3;
+    degree = 'K';
   }
 
   if (degree) {
-    return `${num / (Math.pow(10, pow10)).toFixed(2)}${degree}`
-  } else return num // string
-}
+    return `${num / Math.pow(10, pow10).toFixed(2)}${degree}`;
+  } else return num; // string
+};
 
 /**
  * Waits to perform actions for a given numbero of milliseconds.
@@ -546,6 +568,6 @@ module.exports.num = (num) => {
  */
 module.exports.wait = (time) => {
   return new Promise((resolve) => {
-    setTimeout(resolve, time)
-  })
-}
+    setTimeout(resolve, time);
+  });
+};

@@ -13,7 +13,7 @@ module.exports = {
   ***REMOVED***
   ],
   async run(interaction, guild, author, options) {
-    const properties = await util.getCommandStats(guild.id, this.name);
+    const properties = await util.getIncomeCommandStats(guild.id, this.name);
     const { wallet } = await util.getEconInfo(guild.id, author.id);
     let color = 'RED',
       description = '',

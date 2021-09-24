@@ -7,7 +7,7 @@ module.exports = {
   async run(interaction, guild, author, options) {
     const guildID = guild.id,
       userID = author.id;
-    const properties = await util.getCommandStats(guildID, this.name);
+    const properties = await util.getIncomeCommandStats(guildID, this.name);
 
     let color, description;
     if (!util.isSuccess(properties)) {
