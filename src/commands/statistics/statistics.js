@@ -188,7 +188,7 @@ module.exports = {
       .embedify(
         'GOLD',
         'Balance Statistics',
-        guild.iconURL(),
+        options._subcommand === 'total' ? guild.iconURL() : member.user.displayAvatarURL(),
         `Total transactions: \`${transactions.length}\``
       )
       .setImage(url)
