@@ -14,14 +14,14 @@ module.exports = {
       required: false,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     let embed = null,
       msgCount = options._hoistedOptions?.[0]?.value ?? 100;
     if ((msgCount && msgCount > 100) || msgCount < 0) {
       embed = util.embedify(
         'RED',
-        author.user.username,
-        author.user.displayAvatarURL(),
+        member.user.username,
+        member.user.displayAvatarURL(),
         `Invalid Length: \`${msgCount}\` out of bounds.`
       );
     } else {
@@ -30,8 +30,8 @@ module.exports = {
       await channel.bulkDelete(msgCount).then((val) => {
         embed = util.embedify(
           'GREEN',
-          author.user.username,
-          author.user.displayAvatarURL(),
+          member.user.username,
+          member.user.displayAvatarURL(),
           `Deleted \`${val.size}\` messages.`
         );
       });

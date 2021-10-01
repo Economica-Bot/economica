@@ -171,7 +171,7 @@ module.exports = {
       ],
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options, clientMember, fops) {
+  async run(interaction, guild, member, options, clientMember, fops) {
     const { _group, _subcommand, _hoistedOptions } = options;
 
     options = {};
@@ -412,7 +412,7 @@ module.exports = {
 
       let embed = new Discord.MessageEmbed();
       embed.setColor('BLUE');
-      embed.setAuthor(author.user.username, author.user.displayAvatarURL());
+      embed.setAuthor(member.user.username, member.user.displayAvatarURL());
       embed.setTitle(item.name);
       embed.setDescription(item.description || 'A very interesting item.');
 
@@ -512,7 +512,7 @@ module.exports = {
 
         let embed = new Discord.MessageEmbed();
         embed.setColor('GREEN');
-        embed.setAuthor(author.user.username, author.user.displayAvatarURL());
+        embed.setAuthor(member.user.username, member.user.displayAvatarURL());
         embed.setDescription(
           `Successfully deleted item with \`name\` ${options.name}`
         );

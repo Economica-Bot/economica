@@ -38,18 +38,18 @@ module.exports = {
       type: 'STRING',
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     await interaction.deferReply();
 
-    const member = options._hoistedOptions[1].member,
+    const targetMember = options._hoistedOptions[1].member,
       _id = options._hoistedOptions[2]?.value;
     if (!isValidObjectId(_id)) {
       interaction.editReply({
         embeds: [
           util.embedify(
             'RED',
-            author.user.username,
-            author.user.displayAvatarURL(),
+            member.user.username,
+            member.user.displayAvatarURL(),
             `Invalid loan ID: \`${_id}\``
           ),
         ],
@@ -63,7 +63,7 @@ module.exports = {
       const infractions = await infractionSchema
         .find({
           guildID: guild.id,
-          userID: member.user.id,
+          userID: targetMember.user.id,
         })
         .sort({
           createdAt: -1,
@@ -99,11 +99,11 @@ module.exports = {
 
       let infractionEmbed = util.embedify(
         'BLURPLE',
-        `${member.user.tag}'s Infractions`,
-        member.user.displayAvatarURL(),
+        `${targetMember.user.tag}'s Infractions`,
+        targetMember.user.displayAvatarURL(),
         '',
         `Server Member | Joined ${new Date(
-          member.joinedTimestamp
+          targetMember.joinedTimestamp
         ).toLocaleString()}`
       );
 
@@ -188,7 +188,7 @@ module.exports = {
           if (
             interaction.isButton() &&
             interaction.message.id === msg.id &&
-            interaction.user.id === author.user.id
+            interaction.user.id === member.user.id
           ) {
             let title = '',
               description = '';
@@ -214,8 +214,8 @@ module.exports = {
 
             const specEmbed = util.embedify(
               'BLURPLE',
-              `${member.user.tag} | ${title}`,
-              member.user.displayAvatarURL(),
+              `${targetMember.user.tag} | ${title}`,
+              targetMember.user.displayAvatarURL(),
               description
             );
 
@@ -248,7 +248,7 @@ module.exports = {
       else {
         const infractions = await infractionSchema.deleteMany({
           guildID: guild.id,
-          userID: member.user.id,
+          userID: targetMember.user.id,
         });
 
         description = `Deleted \`${infractions.n}\` infractions.`;
@@ -258,8 +258,8 @@ module.exports = {
         embeds: [
           util.embedify(
             color,
-            author.user.username,
-            author.user.displayAvatarURL(),
+            member.user.username,
+            member.user.displayAvatarURL(),
             description
           ),
         ],

@@ -6,7 +6,7 @@ module.exports = {
   description: 'Buy and sell items on the market.',
   global: true,
   options: null,
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild) {
     const currencySymbol = await util.getCurrencySymbol(guild.id);
     const listings = await marketItemSchema
       .find({

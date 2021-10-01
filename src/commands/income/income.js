@@ -7,7 +7,7 @@ module.exports = {
   description: 'View all income commands and their settings.',
   global: true,
   options: null,
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild) {
     const incomeEmbed = util.embedify(
       'BLURPLE',
       `${guild.name}'s Income Commands`,

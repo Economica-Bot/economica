@@ -50,17 +50,17 @@ client.on('interactionCreate', async (interaction) => {
 
   const command = client.commands.get(interaction.commandName);
   const channel = interaction.channel;
-  const author = interaction.member;
-  const guild = author.guild;
+  const member = interaction.member;
+  const guild = interaction.guild;
   const options = interaction.options;
 
   //Check permission
-  const permissible = await client.permissible(author, guild, channel, command);
+  const permissible = await client.permissible(member, guild, channel, command);
   if (permissible.length) {
     const embed = util.embedify(
       'RED',
-      author.user.username,
-      author.user.displayAvatarURL(),
+      member.user.username,
+      member.user.displayAvatarURL(),
       permissible
     );
 
@@ -78,10 +78,10 @@ client.on('interactionCreate', async (interaction) => {
     timestamp: new Date().getTime(),
   };
 
-  await util.setUserCommandStats(guild.id, author.user.id, properties);
+  await util.setUserCommandStats(guild.id, member.user.id, properties);
 
   await command
-    ?.run(interaction, guild, author, options)
+    ?.run(interaction, guild, member, options)
     .catch((error) => client.error(error, interaction, command));
 });
 

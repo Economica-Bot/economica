@@ -275,14 +275,14 @@ module.exports = {
       ],
   ***REMOVED***
   ], //https://crescent.edu/post/the-basic-rules-of-roulette
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     let color = 'GREEN',
-      title = author.user.username,
-      icon_url = author.user.displayAvatarURL(),
+      title = member.user.username,
+      icon_url = member.user.displayAvatarURL(),
       description = '',
       bet;
     const cSymbol = await util.getCurrencySymbol(guild.id);
-    const { wallet } = await util.getEconInfo(guild.id, author.user.id);
+    const { wallet } = await util.getEconInfo(guild.id, member.user.id);
     const ballPocket =
       options._group === 'inside'
         ? Math.floor(Math.random() * 36 + 1)
@@ -541,7 +541,7 @@ module.exports = {
     if (!description.includes('format')) {
       await util.transaction(
         guild.id,
-        author.user.id,
+        member.user.id,
         this.name,
         description,
         bet,

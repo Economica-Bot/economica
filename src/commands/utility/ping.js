@@ -4,13 +4,13 @@ module.exports = {
   description: 'ping',
   options: null,
   global: true,
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member) {
     await interaction.reply({
       embeds: [
         util.embedify(
           'GREEN',
-          author.user.username,
-          author.user.displayAvatarURL(),
+          member.user.username,
+          member.user.displayAvatarURL(),
           `Pong! \`${client.ws.ping}ms\``
         ),
       ],

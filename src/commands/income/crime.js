@@ -5,7 +5,7 @@ module.exports = {
     'Commit a crime to increase your wallet balance with risk of fine.',
   global: true,
   options: null,
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, author) {
     const guildID = guild.id,
       userID = author.id;
     const properties = await util.getCommandStats(guildID, this.name);

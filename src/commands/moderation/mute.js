@@ -32,7 +32,7 @@ module.exports = {
       type: 3,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     let member,
       reason,
       duration,
@@ -41,8 +41,8 @@ module.exports = {
       permanent = true,
       exit = false;
     let color = 'BLURPLE',
-      title = author.user.username,
-      icon_url = author.user.displayAvatarURL(),
+      title = member.user.username,
+      icon_url = member.user.displayAvatarURL(),
       description = '',
       footer = '';
 
@@ -60,7 +60,7 @@ module.exports = {
       options._hoistedOptions.forEach((option) => {
         if (option.name === 'user') {
           member = option.member;
-          if (member.user.id === author.user.id) {
+          if (member.user.id === member.user.id) {
             color = 'RED';
             description = 'You cannot mute yourself!';
 
@@ -133,7 +133,7 @@ module.exports = {
         await util.infraction(
           guild.id,
           member.id,
-          author.user.id,
+          member.user.id,
           this.name,
           reason,
           permanent,
