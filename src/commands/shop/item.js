@@ -301,8 +301,6 @@ module.exports = {
           util.error('`description` must be 400 characters or less.')
         );
       if (options.duration) {
-        console.log('duration1:' + options.duration)
-        console.log('duration2:' + ms(options.duration))
         if (!ms(options.duration))
           return await interaction.reply(
             util.error(
@@ -351,13 +349,14 @@ module.exports = {
           .replace(/[\s,]+/g, ',')
           .split(',')) {
           if (item) {
+            const dbItem = await shopItemSchema.findOne({
+              guildID: guild.id,
+              name: {
+                $regex: new RegExp(item, 'i'),
+            ***REMOVED***
+            })
             if (
-              !(await shopItemSchema.findOne({
-                guildID: guild.id,
-                name: {
-                  $regex: new RegExp(item, 'i'),
-              ***REMOVED***
-              }))
+              !(dbItem)
               // string is not an item in the shop
             ) {
               return await interaction.reply(
@@ -366,7 +365,7 @@ module.exports = {
                 )
               );
             } else {
-              requiredItemsArray.push(item);
+              requiredItemsArray.push(dbItem.name);
             }
           }
         }
@@ -380,8 +379,6 @@ module.exports = {
             `\`required_balance\` must be greater than \`price\` (${options.price}).`
           )
         );
-      
-      console.log('duration:' + options.duration)
       // type<Type> validation
       if (_subcommand !== 'basic') {
         if (_subcommand === 'generator') {
@@ -398,7 +395,7 @@ module.exports = {
             );
           options.generator_period =
             +options.generator_period || +ms(options.generator_period); // parseInt
-          
+
           if (
             !(await shopItemSchema.findOne({
               guildID: guild.id,
@@ -510,7 +507,7 @@ module.exports = {
         }`,
         true
       );
-      const createdAt = new Date(item.createdOnTimestamp);
+      const createdAt = new Date(item.createdAt);
       embed.addField('Date Created', `${createdAt.toUTCString()}`, true);
       embed.addField(
         'Type',
@@ -522,6 +519,11 @@ module.exports = {
         `${item.stockLeft?.toLocaleString() || 'Infinite'}`,
         true
       );
+      embed.addField(
+        'Expires In',
+        item.expiresOnTimestamp ? ms(item.expiresOnTimestamp - Date.now()) : 'Never',
+        true
+      )
       embed.addField(
         'Role Given',
         `${item.rolesGivenArray?.[0]
@@ -553,7 +555,7 @@ module.exports = {
       );
       embed.addField(
         'Items Required',
-        item.requirements?.requiredInventoryItemsArray?.join(', ') || 'None',
+        `\`${item.requirements?.requiredInventoryItemsArray?.join('`, `')}\`` || 'None',
         false
       );
 
@@ -578,13 +580,14 @@ module.exports = {
 
       await interaction.reply({ embeds: [embed] });
     } else if (_subcommand === 'delete') {
+      const item = await shopItemSchema.findOne({
+        guildID: guild.id,
+        name: {
+          $regex: new RegExp(options.name, 'i'),
+      ***REMOVED***
+      })
       if (
-        await shopItemSchema.findOne({
-          guildID: guild.id,
-          name: {
-            $regex: new RegExp(options.name, 'i'),
-        ***REMOVED***
-        })
+        item
       ) {
         await shopItemSchema.deleteOne({
           guildID: guild.id,
@@ -597,7 +600,7 @@ module.exports = {
         embed.setColor('GREEN');
         embed.setAuthor(member.user.username, member.user.displayAvatarURL());
         embed.setDescription(
-          `Successfully deleted item with \`name\` ${options.name}`
+          `Successfully deleted item with name \`${item.name}\``
         );
 
         await interaction.reply({ embeds: [embed] });
