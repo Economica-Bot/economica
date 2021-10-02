@@ -53,6 +53,10 @@ client.on('interactionCreate', async (interaction) => {
   const member = interaction.member;
   const guild = interaction.guild;
   const options = interaction.options;
+  const fops = {}
+  options._hoistedOptions.forEach((o) => {
+    fops[o.name] = o.value;
+  });
 
   //Check permission
   const permissible = await client.permissible(member, guild, channel, command);
@@ -81,7 +85,7 @@ client.on('interactionCreate', async (interaction) => {
   await util.setUserCommandStats(guild.id, member.user.id, properties);
 
   await command
-    ?.run(interaction, guild, member, options)
+    ?.run(interaction, guild, member, options, fops)
     .catch((error) => client.error(error, interaction, command));
 });
 
