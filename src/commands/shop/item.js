@@ -104,7 +104,7 @@ module.exports = {
           description:
             'The new name of the item.',
           type: apiTypes.String,
-          required: true,
+          required: false,
       ***REMOVED***
         {
           name: 'price',
@@ -507,7 +507,7 @@ module.exports = {
       embed.setColor('BLUE');
       embed.setAuthor(member.user.username, member.user.displayAvatarURL());
       embed.setTitle(item.name);
-      embed.setDescription(item.description || 'A very interesting item.');
+      embed.setDescription(`__ID:__ \`${item._id}\`\n\n` + (item.description || 'A very interesting item.'));
 
       embed.addField(
         'Price',
@@ -545,21 +545,20 @@ module.exports = {
       );
       embed.addField(
         'Role Required',
-        `${item.requirements.requiredRolesArray?.[0]
-          ? '<@&' + item.requirements.requiredRolesArray?.[0] + '>'
+        `${item.requirements?.requiredRolesArray?.[0]
+          ? '<@&' + item.requirements?.requiredRolesArray?.[0] + '>'
           : 'None'
         }`,
         true
       );
       embed.addField(
         'Minimum Balance',
-        `${currencySymbol}${item.requirements.requiredBalance?.toLocaleString() || '0'}`,
+        `${currencySymbol}${item.requirements?.requiredBalance?.toLocaleString() || '0'}`,
         true
       );
       embed.addField(
         'Items Required',
-        item.requirements.requiredInventoryItemsArray ?
-          item.requirements.requiredInventoryItemsArray.join(', ') : 'None',
+        item.requirements?.requiredInventoryItemsArray?.join(', ') || 'None',
         false
       );
 
@@ -684,12 +683,12 @@ module.exports = {
       interaction.reply(`You bought ${item.name}`);
     } else if (_subcommand === 'edit') {
       // validation
-      if (!(
-        await shopItemSchema.findOne({
-          guildID: guild.id,
-          name: { $regex: new RegExp(options.name, 'i') }
-        })
-      )) {
+      const targetItem = await shopItemSchema.findOne({
+        guildID: guild.id,
+        name: { $regex: new RegExp(options.name, 'i') }
+      })
+
+      if (!targetItem) {
         return await interaction.reply(util.error(`No item with name ${options.name} found in the shop!`))
       }
       if (!(options.new_name.length <= 200))
@@ -797,6 +796,62 @@ module.exports = {
           )
         );
       }
+
+      let editedItem = {
+        requirements: {}
+      }
+
+      if (options.new_name) {
+        editedItem['name'] = options.new_name
+      }
+      if (options.price) {
+        editedItem['price'] = options.price
+      }
+      if (options.description) {
+        editedItem['description'] = options.description
+      }
+      if (options.duration) {
+        editedItem['duration'] = options.duration
+      }
+      if (options.stock) {
+        editedItem['stockLeft'] = options.stock
+      }
+      if (options.is_inventory_item) {
+        editedItem['isInvetoryItem'] = options.is_inventory_item
+      }
+      if (options.role_given) {
+        editedItem['rolesGivenArray'] = [options.role_given]
+      }
+      if (options.role_removed) {
+        editedItem['rolesRemovedArray'] = [options.role_removed]
+      }
+      if (options.required_role) {
+        editedItem.requirements['requiredRolesArray'] = [options.required_role]
+      }
+      if (options.required_inventory_items) {
+        editedItem.requirements['requiredInventoryItemsArray'] = options.requiredItemsArray
+      }
+      if (options.required_balance) {
+        editedItem.requirements['requiredBalance'] = options.required_balance
+      }
+
+      if (!(Object.keys(editedItem.requirements).length)) delete editedItem.requirements
+
+      if (
+        targetItem
+      ) {
+        await shopItemSchema.findOneAndUpdate({
+          guildID: guild.id,
+          name: {
+            $regex: new RegExp(options.name, 'i')
+          }
+      ***REMOVED*** editedItem)
+      }
+
+      console.log(await shopItemSchema.findOne({
+        guildID: guild.id,
+        _id: targetItem._id
+      }))
 
       // execution (callback)
       let description = ``;
