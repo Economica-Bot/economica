@@ -18,31 +18,31 @@ module.exports = {
       type: 3,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
-    const member = options._hoistedOptions[0].member;
+  async run(interaction, guild, member, options) {
+    const targetMember = options._hoistedOptions[0].member;
     let embed = (result = null),
       ephemeral = false,
       reason = options._hoistedOptions[1]?.value ?? 'No reason provided';
 
-    if (member.user.id === author.user.id) {
+    if (targetMember.user.id === member.user.id) {
       embed = util.embedify(
         'RED',
-        author.user.username,
-        author.user.displayAvatarURL(),
+        member.user.username,
+        member.user.displayAvatarURL(),
         'You cannot ban yourself!'
       );
       ephemeral = true;
-    } else if (!member.bannable) {
+    } else if (!targetMember.bannable) {
       embed = util.embedify(
         'RED',
-        author.user.username,
-        author.user.displayAvatarURL(),
-        `<@!${member.user.id}> is not bannable.`
+        member.user.username,
+        member.user.displayAvatarURL(),
+        `<@!${targetMember.user.id}> is not bannable.`
       );
       ephemeral = true;
     } else {
       //Ban, record, and send message
-      await member
+      await targetMember
         .send({
           embeds: [
             util.embedify(
@@ -54,25 +54,25 @@ module.exports = {
           ],
         })
         .catch((err) => {
-          result = `Could not dm ${member.user.tag}.\n\`${err}\``;
+          result = `Could not dm ${targetMember.user.tag}.\n\`${err}\``;
         });
 
       embed = util.embedify(
         'GREEN',
-        `Banned ${member.user.tag}`,
-        member.user.displayAvatarURL(),
+        `Banned ${targetMember.user.tag}`,
+        targetMember.user.displayAvatarURL(),
         `**Reason**: \`${reason}\``,
-        result ? result : member.user.id
+        result ? result : targetMember.user.id
       );
 
-      member.ban({
+      targetMember.ban({
         reason,
       });
 
       await util.infraction(
         guild.id,
-        member.id,
-        author.user.id,
+        targetMember.id,
+        member.user.id,
         this.name,
         reason,
         true

@@ -5,18 +5,10 @@ module.exports = {
     'Commit a crime to increase your wallet balance with risk of fine.',
   global: true,
   options: null,
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, author) {
     const guildID = guild.id,
       userID = author.id;
-    const properties = await util.getCommandStats(guildID, this.name);
-    const uProperties = await util.getUserCommandStats(
-      guildID,
-      userID,
-      this.name
-    );
-    if (!(await util.coolDown(interaction, properties, uProperties))) {
-      return;
-    }
+    const properties = await util.getIncomeCommandStats(guildID, this.name);
 
     let color, description, amount;
     const { min, max, minfine, maxfine } = properties;
@@ -50,8 +42,5 @@ module.exports = {
       0,
       amount
     );
-    await util.setUserCommandStats(guildID, userID, this.name, {
-      timestamp: new Date().getTime(),
-    });
 ***REMOVED***
 };

@@ -13,6 +13,10 @@ module.exports = {
       required: true,
       choices: [
         {
+          name: 'Configuration',
+          value: 'config',
+      ***REMOVED***
+        {
           name: 'Economy',
           value: 'economy',
       ***REMOVED***
@@ -29,12 +33,12 @@ module.exports = {
           value: 'moderation',
       ***REMOVED***
         {
-          name: 'Statistics',
-          value: 'statistics',
-      ***REMOVED***
-        {
           name: 'Shop',
           value: 'shop',
+      ***REMOVED***
+        {
+          name: 'Statistics',
+          value: 'statistics',
       ***REMOVED***
         {
           name: 'Utility',
@@ -48,7 +52,7 @@ module.exports = {
       type: 7, //CHANNEL
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     const group = options._hoistedOptions[0].value;
     let commands = [];
     client.commands.forEach((command) => {
@@ -90,8 +94,8 @@ module.exports = {
 
     embed = util.embedify(
       color,
-      author.user.username,
-      author.user.displayAvatarURL(),
+      member.user.username,
+      member.user.displayAvatarURL(),
       description
     );
 

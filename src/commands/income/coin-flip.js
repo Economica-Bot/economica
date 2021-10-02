@@ -12,19 +12,9 @@ module.exports = {
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     const properties = await util.getCommandStats(guild.id, this.name);
-    const uProperties = await util.getUserCommandStats(
-      guild.id,
-      author.id,
-      this.name
-    );
-    const { wallet } = await util.getEconInfo(guild.id, author.id);
-
-    if (!(await util.coolDown(interaction, properties, uProperties))) {
-      return;
-    }
-
+    const { wallet } = await util.getEconInfo(guild.id, member.id);
     let color = 'RED',
       description = '',
       embed;
@@ -48,7 +38,7 @@ module.exports = {
 
       util.transaction(
         guild.id,
-        author.id,
+        member.id,
         this.name,
         '`system`',
         amount,
@@ -59,15 +49,11 @@ module.exports = {
 
     embed = util.embedify(
       color,
-      author.user.username,
-      author.user.displayAvatarURL(),
+      member.user.username,
+      member.user.displayAvatarURL(),
       description
     );
 
     await interaction.reply({ embeds: [embed] });
-
-    await util.setUserCommandStats(guild.id, author.id, this.name, {
-      timestamp: new Date().getTime(),
-    });
 ***REMOVED***
 };

@@ -3,24 +3,22 @@ module.exports = {
   group: 'utility',
   description: `Get information about ${client.user.tag}'s servers`,
   global: true,
-  commandOptions: null,
-  async run(interaction, guild, author, options) {
+  options: null,
+  async run(interaction) {
     let serverCount = 0,
-      memberCount = 0,
-      description = '';
+      memberCount = 0;
     client.guilds.cache.forEach((guild) => {
       serverCount++;
       memberCount += guild.memberCount;
-      description += `**${guild}** | \`${guild.memberCount.toLocaleString()}\` Members\n`;
     });
 
     const embed = util.embedify(
       'GREEN',
-      'Server List',
+      `Economica's Servers`,
       client.user.displayAvatarURL(),
-      description
+      `Server Count: \`${serverCount}\` | Member Count: \`${memberCount}\``
     );
 
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed] });
 ***REMOVED***
 };

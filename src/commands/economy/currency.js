@@ -27,7 +27,7 @@ module.exports = {
       options: null,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     let color, description, footer;
     if (options._subcommand === 'set') {
       const currency = options._hoistedOptions[0].value;
@@ -74,6 +74,6 @@ module.exports = {
       footer
     );
 
-    interaction.reply({ embeds: [embed] });
+    await interaction.reply({ embeds: [embed] });
 ***REMOVED***
 };

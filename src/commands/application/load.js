@@ -14,7 +14,7 @@ module.exports = {
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     const commandDirectories = fs.readdirSync('./commands');
     for (const commandDirectory of commandDirectories) {
       const commandFiles = fs
@@ -30,24 +30,24 @@ module.exports = {
           client.commands.set(command.name, command);
           const embed = util.embedify(
             'GREEN',
-            author.user.username,
-            author.user.displayAvatarURL(),
+            member.user.username,
+            member.user.displayAvatarURL(),
             `Force loaded \`${command.name}\``
           );
 
-          interaction.editReply({ embeds: [embed], ephemeral: true });
+          await interaction.editReply({ embeds: [embed], ephemeral: true });
           return;
         }
       }
     }
-    
+
     const embed = util.embedify(
       'RED',
-      author.user.username,
-      author.user.displayAvatarURL(),
+      member.user.username,
+      member.user.displayAvatarURL(),
       `Command \`${options._hoistedOptions[0].value}\` not found.`
     );
 
-    interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed], ephemeral: true });
 ***REMOVED***
 };

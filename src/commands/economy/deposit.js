@@ -12,19 +12,19 @@ module.exports = {
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     let color = 'GREEN',
       description = '',
       embed;
 
     const cSymbol = await util.getCurrencySymbol(guild.id);
-    const { wallet } = await util.getEconInfo(guild.id, author.user.id);
+    const { wallet } = await util.getEconInfo(guild.id, member.user.id);
     const amount =
       options._hoistedOptions[0].value === 'all'
         ? wallet
         : parseInt(options._hoistedOptions[0].value);
 
-    if (amount) {
+    if (amount) { 
       if (amount < 1 || amount > wallet) {
         color = 'RED';
         description = `Insufficient wallet: ${cSymbol}${amount.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`;
@@ -32,7 +32,7 @@ module.exports = {
         description = `Deposited ${cSymbol}${amount.toLocaleString()}`;
         await util.transaction(
           guild.id,
-          author.user.id,
+          member.user.id,
           this.name,
           '`system`',
           -amount,
@@ -47,11 +47,11 @@ module.exports = {
 
     embed = util.embedify(
       color,
-      author.user.username,
-      author.user.displayAvatarURL(),
+      member.user.username,
+      member.user.displayAvatarURL(),
       description
     );
 
-    interaction.reply({ embeds: [embed] });
+    await interaction.reply({ embeds: [embed] });
 ***REMOVED***
 };

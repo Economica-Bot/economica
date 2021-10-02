@@ -18,25 +18,25 @@ module.exports = {
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     let color = 'GREEN',
       description = '',
       embed,
       ephemeral = false;
 
     const cSymbol = await util.getCurrencySymbol(guild.id);
-    const { wallet } = await util.getEconInfo(guild.id, author.user.id);
-    const member = options._hoistedOptions[0].member;
+    const { wallet } = await util.getEconInfo(guild.id, member.user.id);
+    const targetMember = options._hoistedOptions[0].member;
     const amount =
       options._hoistedOptions[1].value === 'all'
         ? wallet
         : parseInt(options._hoistedOptions[1].value);
 
-    if (member.user.id === author.user.id) {
+    if (targetMember.user.id === member.user.id) {
       embed = util.embedify(
         'RED',
-        author.user.username,
-        author.user.displayAvatarURL(),
+        member.user.username,
+        member.user.displayAvatarURL(),
         'You cannot pay yourself!'
       );
 
@@ -47,22 +47,22 @@ module.exports = {
         description = `Insufficient wallet: ${cSymbol}${amount.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`;
       } else {
         description = `Payed <@!${
-          member.user.id
+          targetMember.user.id
         }> ${cSymbol}${amount.toLocaleString()}`;
         await util.transaction(
           guild.id,
-          author.user.id,
+          member.user.id,
           this.name,
-          `Payment to  <@!${member.user.id}>`,
+          `Payment to  <@!${targetMember.user.id}>`,
           -amount,
           0,
           -amount
         );
         await util.transaction(
           guild.id,
-          member.user.id,
+          targetMember.user.id,
           this.name,
-          `Payment from  <@!${author.user.id}>`,
+          `Payment from  <@!${member.user.id}>`,
           amount,
           0,
           amount
@@ -76,11 +76,11 @@ module.exports = {
 
     embed = util.embedify(
       color,
-      author.user.username,
-      author.user.displayAvatarURL(),
+      member.user.username,
+      member.user.displayAvatarURL(),
       description
     );
 
-    interaction.reply({ embeds: [embed], ephemeral });
+    await interaction.reply({ embeds: [embed], ephemeral });
 ***REMOVED***
 };

@@ -11,8 +11,8 @@ module.exports = {
       type: 6,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
-    const user = options._hoistedOptions?.[0]?.user ?? author.user;
+  async run(interaction, guild, member, options) {
+    const user = options._hoistedOptions?.[0]?.user ?? member.user;
 
     const cSymbol = await util.getCurrencySymbol(guild.id);
     const { wallet, treasury, total, rank } = await util.getEconInfo(
@@ -45,6 +45,6 @@ module.exports = {
       ***REMOVED***
       ]);
 
-    interaction.reply({ embeds: [balEmbed] });
+    await interaction.reply({ embeds: [balEmbed] });
 ***REMOVED***
 };

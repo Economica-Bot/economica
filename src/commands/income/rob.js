@@ -16,17 +16,7 @@ module.exports = {
     const user = options._hoistedOptions[0].user;
     const guildID = guild.id;
     const userID = author.id;
-    const properties = await util.getCommandStats(guildID, this.name);
-    const uProperties = await util.getUserCommandStats(
-      guildID,
-      userID,
-      this.name
-    );
-
-    if (!util.coolDown(interaction, properties, uProperties)) {
-      return;
-    }
-
+    const properties = await util.getIncomeCommandStats(guildID, this.name);
     let color, description, amount;
     const { minfine, maxfine } = properties;
     const { wallet } = await util.getEconInfo(guildID, user.id);
@@ -66,9 +56,6 @@ module.exports = {
         0,
         amount
       );
-      await util.setUserCommandStats(guildID, userID, this.name, {
-        timestamp: new Date().getTime(),
-      });
     }
 
     const embed = util.embedify(

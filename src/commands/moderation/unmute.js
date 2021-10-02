@@ -21,8 +21,8 @@ module.exports = {
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
-    const member = options._hoistedOptions[0].member;
+  async run(interaction, guild, member, options) {
+    const targetMember = options._hoistedOptions[0].member;
 
     //Remove muted role
     const mutedRole = guild.roles.cache.find((role) => {
@@ -36,8 +36,8 @@ module.exports = {
         embeds: [
           util.embedify(
             'RED',
-            author.user.username,
-            author.user.displayAvatarURL(),
+            member.user.username,
+            member.user.displayAvatarURL(),
             `The ${mutedRole} role is above my highest role!`
           ),
         ],
@@ -46,11 +46,11 @@ module.exports = {
       return
     }
 
-    member.roles.remove(mutedRole);
+    targetMember.roles.remove(mutedRole);
 
     //Check if there is an active mute
     const activeMutes = await infractionSchema.find({
-      userID: member.id,
+      userID: targetMember.id,
       guildID: guild.id,
       type: 'mute',
       active: true,
@@ -61,10 +61,10 @@ module.exports = {
         embeds: [
           util.embedify(
             'RED',
-            member.user.tag,
-            member.user.displayAvatarURL(),
+            targetMember.user.tag,
+            targetMember.user.displayAvatarURL(),
             `Could not find any active mutes for this user.`,
-            member.user.id
+            targetMember.user.id
           ),
         ],
       });
@@ -72,20 +72,20 @@ module.exports = {
       return;
     }
 
-    interaction.reply({
+    await interaction.reply({
       embeds: [
         util.embedify(
           'GREEN',
           guild.name,
           guild.iconURL(),
-          `Unmuted <@!${member.user.id}>`
+          `Unmuted <@!${targetMember.user.id}>`
         ),
       ],
     });
 
     await infractionSchema.updateMany(
       {
-        userID: member.id,
+        userID: targetMember.id,
         guildID: guild.id,
         type: 'mute',
         active: true,

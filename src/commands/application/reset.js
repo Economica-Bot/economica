@@ -1,28 +1,60 @@
 module.exports = {
   name: 'reset',
   group: 'application',
-  description: 'Resets all slash commands.',
+  description: 'Resets slash commands.',
   global: true,
-  options: null,
+  options: [
+    {
+      name: 'guild',
+      description: 'Reset guilds slash commands.',
+      type: 1,
+      options: [
+        {
+          name: 'scope',
+          description: 'Reset scope.',
+          type: 3,
+          choices: [
+            {
+              name: 'This',
+              value: 'this',
+          ***REMOVED***
+            {
+              name: 'All',
+              value: 'all',
+          ***REMOVED***
+          ],
+          required: true,
+      ***REMOVED***
+      ],
+  ***REMOVED***
+    {
+      name: 'global',
+      description: 'Reset global slash commands.',
+      type: 1,
+  ***REMOVED***
+  ],
   ownerOnly: true,
-  async run(interaction, guild, author, options) {
-    // client.guilds.cache.forEach(async guild => {
-    //     guild.commands.set([])
-    // })
-
-    // await client.commands.set([])
-
-    //Only economica server + globals
-    guild.commands.set([]);
-    client.commands.set([]);
+  async run(interaction, guild, member, options) {
+    interaction.deferReply();
+        if (options._subcommand === 'guild') {
+      if (options._hoistedOptions[0].value === 'this') {
+        await guild.commands.set([]);
+      } else {
+        client.guilds.cache.forEach(async (guild) => {
+          guild.commands.set([]);
+        });
+      }
+    } else {
+      await client.application.commands.set([]);
+    }
 
     embed = util.embedify(
       'GREEN',
-      author.user.username,
-      author.user.displayAvatarURL(),
+      member.user.username,
+      member.user.displayAvatarURL(),
       '`RESET ALL SLASH COMMANDS`'
     );
 
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.editReply({ embeds: [embed], ephemeral: true });
 ***REMOVED***
 };

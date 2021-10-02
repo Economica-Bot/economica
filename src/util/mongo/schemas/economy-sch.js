@@ -11,8 +11,6 @@ const reqNumber = {
   default: 0,
 };
 
-const commandParams = {};
-
 const econSchema = mongoose.Schema(
   {
     guildID: reqString,
@@ -20,13 +18,7 @@ const econSchema = mongoose.Schema(
     wallet: reqNumber,
     treasury: reqNumber,
     total: reqNumber,
-    commands: {
-      work: commandParams,
-      beg: commandParams,
-      crime: commandParams,
-      rob: commandParams,
-      coinflip: commandParams,
-  ***REMOVED***
+    commands: [],
 ***REMOVED***
   {
     versionKey: false,

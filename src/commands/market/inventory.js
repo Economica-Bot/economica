@@ -15,31 +15,28 @@ module.exports = {
   ],
   async run(interaction, guild, author, options) {
     const user = options._hoistedOptions?.[0]?.user ?? author.user;
-
-    const currencySymbol = await util.getCurrencySymbol(guild.id);
     const inventory = await inventorySchema.findOne({
       userID: user.id,
       guildID: guild.id,
     });
 
-    const inventoryEmbed = util.embedify(
-      'BLURPLE',
-      user.username,
-      user.displayAvatarURL()
-    );
-
     let i = 0;
+    let description = '';
     if (inventory) {
       for (const item of inventory.inventory) {
         i++;
-        inventoryEmbed.addField(
-          `${currencySymbol}${item.price.toLocaleString()} | \`${item.item}\``,
-          `${item.description}`
-        );
+        for (const prop in item) {
+          description += `${prop}: ${item[prop]}\n`;
+        }
+        description += '\n';
       }
     }
-
-    inventoryEmbed.setDescription(`\`${i}\` Items`);
+    const inventoryEmbed = util.embedify(
+      'BLURPLE',
+      user.username,
+      user.displayAvatarURL(),
+      `\`${i}\` Items\n\`\`\`${description}\`\`\``
+    );
 
     await interaction.reply({ embeds: [inventoryEmbed] });
 ***REMOVED***

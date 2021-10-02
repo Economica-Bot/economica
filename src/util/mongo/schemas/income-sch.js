@@ -13,35 +13,7 @@ const reqString = {
 const incomeSchema = mongoose.Schema(
   {
     guildID: reqString,
-    work: {
-      min: num,
-      max: num,
-      cooldown: num,
-  ***REMOVED***
-    beg: {
-      min: num,
-      max: num,
-      cooldown: num,
-      chance: num,
-  ***REMOVED***
-    crime: {
-      min: num,
-      max: num,
-      cooldown: num,
-      chance: num,
-      minfine: num,
-      maxfine: num,
-  ***REMOVED***
-    rob: {
-      cooldown: num,
-      chance: num,
-      minfine: num,
-      maxfine: num,
-  ***REMOVED***
-    coinflip: {
-      cooldown: num,
-      chance: num,
-  ***REMOVED***
+    incomeCommands: [],
 ***REMOVED***
   {
     versionKey: false,

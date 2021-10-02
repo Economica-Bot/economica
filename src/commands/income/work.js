@@ -4,21 +4,13 @@ module.exports = {
   description: 'Earn wallet money',
   global: true,
   options: null,
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, author) {
     const guildID = guild.id,
       userID = author.id;
-    const properties = await util.getCommandStats(guildID, this.name);
-    const uProperties = await util.getUserCommandStats(
-      guildID,
-      userID,
-      this.name
-    );
-    if (!(await util.coolDown(interaction, properties, uProperties))) {
-      return;
-    }
+    const { min, max } = await util.getIncomeCommandStats(guildID, this.name);
 
     const currencySymbol = await util.getCurrencySymbol(guildID);
-    const amount = util.intInRange(properties.min, properties.max);
+    const amount = util.intInRange(min, max);
     const embed = util.embedify(
       'GREEN',
       author.user.username,
@@ -37,8 +29,5 @@ module.exports = {
       0,
       amount
     );
-    await util.setUserCommandStats(guildID, userID, this.name, {
-      timestamp: new Date().getTime(),
-    });
 ***REMOVED***
 };

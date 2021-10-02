@@ -21,14 +21,14 @@ module.exports = {
           value: 'treasury',
       ***REMOVED***
         {
-          name: 'Total',
-          value: 'total',
+          name: 'Networth',
+          value: 'networth',
       ***REMOVED***
       ],
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     await interaction.deferReply({
       ephemeral: true,
     });
