@@ -1,5 +1,6 @@
 const ms = require('ms');
 const shopItemSchema = require('@schemas/shop-item-sch');
+const inventorySchema = require('@schemas/inventory-sch');
 
 const globalCreateOptions = {
   required: [
@@ -173,6 +174,8 @@ module.exports = {
   ],
   async run(interaction, guild, member, options, clientMember, fops) {
     const { _group, _subcommand, _hoistedOptions } = options;
+
+    const currencySymbol = await util.getCurrencySymbol(guild.id);
 
     options = {};
     _hoistedOptions.forEach((o) => {
@@ -408,6 +411,8 @@ module.exports = {
           $regex: new RegExp(options.name, 'i'),
       ***REMOVED***
       });
+
+      if (!item) return await interaction.reply(util.error(`No item found with name ${options.name}`));
       const currencySymbol = await util.getCurrencySymbol(guild.id);
 
       let embed = new Discord.MessageEmbed();
@@ -418,8 +423,7 @@ module.exports = {
 
       embed.addField(
         'Price',
-        `${currencySymbol}${
-          item.price > 0 ? item.price.toLocaleString() : 'Free'
+        `${currencySymbol}${item.price > 0 ? item.price.toLocaleString() : 'Free'
         }`,
         true
       );
@@ -437,28 +441,25 @@ module.exports = {
       );
       embed.addField(
         'Role Given',
-        `${
-          item.rolesGivenArray?.[0]
-            ? '<@&' + item.rolesGivenArray?.[0] + '>'
-            : 'None'
+        `${item.rolesGivenArray?.[0]
+          ? '<@&' + item.rolesGivenArray?.[0] + '>'
+          : 'None'
         }`,
         true
       );
       embed.addField(
         'Role Removed',
-        `${
-          item.rolesRemovedArray?.[0]
-            ? '<@&' + item.rolesRemovedArray?.[0] + '>'
-            : 'None'
+        `${item.rolesRemovedArray?.[0]
+          ? '<@&' + item.rolesRemovedArray?.[0] + '>'
+          : 'None'
         }`,
         true
       );
       embed.addField(
         'Role Required',
-        `${
-          item.requiredRolesArray?.[0]
-            ? '<@&' + item.requiredRolesArray?.[0] + '>'
-            : 'None'
+        `${item.requiredRolesArray?.[0]
+          ? '<@&' + item.requiredRolesArray?.[0] + '>'
+          : 'None'
         }`,
         true
       );
@@ -469,7 +470,8 @@ module.exports = {
       );
       embed.addField(
         'Items Required',
-        `${item.requiredInventoryItemsArray.join(', ') || 'None'}`,
+        item.requiredInventoryItemsArray ?
+          item.requiredInventoryItemsArray.join(', ') : 'None',
         false
       );
 
@@ -486,8 +488,7 @@ module.exports = {
         );
         embed.addField(
           'Income Deposited?',
-          `${
-            item.isIncomeDeposited !== undefined ? item.isIncomeDeposited : true
+          `${item.isIncomeDeposited !== undefined ? item.isIncomeDeposited : true
           }`,
           true
         );
@@ -524,6 +525,75 @@ module.exports = {
         );
       }
     } else if (_subcommand === 'buy') {
+      const item = await shopItemSchema.findOne({
+        guildID: guild.id,
+        name: options.name,
+      });
+
+      if (!item) {
+        interaction.reply("Item doesn't exist");
+        return;
+      }
+
+      const inventory = (
+        await inventorySchema.findOne({
+          guildID: guild.id,
+          userID: author.user.id,
+        })
+      ).inventory;
+
+      const inventoryItem = inventory?.find((item) => {
+        return item.ref === options.name;
+      });
+
+      const { wallet } = util.getEconInfo(guild.id, author.user.id);
+
+      if (item.price > wallet) {
+        interaction.reply('You cannot afford this item.');
+        return;
+      }
+
+      if (inventoryItem) {
+        await inventorySchema.findOneAndUpdate(
+          {
+            guildID: guild.id,
+            userID: author.user.id,
+            'inventory.ref': inventoryItem.ref,
+        ***REMOVED***
+          {
+            $inc: {
+              'inventory.$.amount': 1,
+          ***REMOVED***
+          }
+        );
+      } else {
+        await inventorySchema.findOneAndUpdate(
+          {
+            guildID: guild.id,
+            userID: author.user.id,
+        ***REMOVED***
+          {
+            $push: {
+              inventory: {
+                name: item.name,
+                amount: 1,
+            ***REMOVED***
+          ***REMOVED***
+          }
+        );
+      }
+
+      util.transaction(
+        guild.id,
+        author.user.id,
+        'PURCHASE_SHOP_ITEM',
+        `Purchased ${item.name}`,
+        -item.price,
+        0,
+        -item.price
+      );
+
+      interaction.reply(`You bought ${item.name}`);
     }
 ***REMOVED***
 };

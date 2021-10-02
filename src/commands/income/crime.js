@@ -8,7 +8,7 @@ module.exports = {
   async run(interaction, guild, author) {
     const guildID = guild.id,
       userID = author.id;
-    const properties = await util.getCommandStats(guildID, this.name);
+    const properties = await util.getIncomeCommandStats(guildID, this.name);
 
     let color, description, amount;
     const { min, max, minfine, maxfine } = properties;
