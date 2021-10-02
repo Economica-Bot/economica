@@ -49,6 +49,9 @@ const shopItemSchema = mongoose.Schema({
   ***REMOVED***
 ***REMOVED***
   amountGiven: { type: Number, required: true, default: 1 },
+}, {
+  timestamps: true,
+  versionKey: false
 });
 
 /* 
