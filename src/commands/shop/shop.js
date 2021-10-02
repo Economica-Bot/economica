@@ -38,7 +38,7 @@ module.exports = {
   ***REMOVED***
   ],
   async run(interaction, guild, member, options, fops) {
-    const { _group, _subcommand, _hoistedOptions } = options;
+    const { _subcommand } = options;
     let embed = new Discord.MessageEmbed();
 
     if (_subcommand === 'view') {
