@@ -52,7 +52,7 @@ module.exports = {
       type: 7, //CHANNEL
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     const group = options._hoistedOptions[0].value;
     let commands = [];
     client.commands.forEach((command) => {
@@ -94,8 +94,8 @@ module.exports = {
 
     embed = util.embedify(
       color,
-      author.user.username,
-      author.user.displayAvatarURL(),
+      member.user.username,
+      member.user.displayAvatarURL(),
       description
     );
 

@@ -56,7 +56,7 @@ module.exports = {
           description = `Successfully purchased \`${item}\` for ${currencySymbol}${price.toLocaleString()}`;
           util.transaction(
             guild.id,
-            author.id,
+            author.user.id,
             this.name,
             `Purchased \`${item}\``,
             -price,

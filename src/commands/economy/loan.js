@@ -105,26 +105,26 @@ module.exports = {
   ***REMOVED***
   ],
 
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     const guildID = guild.id;
 
     let color = 'BLURPLE',
-      title = author.user.username,
-      icon_url = author.user.displayAvatarURL(),
+      title = member.user.username,
+      icon_url = member.user.displayAvatarURL(),
       description = '',
       footer = '';
 
     const cSymbol = await util.getCurrencySymbol(guild.id);
-    const { wallet } = await util.getEconInfo(guild.id, author.user.id);
+    const { wallet } = await util.getEconInfo(guild.id, member.user.id);
 
     if (options._subcommand === 'propose') {
-      const member = options._hoistedOptions[0].member;
+      const targetMember = options._hoistedOptions[0].member;
       const principal = options._hoistedOptions[1].value;
       const repayment = options._hoistedOptions[2].value;
       const length = options._hoistedOptions[3].value;
 
       //Validation
-      if (member.user.id === author.user.id) {
+      if (targetMember.user.id === member.user.id) {
         (color = 'RED'), (description += 'You cannot give yourself a loan!\n');
       }
       if (principal < 1 || repayment < 1) {
@@ -154,8 +154,8 @@ module.exports = {
       //Create loan schema - to be handled in a dedicated feature
       const loan = await new loanSchema({
         guildID,
-        borrowerID: member.user.id,
-        lenderID: author.user.id,
+        borrowerID: targetMember.user.id,
+        lenderID: member.user.id,
         principal,
         repayment,
         expires: new Date(new Date().getTime() + ms(length)),
@@ -167,9 +167,9 @@ module.exports = {
       //Execute principal transaction
       await util.transaction(
         guild.id,
-        author.user.id,
+        member.user.id,
         this.name,
-        `Loan to <@!${member.user.id}> | Loan ID \`${loan._id}\``,
+        `Loan to <@!${targetMember.user.id}> | Loan ID \`${loan._id}\``,
         -principal,
         0,
         -principal
@@ -194,7 +194,7 @@ module.exports = {
         });
 
         let loan;
-        if (author.roles.cache.has(econManagerRole.id)) {
+        if (member.roles.cache.has(econManagerRole.id)) {
           loan = await loanSchema.findOneAndDelete({
             _id,
             pending: true,
@@ -202,7 +202,7 @@ module.exports = {
         } else {
           loan = await loanSchema.findOneAndDelete({
             _id,
-            userID: author.user.id,
+            userID: member.user.id,
             pending: true,
           });
         }
@@ -237,7 +237,7 @@ module.exports = {
         const loan = await loanSchema.findOneAndUpdate(
           {
             _id,
-            borrowerID: author.user.id,
+            borrowerID: member.user.id,
             pending: true,
         ***REMOVED***
           {
@@ -252,7 +252,7 @@ module.exports = {
           //Transfer funds
           await util.transaction(
             guildID,
-            author.user.id,
+            member.user.id,
             this.name,
             `Loan from <@!${loan.lenderID}> \`accepted\` | Loan ID: \`${loan._id}\``,
             loan.principal,
@@ -275,7 +275,7 @@ module.exports = {
         const loan = await loanSchema.findOneAndUpdate(
           {
             _id,
-            borrowerID: author.user.id,
+            borrowerID: member.user.id,
             pending: true,
         ***REMOVED***
           {

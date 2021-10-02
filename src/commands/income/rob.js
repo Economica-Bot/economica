@@ -16,7 +16,7 @@ module.exports = {
     const user = options._hoistedOptions[0].user;
     const guildID = guild.id;
     const userID = author.id;
-    const properties = await util.getCommandStats(guildID, this.name);
+    const properties = await util.getIncomeCommandStats(guildID, this.name);
     let color, description, amount;
     const { minfine, maxfine } = properties;
     const { wallet } = await util.getEconInfo(guildID, user.id);

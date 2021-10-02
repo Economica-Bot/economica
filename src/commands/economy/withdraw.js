@@ -12,13 +12,13 @@ module.exports = {
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     let color = 'GREEN',
       description = '',
       embed;
 
     const cSymbol = await util.getCurrencySymbol(guild.id);
-    const { treasury } = await util.getEconInfo(guild.id, author.user.id);
+    const { treasury } = await util.getEconInfo(guild.id, member.user.id);
     const amount =
       options._hoistedOptions[0].value === 'all'
         ? treasury
@@ -32,7 +32,7 @@ module.exports = {
         description = `Withdrew ${cSymbol}${amount.toLocaleString()}`;
         await util.transaction(
           guild.id,
-          author.user.id,
+          member.user.id,
           this.name,
           '`system`',
           amount,
@@ -47,8 +47,8 @@ module.exports = {
 
     embed = util.embedify(
       color,
-      author.user.username,
-      author.user.displayAvatarURL(),
+      member.user.username,
+      member.user.displayAvatarURL(),
       description
     );
 

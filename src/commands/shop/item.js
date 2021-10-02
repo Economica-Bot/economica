@@ -1,5 +1,6 @@
 const ms = require('ms');
 const shopItemSchema = require('@schemas/shop-item-sch');
+const inventorySchema = require('@schemas/inventory-sch');
 
 const globalCreateOptions = {
   required: [
@@ -171,8 +172,10 @@ module.exports = {
       ],
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options, clientMember, fops) {
+  async run(interaction, guild, member, options, clientMember, fops) {
     const { _group, _subcommand, _hoistedOptions } = options;
+
+    const currencySymbol = await util.getCurrencySymbol(guild.id);
 
     options = {};
     _hoistedOptions.forEach((o) => {
@@ -414,7 +417,7 @@ module.exports = {
 
       let embed = new Discord.MessageEmbed();
       embed.setColor('BLUE');
-      embed.setAuthor(author.user.username, author.user.displayAvatarURL());
+      embed.setAuthor(member.user.username, member.user.displayAvatarURL());
       embed.setTitle(item.name);
       embed.setDescription(item.description || 'A very interesting item.');
 
@@ -510,7 +513,7 @@ module.exports = {
 
         let embed = new Discord.MessageEmbed();
         embed.setColor('GREEN');
-        embed.setAuthor(author.user.username, author.user.displayAvatarURL());
+        embed.setAuthor(member.user.username, member.user.displayAvatarURL());
         embed.setDescription(
           `Successfully deleted item with \`name\` ${options.name}`
         );
@@ -521,6 +524,76 @@ module.exports = {
           util.error(`No item found with \`name\` "${options.name}"`)
         );
       }
+    } else if (_subcommand === 'buy') {
+      const item = await shopItemSchema.findOne({
+        guildID: guild.id,
+        name: options.name,
+      });
+
+      if (!item) {
+        interaction.reply("Item doesn't exist");
+        return;
+      }
+
+      const inventory = (
+        await inventorySchema.findOne({
+          guildID: guild.id,
+          userID: author.user.id,
+        })
+      ).inventory;
+
+      const inventoryItem = inventory?.find((item) => {
+        return item.ref === options.name;
+      });
+
+      const { wallet } = util.getEconInfo(guild.id, author.user.id);
+
+      if (item.price > wallet) {
+        interaction.reply('You cannot afford this item.');
+        return;
+      }
+
+      if (inventoryItem) {
+        await inventorySchema.findOneAndUpdate(
+          {
+            guildID: guild.id,
+            userID: author.user.id,
+            'inventory.ref': inventoryItem.ref,
+        ***REMOVED***
+          {
+            $inc: {
+              'inventory.$.amount': 1,
+          ***REMOVED***
+          }
+        );
+      } else {
+        await inventorySchema.findOneAndUpdate(
+          {
+            guildID: guild.id,
+            userID: author.user.id,
+        ***REMOVED***
+          {
+            $push: {
+              inventory: {
+                name: item.name,
+                amount: 1,
+            ***REMOVED***
+          ***REMOVED***
+          }
+        );
+      }
+
+      util.transaction(
+        guild.id,
+        author.user.id,
+        'PURCHASE_SHOP_ITEM',
+        `Purchased ${item.name}`,
+        -item.price,
+        0,
+        -item.price
+      );
+
+      interaction.reply(`You bought ${item.name}`);
     }
 ***REMOVED***
 };

@@ -33,7 +33,7 @@ module.exports = {
       ],
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     let wallet = 0, treasury = 0, total = 0, transactions = [];
     const wallets = [], treasuries = [], totals = [], dates = [];
     
@@ -44,7 +44,7 @@ module.exports = {
     
     if(options._group === 'balance') {
       if(options._subcommand === 'user') {
-        const user = options._hoistedOptions[0]?.user ?? author.user;
+        const user = options._hoistedOptions[0]?.user ?? member.user;
         transactions = await transactionSchema.find({
           guildID: guild.id,
           userID: user.id,

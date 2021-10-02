@@ -15,7 +15,7 @@ module.exports = {
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     const userID = options._hoistedOptions[0].value;
     const guildBan = (await guild.bans.fetch()).get(userID);
 

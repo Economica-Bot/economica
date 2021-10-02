@@ -17,12 +17,12 @@ module.exports = {
             required: true        
       ***REMOVED***
     ],
-    async run(interaction, guild, author, options) {
-        let color = 'GREEN', title = author.user.username, icon_url = author.user.displayAvatarURL(), description = ''
+    async run(interaction, guild, member, options) {
+        let color = 'GREEN', title = member.user.username, icon_url = member.user.displayAvatarURL(), description = ''
         let bet = options._hoistedOptions[0].value
         const number = options._hoistedOptions[1].value;
         const cSymbol = await util.getCurrencySymbol(guild.id)
-        const { wallet } = await util.getEconInfo(guild.id, author.user.id)
+        const { wallet } = await util.getEconInfo(guild.id, member.user.id)
         if(number < 0 || number > 6) {
             color = 'RED'
             description = `Invalid value: \`${number.toLocaleString()}\``
@@ -41,7 +41,7 @@ module.exports = {
                 bet*=-1
             }
 
-            await util.transaction(guild.id, author.user.id, this.name, description, bet, 0, bet)
+            await util.transaction(guild.id, member.user.id, this.name, description, bet, 0, bet)
         }
 
         await interaction.reply({

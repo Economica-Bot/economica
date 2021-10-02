@@ -95,6 +95,19 @@ module.exports = {
       ***REMOVED***
       ],
   ***REMOVED***
+    {
+      name: 'buy',
+      description: 'Buy a market listing.',
+      type: 1,
+      options: [
+        {
+          name: 'item',
+          description: 'Specify the item you wish to buy.',
+          type: 3,
+          required: true,
+      ***REMOVED***
+      ],
+  ***REMOVED***
   ],
   async run(interaction, guild, author, options) {
     const guildID = guild.id;
@@ -237,6 +250,78 @@ module.exports = {
         color = 'GREEN';
         description = `Successfully disabled \`${item}\` on the market.`;
       }
+    } else if (options._subcommand === 'buy') {
+      const item = await marketItemSchema.findOne({
+        guildID: guild.id,
+        name: options.name,
+      });
+
+      if (!item) {
+        interaction.reply("Item doesn't exist");
+        return;
+      }
+
+      const inventory = (
+        await inventorySchema.findOne({
+          guildID: guild.id,
+          userID: author.user.id,
+        })
+      ).inventory;
+
+      const inventoryItem = inventory?.find((item) => {
+        return item.ref === options.name;
+      });
+
+      const { wallet } = util.getEconInfo(guild.id, author.user.id);
+
+      if (item.price > wallet) {
+        interaction.reply('You cannot afford this item.');
+        return;
+      }
+
+      if (inventoryItem) {
+        await inventorySchema.findOneAndUpdate(
+          {
+            guildID: guild.id,
+            userID: author.user.id,
+            'inventory.ref': inventoryItem.ref,
+        ***REMOVED***
+          {
+            $inc: {
+              'inventory.$.amount': 1,
+          ***REMOVED***
+          }
+        );
+      } else {
+        await inventorySchema.findOneAndUpdate(
+          {
+            guildID: guild.id,
+            userID: author.user.id,
+        ***REMOVED***
+          {
+            $push: {
+              inventory: {
+                type: 'shop_item',
+                ref: item.name,
+                purchasedAt: Date.now(),
+                amount: 1,
+            ***REMOVED***
+          ***REMOVED***
+          }
+        );
+      }
+
+      util.transaction(
+        guild.id,
+        author.user.id,
+        'PURCHASE_SHOP_ITEM',
+        `Purchased ${item.name}`,
+        -item.price,
+        0,
+        -item.price
+      );
+
+      interaction.reply(`You bought ${item.name}`);
     }
 
     embed
