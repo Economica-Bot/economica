@@ -8,6 +8,12 @@ module.exports = {
   permissions: ['MANAGE_MESSAGES'],
   options: [
     {
+      name: 'channel',
+      description: 'Select a channel.',
+      type: 7, //channel
+      required: false,
+  ***REMOVED***
+    {
       name: 'msgcount',
       description: 'The count of messages to delete, between 0 and 100.',
       type: 4, //integer
@@ -15,8 +21,16 @@ module.exports = {
   ***REMOVED***
   ],
   async run(interaction, guild, member, options) {
+    console.log(options);
     let embed = null,
-      msgCount = options._hoistedOptions?.[0]?.value ?? 100;
+      channelID,
+      msgCount;
+    for (const option of options._hoistedOptions) {
+      if (option.channel) {
+        channelID = option.channel.id;
+      } else if (option.name === 'msgcount') msgCount = option.value;
+    }
+    msgCount = msgCount ?? 100;
     if ((msgCount && msgCount > 100) || msgCount < 0) {
       embed = util.embedify(
         'RED',
@@ -25,7 +39,9 @@ module.exports = {
         `Invalid Length: \`${msgCount}\` out of bounds.`
       );
     } else {
-      const channel = await client.channels.fetch(interaction.channelId);
+      const channel = await guild.channels.fetch(
+        channelID || interaction.channelId
+      );
 
       await channel.bulkDelete(msgCount).then((val) => {
         embed = util.embedify(
