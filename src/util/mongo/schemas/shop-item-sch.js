@@ -1,17 +1,15 @@
 const mongoose = require('mongoose');
 
 const shopItemSchema = mongoose.Schema({
-  _id: { type: String, required: true },
   guildID: {
     type: String,
     required: true,
 ***REMOVED***
-  createdOnTimestamp: { type: Number, required: false }, // when the item was created
-  lastEditedOnTimestamp: { type: Number, required: false }, // last editeed time
   name: { type: String, required: true },
   price: { type: Number, required: true },
   description: { type: String, required: false },
   expiresOnTimestamp: { type: Number, required: false }, // when the item will be de-activated in the shop
+  duration: { type: Number, required: false }, // temp value that gets translated to expiresOnTimestamp
   stockLeft: { type: Number, required: false }, // how many instances of the item can be purchased before it is de-activated in the shop
   isInventoryItem: { type: Boolean, required: false },
   rolesGivenArray: { type: Array, required: false },
@@ -62,8 +60,12 @@ const shopItemSchema = mongoose.Schema({
 */
 shopItemSchema.pre('save', function (next) {
   let item = this
+  if (this.duration) {
+    this.expiresOnTimestamp = Date.now() + this.duration
+    delete this.duration
+  }
 
-  console.log(item)
+  console.log(this)
 
   next();
 })
