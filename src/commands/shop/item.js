@@ -301,13 +301,15 @@ module.exports = {
           util.error('`description` must be 400 characters or less.')
         );
       if (options.duration) {
+        console.log('duration1:' + options.duration)
+        console.log('duration2:' + ms(options.duration))
         if (!ms(options.duration))
           return await interaction.reply(
             util.error(
               '`duration` must be a parseable duration value (5000, 5s, 5m, etc...) and greater than 0.'
             )
           );
-        options.duration = +options.duration;
+        options.duration = +options.duration || ms(options.duration);
       }
       if (options.stock && !(options.stock >= 0))
         return await interaction.reply(
@@ -378,6 +380,8 @@ module.exports = {
             `\`required_balance\` must be greater than \`price\` (${options.price}).`
           )
         );
+      
+      console.log('duration:' + options.duration)
       // type<Type> validation
       if (_subcommand !== 'basic') {
         if (_subcommand === 'generator') {
@@ -394,7 +398,7 @@ module.exports = {
             );
           options.generator_period =
             +options.generator_period || +ms(options.generator_period); // parseInt
-
+          
           if (
             !(await shopItemSchema.findOne({
               guildID: guild.id,
@@ -407,16 +411,11 @@ module.exports = {
               await util.trimObj(
                 {
                   // omit undefined/null properties
-                  _id: `${options.name.toUpperCase()}${Date.now()}`,
                   guildID: guild.id,
-                  createdOnTimestamp: new Date(),
                   name: options.name,
                   price: options.price,
                   description: options.description,
                   duration: options.duration,
-                  expiresOnTimestamp: options.duration
-                    ? Date.now() + options.duration
-                    : undefined,
                   stockLeft: options.stock,
                   isInventoryItem: options.is_inventory_item,
                   rolesGivenArray: [options.role_given],
@@ -452,16 +451,11 @@ module.exports = {
             await util.trimObj(
               {
                 // omit undefined/null properties
-                _id: `${options.name.toUpperCase()}${Date.now()}`,
                 guildID: guild.id,
-                createdOnTimestamp: new Date(),
                 name: options.name,
                 price: options.price,
                 description: options.description,
                 duration: options.duration,
-                expiresOnTimestamp: options.duration
-                  ? Date.now() + options.duration
-                  : undefined,
                 stockLeft: options.stock,
                 isInventoryItem: options.is_inventory_item,
                 rolesGivenArray: [options.role_given],
@@ -507,7 +501,6 @@ module.exports = {
       embed.setColor('BLUE');
       embed.setAuthor(member.user.username, member.user.displayAvatarURL());
       embed.setTitle(item.name);
-      embed.setDescription(`__ID:__ \`${item._id}\`\n\n` + (item.description || 'A very interesting item.'));
 
       embed.addField(
         'Price',
