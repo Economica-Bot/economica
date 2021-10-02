@@ -50,6 +50,19 @@ module.exports.error = (description, title = 'Input Error') => {
   };
 };
 
+module.exports.warning = (description, title = 'Warning') => {
+  return {
+    embeds: [
+      {
+        color: 'YELLOW',
+        title,
+        description,
+    ***REMOVED***
+    ],
+    ephemeral: true,
+  };
+};
+
 /**
  * Gets a user's economy information.
  * @param {string} guildID - Guild id.
