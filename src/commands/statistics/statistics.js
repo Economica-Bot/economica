@@ -84,12 +84,44 @@ module.exports = {
       }
     }
 
+    dates1 = []
+    if(dates.length > 250) {
+      const r = dates.length / 250
+      for(let i = 0; i < 250; i+=r) {
+        dates1.push(dates[Math.round(i)])
+      }
+    }
+
+    wallets1 = []
+    if(wallets.length > 250) {
+      const r = wallets.length / 250
+      for(let i = 0; i < 250; i+=r) {
+        wallets1.push(wallets[Math.round(i)])
+      }
+    }
+
+    treasuries1 = []
+    if(treasuries.length > 250) {
+      const r = treasuries.length / 250
+      for(let i = 0; i < 250; i+=r) {
+        treasuries1.push(treasuries[Math.round(i)])
+      }
+    }
+
+    totals1 = []
+    if(totals.length > 250) {
+      const r = totals.length / 250
+      for(let i = 0; i < 250; i+=r) {
+        totals1.push(totals[Math.round(i)])
+      }
+    }
+
     const data = {
-      labels: dates,
+      labels: dates1.length ? dates1 : dates,
       datasets: [
         {
           label: 'Wallet',
-          data: wallets,
+          data: wallets1.length ? wallets1 : wallets,
           borderColor: 'rgb(255, 99, 132)',
           backgroundColor: 'rgba(255, 99, 132, .5)',
           borderWidth: '3',
@@ -98,7 +130,7 @@ module.exports = {
       ***REMOVED***
         {
           label: 'Treasury',
-          data: treasuries,
+          data: treasuries1.length ? treasuries1 : treasuries,
           borderColor: 'rgb(54, 162, 235)',
           backgroundColor: 'rgba(54, 162, 235, .5)',
           borderWidth: '3',
@@ -107,7 +139,7 @@ module.exports = {
       ***REMOVED***
         {
           label: 'Total',
-          data: totals,
+          data: totals1.length ? totals1 : totals,
           borderColor: 'rgb(255, 205, 86)',
           backgroundColor: 'rgba(255, 205, 86, .5)',
           borderWidth: '3',
