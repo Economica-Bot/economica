@@ -63,21 +63,8 @@ const shopItemSchema = mongoose.Schema({
 shopItemSchema.pre('save', function (next) {
   let item = this
 
-  // set the creation and lastEdited dates if not specified in schema object construction
-  if (!item.createdOnTimestamp) item.createdOnTimestamp = Date.now()
-  item.lastEditedOnTimestamp = Date.now()
-
   console.log(item)
 
-  // temp values
-  if (true) { // true will be replaced with `item.expiresOnTimestamp`
-    util.wait(10000).then(() => { // 10000 will be replaced with `item.expiresOnTimestamp`
-      console.log(`item ${item.name} has expired!`) // entire function will be replaced with `shopItemSchema.deleteOne(...)`
-    })
-  }
-
-  // trim the object's properties:
-  // item = util.trimObj(item, undefined, true) // iterated trim
   next();
 })
 
