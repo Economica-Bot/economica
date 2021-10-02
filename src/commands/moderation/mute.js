@@ -33,8 +33,7 @@ module.exports = {
   ***REMOVED***
   ],
   async run(interaction, guild, member, options) {
-    let member,
-      reason,
+    let reason,
       duration,
       expires,
       ephemeral = false,
@@ -59,8 +58,8 @@ module.exports = {
     } else {
       options._hoistedOptions.forEach((option) => {
         if (option.name === 'user') {
-          member = option.member;
-          if (member.user.id === member.user.id) {
+          targetMember = option.member;
+          if (targetMember.user.id === member.user.id) {
             color = 'RED';
             description = 'You cannot mute yourself!';
 
