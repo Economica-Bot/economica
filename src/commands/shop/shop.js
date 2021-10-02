@@ -57,8 +57,7 @@ module.exports = {
         );
         items.forEach((item) => {
           embed.addField(
-            `${currencySymbol}${
-              item.price > 0 ? util.num(item.price) : 'Free'
+            `${currencySymbol}${item.price > 0 ? util.num(item.price) : 'Free'
             } - ${util.cut(item.name)}`,
             util.cut(item.description || 'A very interesting item.', 200),
             item.description?.length > 100 ? false : true
@@ -67,21 +66,30 @@ module.exports = {
       }
     } else if (_subcommand === 'clear') {
       console.log(fops);
-      if (fops.confirm) {
-        return;
+      if (!fops.confirm) {
+        return interaction.reply(util.warning('Shop clear was aborted.'));
       } else {
-        await shopItemSchema.deleteMany({
-          guildID: guild.id,
-        });
+        const items = await shopItemSchema.find({
+          guildID: guild.id
+        })
+        console.log(items)
+        if (items.length < 1) {
+          // there are no items in the shop
+          return await interaction.reply(util.error('There were no items in the shop.', 'Usage Error'))
+        } else {
+          await shopItemSchema.deleteMany({
+            guildID: guild.id,
+          });
 
-        embed.setAuthor(
-          `${member.user.username}`,
-          member.user.displayAvatarURL()
-        );
-        embed.setColor('GREEN');
-        embed.setDescription(
-          `Successfully deleted all items in the ${guild.name} shop.`
-        );
+          embed.setAuthor(
+            `${member.user.username}`,
+            member.user.displayAvatarURL()
+          );
+          embed.setColor('GREEN');
+          embed.setDescription(
+            `Successfully deleted all items in the ${guild.name} shop.`
+          );
+        }
       }
     }
 
