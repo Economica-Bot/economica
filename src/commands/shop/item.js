@@ -408,6 +408,8 @@ module.exports = {
           $regex: new RegExp(options.name, 'i'),
       ***REMOVED***
       });
+
+      if (!item) return await interaction.reply(util.error(`No item found with name ${options.name}`));
       const currencySymbol = await util.getCurrencySymbol(guild.id);
 
       let embed = new Discord.MessageEmbed();
@@ -418,8 +420,7 @@ module.exports = {
 
       embed.addField(
         'Price',
-        `${currencySymbol}${
-          item.price > 0 ? item.price.toLocaleString() : 'Free'
+        `${currencySymbol}${item.price > 0 ? item.price.toLocaleString() : 'Free'
         }`,
         true
       );
@@ -437,28 +438,25 @@ module.exports = {
       );
       embed.addField(
         'Role Given',
-        `${
-          item.rolesGivenArray?.[0]
-            ? '<@&' + item.rolesGivenArray?.[0] + '>'
-            : 'None'
+        `${item.rolesGivenArray?.[0]
+          ? '<@&' + item.rolesGivenArray?.[0] + '>'
+          : 'None'
         }`,
         true
       );
       embed.addField(
         'Role Removed',
-        `${
-          item.rolesRemovedArray?.[0]
-            ? '<@&' + item.rolesRemovedArray?.[0] + '>'
-            : 'None'
+        `${item.rolesRemovedArray?.[0]
+          ? '<@&' + item.rolesRemovedArray?.[0] + '>'
+          : 'None'
         }`,
         true
       );
       embed.addField(
         'Role Required',
-        `${
-          item.requiredRolesArray?.[0]
-            ? '<@&' + item.requiredRolesArray?.[0] + '>'
-            : 'None'
+        `${item.requiredRolesArray?.[0]
+          ? '<@&' + item.requiredRolesArray?.[0] + '>'
+          : 'None'
         }`,
         true
       );
@@ -469,7 +467,8 @@ module.exports = {
       );
       embed.addField(
         'Items Required',
-        `${item.requiredInventoryItemsArray.join(', ') || 'None'}`,
+        item.requiredInventoryItemsArray ?
+          item.requiredInventoryItemsArray.join(', ') : 'None',
         false
       );
 
@@ -486,8 +485,7 @@ module.exports = {
         );
         embed.addField(
           'Income Deposited?',
-          `${
-            item.isIncomeDeposited !== undefined ? item.isIncomeDeposited : true
+          `${item.isIncomeDeposited !== undefined ? item.isIncomeDeposited : true
           }`,
           true
         );
@@ -523,7 +521,6 @@ module.exports = {
           util.error(`No item found with \`name\` "${options.name}"`)
         );
       }
-    } else if (_subcommand === 'buy') {
     }
 ***REMOVED***
 };
