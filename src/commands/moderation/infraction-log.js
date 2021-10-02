@@ -28,7 +28,7 @@ module.exports = {
       options: null,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     let color, description;
     if (options._subcommand === 'set') {
       const channel = options._hoistedOptions[0].channel;

@@ -12,7 +12,7 @@ module.exports = {
       type: 3, //STRING
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     let embed,
       command = options._hoistedOptions?.[0]?.value;
     if (!command) {
@@ -62,8 +62,8 @@ module.exports = {
       } else {
         embed = util.embedify(
           'RED',
-          author.user.username,
-          author.user.displayAvatarURL(),
+          member.user.username,
+          member.user.displayAvatarURL(),
           `Command \`${command}\` not found`
         );
       }

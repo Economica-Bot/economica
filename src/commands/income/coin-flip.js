@@ -12,9 +12,9 @@ module.exports = {
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
-    const properties = await util.getIncomeCommandStats(guild.id, this.name);
-    const { wallet } = await util.getEconInfo(guild.id, author.id);
+  async run(interaction, guild, member, options) {
+    const properties = await util.getCommandStats(guild.id, this.name);
+    const { wallet } = await util.getEconInfo(guild.id, member.id);
     let color = 'RED',
       description = '',
       embed;
@@ -38,7 +38,7 @@ module.exports = {
 
       util.transaction(
         guild.id,
-        author.id,
+        member.id,
         this.name,
         '`system`',
         amount,
@@ -49,8 +49,8 @@ module.exports = {
 
     embed = util.embedify(
       color,
-      author.user.username,
-      author.user.displayAvatarURL(),
+      member.user.username,
+      member.user.displayAvatarURL(),
       description
     );
 

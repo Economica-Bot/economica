@@ -4,7 +4,7 @@ module.exports = {
   description: `Get information about ${client.user.tag}'s servers`,
   global: true,
   options: null,
-  async run(interaction, guild, author, options) {
+  async run(interaction) {
     let serverCount = 0,
       memberCount = 0;
     client.guilds.cache.forEach((guild) => {

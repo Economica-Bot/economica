@@ -34,10 +34,9 @@ module.exports = {
   ***REMOVED***
   ],
   ownerOnly: true,
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     interaction.deferReply();
-
-    if (options._subcommand === 'guild') {
+        if (options._subcommand === 'guild') {
       if (options._hoistedOptions[0].value === 'this') {
         await guild.commands.set([]);
       } else {
@@ -51,8 +50,8 @@ module.exports = {
 
     embed = util.embedify(
       'GREEN',
-      author.user.username,
-      author.user.displayAvatarURL(),
+      member.user.username,
+      member.user.displayAvatarURL(),
       '`RESET ALL SLASH COMMANDS`'
     );
 

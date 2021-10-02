@@ -37,7 +37,7 @@ module.exports = {
       ],
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options, fops) {
+  async run(interaction, guild, member, options, fops) {
     const { _group, _subcommand, _hoistedOptions } = options;
     let embed = new Discord.MessageEmbed();
 
@@ -75,8 +75,8 @@ module.exports = {
         });
 
         embed.setAuthor(
-          `${author.user.username}`,
-          author.user.displayAvatarURL()
+          `${member.user.username}`,
+          member.user.displayAvatarURL()
         );
         embed.setColor('GREEN');
         embed.setDescription(

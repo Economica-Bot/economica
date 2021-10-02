@@ -95,11 +95,11 @@ module.exports = {
       ],
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
+  async run(interaction, guild, member, options) {
     const guildID = guild.id;
     let color = 'GREEN',
-      title = author.user.username,
-      icon_url = author.user.displayAvatarURL(),
+      title = member.user.username,
+      icon_url = member.user.displayAvatarURL(),
       description = '';
 
     if (options._group === 'inventory') {
