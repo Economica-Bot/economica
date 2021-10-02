@@ -85,7 +85,7 @@ client.on('interactionCreate', async (interaction) => {
     .catch((error) => client.error(error, interaction, command));
 });
 
-client.login(process.env.ECON_TOKEN);
+client.login(process.env.ECON_ALPHA_TOKEN);
 
 client.registerCommands = async () => {
   const commands = [];
@@ -194,7 +194,7 @@ client.permissible = async (author, guild, channel, command) => {
   }
 
   if (command?.disabled) {
-    description += 'This command is disabled.\n';
+    permissible += 'This command is disabled.\n';
   }
 
   if (missingClientPermissions.length) {
