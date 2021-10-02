@@ -501,6 +501,8 @@ module.exports = {
       embed.setColor('BLUE');
       embed.setAuthor(member.user.username, member.user.displayAvatarURL());
       embed.setTitle(item.name);
+      embed.setDescription(item.description || 'A very interesting item.');
+      embed.setFooter(`ID: ${item._id}`)
 
       embed.addField(
         'Price',
