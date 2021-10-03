@@ -555,7 +555,7 @@ module.exports = {
       );
       embed.addField(
         'Items Required',
-        item.requirements?.requiredInventoryItemsArray?.length > 0? `\`${item.requirements?.requiredInventoryItemsArray?.join('`, `')}\`` : 'None',
+        item.requirements?.requiredInventoryItemsArray?.length > 0 ? `\`${item.requirements?.requiredInventoryItemsArray?.join('`, `')}\`` : 'None',
         false
       );
 
@@ -689,7 +689,7 @@ module.exports = {
       if (!targetItem) {
         return await interaction.reply(util.error(`No item with name ${options.name} found in the shop!`))
       }
-      if (!(options.new_name.length <= 200))
+      if ((options.new_name?.length > 200))
         return await interaction.reply(
           util.error('`new_name` must be 200 characters or less.')
         );
@@ -702,7 +702,7 @@ module.exports = {
         return await interaction.reply(
           util.error(`An item with \`new_name\` "${options.new_name}" already exists.`)
         );
-      if (options.new_name.includes(','))
+      if (options.new_name?.includes(','))
         return await interaction.reply(
           util.error('`new_name` must not contain commas.')
         );
@@ -763,24 +763,26 @@ module.exports = {
       if (options.required_items) {
         for (item of `,${options.required_items},`
           .replace(/[\s,]+/g, ',')
-          .split(','));
-        {
-          if (
-            !(await shopItemSchema.findOne({
+          .split(',')) {
+          if (item) {
+            const dbItem = await shopItemSchema.findOne({
               guildID: guild.id,
-              new_name: {
+              name: {
                 $regex: new RegExp(item, 'i'),
             ***REMOVED***
-            }))
-            // string is not an item in the shop
-          ) {
-            return await interaction.reply(
-              util.error(
-                `Could not find item "${item}" in shop!\n\n\`required_items\` must be a valid shop item new_name or list of valid shop item new_names separated by comma(s) \`,\``
-              )
-            );
-          } else {
-            requiredItemsArray.push(item);
+            })
+            if (
+              !(dbItem)
+              // string is not an item in the shop
+            ) {
+              return await interaction.reply(
+                util.error(
+                  `Could not find item "${item}" in shop!\n\n\`required_items\` must be a valid shop item name or list of valid shop item names separated by comma(s) \`,\``
+                )
+              );
+            } else {
+              requiredItemsArray.push(dbItem.name);
+            }
           }
         }
       }
@@ -826,9 +828,10 @@ module.exports = {
       if (options.required_role) {
         editedItem.requirements['requiredRolesArray'] = [options.required_role]
       }
-      if (options.required_inventory_items) {
-        editedItem.requirements['requiredInventoryItemsArray'] = options.requiredItemsArray
-      }
+      if (options.required_items) {
+        console.log(requiredItemsArray)
+        editedItem.requirements['requiredInventoryItemsArray'] = requiredItemsArray
+      } else delete editedItem.requirements['requiredInventoryItemsArray']
       if (options.required_balance) {
         editedItem.requirements['requiredBalance'] = options.required_balance
       }
