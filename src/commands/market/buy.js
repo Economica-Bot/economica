@@ -2,6 +2,7 @@ const inventorySchema = require('@schemas/inventory-sch');
 const marketItemSchema = require('@schemas/market-item-sch');
 
 module.exports = {
+  disabled: true,
   name: 'buy',
   group: 'market',
   description: 'Purchase an item from the market.',
