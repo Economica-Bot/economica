@@ -31,24 +31,6 @@ const shopItemSchema = mongoose.Schema({
       isIncomeDeposited: { type: Boolean, required: false }, // deposit the income to bank (true) or keep it as cash (false)
   ***REMOVED***
 ***REMOVED***
-  special: {
-    changeNick: { type: Boolean, required: false }, // purchaser can change their nickname regardless of permissions
-    gift: {
-      giftMoneyAmount: { type: Number, required: false },
-      giftItemsContentArray: { type: Array, required: false }, // items in the gift
-      giftClaimExpiration: { type: Date, required: false }, // how long until the gift can no longer be claimed
-  ***REMOVED***
-    incomeMultiplier: {
-      multiplier: { type: Number, required: false },
-      multiplierExpiration: { type: Date, required: false },
-  ***REMOVED***
-    changeNameColor: {
-      anyColor: { type: Boolean, required: false }, // can the purchaser decide the color?
-      colorRoleHex: { type: String, required: false }, // the specific color hex if the purchaser cannot decide the color
-      colorRoleExpiration: { type: Date, required: false },
-  ***REMOVED***
-***REMOVED***
-  amountGiven: { type: Number, required: true, default: 1 },
 }, {
   timestamps: true,
   versionKey: false
