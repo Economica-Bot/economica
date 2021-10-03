@@ -555,7 +555,7 @@ module.exports = {
       );
       embed.addField(
         'Items Required',
-        `\`${item.requirements?.requiredInventoryItemsArray?.join('`, `')}\`` || 'None',
+        item.requirements?.requiredInventoryItemsArray?.length > 0? `\`${item.requirements?.requiredInventoryItemsArray?.join('`, `')}\`` : 'None',
         false
       );
 
