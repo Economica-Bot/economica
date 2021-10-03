@@ -95,40 +95,40 @@ module.exports = {
         {
           name: 'name',
           description:
-            'The name of the item. This is also how it will be referenced for future actions.',
+            'The name of the item to edit.',
           type: apiTypes.String,
           required: true,
       ***REMOVED***
         {
           name: 'new_name',
           description:
-            'The new name of the item.',
+            'The new name of the item, if desired.',
           type: apiTypes.String,
           required: false,
       ***REMOVED***
         {
           name: 'price',
           description:
-            'The cost of the item and the minimum balance needed to purchase.',
+            'The new cost of the item and the minimum cash balance needed to purchase.',
           type: apiTypes.Integer,
           required: false,
       ***REMOVED***
         {
           name: 'description',
-          description: 'The description/info of the item.',
+          description: 'The new description/info of the item.',
           type: apiTypes.String,
           required: false,
       ***REMOVED***
         {
           name: 'duration',
-          description: 'Time until the item is deactivated in the shop.',
+          description: 'the updated time until the item is deactivated in the shop.',
           type: apiTypes.String,
           required: false,
       ***REMOVED***
         {
           name: 'stock',
           description:
-            'Quantity of this item that can be purchased until the item is deactivated in the shop.',
+            'The updated quantity of this item that can be purchased until the item is deactivated in the shop. Enter -1 for infinite.',
           type: apiTypes.Integer,
           required: false,
       ***REMOVED***
@@ -141,33 +141,33 @@ module.exports = {
       ***REMOVED***
         {
           name: 'required_role',
-          description: 'Role that a user must have to purchase.',
+          description: 'The new role that a user must have to purchase. Select Economica\'s bot role for none.',
           type: apiTypes.Role,
           required: false,
       ***REMOVED***
         {
           name: 'required_items',
           description:
-            'Inventory items or generators that a user must have to purchase.',
+            'New inventory items or generators that a user must have to purchase. Enter one , for none.',
           type: apiTypes.String,
           required: false,
       ***REMOVED***
         {
           name: 'required_balance',
           description:
-            'The minimum balance that a user must have to purchase. Cannot be lower than the item price.',
+            'The minimum balance that a user must have to purchase. Cannot be lower than the item price. Enter -1 for none.',
           type: apiTypes.Integer,
           required: false,
       ***REMOVED***
         {
           name: 'role_given',
-          description: 'A list of role mentions given on item purchase.',
+          description: 'A list of role mentions given on item purchase. Select Economica\'s bot role for none.',
           type: apiTypes.Role,
           required: false,
       ***REMOVED***
         {
           name: 'role_removed',
-          description: 'A list of role mentions removed on item purchase.',
+          description: 'A list of role mentions removed on item purchase. Select Economica\'s bot role for none.',
           type: apiTypes.Role,
           required: false,
       ***REMOVED***
