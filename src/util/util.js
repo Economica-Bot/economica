@@ -570,9 +570,9 @@ module.exports.num = (num) => {
   }
 
   if (degree) {
-    return `${(num / (Math.pow(10, pow10))).toFixed(2)}${degree}`
-  } else return num // string
-}
+    return `${(num / Math.pow(10, pow10)).toFixed(2)}${degree}`;
+  } else return num; // string
+};
 
 /**
  * Waits to perform actions for a given numbero of milliseconds.
