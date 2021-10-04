@@ -321,8 +321,6 @@ module.exports.getCommandStats = async (guildID, command) => {
     return c.command === command;
   });
 
-  console.log(result);
-
   let properties = config.commands[command] || config.commands['default'];
 
   for (const property in properties) {
