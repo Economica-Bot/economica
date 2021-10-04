@@ -123,7 +123,8 @@ module.exports = {
           label: 'Wallet',
           data: wallets1.length ? wallets1 : wallets,
           borderColor: 'rgb(255, 99, 132)',
-          backgroundColor: 'rgba(255, 99, 132, .5)',
+          //backgroundColor: 'rgba(255, 99, 132, .5)',
+          backgroundColor: 'transparent',
           borderWidth: '3',
           tension: 0,
           pointRadius: 0,
@@ -132,7 +133,8 @@ module.exports = {
           label: 'Treasury',
           data: treasuries1.length ? treasuries1 : treasuries,
           borderColor: 'rgb(54, 162, 235)',
-          backgroundColor: 'rgba(54, 162, 235, .5)',
+          //backgroundColor: 'rgba(54, 162, 235, .5)',
+          backgroundColor: 'transparent',
           borderWidth: '3',
           tension: 0,
           pointRadius: 0,
@@ -141,7 +143,8 @@ module.exports = {
           label: 'Total',
           data: totals1.length ? totals1 : totals,
           borderColor: 'rgb(255, 205, 86)',
-          backgroundColor: 'rgba(255, 205, 86, .5)',
+          //backgroundColor: 'rgba(255, 205, 86, .5)',
+          backgroundColor: 'transparent',
           borderWidth: '3',
           tension: 0,
           pointRadius: 0,
@@ -213,7 +216,7 @@ module.exports = {
       })
       .setWidth(600)
       .setHeight(450)
-      .setBackgroundColor('transparent');
+      .setBackgroundColor('#2f3136');
 
     const url = await chart.getShortUrl();
     const embed = util
