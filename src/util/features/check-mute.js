@@ -26,7 +26,7 @@ module.exports = (client) => {
 
         const clientMember = await guild.members.cache.get(client.user.id);
 
-        if(clientMember.roles.highest.position > mutedRole.position) {
+        if (clientMember.roles.highest.position > mutedRole.position) {
           member.roles.remove(mutedRole);
         }
       }
