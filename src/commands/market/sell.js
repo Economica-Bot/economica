@@ -1,6 +1,7 @@
 const inventorySchema = require('@schemas/inventory-sch');
 
 module.exports = {
+  disabled: true,
   name: 'sell',
   group: 'market',
   description: 'Sell an item for wallet cash.',

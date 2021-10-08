@@ -100,6 +100,10 @@ module.exports = {
           required: true,
       ***REMOVED***
         {
+          name: 'replace_all',
+          description: 'Whether to replace all omitted'
+      ***REMOVED***
+        {
           name: 'new_name',
           description:
             'The new name of the item, if desired.',
@@ -128,7 +132,7 @@ module.exports = {
         {
           name: 'stock',
           description:
-            'The updated quantity of this item that can be purchased until the item is deactivated in the shop. Enter -1 for infinite.',
+            'The updated quantity of this item remaining in the shop.',
           type: apiTypes.Integer,
           required: false,
       ***REMOVED***
@@ -141,14 +145,14 @@ module.exports = {
       ***REMOVED***
         {
           name: 'required_role',
-          description: 'The new role that a user must have to purchase. Select Economica\'s bot role for none.',
+          description: 'The new role that a user must have to purchase.',
           type: apiTypes.Role,
           required: false,
       ***REMOVED***
         {
           name: 'required_items',
           description:
-            'New inventory items or generators that a user must have to purchase. Enter one , for none.',
+            'New inventory items or generators that a user must have to purchase.',
           type: apiTypes.String,
           required: false,
       ***REMOVED***
@@ -725,10 +729,11 @@ module.exports = {
           );
         options.duration = +options.duration;
       }
-      if (options.stock && !(options.stock >= 0))
-        return await interaction.reply(
-          util.error('`stock` must be 0 or greater.')
-        );
+      if (options.stock) {
+        if (options.stock < 0) {
+          options.stock = undefined
+        } 
+      }
       if (options.role_given) {
         const role_given = await guild.roles.cache.get(options.role_given);
         if (clientMember.roles.highest.rawPosition <= role_given.rawPosition)

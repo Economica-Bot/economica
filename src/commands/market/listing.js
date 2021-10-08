@@ -2,6 +2,7 @@ const marketItemSchema = require('@schemas/market-item-sch');
 const inventorySchema = require('@schemas/inventory-sch');
 
 module.exports = {
+  disabled: true,
   name: 'listing',
   group: 'market',
   description: 'Interact with the server market.',

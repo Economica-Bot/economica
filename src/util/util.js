@@ -321,8 +321,6 @@ module.exports.getCommandStats = async (guildID, command) => {
     return c.command === command;
   });
 
-  console.log(result);
-
   let properties = config.commands[command] || config.commands['default'];
 
   for (const property in properties) {
@@ -570,9 +568,9 @@ module.exports.num = (num) => {
   }
 
   if (degree) {
-    return `${(num / (Math.pow(10, pow10))).toFixed(2)}${degree}`
-  } else return num // string
-}
+    return `${(num / Math.pow(10, pow10)).toFixed(2)}${degree}`;
+  } else return num; // string
+};
 
 /**
  * Waits to perform actions for a given numbero of milliseconds.
