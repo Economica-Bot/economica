@@ -19,6 +19,7 @@ const shopItemSchema = mongoose.Schema({
     // isEveryRoleRequired: { type: Boolean, required: false }, // when true, buyer must have all required roles to purchase. When false, buyer must have at least one required role to purchase.
     requiredInventoryItemsArray: { type: Array, required: false },
     requiredBalance: { type: Number, required: false },
+    required: false
 ***REMOVED***
   type: {
     type: String,
@@ -44,13 +45,32 @@ const shopItemSchema = mongoose.Schema({
   in 'pre' middleware, this refers to the schema object.
 */
 shopItemSchema.pre('save', function (next) {
-  let item = this
   if (this.duration) {
     this.expiresOnTimestamp = Date.now() + this.duration
     delete this.duration
   }
 
-  console.log(this)
+  let trimmedRequirements = {}
+
+  if (Object.keys(this.requirements).length) {
+    if (this.requirements.requiredRolesArray && this.requirements.requiredRolesArray?.length) {
+      trimmedRequirements['requiredRolesArray'] = this.requirements.requiredRolesArray
+    }
+    if (this.requirements.requiredInventoryItemsArray && this.requirements.requiredInventoryItemsArray?.length) {
+      trimmedRequirements['requiredInventoryItemsArray'] = this.requirements.requiredInventoryItemsArray
+    }
+
+    if (this.rolesGivenArray && !this.rolesGivenArray?.length) {
+      this.rolesGivenArray = undefined
+    }
+    if (this.rolesRemovedArray && !this.rolesRemovedArray?.length) {
+      this.rolesRemovedArray = undefined
+    }
+  }
+
+  this.requirements = trimmedRequirements
+
+  console.log('shopItemSchema.pre:', this)
 
   next();
 })
