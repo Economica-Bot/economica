@@ -17,6 +17,19 @@ module.exports = {
       type: 2,
       options: [
         {
+          name: 'view', 
+          description: "View a command's permissions.", 
+          type: 1, 
+          options: [
+            {
+              name: 'command', 
+              description: 'Specify a command.', 
+              type: 3, 
+              required: true
+          ***REMOVED***  
+          ],
+      ***REMOVED***
+        {
           name: 'enable',
           description: 'Enable a command.',
           type: 1,
@@ -143,7 +156,7 @@ module.exports = {
   async run(interaction, guild, member, options) {
     let color = 'GREEN',
       title = member.user.username,
-      icon_url = member.user.displayAvatarURL(),
+      icon_url = guild.iconURL(),
       description = '',
       footer = '',
       guildID = guild.id;
@@ -188,88 +201,113 @@ module.exports = {
       );
 
       let commandSettings = guildSettings.commands.find(
-        (c) => c.command === cmd.name
+        (c) => {
+          return c.command === cmd.name
+        } 
       ) ?? {
         command: cmd.name,
       };
 
-      //Enable or disable a channel for a command
-      if (options._hoistedOptions.find((option) => option.name === 'channel')) {
-        const channel = await options._hoistedOptions.find((option) => {
-          return option.name === 'channel';
-        }).channel;
-        if (!channel.isText()) {
-          color = 'RED';
-          description += `\`${channel.name}\` is not a text channel.\n`;
-        } else {
-          if (!commandSettings.channels) {
-            commandSettings.channels = [];
-          }
-          if (commandSettings.channels.find((c) => c.channel === channel.id)) {
-            commandSettings.channels.find(
-              (c) => c.channel === channel.id
-            ).disabled = options._subcommand === 'disable' ? true : false;
+      //View permissions for a command
+      if (options._subcommand === 'view') {
+        for(const setting in commandSettings) {
+          if(commandSettings[setting] instanceof Array) {
+            for(const set of commandSettings[setting]) {
+              description += set.channel ? `<#${set.channel}>: \`${set.disabled ? 'Disabled' : 'Enabled'}\`` : `<@&${set.role}>: \`${set.disabled  ? 'Disabled' : 'Enabled'}\``
+              description += '\n'
+            }
           } else {
-            commandSettings.channels.push({
-              channel: channel.id,
+            if(setting==='command') {
+              description += `**Command**: \`${commandSettings[setting]}\``
+            } else if (setting==='cooldown') {
+              description += `**Cooldown**: \`${ms(commandSettings[setting])}\``
+            } else if(setting==='disabled') {
+              description += `**Server Disabled**: \`${commandSettings[setting]}\``
+            }
+            description += '\n'
+          }
+        }
+      }
+
+      //Enable or disable a channel for a command
+      else {
+        if (options._hoistedOptions.find((option) => option.name === 'channel')) {
+          const channel = await options._hoistedOptions.find((option) => {
+            return option.name === 'channel';
+          }).channel;
+          if (!channel.isText()) {
+            color = 'RED';
+            description += `\`${channel.name}\` is not a text channel.\n`;
+          } else {
+            if (!commandSettings.channels) {
+              commandSettings.channels = [];
+            }
+            if (commandSettings.channels.find((c) => c.channel === channel.id)) {
+              commandSettings.channels.find(
+                (c) => c.channel === channel.id
+              ).disabled = options._subcommand === 'disable' ? true : false;
+            } else {
+              commandSettings.channels.push({
+                channel: channel.id,
+                disabled: options._subcommand === 'disable' ? true : false,
+              });
+            }
+            description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
+              1,
+              options._subcommand.length
+            )}d command \`${cmd.name}\` in <#${channel.id}>\n`;
+          }
+        }
+
+        //Enable or disable a role for a command
+        if (options._hoistedOptions.find((option) => option.name === 'role')) {
+          const role = options._hoistedOptions.find((option) => {
+            return option.name === 'role';
+          }).role;
+          if (!commandSettings.roles) {
+            commandSettings.roles = [];
+          }
+          if (commandSettings.roles.find((r) => r.role === role.id)) {
+            commandSettings.roles.find((r) => r.role === role.id).disabled =
+              options._subcommand === 'disable' ? true : false;
+          } else {
+            commandSettings.roles.push({
+              role: role.id,
               disabled: options._subcommand === 'disable' ? true : false,
             });
           }
           description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
             1,
             options._subcommand.length
-          )}d command \`${cmd.name}\` in <#${channel.id}>\n`;
+          )}d command \`${cmd.name}\` for <@&${role.id}>\n`;
         }
-      }
 
-      //Enable or disable a role for a command
-      if (options._hoistedOptions.find((option) => option.name === 'role')) {
-        const role = options._hoistedOptions.find((option) => {
-          return option.name === 'role';
-        }).role;
-        if (!commandSettings.roles) {
-          commandSettings.roles = [];
+        //Add a cooldown to a command
+        if (
+          options._hoistedOptions.find((option) => option.name === 'cooldown')
+        ) {
+          const cooldown = ms(
+            options._hoistedOptions.find((option) => {
+              return option.name === 'cooldown';
+            }).value
+          );
+
+          commandSettings.cooldown = cooldown;
+          description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
+            1,
+            options._subcommand.length
+          )}d cooldown of \`${ms(cooldown)}\` for command \`${cmd.name}\`\n`;
         }
-        if (commandSettings.roles.find((r) => r.role === role.id)) {
-          commandSettings.roles.find((r) => r.role === role.id).disabled =
+
+        //Enable or disable a command
+        if (options._hoistedOptions.length === 1) {
+          commandSettings.disabled =
             options._subcommand === 'disable' ? true : false;
-        } else {
-          commandSettings.roles.push({
-            role: role.id,
-            disabled: options._subcommand === 'disable' ? true : false,
-          });
+          description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
+            1,
+            options._subcommand.length
+          )}d command \`${cmd.name}\``;
         }
-        description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
-          1,
-          options._subcommand.length
-        )}d command \`${cmd.name}\` for <@&${role.id}>\n`;
-      }
-
-      //Add a cooldown to a command
-      if (
-        options._hoistedOptions.find((option) => option.name === 'cooldown')
-      ) {
-        const cooldown = ms(
-          options._hoistedOptions.find((option) => {
-            return option.name === 'cooldown';
-          }).value
-        );
-
-        commandSettings.cooldown = cooldown;
-        description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
-          1,
-          options._subcommand.length
-        )}d cooldown of \`${ms(cooldown)}\` for command \`${cmd.name}\`\n`;
-      }
-
-      //Enable or disable a command
-      if (options._hoistedOptions.length === 1) {
-        commandSettings.disabled =
-          options._subcommand === 'disable' ? true : false;
-        description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
-          1,
-          options._subcommand.length
-        )}d command \`${cmd.name}\``;
       }
 
       if (options._subcommand !== 'reset') {
