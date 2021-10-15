@@ -582,3 +582,92 @@ module.exports.wait = (time) => {
     setTimeout(resolve, time);
   });
 };
+
+module.exports.paginate = async (interaction, embeds) => {
+  const row = new Discord.MessageActionRow()
+    .addComponents(
+      new Discord.MessageButton()
+        .setCustomId('previous_page')
+        .setLabel('Previous')
+        .setStyle('SECONDARY')
+        .setDisabled(true)
+    )
+    .addComponents(
+      new Discord.MessageButton()
+        .setCustomId('next_page')
+        .setLabel('Next')
+        .setStyle('PRIMARY')
+        .setDisabled(embeds.length > 1 ? false : true)
+    );
+
+  const msg = await interaction.editReply({
+    embeds: [embeds[0]],
+    components: [row],
+    ephemeral: true,
+  });
+
+  let page = 0;
+
+  client.on('interactionCreate', async (interaction) => {
+    if (
+      interaction.isButton() &&
+      interaction.message.id === msg.id &&
+      interaction.user.id === interaction.member.id
+    ) {
+      if (
+        page < embeds.length - 1 &&
+        page >= 0 &&
+        interaction.customId === 'next_page'
+      ) {
+        page++;
+        const row = new Discord.MessageActionRow()
+          .addComponents(
+            new Discord.MessageButton()
+              .setCustomId('previous_page')
+              .setLabel('Previous')
+              .setStyle('SECONDARY')
+              .setDisabled(false)
+          )
+          .addComponents(
+            new Discord.MessageButton()
+              .setCustomId('next_page')
+              .setLabel('Next')
+              .setStyle('PRIMARY')
+              .setDisabled(page == embeds.length - 1 ? true : false)
+          );
+        await interaction.update({
+          embeds: [embeds[page]],
+          components: [row],
+          ephemeral: true,
+        });
+      }
+    } else if (
+      page > 0 &&
+      page < embeds.length &&
+      interaction.customID === 'previous_page'
+    ) {
+      page--;
+      const row = new Discord.MessageActionRow()
+        .addComponents(
+          new Discord.MessageButton()
+            .setCustomId('previous_page')
+            .setLabel('Previous')
+            .setStyle('SECONDARY')
+            .setDisabled(page == 0 ? true : false)
+        )
+        .addComponents(
+          new Discord.MessageButton()
+            .setCustomId('next_page')
+            .setLabel('Next')
+            .setStyle('PRIMARY')
+            .setDisabled(false)
+        );
+
+      await interaction.update({
+        embeds: [embeds[page]],
+        components: [row],
+        ephemeral: true,
+      });
+    }
+  });
+};
