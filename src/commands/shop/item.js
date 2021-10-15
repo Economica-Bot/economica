@@ -101,7 +101,9 @@ module.exports = {
       ***REMOVED***
         {
           name: 'replace_all',
-          description: 'Whether to replace all omitted'
+          description: 'Whether to replace all omitted',
+          type: apiTypes.Boolean,
+          required: false
       ***REMOVED***
         {
           name: 'new_name',
@@ -159,19 +161,19 @@ module.exports = {
         {
           name: 'required_balance',
           description:
-            'The minimum balance that a user must have to purchase. Cannot be lower than the item price. Enter -1 for none.',
+            'The minimum balance that a user must have to purchase. Cannot be lower than the item price.',
           type: apiTypes.Integer,
           required: false,
       ***REMOVED***
         {
           name: 'role_given',
-          description: 'A list of role mentions given on item purchase. Select Economica\'s bot role for none.',
+          description: 'A list of role mentions given on item purchase.',
           type: apiTypes.Role,
           required: false,
       ***REMOVED***
         {
           name: 'role_removed',
-          description: 'A list of role mentions removed on item purchase. Select Economica\'s bot role for none.',
+          description: 'A list of role mentions removed on item purchase.',
           type: apiTypes.Role,
           required: false,
       ***REMOVED***
@@ -399,79 +401,56 @@ module.exports = {
             );
           options.generator_period =
             +options.generator_period || +ms(options.generator_period); // parseInt
-
-          if (
-            !(await shopItemSchema.findOne({
-              guildID: guild.id,
-              name: {
-                $regex: new RegExp(options.name, 'i'),
-            ***REMOVED***
-            }))
-          )
-            await new shopItemSchema(
-              await util.trimObj(
-                {
-                  // omit undefined/null properties
-                  guildID: guild.id,
-                  name: options.name,
-                  price: options.price,
-                  description: options.description,
-                  duration: options.duration,
-                  stockLeft: options.stock,
-                  isInventoryItem: options.is_inventory_item,
-                  rolesGivenArray: [options.role_given],
-                  rolesRemovedArray: [options.role_removed],
-                  requirements: {
-                    requiredRolesArray: [options.required_role],
-                    requiredInventoryItemsArray: requiredItemsArray,
-                    requiredBalance: options.required_balance,
-                ***REMOVED***
-                  data: {
-                    typeGenerator: {
-                      generatorPeriod: options.generator_period,
-                      generatorIncomeAmount: options.generator_amount,
-                      isIncomeDeposited: options.deposit_income,
-                  ***REMOVED***
-                ***REMOVED***
-              ***REMOVED***
-                [undefined, null, [], {}, ''],
-                true
-              )
-            ).save();
         }
-      } else {
-        if (
-          !(await shopItemSchema.findOne({
-            guildID: guild.id,
-            name: {
-              $regex: new RegExp(options.name, 'i'),
-          ***REMOVED***
-          }))
-        )
-          await new shopItemSchema(
-            await util.trimObj(
-              {
-                // omit undefined/null properties
-                guildID: guild.id,
-                name: options.name,
-                price: options.price,
-                description: options.description,
-                duration: options.duration,
-                stockLeft: options.stock,
-                isInventoryItem: options.is_inventory_item,
-                rolesGivenArray: [options.role_given],
-                rolesRemovedArray: [options.role_removed],
-                requirements: {
-                  requiredRolesArray: [options.required_role],
-                  requiredInventoryItemsArray: requiredItemsArray,
-                  requiredBalance: options.required_balance,
-              ***REMOVED***
-            ***REMOVED***
-              [undefined, null, [], {}, ''],
-              true
-            )
-          ).save();
       }
+
+      let editedItem = {
+        requirements: {}
+      }
+
+      console.log(options)
+
+      if (options.name) {
+        editedItem['name'] = options.name
+      }
+      if (options.price) {
+        editedItem['price'] = options.price
+      }
+      if (options.description) {
+        editedItem['description'] = options.description
+      }
+      if (options.duration) {
+        editedItem['duration'] = options.duration
+      }
+      if (options.stock) {
+        editedItem['stockLeft'] = options.stock
+      }
+      if (options.is_inventory_item) {
+        editedItem['isInvetoryItem'] = options.is_inventory_item
+      }
+      if (options.role_given) {
+        editedItem['rolesGivenArray'] = [options.role_given]
+      }
+      if (options.role_removed) {
+        editedItem['rolesRemovedArray'] = [options.role_removed]
+      }
+      if (options.required_role) {
+        editedItem.requirements['requiredRolesArray'] = [options.required_role]
+      }
+      if (options.required_items) {
+        console.log(requiredItemsArray)
+        editedItem.requirements['requiredInventoryItemsArray'] = requiredItemsArray
+      } else delete editedItem.requirements['requiredInventoryItemsArray']
+      if (options.required_balance) {
+        editedItem.requirements['requiredBalance'] = options.required_balance
+      }
+
+      if (!(Object.keys(editedItem.requirements).length)) delete editedItem.requirements
+
+      await new shopItemSchema({
+        guildID: guild.id,
+        ...editedItem
+      }).save()
 
       let description = ``;
       _hoistedOptions.forEach((o) => {
@@ -732,7 +711,7 @@ module.exports = {
       if (options.stock) {
         if (options.stock < 0) {
           options.stock = undefined
-        } 
+        }
       }
       if (options.role_given) {
         const role_given = await guild.roles.cache.get(options.role_given);
