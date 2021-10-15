@@ -65,14 +65,12 @@ module.exports = {
         });
       }
     } else if (_subcommand === 'clear') {
-      console.log(fops);
       if (!fops.confirm) {
         return interaction.reply(util.warning('Shop clear was aborted.'));
       } else {
         const items = await shopItemSchema.find({
           guildID: guild.id
         })
-        console.log(items)
         if (items.length < 1) {
           // there are no items in the shop
           return await interaction.reply(util.error('There were no items in the shop.', 'Usage Error'))
