@@ -447,6 +447,27 @@ module.exports = {
 
       if (!(Object.keys(editedItem.requirements).length)) delete editedItem.requirements
 
+      // preset types
+      if (_subcommand === 'generator') {
+        editedItem['type'] = 'typeGenerator'
+        
+        editedItem['data'] = {
+          typeGenerator: {}
+        }
+
+        if (options.generator_period) {
+          editedItem.data.typeGenerator['generatorPeriod'] = options.generator_period
+        }
+        if (options.generator_amount) {
+          editedItem.data.typeGenerator['generatorIncomeAmount'] = options.generator_amount
+        }
+        if (options.is_deposited) {
+          editedItem.data.typeGenerator['isIncomeDeposited'] = options.is_deposited
+        }
+
+        if (!(Object.keys(editedItem.data.typeGenerator).length)) delete editedItem.data.typeGenerator
+      }
+
       await new shopItemSchema({
         guildID: guild.id,
         ...editedItem
