@@ -1,5 +1,3 @@
-const fs = require('fs');
-
 module.exports = {
   name: 'load',
   description: 'Load a slash command.',
@@ -14,40 +12,30 @@ module.exports = {
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
-    const commandDirectories = fs.readdirSync('./commands');
-    for (const commandDirectory of commandDirectories) {
-      const commandFiles = fs
-        .readdirSync(`./commands/${commandDirectory}/`)
-        .filter((file) => file.endsWith('js'));
-      for (const commandFile of commandFiles) {
-        const command = require(`../../commands/${commandDirectory}/${commandFile}`);
-        if (options._hoistedOptions[0].value === command.name) {
-          interaction.deferReply({ ephemeral: true });
-          await client.guilds.cache
-            .get(process.env.GUILD_ID)
-            .commands.create(command);
-          client.commands.set(command.name, command);
-          const embed = util.embedify(
-            'GREEN',
-            member.user.username,
-            member.user.displayAvatarURL(),
-            `Force loaded \`${command.name}\``
-          );
+  async run(interaction) {
+    const commandName = interaction.options.getString('command');
+    const command = client.commands.get(commandName);
+    if (command) {
+      const cmd = require(`../../commands/${command.group}/${command.name}.js`);
+      await client.guilds.cache.get(process.env.GUILD_ID).commands.create(cmd);
+      client.commands.set(cmd.name, cmd);
+      const embed = util.embedify(
+        'GREEN',
+        interaction.member.user.username,
+        interaction.member.user.displayAvatarURL(),
+        `Force loaded \`${cmd.name}\``
+      );
 
-          await interaction.editReply({ embeds: [embed], ephemeral: true });
-          return;
-        }
-      }
+      await interaction.reply({ embeds: [embed], ephemeral: true });
+    } else {
+      const embed = util.embedify(
+        'RED',
+        interaction.member.user.username,
+        interaction.member.user.displayAvatarURL(),
+        `Command \`${commandName}\` not found.`
+      );
+
+      await interaction.reply({ embeds: [embed], ephemeral: true });
     }
-
-    const embed = util.embedify(
-      'RED',
-      member.user.username,
-      member.user.displayAvatarURL(),
-      `Command \`${options._hoistedOptions[0].value}\` not found.`
-    );
-
-    await interaction.reply({ embeds: [embed], ephemeral: true });
 ***REMOVED***
 };

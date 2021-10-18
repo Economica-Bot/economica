@@ -107,13 +107,8 @@ module.exports = {
       ***REMOVED***
         {
           name: 'new_name',
-          description:
-            'The new name of the item, if desired.',
           type: apiTypes.String,
           required: false,
-      ***REMOVED***
-        {
-          name: 'price',
           description:
             'The new cost of the item and the minimum cash balance needed to purchase.',
           type: apiTypes.Integer,
@@ -267,7 +262,7 @@ module.exports = {
   async run(interaction, guild, member, options, fops) {
     const { _group, _subcommand, _hoistedOptions } = options;
 
-    const clientMember = guild.members.cache.get(interaction.client.user.id)
+    const clientMember = guild.members.cache.get(interaction.client.user.id);
 
     options = {};
     _hoistedOptions.forEach((o) => {
@@ -324,13 +319,13 @@ module.exports = {
         if (clientMember.roles.highest.rawPosition <= role_given.rawPosition)
           return await interaction.reply(
             util.error(
-              "`role_given` is higher than the bot's highest role and cannot be added."
+              `${role_given} is higher than the bot's highest role and cannot be added.`
             )
           ); // role is too high!
         if (role_given.managed)
           return await interaction.reply(
             util.error(
-              '`role_given` cannot be a bot role (integration-managed).'
+              `${role_given} cannot be a bot role (integration-managed).`
             )
           ); // role can't be added
       }
@@ -339,13 +334,13 @@ module.exports = {
         if (clientMember.roles.highest.rawPosition <= role_removed.rawPosition)
           return await interaction.reply(
             util.error(
-              "`role_removed` is higher than the bot's highest role and cannot be removed."
+              `${role_removed} is higher than the bot's highest role and cannot be removed.`
             )
           ); // role is too high!
         if (role_removed.managed)
           return await interaction.reply(
             util.error(
-              '`role_removed` cannot be a bot role (integration-managed).'
+              `${role_removed} cannot be a bot role (integration-managed).`
             )
           ); // role can't be added
       }
@@ -360,14 +355,14 @@ module.exports = {
               name: {
                 $regex: new RegExp(item, 'i'),
             ***REMOVED***
-            })
+            });
             if (
-              !(dbItem)
+              !dbItem
               // string is not an item in the shop
             ) {
               return await interaction.reply(
                 util.error(
-                  `Could not find item "${item}" in shop!\n\n\`required_items\` must be a valid shop item name or list of valid shop item names separated by comma(s) \`,\``
+                  `Could not find item \`${item}\` in shop!\n\n\`required_items\` must be a valid shop item name or list of valid shop item names separated by comma(s) \`,\``
                 )
               );
             } else {
@@ -495,7 +490,10 @@ module.exports = {
       ***REMOVED***
       });
 
-      if (!item) return await interaction.reply(util.error(`No item found with name ${options.name}`));
+      if (!item)
+        return await interaction.reply(
+          util.error(`No item found with name ${options.name}`)
+        );
       const currencySymbol = await util.getCurrencySymbol(guild.id);
 
       let embed = new Discord.MessageEmbed();
@@ -503,11 +501,12 @@ module.exports = {
       embed.setAuthor(member.user.username, member.user.displayAvatarURL());
       embed.setTitle(item.name);
       embed.setDescription(item.description || 'A very interesting item.');
-      embed.setFooter(`ID: ${item._id}`)
+      embed.setFooter(`ID: ${item._id}`);
 
       embed.addField(
         'Price',
-        `${currencySymbol}${item.price > 0 ? item.price.toLocaleString() : 'Free'
+        `${currencySymbol}${
+          item.price > 0 ? item.price.toLocaleString() : 'Free'
         }`,
         true
       );
@@ -525,41 +524,52 @@ module.exports = {
       );
       embed.addField(
         'Expires In',
-        item.expiresOnTimestamp ? ms(item.expiresOnTimestamp - Date.now()) : 'Never',
+        item.expiresOnTimestamp
+          ? ms(item.expiresOnTimestamp - Date.now())
+          : 'Never',
         true
-      )
+      );
       embed.addField(
         'Role Given',
-        `${item.rolesGivenArray?.[0]
-          ? '<@&' + item.rolesGivenArray?.[0] + '>'
-          : 'None'
+        `${
+          item.rolesGivenArray?.[0]
+            ? '<@&' + item.rolesGivenArray?.[0] + '>'
+            : 'None'
         }`,
         true
       );
       embed.addField(
         'Role Removed',
-        `${item.rolesRemovedArray?.[0]
-          ? '<@&' + item.rolesRemovedArray?.[0] + '>'
-          : 'None'
+        `${
+          item.rolesRemovedArray?.[0]
+            ? '<@&' + item.rolesRemovedArray?.[0] + '>'
+            : 'None'
         }`,
         true
       );
       embed.addField(
         'Role Required',
-        `${item.requirements?.requiredRolesArray?.[0]
-          ? '<@&' + item.requirements?.requiredRolesArray?.[0] + '>'
-          : 'None'
+        `${
+          item.requirements?.requiredRolesArray?.[0]
+            ? '<@&' + item.requirements?.requiredRolesArray?.[0] + '>'
+            : 'None'
         }`,
         true
       );
       embed.addField(
         'Minimum Balance',
-        `${currencySymbol}${item.requirements?.requiredBalance?.toLocaleString() || '0'}`,
+        `${currencySymbol}${
+          item.requirements?.requiredBalance?.toLocaleString() || '0'
+        }`,
         true
       );
       embed.addField(
         'Items Required',
-        item.requirements?.requiredInventoryItemsArray?.length > 0 ? `\`${item.requirements?.requiredInventoryItemsArray?.join('`, `')}\`` : 'None',
+        item.requirements?.requiredInventoryItemsArray?.length > 0
+          ? `\`${item.requirements?.requiredInventoryItemsArray?.join(
+              '`, `'
+            )}\``
+          : 'None',
         false
       );
 
@@ -576,7 +586,8 @@ module.exports = {
         );
         embed.addField(
           'Income Deposited?',
-          `${item.isIncomeDeposited !== undefined ? item.isIncomeDeposited : true
+          `${
+            item.isIncomeDeposited !== undefined ? item.isIncomeDeposited : true
           }`,
           true
         );
@@ -589,10 +600,8 @@ module.exports = {
         name: {
           $regex: new RegExp(options.name, 'i'),
       ***REMOVED***
-      })
-      if (
-        item
-      ) {
+      });
+      if (item) {
         await shopItemSchema.deleteOne({
           guildID: guild.id,
           name: {
@@ -624,57 +633,111 @@ module.exports = {
         return;
       }
 
-      const inventory = (
-        await inventorySchema.findOne({
-          guildID: guild.id,
-          userID: author.user.id,
-        })
-      ).inventory;
-
-      const inventoryItem = inventory?.find((item) => {
-        return item.ref === options.name;
+      const inventory = await inventorySchema.findOne({
+        guildID: guild.id,
+        userID: member.user.id,
       });
 
-      const { wallet } = util.getEconInfo(guild.id, author.user.id);
+      const inventoryItem = inventory?.inventory.find((item) => {
+        return item.name === options.name;
+      });
 
+      const { wallet, total } = await util.getEconInfo(
+        guild.id,
+        member.user.id
+      );
+
+      //Requirement Validation
       if (item.price > wallet) {
         interaction.reply('You cannot afford this item.');
         return;
       }
 
+      if (item.requirements.requiredRolesArray.length) {
+        for (const role of item.requirements.requiredRolesArray) {
+          if (!member.roles.cache.has(role)) {
+            interaction.reply(`You do not have the <@&${role}> role.`);
+            return;
+          }
+        }
+      }
+
+      if (item.requirements.requiredInventoryItemsArray.length) {
+        for (const invitem of item.requirements.requiredInventoryItemsArray) {
+          if (!inventory?.inventory.find((i) => i.name === invitem)) {
+            interaction.reply(`You need a(n) \`${invitem}\``);
+            return;
+          }
+        }
+      }
+
+      if (item.requirements.requiredInventoryItemsArray.length) {
+        for (const invitem of item.requirements.requiredInventoryItemsArray) {
+          if (!inventory?.inventory.find((i) => i.name === invitem)) {
+            interaction.reply(`You need a(n) \`${invitem}\``);
+            return;
+          }
+        }
+      }
+
+      if (
+        item.requirements.requiredBalance &&
+        total < item.requirements.requiredBalance
+      ) {
+        interaction.reply(
+          `Insufficent total\n${item.requirements.requiredBalance} required.`
+        );
+        return;
+      }
+
+      //If stock, check stock and decrement or deny purchase
+      if (item.stockLeft) {
+        if (item.stockLeft > 0) {
+          item = await shopItemSchema.findOneAndUpdate(
+            { guildID: guild.id, name: options.name },
+            { $dec: { stockLeft: 1 } }
+          );
+          if (item.stockLeft === 0) {
+            await shopItemSchema.findOneAndUpdate(
+              { guildID: guild.id, name: options.name },
+              { deactivated: true }
+            );
+          }
+        } else {
+          interaction.reply('This item is out of stock.');
+          return;
+        }
+      }
+
+      //Add roles given
+      if (item.rolesGivenArray) member.roles.add(rolesGivenArray);
+
+      //Remove roles removed
+      if (item.rolesRemovedArray) member.roles.remove(rolesRemovedArray);
+
+      //If user owns item, increment
+      //If not, add item to inventory
       if (inventoryItem) {
         await inventorySchema.findOneAndUpdate(
           {
             guildID: guild.id,
-            userID: author.user.id,
+            userID: member.user.id,
             'inventory.ref': inventoryItem.ref,
         ***REMOVED***
-          {
-            $inc: {
-              'inventory.$.amount': 1,
-          ***REMOVED***
-          }
+          { $inc: { 'inventory.$.amount': 1 } },
+          { new: true, upsert: true }
         );
       } else {
         await inventorySchema.findOneAndUpdate(
-          {
-            guildID: guild.id,
-            userID: author.user.id,
-        ***REMOVED***
-          {
-            $push: {
-              inventory: {
-                name: item.name,
-                amount: 1,
-            ***REMOVED***
-          ***REMOVED***
-          }
+          { guildID: guild.id, userID: member.user.id },
+          { $push: { inventory: { name: item.name, amount: 1 } } },
+          { new: true, upsert: true }
         );
       }
 
-      util.transaction(
+      await util.transaction(
         guild.id,
-        author.user.id,
+        member.user.id,
         'PURCHASE_SHOP_ITEM',
         `Purchased ${item.name}`,
         -item.price,
@@ -682,18 +745,20 @@ module.exports = {
         -item.price
       );
 
-      interaction.reply(`You bought ${item.name}`);
+      await interaction.reply(`You bought ${item.name}`);
     } else if (_subcommand === 'edit') {
       // validation
       const targetItem = await shopItemSchema.findOne({
         guildID: guild.id,
-        name: { $regex: new RegExp(options.name, 'i') }
-      })
+        name: { $regex: new RegExp(options.name, 'i') },
+      });
 
       if (!targetItem) {
-        return await interaction.reply(util.error(`No item with name ${options.name} found in the shop!`))
+        return await interaction.reply(
+          util.error(`No item with name ${options.name} found in the shop!`)
+        );
       }
-      if ((options.new_name?.length > 200))
+      if (options.new_name?.length > 200)
         return await interaction.reply(
           util.error('`new_name` must be 200 characters or less.')
         );
@@ -704,7 +769,9 @@ module.exports = {
         })
       )
         return await interaction.reply(
-          util.error(`An item with \`new_name\` "${options.new_name}" already exists.`)
+          util.error(
+            `An item with \`new_name\` "${options.new_name}" already exists.`
+          )
         );
       if (options.new_name?.includes(','))
         return await interaction.reply(
@@ -720,7 +787,7 @@ module.exports = {
         return await interaction.reply(
           util.error('`description` must be 400 characters or less.')
         );
-      if (options.duration) {
+      if (options.duration && !ms(options.duration)) {
         if (!ms(options.duration))
           return await interaction.reply(
             util.error(
@@ -775,9 +842,9 @@ module.exports = {
               name: {
                 $regex: new RegExp(item, 'i'),
             ***REMOVED***
-            })
+            });
             if (
-              !(dbItem)
+              !dbItem
               // string is not an item in the shop
             ) {
               return await interaction.reply(
@@ -803,61 +870,66 @@ module.exports = {
       }
 
       let editedItem = {
-        requirements: {}
-      }
+        requirements: {},
+      };
 
       if (options.new_name) {
-        editedItem['name'] = options.new_name
+        editedItem['name'] = options.new_name;
       }
       if (options.price) {
-        editedItem['price'] = options.price
+        editedItem['price'] = options.price;
       }
       if (options.description) {
-        editedItem['description'] = options.description
+        editedItem['description'] = options.description;
       }
       if (options.duration) {
-        editedItem['duration'] = options.duration
+        editedItem['duration'] = options.duration;
       }
       if (options.stock) {
-        editedItem['stockLeft'] = options.stock
+        editedItem['stockLeft'] = options.stock;
       }
       if (options.is_inventory_item) {
-        editedItem['isInvetoryItem'] = options.is_inventory_item
+        editedItem['isInvetoryItem'] = options.is_inventory_item;
       }
       if (options.role_given) {
-        editedItem['rolesGivenArray'] = [options.role_given]
+        editedItem['rolesGivenArray'] = [options.role_given];
       }
       if (options.role_removed) {
-        editedItem['rolesRemovedArray'] = [options.role_removed]
+        editedItem['rolesRemovedArray'] = [options.role_removed];
       }
       if (options.required_role) {
-        editedItem.requirements['requiredRolesArray'] = [options.required_role]
+        editedItem.requirements['requiredRolesArray'] = [options.required_role];
       }
       if (options.required_items) {
-        console.log(requiredItemsArray)
-        editedItem.requirements['requiredInventoryItemsArray'] = requiredItemsArray
-      } else delete editedItem.requirements['requiredInventoryItemsArray']
+        console.log(requiredItemsArray);
+        editedItem.requirements['requiredInventoryItemsArray'] =
+          requiredItemsArray;
+      } else delete editedItem.requirements['requiredInventoryItemsArray'];
       if (options.required_balance) {
-        editedItem.requirements['requiredBalance'] = options.required_balance
+        editedItem.requirements['requiredBalance'] = options.required_balance;
       }
 
-      if (!(Object.keys(editedItem.requirements).length)) delete editedItem.requirements
+      if (!Object.keys(editedItem.requirements).length)
+        delete editedItem.requirements;
 
-      if (
-        targetItem
-      ) {
-        await shopItemSchema.findOneAndUpdate({
+      if (targetItem) {
+        await shopItemSchema.findOneAndUpdate(
+          {
+            guildID: guild.id,
+            name: {
+              $regex: new RegExp(options.name, 'i'),
+          ***REMOVED***
+        ***REMOVED***
+          editedItem
+        );
+      }
+
+      console.log(
+        await shopItemSchema.findOne({
           guildID: guild.id,
-          name: {
-            $regex: new RegExp(options.name, 'i')
-          }
-      ***REMOVED*** editedItem)
-      }
-
-      console.log(await shopItemSchema.findOne({
-        guildID: guild.id,
-        _id: targetItem._id
-      }))
+          _id: targetItem._id,
+        })
+      );
 
       // execution (callback)
       let description = ``;

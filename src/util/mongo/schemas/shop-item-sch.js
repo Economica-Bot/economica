@@ -1,41 +1,45 @@
 const mongoose = require('mongoose');
 
-const shopItemSchema = mongoose.Schema({
-  guildID: {
-    type: String,
-    required: true,
-***REMOVED***
-  name: { type: String, required: true },
-  price: { type: Number, required: true },
-  description: { type: String, required: false },
-  expiresOnTimestamp: { type: Number, required: false }, // when the item will be de-activated in the shop
-  duration: { type: Number, required: false }, // temp value that gets translated to expiresOnTimestamp
-  stockLeft: { type: Number, required: false }, // how many instances of the item can be purchased before it is de-activated in the shop
-  isInventoryItem: { type: Boolean, required: false },
-  rolesGivenArray: { type: Array, required: false },
-  rolesRemovedArray: { type: Array, required: false },
-  requirements: {
-    requiredRolesArray: { type: Array, required: false },
-    // isEveryRoleRequired: { type: Boolean, required: false }, // when true, buyer must have all required roles to purchase. When false, buyer must have at least one required role to purchase.
-    requiredInventoryItemsArray: { type: Array, required: false },
-    requiredBalance: { type: Number, required: false },
-    required: false
-***REMOVED***
-  type: {
-    type: String,
-    // options: typeGenerator (null/und = basic)
-***REMOVED***
-  data: {
-    typeGenerator: {
-      generatorPeriod: { type: Number, required: false }, // interval after which the owner of the generator receives income
-      generatorIncomeAmount: { type: Number, required: false },
-      isIncomeDeposited: { type: Boolean, required: false }, // deposit the income to bank (true) or keep it as cash (false)
+const shopItemSchema = mongoose.Schema(
+  {
+    guildID: {
+      type: String,
+      required: true,
+  ***REMOVED***
+    name: { type: String, required: true },
+    price: { type: Number, required: true },
+    deactivated: { type: Boolean, required: false },
+    description: { type: String, required: false },
+    expiresOnTimestamp: { type: Number, required: false }, // when the item will be de-activated in the shop
+    duration: { type: Number, required: false }, // temp value that gets translated to expiresOnTimestamp
+    stockLeft: { type: Number, required: false }, // how many instances of the item can be purchased before it is de-activated in the shop
+    isInventoryItem: { type: Boolean, required: false },
+    rolesGivenArray: { type: Array, required: false },
+    rolesRemovedArray: { type: Array, required: false },
+    requirements: {
+      requiredRolesArray: { type: Array, required: false },
+      // isEveryRoleRequired: { type: Boolean, required: false }, // when true, buyer must have all required roles to purchase. When false, buyer must have at least one required role to purchase.
+      requiredInventoryItemsArray: { type: Array, required: false },
+      requiredBalance: { type: Number, required: false },
+  ***REMOVED***
+    type: {
+      type: String,
+      required: true,
+      // options: typeGenerator (null/und = basic)
+  ***REMOVED***
+    data: {
+      typeGenerator: {
+        generatorPeriod: { type: Number, required: false }, // interval after which the owner of the generator receives income
+        generatorIncomeAmount: { type: Number, required: false },
+        isIncomeDeposited: { type: Boolean, required: false }, // deposit the income to bank (true) or keep it as cash (false)
+    ***REMOVED***
   ***REMOVED***
 ***REMOVED***
-}, {
-  timestamps: true,
-  versionKey: false
-});
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
 
 /* 
   middleware validation check
@@ -45,9 +49,10 @@ const shopItemSchema = mongoose.Schema({
   in 'pre' middleware, this refers to the schema object.
 */
 shopItemSchema.pre('save', function (next) {
+  let item = this;
   if (this.duration) {
-    this.expiresOnTimestamp = Date.now() + this.duration
-    delete this.duration
+    this.expiresOnTimestamp = Date.now() + this.duration;
+    delete this.duration;
   }
 
   let trimmedRequirements = {}
@@ -73,6 +78,6 @@ shopItemSchema.pre('save', function (next) {
   console.log('shopItemSchema.pre:', this)
 
   next();
-})
+});
 
 module.exports = mongoose.model('shop', shopItemSchema);

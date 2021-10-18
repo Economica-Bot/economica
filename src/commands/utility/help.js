@@ -12,9 +12,9 @@ module.exports = {
       type: 3, //STRING
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
+  async run(interaction) {
     let embed,
-      command = options._hoistedOptions?.[0]?.value;
+      command = interaction.options.getString('command') ?? null;
     if (!command) {
       embed = util.embedify(
         'YELLOW',

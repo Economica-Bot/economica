@@ -275,20 +275,24 @@ module.exports = {
       ],
   ***REMOVED***
   ], //https://crescent.edu/post/the-basic-rules-of-roulette
-  async run(interaction, guild, member, options) {
+  async run(interaction) {
+    console.log(interaction.options);
     let color = 'GREEN',
-      title = member.user.username,
-      icon_url = member.user.displayAvatarURL(),
+      title = interaction.member.user.username,
+      icon_url = interaction.member.user.displayAvatarURL(),
       description = '',
       bet;
-    const cSymbol = await util.getCurrencySymbol(guild.id);
-    const { wallet } = await util.getEconInfo(guild.id, member.user.id);
+    const cSymbol = await util.getCurrencySymbol(interaction.guild.id);
+    const { wallet } = await util.getEconInfo(
+      interaction.guild.id,
+      interaction.member.user.id
+    );
     const ballPocket =
-      options._group === 'inside'
+      interaction.options.getSubcommand() === 'inside'
         ? Math.floor(Math.random() * 36 + 1)
         : Math.floor(Math.random() * 37 + 1);
     const nums = [];
-    for (const option of options._hoistedOptions) {
+    for (const option of interaction.options._hoistedOptions) {
       if (
         [
           'number_one',
@@ -326,7 +330,7 @@ module.exports = {
 
     description += `The ball landed on \`${ballPocket}\`\n`;
 
-    if (options._subcommand === 'single') {
+    if (interaction.options.getSubcommand() === 'single') {
       if (nums[0] === ballPocket) {
         bet *= 4;
         description += `You won ${cSymbol}${bet.toLocaleString()}`;
@@ -335,7 +339,7 @@ module.exports = {
         description += `You lost ${cSymbol}${bet.toLocaleString()}`;
         bet *= -1;
       }
-    } else if (options._subcommand === 'split') {
+    } else if (interaction.options.getSubcommand() === 'split') {
       if (
         nums[0] != nums[1] &&
         (Math.abs(nums[0] - nums[1]) === 1 || Math.abs(nums[0] - nums[1]) === 3)
@@ -352,7 +356,7 @@ module.exports = {
         color = 'RED';
         description = `Incorrect format.\n\`${this.options[0].options[1].description}\``;
       }
-    } else if (options._subcommand === 'street') {
+    } else if (interaction.options.getSubcommand() === 'street') {
       if (
         nums[0] % 3 === 1 &&
         nums[0] != nums[1] &&
@@ -377,7 +381,7 @@ module.exports = {
         color = 'RED';
         description = `Incorrect format.\n\`${this.options[0].options[2].description}\``;
       }
-    } else if (options._subcommand === 'corner') {
+    } else if (interaction.options.getSubcommand() === 'corner') {
       if (
         nums[1] - nums[0] === 1 &&
         nums[3] - nums[2] === 1 &&
@@ -400,7 +404,7 @@ module.exports = {
         color = 'RED';
         description = `Incorrect format.\n\`${this.options[0].options[3].description}\``;
       }
-    } else if (options._subcommand === 'double_street') {
+    } else if (interaction.options.getSubcommand() === 'double_street') {
       if (
         nums[0] % 3 === 1 &&
         nums[0] + 1 === nums[1] &&
@@ -428,8 +432,8 @@ module.exports = {
         color = 'RED';
         description = `Incorrect format.\n\`${this.options[0].options[4].description}\``;
       }
-    } else if (options._subcommand === 'trio') {
-      if (options._hoistedOptions === '0-1-2') {
+    } else if (interaction.options.getSubcommand() === 'trio') {
+      if (interaction.options.getString('choice') === '0-1-2') {
         nums[0] = 0;
         nums[1] = 1;
         nums[2] = 2;
@@ -450,7 +454,7 @@ module.exports = {
         description += `You lost ${cSymbol}${bet.toLocaleString()}`;
         bet *= -1;
       }
-    } else if (options._subcommand === 'first_four') {
+    } else if (interaction.options.getSubcommand() === 'first_four') {
       if (ballPocket >= 0 && ballPocket <= 3) {
         bet *= 4;
         description += `You won ${cSymbol}${bet.toLocaleString()}`;
@@ -459,9 +463,10 @@ module.exports = {
         description += `You lost ${cSymbol}${bet.toLocaleString()}`;
         bet *= -1;
       }
-    } else if (options._subcommand === 'half') {
+    } else if (interaction.options.getSubcommand() === 'half') {
       if (
-        (options._hoistedOptions[0].value === 'low' && ballPocket <= 18) ||
+        (interaction.options.getString('choice') === 'low' &&
+          ballPocket <= 18) ||
         ballPocket > 18
       ) {
         bet *= 4;
@@ -473,7 +478,8 @@ module.exports = {
       }
     } else if (options._subcommand === 'color') {
       if (
-        (options._hoistedOptions[0].value === 'red' && ballPocket % 2 === 0) ||
+        (interaction.options.getString('choice') === 'red' &&
+          ballPocket % 2 === 0) ||
         ballPocket % 2 === 1
       ) {
         bet *= 4;
@@ -483,9 +489,10 @@ module.exports = {
         description += `You lost ${cSymbol}${bet.toLocaleString()}`;
         bet *= -1;
       }
-    } else if (options._subcommand === 'even_or_odd') {
+    } else if (interaction.options.getSubcommand() === 'even_or_odd') {
       if (
-        (options._hoistedOptions[0].value === 'even' && ballPocket % 2 === 0) ||
+        (interaction.options.getString('choice') === 'even' &&
+          ballPocket % 2 === 0) ||
         ballPocket % 2 === 1
       ) {
         bet *= 4;
@@ -495,13 +502,14 @@ module.exports = {
         description += `You lost ${cSymbol}${bet.toLocaleString()}`;
         bet *= -1;
       }
-    } else if (options._subcommand === 'dozen') {
+    } else if (interaction.options.getSubcommand() === 'dozen') {
       if (
-        (options._hoistedOptions[0].value === 'first' && ballPocket <= 12) ||
-        (options._hoistedOptions[0].value === 'second' &&
+        (interaction.options.getString('choice') === 'first' &&
+          ballPocket <= 12) ||
+        (interaction.options.getString('choice') === 'second' &&
           ballPocket > 12 &&
           ballPocket <= 24) ||
-        (options._hoistedOptions[0].value === 'third' &&
+        (interaction.options.getString('choice') === 'third' &&
           ballPocket > 25 &&
           ballPocket <= 36)
       ) {
@@ -512,13 +520,14 @@ module.exports = {
         description += `You lost ${cSymbol}${bet.toLocaleString()}`;
         bet *= -1;
       }
-    } else if (options._subcommand === 'column') {
+    } else if (interaction.options.getSubcommand() === 'column') {
       if (
-        (options._hoistedOptions[0].value === 'first' &&
+        (interaction.options.getString('choice') === 'first' &&
           ballPocket % 3 === 1) ||
-        (options._hoistedOptions[0].value === 'second' &&
+        (interaction.options.getString('choice') === 'second' &&
           ballPocket % 3 === 2) ||
-        (options._hoistedOptions[0].value === 'third' && ballPocket % 3 === 0)
+        (interaction.options.getString('choice') === 'third' &&
+          ballPocket % 3 === 0)
       ) {
         bet *= 4;
         description += `You won ${cSymbol}${bet.toLocaleString()}`;
@@ -527,7 +536,7 @@ module.exports = {
         description += `You lost ${cSymbol}${bet.toLocaleString()}`;
         bet *= -1;
       }
-    } else if (options._subcommand === 'snake') {
+    } else if (interaction.options.getSubcommand() === 'snake') {
       if ([1, 5, 9, 12, 14, 16, 19, 23, 27, 30, 32, 34].includes(ballPocket)) {
         bet *= 4;
         description += `You won ${cSymbol}${bet.toLocaleString()}`;
@@ -540,8 +549,8 @@ module.exports = {
 
     if (!description.includes('format')) {
       await util.transaction(
-        guild.id,
-        member.user.id,
+        interaction.guild.id,
+        interaction.member.id,
         this.name,
         description,
         bet,

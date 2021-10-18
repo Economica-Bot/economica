@@ -153,13 +153,18 @@ module.exports = {
       ],
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
+  async run(interaction) {
     let color = 'GREEN',
+<<<<<<< HEAD
       title = member.user.username,
       icon_url = guild.iconURL(),
+=======
+      title = interaction.member.user.username,
+      icon_url = interaction.member.user.displayAvatarURL(),
+>>>>>>> refactor: progress
       description = '',
       footer = '',
-      guildID = guild.id;
+      guildID = interaction.guild.id;
     let cmd;
 
     const commandDirectories = fs.readdirSync('./commands');
@@ -181,7 +186,9 @@ module.exports = {
       (options._subcommand === 'income_command' && cmd.group !== 'income')
     ) {
       color = 'RED';
-      description = `Command \`${options._hoistedOptions[0].value}\` is not found or cannot be toggled`;
+      description = `Command \`${interaction.options.getString(
+        'command'
+      )}\` is not found or cannot be toggled`;
       footer = 'Use help for a list of commands.';
     } else if (options._group === 'permission') {
       const guildSettings = await guildSettingSchema.findOneAndUpdate(
@@ -230,6 +237,7 @@ module.exports = {
       }
 
       //Enable or disable a channel for a command
+<<<<<<< HEAD
       else {
         if (options._hoistedOptions.find((option) => option.name === 'channel')) {
           const channel = await options._hoistedOptions.find((option) => {
@@ -266,6 +274,16 @@ module.exports = {
           }).role;
           if (!commandSettings.roles) {
             commandSettings.roles = [];
+=======
+      if (interaction.options.getChannel('channel')) {
+        const channel = interaction.options.getChannel('channel');
+        if (!channel.isText()) {
+          color = 'RED';
+          description += `\`${channel.name}\` is not a text channel.\n`;
+        } else {
+          if (!commandSettings.channels) {
+            commandSettings.channels = [];
+>>>>>>> refactor: progress
           }
           if (commandSettings.roles.find((r) => r.role === role.id)) {
             commandSettings.roles.find((r) => r.role === role.id).disabled =
@@ -276,12 +294,19 @@ module.exports = {
               disabled: options._subcommand === 'disable' ? true : false,
             });
           }
+<<<<<<< HEAD
           description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
             1,
             options._subcommand.length
           )}d command \`${cmd.name}\` for <@&${role.id}>\n`;
+=======
+          description += `${interaction.options
+            .getSubcommand()
+            .toUpperCase()}D command \`${cmd.name}\` in <#${channel.id}>\n`;
+>>>>>>> refactor: progress
         }
 
+<<<<<<< HEAD
         //Add a cooldown to a command
         if (
           options._hoistedOptions.find((option) => option.name === 'cooldown')
@@ -297,6 +322,13 @@ module.exports = {
             1,
             options._subcommand.length
           )}d cooldown of \`${ms(cooldown)}\` for command \`${cmd.name}\`\n`;
+=======
+      //Enable or disable a role for a command
+      if (interaction.options.getRole('role')) {
+        const role = interaction.options.getRole('role');
+        if (!commandSettings.roles) {
+          commandSettings.roles = [];
+>>>>>>> refactor: progress
         }
 
         //Enable or disable a command
@@ -308,9 +340,36 @@ module.exports = {
             options._subcommand.length
           )}d command \`${cmd.name}\``;
         }
+<<<<<<< HEAD
+=======
+        description += `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
+          1,
+          options._subcommand.length
+        )}d command \`${cmd.name}\` for <@&${role.id}>\n`;
       }
 
-      if (options._subcommand !== 'reset') {
+      //Add a cooldown to a command
+      if (interaction.options.getString('cooldown')) {
+        const cooldown = ms(interaction.options.getString('cooldown'));
+        commandSettings.cooldown = cooldown;
+        description += `${interaction.options
+          .getSubcommand()
+          .toUpperCase()}D cooldown of \`${ms(cooldown)}\` for command \`${
+          cmd.name
+        }\`\n`;
+      }
+
+      //Enable or disable a command
+      if (options._hoistedOptions.length === 1) {
+        commandSettings.disabled =
+          options._subcommand === 'disable' ? true : false;
+        description += `${interaction.options
+          .getSubcommand()
+          .toUpperCase()}D command \`${cmd.name}\``;
+>>>>>>> refactor: progress
+      }
+
+      if (interaction.optione.getSubcommand() !== 'reset') {
         await guildSettingSchema.findOneAndUpdate(
           { guildID },
           {
@@ -324,11 +383,16 @@ module.exports = {
       } else {
         description += `Reset command \`${cmd}\``;
       }
-    } else if (options._group === 'config') {
-      if (options._subcommand === 'income_command' && cmd.group !== 'income') {
-        description = `Command \`${options._hoistedOptions[0].value}\` is not an income command`;
+    } else if (interaction.options.getSubcommandGroup() === 'config') {
+      if (
+        interaction.options.subCommand() === 'income_command' &&
+        cmd.group !== 'income'
+      ) {
+        description = `Command \`${interaction.options.getString(
+          'command'
+        )}\` is not an income command`;
       } else {
-        let income_command = options._hoistedOptions[0].value;
+        let income_command = interaction.options.getString('command');
         let properties = await incomeSchema.findOneAndUpdate(
           {
             guildID: guild.id,

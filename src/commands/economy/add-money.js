@@ -33,7 +33,7 @@ module.exports = {
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options, fops) {
+  async run(interaction, guild, member, options) {
     const targetMember = options._hoistedOptions[0].member;
 
     let wallet = 0,

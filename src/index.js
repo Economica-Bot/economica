@@ -36,9 +36,11 @@ client.on('ready', async () => {
   });
 
   const checkMutes = require('./util/features/check-mute');
-  checkMutes(client);
+  await checkMutes(client);
   const checkLoans = require('./util/features/check-loan');
-  checkLoans();
+  await checkLoans();
+  const generate = require('./util/features/generator');
+  await generate();
 
   console.log(`${client.user.tag} Ready`);
 });
@@ -49,17 +51,9 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   const command = client.commands.get(interaction.commandName);
-  const channel = interaction.channel;
-  const member = interaction.member;
-  const guild = interaction.guild;
-  const options = interaction.options;
-  const fops = {}
-  options._hoistedOptions.forEach((o) => {
-    fops[o.name] = o.value;
-  });
 
   //Check permission
-  const permissible = await client.permissible(member, guild, channel, command);
+  const permissible = await client.permissible(interaction.member, interaction.guild, interaction.channel, command);
   if (permissible.length) {
     const embed = util.embedify(
       'RED',
@@ -82,10 +76,10 @@ client.on('interactionCreate', async (interaction) => {
     timestamp: new Date().getTime(),
   };
 
-  await util.setUserCommandStats(guild.id, member.user.id, properties);
+  await util.setUserCommandStats(interaction.guild.id, interaction.member.id, properties);
 
   await command
-    ?.run(interaction, guild, member, options, fops)
+    ?.run(interaction)
     .catch((error) => client.error(error, interaction, command));
 });
 

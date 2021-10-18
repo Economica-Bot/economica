@@ -34,11 +34,11 @@ module.exports = {
   ***REMOVED***
   ],
   ownerOnly: true,
-  async run(interaction, guild, member, options) {
-    interaction.deferReply();
-        if (options._subcommand === 'guild') {
-      if (options._hoistedOptions[0].value === 'this') {
-        await guild.commands.set([]);
+  async run(interaction) {
+    await interaction.deferReply({ ephemeral: true });
+    if (interaction.options.getSubcommand() === 'guild') {
+      if (interaction.options.getString('scope') === 'this') {
+        await interaction.guild.commands.set([]);
       } else {
         client.guilds.cache.forEach(async (guild) => {
           guild.commands.set([]);
@@ -48,11 +48,12 @@ module.exports = {
       await client.application.commands.set([]);
     }
 
-    embed = util.embedify(
+    const embed = util.embedify(
       'GREEN',
-      member.user.username,
-      member.user.displayAvatarURL(),
-      '`RESET ALL SLASH COMMANDS`'
+      interaction.member.user.username,
+      interaction.member.user.displayAvatarURL(),
+      '`RESET ALL SLASH COMMANDS`',
+      'Restart Required'
     );
 
     await interaction.editReply({ embeds: [embed], ephemeral: true });

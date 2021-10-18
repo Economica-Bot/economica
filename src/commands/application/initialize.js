@@ -4,8 +4,8 @@ module.exports = {
   description: 'Initialize the database.',
   options: null,
   ownerOnly: true, 
-  async run(interaction, guild) {
-    const settings = await util.initGuildSettings(guild);
+  async run(interaction) {
+    const settings = await util.initGuildSettings(interaction.guild);
     await interaction.reply(`Init \`\`\`${settings.toString()}\`\`\``);
 ***REMOVED***
 };
