@@ -53,12 +53,17 @@ client.on('interactionCreate', async (interaction) => {
   const command = client.commands.get(interaction.commandName);
 
   //Check permission
-  const permissible = await client.permissible(interaction.member, interaction.guild, interaction.channel, command);
+  const permissible = await client.permissible(
+    interaction.member,
+    interaction.guild,
+    interaction.channel,
+    command
+  );
   if (permissible.length) {
     const embed = util.embedify(
       'RED',
-      member.user.username,
-      member.user.displayAvatarURL(),
+      interaction.member.user.username,
+      interaction.member.user.displayAvatarURL(),
       permissible
     );
 
@@ -76,14 +81,18 @@ client.on('interactionCreate', async (interaction) => {
     timestamp: new Date().getTime(),
   };
 
-  await util.setUserCommandStats(interaction.guild.id, interaction.member.id, properties);
+  await util.setUserCommandStats(
+    interaction.guild.id,
+    interaction.member.id,
+    properties
+  );
 
   await command
     ?.run(interaction)
     .catch((error) => client.error(error, interaction, command));
 });
 
-client.login(process.env.ECON_ALPHA_TOKEN);
+client.login(process.env.ECON_TOKEN);
 
 client.registerCommands = async () => {
   const commands = [];
