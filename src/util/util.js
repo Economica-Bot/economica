@@ -644,7 +644,7 @@ module.exports.paginate = async (interaction, embeds) => {
     } else if (
       page > 0 &&
       page < embeds.length &&
-      interaction.customID === 'previous_page'
+      interaction.customId === 'previous_page'
     ) {
       page--;
       const row = new Discord.MessageActionRow()

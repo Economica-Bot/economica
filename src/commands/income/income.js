@@ -7,16 +7,17 @@ module.exports = {
   description: 'View all income commands and their settings.',
   global: true,
   options: null,
-  async run(interaction, guild) {
+  async run(interaction) {
     const incomeEmbed = util.embedify(
       'BLURPLE',
-      `${guild.name}'s Income Commands`,
-      guild.iconURL(),
+      `${interaction.guild.name}'s Income Commands`,
+      interaction.guild.iconURL(),
       'Use `command config <income_command>` to configure income commands.'
     );
 
-    let incomeCommands = (await incomeSchema.findOne({ guildID: guild.id }))
-      .incomeCommands;
+    let incomeCommands = (
+      await incomeSchema.findOne({ guildID: interaction.guild.id })
+    ).incomeCommands;
 
     incomeCommands.forEach((command) => {
       let description = '';

@@ -28,15 +28,15 @@ module.exports = {
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
+  async run(interaction) {
     await interaction.deferReply({
       ephemeral: true,
     });
 
-    const currencySymbol = await util.getCurrencySymbol(guild.id),
-      type = options._hoistedOptions[0].value;
+    const currencySymbol = await util.getCurrencySymbol(interaction.guild.id),
+      type = interaction.options.getString('type');
     const balances = await econonomySchema
-      .find({ guildID: guild.id })
+      .find({ guildID: interaction.guild.id })
       .sort({ [type]: -1 });
 
     //amount of entries per page
@@ -50,10 +50,10 @@ module.exports = {
       embeds.push(
         new Discord.MessageEmbed()
           .setAuthor(
-            `${guild}'s ${
+            `${interaction.guild}'s ${
               type[0].toUpperCase() + type.substring(1)
             } Leaderboard`,
-            `${guild.iconURL()}`
+            `${interaction.guild.iconURL()}`
           )
           .setColor(111111)
           .setFooter(`Page ${embeds.length + 1} / ${pageCount}`)
@@ -61,16 +61,13 @@ module.exports = {
 
       // Fill the length of each page.
       for (let i = 0; i < entries; i++) {
-        try {
-          const member = await guild.members.fetch(balances[balCounter].userID);
-          embeds[embeds.length - 1].addField(
-            `#${rank++} ${member.user.tag}`,
-            `${currencySymbol}${balances[balCounter++][type].toLocaleString()}`
-          );
-        } catch (err) {
-          balCounter++;
-          embeds[0].setDescription(`\`0\` users on leaderboard.`);
-        }
+        const member = await interaction.guild.members.fetch(
+          balances[balCounter].userID
+        );
+        embeds[embeds.length - 1].addField(
+          `#${rank++} ${member.user.tag}`,
+          `${currencySymbol}${balances[balCounter++][type].toLocaleString()}`
+        );
 
         // If all balances have been inserted, break out of nested loops.
         if (balCounter >= balances.length) break loop1;

@@ -37,17 +37,17 @@ module.exports = {
       ],
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
+  async run(interaction) {
     let color = 'GREEN',
-      title = member.user.username,
-      icon_url = member.user.displayAvatarURL(),
+      title = interaction.member.user.username,
+      icon_url = interaction.member.user.displayAvatarURL(),
       description = '',
       footer = '',
       module,
-      guildID = guild.id;
+      guildID = interaction.guild.id;
     const commandDirectories = fs.readdirSync('./commands');
     for (const commandDirectory of commandDirectories) {
-      if (options._hoistedOptions[0].value === commandDirectory) {
+      if (interaction.options.getString('module') === commandDirectory) {
         //Insert undisableable modules here:
         if (!['config', 'application', 'utility'].includes(commandDirectory)) {
           module = commandDirectory;
@@ -58,7 +58,9 @@ module.exports = {
 
     if (!module) {
       color = 'RED';
-      description = `Command module \`${options._hoistedOptions[0].value}\` not found or cannot be toggled.`;
+      description = `Command module \`${interaction.options.getString(
+        'module'
+      )}\` not found or cannot be toggled.`;
       footer = 'Use help for a list of command modules.';
     } else {
       await guildSettingSchema.findOneAndUpdate(
@@ -77,7 +79,8 @@ module.exports = {
           $push: {
             modules: {
               module: module,
-              disabled: options._subcommand === 'enable' ? false : true,
+              disabled:
+                interaction.options.getSubcommand() === 'enable' ? false : true,
           ***REMOVED***
         ***REMOVED***
         }

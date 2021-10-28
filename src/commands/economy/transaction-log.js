@@ -11,12 +11,12 @@ module.exports = {
     {
       name: 'set',
       description: 'Set the transaction log.',
-      type: 1,
+      type: 'SUB_COMMAND',
       options: [
         {
           name: 'channel',
           description: 'Specify a channel.',
-          type: 7,
+          type: 'CHANNEL',
           required: true,
       ***REMOVED***
       ],
@@ -24,14 +24,14 @@ module.exports = {
     {
       name: 'remove',
       description: 'Remove the transaction log.',
-      type: 1,
+      type: 'SUB_COMMAND',
       options: null,
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
+  async run(interaction) {
     let color, description;
-    if (options._subcommand === 'set') {
-      const channel = options._hoistedOptions[0].channel;
+    if (interaction.options.getSubcommand() === 'set') {
+      const channel = interaction.options.getChannel('channel');
       if (!channel.isText()) {
         color = 'RED';
         description = `\`${channel.name}\` is not a text channel.`;
@@ -39,7 +39,7 @@ module.exports = {
         await guildSettingSchema
           .findOneAndUpdate(
             {
-              guildID: guild.id,
+              guildID: interaction.guild.id,
           ***REMOVED***
             {
               transactionLogChannel: channel.id,
@@ -54,11 +54,11 @@ module.exports = {
             description = `Transaction log set to <#${channel.id}>`;
           });
       }
-    } else if (options._subcommand === 'remove') {
+    } else if (interaction.options.getSubcommand() === 'remove') {
       await guildSettingSchema
         .findOneAndUpdate(
           {
-            guildID: guild.id,
+            guildID: interaction.guild.id,
         ***REMOVED***
           {
             $unset: {
@@ -72,13 +72,8 @@ module.exports = {
         });
     }
 
-    const embed = util.embedify(
-      color,
-      guild.name,
-      guild.iconURL(),
-      description
-    );
-
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({
+      embeds: [util.embedify(color, guild.name, guild.iconURL(), description)],
+    });
 ***REMOVED***
 };

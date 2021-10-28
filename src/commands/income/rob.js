@@ -8,14 +8,14 @@ module.exports = {
     {
       name: 'user',
       description: 'Name a user you wish to see the balance of.',
-      type: 6,
+      type: 'USER',
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
-    const user = options._hoistedOptions[0].user;
-    const guildID = guild.id;
-    const userID = author.id;
+  async run(interaction) {
+    const user = interaction.options.getUser('user');
+    const guildID = interaction.guild.id;
+    const userID = interaction.member.id;
     const properties = await util.getIncomeCommandStats(guildID, this.name);
     let color, description, amount;
     const { minfine, maxfine } = properties;
@@ -35,15 +35,15 @@ module.exports = {
           guildID,
           user.id,
           this.name,
-          `Robbed by <@!${author.user.id}>`,
+          `Robbed by <@!${interaction.member.id}>`,
           -amount,
           0,
           -amount
         );
       } else {
         amount = util.intInRange(minfine, maxfine);
-        (color = 'RED'),
-          (description = `You were caught robbing and fined ${cSymbol}${amount.toLocaleString()}`);
+        color = 'RED';
+        description = `You were caught robbing and fined ${cSymbol}${amount.toLocaleString()}`;
         amount *= -1;
       }
 
@@ -58,13 +58,15 @@ module.exports = {
       );
     }
 
-    const embed = util.embedify(
-      color,
-      author.user.username,
-      author.user.displayAvatarURL(),
-      description
-    );
-
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({
+      embeds: [
+        util.embedify(
+          color,
+          interaction.member.user.username,
+          interaction.member.user.displayAvatarURL(),
+          description
+        ),
+      ],
+    });
 ***REMOVED***
 };

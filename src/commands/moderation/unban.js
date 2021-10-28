@@ -11,12 +11,12 @@ module.exports = {
     {
       name: 'user_id',
       description: 'Specify the ID of a user to unban.',
-      type: apiTypes.String,
+      type: 'STRING',
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
-    const userID = options._hoistedOptions[0].value;
+  async run(interaction) {
+    const userID = interaction.options.getString('user_id');
     const guildBan = (await guild.bans.fetch()).get(userID);
 
     if (!guildBan) {
@@ -24,8 +24,8 @@ module.exports = {
         embeds: [
           util.embedify(
             'RED',
-            guild.name,
-            guild.iconURL(),
+            interaction.guild.name,
+            interaction.guild.iconURL(),
             `Could not find banned user with ID \`${userID}\`.`
           ),
         ],
@@ -38,18 +38,18 @@ module.exports = {
       embeds: [
         util.embedify(
           'GREEN',
-          guild.name,
-          guild.iconURL(),
+          interaction.guild.name,
+          interaction.guild.iconURL(),
           `Unbanned \`${userID}\`.`
         ),
       ],
     });
 
-    guild.members.unban(userID);
+    interaction.guild.members.unban(userID);
 
     await infractionSchema.updateMany(
       {
-        guildID: guild.id,
+        guildID: interaction.guild.id,
         userID,
         type: 'ban',
         active: true,

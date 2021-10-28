@@ -10,49 +10,46 @@ module.exports = {
     {
       name: 'channel',
       description: 'Select a channel.',
-      type: 7, //channel
+      type: 'CHANNEL',
       required: false,
   ***REMOVED***
     {
       name: 'msgcount',
       description: 'The count of messages to delete, between 0 and 100.',
-      type: 4, //integer
+      type: 'NUMBER',
       required: false,
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
-    console.log(options);
-    let embed = null,
-      channelID,
-      msgCount;
-    for (const option of options._hoistedOptions) {
-      if (option.channel) {
-        channelID = option.channel.id;
-      } else if (option.name === 'msgcount') msgCount = option.value;
-    }
-    msgCount = msgCount ?? 100;
-    if ((msgCount && msgCount > 100) || msgCount < 0) {
-      embed = util.embedify(
-        'RED',
-        member.user.username,
-        member.user.displayAvatarURL(),
-        `Invalid Length: \`${msgCount}\` out of bounds.`
-      );
+  async run(interaction) {
+    const channel =
+      interaction.options.getChannel('channel') ?? interaction.channel;
+    const msgCount = interaction.options.getNumber('msgCount') ?? 100;
+    if (msgCount > 100 || msgCount < 0) {
+      await interaction.reply({
+        embeds: [
+          util.embedify(
+            'RED',
+            interaction.member.user.username,
+            interaction.member.user.displayAvatarURL(),
+            `Invalid Length: \`${msgCount}\` out of bounds.`
+          ),
+        ],
+        ephemeral: true,
+      });
     } else {
-      const channel = await guild.channels.fetch(
-        channelID || interaction.channelId
-      );
-
-      await channel.bulkDelete(msgCount).then((val) => {
-        embed = util.embedify(
-          'GREEN',
-          member.user.username,
-          member.user.displayAvatarURL(),
-          `Deleted \`${val.size}\` messages.`
-        );
+      await channel.bulkDelete(msgCount, true).then(async (val) => {
+        await interaction.reply({
+          embeds: [
+            util.embedify(
+              'GREEN',
+              interaction.member.user.username,
+              interaction.member.user.displayAvatarURL(),
+              `Deleted \`${val.size}\` messages.`
+            ),
+          ],
+          ephemeral: true,
+        });
       });
     }
-
-    await interaction.reply({ embeds: [embed], ephemeral: true });
 ***REMOVED***
 };

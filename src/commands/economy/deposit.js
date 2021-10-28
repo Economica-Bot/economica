@@ -8,31 +8,32 @@ module.exports = {
     {
       name: 'amount',
       description: 'Specify the amount you wish to deposit.',
-      type: 3,
+      type: 'STRING',
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
+  async run(interaction) {
     let color = 'GREEN',
-      description = '',
-      embed;
-
-    const cSymbol = await util.getCurrencySymbol(guild.id);
-    const { wallet } = await util.getEconInfo(guild.id, member.user.id);
+      description = '';
+    const cSymbol = await util.getCurrencySymbol(interaction.guild.id);
+    const { wallet } = await util.getEconInfo(
+      interaction.guild.id,
+      interaction.member.id
+    );
     const amount =
-      options._hoistedOptions[0].value === 'all'
+      interaction.options.getString('amount') === 'all'
         ? wallet
-        : parseInt(options._hoistedOptions[0].value);
+        : parseInt(interaction.options.getString('amount'));
 
-    if (amount) { 
+    if (amount) {
       if (amount < 1 || amount > wallet) {
         color = 'RED';
         description = `Insufficient wallet: ${cSymbol}${amount.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`;
       } else {
         description = `Deposited ${cSymbol}${amount.toLocaleString()}`;
         await util.transaction(
-          guild.id,
-          member.user.id,
+          interaction.guild.id,
+          interaction.member.user.id,
           this.name,
           '`system`',
           -amount,
@@ -45,13 +46,15 @@ module.exports = {
       description = `Invalid amount: \`${amount}\`\nFormat: \`${this.name} ${this.format}\``;
     }
 
-    embed = util.embedify(
-      color,
-      member.user.username,
-      member.user.displayAvatarURL(),
-      description
-    );
-
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({
+      embeds: [
+        util.embedify(
+          color,
+          interaction.member.user.username,
+          interaction.member.user.displayAvatarURL(),
+          description
+        ),
+      ],
+    });
 ***REMOVED***
 };

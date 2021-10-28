@@ -9,7 +9,7 @@ module.exports = {
     {
       name: 'command',
       description: 'Specify a command.',
-      type: 3, //STRING
+      type: 'STRING',
   ***REMOVED***
   ],
   async run(interaction) {
@@ -62,8 +62,8 @@ module.exports = {
       } else {
         embed = util.embedify(
           'RED',
-          member.user.username,
-          member.user.displayAvatarURL(),
+          interaction.member.user.username,
+          interaction.member.user.displayAvatarURL(),
           `Command \`${command}\` not found`
         );
       }

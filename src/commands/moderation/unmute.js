@@ -17,33 +17,35 @@ module.exports = {
     {
       name: 'user',
       description: 'Specify a user to unmute.',
-      type: 6,
+      type: 'USER',
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
-    const targetMember = options._hoistedOptions[0].member;
+  async run(interaction) {
+    const targetMember = interaction.options.getMember('user');
 
     //Remove muted role
     const mutedRole = guild.roles.cache.find((role) => {
       return role.name.toLowerCase() === 'muted';
     });
 
-    const clientMember = await guild.members.cache.get(client.user.id);
+    const clientMember = await interaction.guild.members.cache.get(
+      client.user.id
+    );
 
     if (clientMember.roles.highest.position < mutedRole.position) {
       interaction.reply({
         embeds: [
           util.embedify(
             'RED',
-            member.user.username,
-            member.user.displayAvatarURL(),
+            interaction.member.user.username,
+            interaction.member.user.displayAvatarURL(),
             `The ${mutedRole} role is above my highest role!`
           ),
         ],
       });
 
-      return
+      return;
     }
 
     targetMember.roles.remove(mutedRole);
@@ -51,7 +53,7 @@ module.exports = {
     //Check if there is an active mute
     const activeMutes = await infractionSchema.find({
       userID: targetMember.id,
-      guildID: guild.id,
+      guildID: interaction.guild.id,
       type: 'mute',
       active: true,
     });
@@ -76,8 +78,8 @@ module.exports = {
       embeds: [
         util.embedify(
           'GREEN',
-          guild.name,
-          guild.iconURL(),
+          interaction.guild.name,
+          interaction.guild.iconURL(),
           `Unmuted <@!${targetMember.user.id}>`
         ),
       ],
@@ -86,7 +88,7 @@ module.exports = {
     await infractionSchema.updateMany(
       {
         userID: targetMember.id,
-        guildID: guild.id,
+        guildID: interaction.guild.id,
         type: 'mute',
         active: true,
     ***REMOVED***

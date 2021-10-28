@@ -10,43 +10,50 @@ module.exports = {
     {
       name: 'balance',
       description: 'The statistics for user balance.',
-      type: 2,
+      type: 'SUB_COMMAND_GROUP',
       options: [
         {
           name: 'user',
           description: 'Specify a user.',
-          type: 1,
+          type: 'SUB_COMMAND',
           options: [
             {
-              name: 'user', 
-              description: 'Specify a user.', 
-              type: 'USER', 
-              required: true
-            }
+              name: 'user',
+              description: 'Specify a user.',
+              type: 'USER',
+              required: true,
+          ***REMOVED***
           ],
       ***REMOVED***
         {
-          name: 'total', 
-          description: 'View total balance trend.', 
-          type: 1, 
-        }
+          name: 'total',
+          description: 'View total balance trend.',
+          type: 'SUB_COMMAND',
+      ***REMOVED***
       ],
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
-    let wallet = 0, treasury = 0, total = 0, transactions = [];
-    const wallets = [], treasuries = [], totals = [], dates = [];
-    
+  async run(interaction) {
+    let wallet = 0,
+      treasury = 0,
+      total = 0,
+      transactions = [];
+    const wallets = [],
+      treasuries = [],
+      totals = [],
+      dates = [];
+
     //Init
     wallets.push(wallet);
     treasuries.push(treasury);
     totals.push(total);
-    
-    if(options._group === 'balance') {
-      if(options._subcommand === 'user') {
-        const user = options._hoistedOptions[0]?.user ?? member.user;
+
+    if (interaction.options.getSubcommandGroup() === 'balance') {
+      if (interaction.options.getSubcommand() === 'user') {
+        const user =
+          interaction.options.getUser('user') ?? interaction.member.user;
         transactions = await transactionSchema.find({
-          guildID: guild.id,
+          guildID: interaction.guild.id,
           userID: user.id,
         });
         for (const transaction of transactions) {
@@ -57,16 +64,17 @@ module.exports = {
           treasuries.push(treasury);
           totals.push(total);
           dates.push(transaction.createdAt.toLocaleDateString());
-        } 
-  
+        }
+
         //Current vals
         wallets.push(wallet);
         treasuries.push(treasury);
         totals.push(total);
         dates.push(new Date().toLocaleDateString());
-  
-      } else if(options._subcommand === 'total') {
-        transactions = await transactionSchema.find({ guildID: guild.id });
+      } else if (interaction.options.getSubcommand() === 'total') {
+        transactions = await transactionSchema.find({
+          guildID: interaction.guild.id,
+        });
         for (const transaction of transactions) {
           wallet += transaction.wallet;
           treasury += transaction.treasury;
@@ -75,8 +83,8 @@ module.exports = {
           treasuries.push(treasury);
           totals.push(total);
           dates.push(transaction.createdAt.toLocaleDateString());
-        } 
-  
+        }
+
         wallets.push(wallet);
         treasuries.push(treasury);
         totals.push(total);
@@ -84,35 +92,35 @@ module.exports = {
       }
     }
 
-    dates1 = []
-    if(dates.length > 250) {
-      const r = dates.length / 250
-      for(let i = 0; i < 250; i+=r) {
-        dates1.push(dates[Math.round(i)])
+    dates1 = [];
+    if (dates.length > 250) {
+      const r = dates.length / 250;
+      for (let i = 0; i < 250; i += r) {
+        dates1.push(dates[Math.round(i)]);
       }
     }
 
-    wallets1 = []
-    if(wallets.length > 250) {
-      const r = wallets.length / 250
-      for(let i = 0; i < 250; i+=r) {
-        wallets1.push(wallets[Math.round(i)])
+    wallets1 = [];
+    if (wallets.length > 250) {
+      const r = wallets.length / 250;
+      for (let i = 0; i < 250; i += r) {
+        wallets1.push(wallets[Math.round(i)]);
       }
     }
 
-    treasuries1 = []
-    if(treasuries.length > 250) {
-      const r = treasuries.length / 250
-      for(let i = 0; i < 250; i+=r) {
-        treasuries1.push(treasuries[Math.round(i)])
+    treasuries1 = [];
+    if (treasuries.length > 250) {
+      const r = treasuries.length / 250;
+      for (let i = 0; i < 250; i += r) {
+        treasuries1.push(treasuries[Math.round(i)]);
       }
     }
 
-    totals1 = []
-    if(totals.length > 250) {
-      const r = totals.length / 250
-      for(let i = 0; i < 250; i+=r) {
-        totals1.push(totals[Math.round(i)])
+    totals1 = [];
+    if (totals.length > 250) {
+      const r = totals.length / 250;
+      for (let i = 0; i < 250; i += r) {
+        totals1.push(totals[Math.round(i)]);
       }
     }
 
@@ -223,7 +231,10 @@ module.exports = {
       .embedify(
         'GOLD',
         'Balance Statistics',
-        options._subcommand === 'total' ? guild.iconURL() : member.user.displayAvatarURL(),
+        interaction.options.getSubcommand() === 'total'
+          ? interaction.guild.iconURL()
+          : interaction.options.getUser('user')?.displayAvatarURL() ??
+              interaction.member.user.displayAvatarURL(),
         `Total transactions: \`${transactions.length}\``
       )
       .setImage(url)

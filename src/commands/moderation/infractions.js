@@ -11,45 +11,54 @@ module.exports = {
   global: true,
   options: [
     {
-      name: 'option',
-      description: 'View or delete infractions.',
-      type: 'STRING',
-      choices: [
+      name: 'view',
+      description: 'View infractions.',
+      type: 'SUB_COMMAND',
+      options: [
         {
-          name: 'View',
-          value: 'view',
+          name: 'user',
+          description: 'Specify a user.',
+          type: 'USER',
+          required: true,
       ***REMOVED***
         {
-          name: 'Delete',
-          value: 'delete',
+          name: 'infraction_id',
+          description: 'Specify an infraction.',
+          type: 'STRING',
       ***REMOVED***
       ],
-      required: true,
   ***REMOVED***
     {
-      name: 'user',
-      description: 'Specify a user.',
-      type: 'USER',
-      required: true,
-  ***REMOVED***
-    {
-      name: 'infraction_id',
-      description: 'Specify an infraction.',
-      type: 'STRING',
+      name: 'delete',
+      description: 'Delete infractions.',
+      type: 'SUB_COMMAND',
+      options: [
+        {
+          name: 'user',
+          description: 'Specify a user.',
+          type: 'USER',
+          required: true,
+      ***REMOVED***
+        {
+          name: 'infraction_id',
+          description: 'Specify an infraction.',
+          type: 'STRING',
+      ***REMOVED***
+      ],
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
+  async run(interaction) {
     await interaction.deferReply();
 
-    const targetMember = options._hoistedOptions[1].member,
-      _id = options._hoistedOptions[2]?.value;
+    const targetMember = interaction.options.getMember('user');
+    const _id = interaction.options.getString('infraction_id');
     if (!isValidObjectId(_id)) {
       interaction.editReply({
         embeds: [
           util.embedify(
             'RED',
-            member.user.username,
-            member.user.displayAvatarURL(),
+            interaction.member.user.username,
+            interaction.member.user.displayAvatarURL(),
             `Invalid loan ID: \`${_id}\``
           ),
         ],
@@ -58,11 +67,11 @@ module.exports = {
     }
 
     //View infractions
-    if (options._hoistedOptions[0].value === 'view') {
+    if (interaction.options.getSubcommand('view')) {
       //find latest infraction data
       const infractions = await infractionSchema
         .find({
-          guildID: guild.id,
+          guildID: interaction.guild.id,
           userID: targetMember.user.id,
         })
         .sort({
@@ -111,9 +120,9 @@ module.exports = {
       if (_id) {
         const infraction = await infractionSchema.findOne({ _id });
         if (infraction) {
-          infractionEmbed.description = `Infraction \`${_id}\`\n${infractionTypes.find(inf => inf.type === infraction.type).formal} by <@!${
-            infraction.staffID
-          }> for \`${infraction.reason}\` ${
+          infractionEmbed.description = `Infraction \`${_id}\`\n${
+            infractionTypes.find((inf) => inf.type === infraction.type).formal
+          } by <@!${infraction.staffID}> for \`${infraction.reason}\` ${
             infraction.type === 'mute'
               ? `${
                   infraction.permanent
@@ -188,7 +197,7 @@ module.exports = {
           if (
             interaction.isButton() &&
             interaction.message.id === msg.id &&
-            interaction.user.id === member.user.id
+            interaction.user.id === interaction.user.id
           ) {
             let title = '',
               description = '';
@@ -247,7 +256,7 @@ module.exports = {
       //Delete all infractions
       else {
         const infractions = await infractionSchema.deleteMany({
-          guildID: guild.id,
+          guildID: interaction.guild.id,
           userID: targetMember.user.id,
         });
 
@@ -258,8 +267,8 @@ module.exports = {
         embeds: [
           util.embedify(
             color,
-            member.user.username,
-            member.user.displayAvatarURL(),
+            interaction.member.user.username,
+            interaction.member.user.displayAvatarURL(),
             description
           ),
         ],

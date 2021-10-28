@@ -8,25 +8,30 @@ module.exports = {
     {
       name: 'amount',
       description: 'Specify the amount you wish to withdraw.',
-      type: 3,
+      type: 'STRING',
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
-    const properties = await util.getCommandStats(guild.id, this.name);
-    const { wallet } = await util.getEconInfo(guild.id, member.id);
+  async run(interaction) {
+    const properties = await util.getCommandStats(
+      interaction.guild.id,
+      this.name
+    );
+    const { wallet } = await util.getEconInfo(
+      interaction.guild.id,
+      interaction.member.id
+    );
     let color = 'RED',
-      description = '',
-      embed;
+      description = '';
     let amount =
-      options._hoistedOptions[0].value === 'all'
+      interaction.options.getString('amount') === 'all'
         ? wallet
-        : parseInt(options._hoistedOptions[0].value);
-    const cSymbol = await util.getCurrencySymbol(guild.id);
+        : parseInt(interaction.options.getString('amount'));
+    const cSymbol = await util.getCurrencySymbol(interaction.guild.id);
     if (wallet < 1 || wallet < amount) {
       description = `Insufficient wallet: ${cSymbol}${wallet.toLocaleString()}`;
-    } else if ( amount < 1) {
-      description = `Invalid amount, must be above 0.`
+    } else if (amount < 1) {
+      description = `Invalid amount, must be above 0.`;
     } else {
       if (!util.isSuccess(properties)) {
         description = `You flipped a coin and lost ${cSymbol}${amount.toLocaleString()}`;
@@ -37,8 +42,8 @@ module.exports = {
       }
 
       util.transaction(
-        guild.id,
-        member.id,
+        interaction.guild.id,
+        interaction.member.id,
         this.name,
         '`system`',
         amount,
@@ -47,13 +52,15 @@ module.exports = {
       );
     }
 
-    embed = util.embedify(
-      color,
-      member.user.username,
-      member.user.displayAvatarURL(),
-      description
-    );
-
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({
+      embeds: [
+        util.embedify(
+          color,
+          interaction.member.user.username,
+          interaction.member.user.displayAvatarURL(),
+          description
+        ),
+      ],
+    });
 ***REMOVED***
 };

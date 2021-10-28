@@ -8,22 +8,24 @@ module.exports = {
     {
       name: 'amount',
       description: 'Specify the amount you wish to withdraw.',
-      type: 3,
+      type: 'STRING',
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
+  async run(interaction) {
     let color = 'GREEN',
-      description = '',
-      embed;
+      description = '';
 
-    const cSymbol = await util.getCurrencySymbol(guild.id);
-    const { treasury } = await util.getEconInfo(guild.id, member.user.id);
+    const cSymbol = await util.getCurrencySymbol(interaction.guild.id);
+    const { treasury } = await util.getEconInfo(
+      interaction.guild.id,
+      interaction.member.id
+    );
     const amount =
-      options._hoistedOptions[0].value === 'all'
+      interaction.options.getString('amount') === 'all'
         ? treasury
-        : parseInt(options._hoistedOptions[0].value);
-    
+        : parseInt(interaction.options.getString('amount'));
+
     if (amount || amount === 0) {
       if (amount < 1 || amount > treasury) {
         color = 'RED';
@@ -31,8 +33,8 @@ module.exports = {
       } else {
         description = `Withdrew ${cSymbol}${amount.toLocaleString()}`;
         await util.transaction(
-          guild.id,
-          member.user.id,
+          interaction.guild.id,
+          interaction.member.id,
           this.name,
           '`system`',
           amount,
@@ -45,13 +47,15 @@ module.exports = {
       description = `Invalid amount: \`${amount}\`\nFormat: \`${this.name} ${this.format}\``;
     }
 
-    embed = util.embedify(
-      color,
-      member.user.username,
-      member.user.displayAvatarURL(),
-      description
-    );
-
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({
+      embeds: [
+        util.embedify(
+          color,
+          interaction.user.username,
+          interaction.member.user.displayAvatarURL(),
+          description
+        ),
+      ],
+    });
 ***REMOVED***
 };

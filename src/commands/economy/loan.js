@@ -19,30 +19,30 @@ module.exports = {
     {
       name: 'propose',
       description: 'Add a loan to the registry',
-      type: 1,
+      type: 'SUB_COMMAND',
       options: [
         {
           name: 'user',
           description: 'Specify a user.',
-          type: 6,
+          type: 'USER',
           required: true,
       ***REMOVED***
         {
           name: 'principal',
           description: 'Specify the principal.',
-          type: 4,
+          type: 'INTEGER',
           required: true,
       ***REMOVED***
         {
           name: 'repayment',
           description: 'Specify the repayment.',
-          type: 4,
+          type: 'INTEGER',
           required: true,
       ***REMOVED***
         {
           name: 'length',
           description: 'Specify the life of the loan.',
-          type: 3,
+          type: 'STRING',
           required: true,
       ***REMOVED***
       ],
@@ -50,12 +50,12 @@ module.exports = {
     {
       name: 'cancel',
       description: 'Cancel a pending loan in the registry.',
-      type: 1,
+      type: 'SUB_COMMAND',
       options: [
         {
           name: 'loan_id',
           description: 'Specify a loan.',
-          type: 3,
+          type: 'STRING',
           required: true,
       ***REMOVED***
       ],
@@ -63,12 +63,12 @@ module.exports = {
     {
       name: 'accept',
       description: 'Accept a pending loan in the registry.',
-      type: 1,
+      type: 'SUB_COMMAND',
       options: [
         {
           name: 'loan_id',
           description: 'Specify a loan.',
-          type: 3,
+          type: 'STRING',
           required: true,
       ***REMOVED***
       ],
@@ -76,12 +76,12 @@ module.exports = {
     {
       name: 'decline',
       description: 'Decline a pending loan in the registry.',
-      type: 1,
+      type: 'SUB_COMMAND',
       options: [
         {
           name: 'loan_id',
           description: 'Specify a loan.',
-          type: 3,
+          type: 'STRING',
           required: true,
       ***REMOVED***
       ],
@@ -89,43 +89,44 @@ module.exports = {
     {
       name: 'view',
       description: 'View the loan registry.',
-      type: 1,
+      type: 'SUB_COMMAND',
       options: [
         {
           name: 'loan_id',
           description: 'Specify a loan.',
-          type: 3,
+          type: 'STRING',
       ***REMOVED***
         {
           name: 'user',
           description: 'Specify a loan participator.',
-          type: 6,
+          type: 'USER',
       ***REMOVED***
       ],
   ***REMOVED***
   ],
 
-  async run(interaction, guild, member, options) {
-    const guildID = guild.id;
+  async run(interaction) {
+    const guildID = interaction.guild.id;
 
     let color = 'BLURPLE',
-      title = member.user.username,
-      icon_url = member.user.displayAvatarURL(),
+      title = interaction.member.user.username,
+      icon_url = interaction.member.user.displayAvatarURL(),
       description = '',
       footer = '';
 
-    const cSymbol = await util.getCurrencySymbol(guild.id);
-    const { wallet } = await util.getEconInfo(guild.id, member.user.id);
+    const cSymbol = await util.getCurrencySymbol(guildID);
+    const { wallet } = await util.getEconInfo(guildID, interaction.member.id);
 
-    if (options._subcommand === 'propose') {
-      const targetMember = options._hoistedOptions[0].member;
-      const principal = options._hoistedOptions[1].value;
-      const repayment = options._hoistedOptions[2].value;
-      const length = options._hoistedOptions[3].value;
+    if (interaction.options.getSubcommand() === 'propose') {
+      const targetMember = interaction.options.getMember('user');
+      const principal = interaction.options.getInteger('principal');
+      const repayment = interaction.options.getInteger('repayment');
+      const length = interaction.options.getString('length');
 
       //Validation
-      if (targetMember.user.id === member.user.id) {
-        (color = 'RED'), (description += 'You cannot give yourself a loan!\n');
+      if (targetMember.user.id === interaction.member.user.id) {
+        color = 'RED';
+        description += 'You cannot give yourself a loan!\n';
       }
       if (principal < 1 || repayment < 1) {
         color = 'RED';
@@ -155,7 +156,7 @@ module.exports = {
       const loan = await new loanSchema({
         guildID,
         borrowerID: targetMember.user.id,
-        lenderID: member.user.id,
+        lenderID: interaction.member.user.id,
         principal,
         repayment,
         expires: new Date(new Date().getTime() + ms(length)),
@@ -166,8 +167,8 @@ module.exports = {
 
       //Execute principal transaction
       await util.transaction(
-        guild.id,
-        member.user.id,
+        guildID,
+        interaction.member.id,
         this.name,
         `Loan to <@!${targetMember.user.id}> | Loan ID \`${loan._id}\``,
         -principal,
@@ -185,16 +186,16 @@ module.exports = {
       }\` | Complete: \`${loan.complete}\`\nPrincipal: ${cSymbol}${
         loan.principal
       } | Repayment: ${cSymbol}${loan.repayment}`;
-    } else if (options._subcommand === 'cancel') {
-      const _id = options._hoistedOptions[0].value;
+    } else if (interaction.options.getSubcommand() === 'cancel') {
+      const _id = interaction.options.getString('loan_id');
 
       if (isValidObjectId(_id)) {
-        const econManagerRole = guild.roles.cache.find((r) => {
+        const econManagerRole = interaction.guild.roles.cache.find((r) => {
           return r.name.toLowerCase() === 'economy manager';
         });
 
         let loan;
-        if (member.roles.cache.has(econManagerRole.id)) {
+        if (interaction.member.roles.cache.has(econManagerRole.id)) {
           loan = await loanSchema.findOneAndDelete({
             _id,
             pending: true,
@@ -202,7 +203,7 @@ module.exports = {
         } else {
           loan = await loanSchema.findOneAndDelete({
             _id,
-            userID: member.user.id,
+            userID: interaction.member.id,
             pending: true,
           });
         }
@@ -229,15 +230,15 @@ module.exports = {
         color = 'RED';
         description = `Invalid loan ID: \`${_id}\``;
       }
-    } else if (options._subcommand === 'accept') {
-      const _id = options._hoistedOptions[0].value;
+    } else if (interaction.options.getSubcommand() === 'accept') {
+      const _id = interaction.options.getString('loan_id');
 
       //Validate ID
       if (isValidObjectId(_id)) {
         const loan = await loanSchema.findOneAndUpdate(
           {
             _id,
-            borrowerID: member.user.id,
+            borrowerID: interaction.member.id,
             pending: true,
         ***REMOVED***
           {
@@ -252,7 +253,7 @@ module.exports = {
           //Transfer funds
           await util.transaction(
             guildID,
-            member.user.id,
+            interaction.member.user.id,
             this.name,
             `Loan from <@!${loan.lenderID}> \`accepted\` | Loan ID: \`${loan._id}\``,
             loan.principal,
@@ -267,15 +268,15 @@ module.exports = {
         color = 'RED';
         description = `Invalid loan ID: \`${_id}\``;
       }
-    } else if (options._subcommand === 'decline') {
-      const _id = options._hoistedOptions[0].value;
+    } else if (interaction.options.getSubcommand() === 'decline') {
+      const _id = interaction.options.getString('loan_id');
 
       //Validate ID
       if (isValidObjectId(_id)) {
         const loan = await loanSchema.findOneAndUpdate(
           {
             _id,
-            borrowerID: member.user.id,
+            borrowerID: interaction.member.id,
             pending: true,
         ***REMOVED***
           {
@@ -306,12 +307,12 @@ module.exports = {
         color = 'RED';
         description = `Invalid loan ID: \`${_id}\``;
       }
-    } else if (options._subcommand === 'view') {
+    } else if (interaction.options.getSubcommand() === 'view') {
       //View all loans
-      if (!options._hoistedOptions.length) {
+      if (!interaction.options._hoistedOptions.length) {
         color = 'GREEN';
-        title = `Loans in ${guild.name}`;
-        icon_url = guild.iconURL();
+        title = `Loans in ${interaction.guild.name}`;
+        icon_url = interaction.guild.iconURL();
 
         const loans = await loanSchema.find({
           guildID,
@@ -329,14 +330,14 @@ module.exports = {
       }
 
       //View loan by ID
-      else if (options._hoistedOptions[0].name === 'loan_id') {
-        const _id = options._hoistedOptions[0].value;
+      else if (interaction.options.getString('loan_id')) {
+        const _id = interaction.options.getString('loan_id');
         color = 'GREEN';
 
         if (isValidObjectId(_id)) {
           const loan = await loanSchema.findOne({
             guildID,
-            _id: options._hoistedOptions[0].value,
+            _id,
           });
 
           if (loan) {
@@ -360,16 +361,16 @@ module.exports = {
       }
 
       //View loans by user
-      else if (options._hoistedOptions[0].name === 'user') {
-        const user = options._hoistedOptions[0].user;
+      else if (interaction.options.getUser('user')) {
+        const user = interaction.options.getUser('user');
 
         const outgoingLoans = await loanSchema.find({
-          guildID: guild.id,
+          guildID,
           lenderID: user.id,
         });
 
         const incomingLoans = await loanSchema.find({
-          guildID: guild.id,
+          guildID,
           borrowerID: user.id,
         });
 
@@ -403,8 +404,8 @@ module.exports = {
       }
     }
 
-    embed = util.embedify(color, title, icon_url, description, footer);
-
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({
+      embeds: [util.embedify(color, title, icon_url, description, footer)],
+    });
 ***REMOVED***
 };

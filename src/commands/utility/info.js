@@ -9,7 +9,7 @@ module.exports = {
     {
       name: 'group',
       description: 'Specify a command group.',
-      type: 3, //STRING
+      type: 'STRING',
       required: true,
       choices: [
         {
@@ -49,11 +49,11 @@ module.exports = {
     {
       name: 'channel',
       description: 'Specify a channel.',
-      type: 7, //CHANNEL
+      type: 'CHANNEL',
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
-    const group = options._hoistedOptions[0].value;
+  async run(interaction) {
+    const group = interaction.options.getString('group');
     let commands = [];
     client.commands.forEach((command) => {
       if (group === command.group) {
@@ -80,22 +80,23 @@ module.exports = {
     }
 
     const channel =
-      options._hoistedOptions[1]?.channel ??
+      interaction.options.getChannel('channel') ??
       guild.channels.cache.get(interaction.channelId);
     let color, description;
 
     if (channel.type !== 'GUILD_TEXT') {
-      (color = 'RED'), (description = 'Channel must be a text channel.');
+      color = 'RED';
+      description = 'Channel must be a text channel.';
     } else {
-      (color = 'GREEN'),
-        (description = `Successfully sent information for **${group}** in <#${channel.id}>.`);
+      color = 'GREEN';
+      description = `Successfully sent information for **${group}** in <#${channel.id}>.`;
       channel.send({ embeds: [infoEmbed] });
     }
 
     embed = util.embedify(
       color,
-      member.user.username,
-      member.user.displayAvatarURL(),
+      interaction.member.user.username,
+      interaction.member.user.displayAvatarURL(),
       description
     );
 

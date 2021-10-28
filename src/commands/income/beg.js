@@ -1,12 +1,12 @@
 module.exports = {
   name: 'beg',
   group: 'income',
-  description: 'Possibly earn wallet money',
+  description: 'Get some quick cash.',
   global: true,
   options: null,
-  async run(interaction, guild, member) {
-    const guildID = guild.id,
-      userID = member.id;
+  async run(interaction) {
+    const guildID = interaction.guild.id,
+      userID = interaction.member.id;
     const properties = await util.getCommandStats(guildID, this.name);
 
     let color, description;
@@ -25,18 +25,20 @@ module.exports = {
         0,
         amount
       );
-      const cSymbol = await util.getCurrencySymbol(guild.id);
+      const cSymbol = await util.getCurrencySymbol(guildID);
       color = 'GREEN';
       description = `You begged and earned ${cSymbol}${amount.toLocaleString()}!`;
     }
 
-    const embed = util.embedify(
-      color,
-      member.user.username,
-      member.user.displayAvatarURL(),
-      description
-    );
-
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({
+      embeds: [
+        util.embedify(
+          color,
+          interaction.member.user.username,
+          interaction.member.user.displayAvatarURL(),
+          description
+        ),
+      ],
+    });
 ***REMOVED***
 };

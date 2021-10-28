@@ -9,34 +9,34 @@ module.exports = {
     {
       name: 'user',
       description: 'Specify a user.',
-      type: 6,
+      type: 'USER',
       required: true,
   ***REMOVED***
     {
       name: 'reason',
       description: 'Provide a reason.',
-      type: 3,
+      type: 'STRING',
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
-    const targetMember = options._hoistedOptions[0].member;
+  async run(interaction) {
+    const targetMember = interaction.options.getMember('user');
     let embed = (result = null),
       ephemeral = false,
-      reason = options._hoistedOptions[1]?.value ?? 'No reason provided';
+      reason = interaction.options.getString('reason') ?? 'No reason provided';
 
     if (targetMember.user.id === member.user.id) {
       embed = util.embedify(
         'RED',
-        member.user.username,
-        member.user.displayAvatarURL(),
+        interaction.member.user.username,
+        interaction.member.user.displayAvatarURL(),
         'You cannot ban yourself!'
       );
       ephemeral = true;
     } else if (!targetMember.bannable) {
       embed = util.embedify(
         'RED',
-        member.user.username,
-        member.user.displayAvatarURL(),
+        interaction.member.user.username,
+        interaction.member.user.displayAvatarURL(),
         `<@!${targetMember.user.id}> is not bannable.`
       );
       ephemeral = true;
@@ -47,8 +47,8 @@ module.exports = {
           embeds: [
             util.embedify(
               'RED',
-              guild.name,
-              guild.iconURL(),
+              interaction.guild.name,
+              interaction.guild.iconURL(),
               `You have been **banned** for \`${reason}\`.`
             ),
           ],
@@ -70,9 +70,9 @@ module.exports = {
       });
 
       await util.infraction(
-        guild.id,
+        interaction.guild.id,
         targetMember.id,
-        member.user.id,
+        interaction.member.user.id,
         this.name,
         reason,
         true

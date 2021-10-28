@@ -8,15 +8,15 @@ module.exports = {
     {
       name: 'user',
       description: 'Name a user you wish to see the balance of.',
-      type: 6,
+      type: 'USER',
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
-    const user = options._hoistedOptions?.[0]?.user ?? member.user;
+  async run(interaction) {
+    const user = interaction.options.getUser('user') ?? interaction.member.user;
 
-    const cSymbol = await util.getCurrencySymbol(guild.id);
+    const cSymbol = await util.getCurrencySymbol(interaction.guild.id);
     const { wallet, treasury, total, rank } = await util.getEconInfo(
-      guild.id,
+      interaction.guild.id,
       user.id
     );
     const balEmbed = util

@@ -7,7 +7,7 @@ module.exports = {
     {
       name: 'user',
       description: 'Specify a user.',
-      type: apiTypes.User,
+      type: 'USER',
       required: true,
   ***REMOVED***
     {
@@ -33,15 +33,15 @@ module.exports = {
       required: true,
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
-    const targetMember = options._hoistedOptions[0].member;
+  async run(interaction) {
+    const targetMember = interaction.options.getMember('user');
 
     let wallet = 0,
       treasury = 0,
       total = 0;
-    const amount = options._hoistedOptions[1].value;
+    const amount = interaction.options.getInteger('amount');
 
-    if (options._hoistedOptions[2].value === 'treasury') {
+    if (interaction.options.getString('target') === 'treasury') {
       treasury += amount;
     } else {
       wallet += amount;
@@ -50,10 +50,10 @@ module.exports = {
     total += amount;
 
     await util.transaction(
-      guild.id,
+      interaction.guild.id,
       targetMember.user.id,
       'ADD_MONEY',
-      `add-money | <@!${member.user.id}>`,
+      `add-money | <@!${interaction.member.user.id}>`,
       wallet,
       treasury,
       total
@@ -65,7 +65,11 @@ module.exports = {
           'GREEN',
           targetMember.user.username,
           targetMember.user.displayAvatarURL(),
-          `Added by <@!${member.user.id}> to <@!${targetMember.user.id}>'s \`${options._hoistedOptions[2].value}\``
+          `Added ${await util.getCurrencySymbol(
+            interaction.guild.id
+          )}${amount.toLocaleString()} to <@!${
+            targetMember.user.id
+          }>'s \`${interaction.options.getString('target')}\``
         ),
       ],
     });

@@ -10,12 +10,12 @@ module.exports = {
     {
       name: 'set',
       description: 'Set the currency symbol.',
-      type: 1,
+      type: 'SUB_COMMAND',
       options: [
         {
           name: 'symbol',
           description: 'Specify a symbol.',
-          type: 3,
+          type: 'STRING',
           required: true,
       ***REMOVED***
       ],
@@ -23,18 +23,18 @@ module.exports = {
     {
       name: 'reset',
       description: 'Reset the currency symbol.',
-      type: 1,
+      type: 'SUB_COMMAND',
       options: null,
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
+  async run(interaction) {
     let color, description, footer;
-    if (options._subcommand === 'set') {
-      const currency = options._hoistedOptions[0].value;
+    if (interaction.options.getSubcommand() === 'set') {
+      const currency = interaction.options.getString('symbol');
       await guildSettingSchema
         .findOneAndUpdate(
           {
-            guildID: guild.id,
+            guildID: interaction.guild.id,
         ***REMOVED***
           {
             currency,
@@ -49,11 +49,11 @@ module.exports = {
           description = `Currency symbol set to ${currency}`;
           footer = currency;
         });
-    } else if (options._subcommand === 'reset') {
+    } else if (interaction.options.getSubcommand() === 'reset') {
       await guildSettingSchema
         .findOneAndUpdate(
           {
-            guildID: guild.id,
+            guildID: interaction.guild.id,
         ***REMOVED***
           {
             $unset: {
@@ -62,14 +62,15 @@ module.exports = {
           }
         )
         .then(() => {
-          (color = 'GREEN'), (description = 'Reset the currency symbol.');
+          color = 'GREEN';
+          description = 'Reset the currency symbol.';
         });
     }
 
     const embed = util.embedify(
       color,
-      guild.name,
-      guild.iconURL(),
+      interaction.guild.name,
+      interaction.guild.iconURL(),
       description,
       footer
     );

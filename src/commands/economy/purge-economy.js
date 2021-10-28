@@ -19,23 +19,23 @@ module.exports = {
     {
       name: 'inventory',
       description: 'Delete inventory data.',
-      type: 2, //SUB_COMMAND_GROUP
+      type: 'SUB_COMMAND_GROUP',
       options: [
         {
           name: 'all',
           description: 'All inventories.',
-          type: 1, //SUB_COMMAND
+          type: 'SUB_COMMAND',
           options: null,
       ***REMOVED***
         {
           name: 'user',
           description: 'Specify a user.',
-          type: 1,
+          type: 'SUB_COMMAND',
           options: [
             {
               name: 'user',
               description: 'Specify a user.',
-              type: 6,
+              type: 'USER',
               required: true,
           ***REMOVED***
           ],
@@ -45,23 +45,23 @@ module.exports = {
     {
       name: 'market',
       description: 'Delete market data.',
-      type: 2, //SUB_COMMAND_GROUP
+      type: 'SUB_COMMAND_GROUP',
       options: [
         {
           name: 'all',
           description: 'All listings.',
-          type: 1, //SUB_COMMAND
+          type: 'SUB_COMMAND',
           options: null,
       ***REMOVED***
         {
           name: 'user',
           description: 'Specify a user.',
-          type: 1,
+          type: 'SUB_COMMAND',
           options: [
             {
               name: 'user',
               description: 'Specify a user.',
-              type: 6,
+              type: 'USER',
               required: true,
           ***REMOVED***
           ],
@@ -71,23 +71,23 @@ module.exports = {
     {
       name: 'balance',
       description: 'Delete balance data.',
-      type: 2, //SUB_COMMAND_GROUP
+      type: 'SUB_COMMAND_GROUP',
       options: [
         {
           name: 'all',
           description: 'All balances.',
-          type: 1, //SUB_COMMAND
+          type: 'SUB_COMMAND',
           options: null,
       ***REMOVED***
         {
           name: 'user',
           description: 'Specify a user.',
-          type: 1,
+          type: 'SUB_COMMAND',
           options: [
             {
               name: 'user',
               description: 'Specify a user.',
-              type: 6,
+              type: 'USER',
               required: true,
           ***REMOVED***
           ],
@@ -95,15 +95,15 @@ module.exports = {
       ],
   ***REMOVED***
   ],
-  async run(interaction, guild, member, options) {
-    const guildID = guild.id;
+  async run(interaction) {
+    const guildID = interaction.guild.id;
     let color = 'GREEN',
-      title = member.user.username,
-      icon_url = member.user.displayAvatarURL(),
+      title = interaction.member.user.username,
+      icon_url = interaction.member.user.displayAvatarURL(),
       description = '';
 
-    if (options._group === 'inventory') {
-      if (options._subcommand === 'all') {
+    if (interaction.options.getSubcommandGroup() === 'inventory') {
+      if (interaction.options.getSubcommand() === 'all') {
         await inventorySchema
           .deleteMany({
             guildID,
@@ -111,8 +111,8 @@ module.exports = {
           .then((result) => {
             description = `Deleted all inventory data. \`${result.n}\` removed.`;
           });
-      } else if (options._subcommand === 'user') {
-        const user = options._hoistedOptions[0].user;
+      } else if (interaction.options.getSubcommand() === 'user') {
+        const user = interaction.options.getUser('user');
         await inventorySchema
           .findOneAndDelete({
             guildID,
@@ -122,8 +122,8 @@ module.exports = {
             description = `Deleted inventory data for <@!${user.id}>`;
           });
       }
-    } else if (options._group === 'market') {
-      if (options._subcommand === 'all') {
+    } else if (interaction.options.getSubcommandGroup() === 'market') {
+      if (interaction.options.getSubcommand() === 'all') {
         await marketItemSchema
           .deleteMany({
             guildID,
@@ -131,8 +131,8 @@ module.exports = {
           .then((result) => {
             description = `Deleted all market data. \`${result.n}\` removed.`;
           });
-      } else if (options._subcommand === 'user') {
-        const user = options._hoistedOptions[0].user;
+      } else if (interaction.options.getSubcommand() === 'user') {
+        const user = interaction.options.getUser('user');
         await marketItemSchema
           .deleteMany({
             guildID,
@@ -142,8 +142,8 @@ module.exports = {
             description = `Deleted market data for <@!${user.id}>`;
           });
       }
-    } else if (options._group === 'balance') {
-      if (options._subcommand === 'all') {
+    } else if (interaction.options.getSubcommandGroup() === 'balance') {
+      if (interaction.options.getSubcommand() === 'all') {
         await economySchema
           .deleteMany({
             guildID,
@@ -151,8 +151,8 @@ module.exports = {
           .then((result) => {
             description = `Deleted all balance data. \`${result.n}\` removed.`;
           });
-      } else if (options._subcommand === 'user') {
-        const user = options._hoistedOptions[0].user;
+      } else if (interaction.options.getSubcommand() === 'user') {
+        const user = interaction.options.getUser('user');
         await economySchema
           .deleteMany({
             guildID,
@@ -164,7 +164,8 @@ module.exports = {
       }
     }
 
-    embed = util.embedify(color, title, icon_url, description);
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({
+      embeds: [util.embedify(color, title, icon_url, description)],
+    });
 ***REMOVED***
 };
