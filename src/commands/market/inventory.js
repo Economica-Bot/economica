@@ -10,14 +10,14 @@ module.exports = {
     {
       name: 'user',
       description: 'Name a user you wish to see the inventory of.',
-      type: 6,
+      type: 'USER',
   ***REMOVED***
   ],
-  async run(interaction, guild, author, options) {
-    const user = options._hoistedOptions?.[0]?.user ?? author.user;
+  async run(interaction) {
+    const user = interaction.options.getUser('user') ?? interaction.member.user;
     const inventory = await inventorySchema.findOne({
       userID: user.id,
-      guildID: guild.id,
+      guildID: interaction.guild.id,
     });
 
     let i = 0;
@@ -31,13 +31,16 @@ module.exports = {
         description += '\n';
       }
     }
-    const inventoryEmbed = util.embedify(
-      'BLURPLE',
-      user.username,
-      user.displayAvatarURL(),
-      `\`${i}\` Items\n\`\`\`${description}\`\`\``
-    );
 
-    await interaction.reply({ embeds: [inventoryEmbed] });
+    await interaction.reply({
+      embeds: [
+        util.embedify(
+          'BLURPLE',
+          user.username,
+          user.displayAvatarURL(),
+          `\`${i}\` Items\n${description ? `\`\`${description}\`\`\`` : ''}`
+        ),
+      ],
+    });
 ***REMOVED***
 };
