@@ -276,7 +276,6 @@ module.exports = {
   ***REMOVED***
   ], //https://crescent.edu/post/the-basic-rules-of-roulette
   async run(interaction) {
-    console.log(interaction.options);
     let color = 'GREEN',
       title = interaction.member.user.username,
       icon_url = interaction.member.user.displayAvatarURL(),
