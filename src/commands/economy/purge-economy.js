@@ -1,5 +1,6 @@
 const economySchema = require('@schemas/economy-sch');
 const marketItemSchema = require('@schemas/market-item-sch');
+const shopItemSchema = require('@schemas/shop-item-sch');
 const inventorySchema = require('@schemas/inventory-sch');
 
 module.exports = {
@@ -62,6 +63,32 @@ module.exports = {
               name: 'user',
               description: 'Specify a user.',
               type: 'USER',
+              required: true,
+          ***REMOVED***
+          ],
+      ***REMOVED***
+      ],
+  ***REMOVED***
+    {
+      name: 'shop',
+      description: 'Delete shop data.',
+      type: 'SUB_COMMAND_GROUP',
+      options: [
+        {
+          name: 'all',
+          description: 'All listings.',
+          type: 'SUB_COMMAND',
+          options: null,
+      ***REMOVED***
+        {
+          name: 'item',
+          description: 'Specify an item.',
+          type: 'SUB_COMMAND',
+          options: [
+            {
+              name: 'item',
+              description: 'Specify an item.',
+              type: 'STRING',
               required: true,
           ***REMOVED***
           ],
@@ -140,6 +167,26 @@ module.exports = {
           })
           .then((result) => {
             description = `Deleted market data for <@!${user.id}>`;
+          });
+      }
+    } else if (interaction.options.getSubcommandGroup() === 'shop') {
+      if (interaction.options.getSubcommand() === 'all') {
+        await shopItemSchema
+          .deleteMany({
+            guildID,
+          })
+          .then((result) => {
+            description = `Deleted all shop data. \`${result.n}\` removed.`;
+          });
+      } else if (interaction.options.getSubcommand() === 'item') {
+        const item = interaction.options.getString('item');
+        await shopItemSchema
+          .deleteMany({
+            guildID,
+            name: item,
+          })
+          .then((result) => {
+            description = `Deleted \`${item}\` from the market.`;
           });
       }
     } else if (interaction.options.getSubcommandGroup() === 'balance') {
