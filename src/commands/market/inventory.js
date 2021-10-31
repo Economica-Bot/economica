@@ -38,7 +38,9 @@ module.exports = {
           'BLURPLE',
           user.username,
           user.displayAvatarURL(),
-          `\`${i}\` Items\n${description ? `\`\`${description}\`\`\`` : ''}`
+          `\`${i}\` Items\n${
+            description.length ? `\`\`\`${description}\`\`\`` : ''
+          }`
         ),
       ],
     });
