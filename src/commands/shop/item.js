@@ -320,7 +320,7 @@ module.exports = {
         requiredRoles: required_role ? [required_role] : [],
         requiredItems: required_items ? required_items.split(',') : [],
         requiredBank: required_bank,
-        generatorPeriod: ms(generator_period),
+        generatorPeriod: generator_period ? ms(generator_period) : null,
         generatorAmount: generator_amount,
       }).save();
 

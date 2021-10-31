@@ -31,4 +31,6 @@ module.exports = () => {
     //checks for expired items every 5 seconds
     setTimeout(checkActive, 1000 * 5);
   };
+
+  checkActive()
 };
