@@ -19,18 +19,22 @@ module.exports = {
       );
     } else {
       const currencySymbol = await util.getCurrencySymbol(interaction.guild.id);
-      embed.setDescription(
-        `There are currently \`${items.length}\` items in the shop. Use the \`item view\` command to view detailed item stats, use the \`item buy\` command to purchase an item!`
-      );
+      let count = 0;
       items.forEach((item) => {
-        embed.addField(
-          `${currencySymbol}${
-            item.price > 0 ? util.num(item.price) : 'Free'
-          } - ${util.cut(item.name)}`,
-          util.cut(item.description || 'A very interesting item.', 200),
-          item.description?.length > 100 ? false : true
-        );
+        if (item.active) {
+          count++;
+          embed.addField(
+            `${currencySymbol}${
+              item.price > 0 ? util.num(item.price) : 'Free'
+            } - ${util.cut(item.name)}`,
+            util.cut(item.description, 200),
+            item.description?.length > 100 ? false : true
+          );
+        }
       });
+      embed.setDescription(
+        `There are currently \`${count}\` items in the shop. Use the \`item view\` command to view detailed item stats, use the \`item buy\` command to purchase an item!`
+      );
     }
 
     await interaction.reply({ embeds: [embed] });

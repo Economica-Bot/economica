@@ -100,13 +100,13 @@ module.exports = {
       ],
   ***REMOVED***
     {
-      name: 'delete',
-      description: 'Delete an item from the shop.',
+      name: 'remove',
+      description: 'Remove an item from the shop.',
       type: 'SUB_COMMAND',
       options: [
         {
           name: 'name',
-          description: 'The name of the item to be deleted',
+          description: 'The name of the item to be removed.',
           type: 'STRING',
           required: true,
       ***REMOVED***
@@ -437,7 +437,7 @@ module.exports = {
       }
 
       await interaction.reply({ embeds: [embed] });
-    } else if (interaction.options.getSubcommand() == 'delete') {
+    } else if (interaction.options.getSubcommand() == 'remove') {
       const item = await shopItemSchema.findOne({
         guildID: interaction.guild.id,
         name: {
@@ -445,23 +445,31 @@ module.exports = {
       ***REMOVED***
       });
       if (item) {
-        await shopItemSchema.deleteOne({
-          guildID: interaction.guild.id,
-          name: {
-            $regex: new RegExp(name, 'i'),
+        await shopItemSchema.findOneAndUpdate(
+          {
+            guildID: interaction.guild.id,
+            name: {
+              $regex: new RegExp(name, 'i'),
+          ***REMOVED***
         ***REMOVED***
-        });
+          {
+            active: false,
+          }
+        );
 
         let embed = new Discord.MessageEmbed()
           .setColor('GREEN')
-          .setAuthor(member.user.username, member.user.displayAvatarURL())
+          .setAuthor(
+            interaction.member.user.username,
+            interaction.member.user.displayAvatarURL()
+          )
           .setDescription(
-            `Successfully deleted item with name \`${item.name}\``
+            `Successfully removed \`${item.name}\` from the shop.`
           );
 
         await interaction.reply({ embeds: [embed] });
       } else {
-        interaction.reply(util.error(`No item found with \`name\` "${name}"`));
+        await interaction.reply(util.error(`Item not found.`));
       }
     } else if (interaction.options.getSubcommand() == 'buy') {
       let item = await shopItemSchema.findOne({
