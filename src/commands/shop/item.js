@@ -184,7 +184,7 @@ module.exports = {
     const required_items = interaction.options.getString('required_items');
     const required_role = interaction.options.getRole('required_role');
     const type = interaction.options.getSubcommand();
-    const generator_period = interaction.options.getInteger('generator_period');
+    const generator_period = interaction.options.getString('generator_period');
     const generator_amount = interaction.options.getInteger('generator_amount');
 
     // Create an item
@@ -320,7 +320,7 @@ module.exports = {
         requiredRoles: required_role ? [required_role] : [],
         requiredItems: required_items ? required_items.split(',') : [],
         requiredBank: required_bank,
-        generatorPeriod: generator_period,
+        generatorPeriod: ms(generator_period),
         generatorAmount: generator_amount,
       }).save();
 
@@ -371,7 +371,7 @@ module.exports = {
         )
         .addField(
           'Type',
-          `${item.type === 'typeGenerator' ? 'Generator' : 'Basic'}`,
+          `${item.type === 'generator' ? 'Generator' : 'Basic'}`,
           false
         )
         .addField(
@@ -426,7 +426,7 @@ module.exports = {
           false
         );
 
-      if (item.type == 'typeGenerator') {
+      if (item.type == 'generator') {
         embed
           .addField('Generator Period', `${ms(item.generatorPeriod)}`, true)
           .addField(
