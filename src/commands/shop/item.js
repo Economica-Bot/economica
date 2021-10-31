@@ -474,6 +474,11 @@ module.exports = {
         return;
       }
 
+      if (!item.active) {
+        await interaction.reply('This item is no longer active.');
+        return;
+      }
+
       const inventory = await inventorySchema.findOne({
         guildID: interaction.guild.id,
         userID: interaction.member.user.id,
@@ -528,20 +533,22 @@ module.exports = {
       }
 
       //If there is a stock, check stock and decrement or deny purchase
-      if (item.stock && item.stock > 0) {
-        item = await shopItemSchema.findOneAndUpdate(
-          { guildID: interaction.guild.id, name: name },
-          { $inc: { stock: -1 } }
-        );
-        if (item.stockLeft === 0) {
-          await shopItemSchema.findOneAndUpdate(
+      if (item.stock) {
+        if (item.stock > 0) {
+          item = await shopItemSchema.findOneAndUpdate(
             { guildID: interaction.guild.id, name: name },
-            { active: false }
+            { $inc: { stock: -1 } }
           );
+          if (item.stockLeft === 0) {
+            await shopItemSchema.findOneAndUpdate(
+              { guildID: interaction.guild.id, name: name },
+              { active: false }
+            );
+          }
+        } else {
+          interaction.reply('This item is out of stock.');
+          return;
         }
-      } else {
-        interaction.reply('This item is out of stock.');
-        return;
       }
 
       //Add roles given

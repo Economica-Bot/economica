@@ -39,6 +39,8 @@ client.on('ready', async () => {
   await checkMutes(client);
   const checkLoans = require('./util/features/check-loan');
   await checkLoans();
+  const checkActive = require('./util/features/shop-item-handler');
+  await checkActive();
   const generate = require('./util/features/generator');
   await generate();
 
