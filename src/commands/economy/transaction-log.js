@@ -30,7 +30,7 @@ module.exports = {
   ],
   async run(interaction) {
     let color, description;
-    if (interaction.options.getSubcommand() === 'set') {
+    if (interaction.options.getSubcommand() == 'set') {
       const channel = interaction.options.getChannel('channel');
       if (!channel.isText()) {
         color = 'RED';
@@ -73,7 +73,14 @@ module.exports = {
     }
 
     await interaction.reply({
-      embeds: [util.embedify(color, guild.name, guild.iconURL(), description)],
+      embeds: [
+        util.embedify(
+          color,
+          interaction.guild.name,
+          interaction.guild.iconURL(),
+          description
+        ),
+      ],
     });
 ***REMOVED***
 };
