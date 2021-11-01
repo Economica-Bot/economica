@@ -2,7 +2,7 @@ const inventorySchema = require('@schemas/inventory-sch');
 
 module.exports = {
   name: 'inventory',
-  group: 'market',
+  group: 'economy',
   description: 'View an inventory.',
   format: '[user]',
   global: true,

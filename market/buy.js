@@ -3,7 +3,7 @@ const marketItemSchema = require('@schemas/market-item-sch');
 
 module.exports = {
   disabled: true,
-  name: 'buy',
+  name: 'market buy',
   group: 'market',
   description: 'Purchase an item from the market.',
   format: '<item>',

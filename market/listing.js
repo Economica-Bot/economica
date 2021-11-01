@@ -3,7 +3,7 @@ const inventorySchema = require('@schemas/inventory-sch');
 
 module.exports = {
   disabled: true,
-  name: 'listing',
+  name: 'market listing',
   group: 'market',
   description: 'Interact with the server market.',
   format: '<view | create | delete | enable | disable> [...options]',

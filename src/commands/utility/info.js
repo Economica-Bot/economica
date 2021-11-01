@@ -25,10 +25,6 @@ module.exports = {
           value: 'income',
       ***REMOVED***
         {
-          name: 'Market',
-          value: 'market',
-      ***REMOVED***
-        {
           name: 'Moderation',
           value: 'moderation',
       ***REMOVED***
