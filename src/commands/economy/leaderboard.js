@@ -59,19 +59,24 @@ module.exports = {
           .setFooter(`Page ${embeds.length + 1} / ${pageCount}`)
       );
 
+      let description = '';
       // Fill the length of each page.
       for (let i = 0; i < entries; i++) {
         const member = await interaction.guild.members.fetch(
           balances[balCounter].userID
         );
-        embeds[embeds.length - 1].addField(
-          `#${rank++} ${member.user.tag}`,
-          `${currencySymbol}${balances[balCounter++][type].toLocaleString()}`
-        );
+
+        description += `\`${rank++}\` - <@${
+          member.id
+        }> | ${currencySymbol}${balances[balCounter++][
+          type
+        ].toLocaleString()}\n`;
 
         // If all balances have been inserted, break out of nested loops.
         if (balCounter >= balances.length) break loop1;
       }
+
+      embeds[embeds.length - 1].setDescription(description);
     }
 
     await util.paginate(interaction, embeds);
