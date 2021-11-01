@@ -21,8 +21,8 @@ module.exports = {
           value: 'treasury',
       ***REMOVED***
         {
-          name: 'Networth',
-          value: 'networth',
+          name: 'Total',
+          value: 'total',
       ***REMOVED***
       ],
       required: true,
@@ -33,48 +33,39 @@ module.exports = {
 
     const currencySymbol = await util.getCurrencySymbol(interaction.guild.id),
       type = interaction.options.getString('type');
-    const balances = await econonomySchema
+    const profiles = await econonomySchema
       .find({ guildID: interaction.guild.id })
       .sort({ [type]: -1 });
 
-    //amount of entries per page
-    let entries = 10,
-      embeds = [],
-      rank = 1,
-      balCounter = 0,
-      pageCount = Math.ceil(balances.length / entries);
+    const embeds = [];
 
-    loop1: while (true) {
+    let entries = 10,
+      rank = 1,
+      pageCount = Math.ceil(profiles.length / entries);
+
+    const leaderboardEntries = [];
+    profiles.map((profile) => {
+      const userID = profile.userID;
+      const balance = profile[type].toLocaleString();
+      leaderboardEntries.push(
+        `\`${rank++}\` - <@${userID}> | ${currencySymbol}${balance}\n`
+      );
+    });
+
+    let k = 0;
+    for (let i = 0; i < pageCount; i++) {
+      description = '';
+      for (let j = 0; j < entries; j++) {
+        if (leaderboardEntries[k]) {
+          description += leaderboardEntries[k++];
+        }
+      }
       embeds.push(
         new Discord.MessageEmbed()
-          .setAuthor(
-            `${interaction.guild}'s ${
-              type[0].toUpperCase() + type.substring(1)
-            } Leaderboard`,
-            `${interaction.guild.iconURL()}`
-          )
-          .setColor(111111)
-          .setFooter(`Page ${embeds.length + 1} / ${pageCount}`)
+          .setAuthor(`${interaction.guild}'s ${type} Leaderboard`)
+          .setColor('BLUE')
+          .setDescription(description)
       );
-
-      let description = '';
-      // Fill the length of each page.
-      for (let i = 0; i < entries; i++) {
-        const member = await interaction.guild.members.fetch(
-          balances[balCounter].userID
-        );
-
-        description += `\`${rank++}\` - <@${
-          member.id
-        }> | ${currencySymbol}${balances[balCounter++][
-          type
-        ].toLocaleString()}\n`;
-
-        // If all balances have been inserted, break out of nested loops.
-        if (balCounter >= balances.length) break loop1;
-      }
-
-      embeds[embeds.length - 1].setDescription(description);
     }
 
     await util.paginate(interaction, embeds);

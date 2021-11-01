@@ -14,35 +14,47 @@ module.exports = {
   ***REMOVED***
   ],
   async run(interaction) {
+    await interaction.deferReply();
+
     const user = interaction.options.getUser('user') ?? interaction.member.user;
     const inventory = await inventorySchema.findOne({
       userID: user.id,
       guildID: interaction.guild.id,
     });
 
-    let i = 0;
-    let description = '';
-    if (inventory) {
-      for (const item of inventory.inventory) {
-        i++;
-        for (const prop in item) {
-          description += `${prop}: ${item[prop]}\n`;
-        }
-        description += '\n';
+    const embeds = [];
+
+    let entries = 15;
+    let pageCount = Math.ceil(inventory.inventory.length / entries);
+
+    const inventoryEntries = [];
+    inventory.inventory.forEach((item) => {
+      let itemDescription = '';
+      for (prop in item) {
+        itemDescription += `**${prop}**: \`${item[prop]}\`\n`;
       }
+      inventoryEntries.push(`${itemDescription}\n`);
+    });
+
+    let k = 0;
+    for (let i = 0; i < pageCount; i++) {
+      description = '';
+      for (let j = 0; j < entries; j++) {
+        if (inventoryEntries[k]) {
+          description += inventoryEntries[k++];
+        }
+      }
+      embeds.push(
+        new Discord.MessageEmbed()
+          .setAuthor(
+            `${interaction.member.user.tag}`,
+            interaction.member.user.displayAvatarURL()
+          )
+          .setColor('BLUE')
+          .setDescription(description)
+      );
     }
 
-    await interaction.reply({
-      embeds: [
-        util.embedify(
-          'BLURPLE',
-          user.username,
-          user.displayAvatarURL(),
-          `\`${i}\` Items\n${
-            description.length ? `\`\`\`${description}\`\`\`` : ''
-          }`
-        ),
-      ],
-    });
+    await util.paginate(interaction, embeds);
 ***REMOVED***
 };
