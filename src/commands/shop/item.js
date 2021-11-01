@@ -101,8 +101,21 @@ module.exports = {
       ],
   ***REMOVED***
     {
-      name: 'remove',
-      description: 'Remove an item from the shop.',
+      name: 'deactivate',
+      description: 'Deactivate an item from the shop.',
+      type: 'SUB_COMMAND',
+      options: [
+        {
+          name: 'name',
+          description: 'The name of the item to be reactivated.',
+          type: 'STRING',
+          required: true,
+      ***REMOVED***
+      ],
+  ***REMOVED***
+    {
+      name: 'reactivate',
+      description: 'Reactivate an item from the shop.',
       type: 'SUB_COMMAND',
       options: [
         {
@@ -355,13 +368,12 @@ module.exports = {
           interaction.member.user.username,
           interaction.member.user.displayAvatarURL()
         )
-        .setTitle(`${item.name}` + (item.active? ' `active`' : ' *`deactivated`*'))
+        .setTitle(`${item.name}` + (item.active ? ' `active`' : ' *`deactivated`*'))
         .setDescription(item.description || 'A very interesting item.')
         .setFooter(`ID: ${item._id}`)
         .addField(
           'Price',
-          `${currencySymbol}${
-            item.price > 0 ? item.price.toLocaleString() : 'Free'
+          `${currencySymbol}${item.price > 0 ? item.price.toLocaleString() : 'Free'
           }`,
           true
         )
@@ -389,28 +401,25 @@ module.exports = {
         )
         .addField(
           'Roles Given',
-          `${
-            item.rolesGiven?.[0]
-              ? '<@&' + item.rolesGiven.join('\n<@&') + '>'
-              : 'None'
+          `${item.rolesGiven?.[0]
+            ? '<@&' + item.rolesGiven.join('\n<@&') + '>'
+            : 'None'
           }`,
           true
         )
         .addField(
           'Role Removed',
-          `${
-            item.rolesRemoved?.[0]
-              ? '<@&' + item.rolesRemoved.join('\n<@&') + '>'
-              : 'None'
+          `${item.rolesRemoved?.[0]
+            ? '<@&' + item.rolesRemoved.join('\n<@&') + '>'
+            : 'None'
           }`,
           true
         )
         .addField(
           'Role Required',
-          `${
-            item.requiredRoles?.[0]
-              ? '<@&' + item.requiredRoles?.join('\n<@&') + '>'
-              : 'None'
+          `${item.requiredRoles?.[0]
+            ? '<@&' + item.requiredRoles?.join('\n<@&') + '>'
+            : 'None'
           }`,
           true
         )
@@ -438,7 +447,7 @@ module.exports = {
       }
 
       await interaction.reply({ embeds: [embed] });
-    } else if (interaction.options.getSubcommand() == 'remove') {
+    } else if (interaction.options.getSubcommand() == 'deactivate') {
       const item = await shopItemSchema.findOne({
         guildID: interaction.guild.id,
         name: {
@@ -465,7 +474,43 @@ module.exports = {
             interaction.member.user.displayAvatarURL()
           )
           .setDescription(
-            `Successfully removed \`${item.name}\` from the shop.`
+            `Successfully deactivated \`${item.name}\` from the shop.`
+          );
+
+        await interaction.reply({ embeds: [embed] });
+      } else {
+        await interaction.reply(util.error(`Item not found.`));
+      }
+    } else if (interaction.options.getSubcommand() == 'reactivate') {
+      const item = await shopItemSchema.findOne({
+        guildID: interaction.guild.id,
+        name: {
+          $regex: new RegExp(name, 'i'),
+      ***REMOVED***
+      });
+      if (item) {
+        if (!item.active) {
+          await shopItemSchema.findOneAndUpdate(
+            {
+              guildID: interaction.guild.id,
+              name: {
+                $regex: new RegExp(name, 'i'),
+            ***REMOVED***
+          ***REMOVED***
+            {
+              active: true,
+            }
+          );
+        } else interaction.reply(util.error(`${item.name} is already active.`))
+
+        let embed = new Discord.MessageEmbed()
+          .setColor('GREEN')
+          .setAuthor(
+            interaction.member.user.username,
+            interaction.member.user.displayAvatarURL()
+          )
+          .setDescription(
+            `Successfully reactivated \`${item.name}\` in the shop.`
           );
 
         await interaction.reply({ embeds: [embed] });
