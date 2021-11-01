@@ -46,9 +46,11 @@ module.exports = {
         amount
       );
       await interaction.reply(
-        `Collected ${await util.getCurrencySymbol(
-          interaction.guild.id
-        )}${amount}`
+        util.success(
+          `Collected ${await util.getCurrencySymbol(
+            interaction.guild.id
+          )}${amount.toLocaleString()}`
+        )
       );
       await inventorySchema.findOneAndUpdate(
         {
@@ -60,10 +62,7 @@ module.exports = {
         }
       );
     } else {
-      await interaction.reply({
-        content: 'You do not have any money to collect.',
-        ephemeral: true,
-      });
+      await interaction.reply(util.error('You do not have any money to collect.'));
     }
 ***REMOVED***
 };
