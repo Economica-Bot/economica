@@ -86,10 +86,9 @@ module.exports = {
         }
       );
 
-      description = `${options._subcommand[0].toUpperCase()}${options._subcommand.substring(
-        1,
-        options._subcommand.length
-      )}d module \`${module}\``;
+      description = `${interaction.options
+        .getSubcommand()
+        .toUpperCase()}D module \`${module}\``;
     }
 
     const embed = util.embedify(color, title, icon_url, description, footer);
