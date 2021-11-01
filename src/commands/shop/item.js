@@ -1,6 +1,7 @@
 const ms = require('ms');
 const shopItemSchema = require('@schemas/shop-item-sch');
 const inventorySchema = require('@schemas/inventory-sch');
+const util = require('../../util/util');
 
 const globalCreateOptions = {
   required: [
@@ -100,8 +101,21 @@ module.exports = {
       ],
   ***REMOVED***
     {
-      name: 'remove',
-      description: 'Remove an item from the shop.',
+      name: 'deactivate',
+      description: 'Deactivate an item from the shop.',
+      type: 'SUB_COMMAND',
+      options: [
+        {
+          name: 'name',
+          description: 'The name of the item to be reactivated.',
+          type: 'STRING',
+          required: true,
+      ***REMOVED***
+      ],
+  ***REMOVED***
+    {
+      name: 'reactivate',
+      description: 'Reactivate an item from the shop.',
       type: 'SUB_COMMAND',
       options: [
         {
@@ -354,13 +368,12 @@ module.exports = {
           interaction.member.user.username,
           interaction.member.user.displayAvatarURL()
         )
-        .setTitle(item.name)
+        .setTitle(`${item.name}` + (item.active ? ' `active`' : ' *`deactivated`*'))
         .setDescription(item.description || 'A very interesting item.')
         .setFooter(`ID: ${item._id}`)
         .addField(
           'Price',
-          `${currencySymbol}${
-            item.price > 0 ? item.price.toLocaleString() : 'Free'
+          `${currencySymbol}${item.price > 0 ? item.price.toLocaleString() : 'Free'
           }`,
           true
         )
@@ -388,28 +401,25 @@ module.exports = {
         )
         .addField(
           'Roles Given',
-          `${
-            item.rolesGiven?.[0]
-              ? '<@&' + item.rolesGiven.join('\n<@&') + '>'
-              : 'None'
+          `${item.rolesGiven?.[0]
+            ? '<@&' + item.rolesGiven.join('\n<@&') + '>'
+            : 'None'
           }`,
           true
         )
         .addField(
           'Role Removed',
-          `${
-            item.rolesRemoved?.[0]
-              ? '<@&' + item.rolesRemoved.join('\n<@&') + '>'
-              : 'None'
+          `${item.rolesRemoved?.[0]
+            ? '<@&' + item.rolesRemoved.join('\n<@&') + '>'
+            : 'None'
           }`,
           true
         )
         .addField(
           'Role Required',
-          `${
-            item.requiredRoles?.[0]
-              ? '<@&' + item.requiredRoles?.join('\n<@&') + '>'
-              : 'None'
+          `${item.requiredRoles?.[0]
+            ? '<@&' + item.requiredRoles?.join('\n<@&') + '>'
+            : 'None'
           }`,
           true
         )
@@ -437,7 +447,7 @@ module.exports = {
       }
 
       await interaction.reply({ embeds: [embed] });
-    } else if (interaction.options.getSubcommand() == 'remove') {
+    } else if (interaction.options.getSubcommand() == 'deactivate') {
       const item = await shopItemSchema.findOne({
         guildID: interaction.guild.id,
         name: {
@@ -464,7 +474,43 @@ module.exports = {
             interaction.member.user.displayAvatarURL()
           )
           .setDescription(
-            `Successfully removed \`${item.name}\` from the shop.`
+            `Successfully deactivated \`${item.name}\` from the shop.`
+          );
+
+        await interaction.reply({ embeds: [embed] });
+      } else {
+        await interaction.reply(util.error(`Item not found.`));
+      }
+    } else if (interaction.options.getSubcommand() == 'reactivate') {
+      const item = await shopItemSchema.findOne({
+        guildID: interaction.guild.id,
+        name: {
+          $regex: new RegExp(name, 'i'),
+      ***REMOVED***
+      });
+      if (item) {
+        if (!item.active) {
+          await shopItemSchema.findOneAndUpdate(
+            {
+              guildID: interaction.guild.id,
+              name: {
+                $regex: new RegExp(name, 'i'),
+            ***REMOVED***
+          ***REMOVED***
+            {
+              active: true,
+            }
+          );
+        } else interaction.reply(util.error(`${item.name} is already active.`))
+
+        let embed = new Discord.MessageEmbed()
+          .setColor('GREEN')
+          .setAuthor(
+            interaction.member.user.username,
+            interaction.member.user.displayAvatarURL()
+          )
+          .setDescription(
+            `Successfully reactivated \`${item.name}\` in the shop.`
           );
 
         await interaction.reply({ embeds: [embed] });
@@ -474,16 +520,18 @@ module.exports = {
     } else if (interaction.options.getSubcommand() == 'buy') {
       let item = await shopItemSchema.findOne({
         guildID: interaction.guild.id,
-        name: name,
+        name: {
+          $regex: new RegExp(interaction.options.getString('name'), 'i'),
+      ***REMOVED***
       });
 
       if (!item) {
-        interaction.reply("Item doesn't exist");
+        interaction.reply(util.error("Item doesn't exist"));
         return;
       }
 
       if (!item.active) {
-        await interaction.reply('This item is no longer active.');
+        await interaction.reply(util.error('This item is no longer active.'));
         return;
       }
 
@@ -503,14 +551,14 @@ module.exports = {
 
       //Requirement Validation
       if (item.price > wallet) {
-        interaction.reply('You cannot afford this item.');
+        interaction.reply(util.error('You cannot afford this item.'));
         return;
       }
 
       if (item.requiredRoles.length) {
         for (const role of item.requiredRoles) {
           if (!interaction.member.roles.cache.has(role)) {
-            interaction.reply(`You do not have the <@&${role}> role.`);
+            interaction.reply(util.error(`You do not have the <@&${role}> role.`));
             return;
           }
         }
@@ -519,7 +567,7 @@ module.exports = {
       if (item.requiredItems.length) {
         for (const invitem of item.requiredItems) {
           if (!inventory?.inventory.find((i) => i.name === invitem)) {
-            interaction.reply(`You need a(n) \`${invitem}\``);
+            interaction.reply(util.error(`You need a(n) \`${invitem}\``));
             return;
           }
         }
@@ -534,9 +582,9 @@ module.exports = {
 
       //Check if the item is stackable
       if (!item.stackable && inventoryItem) {
-        await interaction.reply(
+        await interaction.reply(util.error(
           'This item is unstackable and you already have one!'
-        );
+        ));
         return;
       }
 
@@ -554,7 +602,7 @@ module.exports = {
             );
           }
         } else {
-          interaction.reply('This item is out of stock.');
+          interaction.reply(util.error('This item is out of stock.'));
           return;
         }
       }
@@ -596,7 +644,7 @@ module.exports = {
         -item.price
       );
 
-      await interaction.reply(`You bought ${item.name}`);
+      await interaction.reply(util.success(`You bought ${item.name}`));
     }
 ***REMOVED***
 };
