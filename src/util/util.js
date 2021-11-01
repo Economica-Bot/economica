@@ -63,6 +63,19 @@ module.exports.warning = (description, title = 'Warning') => {
   };
 };
 
+module.exports.success = (description, title = 'Success') => {
+  return {
+    embeds: [
+      {
+        color: 'GREEN',
+        title,
+        description,
+    ***REMOVED***
+    ],
+    ephemeral: false,
+  };
+};
+
 /**
  * Gets a user's economy information.
  * @param {string} guildID - Guild id.
