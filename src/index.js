@@ -94,7 +94,11 @@ client.on('interactionCreate', async (interaction) => {
     .catch((error) => client.error(error, interaction, command));
 });
 
-client.login(process.env.ECON_TOKEN);
+client.on('guildCreate', (guild) => {
+  util.initGuildSettings(guild);
+});
+
+client.login(process.env.ECON_ALPHA_TOKEN);
 
 client.registerCommands = async () => {
   const commands = [];
@@ -271,14 +275,6 @@ client.coolDown = async (interaction) => {
   }
 };
 
-process.on('unhandledRejection', (error) => {
-  client.error(error);
-});
-
-process.on('uncaughtException', (error) => {
-  client.error(error);
-});
-
 client.error = async (error, interaction = null, command = null) => {
   let description, title, icon_url;
   if (interaction) {
@@ -302,3 +298,11 @@ client.error = async (error, interaction = null, command = null) => {
   const embed = util.embedify('RED', title, icon_url, description);
   client.channels.cache.get(process.env.BOT_LOG_ID).send({ embeds: [embed] });
 };
+
+process.on('unhandledRejection', (error) => {
+  client.error(error);
+});
+
+process.on('uncaughtException', (error) => {
+  client.error(error);
+});
