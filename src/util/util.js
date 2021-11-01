@@ -603,7 +603,6 @@ module.exports.paginate = async (interaction, embeds) => {
   const msg = await interaction.editReply({
     embeds: [embeds[0]],
     components: [row],
-    ephemeral: true,
   });
 
   let page = 0;
@@ -658,7 +657,12 @@ module.exports.paginate = async (interaction, embeds) => {
     await i.update({
       embeds: [embeds[page]],
       components: [row],
-      ephemeral: true,
+    });
+  });
+
+  collector.on('end', async () => {
+    await msg.edit({
+      components: [],
     });
   });
 };

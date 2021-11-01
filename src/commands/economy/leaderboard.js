@@ -29,9 +29,7 @@ module.exports = {
   ***REMOVED***
   ],
   async run(interaction) {
-    await interaction.deferReply({
-      ephemeral: true,
-    });
+    await interaction.deferReply();
 
     const currencySymbol = await util.getCurrencySymbol(interaction.guild.id),
       type = interaction.options.getString('type');
