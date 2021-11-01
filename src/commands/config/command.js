@@ -2,6 +2,7 @@ const fs = require('fs');
 const ms = require('ms');
 const guildSettingSchema = require('@schemas/guild-settings-sch');
 const incomeSchema = require('@schemas/income-sch');
+const config = require('../../config.json');
 
 module.exports = {
   name: 'command',
@@ -122,6 +123,12 @@ module.exports = {
               description: 'Specify an income command.',
               type: 'STRING',
               required: true,
+          ***REMOVED***
+            {
+              name: 'reset',
+              description: 'Reset this income command.',
+              type: 'BOOLEAN',
+              required: false,
           ***REMOVED***
             {
               name: 'min',
@@ -406,10 +413,22 @@ module.exports = {
 
         if (!updates.length) updates = 'No parameters updated';
 
-        description = `\`\`\`\n${updates}\n\`\`\`${
-          description ? `\n${description}` : ''
-        }`;
         properties = Object.fromEntries(properties);
+
+        if (
+          interaction.options.getBoolean('reset') != null &&
+          interaction.options.getBoolean('reset') === true
+        ) {
+          properties = config.commands[cmd.name];
+          properties['command'] = cmd.name;
+          updates = `Reset to default\n\n${config.commands[cmd.name]}`;
+          description = `\`\`\`Reset ${cmd.name}\`\`\``;
+        } else {
+          description = `\`\`\`\n${updates}\n\`\`\`${
+            description ? `\n${description}` : ''
+          }`;
+        }
+
         await incomeSchema
           .findOneAndUpdate(
             {
