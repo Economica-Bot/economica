@@ -334,7 +334,7 @@ module.exports = {
           }
         );
       } else {
-        description += `Reset command \`${cmd}\``;
+        description = `Reset command \`${cmd.name}\``;
       }
     } else if (interaction.options.getSubcommandGroup() === 'config') {
       if (
