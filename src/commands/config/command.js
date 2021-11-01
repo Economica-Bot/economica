@@ -236,6 +236,10 @@ module.exports = {
             description += '\n';
           }
         }
+
+        if (description.indexOf('cooldown') == -1) {
+          description += '**Cooldown**: `5s` *(Default)*';
+        }
       }
 
       //Change permissions for a command
