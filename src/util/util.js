@@ -608,46 +608,37 @@ module.exports.paginate = async (interaction, embeds) => {
 
   let page = 0;
 
-  client.on('interactionCreate', async (interaction) => {
-    if (
-      interaction.isButton() &&
-      interaction.message.id === msg.id &&
-      interaction.user.id === interaction.member.id
-    ) {
-      if (
-        page < embeds.length - 1 &&
-        page >= 0 &&
-        interaction.customId === 'next_page'
-      ) {
-        page++;
-        const row = new Discord.MessageActionRow()
-          .addComponents(
-            new Discord.MessageButton()
-              .setCustomId('previous_page')
-              .setLabel('Previous')
-              .setStyle('SECONDARY')
-              .setDisabled(false)
-          )
-          .addComponents(
-            new Discord.MessageButton()
-              .setCustomId('next_page')
-              .setLabel('Next')
-              .setStyle('PRIMARY')
-              .setDisabled(page == embeds.length - 1 ? true : false)
-          );
-        await interaction.update({
-          embeds: [embeds[page]],
-          components: [row],
-          ephemeral: true,
-        });
-      }
+  const filter = (i) => i.user.id === interaction.user.id;
+  const collector = msg.createMessageComponentCollector({
+    filter,
+    time: 1000 * 15,
+  });
+  collector.on('collect', async (i) => {
+    let row;
+    if (page < embeds.length - 1 && page >= 0 && i.customId === 'next_page') {
+      page++;
+      row = new Discord.MessageActionRow()
+        .addComponents(
+          new Discord.MessageButton()
+            .setCustomId('previous_page')
+            .setLabel('Previous')
+            .setStyle('SECONDARY')
+            .setDisabled(false)
+        )
+        .addComponents(
+          new Discord.MessageButton()
+            .setCustomId('next_page')
+            .setLabel('Next')
+            .setStyle('PRIMARY')
+            .setDisabled(page == embeds.length - 1 ? true : false)
+        );
     } else if (
       page > 0 &&
       page < embeds.length &&
-      interaction.customId === 'previous_page'
+      i.customId === 'previous_page'
     ) {
       page--;
-      const row = new Discord.MessageActionRow()
+      row = new Discord.MessageActionRow()
         .addComponents(
           new Discord.MessageButton()
             .setCustomId('previous_page')
@@ -662,12 +653,12 @@ module.exports.paginate = async (interaction, embeds) => {
             .setStyle('PRIMARY')
             .setDisabled(false)
         );
-
-      await interaction.update({
-        embeds: [embeds[page]],
-        components: [row],
-        ephemeral: true,
-      });
     }
+
+    await i.update({
+      embeds: [embeds[page]],
+      components: [row],
+      ephemeral: true,
+    });
   });
 };
