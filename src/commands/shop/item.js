@@ -1,6 +1,7 @@
 const ms = require('ms');
 const shopItemSchema = require('@schemas/shop-item-sch');
 const inventorySchema = require('@schemas/inventory-sch');
+const util = require('../../util/util');
 
 const globalCreateOptions = {
   required: [
@@ -354,7 +355,7 @@ module.exports = {
           interaction.member.user.username,
           interaction.member.user.displayAvatarURL()
         )
-        .setTitle(item.name)
+        .setTitle(`${item.name}` + (item.active? ' `active`' : ' *`deactivated`*'))
         .setDescription(item.description || 'A very interesting item.')
         .setFooter(`ID: ${item._id}`)
         .addField(
@@ -474,16 +475,18 @@ module.exports = {
     } else if (interaction.options.getSubcommand() == 'buy') {
       let item = await shopItemSchema.findOne({
         guildID: interaction.guild.id,
-        name: name,
+        name: {
+          $regex: new RegExp(interaction.options.getString('name'), 'i'),
+      ***REMOVED***
       });
 
       if (!item) {
-        interaction.reply("Item doesn't exist");
+        interaction.reply(util.error("Item doesn't exist"));
         return;
       }
 
       if (!item.active) {
-        await interaction.reply('This item is no longer active.');
+        await interaction.reply(util.error('This item is no longer active.'));
         return;
       }
 
@@ -503,14 +506,14 @@ module.exports = {
 
       //Requirement Validation
       if (item.price > wallet) {
-        interaction.reply('You cannot afford this item.');
+        interaction.reply(util.error('You cannot afford this item.'));
         return;
       }
 
       if (item.requiredRoles.length) {
         for (const role of item.requiredRoles) {
           if (!interaction.member.roles.cache.has(role)) {
-            interaction.reply(`You do not have the <@&${role}> role.`);
+            interaction.reply(util.error(`You do not have the <@&${role}> role.`));
             return;
           }
         }
@@ -519,7 +522,7 @@ module.exports = {
       if (item.requiredItems.length) {
         for (const invitem of item.requiredItems) {
           if (!inventory?.inventory.find((i) => i.name === invitem)) {
-            interaction.reply(`You need a(n) \`${invitem}\``);
+            interaction.reply(util.error(`You need a(n) \`${invitem}\``));
             return;
           }
         }
@@ -534,9 +537,9 @@ module.exports = {
 
       //Check if the item is stackable
       if (!item.stackable && inventoryItem) {
-        await interaction.reply(
+        await interaction.reply(util.error(
           'This item is unstackable and you already have one!'
-        );
+        ));
         return;
       }
 
@@ -554,7 +557,7 @@ module.exports = {
             );
           }
         } else {
-          interaction.reply('This item is out of stock.');
+          interaction.reply(util.error('This item is out of stock.'));
           return;
         }
       }
@@ -596,7 +599,7 @@ module.exports = {
         -item.price
       );
 
-      await interaction.reply(`You bought ${item.name}`);
+      await interaction.reply(util.success(`You bought ${item.name}`));
     }
 ***REMOVED***
 };
