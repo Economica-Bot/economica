@@ -162,7 +162,7 @@ module.exports = {
   ],
   async run(interaction) {
     let color = 'GREEN',
-      title = interaction.member.user.username,
+      title = interaction.member.user.tag,
       icon_url = interaction.member.user.displayAvatarURL(),
       description = '',
       footer = '',

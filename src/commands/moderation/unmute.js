@@ -38,7 +38,7 @@ module.exports = {
         embeds: [
           util.embedify(
             'RED',
-            interaction.member.user.username,
+            interaction.member.user.tag,
             interaction.member.user.displayAvatarURL(),
             `The ${mutedRole} role is above my highest role!`
           ),

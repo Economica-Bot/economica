@@ -62,7 +62,7 @@ module.exports = {
       } else {
         embed = util.embedify(
           'RED',
-          interaction.member.user.username,
+          interaction.member.user.tag,
           interaction.member.user.displayAvatarURL(),
           `Command \`${command}\` not found`
         );

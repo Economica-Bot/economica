@@ -29,7 +29,7 @@ module.exports = {
         embeds: [
           util.embedify(
             'RED',
-            interaction.member.user.username,
+            interaction.member.user.tag,
             interaction.member.user.displayAvatarURL(),
             `Invalid Length: \`${msgCount}\` out of bounds.`
           ),
@@ -42,7 +42,7 @@ module.exports = {
           embeds: [
             util.embedify(
               'GREEN',
-              interaction.member.user.username,
+              interaction.member.user.tag,
               interaction.member.user.displayAvatarURL(),
               `Deleted \`${val.size}\` messages.`
             ),

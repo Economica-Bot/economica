@@ -64,7 +64,7 @@ client.on('interactionCreate', async (interaction) => {
   if (permissible.length) {
     const embed = util.embedify(
       'RED',
-      interaction.member.user.username,
+      interaction.member.user.tag,
       interaction.member.user.displayAvatarURL(),
       permissible
     );
@@ -259,7 +259,7 @@ client.coolDown = async (interaction) => {
   if (now - timestamp < cooldown) {
     const embed = util.embedify(
       'GREY',
-      interaction.member.user.username,
+      interaction.member.user.tag,
       '', // interaction.member.user.displayAvatarURL(),
       `:hourglass: You need to wait ${ms(
         cooldown - (now - timestamp)
@@ -278,7 +278,7 @@ client.coolDown = async (interaction) => {
 client.error = async (error, interaction = null, command = null) => {
   let description, title, icon_url;
   if (interaction) {
-    title = interaction.member.user.username;
+    title = interaction.member.user.tag;
     icon_url = interaction.member.user.displayAvatarURL();
     description = `**Command**: \`${command.name}\`\n\`\`\`js\n${error}\`\`\`
     You've encountered an error.

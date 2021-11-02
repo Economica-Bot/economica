@@ -27,7 +27,7 @@ module.exports = {
     if (targetMember.user.id === member.user.id) {
       embed = util.embedify(
         'RED',
-        interaction.member.user.username,
+        interaction.member.user.tag,
         interaction.member.user.displayAvatarURL(),
         'You cannot ban yourself!'
       );
@@ -35,7 +35,7 @@ module.exports = {
     } else if (!targetMember.bannable) {
       embed = util.embedify(
         'RED',
-        interaction.member.user.username,
+        interaction.member.user.tag,
         interaction.member.user.displayAvatarURL(),
         `<@!${targetMember.user.id}> is not bannable.`
       );

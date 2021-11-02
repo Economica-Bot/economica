@@ -1,23 +1,23 @@
-const inventorySchema = require('@schemas/inventory-sch');
+const inventorySchema = require("@schemas/inventory-sch");
 
 module.exports = {
   disabled: true,
-  name: 'market sell',
-  group: 'market',
-  description: 'Sell an item for wallet cash.',
-  format: '<item>',
+  name: "market sell",
+  group: "market",
+  description: "Sell an item for wallet cash.",
+  format: "<item>",
   global: true,
   options: [
     {
-      name: 'item',
-      description: 'Specify the item you wish to sell.',
+      name: "item",
+      description: "Specify the item you wish to sell.",
       type: 3,
       required: true,
   ***REMOVED***
   ],
   async run(interaction, guild, author, options) {
-    let color = 'BLURPLE',
-      title = author.user.username,
+    let color = "BLURPLE",
+      title = author.user.tag,
       icon_url = author.user.displayAvatarURL(),
       description;
     const currencySymbol = await util.getCurrencySymbol(guild.id),
@@ -32,11 +32,11 @@ module.exports = {
     });
 
     if (!owned) {
-      color = 'RED';
+      color = "RED";
       description = `You do not have a(n) \`${item}\`.`;
     } else {
       const price = owned.price;
-      (color = 'GREEN'),
+      (color = "GREEN"),
         (description = `Successfully sold \`${item}\` for ${currencySymbol}${price.toLocaleString()}`);
       await util.transaction(
         guild.id,
@@ -63,7 +63,7 @@ module.exports = {
     }
 
     const embed = util.embedify(color, title, icon_url, description);
-    
+
     await interaction.reply({ embeds: [embed] });
 ***REMOVED***
 };

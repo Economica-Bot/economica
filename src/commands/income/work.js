@@ -13,7 +13,7 @@ module.exports = {
     const amount = util.intInRange(min, max);
     const embed = util.embedify(
       'GREEN',
-      interaction.user.username,
+      interaction.user.tag,
       interaction.user.displayAvatarURL(),
       `You worked and earned ${currencySymbol}${amount.toLocaleString()}!`
     );

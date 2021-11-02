@@ -91,7 +91,7 @@ module.exports = {
 
     embed = util.embedify(
       color,
-      interaction.member.user.username,
+      interaction.member.user.tag,
       interaction.member.user.displayAvatarURL(),
       description
     );

@@ -38,7 +38,7 @@ module.exports = {
     if (targetMember.user.id === interaction.member.id) {
       embed = util.embedify(
         'RED',
-        interaction.member.user.username,
+        interaction.member.user.tag,
         interaction.member.user.displayAvatarURL(),
         'You cannot pay yourself!'
       );
@@ -79,7 +79,7 @@ module.exports = {
 
     embed = util.embedify(
       color,
-      interaction.member.user.username,
+      interaction.member.user.tag,
       interaction.member.user.displayAvatarURL(),
       description
     );

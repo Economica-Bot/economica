@@ -21,7 +21,7 @@ module.exports = {
       client.commands.set(cmd.name, cmd);
       const embed = util.embedify(
         'GREEN',
-        interaction.member.user.username,
+        interaction.member.user.tag,
         interaction.member.user.displayAvatarURL(),
         `Force loaded \`${cmd.name}\``
       );
@@ -30,7 +30,7 @@ module.exports = {
     } else {
       const embed = util.embedify(
         'RED',
-        interaction.member.user.username,
+        interaction.member.user.tag,
         interaction.member.user.displayAvatarURL(),
         `Command \`${commandName}\` not found.`
       );

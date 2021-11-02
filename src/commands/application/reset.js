@@ -50,7 +50,7 @@ module.exports = {
 
     const embed = util.embedify(
       'GREEN',
-      interaction.member.user.username,
+      interaction.member.user.tag,
       interaction.member.user.displayAvatarURL(),
       '`RESET ALL SLASH COMMANDS`',
       'Restart Required'

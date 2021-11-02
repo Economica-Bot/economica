@@ -26,7 +26,7 @@ module.exports = {
     if (targetMember.user.id === interaction.member.user.id) {
       embed = util.embedify(
         'RED',
-        interaction.member.user.username,
+        interaction.member.user.tag,
         interaction.member.user.displayAvatarURL(),
         'You cannot kick yourself!'
       );
@@ -34,7 +34,7 @@ module.exports = {
     } else if (!targetMember.kickable) {
       embed = util.embedify(
         'RED',
-        interaction.member.user.username,
+        interaction.member.user.tag,
         interaction.member.user.displayAvatarURL(),
         `<@!${targetMember.user.id}> is not kickable.`
       );

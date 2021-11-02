@@ -22,7 +22,7 @@ module.exports = {
     const balEmbed = util
       .embedify(
         'GOLD',
-        user.username,
+        user.tag,
         user.displayAvatarURL(),
         '',
         `🏆 Rank ${rank}`

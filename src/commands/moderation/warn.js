@@ -27,7 +27,7 @@ module.exports = {
     if (targetMember.id === interaction.member.id) {
       embed = util.embedify(
         'RED',
-        interaction.member.user.username,
+        interaction.member.user.tag,
         interaction.member.user.displayAvatarURL(),
         'You cannot warn yourself!'
       );

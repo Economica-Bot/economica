@@ -57,7 +57,7 @@ module.exports = {
         embeds: [
           util.embedify(
             'RED',
-            interaction.member.user.username,
+            interaction.member.user.tag,
             interaction.member.user.displayAvatarURL(),
             `Invalid loan ID: \`${_id}\``
           ),
@@ -267,7 +267,7 @@ module.exports = {
         embeds: [
           util.embedify(
             color,
-            interaction.member.user.username,
+            interaction.member.user.tag,
             interaction.member.user.displayAvatarURL(),
             description
           ),

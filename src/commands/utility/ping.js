@@ -9,7 +9,7 @@ module.exports = {
       embeds: [
         util.embedify(
           'GREEN',
-          interaction.member.user.username,
+          interaction.member.user.tag,
           interaction.member.user.displayAvatarURL(),
           `Pong! \`${client.ws.ping}ms\``
         ),

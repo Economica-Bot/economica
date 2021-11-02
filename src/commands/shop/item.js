@@ -365,15 +365,18 @@ module.exports = {
       let embed = new Discord.MessageEmbed()
         .setColor('BLUE')
         .setAuthor(
-          interaction.member.user.username,
+          interaction.member.user.tag,
           interaction.member.user.displayAvatarURL()
         )
-        .setTitle(`${item.name}` + (item.active ? ' `active`' : ' *`deactivated`*'))
+        .setTitle(
+          `${item.name}` + (item.active ? ' `active`' : ' *`deactivated`*')
+        )
         .setDescription(item.description || 'A very interesting item.')
         .setFooter(`ID: ${item._id}`)
         .addField(
           'Price',
-          `${currencySymbol}${item.price > 0 ? item.price.toLocaleString() : 'Free'
+          `${currencySymbol}${
+            item.price > 0 ? item.price.toLocaleString() : 'Free'
           }`,
           true
         )
@@ -401,25 +404,28 @@ module.exports = {
         )
         .addField(
           'Roles Given',
-          `${item.rolesGiven?.[0]
-            ? '<@&' + item.rolesGiven.join('\n<@&') + '>'
-            : 'None'
+          `${
+            item.rolesGiven?.[0]
+              ? '<@&' + item.rolesGiven.join('\n<@&') + '>'
+              : 'None'
           }`,
           true
         )
         .addField(
           'Role Removed',
-          `${item.rolesRemoved?.[0]
-            ? '<@&' + item.rolesRemoved.join('\n<@&') + '>'
-            : 'None'
+          `${
+            item.rolesRemoved?.[0]
+              ? '<@&' + item.rolesRemoved.join('\n<@&') + '>'
+              : 'None'
           }`,
           true
         )
         .addField(
           'Role Required',
-          `${item.requiredRoles?.[0]
-            ? '<@&' + item.requiredRoles?.join('\n<@&') + '>'
-            : 'None'
+          `${
+            item.requiredRoles?.[0]
+              ? '<@&' + item.requiredRoles?.join('\n<@&') + '>'
+              : 'None'
           }`,
           true
         )
@@ -470,7 +476,7 @@ module.exports = {
         let embed = new Discord.MessageEmbed()
           .setColor('GREEN')
           .setAuthor(
-            interaction.member.user.username,
+            interaction.member.user.tag,
             interaction.member.user.displayAvatarURL()
           )
           .setDescription(
@@ -501,12 +507,12 @@ module.exports = {
               active: true,
             }
           );
-        } else interaction.reply(util.error(`${item.name} is already active.`))
+        } else interaction.reply(util.error(`${item.name} is already active.`));
 
         let embed = new Discord.MessageEmbed()
           .setColor('GREEN')
           .setAuthor(
-            interaction.member.user.username,
+            interaction.member.user.tag,
             interaction.member.user.displayAvatarURL()
           )
           .setDescription(
@@ -558,7 +564,9 @@ module.exports = {
       if (item.requiredRoles.length) {
         for (const role of item.requiredRoles) {
           if (!interaction.member.roles.cache.has(role)) {
-            interaction.reply(util.error(`You do not have the <@&${role}> role.`));
+            interaction.reply(
+              util.error(`You do not have the <@&${role}> role.`)
+            );
             return;
           }
         }
@@ -582,9 +590,9 @@ module.exports = {
 
       //Check if the item is stackable
       if (!item.stackable && inventoryItem) {
-        await interaction.reply(util.error(
-          'This item is unstackable and you already have one!'
-        ));
+        await interaction.reply(
+          util.error('This item is unstackable and you already have one!')
+        );
         return;
       }
 

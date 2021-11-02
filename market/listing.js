@@ -1,109 +1,109 @@
-const marketItemSchema = require('@schemas/market-item-sch');
-const inventorySchema = require('@schemas/inventory-sch');
+const marketItemSchema = require("@schemas/market-item-sch");
+const inventorySchema = require("@schemas/inventory-sch");
 
 module.exports = {
   disabled: true,
-  name: 'market listing',
-  group: 'market',
-  description: 'Interact with the server market.',
-  format: '<view | create | delete | enable | disable> [...options]',
+  name: "market listing",
+  group: "market",
+  description: "Interact with the server market.",
+  format: "<view | create | delete | enable | disable> [...options]",
   global: true,
   roles: [
     {
-      name: 'ECONOMY MANAGER',
+      name: "ECONOMY MANAGER",
       required: false,
   ***REMOVED***
   ],
   options: [
     {
-      name: 'view',
-      description: 'View listings.',
+      name: "view",
+      description: "View listings.",
       type: 1, //SUB_COMMAND
       options: [
         {
-          name: 'user',
-          description: 'Specify a user.',
+          name: "user",
+          description: "Specify a user.",
           type: 6, //USER
       ***REMOVED***
       ],
   ***REMOVED***
     {
-      name: 'create',
-      description: 'Create a new listing.',
+      name: "create",
+      description: "Create a new listing.",
       type: 1,
       options: [
         {
-          name: 'item',
-          description: 'The listing name.',
+          name: "item",
+          description: "The listing name.",
           type: 3, //STRING
           required: true,
       ***REMOVED***
         {
-          name: 'price',
-          description: 'This listing price.',
+          name: "price",
+          description: "This listing price.",
           type: 4, //INTEGER
           required: true,
       ***REMOVED***
         {
-          name: 'description',
-          description: 'The listing description.',
+          name: "description",
+          description: "The listing description.",
           type: 3,
       ***REMOVED***
       ],
   ***REMOVED***
     {
-      name: 'delete',
-      description: 'Delete a market listing.',
+      name: "delete",
+      description: "Delete a market listing.",
       type: 1,
       options: [
         {
-          name: 'user',
-          description: 'Specify a user.',
+          name: "user",
+          description: "Specify a user.",
           type: 6,
           required: true,
       ***REMOVED***
         {
-          name: 'item',
-          description: 'The listing name.',
+          name: "item",
+          description: "The listing name.",
           type: 3,
           required: true,
       ***REMOVED***
       ],
   ***REMOVED***
     {
-      name: 'enable',
-      description: 'Enable a market listing.',
+      name: "enable",
+      description: "Enable a market listing.",
       type: 1,
       options: [
         {
-          name: 'item',
-          description: 'The listing item.',
+          name: "item",
+          description: "The listing item.",
           type: 3,
           required: true,
       ***REMOVED***
       ],
   ***REMOVED***
     {
-      name: 'disable',
-      description: 'Disable a market listing.',
+      name: "disable",
+      description: "Disable a market listing.",
       type: 1,
       options: [
         {
-          name: 'item',
-          description: 'The listing item.',
+          name: "item",
+          description: "The listing item.",
           type: 3,
           required: true,
       ***REMOVED***
       ],
   ***REMOVED***
     {
-      name: 'buy',
-      description: 'Buy a market listing.',
+      name: "buy",
+      description: "Buy a market listing.",
       type: 1,
       options: [
         {
-          name: 'item',
-          description: 'Specify the item you wish to buy.',
+          name: "item",
+          description: "Specify the item you wish to buy.",
           type: 3,
           required: true,
       ***REMOVED***
@@ -112,18 +112,18 @@ module.exports = {
   ],
   async run(interaction, guild, author, options) {
     const guildID = guild.id;
-    let color = 'BLURPLE',
-      title = author.user.username,
+    let color = "BLURPLE",
+      title = author.user.tag,
       icon_url = author.user.displayAvatarURL(),
-      description = '',
-      footer = '',
+      description = "",
+      footer = "",
       ephemeral = false;
     const embed = new Discord.MessageEmbed();
     const currencySymbol = await util.getCurrencySymbol(guildID);
 
-    if (options._subcommand === 'view') {
+    if (options._subcommand === "view") {
       const user = options._hoistedOptions?.[0]?.user ?? author.user;
-      (title = user.username), (icon_url = user.displayAvatarURL());
+      (title = user.tag), (icon_url = user.displayAvatarURL());
       const listings = await marketItemSchema.find({
         guildID,
         userID: user.id,
@@ -140,17 +140,17 @@ module.exports = {
               listing.item
             }\``,
             `${listing.description} | ${
-              listing.active ? 'Listing **active**' : 'Listing **inactive**'
+              listing.active ? "Listing **active**" : "Listing **inactive**"
             }`
           );
         }
       }
 
       description = `Total Listings: \`${i}\` | Active Listings: \`${j}\``;
-    } else if (options._subcommand === 'create') {
+    } else if (options._subcommand === "create") {
       const item = options._hoistedOptions[0].value;
       const price = options._hoistedOptions[1].value;
-      const desc = options._hoistedOptions[2].value ?? 'No description';
+      const desc = options._hoistedOptions[2].value ?? "No description";
 
       const listing = await marketItemSchema.findOne({
         guildID,
@@ -160,9 +160,9 @@ module.exports = {
       });
 
       if (listing) {
-        color = 'RED';
+        color = "RED";
         description = `You already have a(n) \`${item}\` for sale.`;
-        footer = 'Please use a different name.';
+        footer = "Please use a different name.";
       } else {
         await new marketItemSchema({
           userID: author.user.id,
@@ -173,24 +173,24 @@ module.exports = {
           active: true,
         }).save();
 
-        color = 'GREEN';
+        color = "GREEN";
         description = `Successfully created a listing for \`${item}\``;
         embed.addFields([
           {
-            name: 'Price',
+            name: "Price",
             value: `${currencySymbol}${price.toLocaleString()}`,
             inLine: true,
         ***REMOVED***
           {
-            name: 'Description',
+            name: "Description",
             value: desc,
             inLine: true,
         ***REMOVED***
         ]);
       }
-    } else if (options._subcommand === 'delete') {
+    } else if (options._subcommand === "delete") {
       const econManagerRole = guild.roles.cache.find((r) => {
-        return r.name.toLowerCase() === 'economy manager';
+        return r.name.toLowerCase() === "economy manager";
       });
 
       if (!author.roles.cache.has(econManagerRole.id)) {
@@ -206,20 +206,20 @@ module.exports = {
         });
 
         if (!listing) {
-          color = 'RED';
+          color = "RED";
           description = `Could not find \`${item}\``;
         } else {
           const items = await inventorySchema.updateMany(
-            { guildID, 'inventory.item': item },
+            { guildID, "inventory.item": item },
             { $pull: { inventory: { item } } }
           );
 
-          color = 'GREEN';
+          color = "GREEN";
           description = `Successfully deleted \`${item}\` from market DB.`;
-          footer = item ? `${items.n} items removed.` : '';
+          footer = item ? `${items.n} items removed.` : "";
         }
       }
-    } else if (options._subcommand === 'enable') {
+    } else if (options._subcommand === "enable") {
       const item = options._hoistedOptions[0].value;
 
       const listing = await marketItemSchema.findOneAndUpdate(
@@ -228,14 +228,14 @@ module.exports = {
       );
 
       if (!listing) {
-        color = 'RED';
+        color = "RED";
         description = `Could not find \`${item}\` as an inactive listing under your id.`;
-        footer = 'Check your listings with `listing view`.';
+        footer = "Check your listings with `listing view`.";
       } else {
-        color = 'GREEN';
+        color = "GREEN";
         description = `Successfully enabled \`${item}\` on the market.`;
       }
-    } else if (options._subcommand === 'disable') {
+    } else if (options._subcommand === "disable") {
       const item = options._hoistedOptions[0].value;
 
       const listing = await marketItemSchema.findOneAndUpdate(
@@ -244,14 +244,14 @@ module.exports = {
       );
 
       if (!listing) {
-        color = 'RED';
+        color = "RED";
         description = `Could not find \`${item}\` as an active listing under your id.`;
-        footer = 'Check your listings with `listing view`.';
+        footer = "Check your listings with `listing view`.";
       } else {
-        color = 'GREEN';
+        color = "GREEN";
         description = `Successfully disabled \`${item}\` on the market.`;
       }
-    } else if (options._subcommand === 'buy') {
+    } else if (options._subcommand === "buy") {
       const item = await marketItemSchema.findOne({
         guildID: guild.id,
         name: options.name,
@@ -276,7 +276,7 @@ module.exports = {
       const { wallet } = util.getEconInfo(guild.id, author.user.id);
 
       if (item.price > wallet) {
-        interaction.reply('You cannot afford this item.');
+        interaction.reply("You cannot afford this item.");
         return;
       }
 
@@ -285,11 +285,11 @@ module.exports = {
           {
             guildID: guild.id,
             userID: author.user.id,
-            'inventory.ref': inventoryItem.ref,
+            "inventory.ref": inventoryItem.ref,
         ***REMOVED***
           {
             $inc: {
-              'inventory.$.amount': 1,
+              "inventory.$.amount": 1,
           ***REMOVED***
           }
         );
@@ -302,7 +302,7 @@ module.exports = {
           {
             $push: {
               inventory: {
-                type: 'shop_item',
+                type: "shop_item",
                 ref: item.name,
                 purchasedAt: Date.now(),
                 amount: 1,
@@ -315,7 +315,7 @@ module.exports = {
       util.transaction(
         guild.id,
         author.user.id,
-        'PURCHASE_SHOP_ITEM',
+        "PURCHASE_SHOP_ITEM",
         `Purchased ${item.name}`,
         -item.price,
         0,

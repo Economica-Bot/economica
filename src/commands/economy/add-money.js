@@ -63,7 +63,7 @@ module.exports = {
       embeds: [
         util.embedify(
           'GREEN',
-          targetMember.user.username,
+          targetMember.user.tag,
           targetMember.user.displayAvatarURL(),
           `Added ${await util.getCurrencySymbol(
             interaction.guild.id
