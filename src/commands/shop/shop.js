@@ -6,10 +6,16 @@ module.exports = {
   group: 'shop',
   permissions: ['ADMINISTRATOR'],
   global: true,
-  options: null,
+  options: [
+    {
+      name: 'page',
+      description: 'Specify the page.',
+      type: 'INTEGER',
+      required: false,
+  ***REMOVED***
+  ],
   async run(interaction) {
     await interaction.deferReply();
-
     const items = await util.getShopItems(interaction.guild.id);
     if (items.length === 0) {
       interaction.reply(
@@ -17,9 +23,10 @@ module.exports = {
       );
       return;
     } else {
+      const page = interaction.options.getInteger('page') ?? 1;
       const embeds = [];
       let entries = 15;
-      let pageCount = Math.ceil(items.length / entries);
+      const pageCount = Math.ceil(items.length / entries);
       const shopEntries = [];
       const currencySymbol = await util.getCurrencySymbol(interaction.guild.id);
       items.forEach((item) => {
@@ -53,7 +60,7 @@ module.exports = {
         );
       }
 
-      await util.paginate(interaction, embeds);
+      await util.paginate(interaction, embeds, page - 1);
     }
 ***REMOVED***
 };

@@ -1,5 +1,6 @@
 const ms = require('ms');
 const config = require('../config.json');
+const Discord = require('discord.js');
 
 require('module-alias/register');
 const econSchema = require('@schemas/economy-sch');
@@ -596,37 +597,46 @@ module.exports.wait = (time) => {
   });
 };
 
-module.exports.paginate = async (interaction, embeds) => {
-  const row = new Discord.MessageActionRow()
+/**
+ * Initiates a pagination embed display.
+ * @param {Discord.CommandInteraction} interaction
+ * @param {[Discord.MessageEmbed]} embeds
+ * @param {Number} page
+ */
+module.exports.paginate = async (interaction, embeds, page = 0) => {
+  if (page > embeds.length - 1) {
+    interaction.editReply(this.error('Page number out of bounds!'));
+    return;
+  }
+
+  const time = 1000 * 15; //15 second on buttons
+  let row = new Discord.MessageActionRow()
     .addComponents(
       new Discord.MessageButton()
         .setCustomId('previous_page')
         .setLabel('Previous')
         .setStyle('SECONDARY')
-        .setDisabled(true)
+        .setDisabled(page == 0 ? true : false)
     )
     .addComponents(
       new Discord.MessageButton()
         .setCustomId('next_page')
         .setLabel('Next')
         .setStyle('PRIMARY')
-        .setDisabled(embeds.length > 1 ? false : true)
+        .setDisabled(page == embeds.length - 1 ? true : false)
     );
 
   const msg = await interaction.editReply({
-    embeds: [embeds[0]],
+    embeds: [embeds[page]],
     components: [row],
   });
-
-  let page = 0;
 
   const filter = (i) => i.user.id === interaction.user.id;
   const collector = msg.createMessageComponentCollector({
     filter,
-    time: 1000 * 15,
+    time,
   });
   collector.on('collect', async (i) => {
-    let row;
     if (page < embeds.length - 1 && page >= 0 && i.customId === 'next_page') {
       page++;
       row = new Discord.MessageActionRow()
@@ -635,7 +645,7 @@ module.exports.paginate = async (interaction, embeds) => {
             .setCustomId('previous_page')
             .setLabel('Previous')
             .setStyle('SECONDARY')
-            .setDisabled(false)
+            .setDisabled(page == 0 ? true : false)
         )
         .addComponents(
           new Discord.MessageButton()
@@ -663,7 +673,7 @@ module.exports.paginate = async (interaction, embeds) => {
             .setCustomId('next_page')
             .setLabel('Next')
             .setStyle('PRIMARY')
-            .setDisabled(false)
+            .setDisabled(page == embeds.length - 1 ? true : false)
         );
     }
 

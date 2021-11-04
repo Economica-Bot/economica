@@ -10,7 +10,7 @@ module.exports = {
     {
       name: 'type',
       description: 'Specify the leaderboard type.',
-      type: 3,
+      type: 'STRING',
       choices: [
         {
           name: 'Wallet',
@@ -27,6 +27,11 @@ module.exports = {
       ],
       required: true,
   ***REMOVED***
+    {
+      name: 'page',
+      description: 'Specify the page.',
+      type: 'INTEGER',
+  ***REMOVED***
   ],
   async run(interaction) {
     await interaction.deferReply();
@@ -36,13 +41,11 @@ module.exports = {
     const profiles = await econonomySchema
       .find({ guildID: interaction.guild.id })
       .sort({ [type]: -1 });
-
     const embeds = [];
-
-    let entries = 10,
-      rank = 1,
-      pageCount = Math.ceil(profiles.length / entries);
-
+    const page = interaction.options.getInteger('page') ?? 1;
+    let entries = 10;
+    let rank = 1;
+    const pageCount = Math.ceil(profiles.length / entries);
     const leaderboardEntries = [];
     profiles.map((profile) => {
       const userID = profile.userID;
@@ -68,6 +71,6 @@ module.exports = {
       );
     }
 
-    await util.paginate(interaction, embeds);
+    await util.paginate(interaction, embeds, page - 1);
 ***REMOVED***
 };

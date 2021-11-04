@@ -12,21 +12,23 @@ module.exports = {
       description: 'Name a user you wish to see the inventory of.',
       type: 'USER',
   ***REMOVED***
+    {
+      name: 'page',
+      description: 'Specify the page.',
+      type: 'INTEGER',
+  ***REMOVED***
   ],
   async run(interaction) {
     await interaction.deferReply();
-
     const user = interaction.options.getUser('user') ?? interaction.member.user;
     const inventory = await inventorySchema.findOne({
       userID: user.id,
       guildID: interaction.guild.id,
     });
-
+    const page = interaction.options.getInteger('page') ?? 1;
     const embeds = [];
-
     let entries = 15;
-    let pageCount = Math.ceil(inventory.inventory.length / entries);
-
+    const pageCount = Math.ceil(inventory.inventory.length / entries);
     const inventoryEntries = [];
     inventory.inventory.forEach((item) => {
       let itemDescription = '';
@@ -55,6 +57,6 @@ module.exports = {
       );
     }
 
-    await util.paginate(interaction, embeds);
+    await util.paginate(interaction, embeds, page - 1);
 ***REMOVED***
 };
