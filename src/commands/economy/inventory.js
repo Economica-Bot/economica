@@ -21,39 +21,40 @@ module.exports = {
   async run(interaction) {
     await interaction.deferReply();
     const user = interaction.options.getUser('user') ?? interaction.member.user;
-    const inventory = await inventorySchema.findOne({
+    const profile = await inventorySchema.findOne({
       userID: user.id,
       guildID: interaction.guild.id,
     });
     const page = interaction.options.getInteger('page') ?? 1;
     const embeds = [];
     let entries = 15;
-    const pageCount = Math.ceil(inventory.inventory.length / entries);
-    const inventoryEntries = [];
-    inventory.inventory.forEach((item) => {
-      let itemDescription = '';
-      for (prop in item) {
-        itemDescription += `**${prop}**: \`${item[prop]}\`\n`;
-      }
-      inventoryEntries.push(`${itemDescription}\n`);
-    });
+    const pageCount = Math.ceil(profile.inventory.length / entries);
 
     let k = 0;
+    let volume = 0
     for (let i = 0; i < pageCount; i++) {
-      description = '';
+      let embed = new Discord.MessageEmbed()
+      .setAuthor(
+        `${interaction.member.user.tag}`,
+        interaction.member.user.displayAvatarURL()
+      )
+      .setColor('BLUE')
+
       for (let j = 0; j < entries; j++) {
-        if (inventoryEntries[k]) {
-          description += inventoryEntries[k++];
+        const item = profile.inventory[k++]
+        if (item) {
+          volume += item.amount
+          embed.addField(
+            item.name,
+            `Amount: \`${item.amount}\`${item.lastGenerateAt? `\nIncome Ready: \`${!item.collected}\`` : ''}`,
+            true
+          )
         }
       }
       embeds.push(
-        new Discord.MessageEmbed()
-          .setAuthor(
-            `${interaction.member.user.tag}`,
-            interaction.member.user.displayAvatarURL()
-          )
-          .setColor('BLUE')
-          .setDescription(description)
+        embed
+          .setDescription(`${(interaction.member.user.tag == user.tag || !user)? 'You have ' : user.tag + ' has '} \`${profile.inventory.length}\` inventory items.\nTotal volume: \`${volume}\``)
+          .setFooter(`Page ${i + 1} of ${pageCount}`)
       );
     }
 
