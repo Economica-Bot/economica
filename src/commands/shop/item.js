@@ -338,13 +338,104 @@ module.exports = {
         generatorAmount: generator_amount,
       }).save();
 
+      const item = await shopItemSchema.findOne({
+        guildID: interaction.guild.id,
+        name: {
+          $regex: new RegExp(name, 'i'),
+      ***REMOVED***
+      });
+
+      const currencySymbol = await util.getCurrencySymbol(interaction.guild.id);
+
+      let embed = new Discord.MessageEmbed()
+        .setColor('GREEN')
+        .setAuthor(
+          interaction.member.user.tag,
+          interaction.member.user.displayAvatarURL()
+        )
+        .setTitle(
+          `New Item Created — ${item.name}`
+        )
+        .setDescription(util.cut(item.description, 1000) || 'A very interesting item.')
+        .setFooter(`ID: ${item._id}`)
+        .addField(
+          'Price',
+          `${currencySymbol}${item.price > 0 ? item.price.toLocaleString() : 'Free'
+          }`,
+          true
+        )
+        .addField(
+          'Date Created',
+          `${new Date(item.createdAt).toLocaleString()}`,
+          true
+        )
+        .addField(
+          'Type',
+          `${item.type === 'generator' ? 'Generator' : 'Basic'}`,
+          false
+        )
+        .addField(
+          'Stock Remaining',
+          `${item.stock?.toLocaleString() || 'Infinite'}`,
+          true
+        )
+        .addField(
+          'Expires ',
+          item.expiresOnTimestamp
+            ? `in \`${ms(item.expiresOnTimestamp - Date.now())}\`.`
+            : 'Never.',
+          true
+        )
+        .addField(
+          'Roles Given',
+          `${item.rolesGiven?.[0]
+            ? '<@&' + item.rolesGiven.join('\n<@&') + '>'
+            : 'None'
+          }`,
+          true
+        )
+        .addField(
+          'Role Removed',
+          `${item.rolesRemoved?.[0]
+            ? '<@&' + item.rolesRemoved.join('\n<@&') + '>'
+            : 'None'
+          }`,
+          true
+        )
+        .addField(
+          'Role Required',
+          `${item.requiredRoles?.[0]
+            ? '<@&' + item.requiredRoles?.join('\n<@&') + '>'
+            : 'None'
+          }`,
+          true
+        )
+        .addField(
+          'Minimum Bank Balance',
+          `${currencySymbol}${item.requiredBank?.toLocaleString() ?? '0'}`,
+          true
+        )
+        .addField(
+          'Items Required',
+          item.requiredItems.length > 0
+            ? `\`${item.requiredItems?.join('`, `')}\``
+            : 'None',
+          false
+        );
+
+      if (item.type == 'generator') {
+        embed
+          .addField('Generator Period', `${ms(item.generatorPeriod)}`, true)
+          .addField(
+            'Generator Amount',
+            `${currencySymbol}${item.generatorAmount}`,
+            true
+          );
+      }
+
       await interaction.reply({
         embeds: [
-          {
-            color: 'BLUE',
-            title: `Shop item successfully created:`,
-            description: `\`\`\`${interaction.options}\`\`\``,
-        ***REMOVED***
+          embed,
         ],
       });
     } else if (interaction.options.getSubcommand() == 'view') {
@@ -375,8 +466,7 @@ module.exports = {
         .setFooter(`ID: ${item._id}`)
         .addField(
           'Price',
-          `${currencySymbol}${
-            item.price > 0 ? item.price.toLocaleString() : 'Free'
+          `${currencySymbol}${item.price > 0 ? item.price.toLocaleString() : 'Free'
           }`,
           true
         )
@@ -404,28 +494,25 @@ module.exports = {
         )
         .addField(
           'Roles Given',
-          `${
-            item.rolesGiven?.[0]
-              ? '<@&' + item.rolesGiven.join('\n<@&') + '>'
-              : 'None'
+          `${item.rolesGiven?.[0]
+            ? '<@&' + item.rolesGiven.join('\n<@&') + '>'
+            : 'None'
           }`,
           true
         )
         .addField(
           'Role Removed',
-          `${
-            item.rolesRemoved?.[0]
-              ? '<@&' + item.rolesRemoved.join('\n<@&') + '>'
-              : 'None'
+          `${item.rolesRemoved?.[0]
+            ? '<@&' + item.rolesRemoved.join('\n<@&') + '>'
+            : 'None'
           }`,
           true
         )
         .addField(
           'Role Required',
-          `${
-            item.requiredRoles?.[0]
-              ? '<@&' + item.requiredRoles?.join('\n<@&') + '>'
-              : 'None'
+          `${item.requiredRoles?.[0]
+            ? '<@&' + item.requiredRoles?.join('\n<@&') + '>'
+            : 'None'
           }`,
           true
         )
