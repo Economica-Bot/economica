@@ -1,4 +1,5 @@
 const econonomySchema = require('@schemas/economy-sch');
+const util = require('../../util/util');
 
 module.exports = {
   name: 'leaderboard',
@@ -9,7 +10,7 @@ module.exports = {
   options: [
     {
       name: 'type',
-      description: 'Specify the leaderboard type.',
+      description: 'Specify the value to order by.',
       type: 'STRING',
       choices: [
         {
@@ -25,7 +26,7 @@ module.exports = {
           value: 'total',
       ***REMOVED***
       ],
-      required: true,
+      required: false,
   ***REMOVED***
     {
       name: 'page',
@@ -37,7 +38,7 @@ module.exports = {
     await interaction.deferReply();
 
     const currencySymbol = await util.getCurrencySymbol(interaction.guild.id),
-      type = interaction.options.getString('type');
+      type = interaction.options.getString('type') ?? 'total';
     const profiles = await econonomySchema
       .find({ guildID: interaction.guild.id })
       .sort({ [type]: -1 });
@@ -45,13 +46,14 @@ module.exports = {
     const page = interaction.options.getInteger('page') ?? 1;
     let entries = 10;
     let rank = 1;
+
     const pageCount = Math.ceil(profiles.length / entries);
     const leaderboardEntries = [];
     profiles.map((profile) => {
       const userID = profile.userID;
-      const balance = profile[type].toLocaleString();
+      const balance = profile[type];
       leaderboardEntries.push(
-        `\`${rank++}\` - <@${userID}> | ${currencySymbol}${balance}\n`
+        rank++ == 1? `<:RichestPlayer:906756586553372693> • <@${userID}> | ${currencySymbol}${util.num(balance).toLocaleString()}\n\n` : `\`${(rank - 1).toString().padStart(2, '0')}\` • <@${userID}> | ${currencySymbol}${util.num(balance).toLocaleString()}\n`
       );
     });
 
@@ -65,9 +67,10 @@ module.exports = {
       }
       embeds.push(
         new Discord.MessageEmbed()
-          .setAuthor(`${interaction.guild}'s ${type} Leaderboard`)
+          .setAuthor(`${interaction.guild}'s ${type} Leaderboard`, interaction.guild.iconURL())
           .setColor('BLUE')
           .setDescription(description)
+          .setFooter(`Page ${i + 1} of ${pageCount}`)
       );
     }
 
