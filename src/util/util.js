@@ -567,16 +567,16 @@ module.exports.num = (num) => {
   let pow10 = 1;
   let degree = null;
 
-  if (num / 1000000000000 > 1) {
+  if (num / 1000000000000 >= 1) {
     pow10 = 12;
     degree = 'T';
-  } else if (num / 1000000000 > 1) {
+  } else if (num / 1000000000 >= 1) {
     pow10 = 9;
     degree = 'B';
-  } else if (num / 1000000 > 1) {
+  } else if (num / 1000000 >= 1) {
     pow10 = 6;
     degree = 'M';
-  } else if (num / 1000 > 1) {
+  } else if (num / 1000 >= 1) {
     pow10 = 3;
     degree = 'K';
   }
