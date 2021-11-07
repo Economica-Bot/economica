@@ -25,38 +25,39 @@ module.exports = {
     } else {
       const page = interaction.options.getInteger('page') ?? 1;
       const embeds = [];
-      let entries = 15;
-      const pageCount = Math.ceil(items.length / entries);
+      let maxEntries = 15;
       const shopEntries = [];
       const currencySymbol = await util.getCurrencySymbol(interaction.guild.id);
       items.forEach((item) => {
         if (item.active) {
-          shopEntries.push(`${currencySymbol}**${
-            item.price > 0 ? util.num(item.price) : 'Free'
-          } - __*${util.cut(item.name)}*__**\n
-            ${util.cut(item.description, 200)}\n\n`);
+          shopEntries.push(item);
         }
       });
+      const pageCount = Math.ceil(shopEntries.length / maxEntries); // Numerator as shopEntries instead of items to ignore deactivated items.
 
       let k = 0;
       for (let i = 0; i < pageCount; i++) {
-        description = '';
-        for (let j = 0; j < entries; j++) {
+        // Construct each page
+        let embed = new Discord.MessageEmbed()
+          .setAuthor(`${interaction.guild.name} Shop`, interaction.guild.iconURL())
+          .setColor('BLUE');
+        for (let j = 0; j < maxEntries; j++) {
           if (shopEntries[k]) {
-            description += shopEntries[k++];
+            const item = shopEntries[k];
+            // Push fields for each active item to the page
+            embed.addField(
+              `${currencySymbol}${item.price > 0 ? util.num(item.price) : 'Free'
+              } - ${util.cut(item.name)}`,
+              util.cut(item.description, 200),
+              item.description?.length > 100 ? false : true
+            );
+            k++
           }
         }
         embeds.push(
-          new Discord.MessageEmbed()
-            .setAuthor(
-              `${interaction.guild.name} Shop`,
-              interaction.guild.iconURL()
-            )
-            .setColor('BLUE')
-            .setDescription(description)
-            .setFooter(
-              `There are currently \`${k}\` items in the shop. Use the \`item view\` command to view detailed item stats, use the \`item buy\` command to purchase an item!`
-            )
+          embed
+            .setDescription(`There are currently \`${k}\` items in the shop. Use the \`item view\` command to view detailed item stats, use the \`item buy\` command to purchase an item!`)
+            .setFooter(`Page ${i + 1} of ${pageCount}`)
         );
       }
 
