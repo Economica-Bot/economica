@@ -21,14 +21,22 @@ module.exports = {
   async run(interaction) {
     await interaction.deferReply();
     const user = interaction.options.getUser('user') ?? interaction.member.user;
-    const profile = await inventorySchema.findOne({
+    let profile = await inventorySchema.findOne({
       userID: user.id,
       guildID: interaction.guild.id,
     });
+    if (!profile?.inventory) {
+      profile = await new inventorySchema({
+        userID: user.id,
+        guildID: interaction.guild.id,
+        inventory: []
+      }).save()
+    }
+
     const page = interaction.options.getInteger('page') ?? 1;
     const embeds = [];
     let entries = 15;
-    const pageCount = Math.ceil(profile.inventory.length / entries);
+    const pageCount = Math.ceil(profile.inventory.length / entries) || 1;
 
     let k = 0;
     let volume = 0;
