@@ -686,11 +686,11 @@ module.exports = {
       //If there is a stock, check stock and decrement or deny purchase
       if (item.stock) {
         if (item.stock > 0) {
-          item = await shopItemSchema.findOneAndUpdate(
+          await shopItemSchema.findOneAndUpdate(
             { guildID: interaction.guild.id, name: name },
             { $inc: { stock: -1 } }
           );
-          if (item.stockLeft === 0) {
+          if (item.stock === 0) {
             await shopItemSchema.findOneAndUpdate(
               { guildID: interaction.guild.id, name: name },
               { active: false }
@@ -739,7 +739,7 @@ module.exports = {
         -item.price
       );
 
-      await interaction.reply(util.success(`You bought ${item.name}`));
+      await interaction.reply(util.success(`You bought \`${item.name}\``));
     }
 ***REMOVED***
 };
