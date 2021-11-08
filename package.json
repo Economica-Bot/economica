@@ -5,6 +5,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
 ***REMOVED***
+  "engines": {
+    "node": "16.x"
+***REMOVED***
   "keywords": [],
   "author": "",
   "license": "ISC",
