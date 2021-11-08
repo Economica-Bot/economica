@@ -13,6 +13,7 @@ module.exports = {
       userID: interaction.member.id,
     });
 
+    if (!user) return interaction.reply(util.error("You don't have any items."))
     const now = new Date();
     const inventory = user.inventory;
     let amount = 0;
