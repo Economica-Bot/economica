@@ -31,29 +31,38 @@ module.exports = {
     const pageCount = Math.ceil(profile.inventory.length / entries);
 
     let k = 0;
-    let volume = 0
+    let volume = 0;
     for (let i = 0; i < pageCount; i++) {
       let embed = new Discord.MessageEmbed()
-      .setAuthor(
-        `${interaction.member.user.tag}`,
-        interaction.member.user.displayAvatarURL()
-      )
-      .setColor('BLUE')
+        .setAuthor(`${user.tag}`, user.displayAvatarURL())
+        .setColor('BLUE');
 
       for (let j = 0; j < entries; j++) {
-        const item = profile.inventory[k++]
+        const item = profile.inventory[k++];
         if (item) {
-          volume += item.amount
+          volume += item.amount;
           embed.addField(
             item.name,
-            `Amount: \`${item.amount}\`${item.lastGenerateAt? `\nIncome Ready: \`${!item.collected}\`` : ''}`,
+            `Amount: \`${item.amount}\`${
+              item.lastGenerateAt
+                ? `\nIncome Ready: \`${!item.collected}\``
+                : ''
+            }`,
             true
-          )
+          );
         }
       }
       embeds.push(
         embed
-          .setDescription(`${(interaction.member.user.tag == user.tag || !user)? 'You have ' : user.tag + ' has '} \`${profile.inventory.length}\` inventory items.\nTotal volume: \`${volume}\``)
+          .setDescription(
+            `${
+              interaction.member.user.tag == user.tag || !user
+                ? 'You have '
+                : user.tag + ' has '
+            } \`${
+              profile.inventory.length
+            }\` inventory items.\nTotal volume: \`${volume}\``
+          )
           .setFooter(`Page ${i + 1} of ${pageCount}`)
       );
     }

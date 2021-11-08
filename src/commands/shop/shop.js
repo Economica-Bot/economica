@@ -1,5 +1,3 @@
-const shopItemSchema = require('@schemas/shop-item-sch');
-
 module.exports = {
   name: 'shop',
   description: "View the server's shop items.",
@@ -39,24 +37,30 @@ module.exports = {
       for (let i = 0; i < pageCount; i++) {
         // Construct each page
         let embed = new Discord.MessageEmbed()
-          .setAuthor(`${interaction.guild.name} Shop`, interaction.guild.iconURL())
+          .setAuthor(
+            `${interaction.guild.name} Shop`,
+            interaction.guild.iconURL()
+          )
           .setColor('BLUE');
         for (let j = 0; j < maxEntries; j++) {
           if (shopEntries[k]) {
             const item = shopEntries[k];
             // Push fields for each active item to the page
             embed.addField(
-              `${currencySymbol}${item.price > 0 ? util.num(item.price) : 'Free'
+              `${currencySymbol}${
+                item.price > 0 ? util.num(item.price) : 'Free'
               } - ${util.cut(item.name)}`,
               util.cut(item.description, 200),
               item.description?.length > 100 ? false : true
             );
-            k++
+            k++;
           }
         }
         embeds.push(
           embed
-            .setDescription(`There are currently \`${k}\` items in the shop. Use the \`item view\` command to view detailed item stats, use the \`item buy\` command to purchase an item!`)
+            .setDescription(
+              `There are currently \`${shopEntries.length}\` items in the shop. Use the \`item view\` command to view detailed item stats, use the \`item buy\` command to purchase an item!`
+            )
             .setFooter(`Page ${i + 1} of ${pageCount}`)
         );
       }
