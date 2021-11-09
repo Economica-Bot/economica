@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js",
-    "heroku-postbuild": "cd src && npm install && npm run build"
+    "test": "echo \"Error: no test specified\" && exit 1"
 ***REMOVED***
   "engines": {
     "node": "16.6.1"
