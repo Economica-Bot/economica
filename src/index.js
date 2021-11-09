@@ -6,6 +6,7 @@ const util = require('./util/util');
 const mongo = require('./util/mongo/mongo');
 const config = require('./config.json');
 const guildSettingsSchema = require('@schemas/guild-settings-sch');
+const path = require('path');
 
 require('dotenv').config();
 
@@ -102,14 +103,14 @@ client.login(process.env.ECON_ALPHA_TOKEN);
 
 client.registerCommands = async () => {
   const commands = [];
-  const commandDirectories = fs.readdirSync(path.join('__dirname', 'commands'));
+  const commandDirectories = fs.readdirSync(path.join(__dirname, 'commands'));
   for (const commandDirectory of commandDirectories) {
     const commandFiles = fs
-      .readdirSync(path.join('__dirname', `commands/${commandDirectory}/`))
+      .readdirSync(path.join(__dirname, `commands/${commandDirectory}/`))
       .filter((file) => file.endsWith('js'));
     for (const commandFile of commandFiles) {
       const command = require(path.join(
-        '__dirname',
+        __dirname,
         `/commands/${commandDirectory}/${commandFile}`
       ));
       client.commands.set(command.name, command);
