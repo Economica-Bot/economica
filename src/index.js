@@ -1,12 +1,12 @@
 const Discord = require('discord.js');
 const { ApplicationCommandOptionType } = require('discord-api-types/v9');
+const path = require('path');
 const fs = require('fs');
 const ms = require('ms');
-const util = require('./util/util');
-const mongo = require('./util/mongo/mongo');
-const config = require('./config.json');
+const util = require(path.join(__dirname, '/util/util'));
+const mongo = require(path.join(__dirname, '/util/mongo/mongo'));
+const config = require(path.join(__dirname, '/config.json'));
 const guildSettingsSchema = require('@schemas/guild-settings-sch');
-const path = require('path');
 
 require('dotenv').config();
 
