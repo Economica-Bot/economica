@@ -102,13 +102,16 @@ client.login(process.env.ECON_ALPHA_TOKEN);
 
 client.registerCommands = async () => {
   const commands = [];
-  const commandDirectories = fs.readdirSync('./commands');
+  const commandDirectories = fs.readdirSync(path.join('__dirname', 'commands'));
   for (const commandDirectory of commandDirectories) {
     const commandFiles = fs
-      .readdirSync(`./commands/${commandDirectory}/`)
+      .readdirSync(path.join('__dirname', `commands/${commandDirectory}/`))
       .filter((file) => file.endsWith('js'));
     for (const commandFile of commandFiles) {
-      const command = require(`./commands/${commandDirectory}/${commandFile}`);
+      const command = require(path.join(
+        '__dirname',
+        `/commands/${commandDirectory}/${commandFile}`
+      ));
       client.commands.set(command.name, command);
       commands.push(command);
     }
