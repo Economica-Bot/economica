@@ -118,7 +118,7 @@ client.registerCommands = async () => {
     }
   }
 
-  await client.application.commands.set(ApplicationCommandOptionData) //Global
+  await client.application.commands.set(commands) //Global
   
   // await (
   //   await client.guilds.fetch(process.env.GUILD_ID)
