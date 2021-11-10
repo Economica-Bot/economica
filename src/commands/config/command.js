@@ -3,6 +3,7 @@ const ms = require('ms');
 const guildSettingSchema = require('@schemas/guild-settings-sch');
 const incomeSchema = require('@schemas/income-sch');
 const config = require('../../config.json');
+const path = require('path');
 
 module.exports = {
   name: 'command',
@@ -166,16 +167,19 @@ module.exports = {
       icon_url = interaction.member.user.displayAvatarURL(),
       description = '',
       footer = '',
-      guildID = interaction.guild.id;
-    let cmd;
+      guildID = interaction.guild.id,
+      cmd;
 
     const commandDirectories = fs.readdirSync('./commands');
     for (const commandDirectory of commandDirectories) {
       const commandFiles = fs
-        .readdirSync(`./commands/${commandDirectory}/`)
+        .readdirSync(path.join(__dirname, `commands/${commandDirectory}/`))
         .filter((file) => file.endsWith('js'));
       for (const commandFile of commandFiles) {
-        const command = require(`../../commands/${commandDirectory}/${commandFile}`);
+        const command = require(path.join(
+          __dirname,
+          `/commands/${commandDirectory}/${commandFile}`
+        ));
         if (interaction.options.getString('command') === command.name) {
           cmd = command;
         }
