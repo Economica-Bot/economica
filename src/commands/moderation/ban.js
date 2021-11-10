@@ -5,6 +5,7 @@ module.exports = {
   format: '<user> [reason]',
   global: true,
   permissions: ['BAN_MEMBERS'],
+  clientPermissions: ['BAN_MEMBERS'],
   options: [
     {
       name: 'user',

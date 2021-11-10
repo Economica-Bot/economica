@@ -2,6 +2,7 @@ module.exports = {
   name: 'invite',
   group: 'utility',
   description: 'Gets the invite link for Economica.',
+  disabled: true,
   options: null,
   async run(interaction) {
     await interaction.reply({

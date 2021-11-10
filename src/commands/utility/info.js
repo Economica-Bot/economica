@@ -3,7 +3,7 @@ module.exports = {
   group: 'utility',
   description: "Send an embed about Economica's commands.",
   format: '<group> [channel]',
-  permissions: ['ADMINISTRATOR'],
+  permissions: ['MANAGE_MESSAGES'],
   global: true,
   options: [
     {

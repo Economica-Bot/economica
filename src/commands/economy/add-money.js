@@ -3,6 +3,12 @@ module.exports = {
   description: 'Add money.',
   group: 'economy',
   global: true,
+  roles: [
+    {
+      name: 'ECONOMY MANAGER',
+      required: true,
+  ***REMOVED***
+  ],
   options: [
     {
       name: 'user',

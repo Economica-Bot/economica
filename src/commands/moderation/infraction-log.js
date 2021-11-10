@@ -6,7 +6,7 @@ module.exports = {
   description: 'Manage the infraction logging channel.',
   format: '<set | remove> [channel]',
   global: true,
-  permissions: ['ADMINISTRATOR'],
+  permissions: ['MANAGE_CHANNELS'],
   options: [
     {
       name: 'set',
@@ -67,12 +67,20 @@ module.exports = {
           }
         )
         .then(() => {
-          (color = 'GREEN'), (description = `Removed infraction log.`);
+          color = 'GREEN';
+          description = `Removed infraction log.`;
         });
     }
 
     await interaction.reply({
-      embeds: [util.embedify(color, guild.name, guild.iconURL(), description)],
+      embeds: [
+        util.embedify(
+          color,
+          interaction.guild.name,
+          interaction.guild.iconURL(),
+          description
+        ),
+      ],
     });
 ***REMOVED***
 };

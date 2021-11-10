@@ -467,6 +467,8 @@ module.exports.isSuccess = (properties) => {
  * @returns
  */
 module.exports.initGuildSettings = async (guild) => {
+  console.log('Init guild settings');
+
   const guildSettings = await guildSettingsSchema.findOneAndUpdate(
     {
       guildID: guild.id,

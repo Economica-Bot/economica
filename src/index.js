@@ -1,10 +1,11 @@
 const Discord = require('discord.js');
 const { ApplicationCommandOptionType } = require('discord-api-types/v9');
+const path = require('path');
 const fs = require('fs');
 const ms = require('ms');
-const util = require('./util/util');
-const mongo = require('./util/mongo/mongo');
-const config = require('./config.json');
+const util = require(path.join(__dirname, '/util/util'));
+const mongo = require(path.join(__dirname, '/util/mongo/mongo'));
+const config = require(path.join(__dirname, '/config.json'));
 const guildSettingsSchema = require('@schemas/guild-settings-sch');
 
 require('dotenv').config();
@@ -98,26 +99,31 @@ client.on('guildCreate', (guild) => {
   util.initGuildSettings(guild);
 });
 
-client.login(process.env.ECON_ALPHA_TOKEN);
+client.login(process.env.ECON_TOKEN);
 
 client.registerCommands = async () => {
   const commands = [];
-  const commandDirectories = fs.readdirSync('./commands');
+  const commandDirectories = fs.readdirSync(path.join(__dirname, 'commands'));
   for (const commandDirectory of commandDirectories) {
     const commandFiles = fs
-      .readdirSync(`./commands/${commandDirectory}/`)
+      .readdirSync(path.join(__dirname, `commands/${commandDirectory}/`))
       .filter((file) => file.endsWith('js'));
     for (const commandFile of commandFiles) {
-      const command = require(`./commands/${commandDirectory}/${commandFile}`);
+      const command = require(path.join(
+        __dirname,
+        `/commands/${commandDirectory}/${commandFile}`
+      ));
       client.commands.set(command.name, command);
       commands.push(command);
     }
   }
 
-  //await client.application.commands.set(ApplicationCommandOptionData) //Global
-  await (
-    await client.guilds.fetch(process.env.GUILD_ID)
-  ).commands.set(commands);
+  await client.application.commands.set(commands); //Global
+
+  // await (
+  //   await client.guilds.fetch(process.env.GUILD_ID)
+  // ).commands.set(commands);
+
   console.log('Commands registered');
 };
 
@@ -179,11 +185,16 @@ client.permissible = async (author, guild, channel, command) => {
 
   if (command?.permissions) {
     for (const permission of command.permissions) {
-      if (!clientMember.permissionsIn(channel).has(permission)) {
-        missingClientPermissions.push(`\`${permission}\``);
-      }
       if (!author.permissionsIn(channel).has(permission)) {
         missingUserPermissions.push(`\`${permission}\``);
+      }
+    }
+  }
+
+  if (command?.clientPermissions) {
+    for (const permission of command.clientPermissions) {
+      if (!clientMember.permissionsIn(channel).has(permission)) {
+        missingClientPermissions.push(`\`${permission}\``);
       }
     }
   }
@@ -241,6 +252,10 @@ client.coolDown = async (interaction) => {
   const result = await guildSettingsSchema.findOne({
     guildID: interaction.guild.id,
   });
+
+  if (!result) {
+    util.initGuildSettings(interaction.guild);
+  }
 
   properties = result.commands.find((c) => {
     return c.command === interaction.command.name;

@@ -6,6 +6,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
 ***REMOVED***
+  "engines": {
+    "node": "16.6.1"
+***REMOVED***
   "keywords": [],
   "author": "",
   "license": "ISC",

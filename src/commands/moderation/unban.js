@@ -7,6 +7,7 @@ module.exports = {
   format: '<userID>',
   global: true,
   permissions: ['BAN_MEMBERS'],
+  clientPermissions: ['BAN_MEMBERS'],
   options: [
     {
       name: 'user_id',

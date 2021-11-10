@@ -7,7 +7,8 @@ module.exports = {
   group: 'moderation',
   description: 'Mutes a user.',
   format: '<user> [length] [reason]',
-  permissions: ['MUTE_MEMBERS', 'MANAGE_ROLES'],
+  permissions: ['MUTE_MEMBERS'],
+  clientPermissions: ['MANAGE_ROLES'],
   roles: [
     {
       name: 'MUTED',

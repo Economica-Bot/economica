@@ -4,6 +4,7 @@ module.exports = {
   description: 'Kicks a user',
   global: true,
   permissions: ['KICK_MEMBERS'],
+  clientPermissions: ['KICK_MEMBERS'],
   options: [
     {
       name: 'user',
