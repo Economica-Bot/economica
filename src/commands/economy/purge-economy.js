@@ -176,6 +176,9 @@ module.exports = {
           })
           .then((result) => {
             description = `Deleted all shop data. \`${result.n}\` removed.`;
+            await inventorySchema.deleteMany({
+              guildID,
+            });
           });
       } else if (interaction.options.getSubcommand() === 'item') {
         const item = interaction.options.getString('item');
@@ -185,7 +188,19 @@ module.exports = {
             name: item,
           })
           .then((result) => {
-            description = `Deleted \`${item}\` from the market.`;
+            description = `Deleted \`${item}\` from the shop.`;
+            await inventorySchema.deleteMany(
+              {
+                guildID,
+            ***REMOVED***
+              {
+                $pull: {
+                  inventory: {
+                    name: item,
+                ***REMOVED***
+              ***REMOVED***
+              }
+            );
           });
       }
     } else if (interaction.options.getSubcommandGroup() === 'balance') {
