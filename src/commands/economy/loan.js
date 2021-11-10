@@ -115,7 +115,10 @@ module.exports = {
       footer = '';
 
     const cSymbol = await util.getCurrencySymbol(guildID);
-    const { wallet } = await util.getEconInfo(guildID, interaction.member.id);
+    const { wallet, treasury } = await util.getEconInfo(
+      guildID,
+      interaction.member.id
+    );
 
     if (interaction.options.getSubcommand() === 'propose') {
       const targetMember = interaction.options.getMember('user');
@@ -132,9 +135,9 @@ module.exports = {
         color = 'RED';
         description += `${loan < 1 ? `Invalid loan: ${cSymbol}${loan}\n` : ''}
         ${repayment < 1 ? `Invalid repayment: ${cSymbol}${repayment}\n` : ''}`;
-      } else if (principal > wallet) {
+      } else if (principal > treasury) {
         color = 'RED';
-        description += `Insufficient wallet: ${cSymbol}${principal.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`;
+        description += `Insufficient treasury: ${cSymbol}${principal.toLocaleString()}\nCurrent balance: ${cSymbol}${treasury.toLocaleString()}`;
       }
       if (!ms(length)) {
         color = 'RED';
@@ -171,8 +174,8 @@ module.exports = {
         interaction.member.id,
         this.name,
         `Loan to <@!${targetMember.user.id}> | Loan ID \`${loan._id}\``,
-        -principal,
         0,
+        -principal,
         -principal
       );
 
