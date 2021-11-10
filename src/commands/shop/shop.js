@@ -2,7 +2,6 @@ module.exports = {
   name: 'shop',
   description: "View the server's shop items.",
   group: 'shop',
-  permissions: ['ADMINISTRATOR'],
   global: true,
   options: [
     {

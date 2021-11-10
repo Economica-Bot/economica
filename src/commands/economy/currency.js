@@ -5,7 +5,12 @@ module.exports = {
   group: 'economy',
   description: 'View and update the currency symbol',
   global: true,
-  permissions: ['ADMINISTRATOR'],
+  roles: [
+    {
+      name: 'ECONOMY MANAGER',
+      required: true,
+  ***REMOVED***
+  ],
   options: [
     {
       name: 'set',

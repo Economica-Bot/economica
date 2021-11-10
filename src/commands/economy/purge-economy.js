@@ -9,7 +9,6 @@ module.exports = {
   description: 'Delete economy-related content on the server',
   format: '<inventory | market | balance> [user]',
   global: true,
-  permissions: ['ADMINISTRATOR'],
   roles: [
     {
       name: 'ECONOMY MANAGER',

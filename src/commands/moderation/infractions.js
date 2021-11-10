@@ -7,7 +7,6 @@ module.exports = {
   group: 'moderation',
   description: "Display information about a user's infractions.",
   format: '<user>',
-  permissions: ['MUTE_MEMBERS'],
   global: true,
   options: [
     {

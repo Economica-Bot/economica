@@ -6,7 +6,8 @@ module.exports = {
   description: 'Unmute a user.',
   format: '<user>',
   global: true,
-  permissions: ['MUTE_MEMBERS', 'MANAGE_ROLES'],
+  permissions: ['MUTE_MEMBERS'],
+  clientPermissions: ['MANAGE_ROLES'],
   roles: [
     {
       name: 'MUTED',

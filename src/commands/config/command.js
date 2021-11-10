@@ -10,7 +10,7 @@ module.exports = {
   untoggleable: true,
   description: 'Manage commands.',
   global: true,
-  permissions: ['ADMINISTRATOR'],
+  permissions: ['MANAGE_GUILD'],
   options: [
     {
       name: 'permission',

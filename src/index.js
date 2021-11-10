@@ -185,11 +185,16 @@ client.permissible = async (author, guild, channel, command) => {
 
   if (command?.permissions) {
     for (const permission of command.permissions) {
-      if (!clientMember.permissionsIn(channel).has(permission)) {
-        missingClientPermissions.push(`\`${permission}\``);
-      }
       if (!author.permissionsIn(channel).has(permission)) {
         missingUserPermissions.push(`\`${permission}\``);
+      }
+    }
+  }
+
+  if (command?.clientPermissions) {
+    for (const permission of command.clientPermissions) {
+      if (!clientMember.permissionsIn(channel).has(permission)) {
+        missingClientPermissions.push(`\`${permission}\``);
       }
     }
   }
