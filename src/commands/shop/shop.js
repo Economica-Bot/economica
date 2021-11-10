@@ -15,7 +15,7 @@ module.exports = {
     await interaction.deferReply();
     const items = await util.getShopItems(interaction.guild.id);
     if (items.length === 0) {
-      interaction.reply(
+      interaction.editReply(
         `There are currently \`0\` items in the shop.\nAsk your Economy Manager to add some!`
       );
       return;
