@@ -99,7 +99,7 @@ client.on('guildCreate', (guild) => {
   util.initGuildSettings(guild);
 });
 
-client.login(process.env.ECON_ALPHA_TOKEN);
+client.login(process.env.ECON_TOKEN);
 
 client.registerCommands = async () => {
   const commands = [];
@@ -118,10 +118,12 @@ client.registerCommands = async () => {
     }
   }
 
-  //await client.application.commands.set(ApplicationCommandOptionData) //Global
-  await (
-    await client.guilds.fetch(process.env.GUILD_ID)
-  ).commands.set(commands);
+  await client.application.commands.set(ApplicationCommandOptionData) //Global
+  
+  // await (
+  //   await client.guilds.fetch(process.env.GUILD_ID)
+  // ).commands.set(commands);
+
   console.log('Commands registered');
 };
 
