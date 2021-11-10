@@ -174,7 +174,7 @@ module.exports = {
           .deleteMany({
             guildID,
           })
-          .then((result) => {
+          .then(async (result) => {
             description = `Deleted all shop data. \`${result.n}\` removed.`;
             await inventorySchema.deleteMany({
               guildID,
@@ -187,7 +187,7 @@ module.exports = {
             guildID,
             name: item,
           })
-          .then((result) => {
+          .then(async (result) => {
             description = `Deleted \`${item}\` from the shop.`;
             await inventorySchema.deleteMany(
               {
