@@ -118,8 +118,8 @@ client.registerCommands = async () => {
     }
   }
 
-  await client.application.commands.set(commands) //Global
-  
+  await client.application.commands.set(commands); //Global
+
   // await (
   //   await client.guilds.fetch(process.env.GUILD_ID)
   // ).commands.set(commands);
@@ -247,6 +247,10 @@ client.coolDown = async (interaction) => {
   const result = await guildSettingsSchema.findOne({
     guildID: interaction.guild.id,
   });
+
+  if (!result) {
+    util.initGuildSettings(interaction.guild);
+  }
 
   properties = result.commands.find((c) => {
     return c.command === interaction.command.name;
