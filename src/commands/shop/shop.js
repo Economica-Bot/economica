@@ -15,9 +15,20 @@ module.exports = {
     await interaction.deferReply();
     const items = await util.getShopItems(interaction.guild.id);
     if (items.length === 0) {
-      interaction.editReply(
-        `There are currently \`0\` items in the shop.\nAsk your Economy Manager to add some!`
-      );
+      let embed = new Discord.MessageEmbed()
+          .setAuthor(
+            `${interaction.guild.name} Shop`,
+            interaction.guild.iconURL()
+          )
+          .setColor('BLUE')
+          .setDescription(
+            `There are currently \`0\` items in the shop.\nAsk your Economy Manager to add some!`
+          )
+          .setFooter(`Page 1 of 1`);
+        
+      interaction.editReply({
+        embeds: [embed]
+      });
       return;
     } else {
       const page = interaction.options.getInteger('page') ?? 1;
