@@ -25,7 +25,7 @@ module.exports = {
       ephemeral = false,
       reason = interaction.options.getString('reason') ?? 'No reason provided';
 
-    if (targetMember.user.id === member.user.id) {
+    if (targetMember.user.id === interaction.member.user.id) {
       embed = util.embedify(
         'RED',
         interaction.member.user.tag,
