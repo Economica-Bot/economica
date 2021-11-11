@@ -150,7 +150,7 @@ module.exports = {
   ],
   async run(interaction) {
     const guildID = interaction.guild.id;
-    const userID = interaction.options.getUser('user').id;
+    const userID = interaction.options.getUser('user')?.id;
     let color = 'GREEN',
       title = interaction.member.user.tag,
       icon_url = interaction.member.user.displayAvatarURL(),
