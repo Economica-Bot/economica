@@ -2,6 +2,7 @@ const economySchema = require('@schemas/economy-sch');
 const marketItemSchema = require('@schemas/market-item-sch');
 const shopItemSchema = require('@schemas/shop-item-sch');
 const inventorySchema = require('@schemas/inventory-sch');
+const transactionSchema = require('@schemas/transaction-sch');
 
 module.exports = {
   name: 'purge',
@@ -120,9 +121,36 @@ module.exports = {
       ***REMOVED***
       ],
   ***REMOVED***
+    {
+      name: 'transaction',
+      description: 'Delete transaction data.',
+      type: 'SUB_COMMAND_GROUP',
+      options: [
+        {
+          name: 'all',
+          description: 'All transactions.',
+          type: 'SUB_COMMAND',
+          options: null,
+      ***REMOVED***
+        {
+          name: 'user',
+          description: 'Specify a user.',
+          type: 'SUB_COMMAND',
+          options: [
+            {
+              name: 'user',
+              description: 'Specify a user.',
+              type: 'USER',
+              required: true,
+          ***REMOVED***
+          ],
+      ***REMOVED***
+      ],
+  ***REMOVED***
   ],
   async run(interaction) {
     const guildID = interaction.guild.id;
+    const userID = interaction.options.getUser('user').id;
     let color = 'GREEN',
       title = interaction.member.user.tag,
       icon_url = interaction.member.user.displayAvatarURL(),
@@ -138,14 +166,13 @@ module.exports = {
             description = `Deleted all inventory data. \`${result.n}\` removed.`;
           });
       } else if (interaction.options.getSubcommand() === 'user') {
-        const user = interaction.options.getUser('user');
         await inventorySchema
           .findOneAndDelete({
             guildID,
-            userID: user.id,
+            userID,
           })
           .then((result) => {
-            description = `Deleted inventory data for <@!${user.id}>`;
+            description = `Deleted inventory data for <@!${userID}>`;
           });
       }
     } else if (interaction.options.getSubcommandGroup() === 'market') {
@@ -158,14 +185,13 @@ module.exports = {
             description = `Deleted all market data. \`${result.n}\` removed.`;
           });
       } else if (interaction.options.getSubcommand() === 'user') {
-        const user = interaction.options.getUser('user');
         await marketItemSchema
           .deleteMany({
             guildID,
-            userID: user.id,
+            userID,
           })
           .then((result) => {
-            description = `Deleted market data for <@!${user.id}>`;
+            description = `Deleted market data for <@!${userID}>`;
           });
       }
     } else if (interaction.options.getSubcommandGroup() === 'shop') {
@@ -213,14 +239,29 @@ module.exports = {
             description = `Deleted all balance data. \`${result.n}\` removed.`;
           });
       } else if (interaction.options.getSubcommand() === 'user') {
-        const user = interaction.options.getUser('user');
         await economySchema
           .deleteMany({
             guildID,
-            userID: user.id,
+            userID,
           })
           .then((result) => {
-            description = `Deleted balance data for <@!${user.id}>`;
+            description = `Deleted balance data for <@!${userID}>`;
+          });
+      }
+    } else if (interaction.options.getSubCommandGroup() === 'transaction') {
+      if (interaction.options.getSubcommand() === 'all') {
+        await transactionSchema
+          .deleteMany({
+            guildID,
+          })
+          .then((result) => {
+            description = `Deleted all transaction data. \`${result.n}\` removed.`;
+          });
+      } else if (interaction.options.getSubcommand() === 'user') {
+        await transactionSchema
+          .deleteMany({ guildID, userID })
+          .then((result) => {
+            description = `Deleted transaction data for <@!${userID}>. \`${result.n}\` removed.`;
           });
       }
     }
