@@ -61,9 +61,9 @@ module.exports = {
 							} - ${util.cut(item.name)}`,
 							`**${item.type}** ${
 								item.duration
-									? `Expires in <R:${
+									? `Expires in <t:${
 											Date.now() + new Date(item.createdAt).getMilliseconds()
-									  }>`
+									  }:R>`
 									: ''
 							}\n*${util.cut(item.description, 200)}*`,
 							item.description?.length > 100 ? false : true

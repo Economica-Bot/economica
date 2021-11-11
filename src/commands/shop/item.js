@@ -384,9 +384,9 @@ module.exports = {
 				.addField(
 					'Expires ',
 					item.duration
-						? `in <R:${
+						? `in <t:${
 								Date.now() + new Date(item.createdAt).getMilliseconds()
-						  }>`
+						  }:R>`
 						: 'Never',
 					true
 				)
@@ -494,9 +494,9 @@ module.exports = {
 				.addField(
 					'Expires ',
 					item.duration
-						? `in <R:${
+						? `in <t:${
 								Date.now() + new Date(item.createdAt).getMilliseconds()
-						  }>`
+						  }:R>`
 						: 'Never',
 					true
 				)
