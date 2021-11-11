@@ -54,15 +54,6 @@ module.exports = {
     );
 
     if (amount) {
-      await util.transaction(
-        interaction.guild.id,
-        interaction.member.id,
-        'GENERATOR',
-        'Collected generator money',
-        0,
-        amount,
-        amount
-      );
       await interaction.reply(util.success(description));
       await inventorySchema.findOneAndUpdate(
         {
