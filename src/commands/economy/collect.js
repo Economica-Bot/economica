@@ -48,7 +48,7 @@ module.exports = {
           );
           description += `\n\`${++count}.\` **${
             shopItem.name
-          }** | ${currencySymbol}${amount.toLocaleString()}`;
+          }** | ${currencySymbol}${shopItem.generatorAmount.toLocaleString()}`;
         }
       })
     );
