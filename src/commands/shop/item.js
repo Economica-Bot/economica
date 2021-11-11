@@ -1,7 +1,8 @@
 const ms = require('ms');
+const path = require('path');
 const shopItemSchema = require('@schemas/shop-item-sch');
 const inventorySchema = require('@schemas/inventory-sch');
-const util = require('../../util/util');
+const util = require(path.join(__dirname, '../../util/util'));
 
 const globalCreateOptions = {
   required: [
@@ -353,14 +354,15 @@ module.exports = {
           interaction.member.user.tag,
           interaction.member.user.displayAvatarURL()
         )
-        .setTitle(
-          `New Item Created — ${item.name}`
+        .setTitle(`New Item Created — ${item.name}`)
+        .setDescription(
+          util.cut(item.description, 1000) || 'A very interesting item.'
         )
-        .setDescription(util.cut(item.description, 1000) || 'A very interesting item.')
         .setFooter(`ID: ${item._id}`)
         .addField(
           'Price',
-          `${currencySymbol}${item.price > 0 ? item.price.toLocaleString() : 'Free'
+          `${currencySymbol}${
+            item.price > 0 ? item.price.toLocaleString() : 'Free'
           }`,
           true
         )
@@ -388,25 +390,28 @@ module.exports = {
         )
         .addField(
           'Roles Given',
-          `${item.rolesGiven?.[0]
-            ? '<@&' + item.rolesGiven.join('\n<@&') + '>'
-            : 'None'
+          `${
+            item.rolesGiven?.[0]
+              ? '<@&' + item.rolesGiven.join('\n<@&') + '>'
+              : 'None'
           }`,
           true
         )
         .addField(
           'Role Removed',
-          `${item.rolesRemoved?.[0]
-            ? '<@&' + item.rolesRemoved.join('\n<@&') + '>'
-            : 'None'
+          `${
+            item.rolesRemoved?.[0]
+              ? '<@&' + item.rolesRemoved.join('\n<@&') + '>'
+              : 'None'
           }`,
           true
         )
         .addField(
           'Role Required',
-          `${item.requiredRoles?.[0]
-            ? '<@&' + item.requiredRoles?.join('\n<@&') + '>'
-            : 'None'
+          `${
+            item.requiredRoles?.[0]
+              ? '<@&' + item.requiredRoles?.join('\n<@&') + '>'
+              : 'None'
           }`,
           true
         )
@@ -434,9 +439,7 @@ module.exports = {
       }
 
       await interaction.reply({
-        embeds: [
-          embed,
-        ],
+        embeds: [embed],
       });
     } else if (interaction.options.getSubcommand() == 'view') {
       const item = await shopItemSchema.findOne({
@@ -466,7 +469,8 @@ module.exports = {
         .setFooter(`ID: ${item._id}`)
         .addField(
           'Price',
-          `${currencySymbol}${item.price > 0 ? item.price.toLocaleString() : 'Free'
+          `${currencySymbol}${
+            item.price > 0 ? item.price.toLocaleString() : 'Free'
           }`,
           true
         )
@@ -494,25 +498,28 @@ module.exports = {
         )
         .addField(
           'Roles Given',
-          `${item.rolesGiven?.[0]
-            ? '<@&' + item.rolesGiven.join('\n<@&') + '>'
-            : 'None'
+          `${
+            item.rolesGiven?.[0]
+              ? '<@&' + item.rolesGiven.join('\n<@&') + '>'
+              : 'None'
           }`,
           true
         )
         .addField(
           'Role Removed',
-          `${item.rolesRemoved?.[0]
-            ? '<@&' + item.rolesRemoved.join('\n<@&') + '>'
-            : 'None'
+          `${
+            item.rolesRemoved?.[0]
+              ? '<@&' + item.rolesRemoved.join('\n<@&') + '>'
+              : 'None'
           }`,
           true
         )
         .addField(
           'Role Required',
-          `${item.requiredRoles?.[0]
-            ? '<@&' + item.requiredRoles?.join('\n<@&') + '>'
-            : 'None'
+          `${
+            item.requiredRoles?.[0]
+              ? '<@&' + item.requiredRoles?.join('\n<@&') + '>'
+              : 'None'
           }`,
           true
         )

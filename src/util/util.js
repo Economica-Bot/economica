@@ -1,5 +1,6 @@
 const ms = require('ms');
-const config = require('../config.json');
+const path = require('path')
+const config = require(path.join(__dirname, '../config.json'));
 const Discord = require('discord.js');
 
 require('module-alias/register');
@@ -467,8 +468,6 @@ module.exports.isSuccess = (properties) => {
  * @returns
  */
 module.exports.initGuildSettings = async (guild) => {
-  console.log('Init guild settings');
-
   const guildSettings = await guildSettingsSchema.findOneAndUpdate(
     {
       guildID: guild.id,

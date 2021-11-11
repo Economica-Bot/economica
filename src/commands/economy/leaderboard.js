@@ -1,5 +1,6 @@
 const econonomySchema = require('@schemas/economy-sch');
-const util = require('../../util/util');
+const path = require('path');
+const util = require(path.join(__dirname, '../../util/util'));
 
 module.exports = {
   name: 'leaderboard',
@@ -53,7 +54,15 @@ module.exports = {
       const userID = profile.userID;
       const balance = profile[type];
       leaderboardEntries.push(
-        rank++ == 1? `<:RichestPlayer:906756586553372693> • <@${userID}> | ${currencySymbol}${util.num(balance).toLocaleString()}\n\n` : `\`${(rank - 1).toString().padStart(2, '0')}\` • <@${userID}> | ${currencySymbol}${util.num(balance).toLocaleString()}\n`
+        rank++ == 1
+          ? `<:RichestPlayer:906756586553372693> • <@${userID}> | ${currencySymbol}${util
+              .num(balance)
+              .toLocaleString()}\n\n`
+          : `\`${(rank - 1)
+              .toString()
+              .padStart(2, '0')}\` • <@${userID}> | ${currencySymbol}${util
+              .num(balance)
+              .toLocaleString()}\n`
       );
     });
 
@@ -67,7 +76,10 @@ module.exports = {
       }
       embeds.push(
         new Discord.MessageEmbed()
-          .setAuthor(`${interaction.guild}'s ${type} Leaderboard`, interaction.guild.iconURL())
+          .setAuthor(
+            `${interaction.guild}'s ${type} Leaderboard`,
+            interaction.guild.iconURL()
+          )
           .setColor('BLUE')
           .setDescription(description)
           .setFooter(`Page ${i + 1} of ${pageCount}`)

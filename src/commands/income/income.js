@@ -1,4 +1,3 @@
-const { commands } = require('../../config.json');
 const incomeSchema = require('@schemas/income-sch');
 
 module.exports = {
@@ -12,7 +11,7 @@ module.exports = {
       'BLURPLE',
       `${interaction.guild.name}'s Income Commands`,
       interaction.guild.iconURL(),
-      'Use `command config <income_command>` to configure income commands.'
+      'Use `command config income_command <command>` to configure income commands.'
     );
 
     let incomeCommands = (

@@ -36,13 +36,16 @@ client.on('ready', async () => {
     console.log('Connected to DB');
   });
 
-  const checkMutes = require('./util/features/check-mute');
+  const checkMutes = require(path.join(__dirname, '/util/features/check-mute'));
   await checkMutes(client);
-  const checkLoans = require('./util/features/check-loan');
+  const checkLoans = require(path.join(__dirname, '/util/features/check-loan'));
   await checkLoans();
-  const checkActive = require('./util/features/shop-item-handler');
+  const checkActive = require(path.join(
+    __dirname,
+    '/util/features/shop-item-handler'
+  ));
   await checkActive();
-  const generate = require('./util/features/generator');
+  const generate = require(path.join(__dirname, '/util/features/generator'));
   await generate();
 
   console.log(`${client.user.tag} Ready`);
@@ -80,7 +83,7 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   const properties = {
-    command: interaction.command.name,
+    command: interaction.commandName,
     timestamp: new Date().getTime(),
   };
 
@@ -118,7 +121,7 @@ client.registerCommands = async () => {
     }
   }
 
-  await client.application.commands.set(commands); //Global
+  //await client.application.commands.set(commands); //Global
 
   // await (
   //   await client.guilds.fetch(process.env.GUILD_ID)
@@ -258,13 +261,13 @@ client.coolDown = async (interaction) => {
   }
 
   properties = result.commands.find((c) => {
-    return c.command === interaction.command.name;
+    return c.command === interaction.commandName;
   });
 
   const uProperties = await util.getUserCommandStats(
     interaction.guild.id,
     interaction.user.id,
-    interaction.command.name
+    interaction.commandName
   );
 
   const { cooldown } = properties || config.commands['default'];

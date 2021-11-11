@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = {
   name: 'load',
   description: 'Load a slash command.',
@@ -16,7 +18,10 @@ module.exports = {
     const commandName = interaction.options.getString('command');
     const command = client.commands.get(commandName);
     if (command) {
-      const cmd = require(`../../commands/${command.group}/${command.name}.js`);
+      const cmd = require(path.join(
+        __dirname,
+        `../../commands/${command.group}/${command.name}.js`
+      ));
       await client.guilds.cache.get(process.env.GUILD_ID).commands.create(cmd);
       client.commands.set(cmd.name, cmd);
       const embed = util.embedify(

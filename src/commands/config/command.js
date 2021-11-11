@@ -2,8 +2,8 @@ const fs = require('fs');
 const ms = require('ms');
 const guildSettingSchema = require('@schemas/guild-settings-sch');
 const incomeSchema = require('@schemas/income-sch');
-const config = require('../../config.json');
 const path = require('path');
+const config = require(path.join(__dirname, '../../config.json'));
 
 module.exports = {
   name: 'command',
@@ -167,24 +167,11 @@ module.exports = {
       icon_url = interaction.member.user.displayAvatarURL(),
       description = '',
       footer = '',
-      guildID = interaction.guild.id,
-      cmd;
+      guildID = interaction.guild.id;
 
-    const commandDirectories = fs.readdirSync('./commands');
-    for (const commandDirectory of commandDirectories) {
-      const commandFiles = fs
-        .readdirSync(path.join(__dirname, `commands/${commandDirectory}/`))
-        .filter((file) => file.endsWith('js'));
-      for (const commandFile of commandFiles) {
-        const command = require(path.join(
-          __dirname,
-          `/commands/${commandDirectory}/${commandFile}`
-        ));
-        if (interaction.options.getString('command') === command.name) {
-          cmd = command;
-        }
-      }
-    }
+    const cmd = client.commands.find((command) => {
+      return command.name === interaction.options.getString('command');
+    });
 
     if (
       !cmd ||

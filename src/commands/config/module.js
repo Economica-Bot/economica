@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 const guildSettingSchema = require('@schemas/guild-settings-sch');
 
@@ -45,7 +46,8 @@ module.exports = {
       footer = '',
       module,
       guildID = interaction.guild.id;
-    const commandDirectories = fs.readdirSync('./commands');
+    const commandDirectories = fs.readdirSync(path.join(__dirname, '/../'));
+
     for (const commandDirectory of commandDirectories) {
       if (interaction.options.getString('module') === commandDirectory) {
         //Insert undisableable modules here:
