@@ -13,10 +13,15 @@ module.exports = {
       userID: interaction.member.id,
     });
 
-    if (!user) return interaction.reply(util.error("You don't have any items."))
+    if (!user)
+      return interaction.reply(util.error("You don't have any items."));
     const now = new Date();
     const inventory = user.inventory;
     let amount = 0;
+
+    let description = 'Collected generator money\n';
+    let count = 0;
+    const currencySymbol = await util.getCurrencySymbol(interaction.guild.id);
 
     await Promise.all(
       inventory.map(async (item) => {
@@ -32,6 +37,18 @@ module.exports = {
           inventory[itemIndex].collected = true;
           inventory[itemIndex].lastGenerateAt = now.getTime();
           amount += shopItem.generatorAmount;
+          await util.transaction(
+            interaction.guild.id,
+            interaction.member.id,
+            'GENERATOR',
+            `\`${shopItem.name}\``,
+            0,
+            shopItem.generatorAmount,
+            shopItem.generatorAmount
+          );
+          description += `\n\`${++count}.\` **${
+            shopItem.name
+          }** | ${currencySymbol}${amount.toLocaleString()}`;
         }
       })
     );
@@ -46,13 +63,7 @@ module.exports = {
         amount,
         amount
       );
-      await interaction.reply(
-        util.success(
-          `Collected ${await util.getCurrencySymbol(
-            interaction.guild.id
-          )}${amount.toLocaleString()}`
-        )
-      );
+      await interaction.reply(util.success(description));
       await inventorySchema.findOneAndUpdate(
         {
           guildID: interaction.guild.id,
@@ -63,7 +74,9 @@ module.exports = {
         }
       );
     } else {
-      await interaction.reply(util.error('You do not have any money to collect.'));
+      await interaction.reply(
+        util.error('You do not have any money to collect.')
+      );
     }
 ***REMOVED***
 };
