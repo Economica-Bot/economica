@@ -65,7 +65,8 @@ module.exports = {
 											Date.now() + new Date(item.createdAt).getMilliseconds()
 									  }:R>`
 									: ''
-							}\n*${util.cut(item.description, 200)}*`
+							}\n*${util.cut(item.description, 200)}*`,
+							item.description?.length > 100 ? false : true
 						);
 						k++;
 					}
