@@ -1,17 +1,16 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'withdraw',
-	group: 'economy',
-	description: 'Withdraw funds from the treasury to your wallet.',
-	global: true,
-	format: '<amount | all>',
-	options: [
-		{
-			name: 'amount',
-			description: 'Specify the amount you wish to withdraw.',
-			type: 'STRING',
-			required: true,
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('withdraw')
+		.setDescription(commands.commands.withdraw.description)
+		.addStringOption((option) =>
+			option
+				.setName('amount')
+				.setDescription('Specify the amount.')
+				.setRequired(true)
+		),
 	async run(interaction) {
 		let color = 'GREEN',
 			description = '';
@@ -35,7 +34,7 @@ module.exports = {
 				await util.transaction(
 					interaction.guild.id,
 					interaction.member.id,
-					this.name,
+					this.data.name,
 					'`system`',
 					amount,
 					-amount,
@@ -44,7 +43,7 @@ module.exports = {
 			}
 		} else {
 			color = 'RED';
-			description = `Invalid amount: \`${amount}\`\nFormat: \`${this.name} ${this.format}\``;
+			description = `Invalid amount: \`${amount}\``;
 		}
 
 		await interaction.reply({

@@ -1,16 +1,13 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'balance',
-	group: 'economy',
-	description: 'View a balance.',
-	format: '[user]',
-	global: true,
-	options: [
-		{
-			name: 'user',
-			description: 'Name a user you wish to see the balance of.',
-			type: 'USER',
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('balance')
+		.setDescription(commands.commands.balance.description)
+		.addUserOption((option) =>
+			option.setName('user').setDescription('Specify a user.')
+		),
 	async run(interaction) {
 		const user = interaction.options.getUser('user') ?? interaction.member.user;
 

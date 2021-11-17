@@ -1,38 +1,23 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 const ms = require('ms');
 
-const infractionSchema = require('@schemas/infraction-sch');
+const infractionSchema = require('../../util/mongo/schemas/infraction-sch');
 
 module.exports = {
-	name: 'mute',
-	group: 'moderation',
-	description: 'Mutes a user.',
-	format: '<user> [length] [reason]',
-	permissions: ['MUTE_MEMBERS'],
-	clientPermissions: ['MANAGE_ROLES'],
-	roles: [
-		{
-			name: 'MUTED',
-			required: false,
-		},
-	],
-	options: [
-		{
-			name: 'user',
-			description: 'Name a user you wish to warn.',
-			type: 'USER',
-			required: true,
-		},
-		{
-			name: 'duration',
-			description: 'Specify a duration.',
-			type: 'STRING',
-		},
-		{
-			name: 'reason',
-			description: 'Provide a reason.',
-			type: 'STRING',
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('mute')
+		.setDescription(commands.commands.mute.description)
+		.addUserOption((option) =>
+			option.setName('user').setDescription('Specify a user.').setRequired(true)
+		)
+		.addStringOption((option) =>
+			option.setName('duration').setDescription('Specify a duration.')
+		)
+		.addStringOption((option) =>
+			option.setName('reason').setDescription('Specify a reason.')
+		),
 	async run(interaction) {
 		const targetMember = interaction.options.getUser('user');
 		let reason,
@@ -96,7 +81,7 @@ module.exports = {
 			const activeMutes = await infractionSchema.find({
 				guildID: interaction.guild.id,
 				userID: targetMember.id,
-				type: this.name,
+				type: this.data.name,
 				active: true,
 			});
 
@@ -130,7 +115,7 @@ module.exports = {
 					guild.id,
 					targetMember.id,
 					interaction.member.id,
-					this.name,
+					this.data.name,
 					reason,
 					permanent,
 					true,

@@ -1,184 +1,170 @@
+const {
+	SlashCommandBuilder,
+	SlashCommandIntegerOption,
+	SlashCommandStringOption,
+	SlashCommandBooleanOption,
+	SlashCommandRoleOption,
+} = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 const ms = require('ms');
 const path = require('path');
-const shopItemSchema = require('@schemas/shop-item-sch');
-const inventorySchema = require('@schemas/inventory-sch');
+const shopItemSchema = require('../../util/mongo/schemas/shop-item-sch');
+const inventorySchema = require('../../util/mongo/schemas/inventory-sch');
 const util = require(path.join(__dirname, '../../util/util'));
 
 const globalCreateOptions = {
-	required: [
-		{
-			name: 'name',
-			description:
-				'The name of the item. This is also how it will be referenced for future actions.',
-			type: 'STRING',
-			required: true,
-		},
-		{
-			name: 'price',
-			description:
-				'The cost of the item and the minimum balance needed to purchase.',
-			type: 'INTEGER',
-			required: true,
-		},
-		{
-			name: 'stackable',
-			description: 'Whether or not this item can stack.',
-			type: 'BOOLEAN',
-			required: true,
-		},
-	],
-	optional: [
-		{
-			name: 'description',
-			description: 'The description/info of the item.',
-			type: 'STRING',
-			required: false,
-		},
-		{
-			name: 'duration',
-			description: 'Time until the item is deactivated in the shop.',
-			type: 'STRING',
-			required: false,
-		},
-		{
-			name: 'stock',
-			description:
-				'Quantity of this item that can be purchased until the item is deactivated in the shop.',
-			type: 'INTEGER',
-			required: false,
-		},
-		{
-			name: 'required_role',
-			description: 'Role that a user must have to purchase.',
-			type: 'ROLE',
-			required: false,
-		},
-		{
-			name: 'required_items',
-			description:
-				'Inventory items or generators that a user must have to purchase.',
-			type: 'STRING',
-			required: false,
-		},
-		{
-			name: 'required_bank',
-			description:
-				'The minimum bank balance that a user must have to purchase. Cannot be lower than the item price.',
-			type: 'INTEGER',
-			required: false,
-		},
-		{
-			name: 'role_given',
-			description: 'A list of role mentions given on item purchase.',
-			type: 'ROLE',
-			required: false,
-		},
-		{
-			name: 'role_removed',
-			description: 'A list of role mentions removed on item purchase.',
-			type: 'ROLE',
-			required: false,
-		},
-	],
+	required: {
+		name: new SlashCommandStringOption()
+			.setName('name')
+			.setDescription('Specify the name.')
+			.setRequired(true),
+		price: new SlashCommandIntegerOption()
+			.setName('price')
+			.setDescription('Specify the price.')
+			.setRequired(true),
+		stacks: new SlashCommandBooleanOption()
+			.setName('stacks')
+			.setDescription('Whether or not this item can stack.')
+			.setRequired(true),
+	},
+	optional: {
+		description: new SlashCommandStringOption()
+			.setName('description')
+			.setDescription('Specify the description.'),
+		duration: new SlashCommandStringOption()
+			.setName('duration')
+			.setDescription('Time until the item is deactivated in the shop.'),
+		stock: new SlashCommandIntegerOption()
+			.setName('stock')
+			.setDescription(
+				'Quantity of this item that can be purchased until the item is deactivated in the shop.'
+			),
+		required_role: new SlashCommandRoleOption()
+			.setName('required_role')
+			.setDescription('Role that a user must have to purchase.'),
+		required_items: new SlashCommandStringOption()
+			.setName('required_items')
+			.setDescription('Required items.'),
+		required_bank: new SlashCommandIntegerOption()
+			.setName('required_bank')
+			.setDescription(
+				'The minimum bank balance that a user must have to purchase. Cannot be lower than the item price.'
+			),
+		role_given: new SlashCommandRoleOption()
+			.setName('role_given')
+			.setDescription('A list of role mentions given on item purchase.'),
+		role_removed: new SlashCommandRoleOption()
+			.setName('role_removed')
+			.setDescription('A list of role mentions removed on item purchase.'),
+	},
 };
 
 module.exports = {
-	name: 'item',
-	description: "Perform actions with the shop's items.",
-	group: 'shop',
-	global: true,
-	options: [
-		{
-			name: 'buy',
-			description: 'Buy an item from the shop.',
-			type: 'SUB_COMMAND',
-			options: [
-				{
-					name: 'name',
-					description: 'The name of the item to be purchased.',
-					type: 'STRING',
-					required: true,
-				},
-			],
-		},
-		{
-			name: 'deactivate',
-			description: 'Deactivate an item from the shop.',
-			type: 'SUB_COMMAND',
-			options: [
-				{
-					name: 'name',
-					description: 'The name of the item to be reactivated.',
-					type: 'STRING',
-					required: true,
-				},
-			],
-		},
-		{
-			name: 'reactivate',
-			description: 'Reactivate an item from the shop.',
-			type: 'SUB_COMMAND',
-			options: [
-				{
-					name: 'name',
-					description: 'The name of the item to be removed.',
-					type: 'STRING',
-					required: true,
-				},
-			],
-		},
-		{
-			name: 'view',
-			description: 'View an item in more detail.',
-			type: 'SUB_COMMAND',
-			options: [
-				{
-					name: 'name',
-					description: 'The name of the item to view',
-					type: 'STRING',
-					required: true,
-				},
-			],
-		},
-		{
-			name: 'create',
-			description: 'Create a new shop item.',
-			type: 'SUB_COMMAND_GROUP',
-			options: [
-				{
-					name: 'generator',
-					description:
-						'Create a new shop item that automatically generates money periodically.',
-					type: 'SUB_COMMAND',
-					options: [
-						...globalCreateOptions.required,
-						{
-							name: 'generator_period',
-							description: 'The period of time between money generating',
-							type: 'STRING',
-							required: true,
-						},
-						{
-							name: 'generator_amount',
-							description: 'The amount of money generated after each period.',
-							type: 'INTEGER',
-							required: true,
-						},
-						...globalCreateOptions.optional,
-					],
-				},
-				{
-					name: 'basic',
-					description: 'Create a basic shop item without a template.',
-					type: 'SUB_COMMAND',
-					options: [
-						...globalCreateOptions.required,
-						...globalCreateOptions.optional,
-					],
-				},
-			],
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('item')
+		.setDescription(commands.commands.item.description)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('buy')
+				.setDescription('Buy an item.')
+				.addStringOption((option) =>
+					option
+						.setName('name')
+						.setDescription('Specify an item.')
+						.setRequired(true)
+				)
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('deactivate')
+				.setDescription('Deactivate an item.')
+				.addStringOption((option) =>
+					option
+						.setName('name')
+						.setDescription('Specify an item.')
+						.setRequired(true)
+				)
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('reactivate')
+				.setDescription('Reactivate an item.')
+				.addStringOption((option) =>
+					option
+						.setName('name')
+						.setDescription('Specify an item.')
+						.setRequired(true)
+				)
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('view')
+				.setDescription('View an item.')
+				.addStringOption((option) =>
+					option
+						.setName('name')
+						.setDescription('Specify an item.')
+						.setRequired(true)
+				)
+		)
+		.addSubcommandGroup((subcommandgroup) =>
+			subcommandgroup
+				.setName('create')
+				.setDescription('Create an item.')
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('generator')
+						.setDescription('An item that generates money periodically.')
+
+						//Required
+						.addStringOption(globalCreateOptions.required.name)
+						.addIntegerOption(globalCreateOptions.required.price)
+						.addBooleanOption(globalCreateOptions.required.stacks)
+						.addStringOption((option) =>
+							option
+								.setName('generator_period')
+								.setDescription('The period of time between money generation.')
+								.setRequired(true)
+						)
+						.addIntegerOption((option) =>
+							option
+								.setName('generator_amount')
+								.setDescription('The amount of money generated per period.')
+								.setRequired(true)
+						)
+
+						//Optional
+						.addStringOption(globalCreateOptions.optional.description)
+						.addStringOption(globalCreateOptions.optional.duration)
+						.addIntegerOption(globalCreateOptions.optional.stock)
+						.addRoleOption(globalCreateOptions.optional.required_role)
+						.addStringOption(globalCreateOptions.optional.required_items)
+						.addIntegerOption(globalCreateOptions.optional.required_bank)
+						.addRoleOption(globalCreateOptions.optional.role_given)
+						.addRoleOption(globalCreateOptions.optional.role_removed)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('basic')
+						.setDescription('A basic shop item.')
+
+						//Required
+						.addStringOption(globalCreateOptions.required.name)
+						.addIntegerOption(globalCreateOptions.required.price)
+						.addBooleanOption(globalCreateOptions.required.stacks)
+
+						//Optional
+						.addStringOption(globalCreateOptions.optional.description)
+						.addStringOption(globalCreateOptions.optional.duration)
+						.addIntegerOption(globalCreateOptions.optional.stock)
+						.addRoleOption(globalCreateOptions.optional.required_role)
+						.addStringOption(globalCreateOptions.optional.required_items)
+						.addIntegerOption(globalCreateOptions.optional.required_bank)
+						.addRoleOption(globalCreateOptions.optional.role_given)
+						.addRoleOption(globalCreateOptions.optional.role_removed)
+				)
+		),
 	async run(interaction) {
 		const clientMember = interaction.guild.members.cache.get(
 			interaction.client.user.id

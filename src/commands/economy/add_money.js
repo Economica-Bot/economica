@@ -1,44 +1,29 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'add_money',
-	description: 'Add money.',
-	group: 'economy',
-	global: true,
-	roles: [
-		{
-			name: 'ECONOMY MANAGER',
-			required: true,
-		},
-	],
-	options: [
-		{
-			name: 'user',
-			description: 'Specify a user.',
-			type: 'USER',
-			required: true,
-		},
-		{
-			name: 'amount',
-			description: 'Specify the amount',
-			type: 'INTEGER',
-			required: true,
-		},
-		{
-			name: 'target',
-			description: 'Specify where the money is added.',
-			type: 'STRING',
-			choices: [
-				{
-					name: 'wallet',
-					value: 'wallet',
-				},
-				{
-					name: 'treasury',
-					value: 'treasury',
-				},
-			],
-			required: true,
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('add_money')
+		.setDescription(commands.commands.add_money.description)
+		.addUserOption((option) =>
+			option.setName('user').setDescription('Specify a user.').setRequired(true)
+		)
+		.addIntegerOption((option) =>
+			option
+				.setName('amount')
+				.setDescription('Specify the amount.')
+				.setRequired(true)
+		)
+		.addStringOption((option) =>
+			option
+				.setName('target')
+				.setDescription('Specify the target of the funds.')
+				.addChoices([
+					['wallet', 'wallet'],
+					['treasury', 'treasury'],
+				])
+				.setRequired(true)
+		),
 	async run(interaction) {
 		const targetMember = interaction.options.getMember('user');
 
@@ -59,7 +44,7 @@ module.exports = {
 			interaction.guild.id,
 			targetMember.user.id,
 			'ADD_MONEY',
-			`${this.name} | <@!${interaction.member.user.id}>`,
+			`${this.data.name} | <@!${interaction.member.user.id}>`,
 			wallet,
 			treasury,
 			total

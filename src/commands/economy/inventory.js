@@ -1,23 +1,17 @@
-const inventorySchema = require('@schemas/inventory-sch');
+const inventorySchema = require('../../util/mongo/schemas/inventory-sch');
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
 
 module.exports = {
-	name: 'inventory',
-	group: 'economy',
-	description: 'View an inventory.',
-	format: '[user]',
-	global: true,
-	options: [
-		{
-			name: 'user',
-			description: 'Name a user you wish to see the inventory of.',
-			type: 'USER',
-		},
-		{
-			name: 'page',
-			description: 'Specify the page.',
-			type: 'INTEGER',
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('inventory')
+		.setDescription(commands.commands.inventory.description)
+		.addUserOption((option) =>
+			option.setName('user').setDescription('Specify a user.')
+		)
+		.addIntegerOption((option) =>
+			option.setName('page').setDescription('Specify the page.')
+		),
 	async run(interaction) {
 		await interaction.deferReply();
 		const user = interaction.options.getUser('user') ?? interaction.member.user;

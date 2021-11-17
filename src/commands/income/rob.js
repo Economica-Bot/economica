@@ -1,22 +1,21 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'rob',
-	group: 'income',
-	description: "Rob users. Steal up to the entire target's wallet",
-	global: true,
-	format: '<user>',
-	options: [
-		{
-			name: 'user',
-			description: 'Name a user you wish to see the balance of.',
-			type: 'USER',
-			required: true,
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('rob')
+		.setDescription(commands.commands.rob.description)
+		.addUserOption((option) =>
+			option.setName('user').setDescription('Specify a user.').setRequired(true)
+		),
 	async run(interaction) {
 		const user = interaction.options.getUser('user');
 		const guildID = interaction.guild.id;
 		const userID = interaction.member.id;
-		const properties = await util.getIncomeCommandStats(guildID, this.name);
+		const properties = await util.getIncomeCommandStats(
+			guildID,
+			this.data.name
+		);
 		let color, description, amount;
 		const { minfine, maxfine } = properties;
 		const { wallet } = await util.getEconInfo(guildID, user.id);
@@ -34,7 +33,7 @@ module.exports = {
 				await util.transaction(
 					guildID,
 					user.id,
-					this.name,
+					this.data.name,
 					`Robbed by <@!${interaction.member.id}>`,
 					-amount,
 					0,
@@ -50,7 +49,7 @@ module.exports = {
 			await util.transaction(
 				guildID,
 				userID,
-				this.name,
+				this.data.name,
 				`Attempted to rob <@!${user.id}>`,
 				amount,
 				0,

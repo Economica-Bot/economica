@@ -1,14 +1,14 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'crime',
-	group: 'income',
-	description:
-		'Commit a crime to increase your wallet balance with risk of fine.',
-	global: true,
-	options: null,
+	data: new SlashCommandBuilder()
+		.setName('crime')
+		.setDescription(commands.commands.crime.description),
 	async run(interaction) {
 		const guildID = interaction.guild.id,
 			userID = interaction.member.id;
-		const properties = await util.getIncomeCommandStats(guildID, this.name);
+		const properties = await util.getIncomeCommandStats(guildID, this.data.name);
 
 		let color, description, amount;
 		const { min, max, minfine, maxfine } = properties;
@@ -27,7 +27,7 @@ module.exports = {
 		await util.transaction(
 			guildID,
 			userID,
-			this.name,
+			this.data.name,
 			'`system`',
 			amount,
 			0,

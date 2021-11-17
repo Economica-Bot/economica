@@ -1,21 +1,18 @@
-const infractionSchema = require('@schemas/infraction-sch');
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
+const infractionSchema = require('../../util/mongo/schemas/infraction-sch');
 
 module.exports = {
-	name: 'unban',
-	group: 'moderation',
-	description: 'Unban a user.',
-	format: '<userID>',
-	global: true,
-	permissions: ['BAN_MEMBERS'],
-	clientPermissions: ['BAN_MEMBERS'],
-	options: [
-		{
-			name: 'user_id',
-			description: 'Specify the ID of a user to unban.',
-			type: 'STRING',
-			required: true,
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('unban')
+		.setDescription(commands.commands.unban.description)
+		.addStringOption((option) =>
+			option
+				.setName('user_id')
+				.setDescription('Specify a user ID.')
+				.setRequired(true)
+		),
 	async run(interaction) {
 		const userID = interaction.options.getString('user_id');
 		const guildBan = (await guild.bans.fetch()).get(userID);

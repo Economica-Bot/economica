@@ -1,40 +1,26 @@
-const econonomySchema = require('@schemas/economy-sch');
+const econonomySchema = require('../../util/mongo/schemas/economy-sch');
 const path = require('path');
 const util = require(path.join(__dirname, '../../util/util'));
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
 
 module.exports = {
-	name: 'leaderboard',
-	group: 'economy',
-	description: 'View top users in the economy.',
-	global: true,
-	format: '[wallet | treasury | total]',
-	options: [
-		{
-			name: 'type',
-			description: 'Specify the value to order by.',
-			type: 'STRING',
-			choices: [
-				{
-					name: 'Wallet',
-					value: 'wallet',
-				},
-				{
-					name: 'Treasury',
-					value: 'treasury',
-				},
-				{
-					name: 'Total',
-					value: 'total',
-				},
-			],
-			required: false,
-		},
-		{
-			name: 'page',
-			description: 'Specify the page.',
-			type: 'INTEGER',
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('leaderboard')
+		.setDescription(commands.commands.leaderboard.description)
+		.addStringOption((option) =>
+			option
+				.setName('type')
+				.setDescription('Pick a choice.')
+				.addChoices([
+					['Wallet', 'wallet'],
+					['Treasury', 'treasury'],
+					['Total', 'total'],
+				])
+		)
+		.addIntegerOption((option) =>
+			option.setName('page').setDescription('Specify the page.')
+		),
 	async run(interaction) {
 		await interaction.deferReply();
 

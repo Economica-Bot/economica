@@ -1,153 +1,112 @@
-const economySchema = require('@schemas/economy-sch');
-const marketItemSchema = require('@schemas/market-item-sch');
-const shopItemSchema = require('@schemas/shop-item-sch');
-const inventorySchema = require('@schemas/inventory-sch');
-const transactionSchema = require('@schemas/transaction-sch');
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
+const economySchema = require('../../util/mongo/schemas/economy-sch');
+const marketItemSchema = require('../../util/mongo/schemas/market-item-sch');
+const shopItemSchema = require('../../util/mongo/schemas/shop-item-sch');
+const inventorySchema = require('../../util/mongo/schemas/inventory-sch');
+const transactionSchema = require('../../util/mongo/schemas/transaction-sch');
+const infractionSchema = require('../../util/mongo/schemas/infraction-sch');
 
 module.exports = {
-	name: 'purge',
-	group: 'economy',
-	description: 'Delete economy-related content on the server',
-	format: '<inventory | market | balance> [user]',
-	global: true,
-	roles: [
-		{
-			name: 'ECONOMY MANAGER',
-			required: true,
-		},
-	],
-	options: [
-		{
-			name: 'inventory',
-			description: 'Delete inventory data.',
-			type: 'SUB_COMMAND_GROUP',
-			options: [
-				{
-					name: 'all',
-					description: 'All inventories.',
-					type: 'SUB_COMMAND',
-					options: null,
-				},
-				{
-					name: 'user',
-					description: 'Specify a user.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'user',
-							description: 'Specify a user.',
-							type: 'USER',
-							required: true,
-						},
-					],
-				},
-			],
-		},
-		{
-			name: 'market',
-			description: 'Delete market data.',
-			type: 'SUB_COMMAND_GROUP',
-			options: [
-				{
-					name: 'all',
-					description: 'All listings.',
-					type: 'SUB_COMMAND',
-					options: null,
-				},
-				{
-					name: 'user',
-					description: 'Specify a user.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'user',
-							description: 'Specify a user.',
-							type: 'USER',
-							required: true,
-						},
-					],
-				},
-			],
-		},
-		{
-			name: 'shop',
-			description: 'Delete shop data.',
-			type: 'SUB_COMMAND_GROUP',
-			options: [
-				{
-					name: 'all',
-					description: 'All listings.',
-					type: 'SUB_COMMAND',
-					options: null,
-				},
-				{
-					name: 'item',
-					description: 'Specify an item.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'item',
-							description: 'Specify an item.',
-							type: 'STRING',
-							required: true,
-						},
-					],
-				},
-			],
-		},
-		{
-			name: 'balance',
-			description: 'Delete balance data.',
-			type: 'SUB_COMMAND_GROUP',
-			options: [
-				{
-					name: 'all',
-					description: 'All balances.',
-					type: 'SUB_COMMAND',
-					options: null,
-				},
-				{
-					name: 'user',
-					description: 'Specify a user.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'user',
-							description: 'Specify a user.',
-							type: 'USER',
-							required: true,
-						},
-					],
-				},
-			],
-		},
-		{
-			name: 'transaction',
-			description: 'Delete transaction data.',
-			type: 'SUB_COMMAND_GROUP',
-			options: [
-				{
-					name: 'all',
-					description: 'All transactions.',
-					type: 'SUB_COMMAND',
-					options: null,
-				},
-				{
-					name: 'user',
-					description: 'Specify a user.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'user',
-							description: 'Specify a user.',
-							type: 'USER',
-							required: true,
-						},
-					],
-				},
-			],
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('purge')
+		.setDescription(commands.commands.purge.description)
+		.addSubcommandGroup((subcommandgroup) =>
+			subcommandgroup
+				.setName('balance')
+				.setDescription('Delete balance data.')
+				.addSubcommand((subcommand) =>
+					subcommand.setName('all').setDescription('Delete all balances.')
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('user')
+						.setDescription('Delete user balance.')
+						.addUserOption((option) =>
+							option
+								.setName('user')
+								.setDescription('Specify a user.')
+								.setRequired(true)
+						)
+				)
+		)
+		.addSubcommandGroup((subcommandgroup) =>
+			subcommandgroup
+				.setName('inventory')
+				.setDescription('Delete inventory data.')
+				.addSubcommand((subcommand) =>
+					subcommand.setName('all').setDescription('Delete all inventories.')
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('user')
+						.setDescription('Delete user inventory.')
+						.addUserOption((option) =>
+							option
+								.setName('user')
+								.setDescription('Specify a user.')
+								.setRequired(true)
+						)
+				)
+		)
+		.addSubcommandGroup((subcommandgroup) =>
+			subcommandgroup
+				.setName('transaction')
+				.setDescription('Delete transaction data.')
+				.addSubcommand((subcommand) =>
+					subcommand.setName('all').setDescription('Delete all transactions.')
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('user')
+						.setDescription('Delete user transactions.')
+						.addUserOption((option) =>
+							option
+								.setName('user')
+								.setDescription('Specify a user.')
+								.setRequired(true)
+						)
+				)
+		)
+		.addSubcommandGroup((subcommandgroup) =>
+			subcommandgroup
+				.setName('infraction')
+				.setDescription('Delete infraction data.')
+				.addSubcommand((subcommand) =>
+					subcommand.setName('all').setDescription('Delete all infractions.')
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('user')
+						.setDescription('Delete user infractions.')
+						.addUserOption((option) =>
+							option
+								.setName('user')
+								.setDescription('Specify a user.')
+								.setRequired(true)
+						)
+				)
+		)
+		.addSubcommandGroup((subcommandgroup) =>
+			subcommandgroup
+				.setName('shop')
+				.setDescription('Delete shop data.')
+				.addSubcommand((subcommand) =>
+					subcommand.setName('all').setDescription('Delete all listings.')
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('item')
+						.setDescription('Delete shop item.')
+						.addStringOption((option) =>
+							option
+								.setName('item')
+								.setDescription('Specify an item.')
+								.setRequired(true)
+						)
+				)
+		),
 	async run(interaction) {
 		const guildID = interaction.guild.id;
 		const userID = interaction.options.getUser('user')?.id;
@@ -215,7 +174,7 @@ module.exports = {
 					})
 					.then(async (result) => {
 						description = `Deleted \`${item}\` from the shop.`;
-						await inventorySchema.deleteMany(
+						await inventorySchema.updateMany(
 							{
 								guildID,
 							},
@@ -262,6 +221,21 @@ module.exports = {
 					.deleteMany({ guildID, userID })
 					.then((result) => {
 						description = `Deleted transaction data for <@!${userID}>. \`${result.n}\` removed.`;
+					});
+			}
+		} else if (interaction.options.getSubCommandGroup() === 'infraction') {
+			if (interaction.options.getSubcommand() === 'all') {
+				await infractionSchema
+					.deleteMany({ guilddID })
+					.then(
+						(result) =>
+							(description = `Deleted all infraction data. \`${result.n}\` removed.`)
+					);
+			} else if (interaction.options.getSubcommand() === 'user') {
+				await infractionSchema
+					.deleteMany({ guildID, userID })
+					.then((result) => {
+						description = `Deleted infraction data for <@!${userID}>. \`${result.n}\` removed.`;
 					});
 			}
 		}

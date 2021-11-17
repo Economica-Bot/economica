@@ -1,12 +1,12 @@
-const inventorySchema = require('@schemas/inventory-sch');
-const shopItemSchema = require('@schemas/shop-item-sch');
+const inventorySchema = require('../../util/mongo/schemas/inventory-sch');
+const shopItemSchema = require('../../util/mongo/schemas/shop-item-sch');
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
 
 module.exports = {
-	name: 'collect',
-	description: 'Collect generator money.',
-	group: 'economy',
-	global: true,
-	options: null,
+	data: new SlashCommandBuilder()
+		.setName('collect')
+		.setDescription(commands.commands.collect.description),
 	async run(interaction) {
 		const user = await inventorySchema.findOne({
 			guildID: interaction.guild.id,

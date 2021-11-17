@@ -1,15 +1,16 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'invite',
-	group: 'utility',
-	description: 'Gets the invite link for Economica.',
-	disabled: true,
-	options: null,
+	data: new SlashCommandBuilder()
+		.setName('invite')
+		.setDescription(commands.commands.invite.description),
 	async run(interaction) {
 		await interaction.reply({
 			embeds: [
 				util.embedify(
 					'GOLD',
-					client.user.username,
+					client.user.tag,
 					client.user.displayAvatarURL(),
 					`Invite link: __[Click Here](${process.env.INVITE_LINK} 'Invite Economica')__`
 				),

@@ -1,280 +1,237 @@
-const bet = {
-	name: 'bet',
-	description: 'Place a bet.',
-	type: 'INTEGER',
-	required: true,
-};
+const {
+	SlashCommandBuilder,
+	SlashCommandIntegerOption,
+} = require('@discordjs/builders');
+const commands = require('../../config/commands');
 
-const number_one = {
-	name: 'number_one',
-	description: 'Specify the first number.',
-	type: 'INTEGER',
-	required: true,
-};
-
-const number_two = {
-	name: 'number_two',
-	description: 'Specify the second number.',
-	type: 'INTEGER',
-	required: true,
-};
-
-const number_three = {
-	name: 'number_three',
-	description: 'Specify the third number.',
-	type: 'INTEGER',
-	required: true,
-};
-
-const number_four = {
-	name: 'number_four',
-	description: 'Specify the fourth number.',
-	type: 'INTEGER',
-	required: true,
-};
-
-const number_five = {
-	name: 'number_five',
-	description: 'Specify the fifth number.',
-	type: 'INTEGER',
-	required: true,
-};
-
-const number_six = {
-	name: 'number_six',
-	description: 'Specify the sixth number.',
-	type: 'INTEGER',
-	required: true,
-};
+const bet = new SlashCommandIntegerOption()
+	.setName('bet')
+	.setDescription('Provide a bet.')
+	.setRequired(true);
+const number_one = new SlashCommandIntegerOption()
+	.setName('number_one')
+	.setDescription('Specify the first number.')
+	.setRequired(true);
+const number_two = new SlashCommandIntegerOption()
+	.setName('number_two')
+	.setDescription('Specify the second number.')
+	.setRequired(true);
+const number_three = new SlashCommandIntegerOption()
+	.setName('number_three')
+	.setDescription('Specify the third number.')
+	.setRequired(true);
+const number_four = new SlashCommandIntegerOption()
+	.setName('number_four')
+	.setDescription('Specify the fourth number.')
+	.setRequired(true);
+const number_five = new SlashCommandIntegerOption()
+	.setName('number_five')
+	.setDescription('Specify the fifth number.')
+	.setRequired(true);
+const number_six = new SlashCommandIntegerOption()
+	.setName('number_six')
+	.setDescription('Specify the sixth number.')
+	.setRequired(true);
 
 module.exports = {
-	name: 'roulette',
-	description: 'Play roulette.',
-	group: 'casino',
-	global: true,
-	options: [
-		{
-			name: 'inside',
-			description: 'Inside Bets',
-			type: 'SUB_COMMAND_GROUP',
-			options: [
-				{
-					name: 'single',
-					description: 'Bet on a single number.',
-					type: 'SUB_COMMAND',
-					options: [number_one, bet],
-				},
-				{
-					name: 'split',
-					description:
-						'Bet on two distinct vertically/horizontally adjacent numbers.',
-					type: 'SUB_COMMAND',
-					options: [number_one, number_two, bet],
-				},
-				{
-					name: 'street',
-					description:
-						'Bet on three distinct consecutive numbers in a horizontal line.',
-					type: 'SUB_COMMAND',
-					options: [number_one, number_two, number_three, bet],
-				},
-				{
-					name: 'corner',
-					description: 'Bet on four numbers that meet at one corner.',
-					type: 'SUB_COMMAND',
-					options: [number_one, number_two, number_three, number_four, bet],
-				},
-				{
-					name: 'double_street',
-					description:
-						'Bet on six consecutive numbers that form two horizontal lines.',
-					type: 'SUB_COMMAND',
-					options: [
-						number_one,
-						number_two,
-						number_three,
-						number_four,
-						number_five,
-						number_six,
-						bet,
-					],
-				},
-				{
-					name: 'trio',
-					description: 'A three-number bet that involves at least one zero.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'choice',
-							description: 'Choose triangle.',
-							type: 'STRING',
-							required: true,
-							choices: [
-								{
-									name: '0-1-2',
-									value: '0-1-2',
-								},
-								{
-									name: '0-2-3',
-									value: '0-2-3',
-								},
-							],
-						},
-						bet,
-					],
-				},
-				{
-					name: 'first_four',
-					description: 'Bet on 0-1-2-3.',
-					type: 'SUB_COMMAND',
-					options: [bet],
-				},
-			],
-		},
-		{
-			name: 'outside',
-			description: 'Outside Bets',
-			type: 'SUB_COMMAND_GROUP',
-			options: [
-				{
-					name: 'half',
-					description: 'A bet that the number will be in the chosen range.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'choice',
-							description: 'Choose High or Low',
-							type: 'STRING',
-							required: true,
-							choices: [
-								{
-									name: 'low',
-									value: 'low',
-								},
-								{
-									name: 'high',
-									value: 'high',
-								},
-							],
-						},
-						bet,
-					],
-				},
-				{
-					name: 'color',
-					description: 'A bet that the number will be the chosen color.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'choice',
-							description: 'Choose Red or Black',
-							type: 'STRING',
-							required: true,
-							choices: [
-								{
-									name: 'red',
-									value: 'red',
-								},
-								{
-									name: 'black',
-									value: 'black',
-								},
-							],
-						},
-						bet,
-					],
-				},
-				{
-					name: 'even_or_odd',
-					description: 'A bet that the number will be of the chosen type.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'choice',
-							description: 'Choose Even or Odd',
-							type: 'STRING',
-							required: true,
-							choices: [
-								{
-									name: 'Even',
-									value: 'even',
-								},
-								{
-									name: 'Odd',
-									value: 'odd',
-								},
-							],
-						},
-						bet,
-					],
-				},
-				{
-					name: 'dozen',
-					description: 'A bet that the number will be in the chosen dozen.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'choice',
-							description: 'Choose a dozen',
-							type: 'STRING',
-							required: true,
-							choices: [
-								{
-									name: 'First Dozen',
-									value: 'first',
-								},
-								{
-									name: 'Second Dozen',
-									value: 'second',
-								},
-								{
-									name: 'Third Dozen',
-									value: 'third',
-								},
-							],
-						},
-						bet,
-					],
-				},
-				{
-					name: 'column',
-					description:
-						'A bet that the number will be in the chosen vertical column.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'choice',
-							description: 'Choose a column',
-							type: 'STRING',
-							required: true,
-							choices: [
-								{
-									name: 'First Column',
-									value: 'first',
-								},
-								{
-									name: 'Second Column',
-									value: 'second',
-								},
-								{
-									name: 'Third Column',
-									value: 'third',
-								},
-							],
-						},
-						bet,
-					],
-				},
-				{
-					name: 'snake',
-					description:
-						'A special bet that covers the numbers 1, 5, 9, 12, 14, 16, 19, 23, 27, 30, 32, and 34.',
-					type: 'SUB_COMMAND',
-					options: [bet],
-				},
-			],
-		},
-	], //https://crescent.edu/post/the-basic-rules-of-roulette
+	data: new SlashCommandBuilder()
+		.setName('roulette')
+		.setDescription(commands.commands.roulette.description)
+		.addSubcommandGroup((subcommandgroup) =>
+			subcommandgroup
+				.setName('inside')
+				.setDescription('Place an inside bet.')
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('single')
+						.setDescription('Bet on a single number.')
+						.addIntegerOption(number_one)
+						.addIntegerOption(bet)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('split')
+						.setDescription(
+							'Bet on two distinct vertically/horizontally adjacent numbers.'
+						)
+						.addIntegerOption(number_one)
+						.addIntegerOption(number_two)
+						.addIntegerOption(bet)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('street')
+						.setDescription(
+							'Bet on three distinct consecutive numbers in a horizontal line.'
+						)
+						.addIntegerOption(number_one)
+						.addIntegerOption(number_two)
+						.addIntegerOption(number_three)
+						.addIntegerOption(bet)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('street')
+						.setDescription(
+							'Bet on three distinct consecutive numbers in a horizontal line.'
+						)
+						.addIntegerOption(number_one)
+						.addIntegerOption(number_two)
+						.addIntegerOption(number_three)
+						.addIntegerOption(bet)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('corner')
+						.setDescription('Bet on four numbers that meet at one corner.')
+						.addIntegerOption(number_one)
+						.addIntegerOption(number_two)
+						.addIntegerOption(number_three)
+						.addIntegerOption(number_four)
+						.addIntegerOption(bet)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('double_street')
+						.setDescription(
+							'Bet on six consecutive numbers that form two horizontal lines.'
+						)
+						.addIntegerOption(number_one)
+						.addIntegerOption(number_two)
+						.addIntegerOption(number_three)
+						.addIntegerOption(number_four)
+						.addIntegerOption(number_five)
+						.addIntegerOption(number_six)
+						.addIntegerOption(bet)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('trio')
+						.setDescription(
+							'A three-number bet that involves at least one zero.'
+						)
+						.addStringOption((option) =>
+							option
+								.setName('choice')
+								.setDescription('Pick a choice.')
+								.addChoices([
+									['0-1-2', '0-1-2'],
+									['0-2-3', '0-2-3'],
+								])
+								.setRequired(true)
+						)
+						.addIntegerOption(bet)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('first_four')
+						.setDescription('Bet on 0-1-2-3.')
+						.addIntegerOption(bet)
+				)
+		)
+		.addSubcommandGroup((subcommandgroup) =>
+			subcommandgroup
+				.setName('outside')
+				.setDescription('Place an outside bet.')
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('half')
+						.setDescription(
+							'A bet that the number will be in the chosen range.'
+						)
+						.addStringOption((option) =>
+							option
+								.setName('choice')
+								.setDescription('Choose low or high')
+								.addChoices([
+									['low', 'low'],
+									['high', 'high'],
+								])
+								.setRequired(true)
+						)
+						.addIntegerOption(bet)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('color')
+						.setDescription('A bet that the number will be the chosen color.')
+						.addStringOption((option) =>
+							option
+								.setName('choice')
+								.setDescription('Choose red or black')
+								.addChoices([
+									['red', 'red'],
+									['black', 'black'],
+								])
+								.setRequired(true)
+						)
+						.addIntegerOption(bet)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('even_or_odd')
+						.setDescription('A bet that the number will be of the chosen type.')
+						.addStringOption((option) =>
+							option
+								.setName('choice')
+								.setDescription('Choose even or odd.')
+								.addChoices([
+									['even', 'even'],
+									['odd', 'odd'],
+								])
+								.setRequired(true)
+						)
+						.addIntegerOption(bet)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('dozen')
+						.setDescription(
+							'A bet that the number will be in the chosen dozen.'
+						)
+						.addStringOption((option) =>
+							option
+								.setName('choice')
+								.setDescription('Choose a dozen.')
+								.addChoices([
+									['first dozen', 'first'],
+									['second dozen', 'second'],
+									['third dozen', 'third'],
+								])
+								.setRequired(true)
+						)
+						.addIntegerOption(bet)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('column')
+						.setDescription(
+							'A bet that the number will be in the chosen vertical column.'
+						)
+						.addStringOption((option) =>
+							option
+								.setName('choice')
+								.setDescription('Choose a column.')
+								.addChoices([
+									['first column', 'first'],
+									['second column', 'second'],
+									['third column', 'third'],
+								])
+								.setRequired(true)
+						)
+						.addIntegerOption(bet)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('snake')
+						.setDescription(
+							'A special bet that covers the numbers 1, 5, 9, 12, 14, 16, 19, 23, 27, 30, 32, and 34.'
+						)
+						.addIntegerOption(bet)
+				)
+		),
+	//https://crescent.edu/post/the-basic-rules-of-roulette
+
 	async run(interaction) {
 		let color = 'GREEN',
 			title = interaction.member.user.tag,
@@ -475,7 +432,7 @@ module.exports = {
 				description += `You lost ${cSymbol}${bet.toLocaleString()}`;
 				bet *= -1;
 			}
-		} else if (options._subcommand === 'color') {
+		} else if (interaction.options._subcommand === 'color') {
 			if (
 				(interaction.options.getString('choice') === 'red' &&
 					ballPocket % 2 === 0) ||
@@ -550,7 +507,7 @@ module.exports = {
 			await util.transaction(
 				interaction.guild.id,
 				interaction.member.id,
-				this.name,
+				this.data.name,
 				description,
 				bet,
 				0,

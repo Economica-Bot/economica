@@ -1,9 +1,10 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'servers',
-	group: 'utility',
-	description: `Get information about ${client.user.tag}'s servers`,
-	global: true,
-	options: null,
+	data: new SlashCommandBuilder()
+		.setName('servers')
+		.setDescription(commands.commands.servers.description),
 	async run(interaction) {
 		let serverCount = 0,
 			memberCount = 0;

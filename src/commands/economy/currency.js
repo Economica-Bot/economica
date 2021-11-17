@@ -1,37 +1,24 @@
-const guildSettingSchema = require('@schemas/guild-settings-sch');
+const guildSettingSchema = require('../../util/mongo/schemas/guild-settings-sch');
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
 
 module.exports = {
-	name: 'currency',
-	group: 'economy',
-	description: 'View and update the currency symbol',
-	global: true,
-	roles: [
-		{
-			name: 'ECONOMY MANAGER',
-			required: true,
-		},
-	],
-	options: [
-		{
-			name: 'set',
-			description: 'Set the currency symbol.',
-			type: 'SUB_COMMAND',
-			options: [
-				{
-					name: 'symbol',
-					description: 'Specify a symbol.',
-					type: 'STRING',
-					required: true,
-				},
-			],
-		},
-		{
-			name: 'reset',
-			description: 'Reset the currency symbol.',
-			type: 'SUB_COMMAND',
-			options: null,
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('currency')
+		.setDescription(commands.commands.currency.description)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('set')
+				.setDescription('Set the currency symbol.')
+				.addIntegerOption((option) =>
+					option
+						.setName('symbol')
+						.setDescription('Specify a symbol.')
+						.setRequired(true)
+				)
+				.setName('reset')
+				.setDescription('Reset the currency symbol.')
+		),
 	async run(interaction) {
 		let color, description, footer;
 		if (interaction.options.getSubcommand() === 'set') {

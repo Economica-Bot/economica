@@ -1,4 +1,16 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
+	data: new SlashCommandBuilder()
+		.setName('coinflip')
+		.setDescription(commands.commands.coinflip.description)
+		.addStringOption((option) =>
+			option
+				.setName('amount')
+				.setDescription('Specify the amount.')
+				.setRequired(true)
+		),
 	name: 'coinflip',
 	group: 'income',
 	description: 'Double the money in your wallet by flipping a coin.',
@@ -15,7 +27,7 @@ module.exports = {
 	async run(interaction) {
 		const properties = await util.getCommandStats(
 			interaction.guild.id,
-			this.name
+			this.data.name
 		);
 		const { wallet } = await util.getEconInfo(
 			interaction.guild.id,
@@ -44,7 +56,7 @@ module.exports = {
 			util.transaction(
 				interaction.guild.id,
 				interaction.member.id,
-				this.name,
+				this.data.name,
 				'`system`',
 				amount,
 				0,

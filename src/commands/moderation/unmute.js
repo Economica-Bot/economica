@@ -1,27 +1,18 @@
-const infractionSchema = require('@schemas/infraction-sch');
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
+const infractionSchema = require('../../util/mongo/schemas/infraction-sch');
 
 module.exports = {
-	name: 'unmute',
-	group: 'moderation',
-	description: 'Unmute a user.',
-	format: '<user>',
-	global: true,
-	permissions: ['MUTE_MEMBERS'],
-	clientPermissions: ['MANAGE_ROLES'],
-	roles: [
-		{
-			name: 'MUTED',
-			required: false,
-		},
-	],
-	options: [
-		{
-			name: 'user',
-			description: 'Specify a user to unmute.',
-			type: 'USER',
-			required: true,
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('unmute')
+		.setDescription(commands.commands.unmute.description)
+		.addUserOption((option) =>
+			option
+				.setName('option')
+				.setDescription('Specify a user.')
+				.setRequired(true)
+		),
 	async run(interaction) {
 		const targetMember = interaction.options.getMember('user');
 

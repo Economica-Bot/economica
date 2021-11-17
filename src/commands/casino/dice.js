@@ -1,22 +1,19 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'dice',
-	description: 'Roll a dice to and win some cash.',
-	group: 'casino',
-	global: true,
-	options: [
-		{
-			name: 'bet',
-			description: 'Specify a bet.',
-			type: 'INTEGER',
-			required: true,
-		},
-		{
-			name: 'number',
-			description: 'Choose a number.',
-			type: 'INTEGER',
-			required: true,
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('dice')
+		.setDescription(commands.commands.dice.description)
+		.addIntegerOption((option) =>
+			option.setName('bet').setDescription('Specify a bet').setRequired(true)
+		)
+		.addIntegerOption((option) =>
+			option
+				.setName('number')
+				.setDescription('Choose a number')
+				.setRequired(true)
+		),
 	async run(interaction) {
 		let color = 'GREEN',
 			title = interaction.member.user.tag,
@@ -50,7 +47,7 @@ module.exports = {
 			await util.transaction(
 				interaction.guild.id,
 				interaction.member.id,
-				this.name,
+				this.data.name,
 				description,
 				bet,
 				0,

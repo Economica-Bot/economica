@@ -1,16 +1,13 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'shop',
-	description: "View the server's shop items.",
-	group: 'shop',
-	global: true,
-	options: [
-		{
-			name: 'page',
-			description: 'Specify the page.',
-			type: 'INTEGER',
-			required: false,
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('shop')
+		.setDescription(commands.commands.shop.description)
+		.addIntegerOption((option) =>
+			option.setName('page').setDescription('Specify the page.')
+		),
 	async run(interaction) {
 		await interaction.deferReply();
 		const items = await util.getShopItems(interaction.guild.id);
@@ -23,8 +20,7 @@ module.exports = {
 				.setColor('BLUE')
 				.setDescription(
 					`There are currently \`0\` items in the shop.\nAsk your Economy Manager to add some!`
-				)
-				.setFooter(`Page 1 of 1`);
+				);
 
 			interaction.editReply({
 				embeds: [embed],

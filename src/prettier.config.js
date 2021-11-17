@@ -1,4 +1,4 @@
-// prettier.config.js or .prettierrc.js
+// prettierjs or .prettierrc.js
 module.exports = {
 	trailingComma: 'es5',
 	semi: true,

@@ -1,13 +1,14 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'beg',
-	group: 'income',
-	description: 'Get some quick cash.',
-	global: true,
-	options: null,
+	data: new SlashCommandBuilder()
+		.setName('beg')
+		.setDescription(commands.commands.beg.description),
 	async run(interaction) {
 		const guildID = interaction.guild.id,
 			userID = interaction.member.id;
-		const properties = await util.getCommandStats(guildID, this.name);
+		const properties = await util.getCommandStats(guildID, this.data.name);
 
 		let color, description;
 		if (!util.isSuccess(properties)) {
@@ -19,7 +20,7 @@ module.exports = {
 			await util.transaction(
 				guildID,
 				userID,
-				this.name,
+				this.data.name,
 				'`system`',
 				amount,
 				0,

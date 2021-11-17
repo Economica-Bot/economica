@@ -1,19 +1,17 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
 const path = require('path');
 
 module.exports = {
-	name: 'load',
-	description: 'Load a slash command.',
-	group: 'application',
-	global: true,
-	ownerOnly: true,
-	options: [
-		{
-			name: 'command',
-			description: 'Specify a command.',
-			type: 3,
-			required: true,
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('load')
+		.setDescription(commands.commands.load.description)
+		.addStringOption((option) =>
+			option
+				.setName('command')
+				.setDescription('Specify a command.')
+				.setRequired(true)
+		),
 	async run(interaction) {
 		const commandName = interaction.options.getString('command');
 		const command = client.commands.get(commandName);
@@ -22,7 +20,7 @@ module.exports = {
 				__dirname,
 				`../../commands/${command.group}/${command.name}.js`
 			));
-			await client.guilds.cache.get(process.env.GUILD_ID).commands.create(cmd);
+			await client.guilds.fetch(process.env.GUILD_ID).commands.create(cmd);
 			client.commands.set(cmd.name, cmd);
 			const embed = util.embedify(
 				'GREEN',

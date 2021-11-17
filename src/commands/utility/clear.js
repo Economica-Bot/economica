@@ -1,26 +1,20 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'clear',
-	group: 'utility',
-	format: '[msgcount]',
-	description:
-		'Deletes a number of messages in a channel. If not specified, deletes all messages <= 2 weeks old.',
-	global: true,
-	permissions: ['MANAGE_MESSAGES'],
-	clientPermissions: ['MANAGE_MESSAGES'],
-	options: [
-		{
-			name: 'channel',
-			description: 'Select a channel.',
-			type: 'CHANNEL',
-			required: false,
-		},
-		{
-			name: 'msgcount',
-			description: 'The count of messages to delete, between 0 and 100.',
-			type: 'NUMBER',
-			required: false,
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('clear')
+		.setDescription(commands.commands.clear.description)
+		.addChannelOption((option) =>
+			option.setName('channel').setDescription('Specify a channel.')
+		)
+		.addIntegerOption((option) =>
+			option
+				.setName('msgcount')
+				.setDescription(
+					'Specify the amount of messages to delete between 0 and 100.'
+				)
+		),
 	async run(interaction) {
 		const channel =
 			interaction.options.getChannel('channel') ?? interaction.channel;

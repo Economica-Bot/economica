@@ -1,23 +1,16 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'kick',
-	group: 'moderation',
-	description: 'Kicks a user',
-	global: true,
-	permissions: ['KICK_MEMBERS'],
-	clientPermissions: ['KICK_MEMBERS'],
-	options: [
-		{
-			name: 'user',
-			description: 'Name a user you wish to kick.',
-			type: 'USER',
-			required: true,
-		},
-		{
-			name: 'reason',
-			description: 'Provide a reason.',
-			type: 'STRING',
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('kick')
+		.setDescription(commands.commands.kick.description)
+		.addUserOption((option) =>
+			option.setName('user').setDescription('Specify a user.').setRequired(true)
+		)
+		.addStringOption((option) =>
+			option.setName('description').setDescription('Provide a reason.')
+		),
 	async run(interaction) {
 		const targetMember = interaction.options.getMember('user');
 		let embed = (result = null),
@@ -73,7 +66,7 @@ module.exports = {
 				interaction.guild.id,
 				targetMember.id,
 				interaction.member.user.id,
-				this.name,
+				this.data.name,
 				reason
 			);
 		}

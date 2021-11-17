@@ -1,38 +1,33 @@
-const transactionSchema = require('@schemas/transaction-sch');
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
+const transactionSchema = require('../../util/mongo/schemas/transaction-sch');
 
 module.exports = {
-	name: 'statistics',
-	group: 'statistics',
-	description: 'View statistics.',
-	format: '<balance>',
-	global: true,
-	options: [
-		{
-			name: 'balance',
-			description: 'The statistics for user balance.',
-			type: 'SUB_COMMAND_GROUP',
-			options: [
-				{
-					name: 'user',
-					description: 'Specify a user.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'user',
-							description: 'Specify a user.',
-							type: 'USER',
-							required: true,
-						},
-					],
-				},
-				{
-					name: 'total',
-					description: 'View total balance trend.',
-					type: 'SUB_COMMAND',
-				},
-			],
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('statistics')
+		.setDescription(commands.commands.statistics.description)
+		.addSubcommandGroup((subcommandgroup) =>
+			subcommandgroup
+				.setName('balance')
+				.setDescription('Statistics for balance.')
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('user')
+						.setDescription('Statistics for user balance')
+						.addUserOption((option) =>
+							option
+								.setName('user')
+								.setDescription('Specify a user.')
+								.setRequired(true)
+						)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('total')
+						.setDescription('Statistics for all balances')
+				)
+		),
 	async run(interaction) {
 		let wallet = 0,
 			treasury = 0,

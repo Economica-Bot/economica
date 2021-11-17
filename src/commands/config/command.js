@@ -1,165 +1,126 @@
 const fs = require('fs');
 const ms = require('ms');
-const guildSettingSchema = require('@schemas/guild-settings-sch');
-const incomeSchema = require('@schemas/income-sch');
+const guildSettingSchema = require('../../util/mongo/schemas/guild-settings-sch');
+const incomeSchema = require('../../util/mongo/schemas/income-sch');
 const path = require('path');
 const config = require(path.join(__dirname, '../../config.json'));
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
 
 module.exports = {
-	name: 'command',
-	group: 'config',
-	untoggleable: true,
-	description: 'Manage commands.',
-	global: true,
-	permissions: ['MANAGE_GUILD'],
-	options: [
-		{
-			name: 'permission',
-			description: 'Manage command permissions.',
-			type: 'SUB_COMMAND_GROUP',
-			options: [
-				{
-					name: 'view',
-					description: "View a command's permissions.",
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'command',
-							description: 'Specify a command.',
-							type: 'STRING',
-							required: true,
-						},
-					],
-				},
-				{
-					name: 'enable',
-					description: 'Enable a command.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'command',
-							description: 'Specify a command.',
-							type: 'STRING',
-							required: true,
-						},
-						{
-							name: 'channel',
-							description: 'Specify a channel.',
-							type: 'CHANNEL',
-							required: false,
-						},
-						{
-							name: 'role',
-							description: 'Specify a role.',
-							type: 'ROLE',
-							required: false,
-						},
-						{
-							name: 'cooldown',
-							description: 'Specify a cooldown.',
-							type: 'STRING',
-							required: false,
-						},
-					],
-				},
-				{
-					name: 'disable',
-					description: 'Disable a command.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'command',
-							description: 'Specify a command.',
-							type: 'STRING',
-							required: true,
-						},
-						{
-							name: 'channel',
-							description: 'Specify a channel.',
-							type: 'CHANNEL',
-							required: false,
-						},
-						{
-							name: 'role',
-							description: 'Specify a role.',
-							type: 'ROLE',
-							required: false,
-						},
-						{
-							name: 'cooldown',
-							description: 'Specify a cooldown.',
-							type: 'STRING',
-							required: false,
-						},
-					],
-				},
-				{
-					name: 'reset',
-					description: 'Reset a command.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'command',
-							description: 'Specify a command.',
-							type: 'STRING',
-							required: true,
-						},
-					],
-				},
-			],
-		},
-		{
-			name: 'config',
-			description: 'Configure a command.',
-			type: 'SUB_COMMAND_GROUP',
-			options: [
-				//module
-				{
-					name: 'income_command',
-					description: 'Configure an income command.',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'command',
-							description: 'Specify an income command.',
-							type: 'STRING',
-							required: true,
-						},
-						{
-							name: 'reset',
-							description: 'Reset this income command.',
-							type: 'BOOLEAN',
-						},
-						{
-							name: 'min',
-							description: 'Specify the minimum income for this command.',
-							type: 'INTEGER',
-						},
-						{
-							name: 'max',
-							description: 'Specify the maximum income for this command.',
-							type: 'INTEGER',
-						},
-						{
-							name: 'chance',
-							description: 'Specify the chance for this command.',
-							type: 'STRING',
-						},
-						{
-							name: 'minfine',
-							description: 'Specify the minimum fine for this command.',
-							type: 'INTEGER',
-						},
-						{
-							name: 'maxfine',
-							description: 'Specify the maximum fine for this command.',
-							type: 'INTEGER',
-						},
-					],
-				},
-			],
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('command')
+		.setDescription(commands.commands.command.description)
+		.addSubcommandGroup((subcommandgroup) =>
+			subcommandgroup
+				.setName('permission')
+				.setDescription('Manage command permissions.')
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('view')
+						.setDescription("View a command's permissions.")
+						.addStringOption((option) =>
+							option
+								.setName('command')
+								.setDescription('Specify a command.')
+								.setRequired(true)
+						)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('enable')
+						.setDescription('Enable a command.')
+						.addStringOption((option) =>
+							option
+								.setName('command')
+								.setDescription('Specify a command.')
+								.setRequired(true)
+						)
+						.addChannelOption((option) =>
+							option.setName('channel').setDescription('Specify a channel.')
+						)
+						.addRoleOption((option) =>
+							option.setName('role').setDescription('Specify a role.')
+						)
+						.addStringOption((option) =>
+							option.setName('cooldown').setDescription('Specify a cooldown.')
+						)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('disable')
+						.setDescription('Disable a command.')
+						.addStringOption((option) =>
+							option
+								.setName('command')
+								.setDescription('Specify a command.')
+								.setRequired(true)
+						)
+						.addChannelOption((option) =>
+							option.setName('channel').setDescription('Specify a channel.')
+						)
+						.addRoleOption((option) =>
+							option.setName('role').setDescription('Specify a role.')
+						)
+				)
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('reset')
+						.setDescription('Reset a command.')
+						.addStringOption((option) =>
+							option
+								.setName('command')
+								.setDescription('Specify a command.')
+								.setRequired(true)
+						)
+				)
+		)
+		.addSubcommandGroup((subcommandgroup) =>
+			subcommandgroup
+				.setName('config')
+				.setDescription('Configure a command.')
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('income_command')
+						.setDescription('Configure an income command.')
+						.addStringOption((option) =>
+							option
+								.setName('command')
+								.setDescription('Specify an income command.')
+								.setRequired(true)
+						)
+						.addBooleanOption((option) =>
+							option
+								.setName('reset')
+								.setDescription('Reset this income command.')
+						)
+						.addIntegerOption((option) =>
+							option
+								.setName('min')
+								.setDescription('Specify the minimum income for this command.')
+						)
+						.addIntegerOption((option) =>
+							option
+								.setName('max')
+								.setDescription('Specify the maximum income for this command.')
+						)
+						.addStringOption((option) =>
+							option
+								.setName('chance')
+								.setDescription('Specify the chance for this command.')
+						)
+						.addIntegerOption((option) =>
+							option
+								.setName('minfine')
+								.setDescription('Specify the minimum fine for this command.')
+						)
+						.addIntegerOption((option) =>
+							option
+								.setName('maxfine')
+								.setDescription('Specify the minimum fine for this command.')
+						)
+				)
+		),
 	async run(interaction) {
 		let color = 'GREEN',
 			title = interaction.member.user.tag,
@@ -200,7 +161,7 @@ module.exports = {
 				}
 			);
 
-			let commandSettings = guildSettings.commands.find((c) => {
+			const commandSettings = guildSettings.commands.find((c) => {
 				return c.command === cmd.name;
 			}) ?? {
 				command: cmd.name,

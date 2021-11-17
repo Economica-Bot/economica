@@ -1,63 +1,46 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'help',
-	description:
-		'Lists available commands, or detailed information about a specific command.',
-	group: 'utility',
-	format: '[command]',
-	global: true,
-	options: [
-		{
-			name: 'command',
-			description: 'Specify a command.',
-			type: 'STRING',
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('help')
+		.setDescription(commands.commands.help.description)
+		.addStringOption((option) =>
+			option.setName('command').setDescription('Specify a command.')
+		),
 	async run(interaction) {
-		let embed,
-			command = interaction.options.getString('command') ?? null;
+		const command = interaction.options.getString('command');
+		let embed;
+
 		if (!command) {
 			embed = util.embedify(
 				'YELLOW',
-				`${client.user.username} Commands`,
-				client.user.displayAvatarURL(),
-				`Use \`help <cmd>\` to view specific information.`
+				`${client.user.tag} Commands`,
+				client.user.displayAvatarURL()
 			);
 
-			let commands = [],
-				groups = [];
-			client.commands.forEach((command) => {
-				if (!groups.includes(command.group)) groups.push(command.group);
-				commands.push(command);
-			});
-
-			for (const group of groups) {
-				let commandGroupList = [];
-				for (const command of commands) {
-					if (command.group === group) {
-						commandGroupList.push(command.name);
-					}
-				}
-
-				embed.addField(group, `\`${commandGroupList.join('`, `')}\``, true);
+			const commandList = [];
+			for (const command in commands.commands) {
+				commandList.push(command);
 			}
+
+			embed.setDescription(`\`${commandList.join('`, `')}\``);
 		} else if (command) {
-			let found = client.commands.find((cmd) => {
-				if (cmd.name.toLowerCase().indexOf(command.toLowerCase()) != -1) {
-					command = cmd;
-					return true;
+			let found = false;
+			for (const cmd in commands.commands) {
+				if (cmd === command) {
+					found = true;
 				}
-			});
+			}
 
 			if (found) {
 				embed = util.embedify(
 					'YELLOW',
-					`${command.name}`,
+					`${command}`,
 					client.user.displayAvatarURL(),
-					`>>> *${command.description}* \n${
-						command.format
-							? `Format: \`${command.name} ${command.format}\``
-							: ''
-					}`
+					`>>> *${
+						commands.commands[command].description
+					}* \n${`Usage: \`${command} ${commands.commands[command].usage}\``}`
 				);
 			} else {
 				embed = util.embedify(

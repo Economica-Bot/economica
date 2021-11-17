@@ -1,33 +1,26 @@
-const guildSettingSchema = require('@schemas/guild-settings-sch');
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
+const guildSettingSchema = require('../../util/mongo/schemas/guild-settings-sch');
 
 module.exports = {
-	name: 'infraction_log',
-	group: 'moderation',
-	description: 'Manage the infraction logging channel.',
-	format: '<set | remove> [channel]',
-	global: true,
-	permissions: ['MANAGE_CHANNELS'],
-	options: [
-		{
-			name: 'set',
-			description: 'Set the infraction log.',
-			type: 'SUB_COMMAND',
-			options: [
-				{
-					name: 'channel',
-					description: 'Specify a channel.',
-					type: 'CHANNEL',
-					required: true,
-				},
-			],
-		},
-		{
-			name: 'remove',
-			description: 'Remove the infraction log.',
-			type: 'SUB_COMMAND',
-			options: null,
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('infraction_log')
+		.setDescription(commands.commands.infraction_log.description)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('set')
+				.setDescription('Set the infraction log.')
+				.addChannelOption((option) =>
+					option
+						.setName('channel')
+						.setDescription('Specify a channel.')
+						.setRequired(true)
+				)
+		)
+		.addSubcommand((subcommand) =>
+			subcommand.setName('reset').setDescription('Reset the infraction log.')
+		),
 	async run(interaction) {
 		let color, description;
 		if (interaction.options.getSubcommand() === 'set') {

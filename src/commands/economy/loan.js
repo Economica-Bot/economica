@@ -3,108 +3,86 @@ const ms = require('ms');
 const loanSchema = require('@schemas/loan-sch');
 const { isValidObjectId } = require('mongoose');
 
-module.exports = {
-	name: 'loan',
-	group: 'economy',
-	description: 'Loan money to other users.',
-	format: '<propose | cancel | accept | decline | view> [...options]',
-	global: true,
-	roles: [
-		{
-			name: 'ECONOMY MANAGER',
-			required: false,
-		},
-	],
-	options: [
-		{
-			name: 'propose',
-			description: 'Add a loan to the registry',
-			type: 'SUB_COMMAND',
-			options: [
-				{
-					name: 'user',
-					description: 'Specify a user.',
-					type: 'USER',
-					required: true,
-				},
-				{
-					name: 'principal',
-					description: 'Specify the principal.',
-					type: 'INTEGER',
-					required: true,
-				},
-				{
-					name: 'repayment',
-					description: 'Specify the repayment.',
-					type: 'INTEGER',
-					required: true,
-				},
-				{
-					name: 'length',
-					description: 'Specify the life of the loan.',
-					type: 'STRING',
-					required: true,
-				},
-			],
-		},
-		{
-			name: 'cancel',
-			description: 'Cancel a pending loan in the registry.',
-			type: 'SUB_COMMAND',
-			options: [
-				{
-					name: 'loan_id',
-					description: 'Specify a loan.',
-					type: 'STRING',
-					required: true,
-				},
-			],
-		},
-		{
-			name: 'accept',
-			description: 'Accept a pending loan in the registry.',
-			type: 'SUB_COMMAND',
-			options: [
-				{
-					name: 'loan_id',
-					description: 'Specify a loan.',
-					type: 'STRING',
-					required: true,
-				},
-			],
-		},
-		{
-			name: 'decline',
-			description: 'Decline a pending loan in the registry.',
-			type: 'SUB_COMMAND',
-			options: [
-				{
-					name: 'loan_id',
-					description: 'Specify a loan.',
-					type: 'STRING',
-					required: true,
-				},
-			],
-		},
-		{
-			name: 'view',
-			description: 'View the loan registry.',
-			type: 'SUB_COMMAND',
-			options: [
-				{
-					name: 'loan_id',
-					description: 'Specify a loan.',
-					type: 'STRING',
-				},
-				{
-					name: 'user',
-					description: 'Specify a loan participator.',
-					type: 'USER',
-				},
-			],
-		},
-	],
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
 
+module.exports = {
+	data: new SlashCommandBuilder()
+		.setName('loan')
+		.setDescription(commands.commands.loan.description)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('propose')
+				.setDescription('Add a loan to the registry.')
+				.addUserOption((option) =>
+					option
+						.setName('user')
+						.setDescription('Specify a user.')
+						.setRequired(true)
+				)
+				.addIntegerOption((option) =>
+					option
+						.setName('principal')
+						.setDescription('Specify a principal.')
+						.setRequired(true)
+				)
+				.addIntegerOption((option) =>
+					option
+						.setName('repayment')
+						.setDescription('Specify a repayment.')
+						.setRequired(true)
+				)
+				.addStringOption((option) =>
+					option
+						.setName('length')
+						.setDescription('Specify a length.')
+						.setRequired(true)
+				)
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('cancel')
+				.setDescription('Cancel a pending loan in the registry.')
+				.addStringOption((option) =>
+					option
+						.setName('loan_id')
+						.setDescription('Specify a loan.')
+						.setRequired(true)
+				)
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('accept')
+				.setDescription('Accept a pending loan in the registry.')
+				.addStringOption((option) =>
+					option
+						.setName('loan_id')
+						.setDescription('Specify a loan.')
+						.setRequired(true)
+				)
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('decline')
+				.setDescription('Decline a pending loan in the registry.')
+				.addStringOption((option) =>
+					option
+						.setName('loan_id')
+						.setDescription('Specify a loan.')
+						.setRequired(true)
+				)
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('view')
+				.setDescription('View the loan registry.')
+				.addStringOption((option) =>
+					option.setName('loan_id').setDescription('Specify a loan.')
+				)
+				.addUserOption((option) =>
+					option.setName('user').setDescription('Specify a user')
+				)
+		),
 	async run(interaction) {
 		const guildID = interaction.guild.id;
 
@@ -172,7 +150,7 @@ module.exports = {
 			await util.transaction(
 				guildID,
 				interaction.member.id,
-				this.name,
+				this.data.name,
 				`Loan to <@!${targetMember.user.id}> | Loan ID \`${loan._id}\``,
 				0,
 				-principal,
@@ -219,7 +197,7 @@ module.exports = {
 					await util.transaction(
 						guildID,
 						loan.lenderID,
-						this.name,
+						this.data.name,
 						`Loan to <@!${loan.borrowerID}> \`canceled\` | Loan ID: \`${loan._id}\``,
 						0,
 						loan.principal,
@@ -257,7 +235,7 @@ module.exports = {
 					await util.transaction(
 						guildID,
 						interaction.member.user.id,
-						this.name,
+						this.data.name,
 						`Loan from <@!${loan.lenderID}> \`accepted\` | Loan ID: \`${loan._id}\``,
 						loan.principal,
 						0,
@@ -296,7 +274,7 @@ module.exports = {
 					await util.transaction(
 						guildID,
 						loan.lenderID,
-						this.name,
+						this.data.name,
 						`Loan to <@!${loan.borrowerID}> \`declined\` | Loan ID: \`${loan._id}\``,
 						0,
 						loan.principal,

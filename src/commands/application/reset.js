@@ -1,39 +1,30 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'reset',
-	group: 'application',
-	description: 'Resets slash commands.',
-	global: true,
-	options: [
-		{
-			name: 'guild',
-			description: 'Reset guilds slash commands.',
-			type: 1,
-			options: [
-				{
-					name: 'scope',
-					description: 'Reset scope.',
-					type: 3,
-					choices: [
-						{
-							name: 'This',
-							value: 'this',
-						},
-						{
-							name: 'All',
-							value: 'all',
-						},
-					],
-					required: true,
-				},
-			],
-		},
-		{
-			name: 'global',
-			description: 'Reset global slash commands.',
-			type: 1,
-		},
-	],
-	ownerOnly: true,
+	data: new SlashCommandBuilder()
+		.setName('reset')
+		.setDescription(commands.commands.reset.description)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('guild')
+				.setDescription('Reset guild slash commands.')
+				.addStringOption((option) =>
+					option
+						.setName('scope')
+						.setDescription('Reset scope.')
+						.addChoices([
+							['This', 'this'],
+							['All', 'all'],
+						])
+						.setRequired(true)
+				)
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('global')
+				.setDescription('Reset global slash commands.')
+		),
 	async run(interaction) {
 		await interaction.deferReply({ ephemeral: true });
 		if (interaction.options.getSubcommand() === 'guild') {
@@ -45,7 +36,7 @@ module.exports = {
 				});
 			}
 		} else {
-			await client.application.commands.set([]);
+			await clientcommands.set([]);
 		}
 
 		const embed = util.embedify(

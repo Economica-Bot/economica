@@ -1,53 +1,28 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'info',
-	group: 'utility',
-	description: "Send an embed about Economica's commands.",
-	format: '<group> [channel]',
-	permissions: ['MANAGE_MESSAGES'],
-	global: true,
-	options: [
-		{
-			name: 'group',
-			description: 'Specify a command group.',
-			type: 'STRING',
-			required: true,
-			choices: [
-				{
-					name: 'Configuration',
-					value: 'config',
-				},
-				{
-					name: 'Economy',
-					value: 'economy',
-				},
-				{
-					name: 'Income',
-					value: 'income',
-				},
-				{
-					name: 'Moderation',
-					value: 'moderation',
-				},
-				{
-					name: 'Shop',
-					value: 'shop',
-				},
-				{
-					name: 'Statistics',
-					value: 'statistics',
-				},
-				{
-					name: 'Utility',
-					value: 'utility',
-				},
-			],
-		},
-		{
-			name: 'channel',
-			description: 'Specify a channel.',
-			type: 'CHANNEL',
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('info')
+		.setDescription(commands.commands.info.description)
+		.addStringOption((option) =>
+			option
+				.setName('group')
+				.setDescription('Specify a group.')
+				.addChoices([
+					['Configuration', 'config'],
+					['Economy', 'economy'],
+					['Income', 'income'],
+					['Moderation', 'moderation'],
+					['Shop', 'shop'],
+					['Statistics', 'statistics'],
+					['Utility', 'utility'],
+				])
+				.setRequired(true)
+		)
+		.addChannelOption((option) =>
+			option.setName('channel').setDescription('Specify a channel.')
+		),
 	async run(interaction) {
 		const group = interaction.options.getString('group');
 		let commands = [];

@@ -1,24 +1,16 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'ban',
-	group: 'moderation',
-	description: 'Ban a user.',
-	format: '<user> [reason]',
-	global: true,
-	permissions: ['BAN_MEMBERS'],
-	clientPermissions: ['BAN_MEMBERS'],
-	options: [
-		{
-			name: 'user',
-			description: 'Specify a user.',
-			type: 'USER',
-			required: true,
-		},
-		{
-			name: 'reason',
-			description: 'Provide a reason.',
-			type: 'STRING',
-		},
-	],
+	data: new SlashCommandBuilder()
+		.setName('ban')
+		.setDescription(commands.commands.ban.description)
+		.addUserOption((option) =>
+			option.setName('user').setDescription('Specify a user.').setRequired(true)
+		)
+		.addStringOption((option) =>
+			option.setName('reason').setDescription('Specify a reason.')
+		),
 	async run(interaction) {
 		const targetMember = interaction.options.getMember('user');
 		let embed = (result = null),
@@ -74,7 +66,7 @@ module.exports = {
 				interaction.guild.id,
 				targetMember.id,
 				interaction.member.user.id,
-				this.name,
+				this.data.name,
 				reason,
 				true
 			);

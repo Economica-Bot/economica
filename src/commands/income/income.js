@@ -1,11 +1,12 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 const incomeSchema = require('@schemas/income-sch');
 
 module.exports = {
-	name: 'income',
-	group: 'income',
-	description: 'View all income commands and their settings.',
-	global: true,
-	options: null,
+	data: new SlashCommandBuilder()
+		.setName('income')
+		.setDescription(commands.commands.income.description),
 	async run(interaction) {
 		const incomeEmbed = util.embedify(
 			'BLURPLE',

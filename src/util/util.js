@@ -1,4 +1,3 @@
-const ms = require('ms');
 const path = require('path');
 const config = require(path.join(__dirname, '../config.json'));
 const Discord = require('discord.js');
@@ -475,6 +474,12 @@ module.exports.initGuildSettings = async (guild) => {
 		{
 			modules: [],
 			commands: [],
+			permissions: {
+				0: [], 
+				1: [], 
+				2: [], 
+				3: []
+			},
 			currency: null,
 			transactionLogChannel: null,
 			infractionLogChannel: null,
@@ -508,7 +513,7 @@ module.exports.initGuildSettings = async (guild) => {
 		}
 	);
 
-	return guildSettings, incomeSettings;
+	return [ guildSettings, incomeSettings ];
 };
 
 /**
@@ -689,4 +694,29 @@ module.exports.paginate = async (interaction, embeds, page = 0) => {
 			components: [],
 		});
 	});
+};
+
+module.exports.runtimeError = async (error, interaction = null) => {
+	let description, title, icon_url;
+	if (interaction) {
+		title = interaction.user.tag;
+		icon_url = interaction.user.displayAvatarURL();
+		description = `**Command**: \`${interaction.commandName}\`\n\`\`\`js\n${error}\`\`\`
+    You've encountered an error.
+    Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](${process.env.DISCORD}).`;
+		const embed = this.embedify('RED', title, icon_url, description);
+		if (interaction.replied || interaction.deferred) {
+			await interaction.followUp({ embeds: [embed], ephemeral: true });
+		} else {
+			await interaction.reply({ embeds: [embed], ephemeral: true });
+		}
+	}
+
+	title = error.name;
+	icon_url = client.user.displayAvatarURL();
+	description = `\`\`\`js\n${error.stack}\`\`\``;
+	const embed = util.embedify('RED', title, icon_url, description);
+	await client.channels.cache
+		.get(process.env.BOT_LOG_ID)
+		.send({ embeds: [embed] });
 };

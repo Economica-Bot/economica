@@ -1,16 +1,17 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const commands = require('../../config/commands');
+
 module.exports = {
-	name: 'ping',
-	group: 'utility',
-	description: 'ping',
-	options: null,
-	global: true,
+	data: new SlashCommandBuilder()
+		.setName('ping')
+		.setDescription(commands.commands.ping.description),
 	async run(interaction) {
 		await interaction.reply({
 			embeds: [
 				util.embedify(
 					'GREEN',
-					interaction.member.user.tag,
-					interaction.member.user.displayAvatarURL(),
+					interaction.user.tag,
+					interaction.user.displayAvatarURL(),
 					`Pong! \`${client.ws.ping}ms\``
 				),
 			],
