@@ -326,6 +326,7 @@ client.coolDown = async (interaction, command) => {
 };
 
 client.error = async (error, interaction = null, command = null) => {
+	console.error(error);
 	let description, title, icon_url;
 	if (interaction) {
 		title = interaction.member.user.tag;

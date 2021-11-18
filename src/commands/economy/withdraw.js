@@ -29,7 +29,7 @@ module.exports = {
 		if (amount || amount === 0) {
 			if (amount < 1 || amount > treasury) {
 				color = 'RED';
-				description = `Insufficient treasury: ${cSymbol}${amount.toLocaleString()}\nCurrent treasury: ${cSymbol}${treasury.toLocaleString()}`;
+				description = `Invalid amount: ${cSymbol}${amount.toLocaleString()}\nCurrent treasury: ${cSymbol}${treasury.toLocaleString()}`;
 			} else {
 				description = `Withdrew ${cSymbol}${amount.toLocaleString()}`;
 				await util.transaction(

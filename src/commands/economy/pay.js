@@ -47,7 +47,7 @@ module.exports = {
 		} else if (amount) {
 			if (amount < 1 || amount > wallet) {
 				color = 'RED';
-				description = `Insufficient wallet: ${cSymbol}${amount.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`;
+				description = `Invalid amount: ${cSymbol}${amount.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`;
 			} else {
 				description = `Payed <@!${
 					targetMember.id

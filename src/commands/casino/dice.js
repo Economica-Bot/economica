@@ -7,9 +7,8 @@ module.exports = {
 		{
 			name: 'bet',
 			description: 'Specify a bet.',
-			type: 'INTEGER',
+			type: 'STRING',
 			required: true,
-			min_value: 1,
 		},
 		{
 			name: 'number',
@@ -25,17 +24,20 @@ module.exports = {
 			title = interaction.member.user.tag,
 			icon_url = interaction.member.user.displayAvatarURL(),
 			description = '';
-		let bet = interaction.options.getInteger('bet');
 		const number = interaction.options.getInteger('number');
 		const cSymbol = await util.getCurrencySymbol(interaction.guild.id);
 		const { wallet } = await util.getEconInfo(
 			interaction.guild.id,
 			interaction.member.id
 		);
+		let bet =
+			interaction.options.getString('bet') === 'all'
+				? wallet
+				: parseInt(interaction.options.getString('bet'));
 
-		if (bet > wallet) {
+		if (bet > wallet || bet < 1) {
 			color = 'RED';
-			description = `Insufficient wallet: ${cSymbol}${wallet.toLocaleString()}`;
+			description = `Invalid bet: ${cSymbol}${bet.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`;
 		} else {
 			const diceRoll = Math.floor(Math.random() * 6 + 1);
 			description += `The dice landed on \`${diceRoll}\`\n`;

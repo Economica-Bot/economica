@@ -7,10 +7,9 @@ module.exports = {
 	options: [
 		{
 			name: 'amount',
-			description: 'Specify the amount you wish to deposit.',
-			type: 'INTEGER',
+			description: 'Specify an amount to pay.',
+			type: 'STRING',
 			required: true,
-			min_value: 1,
 		},
 	],
 	async run(interaction) {
@@ -27,9 +26,9 @@ module.exports = {
 				: parseInt(interaction.options.getString('amount'));
 
 		if (amount) {
-			if (amount > wallet) {
+			if (amount > wallet || amount < 1) {
 				color = 'RED';
-				description = `Insufficient wallet: ${cSymbol}${amount.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`;
+				description = `Invalid amount: ${cSymbol}${amount.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`;
 			} else {
 				description = `Deposited ${cSymbol}${amount.toLocaleString()}`;
 				await util.transaction(

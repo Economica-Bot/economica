@@ -18,8 +18,8 @@ module.exports = {
 		},
 		{
 			name: 'amount',
-			description: 'Specify the amount',
-			type: 'INTEGER',
+			description: 'Specify the amount you wish to withdraw.',
+			type: 'STRING',
 			required: true,
 		},
 		{
@@ -45,7 +45,10 @@ module.exports = {
 		let wallet = 0,
 			treasury = 0,
 			total = 0;
-		const amount = interaction.options.getInteger('amount');
+		const amount =
+			interaction.options.getString('amount') === 'all'
+				? treasury
+				: parseInt(interaction.options.getString('amount'));
 
 		if (interaction.options.getString('target') === 'treasury') {
 			treasury += amount;

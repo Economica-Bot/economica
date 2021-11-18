@@ -1,9 +1,8 @@
 const bet = {
 	name: 'bet',
-	description: 'Place a bet.',
-	type: 'INTEGER',
+	description: 'Specify a bet.',
+	type: 'STRING',
 	required: true,
-	min_value: 1,
 };
 
 const number_one = {
@@ -293,7 +292,10 @@ module.exports = {
 			title = interaction.member.user.tag,
 			icon_url = interaction.member.user.displayAvatarURL(),
 			description = '',
-			bet;
+			bet =
+				interaction.options.getString('bet') === 'all'
+					? wallet
+					: parseInt(interaction.options.getString('bet'));
 		const cSymbol = await util.getCurrencySymbol(interaction.guild.id);
 		const { wallet } = await util.getEconInfo(
 			interaction.guild.id,
@@ -319,9 +321,9 @@ module.exports = {
 			}
 
 			if (option.name === 'bet') {
-				if (bet < 0 || bet > wallet) {
+				if (bet < 0 || bet > wallet || !bet) {
 					color = 'RED';
-					description += `Insufficient wallet: ${cSymbol}${wallet.toLocaleString()}\n`;
+					description = `Invalid bet: ${cSymbol}${bet.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`;
 				} else {
 					bet = option.value;
 				}
