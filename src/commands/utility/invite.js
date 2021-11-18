@@ -1,19 +1,19 @@
 module.exports = {
-  name: 'invite',
-  group: 'utility',
-  description: 'Gets the invite link for Economica.',
-  disabled: true,
-  options: null,
-  async run(interaction) {
-    await interaction.reply({
-      embeds: [
-        util.embedify(
-          'GOLD',
-          client.user.username,
-          client.user.displayAvatarURL(),
-          `Invite link: __[Click Here](${process.env.INVITE_LINK} 'Invite Economica')__`
-        ),
-      ],
-    });
-***REMOVED***
+	name: 'invite',
+	group: 'utility',
+	description: 'Gets the invite link for Economica.',
+	disabled: true,
+	options: null,
+	async run(interaction) {
+		await interaction.reply({
+			embeds: [
+				util.embedify(
+					'GOLD',
+					client.user.username,
+					client.user.displayAvatarURL(),
+					`Invite link: __[Click Here](${process.env.INVITE_LINK} 'Invite Economica')__`
+				),
+			],
+		});
+	},
 };
