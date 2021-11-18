@@ -4,7 +4,7 @@ module.exports = {
   description: 'Ban a user.',
   format: '<user> [reason]',
   global: true,
-  permissions: ['BAN_MEMBERS'],
+  userPermissions: ['BAN_MEMBERS'],
   clientPermissions: ['BAN_MEMBERS'],
   options: [
     {

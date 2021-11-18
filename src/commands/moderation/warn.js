@@ -3,7 +3,7 @@ module.exports = {
   group: 'moderation',
   description: 'Warn a user.',
   format: '<user> [reason]',
-  permissions: ['MUTE_MEMBERS'],
+  userPermissions: ['MUTE_MEMBERS'],
   global: true,
   options: [
     {

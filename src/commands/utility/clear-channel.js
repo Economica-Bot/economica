@@ -5,7 +5,7 @@ module.exports = {
   description:
     'Deletes a number of messages in a channel. If not specified, deletes all messages <= 2 weeks old.',
   global: true,
-  permissions: ['MANAGE_MESSAGES'],
+  userPermissions: ['MANAGE_MESSAGES'],
   clientPermissions: ['MANAGE_MESSAGES'],
   options: [
     {

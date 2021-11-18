@@ -6,7 +6,7 @@ module.exports = {
   description: 'Unban a user.',
   format: '<userID>',
   global: true,
-  permissions: ['BAN_MEMBERS'],
+  userPermissions: ['BAN_MEMBERS'],
   clientPermissions: ['BAN_MEMBERS'],
   options: [
     {

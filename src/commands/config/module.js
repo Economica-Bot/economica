@@ -8,7 +8,7 @@ module.exports = {
   untoggleable: true,
   description: 'Enable or disable a module.',
   global: true,
-  permissions: ['MANAGE_GUILD'],
+  userPermissions: ['MANAGE_GUILD'],
   options: [
     {
       name: 'view',

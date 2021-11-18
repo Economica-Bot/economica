@@ -6,7 +6,7 @@ module.exports = {
   description: 'Manage the infraction logging channel.',
   format: '<set | remove> [channel]',
   global: true,
-  permissions: ['MANAGE_CHANNELS'],
+  userPermissions: ['MANAGE_CHANNELS'],
   options: [
     {
       name: 'set',

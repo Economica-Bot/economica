@@ -475,12 +475,6 @@ module.exports.initGuildSettings = async (guild) => {
 		{
 			modules: [],
 			commands: [],
-			permissions: {
-				0: [], 
-				1: [], 
-				2: [], 
-				3: []
-			},
 			currency: null,
 			transactionLogChannel: null,
 			infractionLogChannel: null,

@@ -3,7 +3,7 @@ module.exports = {
   group: 'moderation',
   description: 'Kicks a user',
   global: true,
-  permissions: ['KICK_MEMBERS'],
+  userPermissions: ['KICK_MEMBERS'],
   clientPermissions: ['KICK_MEMBERS'],
   options: [
     {

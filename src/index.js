@@ -149,8 +149,8 @@ client.permissible = async (author, guild, channel, command) => {
     permissible += 'You must be an `OWNER` to run this command.\n';
   }
 
-  if (command?.permissions) {
-    for (const permission of command.permissions) {
+  if (command?.userPermissions) {
+    for (const permission of command.userPermissions) {
       if (!author.permissionsIn(channel).has(permission)) {
         missingUserPermissions.push(`\`${permission}\``);
       }
