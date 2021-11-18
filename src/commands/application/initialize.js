@@ -3,9 +3,11 @@ module.exports = {
   group: 'application',
   description: 'Initialize the database.',
   options: null,
-  ownerOnly: true, 
+  ownerOnly: true,
   async run(interaction) {
     const settings = await util.initGuildSettings(interaction.guild);
-    await interaction.reply(`Init \`\`\`${settings.toString()}\`\`\``);
+    return await interaction.reply(
+      `Init \`\`\`${settings[0].toString()}\n\n${settings[1].toString()}\`\`\``
+    );
 ***REMOVED***
 };

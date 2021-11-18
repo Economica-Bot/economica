@@ -58,40 +58,46 @@ client.on('interactionCreate', async (interaction) => {
 
   const command = client.commands.get(interaction.commandName);
 
-  //Check permission
-  const permissible = await client.permissible(
-    interaction.member,
-    interaction.guild,
-    interaction.channel,
-    command
-  );
-  if (permissible.length) {
-    const embed = util.embedify(
-      'RED',
-      interaction.member.user.tag,
-      interaction.member.user.displayAvatarURL(),
-      permissible
+  if (
+    command?.ownerOnly &&
+    config.botAuth.admin_id.includes(interaction.user.id)
+  ) {
+  } else {
+    //Check permission
+    const permissible = await client.permissible(
+      interaction.member,
+      interaction.guild,
+      interaction.channel,
+      command
     );
+    if (permissible.length) {
+      const embed = util.embedify(
+        'RED',
+        interaction.member.user.tag,
+        interaction.member.user.displayAvatarURL(),
+        permissible
+      );
 
-    interaction.reply({ embeds: [embed], ephemeral: true });
-    return;
+      interaction.reply({ embeds: [embed], ephemeral: true });
+      return;
+    }
+
+    //Check cooldown
+    if (!(await client.coolDown(interaction, command))) {
+      return;
+    }
+
+    const properties = {
+      command: interaction.commandName,
+      timestamp: new Date().getTime(),
+    };
+
+    await util.setUserCommandStats(
+      interaction.guild.id,
+      interaction.member.id,
+      properties
+    );
   }
-
-  //Check cooldown
-  if (!(await client.coolDown(interaction))) {
-    return;
-  }
-
-  const properties = {
-    command: interaction.commandName,
-    timestamp: new Date().getTime(),
-  };
-
-  await util.setUserCommandStats(
-    interaction.guild.id,
-    interaction.member.id,
-    properties
-  );
 
   await command
     ?.run(interaction)
@@ -102,7 +108,7 @@ client.on('guildCreate', (guild) => {
   util.initGuildSettings(guild);
 });
 
-client.login(process.env.ECON_TOKEN);
+client.login(process.env.ECON_ALPHA_TOKEN);
 
 client.registerCommands = async () => {
   const commands = [];
@@ -123,68 +129,25 @@ client.registerCommands = async () => {
 
   //await client.application.commands.set(commands); //Global
 
-  // await (
-  //   await client.guilds.fetch(process.env.GUILD_ID)
-  // ).commands.set(commands);
+  await (
+    await client.guilds.fetch(process.env.GUILD_ID)
+  ).commands.set(commands);
 
   console.log('Commands registered');
 };
 
 client.permissible = async (author, guild, channel, command) => {
-  let missingClientPermissions = [],
+  const missingClientPermissions = [],
     missingUserPermissions = [],
     missingRoles = [],
-    disabledRoles = [],
-    permissible = '';
-
-  const guildSettings = await guildSettingsSchema.findOne({
-    guildID: guild.id,
-  });
-
-  if (guildSettings?.modules) {
-    for (const moduleSetting of guildSettings?.modules) {
-      if (moduleSetting?.module === command?.group && moduleSetting?.disabled) {
-        permissible += `The \`${moduleSetting.module}\` command module is disabled.\n`;
-        break;
-      }
-    }
-  }
-
-  if (guildSettings?.commands) {
-    for (const commandSetting of guildSettings?.commands) {
-      if (commandSetting?.command === command?.name) {
-        if (commandSetting?.channels) {
-          for (const channelSetting of commandSetting?.channels) {
-            if (
-              channelSetting?.channel === channel.id &&
-              channelSetting?.disabled
-            ) {
-              permissible += `This command is disabled in <#${channelSetting.channel}>.\n`;
-              break;
-            }
-          }
-        }
-
-        if (commandSetting?.roles) {
-          for (const roleSetting of commandSetting?.roles) {
-            if (
-              author.roles.cache.has(roleSetting?.role) &&
-              roleSetting?.disabled
-            ) {
-              disabledRoles.push(`<@&${roleSetting.role}>`);
-            }
-          }
-        }
-
-        if (commandSetting?.disabled) {
-          permissible += `This command is disabled.\n`;
-          break;
-        }
-      }
-    }
-  }
+    disabledRoles = [];
+  let permissible = '';
 
   const clientMember = await guild.members.cache.get(client.user.id);
+
+  if (command?.ownerOnly && !config.botAuth.admin_id.includes(author.user.id)) {
+    permissible += 'You must be an `OWNER` to run this command.\n';
+  }
 
   if (command?.permissions) {
     for (const permission of command.permissions) {
@@ -216,8 +179,76 @@ client.permissible = async (author, guild, channel, command) => {
     }
   }
 
-  if (command?.ownerOnly && !config.botAuth.admin_id.includes(author.user.id)) {
-    permissible += 'You must be an `OWNER` to run this command.\n';
+  const guildSettings = await guildSettingsSchema.findOne({
+    guildID: guild.id,
+  });
+
+  if (guildSettings.modules) {
+    for (const moduleSetting of guildSettings.modules) {
+      if (moduleSetting.module === command.group) {
+        if (moduleSetting.channels) {
+          for (const channelSetting of moduleSetting.channels) {
+            if (
+              channelSetting.channel === channel.id &&
+              channelSetting.disabled
+            ) {
+              permissible += `The \`${moduleSetting.module}\` module is disabled in <#${channelSetting.channel}>.\n`;
+              break;
+            }
+          }
+        }
+
+        if (moduleSetting.roles) {
+          for (const roleSetting of moduleSetting.roles) {
+            if (
+              author.roles.cache.has(roleSetting.role) &&
+              roleSetting.disabled
+            ) {
+              disabledRoles.push(`<@&${roleSetting.role}>`);
+            }
+          }
+        }
+
+        if (moduleSetting.disabled) {
+          permissible += `The \`${moduleSetting.module}\` module is disabled.\n`;
+          break;
+        }
+      }
+    }
+  }
+
+  if (guildSettings.commands) {
+    for (const commandSetting of guildSettings?.commands) {
+      if (commandSetting.command === command?.name) {
+        if (commandSetting.channels) {
+          for (const channelSetting of commandSetting.channels) {
+            if (
+              channelSetting.channel === channel.id &&
+              channelSetting.disabled
+            ) {
+              permissible += `This command is disabled in <#${channelSetting.channel}>.\n`;
+              break;
+            }
+          }
+        }
+
+        if (commandSetting.roles) {
+          for (const roleSetting of commandSetting?.roles) {
+            if (
+              author.roles.cache.has(roleSetting.role) &&
+              roleSetting.disabled
+            ) {
+              disabledRoles.push(`<@&${roleSetting.role}>`);
+            }
+          }
+        }
+
+        if (commandSetting.disabled) {
+          permissible += `This command is disabled.\n`;
+          break;
+        }
+      }
+    }
   }
 
   if (command?.disabled) {
@@ -251,17 +282,17 @@ client.permissible = async (author, guild, channel, command) => {
   return permissible;
 };
 
-client.coolDown = async (interaction) => {
-  const result = await guildSettingsSchema.findOne({
+client.coolDown = async (interaction, command) => {
+  const guildSettings = await guildSettingsSchema.findOne({
     guildID: interaction.guild.id,
   });
 
-  if (!result) {
-    util.initGuildSettings(interaction.guild);
-  }
+  const commandProperties = guildSettings.commands.find((c) => {
+    return c.command === command.name;
+  });
 
-  properties = result.commands.find((c) => {
-    return c.command === interaction.commandName;
+  const moduleProperties = guildSettings.modules.find((m) => {
+    return m.module === command.group;
   });
 
   const uProperties = await util.getUserCommandStats(
@@ -270,7 +301,8 @@ client.coolDown = async (interaction) => {
     interaction.commandName
   );
 
-  const { cooldown } = properties || config.commands['default'];
+  const { cooldown } =
+    commandProperties || moduleProperties || config.commands['default'];
   const { timestamp } = uProperties;
   const now = new Date().getTime();
 

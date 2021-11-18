@@ -469,46 +469,52 @@ module.exports.isSuccess = (properties) => {
  */
 module.exports.initGuildSettings = async (guild) => {
   const guildSettings = await guildSettingsSchema.findOneAndUpdate(
-    {
-      guildID: guild.id,
-  ***REMOVED***
-    {
-      modules: [],
-      commands: [],
-      currency: null,
-      transactionLogChannel: null,
-      infractionLogChannel: null,
-  ***REMOVED***
-    {
-      upsert: true,
-      new: true,
-    }
-  );
+		{
+			guildID: guild.id,
+		},
+		{
+			modules: [],
+			commands: [],
+			permissions: {
+				0: [], 
+				1: [], 
+				2: [], 
+				3: []
+			},
+			currency: null,
+			transactionLogChannel: null,
+			infractionLogChannel: null,
+		},
+		{
+			upsert: true,
+			new: true,
+		}
+	);
 
-  const incomeCommands = [];
-  for (const incomeCommand in config.commands) {
-    if (incomeCommand !== 'default') {
-      incomeCommands.push({
-        ...{ command: incomeCommand },
-        ...config.commands[incomeCommand],
-      });
-    }
-  }
+	const incomeCommands = [];
+	for (const incomeCommand in config.commands) {
+		if (incomeCommand !== 'default') {
+			incomeCommands.push({
+				...{ command: incomeCommand },
+				...config.commands[incomeCommand],
+			});
+		}
+	}
 
-  const incomeSettings = await incomeSchema.findOneAndUpdate(
-    {
-      guildID: guild.id,
-  ***REMOVED***
-    {
-      incomeCommands,
-  ***REMOVED***
-    {
-      upsert: true,
-      new: true,
-    }
-  );
+	const incomeSettings = await incomeSchema.findOneAndUpdate(
+		{
+			guildID: guild.id,
+		},
+		{
+			incomeCommands,
+		},
+		{
+			upsert: true,
+			new: true,
+		}
+	);
 
-  return guildSettings, incomeSettings;
+	return [ guildSettings, incomeSettings ];
 };
 
 /**
