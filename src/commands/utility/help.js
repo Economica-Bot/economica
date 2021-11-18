@@ -10,6 +10,7 @@ module.exports = {
 			name: 'command',
 			description: 'Specify a command.',
 			type: 'STRING',
+			autocomplete: true,
 		},
 	],
 	async run(interaction) {

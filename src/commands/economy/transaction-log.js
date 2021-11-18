@@ -18,6 +18,7 @@ module.exports = {
 					description: 'Specify a channel.',
 					type: 'CHANNEL',
 					required: true,
+					channel_types: [0],
 				},
 			],
 		},
@@ -32,28 +33,23 @@ module.exports = {
 		let color, description;
 		if (interaction.options.getSubcommand() == 'set') {
 			const channel = interaction.options.getChannel('channel');
-			if (!channel.isText()) {
-				color = 'RED';
-				description = `\`${channel.name}\` is not a text channel.`;
-			} else {
-				await guildSettingSchema
-					.findOneAndUpdate(
-						{
-							guildID: interaction.guild.id,
-						},
-						{
-							transactionLogChannel: channel.id,
-						},
-						{
-							upsert: true,
-							new: true,
-						}
-					)
-					.then(() => {
-						color = 'GREEN';
-						description = `Transaction log set to <#${channel.id}>`;
-					});
-			}
+			await guildSettingSchema
+				.findOneAndUpdate(
+					{
+						guildID: interaction.guild.id,
+					},
+					{
+						transactionLogChannel: channel.id,
+					},
+					{
+						upsert: true,
+						new: true,
+					}
+				)
+				.then(() => {
+					color = 'GREEN';
+					description = `Transaction log set to <#${channel.id}>`;
+				});
 		} else if (interaction.options.getSubcommand() === 'remove') {
 			await guildSettingSchema
 				.findOneAndUpdate(

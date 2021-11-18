@@ -16,6 +16,7 @@ module.exports = {
 			name: 'page',
 			description: 'Specify the page.',
 			type: 'INTEGER',
+			min_value: 1,
 		},
 	],
 	async run(interaction) {

@@ -9,12 +9,15 @@ module.exports = {
 			description: 'Specify a bet.',
 			type: 'INTEGER',
 			required: true,
+			min_value: 1,
 		},
 		{
 			name: 'number',
 			description: 'Choose a number.',
 			type: 'INTEGER',
 			required: true,
+			min_value: 1,
+			max_value: 6,
 		},
 	],
 	async run(interaction) {
@@ -29,10 +32,8 @@ module.exports = {
 			interaction.guild.id,
 			interaction.member.id
 		);
-		if (number < 0 || number > 6) {
-			color = 'RED';
-			description = `Invalid value: \`${number.toLocaleString()}\``;
-		} else if (bet < 0 || bet > wallet) {
+
+		if (bet > wallet) {
 			color = 'RED';
 			description = `Insufficient wallet: ${cSymbol}${wallet.toLocaleString()}`;
 		} else {

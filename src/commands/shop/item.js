@@ -12,6 +12,7 @@ const globalCreateOptions = {
 				'The name of the item. This is also how it will be referenced for future actions.',
 			type: 'STRING',
 			required: true,
+			autocomplete: true,
 		},
 		{
 			name: 'price',
@@ -19,6 +20,7 @@ const globalCreateOptions = {
 				'The cost of the item and the minimum balance needed to purchase.',
 			type: 'INTEGER',
 			required: true,
+			min_value: 0,
 		},
 		{
 			name: 'stackable',
@@ -46,6 +48,7 @@ const globalCreateOptions = {
 				'Quantity of this item that can be purchased until the item is deactivated in the shop.',
 			type: 'INTEGER',
 			required: false,
+			min_value: 1,
 		},
 		{
 			name: 'required_role',
@@ -66,6 +69,7 @@ const globalCreateOptions = {
 				'The minimum bank balance that a user must have to purchase. Cannot be lower than the item price.',
 			type: 'INTEGER',
 			required: false,
+			min_value: 1,
 		},
 		{
 			name: 'role_given',
@@ -104,12 +108,7 @@ module.exports = {
 					description: 'The name of the item to be purchased.',
 					type: 'STRING',
 					required: true,
-				},
-				{
-					name: 'amount',
-					description: 'Specify an amount.',
-					type: 'INTEGER',
-					required: false,
+					autocomplete: true,
 				},
 			],
 		},
@@ -123,6 +122,7 @@ module.exports = {
 					description: 'The name of the item to be reactivated.',
 					type: 'STRING',
 					required: true,
+					autocomplete: true,
 				},
 			],
 		},
@@ -136,6 +136,7 @@ module.exports = {
 					description: 'The name of the item to be removed.',
 					type: 'STRING',
 					required: true,
+					autocomplete: true,
 				},
 			],
 		},
@@ -149,6 +150,7 @@ module.exports = {
 					description: 'The name of the item to view',
 					type: 'STRING',
 					required: true,
+					autocomplete: true,
 				},
 			],
 		},
@@ -175,6 +177,7 @@ module.exports = {
 							description: 'The amount of money generated after each period.',
 							type: 'INTEGER',
 							required: true,
+							min_value: 1,
 						},
 						...globalCreateOptions.optional,
 					],
@@ -199,7 +202,6 @@ module.exports = {
 		// global options for item creation
 
 		const name = interaction.options.getString('name');
-		const amount = interaction.options.getInteger('amount') ?? 1;
 		const price = interaction.options.getInteger('price');
 		const required_bank = interaction.options.getInteger('required_bank');
 		const description = interaction.options.getString('description');
@@ -216,7 +218,7 @@ module.exports = {
 		const generator_amount = interaction.options.getInteger('generator_amount');
 
 		// Create an item
-		if (['basic', 'generator'].includes(type)) {
+		if (['basic', 'generator'].includes(interaction.options.getSubcommand())) {
 			const econManagerRole = guild.roles.cache.find((r) => {
 				return r.name.toLowerCase() === 'economy manager';
 			});
@@ -243,16 +245,12 @@ module.exports = {
 				})
 			) {
 				return await interaction.reply(
-					util.error(`An item with \`name\` "${name}" already exists.`)
+					util.error(`An item called "${name}" already exists.`)
 				);
 			}
 			if (name.includes(','))
 				return await interaction.reply(
 					util.error('`name` must not contain commas.')
-				);
-			if (price < 0)
-				return await interaction.reply(
-					util.error('`price` must be 0 or greater.')
 				);
 
 			// global optional options
@@ -267,10 +265,6 @@ module.exports = {
 					)
 				);
 			}
-			if (stock < 0)
-				return await interaction.reply(
-					util.error('`stock` must be 0 or greater.')
-				);
 			if (role_given) {
 				if (clientMember.roles.highest.rawPosition <= role_given.rawPosition)
 					return await interaction.reply(
@@ -337,10 +331,6 @@ module.exports = {
 						util.error(
 							'`generator_period` must be a valid duration value (5000, 5s, 5m, etc...) and greater than 0.'
 						)
-					);
-				if (generator_amount && generator_amount <= 0)
-					return await interaction.reply(
-						util.error('`generator_amount` must be greater than 0.')
 					);
 			}
 
@@ -656,7 +646,7 @@ module.exports = {
 					);
 				} else interaction.reply(util.error(`${item.name} is already active.`));
 
-				const embed = new Discord.MessageEmbed()
+				let embed = new Discord.MessageEmbed()
 					.setColor('GREEN')
 					.setAuthor(
 						interaction.member.user.tag,
@@ -671,14 +661,12 @@ module.exports = {
 				await interaction.reply(util.error(`Item not found.`));
 			}
 		} else if (interaction.options.getSubcommand() == 'buy') {
-			const item = await shopItemSchema.findOne({
+			let item = await shopItemSchema.findOne({
 				guildID: interaction.guild.id,
 				name: {
 					$regex: new RegExp(interaction.options.getString('name'), 'i'),
 				},
 			});
-
-			const stock = item.stock;
 
 			if (!item) {
 				interaction.reply(util.error("Item doesn't exist"));
@@ -705,8 +693,8 @@ module.exports = {
 			);
 
 			//Requirement Validation
-			if (item.price * amount > wallet) {
-				interaction.reply(util.error('Insufficient funds.'));
+			if (item.price > wallet) {
+				interaction.reply(util.error('You cannot afford this item.'));
 				return;
 			}
 
@@ -730,37 +718,29 @@ module.exports = {
 				}
 			}
 
-			if (item.requiredBalance && item.requiredBalance * amount < total) {
+			if (item.requiredBalance && total < item.requiredBalance) {
 				interaction.reply(
-					`Insufficent total.\n${item.requiredBalance} required.`
+					`Insufficent total\n${item.requiredBalance} required.`
 				);
 				return;
 			}
 
 			//Check if the item is stackable
 			if (!item.stackable && inventoryItem) {
-				await interaction.reply(util.error('This item is unstackable.'));
+				await interaction.reply(
+					util.error('This item is unstackable and you already have one!')
+				);
 				return;
 			}
 
-			if (!item.stackable && amount > 1) {
-				await interaction.reply(
-					util.error('You can only buy one of this item.')
-				);
-			}
-
 			//If there is a stock, check stock and decrement or deny purchase
-			if (stock) {
-				if (amount > stock) {
-					return interaction.reply(util.error('Insufficient stock.'));
-				}
-				if (stock > 0) {
+			if (item.stock) {
+				if (item.stock > 0) {
 					await shopItemSchema.findOneAndUpdate(
 						{ guildID: interaction.guild.id, name: name },
-						{ $inc: { stock: -amount } }
+						{ $inc: { stock: -1 } }
 					);
-					stock -= amount;
-					if (stock === 0) {
+					if (item.stock === 0) {
 						await shopItemSchema.findOneAndUpdate(
 							{ guildID: interaction.guild.id, name: name },
 							{ active: false }
@@ -788,13 +768,13 @@ module.exports = {
 						userID: interaction.member.id,
 						'inventory.ref': inventoryItem.ref,
 					},
-					{ $inc: { 'inventory.$.amount': amount } },
+					{ $inc: { 'inventory.$.amount': 1 } },
 					{ new: true, upsert: true }
 				);
 			} else {
 				await inventorySchema.findOneAndUpdate(
 					{ guildID: interaction.guild.id, userID: interaction.member.id },
-					{ $push: { inventory: { name: item.name, amount: amount } } },
+					{ $push: { inventory: { name: item.name, amount: 1 } } },
 					{ new: true, upsert: true }
 				);
 			}
@@ -804,9 +784,9 @@ module.exports = {
 				interaction.member.id,
 				'PURCHASE_SHOP_ITEM',
 				`Purchased ${item.name}`,
-				-item.price * amount,
+				-item.price,
 				0,
-				-item.price * amount
+				-item.price
 			);
 
 			await interaction.reply(util.success(`You bought \`${item.name}\``));

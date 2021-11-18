@@ -32,12 +32,14 @@ module.exports = {
 					description: 'Specify the principal.',
 					type: 'INTEGER',
 					required: true,
+					min_value: 1,
 				},
 				{
 					name: 'repayment',
 					description: 'Specify the repayment.',
 					type: 'INTEGER',
 					required: true,
+					min_value: 1,
 				},
 				{
 					name: 'length',
@@ -131,11 +133,7 @@ module.exports = {
 				color = 'RED';
 				description += 'You cannot give yourself a loan!\n';
 			}
-			if (principal < 1 || repayment < 1) {
-				color = 'RED';
-				description += `${loan < 1 ? `Invalid loan: ${cSymbol}${loan}\n` : ''}
-        ${repayment < 1 ? `Invalid repayment: ${cSymbol}${repayment}\n` : ''}`;
-			} else if (principal > treasury) {
+			if (principal > treasury) {
 				color = 'RED';
 				description += `Insufficient treasury: ${cSymbol}${principal.toLocaleString()}\nCurrent balance: ${cSymbol}${treasury.toLocaleString()}`;
 			}

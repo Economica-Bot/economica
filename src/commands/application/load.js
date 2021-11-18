@@ -12,6 +12,7 @@ module.exports = {
 			description: 'Specify a command.',
 			type: 'STRING',
 			required: true,
+			autocomplete: true,
 		},
 	],
 	async run(interaction) {

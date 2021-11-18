@@ -90,6 +90,7 @@ module.exports = {
 							description: 'Specify an item.',
 							type: 'STRING',
 							required: true,
+							autocomplete: true,
 						},
 					],
 				},

@@ -47,6 +47,7 @@ module.exports = {
 			name: 'channel',
 			description: 'Specify a channel.',
 			type: 'CHANNEL',
+			channel_types: [0],
 		},
 	],
 	async run(interaction) {
@@ -79,22 +80,12 @@ module.exports = {
 		const channel =
 			interaction.options.getChannel('channel') ??
 			guild.channels.cache.get(interaction.channelId);
-		let color, description;
 
-		if (channel.type !== 'GUILD_TEXT') {
-			color = 'RED';
-			description = 'Channel must be a text channel.';
-		} else {
-			color = 'GREEN';
-			description = `Successfully sent information for **${group}** in <#${channel.id}>.`;
-			channel.send({ embeds: [infoEmbed] });
-		}
-
-		embed = util.embedify(
-			color,
-			interaction.member.user.tag,
-			interaction.member.user.displayAvatarURL(),
-			description
+		const embed = util.embedify(
+			'GREEN',
+			interaction.user.tag,
+			interaction.user.displayAvatarURL(),
+			`Successfully sent information for **${group}** in <#${channel.id}>.`
 		);
 
 		await interaction.reply({

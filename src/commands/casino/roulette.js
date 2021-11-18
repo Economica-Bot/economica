@@ -3,6 +3,7 @@ const bet = {
 	description: 'Place a bet.',
 	type: 'INTEGER',
 	required: true,
+	min_value: 1,
 };
 
 const number_one = {
@@ -10,6 +11,8 @@ const number_one = {
 	description: 'Specify the first number.',
 	type: 'INTEGER',
 	required: true,
+	min_value: 0,
+	max_value: 36,
 };
 
 const number_two = {
@@ -17,6 +20,8 @@ const number_two = {
 	description: 'Specify the second number.',
 	type: 'INTEGER',
 	required: true,
+	min_value: 0,
+	max_value: 36,
 };
 
 const number_three = {
@@ -24,6 +29,8 @@ const number_three = {
 	description: 'Specify the third number.',
 	type: 'INTEGER',
 	required: true,
+	min_value: 0,
+	max_value: 36,
 };
 
 const number_four = {
@@ -31,6 +38,8 @@ const number_four = {
 	description: 'Specify the fourth number.',
 	type: 'INTEGER',
 	required: true,
+	min_value: 0,
+	max_value: 36,
 };
 
 const number_five = {
@@ -38,6 +47,8 @@ const number_five = {
 	description: 'Specify the fifth number.',
 	type: 'INTEGER',
 	required: true,
+	min_value: 0,
+	max_value: 36,
 };
 
 const number_six = {
@@ -45,6 +56,8 @@ const number_six = {
 	description: 'Specify the sixth number.',
 	type: 'INTEGER',
 	required: true,
+	min_value: 0,
+	max_value: 36,
 };
 
 module.exports = {
@@ -302,12 +315,7 @@ module.exports = {
 					'number_six',
 				].includes(option.name)
 			) {
-				if (option.value < 0 || option.value > 36) {
-					color = 'RED';
-					description += `Invalid \`${option.name}\`: \`${option.value}\`\n`;
-				} else {
-					nums.push(option.value);
-				}
+				nums.push(option.value);
 			}
 
 			if (option.name === 'bet') {

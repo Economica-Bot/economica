@@ -9,13 +9,14 @@ module.exports = {
 			description: 'Specify the page.',
 			type: 'INTEGER',
 			required: false,
+			min_value: 1,
 		},
 	],
 	async run(interaction) {
 		await interaction.deferReply();
 		const items = await util.getShopItems(interaction.guild.id);
 		if (items.length === 0) {
-			let embed = new Discord.MessageEmbed()
+			const embed = new Discord.MessageEmbed()
 				.setAuthor(
 					`${interaction.guild.name} Shop`,
 					interaction.guild.iconURL()
@@ -23,8 +24,7 @@ module.exports = {
 				.setColor('BLUE')
 				.setDescription(
 					`There are currently \`0\` items in the shop.\nAsk your Economy Manager to add some!`
-				)
-				.setFooter(`Page 1 of 1`);
+				);
 
 			interaction.editReply({
 				embeds: [embed],
