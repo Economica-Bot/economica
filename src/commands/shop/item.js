@@ -105,6 +105,12 @@ module.exports = {
 					type: 'STRING',
 					required: true,
 				},
+				{
+					name: 'amount',
+					description: 'Specify an amount.',
+					type: 'INTEGER',
+					required: false,
+				},
 			],
 		},
 		{
@@ -193,6 +199,7 @@ module.exports = {
 		// global options for item creation
 
 		const name = interaction.options.getString('name');
+		const amount = interaction.options.getInteger('amount') ?? 1;
 		const price = interaction.options.getInteger('price');
 		const required_bank = interaction.options.getInteger('required_bank');
 		const description = interaction.options.getString('description');
@@ -209,7 +216,7 @@ module.exports = {
 		const generator_amount = interaction.options.getInteger('generator_amount');
 
 		// Create an item
-		if (['basic', 'generator'].includes(interaction.options.getSubcommand())) {
+		if (['basic', 'generator'].includes(type)) {
 			const econManagerRole = guild.roles.cache.find((r) => {
 				return r.name.toLowerCase() === 'economy manager';
 			});
@@ -649,7 +656,7 @@ module.exports = {
 					);
 				} else interaction.reply(util.error(`${item.name} is already active.`));
 
-				let embed = new Discord.MessageEmbed()
+				const embed = new Discord.MessageEmbed()
 					.setColor('GREEN')
 					.setAuthor(
 						interaction.member.user.tag,
@@ -664,12 +671,14 @@ module.exports = {
 				await interaction.reply(util.error(`Item not found.`));
 			}
 		} else if (interaction.options.getSubcommand() == 'buy') {
-			let item = await shopItemSchema.findOne({
+			const item = await shopItemSchema.findOne({
 				guildID: interaction.guild.id,
 				name: {
 					$regex: new RegExp(interaction.options.getString('name'), 'i'),
 				},
 			});
+
+			const stock = item.stock;
 
 			if (!item) {
 				interaction.reply(util.error("Item doesn't exist"));
@@ -696,8 +705,8 @@ module.exports = {
 			);
 
 			//Requirement Validation
-			if (item.price > wallet) {
-				interaction.reply(util.error('You cannot afford this item.'));
+			if (item.price * amount > wallet) {
+				interaction.reply(util.error('Insufficient funds.'));
 				return;
 			}
 
@@ -721,29 +730,37 @@ module.exports = {
 				}
 			}
 
-			if (item.requiredBalance && total < item.requiredBalance) {
+			if (item.requiredBalance && item.requiredBalance * amount < total) {
 				interaction.reply(
-					`Insufficent total\n${item.requiredBalance} required.`
+					`Insufficent total.\n${item.requiredBalance} required.`
 				);
 				return;
 			}
 
 			//Check if the item is stackable
 			if (!item.stackable && inventoryItem) {
-				await interaction.reply(
-					util.error('This item is unstackable and you already have one!')
-				);
+				await interaction.reply(util.error('This item is unstackable.'));
 				return;
 			}
 
+			if (!item.stackable && amount > 1) {
+				await interaction.reply(
+					util.error('You can only buy one of this item.')
+				);
+			}
+
 			//If there is a stock, check stock and decrement or deny purchase
-			if (item.stock) {
-				if (item.stock > 0) {
+			if (stock) {
+				if (amount > stock) {
+					return interaction.reply(util.error('Insufficient stock.'));
+				}
+				if (stock > 0) {
 					await shopItemSchema.findOneAndUpdate(
 						{ guildID: interaction.guild.id, name: name },
-						{ $inc: { stock: -1 } }
+						{ $inc: { stock: -amount } }
 					);
-					if (item.stock === 0) {
+					stock -= amount;
+					if (stock === 0) {
 						await shopItemSchema.findOneAndUpdate(
 							{ guildID: interaction.guild.id, name: name },
 							{ active: false }
@@ -771,13 +788,13 @@ module.exports = {
 						userID: interaction.member.id,
 						'inventory.ref': inventoryItem.ref,
 					},
-					{ $inc: { 'inventory.$.amount': 1 } },
+					{ $inc: { 'inventory.$.amount': amount } },
 					{ new: true, upsert: true }
 				);
 			} else {
 				await inventorySchema.findOneAndUpdate(
 					{ guildID: interaction.guild.id, userID: interaction.member.id },
-					{ $push: { inventory: { name: item.name, amount: 1 } } },
+					{ $push: { inventory: { name: item.name, amount: amount } } },
 					{ new: true, upsert: true }
 				);
 			}
@@ -787,9 +804,9 @@ module.exports = {
 				interaction.member.id,
 				'PURCHASE_SHOP_ITEM',
 				`Purchased ${item.name}`,
-				-item.price,
+				-item.price * amount,
 				0,
-				-item.price
+				-item.price * amount
 			);
 
 			await interaction.reply(util.success(`You bought \`${item.name}\``));
