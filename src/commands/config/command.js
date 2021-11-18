@@ -85,12 +85,6 @@ module.exports = {
               type: 'ROLE',
               required: false,
           ***REMOVED***
-            {
-              name: 'cooldown',
-              description: 'Specify a cooldown.',
-              type: 'STRING',
-              required: false,
-          ***REMOVED***
           ],
       ***REMOVED***
         {
@@ -209,6 +203,7 @@ module.exports = {
 
       //View permissions for a command
       if (interaction.options.getSubcommand() === 'view') {
+        let cooldown = true;
         for (const setting in commandSettings) {
           if (commandSettings[setting] instanceof Array) {
             for (const set of commandSettings[setting]) {
@@ -228,6 +223,7 @@ module.exports = {
               description += `**Cooldown**: \`${ms(
                 commandSettings[setting]
               )}\``;
+              cooldown = false;
             } else if (setting === 'disabled') {
               description += `**Server Disabled**: \`${commandSettings[setting]}\``;
             }
@@ -235,7 +231,7 @@ module.exports = {
           }
         }
 
-        if (description.indexOf('cooldown') == -1) {
+        if (cooldown) {
           description += '**Cooldown**: `5s` *(Default)*';
         }
       }
