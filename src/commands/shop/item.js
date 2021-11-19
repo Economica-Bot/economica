@@ -223,7 +223,7 @@ module.exports = {
 				return r.name.toLowerCase() === 'economy manager';
 			});
 
-			if (!author.roles.cache.has(econManagerRole.id)) {
+			if (!interaction.member.roles.cache.has(econManagerRole.id)) {
 				return await interaction.reply(
 					util.error(
 						`You must have the <@&${econManagerRole.id}> role to create items.`
@@ -571,7 +571,7 @@ module.exports = {
 				return r.name.toLowerCase() === 'economy manager';
 			});
 
-			if (!author.roles.cache.has(econManagerRole.id)) {
+			if (!interaction.member.roles.cache.has(econManagerRole.id)) {
 				return await interaction.reply(
 					util.error(
 						`You must have the <@&${econManagerRole.id}> role to create items.`
