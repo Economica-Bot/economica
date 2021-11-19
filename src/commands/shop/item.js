@@ -219,7 +219,7 @@ module.exports = {
 
 		// Create an item
 		if (['basic', 'generator'].includes(interaction.options.getSubcommand())) {
-			const econManagerRole = guild.roles.cache.find((r) => {
+			const econManagerRole = interaction.guild.roles.cache.find((r) => {
 				return r.name.toLowerCase() === 'economy manager';
 			});
 
@@ -567,7 +567,7 @@ module.exports = {
 
 			await interaction.reply({ embeds: [embed] });
 		} else if (interaction.options.getSubcommand() == 'deactivate') {
-			const econManagerRole = guild.roles.cache.find((r) => {
+			const econManagerRole = interaction.guild.roles.cache.find((r) => {
 				return r.name.toLowerCase() === 'economy manager';
 			});
 
@@ -613,7 +613,7 @@ module.exports = {
 				await interaction.reply(util.error(`Item not found.`));
 			}
 		} else if (interaction.options.getSubcommand() == 'reactivate') {
-			const econManagerRole = guild.roles.cache.find((r) => {
+			const econManagerRole = interaction.guild.roles.cache.find((r) => {
 				return r.name.toLowerCase() === 'economy manager';
 			});
 
