@@ -183,6 +183,23 @@ client.permissible = async (author, guild, channel, command) => {
 		guildID: guild.id,
 	});
 
+	if (guildSettings.disabled) {
+		permissible += `All commands are disabled.`;
+	}
+
+	for (const channelSetting of guildSettings.channels) {
+		if (channelSetting.channel === channel.id && channelSetting.disabled) {
+			permissible += `Commands are disabled in <#${channelSetting.channel}>.\n`;
+			break;
+		}
+	}
+
+	for (const roleSetting of guildSettings.roles) {
+		if (author.roles.cache.has(roleSetting.role) && roleSetting.disabled) {
+			disabledRoles.push(`<@&${roleSetting.role}>`);
+		}
+	}
+
 	if (guildSettings.modules) {
 		for (const moduleSetting of guildSettings.modules) {
 			if (moduleSetting.module === command.group) {
@@ -251,6 +268,10 @@ client.permissible = async (author, guild, channel, command) => {
 		}
 	}
 
+	if (command.untoggleable) {
+		permissible = '';
+	}
+
 	if (command?.disabled) {
 		permissible += 'This command is disabled.\n';
 	}
@@ -302,7 +323,11 @@ client.coolDown = async (interaction, command) => {
 	);
 
 	const { cooldown } =
-		commandProperties || moduleProperties || config.commands['default'];
+		commandProperties ||
+		moduleProperties ||
+		guildSettings ||
+		config.commands['default'];
+
 	const { timestamp } = uProperties;
 	const now = new Date().getTime();
 

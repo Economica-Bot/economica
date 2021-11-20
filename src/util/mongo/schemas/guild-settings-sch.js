@@ -8,20 +8,32 @@ const reqString = {
 const guildSettingSchema = mongoose.Schema(
 	{
 		guildID: reqString,
+		disabled: {
+			type: Boolean,
+			required: true,
+			default: false,
+		},
+		channels: [],
+		roles: [],
+		cooldown: {
+			type: Number,
+			required: true,
+			default: 5000,
+		},
 		modules: [],
 		commands: [],
 		currency: {
 			type: String,
-			required: false,
+			required: true,
 			default: '💵',
 		},
 		transactionLogChannel: {
 			type: String,
-			required: false,
+			required: true,
 		},
 		infractionLogChannel: {
 			type: String,
-			required: false,
+			required: true,
 		},
 	},
 	{

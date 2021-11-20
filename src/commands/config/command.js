@@ -1,4 +1,3 @@
-const fs = require('fs');
 const ms = require('ms');
 const guildSettingSchema = require('@schemas/guild-settings-sch');
 const incomeSchema = require('@schemas/income-sch');
@@ -41,7 +40,7 @@ module.exports = {
 							name: 'command',
 							description: 'Specify a command.',
 							type: 'STRING',
-							required: true,
+							required: false,
 							autocomplete: true,
 						},
 						{
@@ -74,7 +73,7 @@ module.exports = {
 							name: 'command',
 							description: 'Specify a command.',
 							type: 'STRING',
-							required: true,
+							required: false,
 							autocomplete: true,
 						},
 						{
@@ -252,35 +251,26 @@ module.exports = {
 				//Enable or disable a channel for a command
 				if (interaction.options.getChannel('channel')) {
 					const channel = interaction.options.getChannel('channel');
-					if (!channel.isText()) {
-						color = 'RED';
-						description += `\`${channel.name}\` is not a text channel.\n`;
+					if (!commandSettings.channels) {
+						commandSettings.channels = [];
+					}
+					if (commandSettings.channels.find((c) => c.channel === channel.id)) {
+						commandSettings.channels.find(
+							(c) => c.channel === channel.id
+						).disabled =
+							interaction.options.getSubcommand() === 'disable' ? true : false;
 					} else {
-						if (!commandSettings.channels) {
-							commandSettings.channels = [];
-						}
-						if (
-							commandSettings.channels.find((c) => c.channel === channel.id)
-						) {
-							commandSettings.channels.find(
-								(c) => c.channel === channel.id
-							).disabled =
+						commandSettings.channels.push({
+							channel: channel.id,
+							disabled:
 								interaction.options.getSubcommand() === 'disable'
 									? true
-									: false;
-						} else {
-							commandSettings.channels.push({
-								channel: channel.id,
-								disabled:
-									interaction.options.getSubcommand() === 'disable'
-										? true
-										: false,
-							});
-						}
-						description += `${interaction.options
-							.getSubcommand()
-							.toUpperCase()}D command \`${cmd.name}\` in <#${channel.id}>\n`;
+									: false,
+						});
 					}
+					description += `${interaction.options
+						.getSubcommand()
+						.toUpperCase()}D command \`${cmd.name}\` in <#${channel.id}>\n`;
 				}
 
 				//Enable or disable a role for a command
