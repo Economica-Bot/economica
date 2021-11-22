@@ -58,8 +58,8 @@ module.exports = {
 						embed.addField(
 							`${currencySymbol}${
 								item.price > 0 ? util.num(item.price) : 'Free'
-							} - ${util.cut(item.name)}`,
-							`**${item.type}** ${
+							} - ${util.cut(item.name)} \`${item.type}\``,
+							`${
 								item.duration
 									? `Expires in <t:${
 											Date.now() + new Date(item.createdAt).getMilliseconds()
