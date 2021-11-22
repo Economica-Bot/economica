@@ -485,7 +485,7 @@ module.exports = {
 				description += `You lost ${cSymbol}${bet.toLocaleString()}`;
 				bet *= -1;
 			}
-		} else if (options._subcommand === 'color') {
+		} else if (interaction.options._subcommand === 'color') {
 			if (
 				(interaction.options.getString('choice') === 'red' &&
 					ballPocket % 2 === 0) ||
