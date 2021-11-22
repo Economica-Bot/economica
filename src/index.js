@@ -145,6 +145,10 @@ client.permissible = async (author, guild, channel, command) => {
 
 	const clientMember = await guild.members.cache.get(client.user.id);
 
+	if (command?.ownerOnly) {
+		permissible += "This command is for owners only.";
+	}
+	
 	if (command?.userPermissions) {
 		for (const permission of command.userPermissions) {
 			if (!author.permissionsIn(channel).has(permission)) {
