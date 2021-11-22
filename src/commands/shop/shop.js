@@ -66,7 +66,7 @@ module.exports = {
 									  }:R>`
 									: ''
 							}\n*${util.cut(item.description, 200)}*`,
-							item.description?.length > 100 ? false : true
+							item.description?.length > 200 ? false : true
 						);
 						k++;
 					}
