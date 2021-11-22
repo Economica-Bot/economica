@@ -13,7 +13,7 @@ module.exports = {
 		},
 	],
 	async run(interaction) {
-		const properties = await util.getCommandStats(
+		const properties = await util.getIncomeCommandStats(
 			interaction.guild.id,
 			this.name
 		);
