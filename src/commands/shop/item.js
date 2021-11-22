@@ -766,7 +766,7 @@ module.exports = {
 					{
 						guildID: interaction.guild.id,
 						userID: interaction.member.id,
-						'inventory.ref': inventoryItem.ref,
+						'inventory.name': inventoryItem.name,
 					},
 					{ $inc: { 'inventory.$.amount': 1 } },
 					{ new: true, upsert: true }
