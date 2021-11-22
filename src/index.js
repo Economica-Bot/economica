@@ -279,7 +279,7 @@ client.permissible = async (author, guild, channel, command) => {
 	}
 
 	if (command?.ownerOnly) {
-		permissible += "This command is for owners only.";
+		permissible += "This command is owner only.\n";
 	}
 	
 	if (command?.disabled) {
