@@ -249,7 +249,7 @@ module.exports = {
 						description = `Deleted balance data for <@!${userID}>`;
 					});
 			}
-		} else if (interaction.options.getSubCommandGroup() === 'transaction') {
+		} else if (interaction.options.getSubcommandGroup() === 'transaction') {
 			if (interaction.options.getSubcommand() === 'all') {
 				await transactionSchema
 					.deleteMany({
