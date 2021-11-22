@@ -127,7 +127,7 @@ client.registerCommands = async () => {
 		}
 	}
 
-	await client.application.commands.set(commands); //Global
+	//await client.application.commands.set(commands); //Global
 
 	// await (
 	// 	await client.guilds.fetch(process.env.GUILD_ID)
@@ -144,10 +144,6 @@ client.permissible = async (author, guild, channel, command) => {
 	let permissible = '';
 
 	const clientMember = await guild.members.cache.get(client.user.id);
-
-	if (command?.ownerOnly && !config.botAuth.admin_id.includes(author.user.id)) {
-		permissible += 'You must be an `OWNER` to run this command.\n';
-	}
 
 	if (command?.userPermissions) {
 		for (const permission of command.userPermissions) {
@@ -184,19 +180,29 @@ client.permissible = async (author, guild, channel, command) => {
 	});
 
 	if (guildSettings.disabled) {
-		permissible += `All commands are disabled.`;
+		permissible += `All commands are disabled.\n`;
 	}
 
 	for (const channelSetting of guildSettings.channels) {
-		if (channelSetting.channel === channel.id && channelSetting.disabled) {
-			permissible += `Commands are disabled in <#${channelSetting.channel}>.\n`;
-			break;
+		if (channelSetting.channel === channel.id) {
+			if (channelSetting.disabled) {
+				permissible += `Commands are disabled in <#${channelSetting.channel}>.\n`;
+				break;
+			} else {
+				permissible = '';
+				break;
+			}
 		}
 	}
 
 	for (const roleSetting of guildSettings.roles) {
-		if (author.roles.cache.has(roleSetting.role) && roleSetting.disabled) {
-			disabledRoles.push(`<@&${roleSetting.role}>`);
+		if (author.roles.cache.has(roleSetting.role)) {
+			if (roleSetting.disabled) {
+				disabledRoles.push(`<@&${roleSetting.role}>`);
+			} else {
+				permissible = '';
+				break;
+			}
 		}
 	}
 
@@ -298,6 +304,13 @@ client.permissible = async (author, guild, channel, command) => {
 		permissible += `This command is disabled for the ${disabledRoles.join(
 			', '
 		)} role(s).\n`;
+	}
+
+	if (
+		author.permissionsIn(channel).has('MANAGE_GUILD') ||
+		author.permissionsIn(channel).has('ADMINISTRATOR')
+	) {
+		permissible = '';
 	}
 
 	return permissible;
