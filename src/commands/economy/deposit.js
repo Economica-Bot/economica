@@ -46,15 +46,17 @@ module.exports = {
 			description = `Invalid amount: \`${amount}\`\nFormat: \`${this.name} ${this.format}\``;
 		}
 
-		await interaction.reply({
-			embeds: [
-				util.embedify(
-					color,
-					interaction.member.user.tag,
-					interaction.member.user.displayAvatarURL(),
-					description
-				),
-			],
-		});
+		return color == "RED"? 
+			await interaction.reply(util.error(description)) :
+			await interaction.reply({
+				embeds: [
+					util.embedify(
+						color,
+						interaction.user.tag,
+						interaction.member.user.displayAvatarURL(),
+						description
+					),
+				],
+			});
 	},
 };
