@@ -7,7 +7,7 @@ module.exports = {
 	options: [
 		{
 			name: 'amount',
-			description: 'Specify an amount to pay.',
+			description: 'Specify an amount to pay or "all".',
 			type: 'STRING',
 			required: true,
 		},

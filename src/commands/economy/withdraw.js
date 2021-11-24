@@ -7,7 +7,7 @@ module.exports = {
 	options: [
 		{
 			name: 'amount',
-			description: 'Specify the amount you wish to withdraw.',
+			description: 'Specify the amount you wish to withdraw or "all".',
 			type: 'STRING',
 			required: true,
 		},
