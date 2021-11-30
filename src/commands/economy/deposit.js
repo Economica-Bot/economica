@@ -20,20 +20,23 @@ module.exports = {
 			interaction.guild.id,
 			interaction.member.id
 		);
-		const amount =
+
+		let amount =
 			interaction.options.getString('amount') === 'all'
 				? wallet
 				: parseInt(interaction.options.getString('amount'));
 
+		if (amount > wallet) amount = wallet;
+
 		if (amount) {
-			if (amount > wallet || amount < 1) {
+			if (amount < 1) {
 				color = 'RED';
-				description = `Invalid amount: ${cSymbol}${amount.toLocaleString()}\nCurrent wallet: ${cSymbol}${wallet.toLocaleString()}`;
+				description = `Invalid amount: ${cSymbol}${amount.toLocaleString()}`;
 			} else {
 				description = `Deposited ${cSymbol}${amount.toLocaleString()}`;
 				await util.transaction(
 					interaction.guild.id,
-					interaction.member.user.id,
+					interaction.user.id,
 					this.name,
 					'`system`',
 					-amount,
@@ -46,17 +49,17 @@ module.exports = {
 			description = `Invalid amount: \`${amount}\`\nFormat: \`${this.name} ${this.format}\``;
 		}
 
-		return color == "RED"? 
-			await interaction.reply(util.error(description)) :
-			await interaction.reply({
-				embeds: [
-					util.embedify(
-						color,
-						interaction.user.tag,
-						interaction.member.user.displayAvatarURL(),
-						description
-					),
-				],
-			});
+		return color == 'RED'
+			? await interaction.reply(util.error(description))
+			: await interaction.reply({
+					embeds: [
+						util.embedify(
+							color,
+							interaction.user.tag,
+							interaction.user.displayAvatarURL(),
+							description
+						),
+					],
+			  });
 	},
 };
