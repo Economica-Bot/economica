@@ -334,7 +334,7 @@ module.exports = {
 					);
 			}
 
-			await new shopItemSchema({
+			const item = await new shopItemSchema({
 				guildID: interaction.guild.id,
 				type: type,
 				name: name,
@@ -353,13 +353,6 @@ module.exports = {
 				generatorPeriod: generator_period ? ms(generator_period) : null,
 				generatorAmount: generator_amount,
 			}).save();
-
-			const item = await shopItemSchema.findOne({
-				guildID: interaction.guild.id,
-				name: {
-					$regex: new RegExp(name, 'i'),
-				},
-			});
 
 			const currencySymbol = await util.getCurrencySymbol(interaction.guild.id);
 
@@ -617,7 +610,7 @@ module.exports = {
 				return r.name.toLowerCase() === 'economy manager';
 			});
 
-			if (!author.roles.cache.has(econManagerRole.id)) {
+			if (!interaction.author.roles.cache.has(econManagerRole.id)) {
 				return await interaction.reply(
 					util.error(
 						`You must have the <@&${econManagerRole.id}> role to create items.`
