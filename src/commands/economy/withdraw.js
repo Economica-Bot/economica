@@ -7,7 +7,7 @@ module.exports = {
 	options: [
 		{
 			name: 'amount',
-			description: 'Specify the amount you wish to withdraw.',
+			description: 'Specify the amount you wish to withdraw or "all".',
 			type: 'STRING',
 			required: true,
 		},
@@ -21,15 +21,18 @@ module.exports = {
 			interaction.guild.id,
 			interaction.member.id
 		);
-		const amount =
+
+		let amount =
 			interaction.options.getString('amount') === 'all'
 				? treasury
 				: parseInt(interaction.options.getString('amount'));
 
+		if (amount > treasury) amount = treasury;
+
 		if (amount || amount === 0) {
-			if (amount < 1 || amount > treasury) {
+			if (amount < 1) {
 				color = 'RED';
-				description = `Invalid amount: ${cSymbol}${amount.toLocaleString()}\nCurrent treasury: ${cSymbol}${treasury.toLocaleString()}`;
+				description = `Invalid amount: ${cSymbol}${amount.toLocaleString()}`;
 			} else {
 				description = `Withdrew ${cSymbol}${amount.toLocaleString()}`;
 				await util.transaction(
@@ -47,15 +50,17 @@ module.exports = {
 			description = `Invalid amount: \`${amount}\`\nFormat: \`${this.name} ${this.format}\``;
 		}
 
-		await interaction.reply({
-			embeds: [
-				util.embedify(
-					color,
-					interaction.user.tag,
-					interaction.member.user.displayAvatarURL(),
-					description
-				),
-			],
-		});
+		return color == 'RED'
+			? await interaction.reply(util.error(description))
+			: await interaction.reply({
+					embeds: [
+						util.embedify(
+							color,
+							interaction.user.tag,
+							interaction.user.displayAvatarURL(),
+							description
+						),
+					],
+			  });
 	},
 };
