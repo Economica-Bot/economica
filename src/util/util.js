@@ -520,8 +520,8 @@ module.exports.initGuildSettings = async (guild) => {
  */
 module.exports.cut = (str, n = 50, rev = false) => {
 	return str.length <= n
-		? str.substr(0, rev ? -n : n)
-		: `${str.substr(0, rev ? -n : n)}...`;
+		? str.substring(0, rev ? -n : n).trim()
+		: `${str.substring(0, rev ? -n : n)}...`.trim();
 };
 
 /**
