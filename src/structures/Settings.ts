@@ -1,6 +1,6 @@
 interface BaseSetting {
-	disabled: Boolean,
-	cooldown: Number
+	disabled: Boolean;
+	cooldown: Number;
 }
 
 export interface ModuleSetting extends BaseSetting {

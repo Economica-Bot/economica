@@ -11,7 +11,7 @@ import { Intents } from 'discord.js';
 import * as fs from 'fs';
 import * as dotenv from 'dotenv';
 
-import EconomicaClient from './structures/EconomicaClient'
+import EconomicaClient from './structures/EconomicaClient';
 
 dotenv.config();
 
@@ -25,11 +25,11 @@ const client = new EconomicaClient({
 	],
 });
 
-const handlerFiles = fs.readdirSync('./handlers');
-handlerFiles.forEach(async (file) => {
-	const handler = await import(`./handlers/${file}`);
-	console.log(`Executing ${handler.name} handler...`);
-	await handler.execute(client);
+const serviceFiles = fs.readdirSync('./services');
+serviceFiles.forEach(async (file) => {
+	const service = await import(`./services/${file}`);
+	console.log(`Executing service ${service.name}...`);
+	await service.execute(client);
 });
 
 client.login(process.env.ECON_ALPHA_TOKEN).then(() => {

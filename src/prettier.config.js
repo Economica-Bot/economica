@@ -4,4 +4,6 @@ module.exports = {
 	semi: true,
 	singleQuote: true,
 	useTabs: true,
+	printWidth: 200,
+	parser: 'typescript',
 };
