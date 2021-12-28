@@ -59,33 +59,23 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	}
 
 	addEconomicaSubcommandGroup(
-		input:
-			| EconomicaSlashCommandSubcommandGroupBuilder
-			| ((
-					subcommandGroup: EconomicaSlashCommandSubcommandGroupBuilder
-			  ) => EconomicaSlashCommandSubcommandGroupBuilder)
+		input: (
+			subcommandGroup: EconomicaSlashCommandSubcommandGroupBuilder
+		) => EconomicaSlashCommandSubcommandGroupBuilder
 	): EconomicaSlashCommandSubcommandsOnlyBuilder {
 		const { options } = this;
-		const result =
-			typeof input === 'function'
-				? input(new EconomicaSlashCommandSubcommandGroupBuilder())
-				: input;
+		const result = input(new EconomicaSlashCommandSubcommandGroupBuilder());
 		options.push(result);
 		return this;
 	}
 
 	addEconomicaSubcommand(
-		input:
-			| EconomicaSlashCommandSubcommandBuilder
-			| ((
-					subcommandGroup: EconomicaSlashCommandSubcommandBuilder
-			  ) => EconomicaSlashCommandSubcommandBuilder)
+		input: (
+			subcommandGroup: EconomicaSlashCommandSubcommandBuilder
+		) => EconomicaSlashCommandSubcommandBuilder
 	): EconomicaSlashCommandSubcommandsOnlyBuilder {
 		const { options } = this;
-		const result =
-			typeof input === 'function'
-				? input(new EconomicaSlashCommandSubcommandBuilder())
-				: input;
+		const result = input(new EconomicaSlashCommandSubcommandBuilder());
 		options.push(result);
 		return this;
 	}
