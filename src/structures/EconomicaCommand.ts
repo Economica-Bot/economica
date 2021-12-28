@@ -1,3 +1,5 @@
+import { CommandInteraction } from 'discord.js';
+import EconomicaClient from './EconomicaClient';
 import {
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandOptionsOnlyBuilder,
@@ -19,5 +21,5 @@ export default class EconomicaCommand {
 				EconomicaSlashCommandBuilder,
 				'addEconomicaSubcommand' | 'addEconomicaSubcommandGroup'
 		  >;
-	execute: Function;
+	execute: (client: EconomicaClient, interaction: CommandInteraction) => Promise<any>;
 }
