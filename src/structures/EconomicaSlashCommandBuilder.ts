@@ -3,12 +3,16 @@ import { SharedSlashCommandOptions } from '@discordjs/builders/dist/interactions
 import { SharedNameAndDescription } from '@discordjs/builders/dist/interactions/slashCommands/mixins/NameAndDescription';
 import { CommandInteraction, PermissionResolvable } from 'discord.js';
 import { PermissionRole } from './CommandOptions';
-import { EconomicaSlashCommandSubcommandBuilder, EconomicaSlashCommandSubcommandGroupBuilder } from './EconomicaSlashCommandSubcommands';
+import {
+	EconomicaSlashCommandSubcommandBuilder,
+	EconomicaSlashCommandSubcommandGroupBuilder,
+} from './EconomicaSlashCommandSubcommands';
 
 export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	global: boolean;
 	group: string;
 	format: string;
+	enabled: boolean = true;
 	userPermissions: PermissionResolvable[];
 	clientPermissions: PermissionResolvable[];
 	roles: PermissionRole[];
@@ -43,25 +47,99 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
+	setEnabled(enabled: boolean): this {
+		this.enabled = enabled;
+		return this;
+	}
+
 	addEconomicaSubcommandGroup(
-		input: EconomicaSlashCommandSubcommandGroupBuilder | ((subcommandGroup: EconomicaSlashCommandSubcommandGroupBuilder) => EconomicaSlashCommandSubcommandGroupBuilder)
+		input:
+			| EconomicaSlashCommandSubcommandGroupBuilder
+			| ((
+					subcommandGroup: EconomicaSlashCommandSubcommandGroupBuilder
+			  ) => EconomicaSlashCommandSubcommandGroupBuilder)
 	): EconomicaSlashCommandSubcommandsOnlyBuilder {
 		const { options } = this;
-		const result = typeof input === 'function' ? input(new EconomicaSlashCommandSubcommandGroupBuilder()) : input;
+		const result =
+			typeof input === 'function'
+				? input(new EconomicaSlashCommandSubcommandGroupBuilder())
+				: input;
 		options.push(result);
 		return this;
 	}
 
 	addEconomicaSubcommand(
-		input: EconomicaSlashCommandSubcommandBuilder | ((subcommandGroup: EconomicaSlashCommandSubcommandBuilder) => EconomicaSlashCommandSubcommandBuilder)
+		input:
+			| EconomicaSlashCommandSubcommandBuilder
+			| ((
+					subcommandGroup: EconomicaSlashCommandSubcommandBuilder
+			  ) => EconomicaSlashCommandSubcommandBuilder)
 	): EconomicaSlashCommandSubcommandsOnlyBuilder {
 		const { options } = this;
-		const result = typeof input === 'function' ? input(new EconomicaSlashCommandSubcommandBuilder()) : input;
+		const result =
+			typeof input === 'function'
+				? input(new EconomicaSlashCommandSubcommandBuilder())
+				: input;
 		options.push(result);
 		return this;
 	}
 
-	toJSON() {
+	public getSubcommandGroup(
+		interaction: CommandInteraction
+	): EconomicaSlashCommandSubcommandGroupBuilder {
+		const subcommandgroup = this.options.find(
+			(
+				builder:
+					| EconomicaSlashCommandSubcommandGroupBuilder
+					| EconomicaSlashCommandSubcommandBuilder
+			) => {
+				return (
+					builder instanceof EconomicaSlashCommandSubcommandGroupBuilder &&
+					builder.name === interaction.options.getSubcommandGroup()
+				);
+			}
+		) as EconomicaSlashCommandSubcommandGroupBuilder;
+		return subcommandgroup ?? undefined;
+	}
+
+	public getSubcommand(
+		interaction: CommandInteraction
+	): EconomicaSlashCommandSubcommandBuilder {
+		const builder = this.options.find(
+			(
+				builder:
+					| EconomicaSlashCommandSubcommandGroupBuilder
+					| EconomicaSlashCommandSubcommandBuilder
+			) => {
+				return (
+					(builder instanceof EconomicaSlashCommandSubcommandGroupBuilder &&
+						builder.name === interaction.options.getSubcommandGroup() &&
+						builder.options.find(
+							(subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) =>
+								subcommandbuilder.name === interaction.options.getSubcommand()
+						)) ||
+					(builder instanceof EconomicaSlashCommandSubcommandBuilder &&
+						builder.name === interaction.options.getSubcommand())
+				);
+			}
+		) as
+			| EconomicaSlashCommandSubcommandGroupBuilder
+			| EconomicaSlashCommandSubcommandBuilder;
+		if (
+			builder &&
+			builder instanceof EconomicaSlashCommandSubcommandGroupBuilder
+		) {
+			return (
+				(builder.options.find(
+					(subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) =>
+						subcommandbuilder.name === interaction.options.getSubcommand()
+				) as EconomicaSlashCommandSubcommandBuilder) ?? undefined
+			);
+		} else if (builder instanceof EconomicaSlashCommandSubcommandBuilder)
+			return builder ?? undefined;
+	}
+
+	public toJSON() {
 		return {
 			...super.toJSON(),
 			global: this.global,
@@ -72,61 +150,18 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 			roles: this.roles,
 		};
 	}
-
-	public getUserPermissions(): PermissionResolvable[] {
-		return this.userPermissions;
-	}
-
-	public getClientPermissions(): PermissionResolvable[] {
-		return this.clientPermissions;
-	}
-
-	public getRoles(): PermissionRole[] {
-		return this.roles;
-	}
-
-	public getGlobal(): boolean {
-		return this.global;
-	}
-
-	public getGroup(): string {
-		return this.group;
-	}
-
-	public getFormat(): string {
-		return this.format;
-	}
-
-	public getSubcommandGroup(interaction: CommandInteraction): EconomicaSlashCommandSubcommandGroupBuilder {
-		const subcommandgroup = this.options.find((builder: EconomicaSlashCommandSubcommandGroupBuilder | EconomicaSlashCommandSubcommandBuilder) => {
-			return builder instanceof EconomicaSlashCommandSubcommandGroupBuilder && builder.name === interaction.options.getSubcommandGroup();
-		}) as EconomicaSlashCommandSubcommandGroupBuilder;
-		return subcommandgroup ?? undefined;
-	}
-
-	public getSubcommand(interaction: CommandInteraction): EconomicaSlashCommandSubcommandBuilder {
-		const builder = this.options.find((builder: EconomicaSlashCommandSubcommandGroupBuilder | EconomicaSlashCommandSubcommandBuilder) => {
-			return (
-				(builder instanceof EconomicaSlashCommandSubcommandGroupBuilder &&
-					builder.name === interaction.options.getSubcommandGroup() &&
-					builder.options.find((subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) => subcommandbuilder.name === interaction.options.getSubcommand())) ||
-				(builder instanceof EconomicaSlashCommandSubcommandBuilder && builder.name === interaction.options.getSubcommand())
-			);
-		}) as EconomicaSlashCommandSubcommandGroupBuilder | EconomicaSlashCommandSubcommandBuilder;
-		if (builder && builder instanceof EconomicaSlashCommandSubcommandGroupBuilder) {
-			return (
-				(builder.options.find(
-					(subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) => subcommandbuilder.name === interaction.options.getSubcommand()
-				) as EconomicaSlashCommandSubcommandBuilder) ?? undefined
-			);
-		} else if (builder instanceof EconomicaSlashCommandSubcommandBuilder) return builder ?? undefined;
-	}
 }
 
 export interface EconomicaSlashCommandBuilder extends SlashCommandBuilder {}
 
 export interface EconomicaSlashCommandSubcommandsOnlyBuilder
 	extends SharedNameAndDescription,
-		Pick<EconomicaSlashCommandBuilder, 'toJSON' | 'addEconomicaSubcommand' | 'addEconomicaSubcommandGroup'> {}
+		Pick<
+			EconomicaSlashCommandBuilder,
+			'toJSON' | 'addEconomicaSubcommand' | 'addEconomicaSubcommandGroup'
+		> {}
 
-export interface EconomicaSlashCommandOptionsOnlyBuilder extends SharedNameAndDescription, SharedSlashCommandOptions, Pick<EconomicaSlashCommandBuilder, 'toJSON'> {}
+export interface EconomicaSlashCommandOptionsOnlyBuilder
+	extends SharedNameAndDescription,
+		SharedSlashCommandOptions,
+		Pick<EconomicaSlashCommandBuilder, 'toJSON'> {}

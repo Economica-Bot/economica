@@ -1,7 +1,9 @@
-import { SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from '@discordjs/builders';
+import {
+	SlashCommandSubcommandBuilder,
+	SlashCommandSubcommandGroupBuilder,
+} from '@discordjs/builders';
 import { PermissionResolvable } from 'discord.js';
 import { PermissionRole } from './CommandOptions';
-import { EconomicaSlashCommandBuilder } from './EconomicaSlashCommandBuilder';
 
 export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSubcommandGroupBuilder {
 	public userPermissions: PermissionResolvable[];
@@ -23,9 +25,18 @@ export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSub
 		return this;
 	}
 
-	addEconomicaSubcommand(input: EconomicaSlashCommandSubcommandBuilder | ((subcommandGroup: EconomicaSlashCommandSubcommandBuilder) => EconomicaSlashCommandSubcommandBuilder)): this {
+	addEconomicaSubcommand(
+		input:
+			| EconomicaSlashCommandSubcommandBuilder
+			| ((
+					subcommandGroup: EconomicaSlashCommandSubcommandBuilder
+			  ) => EconomicaSlashCommandSubcommandBuilder)
+	): this {
 		const { options } = this;
-		const result = typeof input === 'function' ? input(new EconomicaSlashCommandSubcommandBuilder()) : input;
+		const result =
+			typeof input === 'function'
+				? input(new EconomicaSlashCommandSubcommandBuilder())
+				: input;
 
 		options.push(result);
 		return this;
@@ -41,7 +52,8 @@ export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSub
 	}
 }
 
-export interface EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSubcommandGroupBuilder {}
+export interface EconomicaSlashCommandSubcommandGroupBuilder
+	extends SlashCommandSubcommandGroupBuilder {}
 
 export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcommandBuilder {
 	userPermissions: PermissionResolvable[];
@@ -73,4 +85,5 @@ export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcomma
 	}
 }
 
-export interface EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcommandBuilder {}
+export interface EconomicaSlashCommandSubcommandBuilder
+	extends SlashCommandSubcommandBuilder {}
