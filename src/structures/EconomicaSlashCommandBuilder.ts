@@ -12,25 +12,11 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	global: boolean;
 	group: string;
 	format: string;
-	enabled: boolean = true;
+	examples: string[];
 	userPermissions: PermissionResolvable[];
 	clientPermissions: PermissionResolvable[];
 	roles: PermissionRole[];
-
-	setUserPermissions(userPermissions: PermissionResolvable[]): this {
-		this.userPermissions = userPermissions;
-		return this;
-	}
-
-	setClientPermissions(clientPermissions: PermissionResolvable[]): this {
-		this.clientPermissions = clientPermissions;
-		return this;
-	}
-
-	setRoles(roles: PermissionRole[]): this {
-		this.roles = roles;
-		return this;
-	}
+	enabled: boolean = true;
 
 	setGlobal(global: boolean): this {
 		this.global = global;
@@ -44,6 +30,26 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 
 	setFormat(format: string): this {
 		this.format = format;
+		return this;
+	}
+
+	setExamples(examples: string[]): this {
+		this.examples = examples;
+		return this;
+	}
+
+	setUserPermissions(userPermissions: PermissionResolvable[]): this {
+		this.userPermissions = userPermissions;
+		return this;
+	}
+
+	setClientPermissions(clientPermissions: PermissionResolvable[]): this {
+		this.clientPermissions = clientPermissions;
+		return this;
+	}
+
+	setRoles(roles: PermissionRole[]): this {
+		this.roles = roles;
 		return this;
 	}
 
