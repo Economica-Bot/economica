@@ -62,7 +62,10 @@ export default class PermissionsCommand extends EconomicaCommand {
 			}\``;
 		}
 
-		const name = data.name + data.getSubcommandGroup(interaction) ?? '' + data.getSubcommand(interaction) ?? ''
+		const name =
+			data.getSubcommandGroup(interaction) 
+			+ ' ' 
+			+ data.getSubcommand(interaction) == undefined ? data.getSubcommand(interaction) : '';
 
 		interaction.reply({
 			embeds: [
