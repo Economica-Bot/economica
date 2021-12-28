@@ -19,8 +19,8 @@ export default class ResetCommand extends EconomicaCommand {
 			embeds: [
 				embedify(
 					'GREEN',
-					interaction.member.user.username,
-					interaction.member.user.avatar,
+					interaction.user.username,
+					interaction.user.avatarURL(),
 					'`RESET ALL SLASH COMMANDS`'
 				),
 			],
