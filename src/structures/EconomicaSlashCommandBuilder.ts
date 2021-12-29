@@ -18,6 +18,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	userPermissions: PermissionString[];
 	clientPermissions: PermissionString[];
 	roles: PermissionRole[];
+	devOnly: boolean = false;
 	enabled: boolean = true;
 
 	setGlobal(global: boolean): this {
@@ -57,6 +58,11 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 
 	setEnabled(enabled: boolean): this {
 		this.enabled = enabled;
+		return this;
+	}
+
+	setDevOnly(devOnly: boolean): this {
+		this.devOnly = devOnly; 
 		return this;
 	}
 
