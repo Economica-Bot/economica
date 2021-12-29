@@ -19,7 +19,7 @@ export default class implements EconomicaCommand {
 		const commandInput = interaction.options.getString('command');
 		const command = client.commands.get(commandInput);
 		if (!command) {
-			return interaction.reply('Could not find that command.');
+			return await interaction.reply('Could not find that command.');
 		}
 
 		const data = command.data as EconomicaSlashCommandBuilder;
@@ -65,7 +65,7 @@ export default class implements EconomicaCommand {
 				? data.getSubcommand(interaction)
 				: '';
 
-		interaction.reply({
+		await interaction.reply({
 			embeds: [
 				embedify(
 					'BLUE',
