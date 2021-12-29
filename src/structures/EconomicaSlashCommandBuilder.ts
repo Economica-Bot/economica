@@ -1,6 +1,8 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { SharedSlashCommandOptions } from '@discordjs/builders/dist/interactions/slashCommands/mixins/CommandOptions';
-import { SharedNameAndDescription } from '@discordjs/builders/dist/interactions/slashCommands/mixins/NameAndDescription';
+import {
+	SlashCommandBuilder,
+	SlashCommandOptionsOnlyBuilder,
+	SlashCommandSubcommandsOnlyBuilder,
+} from '@discordjs/builders';
 import { CommandInteraction, PermissionResolvable } from 'discord.js';
 import { PermissionRole } from './CommandOptions';
 import {
@@ -98,9 +100,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return subcommandgroup ?? undefined;
 	}
 
-	public getSubcommand(
-		interaction: CommandInteraction
-	): EconomicaSlashCommandSubcommandBuilder {
+	public getSubcommand(interaction: CommandInteraction): EconomicaSlashCommandSubcommandBuilder {
 		const builder = this.options.find(
 			(
 				builder:
@@ -118,13 +118,8 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 						builder.name === interaction.options.getSubcommand())
 				);
 			}
-		) as
-			| EconomicaSlashCommandSubcommandGroupBuilder
-			| EconomicaSlashCommandSubcommandBuilder;
-		if (
-			builder &&
-			builder instanceof EconomicaSlashCommandSubcommandGroupBuilder
-		) {
+		) as EconomicaSlashCommandSubcommandGroupBuilder | EconomicaSlashCommandSubcommandBuilder;
+		if (builder && builder instanceof EconomicaSlashCommandSubcommandGroupBuilder) {
 			return (
 				(builder.options.find(
 					(subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) =>
@@ -151,13 +146,15 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 export interface EconomicaSlashCommandBuilder extends SlashCommandBuilder {}
 
 export interface EconomicaSlashCommandSubcommandsOnlyBuilder
-	extends SharedNameAndDescription,
+	extends Omit<
+			SlashCommandSubcommandsOnlyBuilder,
+			'toJSON' | 'addSubcommand' | 'addSubcommandGroup'
+		>,
 		Pick<
 			EconomicaSlashCommandBuilder,
 			'toJSON' | 'addEconomicaSubcommand' | 'addEconomicaSubcommandGroup'
 		> {}
 
 export interface EconomicaSlashCommandOptionsOnlyBuilder
-	extends SharedNameAndDescription,
-		SharedSlashCommandOptions,
+	extends Omit<SlashCommandOptionsOnlyBuilder, 'toJSON'>,
 		Pick<EconomicaSlashCommandBuilder, 'toJSON'> {}

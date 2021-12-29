@@ -17,9 +17,6 @@ export default class EconomicaCommand {
 		| EconomicaSlashCommandSubcommandBuilder
 		| EconomicaSlashCommandSubcommandsOnlyBuilder
 		| EconomicaSlashCommandOptionsOnlyBuilder
-		| Omit<
-				EconomicaSlashCommandBuilder,
-				'addEconomicaSubcommand' | 'addEconomicaSubcommandGroup'
-		  >;
+		| Omit<EconomicaSlashCommandBuilder, 'addEconomicaSubcommand' | 'addEconomicaSubcommandGroup'>;
 	execute: (client: EconomicaClient, interaction: CommandInteraction) => Promise<any>;
 }
