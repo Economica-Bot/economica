@@ -233,22 +233,25 @@ export async function transaction(
 
 /**
  * Record an infraction.
- * @param {String} guildID - GuildModel id.
- * @param {String} userID - User id.
- * @param {String} staffID - Staff id.
- * @param {String} type - The punishment for the infraction.
- * @param {String} reason - The reason for the punishment.
+ * @param {string} guildID - GuildModel id.
+ * @param {string} userID - User id.
+ * @param {string} staffID - Staff id.
+ * @param {string} type - The punishment for the infraction.
+ * @param {string} reason - The reason for the punishment.
+ * @param {boolean} permanent - Whether the punishment is permanent.
+ * @param {boolean} active - Whehther the punishment is active.
+ * @param {number} length - The length of the punishment.
  */
 export async function infraction(
 	client: Discord.Client,
-	guildID: String,
-	userID: String,
-	staffID: String,
-	type: String,
-	reason: String,
-	permanent: Boolean,
-	active: Boolean,
-	expires: Date
+	guildID: string,
+	userID: string,
+	staffID: string,
+	type: string,
+	reason: string,
+	permanent?: boolean,
+	active?: boolean,
+	duration?: number
 ) {
 	const infraction = await new InfractionModel({
 		guildID,
@@ -258,7 +261,7 @@ export async function infraction(
 		reason,
 		permanent,
 		active,
-		expires,
+		duration,
 	}).save();
 
 	const guildSetting = await GuildModel.findOne({

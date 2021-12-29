@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import { NonReqBoolean, NonReqDate, ReqString } from '../structures/Datatypes';
+import { NonReqBoolean, NonReqDate, NonReqNum, ReqString } from '../structures/Datatypes';
 
 interface Infraction {
 	guildID: string;
@@ -8,7 +8,7 @@ interface Infraction {
 	type: string;
 	permanent: boolean;
 	active: boolean;
-	expires: Date;
+	duration: number;
 }
 
 const Schema = new mongoose.Schema<Infraction>(
@@ -20,7 +20,7 @@ const Schema = new mongoose.Schema<Infraction>(
 		reason: ReqString,
 		permanent: NonReqBoolean,
 		active: NonReqBoolean,
-		expires: NonReqDate,
+		duration: NonReqNum,
 	},
 	{
 		timestamps: true,
