@@ -4,7 +4,7 @@ import {
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 } from '../../structures/index';
-import { infraction } from '../../util';
+import { infraction } from '../../util/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()

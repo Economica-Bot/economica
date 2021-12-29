@@ -4,7 +4,7 @@ import {
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 } from '../../structures/index';
-import { embedify } from '../../util';
+import { embedify } from '../../util/util';
 
 export default class ResetCommand extends EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()

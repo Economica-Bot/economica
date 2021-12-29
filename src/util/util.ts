@@ -8,12 +8,12 @@ import {
 	MemberModel,
 	ShopModel,
 	TransactionModel,
-} from './models/index';
+} from '../models/index';
 import {
 	EconomicaClient,
 	EconomyInfo,
 	IncomeCommandProperties,
-} from './structures/index';
+} from '../structures/index';
 
 /**
  * Returns a message embed object.

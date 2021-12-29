@@ -11,7 +11,7 @@ import { Intents } from 'discord.js';
 import * as fs from 'fs';
 import * as dotenv from 'dotenv';
 import { EconomicaClient } from './structures/EconomicaClient';
-import { runtimeError } from './util';
+import { runtimeError } from './util/util';
 
 dotenv.config();
 

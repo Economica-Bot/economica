@@ -1,8 +1,10 @@
 import { CommandInteraction } from 'discord.js';
-import EconomicaClient from '../../structures/EconomicaClient';
-import EconomicaCommand from '../../structures/EconomicaCommand';
-import { EconomicaSlashCommandBuilder } from '../../structures/EconomicaSlashCommandBuilder';
-import { embedify } from '../../util';
+import {
+	EconomicaClient,
+	EconomicaCommand,
+	EconomicaSlashCommandBuilder,
+} from '../../structures/index';
+import { embedify } from '../../util/util';
 
 export default class PermissionsCommand extends EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -10,16 +12,10 @@ export default class PermissionsCommand extends EconomicaCommand {
 		.setDescription('See the permissions of a command.')
 		.setFormat('<command>')
 		.addStringOption((option) =>
-			option
-				.setName('command')
-				.setDescription('Specify a command.')
-				.setRequired(true)
+			option.setName('command').setDescription('Specify a command.').setRequired(true)
 		);
 
-	execute = async (
-		client: EconomicaClient,
-		interaction: CommandInteraction
-	) => {
+	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
 		const commandInput = interaction.options.getString('command');
 		const command = client.commands.get(commandInput);
 		if (!command) {
@@ -44,7 +40,7 @@ export default class PermissionsCommand extends EconomicaCommand {
 			}Subcommand Group Permissions**\n__User Permissions:__\n\`${
 				data.getSubcommandGroup(interaction).userPermissions ?? '`None`'
 			}\`\n__Client Permissions:__\n\`${
-				data.getSubcommandGroup(interaction).clientPermissions ?? '`None`' 
+				data.getSubcommandGroup(interaction).clientPermissions ?? '`None`'
 			}\`\n__Roles:__\n\`${
 				data.getSubcommandGroup(interaction).roles ?? '`None`'
 			}\`\n\n`;
@@ -63,9 +59,11 @@ export default class PermissionsCommand extends EconomicaCommand {
 		}
 
 		const name =
-			data.getSubcommandGroup(interaction) 
+			+ data.getSubcommandGroup(interaction) 
 			+ ' ' 
-			+ data.getSubcommand(interaction) == undefined ? data.getSubcommand(interaction) : '';
+			+ data.getSubcommand(interaction) == undefined
+				? data.getSubcommand(interaction)
+				: '';
 
 		interaction.reply({
 			embeds: [

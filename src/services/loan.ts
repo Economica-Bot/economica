@@ -1,6 +1,6 @@
 import { Client } from 'discord.js';
 import { LoanModel } from '../models/index';
-import * as util from '../util';
+import * as util from '../util/util';
 
 export const name = 'loan';
 

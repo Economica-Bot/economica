@@ -1,8 +1,10 @@
 import { CommandInteraction } from 'discord.js';
-import EconomicaClient from '../../structures/EconomicaClient';
-import EconomicaCommand from '../../structures/EconomicaCommand';
-import { EconomicaSlashCommandBuilder } from '../../structures/EconomicaSlashCommandBuilder';
-import * as util from '../../util';
+import {
+	EconomicaClient,
+	EconomicaCommand,
+	EconomicaSlashCommandBuilder,
+} from '../../structures/index';
+import * as util from '../../util/util';
 
 export default class PingCommand extends EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -11,10 +13,7 @@ export default class PingCommand extends EconomicaCommand {
 		.setGlobal(true)
 		.setGroup('Utility');
 
-	execute = async (
-		client: EconomicaClient,
-		interaction: CommandInteraction
-	) => {
+	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
 		await interaction.reply({
 			embeds: [
 				util.embedify(
