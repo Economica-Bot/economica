@@ -1,6 +1,5 @@
 import * as mongoose from 'mongoose';
-import { ReqNum, ReqString, TransactionType } from '../structures/Datatypes';
-import { TransactionTypes } from '../structures/Types';
+import { ReqNum, ReqString, TransactionType, TransactionTypes } from '../structures/index';
 
 interface Transaction {
 	guildID: string;
@@ -28,7 +27,4 @@ const Schema = new mongoose.Schema<Transaction>(
 	}
 );
 
-export const TransactionModel: mongoose.Model<Transaction> = mongoose.model(
-	'Transactions',
-	Schema
-);
+export const TransactionModel: mongoose.Model<Transaction> = mongoose.model('Transactions', Schema);

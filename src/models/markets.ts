@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import { ReqBoolean, ReqString } from '../structures/Datatypes';
+import { ReqBoolean, ReqString } from '../structures/index';
 
 interface Market {
 	userID: string;

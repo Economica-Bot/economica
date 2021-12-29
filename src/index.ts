@@ -10,8 +10,8 @@
 import { Intents } from 'discord.js';
 import * as fs from 'fs';
 import * as dotenv from 'dotenv';
-
-import EconomicaClient from './structures/EconomicaClient';
+import { EconomicaClient } from './structures/EconomicaClient';
+import { runtimeError } from './util';
 
 dotenv.config();
 
@@ -36,6 +36,6 @@ client.login(process.env.ECON_ALPHA_TOKEN).then(() => {
 	console.log(`${client.user.username} logged in`);
 });
 
-// process.on('unhandledRejection', async (err) => await util.runtimeError(client, err));
-// process.on('uncaughtException', async (err) => await util.runtimeError(client, err));
-// process.on('rejectionHandled', async (err) => await util.runtimeError(client, err));
+process.on('unhandledRejection', async (err: Error) => await runtimeError(client, err));
+process.on('uncaughtException', async (err: Error) => await runtimeError(client, err));
+process.on('rejectionHandled', async (err: Error) => await runtimeError(client, err));

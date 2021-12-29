@@ -1,11 +1,5 @@
 import * as mongoose from 'mongoose';
-import {
-	ReqBoolean,
-	ReqDate,
-	ReqNum,
-	ReqString,
-	ReqStringArr,
-} from '../structures/Datatypes';
+import { ReqBoolean, ReqDate, ReqNum, ReqString, ReqStringArr } from '../structures/index';
 
 interface Shop {
 	guildID: string;
@@ -53,7 +47,4 @@ const Schema = new mongoose.Schema<Shop>(
 	}
 );
 
-export const ShopModel: mongoose.Model<Shop> = mongoose.model(
-	'Shop_Items',
-	Schema
-);
+export const ShopModel: mongoose.Model<Shop> = mongoose.model('Shop_Items', Schema);

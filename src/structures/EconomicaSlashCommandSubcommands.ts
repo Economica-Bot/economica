@@ -2,20 +2,20 @@ import {
 	SlashCommandSubcommandBuilder,
 	SlashCommandSubcommandGroupBuilder,
 } from '@discordjs/builders';
-import { PermissionResolvable } from 'discord.js';
+import { PermissionString } from 'discord.js';
 import { PermissionRole } from './CommandOptions';
 
 export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSubcommandGroupBuilder {
-	public userPermissions: PermissionResolvable[];
-	public clientPermissions: PermissionResolvable[];
+	public userPermissions: PermissionString[];
+	public clientPermissions: PermissionString[];
 	public roles: PermissionRole[];
 
-	setUserPermissions(userPermissions: PermissionResolvable[]): this {
+	setUserPermissions(userPermissions: PermissionString[]): this {
 		this.userPermissions = userPermissions;
 		return this;
 	}
 
-	setClientPermissions(clientPermissions: PermissionResolvable[]): this {
+	setClientPermissions(clientPermissions: PermissionString[]): this {
 		this.clientPermissions = clientPermissions;
 		return this;
 	}
@@ -34,9 +34,7 @@ export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSub
 	): this {
 		const { options } = this;
 		const result =
-			typeof input === 'function'
-				? input(new EconomicaSlashCommandSubcommandBuilder())
-				: input;
+			typeof input === 'function' ? input(new EconomicaSlashCommandSubcommandBuilder()) : input;
 
 		options.push(result);
 		return this;
@@ -56,16 +54,16 @@ export interface EconomicaSlashCommandSubcommandGroupBuilder
 	extends SlashCommandSubcommandGroupBuilder {}
 
 export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcommandBuilder {
-	userPermissions: PermissionResolvable[];
-	clientPermissions: PermissionResolvable[];
+	userPermissions: PermissionString[];
+	clientPermissions: PermissionString[];
 	roles: PermissionRole[];
 
-	setUserPermissions(userPermissions: PermissionResolvable[]): this {
+	setUserPermissions(userPermissions: PermissionString[]): this {
 		this.userPermissions = userPermissions;
 		return this;
 	}
 
-	setClientPermissions(clientPermissions: PermissionResolvable[]): this {
+	setClientPermissions(clientPermissions: PermissionString[]): this {
 		this.clientPermissions = clientPermissions;
 		return this;
 	}
@@ -85,5 +83,4 @@ export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcomma
 	}
 }
 
-export interface EconomicaSlashCommandSubcommandBuilder
-	extends SlashCommandSubcommandBuilder {}
+export interface EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcommandBuilder {}

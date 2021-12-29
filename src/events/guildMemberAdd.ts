@@ -1,6 +1,6 @@
 import { GuildMember } from 'discord.js';
-import {InfractionModel} from '../models/infractions';
-import EconomicaClient from '../structures/EconomicaClient';
+import { EconomicaClient } from '../structures/index';
+import { InfractionModel } from '../models/index';
 
 export const name = 'guildMemberAdd';
 

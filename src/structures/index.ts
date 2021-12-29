@@ -5,6 +5,10 @@ export {
 	EconomicaSlashCommandOptionsOnlyBuilder,
 	EconomicaSlashCommandSubcommandsOnlyBuilder,
 } from './EconomicaSlashCommandBuilder';
+export {
+	EconomicaSlashCommandSubcommandBuilder,
+	EconomicaSlashCommandSubcommandGroupBuilder,
+} from './EconomicaSlashCommandSubcommands';
 export { ModuleSetting, RoleSetting, ChannelSetting, CommandSetting } from './Settings';
 export { TransactionTypes, InfractionTypes } from './Types';
 export {

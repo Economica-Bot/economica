@@ -3,7 +3,7 @@ import {
 	SlashCommandOptionsOnlyBuilder,
 	SlashCommandSubcommandsOnlyBuilder,
 } from '@discordjs/builders';
-import { CommandInteraction, PermissionResolvable } from 'discord.js';
+import { CommandInteraction, PermissionString } from 'discord.js';
 import { PermissionRole } from './CommandOptions';
 import {
 	EconomicaSlashCommandSubcommandBuilder,
@@ -15,8 +15,8 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	group: string;
 	format: string;
 	examples: string[];
-	userPermissions: PermissionResolvable[];
-	clientPermissions: PermissionResolvable[];
+	userPermissions: PermissionString[];
+	clientPermissions: PermissionString[];
 	roles: PermissionRole[];
 	enabled: boolean = true;
 
@@ -40,12 +40,12 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	setUserPermissions(userPermissions: PermissionResolvable[]): this {
+	setUserPermissions(userPermissions: PermissionString[]): this {
 		this.userPermissions = userPermissions;
 		return this;
 	}
 
-	setClientPermissions(clientPermissions: PermissionResolvable[]): this {
+	setClientPermissions(clientPermissions: PermissionString[]): this {
 		this.clientPermissions = clientPermissions;
 		return this;
 	}

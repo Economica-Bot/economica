@@ -1,4 +1,4 @@
-import { ShopModel } from "../models/shops";
+import { ShopModel } from '../models/index';
 
 export const name = 'shop';
 

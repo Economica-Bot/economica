@@ -1,8 +1,8 @@
-import { Guild } from "discord.js";
-import EconomicaClient from "../structures/EconomicaClient";
+import { Guild } from 'discord.js';
+import { EconomicaClient } from '../structures/index';
+import { GuildModel } from '../models/index';
 
 const config = require('../config.json');
-import { GuildModel } from "../models/guilds";
 
 export const name = 'guildCreate';
 

@@ -6,7 +6,7 @@ import {
 	ReqInventoryItemArr,
 	ReqNum,
 	ReqString,
-} from '../structures/Datatypes';
+} from '../structures/index';
 
 interface Member {
 	guildID: string;
@@ -33,7 +33,4 @@ const Schema = new mongoose.Schema<Member>(
 	}
 );
 
-export const MemberModel: mongoose.Model<Member> = mongoose.model(
-	'Members',
-	Schema
-);
+export const MemberModel: mongoose.Model<Member> = mongoose.model('Members', Schema);

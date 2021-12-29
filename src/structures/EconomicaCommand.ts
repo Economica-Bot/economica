@@ -1,14 +1,12 @@
 import { CommandInteraction } from 'discord.js';
-import { EconomicaClient } from './EconomicaClient';
 import {
+	EconomicaClient,
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandOptionsOnlyBuilder,
 	EconomicaSlashCommandSubcommandsOnlyBuilder,
-} from './EconomicaSlashCommandBuilder';
-import {
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
-} from './EconomicaSlashCommandSubcommands';
+} from './index';
 
 export class EconomicaCommand {
 	data:

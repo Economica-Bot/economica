@@ -1,11 +1,11 @@
 import * as mongoose from 'mongoose';
-import { ReqString } from '../structures/Datatypes';
 import {
 	ChannelSetting,
 	CommandSetting,
 	ModuleSetting,
 	RoleSetting,
-} from '../structures/Settings';
+	ReqString,
+} from '../structures/index';
 
 interface Guild {
 	guildID: string;
@@ -37,7 +37,4 @@ const Schema = new mongoose.Schema<Guild>(
 	}
 );
 
-export const GuildModel: mongoose.Model<Guild> = mongoose.model(
-	'Guilds',
-	Schema
-);
+export const GuildModel: mongoose.Model<Guild> = mongoose.model('Guilds', Schema);

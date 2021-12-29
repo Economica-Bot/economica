@@ -1,4 +1,4 @@
-const config = require('./config.json');
+const config = require('../config.json');
 import * as Discord from 'discord.js';
 import {
 	GuildModel,
@@ -11,7 +11,6 @@ import {
 } from './models/index';
 import {
 	EconomicaClient,
-	CommandData,
 	EconomyInfo,
 	IncomeCommandProperties,
 } from './structures/index';

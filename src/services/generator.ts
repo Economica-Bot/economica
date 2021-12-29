@@ -1,6 +1,4 @@
-import { ShopModel } from "../models/shops";
-
-import { MemberModel } from "../models/members";
+import { ShopModel, MemberModel } from '../models/index';
 
 export const name = 'generator';
 

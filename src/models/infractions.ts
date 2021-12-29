@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import { NonReqBoolean, NonReqDate, NonReqNum, ReqString } from '../structures/Datatypes';
+import { NonReqBoolean, NonReqDate, NonReqNum, ReqString } from '../structures/index';
 
 interface Infraction {
 	guildID: string;
@@ -28,7 +28,4 @@ const Schema = new mongoose.Schema<Infraction>(
 	}
 );
 
-export const InfractionModel: mongoose.Model<Infraction> = mongoose.model(
-	'Infractions',
-	Schema
-);
+export const InfractionModel: mongoose.Model<Infraction> = mongoose.model('Infractions', Schema);
