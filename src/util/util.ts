@@ -1,4 +1,4 @@
-const config = require('../config.json');
+const config = require('../../config.json');
 import * as Discord from 'discord.js';
 import {
 	GuildModel,
