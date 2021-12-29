@@ -2,7 +2,7 @@ import { Guild } from 'discord.js';
 import { EconomicaClient } from '../structures/index';
 import { GuildModel } from '../models/index';
 
-const config = require('../config.json');
+const config = require('../../config.json');
 
 export const name = 'guildCreate';
 
