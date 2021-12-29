@@ -1,4 +1,4 @@
-import { TransactionTypes } from './TransactionTypes';
+import { TransactionTypes } from './Types';
 
 export interface CommandData {
 	command: string;

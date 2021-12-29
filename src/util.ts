@@ -1,19 +1,20 @@
 const config = require('./config.json');
 import * as Discord from 'discord.js';
-
-import { MemberModel } from './models/members';
-import { GuildModel } from './models/guilds';
-import { InfractionModel } from './models/infractions';
-import { LoanModel } from './models/loans';
-import { MarketModel } from './models/markets';
-import { TransactionModel } from './models/transactions';
-import { ShopModel } from './models/shops.js';
-import EconomicaClient from './structures/EconomicaClient';
 import {
+	GuildModel,
+	InfractionModel,
+	LoanModel,
+	MarketModel,
+	MemberModel,
+	ShopModel,
+	TransactionModel,
+} from './models/index';
+import {
+	EconomicaClient,
 	CommandData,
 	EconomyInfo,
 	IncomeCommandProperties,
-} from './structures/Datatypes';
+} from './structures/index';
 
 /**
  * Returns a message embed object.
@@ -95,10 +96,7 @@ export function success(
  * @param {string} userID - User id.
  * @returns {Promise<EconomyInfo>} wallet, treasury, total, rank
  */
-export async function getEconInfo(
-	guildID: string,
-	userID: string
-): Promise<EconomyInfo> {
+export async function getEconInfo(guildID: string, userID: string): Promise<EconomyInfo> {
 	let rank = 0,
 		wallet = 0,
 		treasury = 0,
@@ -200,12 +198,7 @@ export async function transaction(
 		const description = `Transaction for <@!${userID}>\nType: \`${transaction_type}\` | ${memo}`;
 		channel.send({
 			embeds: [
-				this.embedify(
-					'GOLD',
-					`${transaction._id}`,
-					guild.iconURL(),
-					description
-				)
+				this.embedify('GOLD', `${transaction._id}`, guild.iconURL(), description)
 					.addFields([
 						{
 							name: '__**Wallet**__',
@@ -276,12 +269,7 @@ export async function infraction(
 		const description = `Infraction for <@!${userID}> | Executed by <@!${staffID}>\nType: \`${type}\`\n${reason}`;
 		channel.send({
 			embeds: [
-				this.embedify(
-					'RED',
-					`${infraction._id}`,
-					guild.iconURL(),
-					description
-				).setTimestamp(),
+				this.embedify('RED', `${infraction._id}`, guild.iconURL(), description).setTimestamp(),
 			],
 		});
 	}
@@ -313,10 +301,7 @@ export async function getCurrencySymbol(guildID: string): Promise<String> {
  * @param {String} command - Income command.
  * @param {IncomeCommandProperties} properties - Command properties.
  */
-export async function setCommandStats(
-	guildID: string,
-	properties: IncomeCommandProperties
-) {
+export async function setCommandStats(guildID: string, properties: IncomeCommandProperties) {
 	await GuildModel.findOneAndUpdate(
 		{ guildID },
 		{
@@ -373,9 +358,7 @@ export function isSuccess(properties: IncomeCommandProperties): boolean {
  * @returns {string} `str.substr(0, rev? -n : n)`
  */
 export function cut(str: string, n = 50, rev = false) {
-	return str.length <= n
-		? str.substring(0, rev ? -n : n)
-		: `${str.substring(0, rev ? -n : n)}...`;
+	return str.length <= n ? str.substring(0, rev ? -n : n) : `${str.substring(0, rev ? -n : n)}...`;
 }
 
 /**
@@ -471,11 +454,7 @@ export async function paginate(
 						.setStyle('PRIMARY')
 						.setDisabled(page == embeds.length - 1 ? true : false)
 				);
-		} else if (
-			page > 0 &&
-			page < embeds.length &&
-			i.customId === 'previous_page'
-		) {
+		} else if (page > 0 && page < embeds.length && i.customId === 'previous_page') {
 			page--;
 			row = new Discord.MessageActionRow()
 				.addComponents(
@@ -531,8 +510,6 @@ export async function runtimeError(
 	icon_url = client.user.displayAvatarURL();
 	description = `\`\`\`js\n${error.stack}\`\`\``;
 	const embed = this.embedify('RED', title, icon_url, description);
-	const channel = (await client.channels.cache.get(
-		process.env.BOT_LOG_ID
-	)) as Discord.TextChannel;
+	const channel = (await client.channels.cache.get(process.env.BOT_LOG_ID)) as Discord.TextChannel;
 	channel.send({ embeds: [embed] });
 }

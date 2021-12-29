@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 import { ReqNum, ReqString, TransactionType } from '../structures/Datatypes';
-import { TransactionTypes } from '../structures/TransactionTypes';
+import { TransactionTypes } from '../structures/Types';
 
 interface Transaction {
 	guildID: string;

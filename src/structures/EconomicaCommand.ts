@@ -1,5 +1,5 @@
 import { CommandInteraction } from 'discord.js';
-import EconomicaClient from './EconomicaClient';
+import { EconomicaClient } from './EconomicaClient';
 import {
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandOptionsOnlyBuilder,
@@ -10,7 +10,7 @@ import {
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from './EconomicaSlashCommandSubcommands';
 
-export default class EconomicaCommand {
+export class EconomicaCommand {
 	data:
 		| EconomicaSlashCommandBuilder
 		| EconomicaSlashCommandSubcommandGroupBuilder

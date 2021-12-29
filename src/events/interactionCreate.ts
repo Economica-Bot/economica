@@ -1,10 +1,10 @@
-import { SlashCommandSubcommandGroupBuilder } from '@discordjs/builders';
 import { CommandInteraction, PermissionResolvable } from 'discord.js';
-import EconomicaClient from '../structures/EconomicaClient';
-import EconomicaCommand from '../structures/EconomicaCommand';
-import { EconomicaSlashCommandBuilder } from '../structures/EconomicaSlashCommandBuilder';
-import { EconomicaSlashCommandSubcommandBuilder } from '../structures/EconomicaSlashCommandSubcommands';
-
+import {
+	EconomicaClient,
+	EconomicaCommand,
+	PermissionRole,
+	EconomicaSlashCommandBuilder,
+} from '../structures/index';
 export const name = 'interactionCreate';
 
 export async function execute(client: EconomicaClient, interaction: CommandInteraction) {

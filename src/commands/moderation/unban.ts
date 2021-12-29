@@ -1,8 +1,10 @@
 import { CommandInteraction, GuildMember, User } from 'discord.js';
 import { InfractionModel } from '../../models/infractions';
-import EconomicaClient from '../../structures/EconomicaClient';
-import EconomicaCommand from '../../structures/EconomicaCommand';
-import { EconomicaSlashCommandBuilder } from '../../structures/EconomicaSlashCommandBuilder';
+import {
+	EconomicaClient,
+	EconomicaCommand,
+	EconomicaSlashCommandBuilder,
+} from '../../structures/index';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
