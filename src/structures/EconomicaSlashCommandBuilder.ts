@@ -11,13 +11,13 @@ import {
 } from './EconomicaSlashCommandSubcommands';
 
 export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
-	global: boolean;
 	group: string;
 	format: string;
 	examples: string[];
 	userPermissions: PermissionString[];
 	clientPermissions: PermissionString[];
 	roles: PermissionRole[];
+	global: boolean = false;
 	devOnly: boolean = false;
 	enabled: boolean = true;
 
