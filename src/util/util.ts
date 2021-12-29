@@ -9,11 +9,7 @@ import {
 	ShopModel,
 	TransactionModel,
 } from '../models/index';
-import {
-	EconomicaClient,
-	EconomyInfo,
-	IncomeCommandProperties,
-} from '../structures/index';
+import { EconomicaClient, EconomyInfo, IncomeCommandProperties } from '../structures/index';
 
 /**
  * Returns a message embed object.
@@ -497,7 +493,7 @@ export async function runtimeError(
 		description = `**Command**: \`${interaction.commandName}\`\n\`\`\`js\n${error}\`\`\`
     You've encountered an error.
     Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](${process.env.DISCORD}).`;
-		const embed = this.embedify('RED', title, icon_url, description);
+		const embed = embedify('RED', title, icon_url, description);
 		if (interaction.replied || interaction.deferred) {
 			await interaction.followUp({ embeds: [embed], ephemeral: true });
 		} else {
@@ -508,7 +504,7 @@ export async function runtimeError(
 	title = error.name;
 	icon_url = client.user.displayAvatarURL();
 	description = `\`\`\`js\n${error.stack}\`\`\``;
-	const embed = this.embedify('RED', title, icon_url, description);
+	const embed = embedify('RED', title, icon_url, description);
 	const channel = (await client.channels.cache.get(process.env.BOT_LOG_ID)) as Discord.TextChannel;
 	channel.send({ embeds: [embed] });
 }
