@@ -6,7 +6,7 @@ import {
 } from '../../structures/index';
 import { embedify } from '../../util/util';
 
-export default class ResetCommand extends EconomicaCommand {
+export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('reset')
 		.setDescription('Reset all slash commands')

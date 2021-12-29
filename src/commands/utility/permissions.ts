@@ -6,7 +6,7 @@ import {
 } from '../../structures/index';
 import { embedify } from '../../util/util';
 
-export default class PermissionsCommand extends EconomicaCommand {
+export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('permission')
 		.setDescription('See the permissions of a command.')

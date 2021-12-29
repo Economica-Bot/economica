@@ -6,7 +6,7 @@ import {
 } from '../../structures/index';
 import * as util from '../../util/util';
 
-export default class PingCommand extends EconomicaCommand {
+export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('ping')
 		.setDescription("Get Economica's latency.")
