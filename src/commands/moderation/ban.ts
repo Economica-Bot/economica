@@ -61,10 +61,6 @@ export default class implements EconomicaCommand {
 			return await interaction.reply(`<@!${target.id}> is not bannable.`);
 		}
 
-		if (target.communicationDisabledUntil) {
-			return await interaction.reply(`<@!${target.id}> is already banned.`);
-		}
-
 		const milliseconds = ms(duration);
 
 		if (duration !== 'Permanent' && (!milliseconds || milliseconds < 0)) {
