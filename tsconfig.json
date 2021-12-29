@@ -7,6 +7,7 @@
     "preserveConstEnums": true,
     "sourceMap": true,
     "strictNullChecks": false,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
   }
 }
