@@ -29,10 +29,9 @@ export async function execute(client: EconomicaClient) {
 		}
 	}
 
-	//await client.commands.set(commands); //Global
-
 	client.once('ready', async () => {
 		await (await client.guilds.fetch(process.env.GUILD_ID)).commands.set(commands);
+		//await client.commands.set(commands); //Global
 	});
 	console.log('Commands registered');
 }
