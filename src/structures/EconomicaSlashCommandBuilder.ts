@@ -62,7 +62,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	}
 
 	setDevOnly(devOnly: boolean): this {
-		this.devOnly = devOnly; 
+		this.devOnly = devOnly;
 		return this;
 	}
 
@@ -88,52 +88,42 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	public getSubcommandGroup(
-		interaction: CommandInteraction
-	): EconomicaSlashCommandSubcommandGroupBuilder {
-		const subcommandgroup = this.options.find(
-			(
-				builder:
-					| EconomicaSlashCommandSubcommandGroupBuilder
-					| EconomicaSlashCommandSubcommandBuilder
-			) => {
-				return (
-					builder instanceof EconomicaSlashCommandSubcommandGroupBuilder &&
-					builder.name === interaction.options.getSubcommandGroup()
-				);
-			}
-		) as EconomicaSlashCommandSubcommandGroupBuilder;
+	public getSubcommandGroup(query: string): EconomicaSlashCommandSubcommandGroupBuilder {
+		const subcommandgroup = this.options.find((builder) => {
+			return (
+				builder instanceof EconomicaSlashCommandSubcommandGroupBuilder &&
+				(builder.name === query ||
+					builder.options.find(
+						(subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) =>
+							subcommandbuilder.name === query
+					))
+			);
+		}) as EconomicaSlashCommandSubcommandGroupBuilder;
 		return subcommandgroup ?? undefined;
 	}
 
-	public getSubcommand(interaction: CommandInteraction): EconomicaSlashCommandSubcommandBuilder {
-		const builder = this.options.find(
-			(
-				builder:
-					| EconomicaSlashCommandSubcommandGroupBuilder
-					| EconomicaSlashCommandSubcommandBuilder
-			) => {
-				return (
-					(builder instanceof EconomicaSlashCommandSubcommandGroupBuilder &&
-						builder.name === interaction.options.getSubcommandGroup() &&
-						builder.options.find(
-							(subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) =>
-								subcommandbuilder.name === interaction.options.getSubcommand()
-						)) ||
-					(builder instanceof EconomicaSlashCommandSubcommandBuilder &&
-						builder.name === interaction.options.getSubcommand())
-				);
-			}
-		) as EconomicaSlashCommandSubcommandGroupBuilder | EconomicaSlashCommandSubcommandBuilder;
+	public getSubcommand(query: string): EconomicaSlashCommandSubcommandBuilder {
+		const builder = this.options.find((builder) => {
+			return (
+				(builder instanceof EconomicaSlashCommandSubcommandGroupBuilder &&
+					builder.options.find(
+						(subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) =>
+							subcommandbuilder.name === query
+					)) ||
+				(builder instanceof EconomicaSlashCommandSubcommandBuilder && builder.name === query)
+			);
+		}) as EconomicaSlashCommandSubcommandGroupBuilder | EconomicaSlashCommandSubcommandBuilder;
+
 		if (builder && builder instanceof EconomicaSlashCommandSubcommandGroupBuilder) {
 			return (
 				(builder.options.find(
 					(subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) =>
-						subcommandbuilder.name === interaction.options.getSubcommand()
+						subcommandbuilder.name === query
 				) as EconomicaSlashCommandSubcommandBuilder) ?? undefined
 			);
-		} else if (builder instanceof EconomicaSlashCommandSubcommandBuilder)
+		} else if (builder instanceof EconomicaSlashCommandSubcommandBuilder) {
 			return builder ?? undefined;
+		}
 	}
 
 	public toJSON() {
