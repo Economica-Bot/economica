@@ -10,8 +10,8 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('ping')
 		.setDescription("Get Economica's latency.")
-		.setGlobal(true)
-		.setGroup('Utility');
+		.setGroup('utility')
+		.setGlobal(true);
 
 	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
 		await interaction.reply({

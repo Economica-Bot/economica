@@ -10,6 +10,7 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('permission')
 		.setDescription('See the permissions of a command.')
+		.setGroup('utility')
 		.setFormat('<command>')
 		.addStringOption((option) =>
 			option.setName('command').setDescription('Specify a command.').setRequired(true)
@@ -24,13 +25,9 @@ export default class implements EconomicaCommand {
 
 		const data = command.data as EconomicaSlashCommandBuilder;
 
-		let description = `**${
-			data.name
-		} Command Permissions**\n__User Permissions__:\n\`${
+		let description = `**${data.name} Command Permissions**\n__User Permissions__:\n\`${
 			data.userPermissions ?? '`None`'
-		}\`\n__Client Permissions:__\n\`${
-			data.clientPermissions ?? '`None`'
-		}\`\n__Roles:__\n\`${
+		}\`\n__Client Permissions:__\n\`${data.clientPermissions ?? '`None`'}\`\n__Roles:__\n\`${
 			data.roles ?? '`None`'
 		}\`\n\n`;
 
@@ -41,9 +38,7 @@ export default class implements EconomicaCommand {
 				data.getSubcommandGroup(interaction).userPermissions ?? '`None`'
 			}\`\n__Client Permissions:__\n\`${
 				data.getSubcommandGroup(interaction).clientPermissions ?? '`None`'
-			}\`\n__Roles:__\n\`${
-				data.getSubcommandGroup(interaction).roles ?? '`None`'
-			}\`\n\n`;
+			}\`\n__Roles:__\n\`${data.getSubcommandGroup(interaction).roles ?? '`None`'}\`\n\n`;
 		}
 
 		if (data.getSubcommand(interaction)) {
@@ -53,15 +48,11 @@ export default class implements EconomicaCommand {
 				data.getSubcommand(interaction).userPermissions ?? '`None`'
 			}\`\n__Client Permissions:__\n\`${
 				data.getSubcommand(interaction).clientPermissions ?? '`None`'
-			}\`\n__Roles:__\n\`${
-				data.getSubcommand(interaction).roles ?? '`None`'
-			}\``;
+			}\`\n__Roles:__\n\`${data.getSubcommand(interaction).roles ?? '`None`'}\``;
 		}
 
 		const name =
-			+ data.getSubcommandGroup(interaction) 
-			+ ' ' 
-			+ data.getSubcommand(interaction) == undefined
+			+data.getSubcommandGroup(interaction) + ' ' + data.getSubcommand(interaction) == undefined
 				? data.getSubcommand(interaction)
 				: '';
 

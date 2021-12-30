@@ -10,6 +10,7 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('untimeout')
 		.setDescription('Untimeout a member.')
+		.setGroup('moderation')
 		.setFormat('<member>')
 		.setExamples(['untimeout @JohnDoe'])
 		.setGlobal(false)
