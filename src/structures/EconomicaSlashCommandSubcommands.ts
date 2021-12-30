@@ -26,16 +26,12 @@ export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSub
 	}
 
 	addEconomicaSubcommand(
-		input:
-			| EconomicaSlashCommandSubcommandBuilder
-			| ((
-					subcommandGroup: EconomicaSlashCommandSubcommandBuilder
-			  ) => EconomicaSlashCommandSubcommandBuilder)
+		input: (
+			subcommandGroup: EconomicaSlashCommandSubcommandBuilder
+		) => EconomicaSlashCommandSubcommandBuilder
 	): this {
 		const { options } = this;
-		const result =
-			typeof input === 'function' ? input(new EconomicaSlashCommandSubcommandBuilder()) : input;
-
+		const result = input(new EconomicaSlashCommandSubcommandBuilder());
 		options.push(result);
 		return this;
 	}
