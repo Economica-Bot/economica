@@ -10,6 +10,7 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('reset')
 		.setDescription('Reset all slash commands')
+		.setGroup('application')
 		.setDevOnly(true);
 	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
 		await interaction.deferReply({ ephemeral: true });
