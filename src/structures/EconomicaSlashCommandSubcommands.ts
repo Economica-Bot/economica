@@ -6,9 +6,9 @@ import { PermissionString } from 'discord.js';
 import { PermissionRole } from './CommandOptions';
 
 export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSubcommandGroupBuilder {
-	public userPermissions: PermissionString[];
-	public clientPermissions: PermissionString[];
-	public roles: PermissionRole[];
+	userPermissions: PermissionString[];
+	clientPermissions: PermissionString[];
+	roles: PermissionRole[];
 
 	setUserPermissions(userPermissions: PermissionString[]): this {
 		this.userPermissions = userPermissions;
@@ -54,9 +54,21 @@ export interface EconomicaSlashCommandSubcommandGroupBuilder
 	extends SlashCommandSubcommandGroupBuilder {}
 
 export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcommandBuilder {
+	format: string;
+	examples: string[];
 	userPermissions: PermissionString[];
 	clientPermissions: PermissionString[];
 	roles: PermissionRole[];
+
+	setFormat(format: string): this {
+		this.format = format;
+		return this;
+	}
+
+	setExamples(examples: string[]): this {
+		this.examples = examples;
+		return this;
+	}
 
 	setUserPermissions(userPermissions: PermissionString[]): this {
 		this.userPermissions = userPermissions;
