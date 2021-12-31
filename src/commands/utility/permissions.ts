@@ -25,36 +25,46 @@ export default class implements EconomicaCommand {
 
 		const data = command.data as EconomicaSlashCommandBuilder;
 
-		let description = `**${data.name} Command Permissions**\n__User Permissions__:\n\`${
+		let description = `**${
+			data.name
+		} Command Permissions**\n__User Permissions__:\n\`${
 			data.userPermissions ?? '`None`'
-		}\`\n__Client Permissions:__\n\`${data.clientPermissions ?? '`None`'}\`\n__Roles:__\n\`${
+		}\`\n__Client Permissions:__\n\`${
+			data.clientPermissions ?? '`None`'
+		}\`\n__Roles:__\n\`${
 			data.roles ?? '`None`'
 		}\`\n\n`;
 
-		if (data.getSubcommandGroup(interaction)) {
+		const subcommandGroup = interaction.options.getSubcommandGroup(false);
+		const subcommand = interaction.options.getSubcommand(false);
+
+		if (subcommandGroup) {
+			const subcommandGroupData = data.getSubcommandGroup(subcommandGroup);
 			description += `**${
-				data.getSubcommandGroup(interaction).name
+				subcommandGroupData.name
 			}Subcommand Group Permissions**\n__User Permissions:__\n\`${
-				data.getSubcommandGroup(interaction).userPermissions ?? '`None`'
+				subcommandGroupData.userPermissions ?? '`None`'
 			}\`\n__Client Permissions:__\n\`${
-				data.getSubcommandGroup(interaction).clientPermissions ?? '`None`'
-			}\`\n__Roles:__\n\`${data.getSubcommandGroup(interaction).roles ?? '`None`'}\`\n\n`;
+				subcommandGroupData.clientPermissions ?? '`None`'
+			}\`\n__Roles:__\n\`${
+				subcommandGroupData.roles ?? '`None`'
+			}\`\n\n`;
 		}
 
-		if (data.getSubcommand(interaction)) {
-			`**${
-				data.getSubcommand(interaction).name
+		if (subcommand) {
+			const subcommandData = data.getSubcommand(subcommand);
+			description += `**${
+				subcommandData.name
 			} Subcommand Permissions**\n__User Permissions:__\n\`${
-				data.getSubcommand(interaction).userPermissions ?? '`None`'
+				subcommandData.userPermissions ?? '`None`'
 			}\`\n__Client Permissions:__\n\`${
-				data.getSubcommand(interaction).clientPermissions ?? '`None`'
-			}\`\n__Roles:__\n\`${data.getSubcommand(interaction).roles ?? '`None`'}\``;
+				subcommandData.clientPermissions ?? '`None`'
+			}\`\n__Roles:__\n\`${
+				subcommandData.roles ?? '`None`'
+			}\`\n\n`;
 		}
 
-		const name =
-			+data.getSubcommandGroup(interaction) + ' ' + data.getSubcommand(interaction) == undefined
-				? data.getSubcommand(interaction)
-				: '';
+		const name = `${subcommandGroup}:${subcommand == undefined ? subcommand : ''}`;
 
 		await interaction.reply({
 			embeds: [
