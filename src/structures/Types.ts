@@ -3,6 +3,7 @@ export enum TransactionTypes {
 	Sell = 'SELL',
 	Generator = 'GENERATOR',
 	Income = 'INCOME',
+	Add_Money = 'ADD_MONEY',
 }
 
 export enum InfractionTypes {

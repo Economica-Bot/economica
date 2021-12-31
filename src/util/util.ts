@@ -9,7 +9,7 @@ import {
 	ShopModel,
 	TransactionModel,
 } from '../models/index';
-import { EconomicaClient, EconomyInfo, IncomeCommandProperties } from '../structures/index';
+import { EconomicaClient, EconomyInfo, IncomeCommandProperties, TransactionTypes } from '../structures/index';
 
 /**
  * Returns a message embed object.
@@ -133,7 +133,7 @@ export async function getEconInfo(guildID: string, userID: string): Promise<Econ
  * Changes a user's economy info.
  * @param {string} guildID - Guild id.
  * @param {string} userID - User id.
- * @param {string} transaction_type - The transaction type.
+ * @param {TransactionTypes} transaction_type - The transaction type.
  * @param {string} memo - The transaction dispatcher.
  * @param {Number} wallet - The value to be added to the user's wallet.
  * @param {Number} treasury - The value to be added to the user's treasury.
@@ -144,7 +144,7 @@ export async function transaction(
 	client: Discord.Client,
 	guildID: string,
 	userID: string,
-	transaction_type: string,
+	transaction_type: TransactionTypes,
 	memo: string,
 	wallet: Number,
 	treasury: Number,
