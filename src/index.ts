@@ -12,6 +12,7 @@ import * as fs from 'fs';
 import * as dotenv from 'dotenv';
 import { EconomicaClient } from './structures/EconomicaClient';
 import { runtimeError } from './util/util';
+import path from 'path';
 
 dotenv.config();
 
@@ -25,7 +26,7 @@ const client = new EconomicaClient({
 	],
 });
 
-const serviceFiles = fs.readdirSync('./services');
+const serviceFiles = fs.readdirSync(path.join(__dirname, './services'));
 serviceFiles.forEach(async (file) => {
 	const service = await import(`./services/${file}`);
 	console.log(`Executing service ${service.name}...`);
