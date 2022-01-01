@@ -126,9 +126,9 @@ export default class implements EconomicaCommand {
 				})
 				.setColor('YELLOW')
 				.setDescription(`${data.description}`)
-				.addField('format', data.format ? `\`${data.format}\`` : 'none', true)
+				.addField('Format', data.format ? `\`${data.format}\`` : 'none', true)
 				.addField('Examples', data.examples ? `\`${data.examples.join('`\n`')}\`` : 'none', true)
-				.addField('Servers only?', data.global ? 'true' : 'false', true);
+				.addField('Servers Only?', data.global ? '\`True\`' : '\`False\`', true);
 
 			data.options.forEach((option) => {
 				if (option instanceof SlashCommandSubcommandGroupBuilder) {
