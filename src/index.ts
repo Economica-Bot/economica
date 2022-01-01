@@ -7,12 +7,13 @@
 // | $$$$$$$$|  $$$$$$$|  $$$$$$/| $$  | $$|  $$$$$$/| $$ | $$ | $$| $$|  $$$$$$$|  $$$$$$$
 // |________/ \_______/ \______/ |__/  |__/ \______/ |__/ |__/ |__/|__/ \_______/ \_______/
 
+import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
 import { Intents } from 'discord.js';
-import * as fs from 'fs';
-import * as dotenv from 'dotenv';
 import { EconomicaClient } from './structures/EconomicaClient';
 import { runtimeError } from './util/util';
-import path from 'path';
+import { EconomicaService } from './structures';
 
 dotenv.config();
 
@@ -28,8 +29,8 @@ const client = new EconomicaClient({
 
 const serviceFiles = fs.readdirSync(path.join(__dirname, './services'));
 serviceFiles.forEach(async (file) => {
-	const service = await import(`./services/${file}`);
-	console.log(`Executing service ${service.name}...`);
+	const service = new (await import(`./services/${file}`)).default;
+	console.log(`Initializing service ${service.name}`);
 	await service.execute(client);
 });
 
