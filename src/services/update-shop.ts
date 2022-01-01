@@ -2,7 +2,7 @@ import { EconomicaClient, EconomicaService } from '../structures';
 import { ShopModel } from '../models';
 
 export default class implements EconomicaService {
-	name = 'uodate-shop';
+	name = 'update-shop';
 	execute = async (client: EconomicaClient) => {
 		setInterval(async () => {
 			console.log(`Executing service ${this.name}`);
