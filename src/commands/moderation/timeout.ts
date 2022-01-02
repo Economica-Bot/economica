@@ -3,6 +3,7 @@ import {
 	EconomicaClient,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
+	InfractionTypes,
 } from '../../structures/index';
 import { infraction } from '../../util/util';
 import ms from 'ms';
@@ -82,7 +83,7 @@ export default class implements EconomicaCommand {
 			interaction.guildId,
 			target.id,
 			interaction.user.id,
-			'`moderation:TIMEOUT`',
+			InfractionTypes.Timeout,
 			reason,
 			duration === 'Permanent' ? true : false,
 			true,

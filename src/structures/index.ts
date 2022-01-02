@@ -1,5 +1,6 @@
 export { EconomicaClient } from './EconomicaClient';
 export { EconomicaCommand } from './EconomicaCommand';
+export { EconomicaService } from './EconomicaService'
 export {
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandOptionsOnlyBuilder,

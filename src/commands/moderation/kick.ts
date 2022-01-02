@@ -3,6 +3,7 @@ import {
 	EconomicaClient,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
+	InfractionTypes,
 } from '../../structures/index';
 import { infraction } from '../../util/util';
 
@@ -55,7 +56,7 @@ export default class implements EconomicaCommand {
 			interaction.guildId,
 			target.id,
 			interaction.user.id,
-			'`moderation:KICK`',
+			InfractionTypes.Kick,
 			reason
 		);
 

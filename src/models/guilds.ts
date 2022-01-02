@@ -9,10 +9,6 @@ import {
 
 interface Guild {
 	guildID: string;
-	modules: Array<ModuleSetting>;
-	channels: Array<ChannelSetting>;
-	roles: Array<RoleSetting>;
-	commands: Array<CommandSetting>;
 	currency: string;
 	transactionLogChannel: string;
 	infractionLogChannel: string;
@@ -21,18 +17,12 @@ interface Guild {
 const Schema = new mongoose.Schema<Guild>(
 	{
 		guildID: ReqString,
-		modules: [],
-		commands: [],
-		incomecommands: [],
-		currency: {
-			type: String,
-			required: false,
-			default: '💵',
-		},
+		currency: ReqString,
 		transactionLogChannel: ReqString,
 		infractionLogChannel: ReqString,
 	},
 	{
+		strict: true,
 		versionKey: false,
 	}
 );

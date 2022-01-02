@@ -3,6 +3,7 @@ import {
 	EconomicaClient,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
+	InfractionTypes,
 } from '../../structures/index';
 import { infraction } from '../../util/util';
 import ms from 'ms';
@@ -84,7 +85,7 @@ export default class implements EconomicaCommand {
 			interaction.guildId,
 			target.id,
 			interaction.user.id,
-			'`moderation:BAN`',
+			InfractionTypes.Ban,
 			reason,
 			duration === 'Permanent' ? true : false,
 			true,
