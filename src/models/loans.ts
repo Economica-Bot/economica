@@ -11,6 +11,7 @@ interface Loan {
 	pending: boolean;
 	active: boolean;
 	complete: boolean;
+	createdAt: Date;
 }
 
 const Schema = new mongoose.Schema<Loan>(
