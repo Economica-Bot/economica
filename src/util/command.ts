@@ -1,5 +1,10 @@
 import { CommandInteraction, Guild, GuildMember, PermissionString, TextChannel } from 'discord.js';
-import { EconomicaSlashCommandBuilder, PermissionRole } from '../structures';
+import {
+	EconomicaSlashCommandBuilder,
+	EconomicaSlashCommandSubcommandBuilder,
+	EconomicaSlashCommandSubcommandGroupBuilder,
+	PermissionRole,
+} from '../structures';
 
 export async function commandCheck(
 	interaction: CommandInteraction,
@@ -31,8 +36,12 @@ const permissionCheck = async (
 	const guild = interaction.guild as Guild;
 	const clientMember = (await guild.members.fetch(interaction.client.user.id)) as GuildMember;
 	const channel = interaction.channel as TextChannel;
-	const group = data.getSubcommandGroup(interaction.options.getSubcommandGroup(false));
-	const subcommand = data.getSubcommand(interaction.options.getSubcommand(false));
+	const group = data.getSubcommandGroup(
+		interaction.options.getSubcommandGroup(false)
+	) as EconomicaSlashCommandSubcommandGroupBuilder;
+	const subcommand = data.getSubcommand(
+		interaction.options.getSubcommand(false)
+	) as EconomicaSlashCommandSubcommandBuilder;
 	const userPermissions: PermissionString[] = [];
 	const clientPermissions: PermissionString[] = [];
 	const roles: PermissionRole[] = [];

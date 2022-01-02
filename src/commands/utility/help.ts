@@ -8,6 +8,7 @@ import {
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
+	EconomicaSlashCommandSubcommandGroupBuilder,
 } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -64,7 +65,7 @@ export default class implements EconomicaCommand {
 				const data = command.data as EconomicaSlashCommandBuilder;
 				return data.getSubcommand(query) !== undefined;
 			})?.data as EconomicaSlashCommandBuilder
-		)?.getSubcommand(query);
+		)?.getSubcommand(query) as EconomicaSlashCommandSubcommandBuilder;
 
 		const subcommandGroup = (
 			client.commands.find((command) => {
@@ -74,7 +75,7 @@ export default class implements EconomicaCommand {
 					data.getSubcommandGroup(query) !== undefined
 				);
 			})?.data as EconomicaSlashCommandBuilder
-		)?.getSubcommandGroup(subcommand?.name || query);
+		)?.getSubcommandGroup(subcommand?.name || query) as EconomicaSlashCommandSubcommandGroupBuilder;
 
 		const command = client.commands.find((command) => {
 			const data = command.data as EconomicaSlashCommandBuilder;
@@ -128,7 +129,7 @@ export default class implements EconomicaCommand {
 				.setDescription(`${data.description}`)
 				.addField('Format', data.format ? `\`${data.format}\`` : 'none', true)
 				.addField('Examples', data.examples ? `\`${data.examples.join('`\n`')}\`` : 'none', true)
-				.addField('Servers Only?', data.global ? '\`False\`' : '\`True\`', true);
+				.addField('Servers Only?', data.global ? '`False`' : '`True`', true);
 
 			data.options.forEach((option) => {
 				if (option instanceof SlashCommandSubcommandGroupBuilder) {
