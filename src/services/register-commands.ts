@@ -5,7 +5,7 @@ import { EconomicaClient, EconomicaCommand, EconomicaService } from '../structur
 
 export default class implements EconomicaService {
 	name = 'register-commands';
-	execute = async (client: EconomicaClient) => {
+	execute = async (client: EconomicaClient, guild_id?: string, global?: boolean) => {
 		console.log(`Executing service ${this.name}`);
 		client.commands = new Collection();
 		const commands = new Array();
@@ -19,7 +19,12 @@ export default class implements EconomicaService {
 			for (const commandFile of commandFiles) {
 				const command = new (
 					await import(`../commands/${commandDirectory}/${commandFile}`)
-				).default();
+				).default;
+
+				if (!command.data.group) {
+					throw new Error(`Command ${command.name} missing group!`)
+				}
+
 				await client.commands.set(command.data.name, command);
 				commands.push(command.data.toJSON());
 				console.log(`Registered command ${command.data.name}`);
@@ -30,6 +35,13 @@ export default class implements EconomicaService {
 			await (await client.guilds.fetch(process.env.GUILD_ID)).commands.set(commands);
 			//await client.commands.set(commands); //Global
 		});
+
+		if (guild_id) {
+			await (await client.guilds.fetch(guild_id)).commands.set(commands); //Server
+		} else if (global) {
+			await client.application.commands.set(commands); //Global
+		}
+
 		console.log('Commands registered');
 	};
 }
