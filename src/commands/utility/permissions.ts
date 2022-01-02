@@ -3,6 +3,8 @@ import {
 	EconomicaClient,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
+	EconomicaSlashCommandSubcommandBuilder,
+	EconomicaSlashCommandSubcommandGroupBuilder,
 } from '../../structures/index';
 import { embedify } from '../../util/util';
 
@@ -25,55 +27,43 @@ export default class implements EconomicaCommand {
 
 		const data = command.data as EconomicaSlashCommandBuilder;
 
-		let description = `**${
-			data.name
-		} Command Permissions**\n__User Permissions__:\n\`${
+		let description = `**${data.name} Command Permissions**\n__User Permissions__:\n\`${
 			data.userPermissions ?? '`None`'
-		}\`\n__Client Permissions:__\n\`${
-			data.clientPermissions ?? '`None`'
-		}\`\n__Roles:__\n\`${
+		}\`\n__Client Permissions:__\n\`${data.clientPermissions ?? '`None`'}\`\n__Roles:__\n\`${
 			data.roles ?? '`None`'
 		}\`\n\n`;
 
-		const subcommandGroup = interaction.options.getSubcommandGroup(false);
-		const subcommand = interaction.options.getSubcommand(false);
-
-		if (subcommandGroup) {
-			const subcommandGroupData = data.getSubcommandGroup(subcommandGroup);
-			description += `**${
-				subcommandGroupData.name
-			}Subcommand Group Permissions**\n__User Permissions:__\n\`${
-				subcommandGroupData.userPermissions ?? '`None`'
-			}\`\n__Client Permissions:__\n\`${
-				subcommandGroupData.clientPermissions ?? '`None`'
-			}\`\n__Roles:__\n\`${
-				subcommandGroupData.roles ?? '`None`'
-			}\`\n\n`;
+		if (data.getSubcommandGroup()) {
+			(data.getSubcommandGroup() as EconomicaSlashCommandSubcommandGroupBuilder[]).forEach(
+				(subcommandGroupData) => {
+					description += `**${
+						subcommandGroupData.name
+					} Subcommand Group Permissions**\n__User Permissions:__\n\`${
+						subcommandGroupData.userPermissions ?? '`None`'
+					}\`\n__Client Permissions:__\n\`${
+						subcommandGroupData.clientPermissions ?? '`None`'
+					}\`\n__Roles:__\n\`${subcommandGroupData.roles ?? '`None`'}\`\n\n`;
+				}
+			);
 		}
 
-		if (subcommand) {
-			const subcommandData = data.getSubcommand(subcommand);
-			description += `**${
-				subcommandData.name
-			} Subcommand Permissions**\n__User Permissions:__\n\`${
-				subcommandData.userPermissions ?? '`None`'
-			}\`\n__Client Permissions:__\n\`${
-				subcommandData.clientPermissions ?? '`None`'
-			}\`\n__Roles:__\n\`${
-				subcommandData.roles ?? '`None`'
-			}\`\n\n`;
+		if (data.getSubcommand()) {
+			(data.getSubcommand() as EconomicaSlashCommandSubcommandBuilder[]).forEach(
+				(subcommandData) => {
+					description += `**${
+						subcommandData.name
+					} Subcommand Permissions**\n__User Permissions:__\n\`${
+						subcommandData.userPermissions ?? '`None`'
+					}\`\n__Client Permissions:__\n\`${
+						subcommandData.clientPermissions ?? '`None`'
+					}\`\n__Roles:__\n\`${subcommandData.roles ?? '`None`'}\`\n\n`;
+				}
+			);
 		}
-
-		const name = `${subcommandGroup}:${subcommand == undefined ? subcommand : ''}`;
 
 		await interaction.reply({
 			embeds: [
-				embedify(
-					'BLUE',
-					`Permission Hierarchy for ${command.data.name} ${name}`,
-					null,
-					description
-				),
+				embedify('BLUE', `Permission Hierarchy for ${command.data.name}`, null, description),
 			],
 		});
 	};

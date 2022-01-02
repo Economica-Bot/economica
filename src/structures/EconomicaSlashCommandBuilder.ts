@@ -88,7 +88,14 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	public getSubcommandGroup(query: string): EconomicaSlashCommandSubcommandGroupBuilder {
+	public getSubcommandGroup(
+		query?: string
+	): EconomicaSlashCommandSubcommandGroupBuilder | EconomicaSlashCommandSubcommandGroupBuilder[] {
+		if (!query) {
+			return this.options.filter(
+				(builder) => builder instanceof EconomicaSlashCommandSubcommandGroupBuilder
+			) as EconomicaSlashCommandSubcommandGroupBuilder[];
+		}
 		const subcommandgroup = this.options.find((builder) => {
 			return (
 				builder instanceof EconomicaSlashCommandSubcommandGroupBuilder &&
@@ -102,7 +109,14 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return subcommandgroup ?? undefined;
 	}
 
-	public getSubcommand(query: string): EconomicaSlashCommandSubcommandBuilder {
+	public getSubcommand(
+		query?: string
+	): EconomicaSlashCommandSubcommandBuilder | EconomicaSlashCommandSubcommandBuilder[] {
+		if (!query) {
+			return this.options.filter(
+				(builder) => builder instanceof EconomicaSlashCommandSubcommandBuilder
+			) as EconomicaSlashCommandSubcommandBuilder[];
+		}
 		const builder = this.options.find((builder) => {
 			return (
 				(builder instanceof EconomicaSlashCommandSubcommandGroupBuilder &&
