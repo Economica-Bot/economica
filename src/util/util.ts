@@ -9,7 +9,12 @@ import {
 	ShopModel,
 	TransactionModel,
 } from '../models/index';
-import { EconomicaClient, EconomyInfo, IncomeCommandProperties, TransactionTypes } from '../structures/index';
+import {
+	EconomicaClient,
+	EconomyInfo,
+	IncomeCommandProperties,
+	TransactionTypes,
+} from '../structures/index';
 
 /**
  * Returns a message embed object.
@@ -29,10 +34,10 @@ export function embedify(
 ): Discord.MessageEmbed {
 	const embed = new Discord.MessageEmbed().setColor(color);
 	if (icon_url) {
-		embed.setAuthor(title).setThumbnail(icon_url);
+		embed.setAuthor({ name: title, url: icon_url });
 	} else if (title) embed.setTitle(title);
 	if (description) embed.setDescription(description);
-	if (footer) embed.setFooter(footer);
+	if (footer) embed.setFooter({ text: footer });
 
 	return embed;
 }
@@ -151,7 +156,7 @@ export async function transaction(
 	total: Number
 ): Promise<Number> {
 	//Init
-	await this.getEconInfo(guildID, userID);
+	await getEconInfo(guildID, userID);
 	const result = await MemberModel.findOneAndUpdate(
 		{
 			guildID,
@@ -187,13 +192,13 @@ export async function transaction(
 	const channelID = guildSetting?.transactionLogChannel;
 
 	if (channelID) {
-		const cSymbol = await this.getCurrencySymbol(guildID);
+		const cSymbol = await getCurrencySymbol(guildID);
 		const channel = client.channels.cache.get(channelID) as Discord.TextChannel;
 		const guild = channel.guild;
 		const description = `Transaction for <@!${userID}>\nType: \`${transaction_type}\` | ${memo}`;
 		channel.send({
 			embeds: [
-				this.embedify('GOLD', `${transaction._id}`, guild.iconURL(), description)
+				embedify('GOLD', `${transaction._id}`, guild.iconURL(), description)
 					.addFields([
 						{
 							name: '__**Wallet**__',
@@ -276,18 +281,9 @@ export async function infraction(
  * @returns {string} Guild currency symbol
  */
 export async function getCurrencySymbol(guildID: string): Promise<String> {
-	const result = await GuildModel.findOne({
-		guildID,
-	});
-
-	let currency;
-	if (result?.currency) {
-		currency = result.currency;
-	} else {
-		currency = config.cSymbol; //def
-	}
-
-	return currency;
+	return await (
+		await GuildModel.findOne({ guildID })
+	).currency;
 }
 
 /**
