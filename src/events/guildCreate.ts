@@ -2,36 +2,17 @@ import { Guild } from 'discord.js';
 import { EconomicaClient } from '../structures/index';
 import { GuildModel } from '../models/index';
 
-const config = require('../../config.json');
+import config from '../../config.json';
 
 export const name = 'guildCreate';
 
 export async function execute(client: EconomicaClient, guild: Guild) {
-	const incomeCommands = [];
-	for (const incomeCommand in config.commands) {
-		if (incomeCommand !== 'default') {
-			incomeCommands.push({
-				...{ command: incomeCommand },
-				...config.commands[incomeCommand],
-			});
-		}
-	}
-
 	const guildSettings = await GuildModel.findOneAndUpdate(
 		{
 			guildID: guild.id,
 		},
 		{
-			modules: [],
-			commands: [],
-			incomeCommands,
-			permissions: {
-				0: [],
-				1: [],
-				2: [],
-				3: [],
-			},
-			currency: null,
+			currency: config.cSymbol,
 			transactionLogChannel: null,
 			infractionLogChannel: null,
 		},

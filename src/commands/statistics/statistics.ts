@@ -38,7 +38,7 @@ export default class implements EconomicaCommand {
 				wallets.push(transaction.wallet);
 				treasuries.push(transaction.treasury);
 				totals.push(transaction.total);
-				dates.push(transaction.date.toLocaleDateString());
+				dates.push(transaction.createdAt.toLocaleDateString());
 			});
 
 			const wallets1: number[] = [];
