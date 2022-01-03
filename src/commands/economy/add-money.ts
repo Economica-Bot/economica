@@ -1,3 +1,4 @@
+import { parse_string } from '@adrastopoulos/number-parser';
 import { CommandInteraction, GuildMember, MessageEmbed } from 'discord.js';
 import {
 	EconomicaClient,
@@ -11,7 +12,7 @@ import { getCurrencySymbol, transaction } from '../../util/util';
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('add-money')
-		.setDescription('Modify a balance.')
+		.setDescription('Add/remove funds from a balance.')
 		.setGroup('economy')
 		.setFormat('<user> <amount> <target>')
 		.setExamples(['add-money @JohnDoe 300 wallet', 'add-money @Wumpus 100 treasury'])
@@ -36,7 +37,7 @@ export default class implements EconomicaCommand {
 
 	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
 		const member = interaction.options.getMember('user') as GuildMember;
-		const amount = parseInt(interaction.options.getString('amount'));
+		const amount = parse_string(interaction.options.getString('amount'));
 		const target = interaction.options.getString('target');
 		const cSymbol = await getCurrencySymbol(interaction.guild.id);
 		if (!amount) return await interaction.reply(`Invalid amount: \`${amount}\``);
