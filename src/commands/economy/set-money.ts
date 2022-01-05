@@ -1,4 +1,4 @@
-import { parse_string } from '@adrastopoulos/number-parser';
+import {parse_string} from '@adrastopoulos/number-parser';
 import { CommandInteraction, GuildMember, MessageEmbed } from 'discord.js';
 import {
 	EconomicaClient,
@@ -7,15 +7,15 @@ import {
 	PermissionRole,
 	TransactionTypes,
 } from '../../structures';
-import { getCurrencySymbol, transaction } from '../../util/util';
+import { getCurrencySymbol, getEconInfo, transaction } from '../../util/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
-		.setName('add-money')
-		.setDescription('Add/remove funds from a balance.')
+		.setName('set-money')
+		.setDescription('Set a balance.')
 		.setGroup('economy')
 		.setFormat('<user> <amount> <target>')
-		.setExamples(['add-money @JohnDoe 300 wallet', 'add-money @Wumpus 100 treasury'])
+		.setExamples(['set-money @JohnDoe 300 wallet', 'set-money @Wumpus 100 treasury'])
 		.setRoles([new PermissionRole('ECONOMY MANAGER', true)])
 		.setGlobal(false)
 		.addUserOption((option) =>
@@ -36,27 +36,30 @@ export default class implements EconomicaCommand {
 		);
 
 	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
+		const cSymbol = await getCurrencySymbol(interaction.guild.id);
 		const member = interaction.options.getMember('user') as GuildMember;
 		const amount = parse_string(interaction.options.getString('amount'));
 		const target = interaction.options.getString('target');
-		const cSymbol = await getCurrencySymbol(interaction.guild.id);
+		const { wallet, treasury } = await getEconInfo(interaction.guildId, interaction.user.id);
+		const difference = target === 'wallet' ? amount - wallet : amount - treasury;
+		console.log(difference)
 		if (!amount) return await interaction.reply(`Invalid amount: \`${amount}\``);
 		await transaction(
 			client,
 			interaction.guild.id,
 			member.id,
-			TransactionTypes.Add_Money,
-			`add-money | <@!${interaction.member.user.id}>`,
-			target === 'wallet' ? amount : 0,
-			target === 'treasury' ? amount : 0,
-			amount
+			TransactionTypes.Set_Money,
+			`set-money | <@!${interaction.member.user.id}>`,
+			target === 'wallet' ? difference : 0,
+			target === 'treasury' ? difference : 0,
+			difference
 		);
 
 		const embed = new MessageEmbed()
 			.setColor('GREEN')
 			.setAuthor({ name: member.user.username, url: member.user.displayAvatarURL() })
 			.setDescription(
-				`Added ${cSymbol}${amount.toLocaleString()} to <@!${member.user.id}>'s \`${target}\`.`
+				`Set <@!${member.user.id}>'s \`${target}\` to ${cSymbol}${amount.toLocaleString()}.`
 			);
 
 		return await interaction.reply({ embeds: [embed] });

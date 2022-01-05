@@ -1,3 +1,4 @@
+import { parse_string } from '@adrastopoulos/number-parser';
 import { CommandInteraction } from 'discord.js';
 import {
 	EconomicaClient,
@@ -27,7 +28,7 @@ export default class implements EconomicaCommand {
 		const user = interaction.options.getUser('user');
 		const { wallet } = await getEconInfo(interaction.guildId, user.id);
 		const amount = interaction.options.getString('amount');
-		const result = amount === 'all' ? wallet : parseInt(amount);
+		const result = amount === 'all' ? wallet : parse_string(amount);
 
 		if (result) {
 			if (result < 1) {

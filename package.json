@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@adrastopoulos/number-parser": "github:Adrastopoulos/Number-Parser",
     "@discordjs/builders": "^0.10.0",
     "dotenv": "^10.0.0",
     "json-format": "^1.0.1",

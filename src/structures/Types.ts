@@ -7,6 +7,7 @@ export enum TransactionTypes {
 	Generator = 'GENERATOR',
 	Income = 'INCOME',
 	Add_Money = 'ADD_MONEY',
+	Set_Money = 'SET_MONEY',
 	Loan = 'LOAN',
 }
 
