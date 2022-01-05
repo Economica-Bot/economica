@@ -1,11 +1,12 @@
-import { CommandInteraction, MessageEmbed, MessageEmbedAuthor } from 'discord.js';
+import { CommandInteraction, MessageEmbed } from 'discord.js';
 import {
     EconomicaClient,
     EconomicaCommand,
     EconomicaSlashCommandBuilder,
 } from '../../structures/index';
-import { ShopModel, GuildModel } from '../../models/index'
+import { ShopModel, GuildModel, MemberModel } from '../../models/index'
 import * as util from '../../util/util'
+import { hyperlinks, authors } from '../../util/index'
 
 export default class implements EconomicaCommand {
     data = new EconomicaSlashCommandBuilder()
@@ -28,6 +29,14 @@ export default class implements EconomicaCommand {
             subcommand
                 .setName('clear')
                 .setDescription('Delete all items in the shop.')
+                .addStringOption(options =>
+                    options
+                        .setName('confirm')
+                        .setDescription('This action cannot be undone.')
+                        .addChoice('Yes, delete all shop items forever.', 'CONFIRMED')
+                        .addChoice('No, keep our shop items.', 'NOT CONFIRMED')
+                        .setRequired(true)
+                )
                 .addBooleanOption(options =>
                     options
                         .setName('remove_from_members')
@@ -39,6 +48,14 @@ export default class implements EconomicaCommand {
     execute = async (client: EconomicaClient, interaction: CommandInteraction): Promise<any> => {
         const subcommand = interaction.options.getSubcommand();
 
+        // Array of shop items in this guild
+        const shop = await ShopModel.find({
+            guildID: interaction.guildId
+        });
+
+        // Order items by ascending price
+        shop.sort((a, b) => a.price - b.price)
+
         if (subcommand == 'view') {
             // Whether there are items in the shop or not, these embed attributes will be constant
             // Note: hence, changing these attributes will also affect the pages!
@@ -49,16 +66,8 @@ export default class implements EconomicaCommand {
                 })
                 .setColor('BLUE')
 
-            // Array of shop items in this guild
-            const shop = await ShopModel.find({
-                guildID: interaction.guildId
-            });
-
-            // Order items by ascending price
-            shop.sort((a, b) => a.price - b.price)
-
             // There are no items in the shop
-            if (!shop.length) 
+            if (!shop.length)
                 return await interaction.reply({
                     embeds: [
                         page
@@ -68,7 +77,7 @@ export default class implements EconomicaCommand {
                             })
                     ]
                 })
-            
+
             // The currency symbol for prices
             const { currency } = await GuildModel.findOne({
                 guildID: interaction.guildId
@@ -83,7 +92,7 @@ export default class implements EconomicaCommand {
             const filteredEntries: any[] = []
 
             shop.forEach(item => {
-                if (item.active) 
+                if (item.active)
                     filteredEntries.push(item)
             })
 
@@ -109,7 +118,7 @@ export default class implements EconomicaCommand {
                     // No more items
                     if (!item)
                         break
-                    
+
                     page.setDescription(`There are currently \`${filteredEntries.length}\` items in the ${interaction.guild.name} shop.`)
                     //             Display item price and name                         Shortened description and stock                                                                    Inline if small desc.
                     page.addField(`${currency}${item.price ?? 'Free'} • ${item.name}`, util.cut(item.description ?? 'An interesting item', 150) + `\nIn-stock: \`${item.stock ?? '∞'}\``, item.description?.length <= 75)
@@ -122,7 +131,102 @@ export default class implements EconomicaCommand {
             }
 
             // Unpaginated **
-            return interaction.options.getInteger('page')? await interaction.reply({ embeds: [embeds[pageNumber - 1]] }) : await interaction.reply({ embeds })
+            return interaction.options.getInteger('page') ? await interaction.reply({ embeds: [embeds[pageNumber - 1]] }) : await interaction.reply({ embeds })
+
+        } else if (subcommand == 'clear') {
+            // The user did not confirm the purge
+            if (!(interaction.options.getString('confirm') === 'CONFIRMED'))
+                return await interaction.reply({
+                    embeds: [
+                        new MessageEmbed()
+                            .setColor('YELLOW')
+                            .setAuthor(authors.abort)
+                            .setTitle('Shop:shop clear')
+                            .setDescription(`Shop clearing process was intentionally aborted because you did not confirm the data deletion. Be sure to select \`Yes\` on the \`confirm\` option if this was a mistake.\n\n${hyperlinks.insertAll()}`)
+                    ],
+                    ephemeral: true
+                })
+
+            // The user confirmed the purge.
+
+            // There are no items.
+            if (!shop.length)
+                return await interaction.reply({
+                    embeds: [
+                        new MessageEmbed()
+                            .setColor('YELLOW')
+                            .setAuthor(authors.abort)
+                            .setTitle('Shop:shop clear')
+                            .setDescription(`Shop clearing process was intentionally aborted because there are no items in the shop to clear.\n\n${hyperlinks.insertAll()}`)
+                    ]
+                })
+
+            // Clear all shop items from members' inventories.
+            if (interaction.options.getBoolean('remove_from_members')) {
+                // Counts
+                let deletedItems = 0
+
+                // Outer loop: clear all items in the shop.
+                shop.forEach(item => {
+                    // Inner loop: clear item from all members in the guild.
+                    interaction.guild.members.cache.forEach(async member => {
+                        // The member's schema object.
+                        const { inventory } = await MemberModel.findOne({
+                            guildID: interaction.guildId,
+                            userID: member.id
+                        })
+
+                        // Check if the member has the item in his inventory
+                        inventory.forEach(async inventoryItem => {
+                            // If so, delete it
+                            if (inventoryItem.name == item.name) {
+                                delete inventory[inventory.indexOf(inventoryItem)]
+
+                                // And update the document
+                                await MemberModel.updateOne({
+                                    guildID: interaction.guildId,
+                                    userID: member.id
+                              ***REMOVED*** {
+                                    inventory
+                                })
+                            }
+
+                            deletedItems++
+                        })
+
+                        // Delete the item
+                        await ShopModel.deleteOne({
+                            guildID: interaction.guildId,
+                            name: item.name
+                        })
+                    })
+                })
+
+                return await interaction.reply({
+                    embeds: [
+                        new MessageEmbed()
+                            .setColor('GREEN')
+                            .setAuthor(authors.success)
+                            .setTitle('Shop:shop clear')
+                            .setDescription(`• \`${shop.length}\` items were successfully deleted from the ${interaction.guild.name} shop by \`${interaction.user.tag}\`\n• \`${deletedItems}\` were removed from members' inventories by \`${interaction.user.tag}\`\n\n${hyperlinks.insertAll()}`)
+                    ]
+                })
+            } else {
+                // Clear all items in the shop
+                await ShopModel.deleteMany({
+                    guildID: interaction.guildId
+                })
+
+                return await interaction.reply({
+                    embeds: [
+                        new MessageEmbed()
+                            .setColor('GREEN')
+                            .setAuthor(authors.success)
+                            .setTitle('Shop:shop clear')
+                            .setDescription(`\`${shop.length}\` items were successfully deleted from the ${interaction.guild.name} shop by \`${interaction.user.tag}\`\n\n${hyperlinks.insertAll()}`)
+                    ]
+                })
+            }
         }
     }
 }
