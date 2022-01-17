@@ -268,9 +268,7 @@ export async function infraction(
 		const guild = channel.guild;
 		const description = `Infraction for <@!${userID}> | Executed by <@!${staffID}>\nType: \`${type}\`\n${reason}`;
 		channel.send({
-			embeds: [
-				this.embedify('RED', `${infraction._id}`, guild.iconURL(), description).setTimestamp(),
-			],
+			embeds: [embedify('RED', `${infraction._id}`, guild.iconURL(), description).setTimestamp()],
 		});
 	}
 }
@@ -338,7 +336,7 @@ export function intInRange(min: number, max: number) {
  */
 export function isSuccess(properties: IncomeCommandProperties): boolean {
 	const { chance } = properties;
-	return this.intInRange(0, 100) < chance ? true : false;
+	return intInRange(0, 100) < chance ? true : false;
 }
 
 /**
@@ -384,15 +382,19 @@ export function num(num: number) {
  * Initiates a pagination embed display.
  * @param {Discord.CommandInteraction} interaction
  * @param {[Discord.MessageEmbed]} embeds
- * @param {number} page
+ * @param {number} index
  */
 export async function paginate(
 	interaction: Discord.CommandInteraction,
 	embeds: Discord.MessageEmbed[],
-	page: number = 0
+	index: number = 0
 ) {
-	if (page > embeds.length - 1) {
-		interaction.editReply(this.error('Page number out of bounds!'));
+	if (!interaction.deferred) {
+		await interaction.deferReply();
+	}
+
+	if (index > embeds.length - 1) {
+		interaction.editReply(error('Page number out of bounds!'));
 		return;
 	}
 
@@ -403,18 +405,18 @@ export async function paginate(
 				.setCustomId('previous_page')
 				.setLabel('Previous')
 				.setStyle('SECONDARY')
-				.setDisabled(page == 0 ? true : false)
+				.setDisabled(index == 0 ? true : false)
 		)
 		.addComponents(
 			new Discord.MessageButton()
 				.setCustomId('next_page')
 				.setLabel('Next')
 				.setStyle('PRIMARY')
-				.setDisabled(page == embeds.length - 1 ? true : false)
+				.setDisabled(index == embeds.length - 1 ? true : false)
 		);
 
 	const msg = (await interaction.editReply({
-		embeds: [embeds[page]],
+		embeds: [embeds[index]],
 		components: [row],
 	})) as Discord.Message;
 
@@ -428,44 +430,44 @@ export async function paginate(
 	});
 
 	collector.on('collect', async (i) => {
-		if (page < embeds.length - 1 && page >= 0 && i.customId === 'next_page') {
-			page++;
+		if (index < embeds.length - 1 && index >= 0 && i.customId === 'next_page') {
+			index++;
 			row = new Discord.MessageActionRow()
 				.addComponents(
 					new Discord.MessageButton()
 						.setCustomId('previous_page')
 						.setLabel('Previous')
 						.setStyle('SECONDARY')
-						.setDisabled(page == 0 ? true : false)
+						.setDisabled(index == 0 ? true : false)
 				)
 				.addComponents(
 					new Discord.MessageButton()
 						.setCustomId('next_page')
 						.setLabel('Next')
 						.setStyle('PRIMARY')
-						.setDisabled(page == embeds.length - 1 ? true : false)
+						.setDisabled(index == embeds.length - 1 ? true : false)
 				);
-		} else if (page > 0 && page < embeds.length && i.customId === 'previous_page') {
-			page--;
+		} else if (index > 0 && index < embeds.length && i.customId === 'previous_page') {
+			index--;
 			row = new Discord.MessageActionRow()
 				.addComponents(
 					new Discord.MessageButton()
 						.setCustomId('previous_page')
 						.setLabel('Previous')
 						.setStyle('SECONDARY')
-						.setDisabled(page == 0 ? true : false)
+						.setDisabled(index == 0 ? true : false)
 				)
 				.addComponents(
 					new Discord.MessageButton()
 						.setCustomId('next_page')
 						.setLabel('Next')
 						.setStyle('PRIMARY')
-						.setDisabled(page == embeds.length - 1 ? true : false)
+						.setDisabled(index == embeds.length - 1 ? true : false)
 				);
 		}
 
 		await i.update({
-			embeds: [embeds[page]],
+			embeds: [embeds[index]],
 			components: [row],
 		});
 	});

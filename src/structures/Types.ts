@@ -18,3 +18,5 @@ export enum InfractionTypes {
 	Unban = 'moderation:UNBAN',
 	Untimeout = 'moderation:UNTIMEOUT',
 }
+
+export type BalanceTypes = 'wallet' | 'treasury' | 'total';
