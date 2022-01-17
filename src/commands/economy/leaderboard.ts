@@ -1,8 +1,12 @@
-import { parse_number } from '@adrastopoulos/number-parser';
 import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { parse_number } from '@adrastopoulos/number-parser';
 import { MemberModel } from '../../models';
-import { EconomicaClient, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-import { BalanceTypes } from '../../structures/Types';
+import {
+	EconomicaClient,
+	EconomicaCommand,
+	EconomicaSlashCommandBuilder,
+	BalanceTypes,
+} from '../../structures';
 import { getCurrencySymbol, paginate } from '../../util/util';
 
 export default class implements EconomicaCommand {

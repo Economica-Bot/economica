@@ -1,6 +1,6 @@
 export { EconomicaClient } from './EconomicaClient';
 export { EconomicaCommand } from './EconomicaCommand';
-export { EconomicaService } from './EconomicaService'
+export { EconomicaService } from './EconomicaService';
 export {
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandOptionsOnlyBuilder,
@@ -11,7 +11,7 @@ export {
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from './EconomicaSlashCommandSubcommands';
 export { ModuleSetting, RoleSetting, ChannelSetting, CommandSetting } from './Settings';
-export { TransactionTypes, InfractionTypes } from './Types';
+export { TransactionTypes, InfractionTypes, BalanceTypes } from './Types';
 export {
 	CommandData,
 	InventoryItem,
