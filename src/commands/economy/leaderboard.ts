@@ -1,13 +1,13 @@
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import { parse_number } from '@adrastopoulos/number-parser';
 import { MemberModel } from '../../models';
 import {
-	EconomicaClient,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	BalanceTypes,
+	Context,
 } from '../../structures';
-import { getCurrencySymbol, paginate } from '../../util/util';
+import { paginate } from '../../util/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -31,13 +31,14 @@ export default class implements EconomicaCommand {
 		.addIntegerOption((option) =>
 			option.setName('page').setDescription('Specify a page.').setMinValue(1).setRequired(false)
 		);
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		const guildID = interaction.guild.id;
-		const cSymbol = await getCurrencySymbol(guildID);
-		const type = interaction.options.getString('type') as BalanceTypes;
-		const page = interaction.options.getInteger('page') || 1;
+	execute = async (ctx: Context) => {
+		const type = ctx.interaction.options.getString('type') as BalanceTypes;
+		const page = ctx.interaction.options.getInteger('page') || 1;
+		const { currency } = ctx.guildDocument;
 
-		const members = await MemberModel.find({ guildID }).sort({ wallet: -1 });
+		const members = await MemberModel.find({ guildID: ctx.guildDocument.guildID }).sort({
+			[type]: -1,
+		});
 
 		let entryCount = 10;
 		const pageCount = Math.ceil(members.length / entryCount);
@@ -47,7 +48,7 @@ export default class implements EconomicaCommand {
 		members.forEach((member) => {
 			const userID = member.userID;
 			const balance = parse_number(member[type]);
-			leaderBoardEntries.push(`\`${rank++}\` • <@${userID}> | ${cSymbol}${balance}\n`);
+			leaderBoardEntries.push(`\`${rank++}\` • <@${userID}> | ${currency}${balance}\n`);
 		});
 
 		const embeds: MessageEmbed[] = [];
@@ -62,8 +63,8 @@ export default class implements EconomicaCommand {
 
 			const embed = new MessageEmbed()
 				.setAuthor({
-					name: `${interaction.guild}'s ${type} Leaderboard`,
-					iconURL: interaction.guild.iconURL(),
+					name: `${ctx.interaction.guild}'s ${type} Leaderboard`,
+					iconURL: ctx.interaction.guild.iconURL(),
 				})
 				.setColor('BLUE')
 				.setDescription(description)
@@ -72,6 +73,6 @@ export default class implements EconomicaCommand {
 			embeds.push(embed);
 		}
 
-		await paginate(interaction, embeds, page - 1);
+		await paginate(ctx.interaction, embeds, page - 1);
 	};
 }

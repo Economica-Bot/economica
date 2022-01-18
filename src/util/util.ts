@@ -1,7 +1,7 @@
 const config = require('../../config.json');
 import * as Discord from 'discord.js';
 import {
-	GuildModel,
+	guildDocument,
 	InfractionModel,
 	LoanModel,
 	MarketModel,
@@ -92,7 +92,7 @@ export function success(
 
 /**
  * Gets a user's economy information.
- * @param {string} guildID - GuildModel id.
+ * @param {string} guildID - guildDocument id.
  * @param {string} userID - User id.
  * @returns {Promise<EconomyInfo>} wallet, treasury, total, rank
  */
@@ -185,14 +185,14 @@ export async function transaction(
 		total,
 	}).save();
 
-	const guildSetting = await GuildModel.findOne({
+	const guildSetting = await guildDocument.findOne({
 		guildID,
 	});
 
 	const channelID = guildSetting?.transactionLogChannel;
 
 	if (channelID) {
-		const cSymbol = await getCurrencySymbol(guildID);
+		const cSymbol = guildSetting.currency;
 		const channel = client.channels.cache.get(channelID) as Discord.TextChannel;
 		const guild = channel.guild;
 		const description = `Transaction for <@!${userID}>\nType: \`${transaction_type}\` | ${memo}`;
@@ -226,7 +226,7 @@ export async function transaction(
 
 /**
  * Record an infraction.
- * @param {string} guildID - GuildModel id.
+ * @param {string} guildID - guildDocument id.
  * @param {string} userID - User id.
  * @param {string} staffID - Staff id.
  * @param {string} type - The punishment for the infraction.
@@ -257,7 +257,7 @@ export async function infraction(
 		duration,
 	}).save();
 
-	const guildSetting = await GuildModel.findOne({
+	const guildSetting = await guildDocument.findOne({
 		guildiD: `${guildID}`,
 	});
 
@@ -274,24 +274,13 @@ export async function infraction(
 }
 
 /**
- * Gets currency symbol.
- * @param {string} guildID - Guild id.
- * @returns {string} Guild currency symbol
- */
-export async function getCurrencySymbol(guildID: string): Promise<String> {
-	return await (
-		await GuildModel.findOne({ guildID })
-	).currency;
-}
-
-/**
  * Updates the min and max payout for the specified income command
  * @param {String} guildID - Guild id.
  * @param {String} command - Income command.
  * @param {IncomeCommandProperties} properties - Command properties.
  */
 export async function setCommandStats(guildID: string, properties: IncomeCommandProperties) {
-	await GuildModel.findOneAndUpdate(
+	await guildDocument.findOneAndUpdate(
 		{ guildID },
 		{
 			$pull: {
@@ -305,7 +294,7 @@ export async function setCommandStats(guildID: string, properties: IncomeCommand
 		}
 	);
 
-	await GuildModel.findOneAndUpdate(
+	await guildDocument.findOneAndUpdate(
 		{ guildID },
 		{
 			$push: {

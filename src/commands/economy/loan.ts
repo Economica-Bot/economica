@@ -1,15 +1,16 @@
 import ms from 'ms';
 import { isValidObjectId } from 'mongoose';
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import { LoanModel } from '../../models';
 import {
+	Context,
 	EconomicaClient,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	PermissionRole,
 	TransactionTypes,
 } from '../../structures';
-import { getCurrencySymbol, getEconInfo, transaction } from '../../util/util';
+import { getEconInfo, transaction } from '../../util/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -110,35 +111,37 @@ export default class implements EconomicaCommand {
 				)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		const subcommandgroup = interaction.options.getSubcommandGroup(false);
-		const subcommand = interaction.options.getSubcommand();
-		const guildID = interaction.guild.id;
-		const cSymbol = await getCurrencySymbol(guildID);
-		const { wallet, treasury } = await getEconInfo(guildID, interaction.user.id);
+	execute = async (ctx: Context) => {
+		const subcommandgroup = ctx.interaction.options.getSubcommandGroup(false);
+		const subcommand = ctx.interaction.options.getSubcommand();
+		const { currency } = ctx.guildDocument;
+		const { wallet, treasury } = await getEconInfo(
+			ctx.guildDocument.guildID,
+			ctx.interaction.user.id
+		);
 
 		if (subcommand === 'propose') {
-			const borrower = interaction.options.getUser('user');
-			const principal = interaction.options.getInteger('principal');
-			const repayment = interaction.options.getInteger('repayment');
-			const duration = interaction.options.getString('duration');
+			const borrower = ctx.interaction.options.getUser('user');
+			const principal = ctx.interaction.options.getInteger('principal');
+			const repayment = ctx.interaction.options.getInteger('repayment');
+			const duration = ctx.interaction.options.getString('duration');
 
-			if (borrower.id === interaction.user.id) {
-				return await interaction.reply('You cannot give yourself a loan!');
+			if (borrower.id === ctx.interaction.user.id) {
+				return await ctx.interaction.reply('You cannot give yourself a loan!');
 			}
 
 			if (principal > treasury) {
-				return await interaction.reply('Insufficient treasury.');
+				return await ctx.interaction.reply('Insufficient treasury.');
 			}
 
 			if (!ms(duration)) {
-				return await interaction.reply('Invalid length.');
+				return await ctx.interaction.reply('Invalid length.');
 			}
 
 			const loan = await new LoanModel({
-				guildID,
+				guildID: ctx.guildDocument.guildID,
 				borrowerID: borrower.id,
-				lenderID: interaction.user.id,
+				lenderID: ctx.interaction.user.id,
 				principal,
 				repayment,
 				expires: new Date(new Date().getTime() + ms(duration)),
@@ -148,9 +151,9 @@ export default class implements EconomicaCommand {
 			}).save();
 
 			await transaction(
-				client,
-				guildID,
-				interaction.user.id,
+				ctx.client,
+				ctx.guildDocument.guildID,
+				ctx.interaction.user.id,
 				TransactionTypes.Loan,
 				`Loan to <@!${borrower.id}> | Loan ID \`${loan._id}\``,
 				0,
@@ -160,25 +163,25 @@ export default class implements EconomicaCommand {
 
 			console.log(loan.createdAt);
 
-			return await interaction.reply(
+			return await ctx.interaction.reply(
 				`Successfully created a loan.\nLoan \`${
 					loan._id
 				}\` | <t:${loan.createdAt.getTime()}:f>\nExpires in <t:${loan.expires.getTime()}:R>\nBorrower: <@!${
 					loan.borrowerID
 				}>\nPending: \`${loan.pending}\` | Active: \`${loan.active}\` | Complete: \`${
 					loan.complete
-				}\`\nPrincipal: ${cSymbol}${loan.principal} | Repayment: ${cSymbol}${loan.repayment}`
+				}\`\nPrincipal: ${currency}${loan.principal} | Repayment: ${currency}${loan.repayment}`
 			);
 		} else if (subcommand === 'cancel') {
-			const _id = interaction.options.getString('loan_id');
+			const _id = ctx.interaction.options.getString('loan_id');
 			if (!isValidObjectId(_id)) {
-				return await interaction.reply(`Invalid ID: \`${_id}\``);
+				return await ctx.interaction.reply(`Invalid ID: \`${_id}\``);
 			}
 			const loan = await LoanModel.findOneAndUpdate(
 				{
 					_id,
-					guildID: interaction.guild.id,
-					lenderID: interaction.user.id,
+					guildID: ctx.interaction.guild.id,
+					lenderID: ctx.interaction.user.id,
 					pending: false,
 				},
 				{
@@ -187,19 +190,19 @@ export default class implements EconomicaCommand {
 				}
 			);
 			if (!loan) {
-				return await interaction.reply(`Could not find pending loan with ID \`${_id}\``);
+				return await ctx.interaction.reply(`Could not find pending loan with ID \`${_id}\``);
 			}
-			return await interaction.reply(`Canceled loan \`${_id}\``);
+			return await ctx.interaction.reply(`Canceled loan \`${_id}\``);
 		} else if (subcommand === 'accept') {
-			const _id = interaction.options.getString('loan_id');
+			const _id = ctx.interaction.options.getString('loan_id');
 			if (!isValidObjectId(_id)) {
-				return await interaction.reply(`Invalid ID: \`${_id}\``);
+				return await ctx.interaction.reply(`Invalid ID: \`${_id}\``);
 			}
 			const loan = await LoanModel.findOneAndUpdate(
 				{
 					_id,
-					guildID: interaction.guild.id,
-					borrowerID: interaction.user.id,
+					guildID: ctx.interaction.guild.id,
+					borrowerID: ctx.interaction.user.id,
 					pending: true,
 				},
 				{
@@ -207,29 +210,29 @@ export default class implements EconomicaCommand {
 				}
 			);
 			if (!loan) {
-				return await interaction.reply(`Could not find pending loan with ID \`${_id}\``);
+				return await ctx.interaction.reply(`Could not find pending loan with ID \`${_id}\``);
 			}
 			await transaction(
-				client,
-				guildID,
-				interaction.user.id,
+				ctx.client,
+				ctx.guildDocument.guildID,
+				ctx.interaction.user.id,
 				TransactionTypes.Loan,
 				`Loan from <@!${loan.lenderID}> \`accepted\` | Loan ID: \`${loan._id}\``,
 				loan.principal,
 				0,
 				loan.principal
 			);
-			return await interaction.reply(`Accepted loan \`${_id}\``);
+			return await ctx.interaction.reply(`Accepted loan \`${_id}\``);
 		} else if (subcommand === 'decline') {
-			const _id = interaction.options.getString('loan_id');
+			const _id = ctx.interaction.options.getString('loan_id');
 			if (!isValidObjectId(_id)) {
-				return await interaction.reply(`Invalid ID: \`${_id}\``);
+				return await ctx.interaction.reply(`Invalid ID: \`${_id}\``);
 			}
 			const loan = await LoanModel.findOneAndUpdate(
 				{
 					_id,
-					guildID: interaction.guild.id,
-					borrowerID: interaction.user.id,
+					guildID: ctx.interaction.guild.id,
+					borrowerID: ctx.interaction.user.id,
 					pending: true,
 				},
 				{
@@ -238,11 +241,11 @@ export default class implements EconomicaCommand {
 				}
 			);
 			if (!loan) {
-				return await interaction.reply(`Could not find pending loan with ID \`${_id}\``);
+				return await ctx.interaction.reply(`Could not find pending loan with ID \`${_id}\``);
 			}
 			await transaction(
-				client,
-				guildID,
+				ctx.client,
+				ctx.guildDocument.guildID,
 				loan.lenderID,
 				TransactionTypes.Loan,
 				`Loan from <@!${loan.lenderID}> \`declined\` | Loan ID: \`${loan._id}\``,
@@ -250,27 +253,27 @@ export default class implements EconomicaCommand {
 				loan.principal,
 				loan.principal
 			);
-			return await interaction.reply(`Accepted loan \`${_id}\``);
+			return await ctx.interaction.reply(`Accepted loan \`${_id}\``);
 		} else if (subcommand === 'view') {
-			const _id = interaction.options.getString('loan_id', false);
-			const user = interaction.options.getUser('user', false);
+			const _id = ctx.interaction.options.getString('loan_id', false);
+			const user = ctx.interaction.options.getUser('user', false);
 
 			if (_id) {
 				if (!isValidObjectId(_id)) {
-					return await interaction.reply(`Invalid ID: \`${_id}\``);
+					return await ctx.interaction.reply(`Invalid ID: \`${_id}\``);
 				} else {
-					const loan = await LoanModel.findOne({ _id, guildID });
+					const loan = await LoanModel.findOne({ _id, guildID: ctx.guildDocument.guildID });
 					if (!loan) {
-						return await interaction.reply(`Could not find pending loan with ID \`${_id}\``);
+						return await ctx.interaction.reply(`Could not find pending loan with ID \`${_id}\``);
 					}
-					return await interaction.reply(
+					return await ctx.interaction.reply(
 						`Loan \`${
 							loan._id
 						}\` | <t:${loan.createdAt.getMilliseconds()}:f>\nExpires in <t:${loan.expires.getMilliseconds()}:R>\nBorrower: <@!${
 							loan.borrowerID
 						}>\nPending: \`${loan.pending}\` | Active: \`${loan.active}\` | Complete: \`${
 							loan.complete
-						}\`\nPrincipal: ${cSymbol}${loan.principal} | Repayment: ${cSymbol}${loan.repayment})`
+						}\`\nPrincipal: ${currency}${loan.principal} | Repayment: ${currency}${loan.repayment})`
 					);
 				}
 			} else if (user) {
@@ -279,8 +282,14 @@ export default class implements EconomicaCommand {
 					iconURL: user.displayAvatarURL(),
 				});
 
-				const outgoingLoans = await LoanModel.find({ guildID, lenderID: user.id });
-				const incomingLoans = await LoanModel.find({ guildID, borrowerID: user.id });
+				const outgoingLoans = await LoanModel.find({
+					guildID: ctx.guildDocument.guildID,
+					lenderID: user.id,
+				});
+				const incomingLoans = await LoanModel.find({
+					guildID: ctx.guildDocument.guildID,
+					borrowerID: user.id,
+				});
 				let description = '';
 
 				for (const outgoingLoan of outgoingLoans) {
@@ -290,9 +299,9 @@ export default class implements EconomicaCommand {
 						outgoingLoan.borrowerID
 					}>\nPending: \`${outgoingLoan.pending}\` | Active: \`${
 						outgoingLoan.active
-					}\` | Complete: \`${outgoingLoan.complete}\`\nPrincipal: ${cSymbol}${
+					}\` | Complete: \`${outgoingLoan.complete}\`\nPrincipal: ${currency}${
 						outgoingLoan.principal
-					} | Repayment: ${cSymbol}${outgoingLoan.repayment}\n\n`;
+					} | Repayment: ${currency}${outgoingLoan.repayment}\n\n`;
 				}
 
 				for (const incomingLoan of incomingLoans) {
@@ -302,9 +311,9 @@ export default class implements EconomicaCommand {
 						incomingLoan.lenderID
 					}>\nPending: \`${incomingLoan.pending}\` | Active: \`${
 						incomingLoan.active
-					}\` | Complete: \`${incomingLoan.complete}\`\nPrincipal: ${cSymbol}${
+					}\` | Complete: \`${incomingLoan.complete}\`\nPrincipal: ${currency}${
 						incomingLoan.principal
-					} | Repayment: ${cSymbol}${incomingLoan.repayment}\n\n`;
+					} | Repayment: ${currency}${incomingLoan.repayment}\n\n`;
 				}
 
 				if (description.length === 0) {
@@ -312,35 +321,38 @@ export default class implements EconomicaCommand {
 				}
 
 				embed.setDescription(description);
-				return await interaction.reply({ embeds: [embed] });
+				return await ctx.interaction.reply({ embeds: [embed] });
 			}
 		} else if (subcommandgroup === 'delete') {
 			if (subcommand === 'id') {
-				const _id = interaction.options.getString('loan_id');
+				const _id = ctx.interaction.options.getString('loan_id');
 				if (!isValidObjectId(_id)) {
-					return await interaction.reply(`Invalid ID: \`${_id}\``);
+					return await ctx.interaction.reply(`Invalid ID: \`${_id}\``);
 				}
 				const transaction = await LoanModel.findOneAndDelete({
 					_id,
-					guildID: interaction.guild.id,
+					guildID: ctx.interaction.guild.id,
 				});
 				if (!transaction) {
-					return await interaction.reply(`Could not find loan with ID \`${_id}\``);
+					return await ctx.interaction.reply(`Could not find loan with ID \`${_id}\``);
 				}
-				return await interaction.reply(`Deleted loan \`${_id}\``);
+				return await ctx.interaction.reply(`Deleted loan \`${_id}\``);
 			} else if (subcommand === 'user') {
-				const lender = interaction.options.getUser('lender', false);
-				const borrower = interaction.options.getUser('borrower', false);
+				const lender = ctx.interaction.options.getUser('lender', false);
+				const borrower = ctx.interaction.options.getUser('borrower', false);
 				const loans = lender
 					? await LoanModel.deleteMany({
-							guildID,
+							guildID: ctx.guildDocument.guildID,
 							lenderID: lender.id,
 					  })
-					: await LoanModel.deleteMany({ guildID, borrowerID: borrower.id });
-				interaction.reply(`Deleted \`${loans.deletedCount}\` loans.`);
+					: await LoanModel.deleteMany({
+							guildID: ctx.guildDocument.guildID,
+							borrowerID: borrower.id,
+					  });
+				return await ctx.interaction.reply(`Deleted \`${loans.deletedCount}\` loans.`);
 			} else if (subcommand === 'all') {
-				const loans = await LoanModel.deleteMany({ guildID: interaction.guild.id });
-				interaction.reply(`Deleted \`${loans.deletedCount}\` loans.`);
+				const loans = await LoanModel.deleteMany({ guildID: ctx.interaction.guild.id });
+				return await ctx.interaction.reply(`Deleted \`${loans.deletedCount}\` loans.`);
 			}
 		}
 	};

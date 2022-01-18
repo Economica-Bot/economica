@@ -2,9 +2,9 @@ import {
 	SlashCommandSubcommandBuilder,
 	SlashCommandSubcommandGroupBuilder,
 } from '@discordjs/builders';
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import {
-	EconomicaClient,
+	Context,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
@@ -28,14 +28,14 @@ export default class implements EconomicaCommand {
 				.setRequired(false)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		const query = interaction.options.getString('query');
+	execute = async (ctx: Context) => {
+		const query = ctx.interaction.options.getString('query');
 
 		if (!query) {
 			const commands: EconomicaSlashCommandBuilder[] = [];
 			const groups: string[] = [];
 
-			client.commands.forEach((command) => {
+			ctx.client.commands.forEach((command) => {
 				const data = command.data as EconomicaSlashCommandBuilder;
 				if (!groups.includes(data.group)) groups.push(data.group);
 				commands.push(data);
@@ -43,8 +43,8 @@ export default class implements EconomicaCommand {
 
 			const embed = new MessageEmbed()
 				.setAuthor({
-					name: `${client.user.username} Commands`,
-					iconURL: client.user.displayAvatarURL(),
+					name: `${ctx.client.user.username} Commands`,
+					iconURL: ctx.client.user.displayAvatarURL(),
 				})
 				.setColor('YELLOW');
 
@@ -57,18 +57,18 @@ export default class implements EconomicaCommand {
 				embed.addField(group, `\`${list.join('`, `')}\``);
 			}
 
-			return await interaction.reply({ embeds: [embed] });
+			return await ctx.interaction.reply({ embeds: [embed] });
 		}
 
 		const subcommand = (
-			client.commands.find((command) => {
+			ctx.client.commands.find((command) => {
 				const data = command.data as EconomicaSlashCommandBuilder;
 				return data.getSubcommand(query) !== undefined;
 			})?.data as EconomicaSlashCommandBuilder
 		)?.getSubcommand(query) as EconomicaSlashCommandSubcommandBuilder;
 
 		const subcommandGroup = (
-			client.commands.find((command) => {
+			ctx.client.commands.find((command) => {
 				const data = command.data as EconomicaSlashCommandBuilder;
 				return (
 					data.getSubcommand(subcommand?.name) !== undefined ||
@@ -77,7 +77,7 @@ export default class implements EconomicaCommand {
 			})?.data as EconomicaSlashCommandBuilder
 		)?.getSubcommandGroup(subcommand?.name || query) as EconomicaSlashCommandSubcommandGroupBuilder;
 
-		const command = client.commands.find((command) => {
+		const command = ctx.client.commands.find((command) => {
 			const data = command.data as EconomicaSlashCommandBuilder;
 			return (
 				data.name === query ||
@@ -86,26 +86,24 @@ export default class implements EconomicaCommand {
 			);
 		});
 
-		const group = (
-			client.commands.find((cmd) => {
-				const data = cmd.data as EconomicaSlashCommandBuilder;
-				return (
-					data.group === query ||
-					data.getSubcommand(subcommand?.name) !== undefined ||
-					data.getSubcommandGroup(subcommandGroup?.name) !== undefined ||
-					data.name === command?.data?.name
-				);
-			})?.data as EconomicaSlashCommandBuilder
-		)?.group;
+		const { group } = ctx.client.commands.find((cmd) => {
+			const data = cmd.data as EconomicaSlashCommandBuilder;
+			return (
+				data.group === query ||
+				data.getSubcommand(subcommand?.name) !== undefined ||
+				data.getSubcommandGroup(subcommandGroup?.name) !== undefined ||
+				data.name === command?.data?.name
+			);
+		})?.data as EconomicaSlashCommandBuilder;
 
 		if (group && !command) {
 			const embed = new MessageEmbed()
 				.setAuthor({
 					name: `${group}`,
-					iconURL: client.user.displayAvatarURL(),
+					iconURL: ctx.client.user.displayAvatarURL(),
 				})
 				.setColor('YELLOW');
-			for (const command of client.commands) {
+			for (const command of ctx.client.commands) {
 				const data = command[1].data as EconomicaSlashCommandBuilder;
 				if (data.group === group) {
 					embed.addField(
@@ -115,7 +113,7 @@ export default class implements EconomicaCommand {
 				}
 			}
 
-			return await interaction.reply({ embeds: [embed] });
+			return await ctx.interaction.reply({ embeds: [embed] });
 		}
 
 		if (command && !subcommandGroup) {
@@ -123,7 +121,7 @@ export default class implements EconomicaCommand {
 			const embed = new MessageEmbed()
 				.setAuthor({
 					name: `${group}:${data.name}`,
-					iconURL: client.user.displayAvatarURL(),
+					iconURL: ctx.client.user.displayAvatarURL(),
 				})
 				.setColor('YELLOW')
 				.setDescription(`${data.description}`)
@@ -145,7 +143,7 @@ export default class implements EconomicaCommand {
 				}
 			});
 
-			return await interaction.reply({ embeds: [embed] });
+			return await ctx.interaction.reply({ embeds: [embed] });
 		}
 
 		if (subcommandGroup && !subcommand) {
@@ -153,7 +151,7 @@ export default class implements EconomicaCommand {
 			const embed = new MessageEmbed()
 				.setAuthor({
 					name: `${group}:${data.name}:${subcommandGroup.name}`,
-					iconURL: client.user.displayAvatarURL(),
+					iconURL: ctx.client.user.displayAvatarURL(),
 				})
 				.setColor('YELLOW')
 				.setDescription(`${subcommandGroup.description}`);
@@ -166,7 +164,7 @@ export default class implements EconomicaCommand {
 				);
 			}
 
-			return await interaction.reply({ embeds: [embed] });
+			return await ctx.interaction.reply({ embeds: [embed] });
 		}
 
 		if (subcommand) {
@@ -174,7 +172,7 @@ export default class implements EconomicaCommand {
 			const embed = new MessageEmbed()
 				.setAuthor({
 					name: `${group}:${data.name}:${subcommandGroup.name}:${subcommand.name}`,
-					iconURL: client.user.displayAvatarURL(),
+					iconURL: ctx.client.user.displayAvatarURL(),
 				})
 				.setColor('YELLOW')
 				.setDescription(subcommand.description)
@@ -185,10 +183,10 @@ export default class implements EconomicaCommand {
 					true
 				);
 
-			return await interaction.reply({ embeds: [embed] });
+			return await ctx.interaction.reply({ embeds: [embed] });
 		}
 
-		await interaction.reply(
+		return await ctx.interaction.reply(
 			`Could not find any groups, commands, subcommand groups, or subcommands matching \`${query}\`.`
 		);
 	};

@@ -1,6 +1,6 @@
-import { CommandInteraction, GuildMember } from 'discord.js';
+import { GuildMember } from 'discord.js';
 import {
-	EconomicaClient,
+	Context,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	InfractionTypes,
@@ -41,50 +41,52 @@ export default class implements EconomicaCommand {
 				.setRequired(false)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction): Promise<any> => {
-		const member = (await interaction.guild.members.fetch(client.user.id)) as GuildMember;
-		const target = interaction.options.getMember('target') as GuildMember;
-		const duration = interaction.options.getString('length') ?? 'Permanent';
-		const reason = interaction.options.getString('reason') ?? 'No reason provided';
-		const days = interaction.options.getNumber('days') ?? 0;
+	execute = async (ctx: Context) => {
+		const member = (await ctx.interaction.guild.members.fetch(ctx.client.user.id)) as GuildMember;
+		const target = ctx.interaction.options.getMember('target') as GuildMember;
+		const duration = ctx.interaction.options.getString('length') ?? 'Permanent';
+		const reason = ctx.interaction.options.getString('reason') ?? 'No reason provided';
+		const days = ctx.interaction.options.getNumber('days') ?? 0;
 
-		if (target.id === interaction.user.id) {
-			return await interaction.reply('You cannot ban yourself.');
+		if (target.id === ctx.interaction.user.id) {
+			return await ctx.interaction.reply('You cannot ban yourself.');
 		}
 
-		if (target.id === client.user.id) {
-			return await interaction.reply('I cannot ban myself.');
+		if (target.id === ctx.client.user.id) {
+			return await ctx.interaction.reply('I cannot ban myself.');
 		}
 
 		if (target.roles.highest.position > member.roles.highest.position) {
-			return await interaction.reply('Insufficient permissions.');
+			return await ctx.interaction.reply('Insufficient permissions.');
 		}
 
 		if (!target.bannable) {
-			return await interaction.reply(`<@!${target.id}> is not bannable.`);
+			return await ctx.interaction.reply(`<@!${target.id}> is not bannable.`);
 		}
 
 		const milliseconds = ms(duration);
 
 		if (duration !== 'Permanent' && (!milliseconds || milliseconds < 0)) {
-			return interaction.reply('Invalid duration.');
+			return ctx.interaction.reply('Invalid duration.');
 		}
 
 		await target
 			.send(
 				`You have been banned for \`${reason}\` ${
 					milliseconds ? `for ${ms(milliseconds)}` : 'permanently'
-				} from **${interaction.guild.name}**`
+				} from **${ctx.interaction.guild.name}**`
 			)
-			.catch(async (err) => await interaction.reply(`Could not dm ${target.user.tag}\n\`${err}\``));
+			.catch(
+				async (err) => await ctx.interaction.reply(`Could not dm ${target.user.tag}\n\`${err}\``)
+			);
 
 		await target.ban({ days, reason });
 
 		await infraction(
-			client,
-			interaction.guildId,
+			ctx.client,
+			ctx.interaction.guildId,
 			target.id,
-			interaction.user.id,
+			ctx.interaction.user.id,
 			InfractionTypes.Ban,
 			reason,
 			duration === 'Permanent' ? true : false,
@@ -92,12 +94,12 @@ export default class implements EconomicaCommand {
 			milliseconds
 		);
 
-		if (interaction.replied) {
-			interaction.followUp(
+		if (ctx.interaction.replied) {
+			ctx.interaction.followUp(
 				`Banned ${target.user.tag} ${milliseconds ? `for ${ms(milliseconds)}` : 'permanently'}.`
 			);
 		} else {
-			interaction.reply(
+			ctx.interaction.reply(
 				`Banned ${target.user.tag} ${milliseconds ? `for ${ms(milliseconds)}` : 'permanently'}.`
 			);
 		}

@@ -38,6 +38,6 @@ client.login(process.env.ECON_ALPHA_TOKEN).then(() => {
 	console.log(`${client.user.username} logged in`);
 });
 
-process.on('unhandledRejection', async (err: Error) => await runtimeError(client, err));
-process.on('uncaughtException', async (err: Error) => await runtimeError(client, err));
-process.on('rejectionHandled', async (err: Error) => await runtimeError(client, err));
+// process.on('unhandledRejection', async (err: Error) => await runtimeError(client, err));
+// process.on('uncaughtException', async (err: Error) => await runtimeError(client, err));
+// process.on('rejectionHandled', async (err: Error) => await runtimeError(client, err));

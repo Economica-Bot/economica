@@ -1,7 +1,6 @@
-import { CommandInteraction } from 'discord.js';
-import { GuildModel } from '../../models';
+import { guildDocument } from '../../models';
 import {
-	EconomicaClient,
+	Context,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	PermissionRole,
@@ -37,25 +36,25 @@ export default class implements EconomicaCommand {
 				.setDescription('Reset the transaction log channel.')
 				.setRoles([new PermissionRole('ECONOMY MANAGER', true)])
 		);
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		const subcommand = interaction.options.getSubcommand();
+		execute = async (ctx: Context) => {
+		const subcommand = ctx.interaction.options.getSubcommand();
 		if (subcommand === 'view') {
-			const channelID = (await GuildModel.findOne({ guildID: interaction.guildId })).guildID;
+			const channelID = (await guildDocument.findOne({ guildID: ctx.interaction.guildId })).guildID;
 			if (channelID) {
-				return await interaction.reply(`The current transaction log is <#${channelID}>`);
+				return await ctx.interaction.reply(`The current transaction log is <#${channelID}>`);
 			} else {
-				return await interaction.reply('There is no transaction log.');
+				return await ctx.interaction.reply('There is no transaction log.');
 			}
 		} else if (subcommand === 'set') {
-			const channel = interaction.options.getChannel('channel');
-			await GuildModel.findOneAndUpdate(
-				{ guildID: interaction.guildId },
+			const channel = ctx.interaction.options.getChannel('channel');
+			await guildDocument.findOneAndUpdate(
+				{ guildID: ctx.interaction.guildId },
 				{ transactionLogChannel: channel.id }
 			);
-			return await interaction.reply(`Transaction log set to ${channel}`);
+			return await ctx.interaction.reply(`Transaction log set to ${channel}`);
 		} else if (subcommand === 'reset') {
-			await GuildModel.findOneAndUpdate(
-				{ guildID: interaction.guildId },
+			await guildDocument.findOneAndUpdate(
+				{ guildID: ctx.interaction.guildId },
 				{ transactionLogChannel: null }
 			);
 		}

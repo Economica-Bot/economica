@@ -1,5 +1,5 @@
-import { CommandInteraction, MessageEmbed } from 'discord.js';
-import { EconomicaClient, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { MessageEmbed } from 'discord.js';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -9,12 +9,12 @@ export default class implements EconomicaCommand {
 		.setGlobal(true)
 		.setEnabled(false);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		return interaction.reply({
+	execute = async (ctx: Context) => {
+		return await ctx.interaction.reply({
 			embeds: [
 				new MessageEmbed()
 					.setColor('GOLD')
-					.setAuthor({ name: client.user.username, url: client.user.displayAvatarURL() })
+					.setAuthor({ name: ctx.client.user.username, url: ctx.client.user.displayAvatarURL() })
 					.setDescription(
 						`Invite link: __[Click Here](${process.env.INVITE_LINK} 'Invite Economica')__`
 					),

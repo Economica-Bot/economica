@@ -1,6 +1,5 @@
-import { CommandInteraction } from 'discord.js';
 import registerCommands from '../../services/register-commands';
-import { EconomicaClient, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -20,15 +19,15 @@ export default class implements EconomicaCommand {
 			subcommand.setName('global').setDescription('Refresh global commands.')
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		await interaction.deferReply({ ephemeral: true });
-		const guild_id = interaction.options.getString('guild_id');
-		const global = interaction.options.getSubcommand() === 'global' ? true : false;
-		if (!(await client.guilds.fetch()).has(guild_id)) {
-			return await interaction.editReply(`Could not find guild with ID \`${guild_id}\``);
+	execute = async (ctx: Context) => {
+		await ctx.interaction.deferReply({ ephemeral: true });
+		const guild_id = ctx.interaction.options.getString('guild_id');
+		const global = ctx.interaction.options.getSubcommand() === 'global' ? true : false;
+		if (!(await ctx.client.guilds.fetch()).has(guild_id)) {
+			return await ctx.interaction.editReply(`Could not find guild with ID \`${guild_id}\``);
 		}
-		
-		await new registerCommands().execute(client, guild_id, global);
-		return await interaction.editReply('Commands refreshed.');
+
+		await new registerCommands().execute(ctx.client, guild_id, global);
+		return await ctx.interaction.editReply('Commands refreshed.');
 	};
 }

@@ -7,7 +7,7 @@ import {
 	ReqString,
 } from '../structures/index';
 
-interface Guild {
+export interface Guild {
 	guildID: string;
 	currency: string;
 	transactionLogChannel: string;

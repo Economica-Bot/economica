@@ -1,13 +1,12 @@
-import { CommandInteraction, MessageEmbed } from 'discord.js';
-import { isValidObjectId, Types } from 'mongoose';
+import { MessageEmbed } from 'discord.js';
+import { isValidObjectId } from 'mongoose';
 import { TransactionModel } from '../../models';
 import {
-	EconomicaClient,
+	Context,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	PermissionRole,
 } from '../../structures';
-import { getCurrencySymbol } from '../../util/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -62,24 +61,24 @@ export default class implements EconomicaCommand {
 				)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		const subcommandgroup = interaction.options.getSubcommandGroup(false);
-		const subcommand = interaction.options.getSubcommand();
-		const cSymbol = await getCurrencySymbol(interaction.guildId);
+	execute = async (ctx: Context) => {
+		const subcommandgroup = ctx.interaction.options.getSubcommandGroup(false);
+		const subcommand = ctx.interaction.options.getSubcommand();
+		const { currency } = ctx.guildDocument;
 		if (subcommand === 'view') {
-			const id = interaction.options.getString('transaction_id');
+			const id = ctx.interaction.options.getString('transaction_id');
 			if (!isValidObjectId(id)) {
-				return await interaction.reply(`Invalid ID: \`${id}\``);
+				return await ctx.interaction.reply(`Invalid ID: \`${id}\``);
 			}
 			const transaction = await TransactionModel.findOne({ _id: id });
 			if (!transaction) {
-				return await interaction.reply(`Could not find transaction with ID \`${id}\``);
+				return await ctx.interaction.reply(`Could not find transaction with ID \`${id}\``);
 			}
 			const embed = new MessageEmbed()
 				.setColor('GOLD')
 				.setAuthor({
 					name: `Transaction ${transaction._id}`,
-					iconURL: interaction.guild.iconURL(),
+					iconURL: ctx.interaction.guild.iconURL(),
 				})
 				.setDescription(
 					`Transaction for <@!${transaction.userID}>\nType: \`${transaction.transactionType}\` | ${transaction.memo}`
@@ -87,46 +86,48 @@ export default class implements EconomicaCommand {
 				.addFields([
 					{
 						name: '__**Wallet**__',
-						value: `${cSymbol}${transaction.wallet.toLocaleString()}`,
+						value: `${currency}${transaction.wallet.toLocaleString()}`,
 						inline: true,
 					},
 					{
 						name: '__**Treasury**__',
-						value: `${cSymbol}${transaction.treasury.toLocaleString()}`,
+						value: `${currency}${transaction.treasury.toLocaleString()}`,
 						inline: true,
 					},
 					{
 						name: '__**Total**__',
-						value: `${cSymbol}${transaction.total.toLocaleString()}`,
+						value: `${currency}${transaction.total.toLocaleString()}`,
 						inline: true,
 					},
 				]);
 
-			return await interaction.reply({ embeds: [embed] });
+			return await ctx.interaction.reply({ embeds: [embed] });
 		} else if (subcommandgroup === 'delete') {
 			if (subcommand === 'id') {
-				const _id = interaction.options.getString('transaction_id');
+				const _id = ctx.interaction.options.getString('transaction_id');
 				if (!isValidObjectId(_id)) {
-					return await interaction.reply(`Invalid ID: \`${_id}\``);
+					return await ctx.interaction.reply(`Invalid ID: \`${_id}\``);
 				}
 				const transaction = await TransactionModel.findOneAndDelete({
 					_id,
-					guildID: interaction.guild.id,
+					guildID: ctx.interaction.guildId,
 				});
 				if (!transaction) {
-					return await interaction.reply(`Could not find transaction with ID \`${_id}\``);
+					return await ctx.interaction.reply(`Could not find transaction with ID \`${_id}\``);
 				}
-				return await interaction.reply(`Deleted transaction \`${_id}\``);
+				return await ctx.interaction.reply(`Deleted transaction \`${_id}\``);
 			} else if (subcommand === 'user') {
-				const user = interaction.options.getUser('user');
+				const user = ctx.interaction.options.getUser('user');
 				const transactions = await TransactionModel.deleteMany({
-					guildID: interaction.guild.id,
+					guildID: ctx.interaction.guildId,
 					userID: user.id,
 				});
-				interaction.reply(`Deleted \`${transactions.deletedCount}\` transactions.`);
+				ctx.interaction.reply(`Deleted \`${transactions.deletedCount}\` transactions.`);
 			} else if (subcommand === 'all') {
-				const transactions = await TransactionModel.deleteMany({ guildID: interaction.guild.id });
-				interaction.reply(`Deleted \`${transactions.deletedCount}\` transactions.`);
+				const transactions = await TransactionModel.deleteMany({
+					guildID: ctx.interaction.guildId,
+				});
+				ctx.interaction.reply(`Deleted \`${transactions.deletedCount}\` transactions.`);
 			}
 		}
 	};

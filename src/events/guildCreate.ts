@@ -1,13 +1,13 @@
 import { Guild } from 'discord.js';
 import { EconomicaClient } from '../structures/index';
-import { GuildModel } from '../models/index';
+import { guildDocument } from '../models/index';
 
 import config from '../../config.json';
 
 export const name = 'guildCreate';
 
 export async function execute(client: EconomicaClient, guild: Guild) {
-	const guildSettings = await GuildModel.findOneAndUpdate(
+	const guildSettings = await guildDocument.findOneAndUpdate(
 		{
 			guildID: guild.id,
 		},

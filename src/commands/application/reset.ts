@@ -1,9 +1,4 @@
-import { CommandInteraction } from 'discord.js';
-import {
-	EconomicaClient,
-	EconomicaCommand,
-	EconomicaSlashCommandBuilder,
-} from '../../structures/index';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures/index';
 import { embedify } from '../../util/util';
 
 export default class implements EconomicaCommand {
@@ -12,16 +7,16 @@ export default class implements EconomicaCommand {
 		.setDescription('Reset all slash commands')
 		.setGroup('application')
 		.setDevOnly(true);
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		await interaction.deferReply({ ephemeral: true });
-		await interaction.guild.commands.set([]);
-		await client.application.commands.set([]);
-		await interaction.editReply({
+	execute = async (ctx: Context) => {
+		await ctx.interaction.deferReply({ ephemeral: true });
+		await ctx.interaction.guild.commands.set([]);
+		await ctx.client.application.commands.set([]);
+		await ctx.interaction.editReply({
 			embeds: [
 				embedify(
 					'GREEN',
-					interaction.user.username,
-					interaction.user.avatarURL(),
+					ctx.interaction.user.username,
+					ctx.interaction.user.avatarURL(),
 					'`RESET ALL SLASH COMMANDS`'
 				),
 			],

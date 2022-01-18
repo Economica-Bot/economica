@@ -1,6 +1,5 @@
-import { CommandInteraction } from 'discord.js';
 import {
-	EconomicaClient,
+	Context,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
@@ -18,11 +17,11 @@ export default class implements EconomicaCommand {
 			option.setName('command').setDescription('Specify a command.').setRequired(true)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		const commandInput = interaction.options.getString('command');
-		const command = client.commands.get(commandInput);
+	execute = async (ctx: Context) => {
+		const commandInput = ctx.interaction.options.getString('command');
+		const command = ctx.client.commands.get(commandInput);
 		if (!command) {
-			return await interaction.reply('Could not find that command.');
+			return await ctx.interaction.reply('Could not find that command.');
 		}
 
 		const data = command.data as EconomicaSlashCommandBuilder;
@@ -61,7 +60,7 @@ export default class implements EconomicaCommand {
 			);
 		}
 
-		await interaction.reply({
+		return await ctx.interaction.reply({
 			embeds: [
 				embedify('BLUE', `Permission Hierarchy for ${command.data.name}`, null, description),
 			],
