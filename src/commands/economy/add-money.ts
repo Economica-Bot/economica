@@ -56,7 +56,7 @@ export default class implements EconomicaCommand {
 			.setColor('GREEN')
 			.setAuthor({ name: member.user.username, url: member.user.displayAvatarURL() })
 			.setDescription(
-				`Added ${ctx.guildDocument.currency}${parse_number(amount)} to <@!${
+				`Added ${currency}${parse_number(amount)} to <@!${
 					member.user.id
 				}>'s \`${target}\`.`
 			);
