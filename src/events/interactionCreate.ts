@@ -29,7 +29,7 @@ export async function execute(client: EconomicaClient, interaction: CommandInter
 	const check = await commandCheck(interaction, data);
 
 	if (check) {
-		const guildDocument = await GuildModel.findOne({ guildID: interaction.guildId });
+		const guildDocument = await GuildModel.findOne({ guildId: interaction.guildId });
 		const context = new Context(client, interaction, guildDocument);
 		try {
 			await command?.execute(context);

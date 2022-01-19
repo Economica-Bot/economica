@@ -9,8 +9,8 @@ import {
 } from '../structures/index';
 
 interface Member {
-	guildID: string;
-	userID: string;
+	guildId: string;
+	userId: string;
 	wallet: number;
 	treasury: number;
 	total: number;
@@ -20,8 +20,8 @@ interface Member {
 
 const Schema = new mongoose.Schema<Member>(
 	{
-		guildID: ReqString,
-		userID: ReqString,
+		guildId: ReqString,
+		userId: ReqString,
 		wallet: ReqNum,
 		treasury: ReqNum,
 		total: ReqNum,

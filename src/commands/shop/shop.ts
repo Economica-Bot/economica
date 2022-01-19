@@ -48,7 +48,7 @@ export default class implements EconomicaCommand {
 
 		// Array of shop items in this guild
 		const shop = await ShopModel.find({
-			guildID: ctx.interaction.guildId,
+			guildId: ctx.interaction.guildId,
 		});
 
 		// Order items by ascending price
@@ -80,7 +80,7 @@ export default class implements EconomicaCommand {
 
 			// The currency symbol for prices
 			const { currency } = await GuildModel.findOne({
-				guildID: ctx.interaction.guildId,
+				guildId: ctx.interaction.guildId,
 			});
 			// The page number to display
 			const pageNumber = ctx.interaction.options.getInteger('page') ?? 1;
@@ -182,8 +182,8 @@ export default class implements EconomicaCommand {
 					ctx.interaction.guild.members.cache.forEach(async (member) => {
 						// The member's schema object.
 						const { inventory } = await MemberModel.findOne({
-							guildID: ctx.interaction.guildId,
-							userID: member.id,
+							guildId: ctx.interaction.guildId,
+							userId: member.id,
 						});
 
 						// Check if the member has the item in his inventory
@@ -195,8 +195,8 @@ export default class implements EconomicaCommand {
 								// And update the document
 								await MemberModel.updateOne(
 									{
-										guildID: ctx.interaction.guildId,
-										userID: member.id,
+										guildId: ctx.interaction.guildId,
+										userId: member.id,
 									},
 									{
 										inventory,
@@ -209,7 +209,7 @@ export default class implements EconomicaCommand {
 
 						// Delete the item
 						await ShopModel.deleteOne({
-							guildID: ctx.interaction.guildId,
+							guildId: ctx.interaction.guildId,
 							name: item.name,
 						});
 					});
@@ -235,7 +235,7 @@ export default class implements EconomicaCommand {
 			} else {
 				// Clear all items in the shop
 				await ShopModel.deleteMany({
-					guildID: ctx.interaction.guildId,
+					guildId: ctx.interaction.guildId,
 				});
 
 				return await ctx.interaction.reply({

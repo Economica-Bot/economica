@@ -24,7 +24,7 @@ export default class implements EconomicaCommand {
 		const guild_id = ctx.interaction.options.getString('guild_id');
 		const global = ctx.interaction.options.getSubcommand() === 'global' ? true : false;
 		if (!(await ctx.client.guilds.fetch()).has(guild_id)) {
-			return await ctx.interaction.editReply(`Could not find guild with ID \`${guild_id}\``);
+			return await ctx.interaction.editReply(`Could not find guild with Id \`${guild_id}\``);
 		}
 
 		await new registerCommands().execute(ctx.client, guild_id, global);

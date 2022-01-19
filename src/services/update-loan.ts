@@ -20,14 +20,14 @@ export default class implements EconomicaService {
 			//Complete loan transaction.
 			if (loans && loans.length) {
 				for (const loan of loans) {
-					const { guildID, borrowerID, lenderID, repayment } = loan;
+					const { guildId, borrowerId, lenderId, repayment } = loan;
 
 					await util.transaction(
 						client,
-						guildID,
-						borrowerID,
+						guildId,
+						borrowerId,
 						TransactionTypes.Loan,
-						`Loan from <@!${lenderID}> \`repayed\` | Loan ID: \`${loan._id}\``,
+						`Loan from <@!${lenderId}> \`repayed\` | Loan Id: \`${loan._id}\``,
 						0,
 						-repayment,
 						-repayment
@@ -35,10 +35,10 @@ export default class implements EconomicaService {
 
 					await util.transaction(
 						client,
-						guildID,
-						lenderID,
+						guildId,
+						lenderId,
 						TransactionTypes.Loan,
-						`Loan to <@!${borrowerID}> \`repayed\` | Loan ID: \`${loan._id}\``,
+						`Loan to <@!${borrowerId}> \`repayed\` | Loan Id: \`${loan._id}\``,
 						0,
 						repayment,
 						repayment

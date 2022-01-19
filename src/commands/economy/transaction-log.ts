@@ -36,25 +36,25 @@ export default class implements EconomicaCommand {
 				.setDescription('Reset the transaction log channel.')
 				.setRoles([new PermissionRole('ECONOMY MANAGER', true)])
 		);
-		execute = async (ctx: Context) => {
+	execute = async (ctx: Context) => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		if (subcommand === 'view') {
-			const channelID = ctx.guildDocument.transactionLogChannel;
-			if (channelID) {
-				return await ctx.interaction.reply(`The current transaction log is <#${channelID}>`);
+			const channelId = ctx.guildDocument.transactionLogChannel;
+			if (channelId) {
+				return await ctx.interaction.reply(`The current transaction log is <#${channelId}>`);
 			} else {
 				return await ctx.interaction.reply('There is no transaction log.');
 			}
 		} else if (subcommand === 'set') {
 			const channel = ctx.interaction.options.getChannel('channel');
 			await GuildModel.findOneAndUpdate(
-				{ guildID: ctx.interaction.guildId },
+				{ guildId: ctx.interaction.guildId },
 				{ transactionLogChannel: channel.id }
 			);
 			return await ctx.interaction.reply(`Transaction log set to ${channel}`);
 		} else if (subcommand === 'reset') {
 			await GuildModel.findOneAndUpdate(
-				{ guildID: ctx.interaction.guildId },
+				{ guildId: ctx.interaction.guildId },
 				{ transactionLogChannel: null }
 			);
 		}

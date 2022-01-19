@@ -36,7 +36,7 @@ export default class implements EconomicaCommand {
 		const page = ctx.interaction.options.getInteger('page') || 1;
 		const { currency } = ctx.guildDocument;
 
-		const members = await MemberModel.find({ guildID: ctx.guildDocument.guildID }).sort({
+		const members = await MemberModel.find({ guildId: ctx.guildDocument.guildId }).sort({
 			[type]: -1,
 		});
 
@@ -46,9 +46,9 @@ export default class implements EconomicaCommand {
 		let rank = 1;
 
 		members.forEach((member) => {
-			const userID = member.userID;
+			const userId = member.userId;
 			const balance = parse_number(member[type]);
-			leaderBoardEntries.push(`\`${rank++}\` • <@${userID}> | ${currency}${balance}\n`);
+			leaderBoardEntries.push(`\`${rank++}\` • <@${userId}> | ${currency}${balance}\n`);
 		});
 
 		const embeds: MessageEmbed[] = [];

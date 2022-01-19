@@ -32,7 +32,7 @@ export default class implements EconomicaService {
 		}
 
 		client.once('ready', async () => {
-			await (await client.guilds.fetch(process.env.GUILD_ID)).commands.set(commands);
+			await (await client.guilds.fetch(process.env.GUILD_Id)).commands.set(commands);
 			//await client.commands.set(commands); //Global
 		});
 

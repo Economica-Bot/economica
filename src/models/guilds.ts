@@ -8,7 +8,7 @@ import {
 } from '../structures/index';
 
 export interface Guild {
-	guildID: string;
+	guildId: string;
 	currency: string;
 	transactionLogChannel: string;
 	infractionLogChannel: string;
@@ -16,7 +16,7 @@ export interface Guild {
 
 const Schema = new mongoose.Schema<Guild>(
 	{
-		guildID: ReqString,
+		guildId: ReqString,
 		currency: ReqString,
 		transactionLogChannel: ReqString,
 		infractionLogChannel: ReqString,

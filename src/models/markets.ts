@@ -2,8 +2,8 @@ import * as mongoose from 'mongoose';
 import { ReqBoolean, ReqString } from '../structures/index';
 
 interface Market {
-	userID: string;
-	guildID: string;
+	userId: string;
+	guildId: string;
 	item: string;
 	price: number;
 	description: string;
@@ -12,8 +12,8 @@ interface Market {
 
 const Schema = new mongoose.Schema<Market>(
 	{
-		userID: ReqString,
-		guildID: ReqString,
+		userId: ReqString,
+		guildId: ReqString,
 		item: ReqString,
 		price: ReqString,
 		description: ReqString,
@@ -25,7 +25,4 @@ const Schema = new mongoose.Schema<Market>(
 	}
 );
 
-export const MarketModel: mongoose.Model<Market> = mongoose.model(
-	'Market_Items',
-	Schema
-);
+export const MarketModel: mongoose.Model<Market> = mongoose.model('Market_Items', Schema);

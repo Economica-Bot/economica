@@ -10,8 +10,8 @@ import {
 
 interface Transaction {
 	_id: mongoose.Types.ObjectId;
-	guildID: string;
-	userID: string;
+	guildId: string;
+	userId: string;
 	transactionType: TransactionTypes;
 	memo: string;
 	wallet: number;
@@ -22,8 +22,8 @@ interface Transaction {
 
 const Schema = new mongoose.Schema<Transaction>(
 	{
-		guildID: ReqString,
-		userID: ReqString,
+		guildId: ReqString,
+		userId: ReqString,
 		transaction_type: TransactionType,
 		memo: ReqString,
 		wallet: ReqNum,

@@ -47,8 +47,8 @@ export default class implements EconomicaCommand {
 
 		await InfractionModel.updateMany(
 			{
-				userID: target.id,
-				guildID: ctx.interaction.guild.id,
+				userId: target.id,
+				guildId: ctx.interaction.guild.id,
 				type: 'mute',
 				active: true,
 			},

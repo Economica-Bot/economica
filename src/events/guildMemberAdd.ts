@@ -7,8 +7,8 @@ export const name = 'guildMemberAdd';
 export async function execute(client: EconomicaClient, member: GuildMember) {
 	const { guild, id } = member;
 	const currentMute = await InfractionModel.findOne({
-		guildID: guild.id,
-		userID: id,
+		guildId: guild.id,
+		userId: id,
 		type: 'mute',
 		active: true,
 	});

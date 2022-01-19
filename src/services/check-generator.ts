@@ -12,7 +12,7 @@ export default class implements EconomicaService {
 			for (const member of members) {
 				for (const item of member.inventory) {
 					const shopItem = await ShopModel.findOne({
-						guildID: String(member.guildID),
+						guildId: String(member.guildId),
 						name: item.name,
 					});
 
@@ -30,8 +30,8 @@ export default class implements EconomicaService {
 
 					await MemberModel.findOneAndUpdate(
 						{
-							guildID: member.guildID,
-							userID: member.userID,
+							guildId: member.guildId,
+							userId: member.userId,
 							'inventory.name': item.name,
 						},
 						{

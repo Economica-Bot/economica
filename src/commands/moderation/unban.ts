@@ -20,7 +20,7 @@ export default class implements EconomicaCommand {
 		const ban = (await ctx.interaction.guild.bans.fetch()).get(target.id);
 
 		if (!ban) {
-			return await ctx.interaction.reply(`Could not find banned user with ID \`${target.id}\`.`);
+			return await ctx.interaction.reply(`Could not find banned user with Id \`${target.id}\`.`);
 		}
 
 		await target
@@ -31,8 +31,8 @@ export default class implements EconomicaCommand {
 
 		await InfractionModel.updateMany(
 			{
-				userID: target.id,
-				guildID: ctx.interaction.guild.id,
+				userId: target.id,
+				guildId: ctx.interaction.guild.id,
 				type: 'ban',
 				active: true,
 			},

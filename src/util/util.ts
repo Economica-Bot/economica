@@ -92,20 +92,20 @@ export function success(
 
 /**
  * Gets a user's economy information.
- * @param {string} guildID - guild id.
- * @param {string} userID - User id.
+ * @param {string} guildId - guild id.
+ * @param {string} userId - User id.
  * @returns {Promise<EconomyInfo>} wallet, treasury, total, rank
  */
-export async function getEconInfo(guildID: string, userID: string): Promise<EconomyInfo> {
+export async function getEconInfo(guildId: string, userId: string): Promise<EconomyInfo> {
 	let rank = 0,
 		wallet = 0,
 		treasury = 0,
 		total = 0,
 		found = false;
-	const balances = await MemberModel.find({ guildID }).sort({ total: -1 });
+	const balances = await MemberModel.find({ guildId }).sort({ total: -1 });
 	if (balances.length) {
 		for (let rankIndex = 0; rankIndex < balances.length; rankIndex++) {
-			rank = balances[rankIndex].userID === userID ? rankIndex + 1 : rank++;
+			rank = balances[rankIndex].userId === userId ? rankIndex + 1 : rank++;
 		}
 
 		if (balances[rank - 1]) {
@@ -118,8 +118,8 @@ export async function getEconInfo(guildID: string, userID: string): Promise<Econ
 
 	if (!found) {
 		await new MemberModel({
-			guildID,
-			userID,
+			guildId,
+			userId,
 			wallet,
 			treasury,
 			total,
@@ -136,8 +136,8 @@ export async function getEconInfo(guildID: string, userID: string): Promise<Econ
 
 /**
  * Changes a user's economy info.
- * @param {string} guildID - Guild id.
- * @param {string} userID - User id.
+ * @param {string} guildId - Guild id.
+ * @param {string} userId - User id.
  * @param {TransactionTypes} transaction_type - The transaction type.
  * @param {string} memo - The transaction dispatcher.
  * @param {Number} wallet - The value to be added to the user's wallet.
@@ -147,8 +147,8 @@ export async function getEconInfo(guildID: string, userID: string): Promise<Econ
  */
 export async function transaction(
 	client: Discord.Client,
-	guildID: string,
-	userID: string,
+	guildId: string,
+	userId: string,
 	transaction_type: TransactionTypes,
 	memo: string,
 	wallet: Number,
@@ -156,11 +156,11 @@ export async function transaction(
 	total: Number
 ): Promise<Number> {
 	//Init
-	await getEconInfo(guildID, userID);
+	await getEconInfo(guildId, userId);
 	const result = await MemberModel.findOneAndUpdate(
 		{
-			guildID,
-			userID,
+			guildId,
+			userId,
 		},
 		{
 			$inc: {
@@ -176,8 +176,8 @@ export async function transaction(
 	);
 
 	const transaction = await new TransactionModel({
-		guildID,
-		userID,
+		guildId,
+		userId,
 		transaction_type,
 		memo,
 		wallet,
@@ -186,16 +186,16 @@ export async function transaction(
 	}).save();
 
 	const guildSetting = await GuildModel.findOne({
-		guildID,
+		guildId,
 	});
 
-	const channelID = guildSetting?.transactionLogChannel;
+	const channelId = guildSetting?.transactionLogChannel;
 
-	if (channelID) {
+	if (channelId) {
 		const cSymbol = guildSetting.currency;
-		const channel = client.channels.cache.get(channelID) as Discord.TextChannel;
+		const channel = client.channels.cache.get(channelId) as Discord.TextChannel;
 		const guild = channel.guild;
-		const description = `Transaction for <@!${userID}>\nType: \`${transaction_type}\` | ${memo}`;
+		const description = `Transaction for <@!${userId}>\nType: \`${transaction_type}\` | ${memo}`;
 		channel.send({
 			embeds: [
 				embedify('GOLD', `${transaction._id}`, guild.iconURL(), description)
@@ -226,9 +226,9 @@ export async function transaction(
 
 /**
  * Record an infraction.
- * @param {string} guildID - guild id.
- * @param {string} userID - User id.
- * @param {string} staffID - Staff id.
+ * @param {string} guildId - guild id.
+ * @param {string} userId - User id.
+ * @param {string} staffId - Staff id.
  * @param {string} type - The punishment for the infraction.
  * @param {string} reason - The reason for the punishment.
  * @param {boolean} permanent - Whether the punishment is permanent.
@@ -237,9 +237,9 @@ export async function transaction(
  */
 export async function infraction(
 	client: Discord.Client,
-	guildID: string,
-	userID: string,
-	staffID: string,
+	guildId: string,
+	userId: string,
+	staffId: string,
 	type: string,
 	reason: string,
 	permanent?: boolean,
@@ -247,9 +247,9 @@ export async function infraction(
 	duration?: number
 ) {
 	const infraction = await new InfractionModel({
-		guildID,
-		userID,
-		staffID,
+		guildId,
+		userId,
+		staffId,
 		type,
 		reason,
 		permanent,
@@ -258,15 +258,15 @@ export async function infraction(
 	}).save();
 
 	const guildSetting = await GuildModel.findOne({
-		guildiD: `${guildID}`,
+		guildId: `${guildId}`,
 	});
 
-	const channelID = guildSetting?.infractionLogChannel;
+	const channelId = guildSetting?.infractionLogChannel;
 
-	if (channelID) {
-		const channel = client.channels.cache.get(channelID) as Discord.TextChannel;
+	if (channelId) {
+		const channel = client.channels.cache.get(channelId) as Discord.TextChannel;
 		const guild = channel.guild;
-		const description = `Infraction for <@!${userID}> | Executed by <@!${staffID}>\nType: \`${type}\`\n${reason}`;
+		const description = `Infraction for <@!${userId}> | Executed by <@!${staffId}>\nType: \`${type}\`\n${reason}`;
 		channel.send({
 			embeds: [embedify('RED', `${infraction._id}`, guild.iconURL(), description).setTimestamp()],
 		});
@@ -275,13 +275,13 @@ export async function infraction(
 
 /**
  * Updates the min and max payout for the specified income command
- * @param {String} guildID - Guild id.
+ * @param {String} guildId - Guild id.
  * @param {String} command - Income command.
  * @param {IncomeCommandProperties} properties - Command properties.
  */
-export async function setCommandStats(guildID: string, properties: IncomeCommandProperties) {
+export async function setCommandStats(guildId: string, properties: IncomeCommandProperties) {
 	await GuildModel.findOneAndUpdate(
-		{ guildID },
+		{ guildId },
 		{
 			$pull: {
 				commands: {
@@ -295,7 +295,7 @@ export async function setCommandStats(guildID: string, properties: IncomeCommand
 	);
 
 	await GuildModel.findOneAndUpdate(
-		{ guildID },
+		{ guildId },
 		{
 			$push: {
 				commands: {
@@ -492,6 +492,6 @@ export async function runtimeError(
 	icon_url = client.user.displayAvatarURL();
 	description = `\`\`\`js\n${error.stack}\`\`\``;
 	const embed = embedify('RED', title, icon_url, description);
-	const channel = (await client.channels.cache.get(process.env.BOT_LOG_ID)) as Discord.TextChannel;
+	const channel = (await client.channels.cache.get(process.env.BOT_LOG_Id)) as Discord.TextChannel;
 	channel.send({ embeds: [embed] });
 }

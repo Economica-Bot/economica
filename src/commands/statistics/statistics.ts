@@ -32,11 +32,11 @@ export default class implements EconomicaCommand {
 		if (ctx.interaction.options.getSubcommand() === 'balance') {
 			const transactions = user
 				? await TransactionModel.find({
-						guildID: ctx.interaction.guild.id,
-						userID: user.id,
+						guildId: ctx.interaction.guild.id,
+						userId: user.id,
 				  })
 				: await TransactionModel.find({
-						guildID: ctx.interaction.guild.id,
+						guildId: ctx.interaction.guild.id,
 				  });
 
 			transactions.forEach((transaction) => {
