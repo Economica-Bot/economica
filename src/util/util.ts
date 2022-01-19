@@ -1,7 +1,7 @@
 const config = require('../../config.json');
 import * as Discord from 'discord.js';
 import {
-	guildDocument,
+	GuildModel,
 	InfractionModel,
 	LoanModel,
 	MarketModel,
@@ -92,7 +92,7 @@ export function success(
 
 /**
  * Gets a user's economy information.
- * @param {string} guildID - guildDocument id.
+ * @param {string} guildID - guild id.
  * @param {string} userID - User id.
  * @returns {Promise<EconomyInfo>} wallet, treasury, total, rank
  */
@@ -185,7 +185,7 @@ export async function transaction(
 		total,
 	}).save();
 
-	const guildSetting = await guildDocument.findOne({
+	const guildSetting = await GuildModel.findOne({
 		guildID,
 	});
 
@@ -226,7 +226,7 @@ export async function transaction(
 
 /**
  * Record an infraction.
- * @param {string} guildID - guildDocument id.
+ * @param {string} guildID - guild id.
  * @param {string} userID - User id.
  * @param {string} staffID - Staff id.
  * @param {string} type - The punishment for the infraction.
@@ -257,7 +257,7 @@ export async function infraction(
 		duration,
 	}).save();
 
-	const guildSetting = await guildDocument.findOne({
+	const guildSetting = await GuildModel.findOne({
 		guildiD: `${guildID}`,
 	});
 
@@ -280,7 +280,7 @@ export async function infraction(
  * @param {IncomeCommandProperties} properties - Command properties.
  */
 export async function setCommandStats(guildID: string, properties: IncomeCommandProperties) {
-	await guildDocument.findOneAndUpdate(
+	await GuildModel.findOneAndUpdate(
 		{ guildID },
 		{
 			$pull: {
@@ -294,7 +294,7 @@ export async function setCommandStats(guildID: string, properties: IncomeCommand
 		}
 	);
 
-	await guildDocument.findOneAndUpdate(
+	await GuildModel.findOneAndUpdate(
 		{ guildID },
 		{
 			$push: {

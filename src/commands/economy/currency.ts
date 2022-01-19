@@ -1,8 +1,6 @@
-import { CommandInteraction, Guild } from 'discord.js';
-import { guildDocument } from '../../models';
+import { GuildModel } from '../../models';
 import {
 	Context,
-	EconomicaClient,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	PermissionRole,
@@ -42,11 +40,11 @@ export default class implements EconomicaCommand {
 		if (subcommand === 'view') {
 			return await ctx.interaction.reply(`Currency symbol: ${currency}`);
 		} else if (subcommand === 'set') {
-			await guildDocument.findOneAndUpdate({ guildID }, { currency });
+			await GuildModel.findOneAndUpdate({ guildID }, { currency });
 			return await ctx.interaction.reply(`Currency symbol set to ${currency}`);
 		} else if (subcommand === 'reset') {
 			const currency = config.cSymbol;
-			await guildDocument.findOneAndUpdate({ guildID }, { currency });
+			await GuildModel.findOneAndUpdate({ guildID }, { currency });
 			return await ctx.interaction.reply(`Currency symbol reset: ${currency}`);
 		}
 	};

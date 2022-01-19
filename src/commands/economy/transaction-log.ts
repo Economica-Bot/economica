@@ -1,4 +1,4 @@
-import { guildDocument } from '../../models';
+import { GuildModel } from '../../models';
 import {
 	Context,
 	EconomicaCommand,
@@ -39,7 +39,7 @@ export default class implements EconomicaCommand {
 		execute = async (ctx: Context) => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		if (subcommand === 'view') {
-			const channelID = (await guildDocument.findOne({ guildID: ctx.interaction.guildId })).guildID;
+			const channelID = ctx.guildDocument.transactionLogChannel;
 			if (channelID) {
 				return await ctx.interaction.reply(`The current transaction log is <#${channelID}>`);
 			} else {
@@ -47,13 +47,13 @@ export default class implements EconomicaCommand {
 			}
 		} else if (subcommand === 'set') {
 			const channel = ctx.interaction.options.getChannel('channel');
-			await guildDocument.findOneAndUpdate(
+			await GuildModel.findOneAndUpdate(
 				{ guildID: ctx.interaction.guildId },
 				{ transactionLogChannel: channel.id }
 			);
 			return await ctx.interaction.reply(`Transaction log set to ${channel}`);
 		} else if (subcommand === 'reset') {
-			await guildDocument.findOneAndUpdate(
+			await GuildModel.findOneAndUpdate(
 				{ guildID: ctx.interaction.guildId },
 				{ transactionLogChannel: null }
 			);

@@ -1,6 +1,6 @@
 import { MessageEmbed } from 'discord.js';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures/index';
-import { ShopModel, guildDocument, MemberModel } from '../../models/index';
+import { ShopModel, GuildModel, MemberModel } from '../../models/index';
 import * as util from '../../util/util';
 import { hyperlinks, authors } from '../../util/index';
 
@@ -79,7 +79,7 @@ export default class implements EconomicaCommand {
 				});
 
 			// The currency symbol for prices
-			const { currency } = await guildDocument.findOne({
+			const { currency } = await GuildModel.findOne({
 				guildID: ctx.interaction.guildId,
 			});
 			// The page number to display
