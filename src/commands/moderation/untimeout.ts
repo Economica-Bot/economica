@@ -33,7 +33,7 @@ export default class implements EconomicaCommand {
 			return await ctx.interaction.reply(`<@!${target.id}> is not moderatable.`);
 		}
 
-		if (!target.communicationDisabledUntil) {
+		if (target.isCommunicationDisabled) {
 			return await ctx.interaction.reply(`<@!${target.id}> is not in a timeout.`);
 		}
 
