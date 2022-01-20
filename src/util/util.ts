@@ -138,8 +138,7 @@ export async function getEconInfo(guildId: string, userId: string): Promise<Econ
  * Changes a user's economy info.
  * @param {string} guildId - Guild id.
  * @param {string} userId - User id.
- * @param {TransactionTypes} transaction_type - The transaction type.
- * @param {string} memo - The transaction dispatcher.
+ * @param {TransactionTypes} type - The transaction type.
  * @param {Number} wallet - The value to be added to the user's wallet.
  * @param {Number} treasury - The value to be added to the user's treasury.
  * @param {Number} total - The value to be added to the user's total.
@@ -149,8 +148,7 @@ export async function transaction(
 	client: Discord.Client,
 	guildId: string,
 	userId: string,
-	transaction_type: TransactionTypes,
-	memo: string,
+	type: TransactionTypes,
 	wallet: Number,
 	treasury: Number,
 	total: Number
@@ -178,8 +176,7 @@ export async function transaction(
 	const transaction = await new TransactionModel({
 		guildId,
 		userId,
-		transaction_type,
-		memo,
+		type,
 		wallet,
 		treasury,
 		total,
@@ -195,7 +192,7 @@ export async function transaction(
 		const cSymbol = guildSetting.currency;
 		const channel = client.channels.cache.get(channelId) as Discord.TextChannel;
 		const guild = channel.guild;
-		const description = `Transaction for <@!${userId}>\nType: \`${transaction_type}\` | ${memo}`;
+		const description = `Transaction for <@!${userId}>\nType: \`${type}\``;
 		channel.send({
 			embeds: [
 				embedify('GOLD', `${transaction._id}`, guild.iconURL(), description)
@@ -226,9 +223,10 @@ export async function transaction(
 
 /**
  * Record an infraction.
- * @param {string} guildId - guild id.
+ * @param {EconomicaClient} client - The Client.
+ * @param {string} guildId - Guild id.
  * @param {string} userId - User id.
- * @param {string} staffId - Staff id.
+ * @param {string} agentId - Agent/Staff id.
  * @param {string} type - The punishment for the infraction.
  * @param {string} reason - The reason for the punishment.
  * @param {boolean} permanent - Whether the punishment is permanent.
@@ -239,7 +237,7 @@ export async function infraction(
 	client: Discord.Client,
 	guildId: string,
 	userId: string,
-	staffId: string,
+	agentId: string,
 	type: string,
 	reason: string,
 	permanent?: boolean,
@@ -249,7 +247,7 @@ export async function infraction(
 	const infraction = await new InfractionModel({
 		guildId,
 		userId,
-		staffId,
+		agentId,
 		type,
 		reason,
 		permanent,
@@ -266,7 +264,7 @@ export async function infraction(
 	if (channelId) {
 		const channel = client.channels.cache.get(channelId) as Discord.TextChannel;
 		const guild = channel.guild;
-		const description = `Infraction for <@!${userId}> | Executed by <@!${staffId}>\nType: \`${type}\`\n${reason}`;
+		const description = `Infraction for <@!${userId}> | Executed by <@!${agentId}>\nType: \`${type}\`\n${reason}`;
 		channel.send({
 			embeds: [embedify('RED', `${infraction._id}`, guild.iconURL(), description).setTimestamp()],
 		});

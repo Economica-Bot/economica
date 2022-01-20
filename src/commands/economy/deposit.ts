@@ -45,7 +45,6 @@ export default class implements EconomicaCommand {
 			ctx.interaction.guildId,
 			ctx.interaction.user.id,
 			TransactionTypes.Deposit,
-			'`system`',
 			-result,
 			result,
 			0

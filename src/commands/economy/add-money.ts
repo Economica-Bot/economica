@@ -46,7 +46,6 @@ export default class implements EconomicaCommand {
 			ctx.interaction.guildId,
 			member.id,
 			TransactionTypes.Add_Money,
-			`add-money | <@!${ctx.interaction.member.user.id}>`,
 			target === 'wallet' ? amount : 0,
 			target === 'treasury' ? amount : 0,
 			amount

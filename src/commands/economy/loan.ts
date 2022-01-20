@@ -4,11 +4,11 @@ import { MessageEmbed } from 'discord.js';
 import { LoanModel } from '../../models';
 import {
 	Context,
-	EconomicaClient,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	PermissionRole,
 	TransactionTypes,
+	BalanceTypes,
 } from '../../structures';
 import { getEconInfo, transaction } from '../../util/util';
 
@@ -154,14 +154,11 @@ export default class implements EconomicaCommand {
 				ctx.client,
 				ctx.guildDocument.guildId,
 				ctx.interaction.user.id,
-				TransactionTypes.Loan,
-				`Loan to <@!${borrower.id}> | Loan Id \`${loan._id}\``,
+				TransactionTypes.Loan_Propose,
 				0,
 				-principal,
 				-principal
 			);
-
-			console.log(loan.createdAt);
 
 			return await ctx.interaction.reply(
 				`Successfully created a loan.\nLoan \`${
@@ -216,8 +213,7 @@ export default class implements EconomicaCommand {
 				ctx.client,
 				ctx.guildDocument.guildId,
 				ctx.interaction.user.id,
-				TransactionTypes.Loan,
-				`Loan from <@!${loan.lenderId}> \`accepted\` | Loan Id: \`${loan._id}\``,
+				TransactionTypes.Loan_Accept,
 				loan.principal,
 				0,
 				loan.principal
@@ -247,8 +243,7 @@ export default class implements EconomicaCommand {
 				ctx.client,
 				ctx.guildDocument.guildId,
 				loan.lenderId,
-				TransactionTypes.Loan,
-				`Loan from <@!${loan.lenderId}> \`declined\` | Loan Id: \`${loan._id}\``,
+				TransactionTypes.Loan_Decline,
 				0,
 				loan.principal,
 				loan.principal
