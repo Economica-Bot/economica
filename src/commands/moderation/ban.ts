@@ -94,14 +94,11 @@ export default class implements EconomicaCommand {
 			milliseconds
 		);
 
-		if (ctx.interaction.replied) {
-			ctx.interaction.followUp(
-				`Banned ${target.user.tag} ${milliseconds ? `for ${ms(milliseconds)}` : 'permanently'}.`
-			);
-		} else {
-			ctx.interaction.reply(
-				`Banned ${target.user.tag} ${milliseconds ? `for ${ms(milliseconds)}` : 'permanently'}.`
-			);
-		}
+		const content = `Banned ${target.user.tag} ${
+			milliseconds ? `for ${ms(milliseconds)}` : 'permanently'
+		}.`;
+		return await (ctx.interaction.replied
+			? ctx.interaction.followUp(content)
+			: ctx.interaction.reply(content));
 	};
 }

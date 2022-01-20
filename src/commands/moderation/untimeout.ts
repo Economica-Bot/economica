@@ -1,10 +1,10 @@
-import { CommandInteraction, GuildMember } from 'discord.js';
+import { GuildMember } from 'discord.js';
 import { InfractionModel } from '../../models/infractions';
 import {
 	Context,
-	EconomicaClient,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
+	InfractionTypes,
 } from '../../structures/index';
 
 export default class implements EconomicaCommand {
@@ -49,7 +49,7 @@ export default class implements EconomicaCommand {
 			{
 				userId: target.id,
 				guildId: ctx.interaction.guild.id,
-				type: 'mute',
+				type: InfractionTypes.Untimeout,
 				active: true,
 			},
 			{
@@ -57,8 +57,9 @@ export default class implements EconomicaCommand {
 			}
 		);
 
-		ctx.interaction.replied
-			? ctx.interaction.followUp(`Timeout canceled for ${target.user.tag}`)
-			: ctx.interaction.reply(`Timeout canceled for ${target.user.tag}`);
+		const content = `Timeout canceled for ${target.user.tag}`;
+		return await (ctx.interaction.replied
+			? ctx.interaction.followUp(content)
+			: ctx.interaction.reply(content));
 	};
 }

@@ -1,5 +1,10 @@
 import { InfractionModel } from '../../models/infractions';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures/index';
+import {
+	Context,
+	EconomicaCommand,
+	EconomicaSlashCommandBuilder,
+	InfractionTypes,
+} from '../../structures/index';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -33,7 +38,7 @@ export default class implements EconomicaCommand {
 			{
 				userId: target.id,
 				guildId: ctx.interaction.guild.id,
-				type: 'ban',
+				type: InfractionTypes.Ban,
 				active: true,
 			},
 			{
@@ -41,8 +46,9 @@ export default class implements EconomicaCommand {
 			}
 		);
 
-		ctx.interaction.replied
-			? ctx.interaction.followUp(`Unbanned ${target.tag}`)
-			: ctx.interaction.reply(`Unbanned ${target.tag}`);
+		const content = `Unbanned ${target.tag}`;
+		return await (ctx.interaction.replied
+			? ctx.interaction.followUp(content)
+			: ctx.interaction.reply(content));
 	};
 }

@@ -62,10 +62,9 @@ export default class implements EconomicaCommand {
 			reason
 		);
 
-		if (ctx.interaction.replied) {
-			return await ctx.interaction.followUp(`Kicked ${target.user.tag}`);
-		} else {
-			return await ctx.interaction.reply(`Kicked ${target.user.tag}`);
-		}
+		const content = `Kicked ${target.user.tag}`;
+		return await (ctx.interaction.replied
+			? ctx.interaction.followUp(content)
+			: ctx.interaction.reply(content));
 	};
 }

@@ -92,10 +92,9 @@ export default class implements EconomicaCommand {
 			milliseconds
 		);
 
-		ctx.interaction.replied
-			? ctx.interaction.followUp(
-					`Placed ${target.user.tag} under a timeout for ${ms(milliseconds)}.`
-			  )
-			: ctx.interaction.reply(`Placed ${target.user.tag} under a timeout for ${ms(milliseconds)}.`);
+		const content = `Placed ${target.user.tag} under a timeout for ${ms(milliseconds)}.`;
+		return await (ctx.interaction.replied
+			? ctx.interaction.followUp(content)
+			: ctx.interaction.reply(content));
 	};
 }
