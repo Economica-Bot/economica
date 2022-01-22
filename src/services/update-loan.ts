@@ -26,8 +26,8 @@ export default class implements EconomicaService {
 						client,
 						guildId,
 						borrowerId,
-						TransactionTypes.Loan,
-						`Loan from <@!${lenderId}> \`repayed\` | Loan Id: \`${loan._id}\``,
+						lenderId, 
+						TransactionTypes.Loan_Give_Repayment,
 						0,
 						-repayment,
 						-repayment
@@ -37,8 +37,8 @@ export default class implements EconomicaService {
 						client,
 						guildId,
 						lenderId,
-						TransactionTypes.Loan,
-						`Loan to <@!${borrowerId}> \`repayed\` | Loan Id: \`${loan._id}\``,
+						borrowerId,
+						TransactionTypes.Loan_Receive_Repayment,
 						0,
 						repayment,
 						repayment

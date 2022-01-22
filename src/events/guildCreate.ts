@@ -9,7 +9,7 @@ export const name = 'guildCreate';
 export async function execute(client: EconomicaClient, guild: Guild) {
 	const guildSettings = await GuildModel.findOneAndUpdate(
 		{
-			guildId: guild.id,
+			guildID: guild.id,
 		},
 		{
 			currency: config.cSymbol,

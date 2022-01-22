@@ -136,23 +136,25 @@ export async function getEconInfo(guildId: string, userId: string): Promise<Econ
 
 /**
  * Changes a user's economy info.
+ * @param {EconomicaClient} - Economica Client.
  * @param {string} guildId - Guild id.
  * @param {string} userId - User id.
  * @param {TransactionTypes} type - The transaction type.
- * @param {Number} wallet - The value to be added to the user's wallet.
- * @param {Number} treasury - The value to be added to the user's treasury.
- * @param {Number} total - The value to be added to the user's total.
- * @returns {Number} total.
+ * @param {number} wallet - The value to be added to the user's wallet.
+ * @param {number} treasury - The value to be added to the user's treasury.
+ * @param {number} total - The value to be added to the user's total.
+ * @returns {Promise<number>} total.
  */
 export async function transaction(
-	client: Discord.Client,
+	client: EconomicaClient,
 	guildId: string,
 	userId: string,
+	agentId: string,
 	type: TransactionTypes,
-	wallet: Number,
-	treasury: Number,
-	total: Number
-): Promise<Number> {
+	wallet: number,
+	treasury: number,
+	total: number
+): Promise<number> {
 	//Init
 	await getEconInfo(guildId, userId);
 	const result = await MemberModel.findOneAndUpdate(
@@ -173,14 +175,15 @@ export async function transaction(
 		}
 	);
 
-	const transaction = await new TransactionModel({
+	const transaction = await TransactionModel.create({
 		guildId,
 		userId,
+		agentId,
 		type,
 		wallet,
 		treasury,
 		total,
-	}).save();
+	});
 
 	const guildSetting = await GuildModel.findOne({
 		guildId,
@@ -192,7 +195,7 @@ export async function transaction(
 		const cSymbol = guildSetting.currency;
 		const channel = client.channels.cache.get(channelId) as Discord.TextChannel;
 		const guild = channel.guild;
-		const description = `Transaction for <@!${userId}>\nType: \`${type}\``;
+		const description = `Transaction for <@!${userId}>\nPerformed by:<@!${agentId}>\nType: \`${type}\``;
 		channel.send({
 			embeds: [
 				embedify('GOLD', `${transaction._id}`, guild.iconURL(), description)
@@ -305,25 +308,6 @@ export async function setCommandStats(guildId: string, properties: IncomeCommand
 			upsert: true,
 		}
 	);
-}
-
-/**
- * @param {number} min - min value in range
- * @param {number} max - max value in range
- * @returns {number} Random value between two inputs
- */
-export function intInRange(min: number, max: number) {
-	return Math.ceil(Math.random() * (max - min) + min);
-}
-
-/**
- * Returns whether income command is successful.
- * @param {object} properties - the command properties
- * @returns {boolean} Whether income command is successful
- */
-export function isSuccess(properties: IncomeCommandProperties): boolean {
-	const { chance } = properties;
-	return intInRange(0, 100) < chance ? true : false;
 }
 
 /**

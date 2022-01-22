@@ -1,10 +1,9 @@
-import { Client } from 'discord.js';
-import { EconomicaService } from '../structures';
+import { EconomicaClient, EconomicaService } from '../structures';
 import { ShopModel, MemberModel } from '../models';
 
 export default class implements EconomicaService {
 	name = 'check-generator';
-	execute = (client: Client) => {
+	execute = (client: EconomicaClient) => {
 		setInterval(async () => {
 			console.log(`Executing service ${this.name}`);
 			const now = new Date();

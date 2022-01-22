@@ -80,9 +80,7 @@ export default class implements EconomicaCommand {
 					name: `Transaction ${transaction._id}`,
 					iconURL: ctx.interaction.guild.iconURL(),
 				})
-				.setDescription(
-					`Transaction for <@!${transaction.userId}>\nType: \`${transaction.transactionType}\` | ${transaction.memo}`
-				)
+				.setDescription(`Transaction for <@!${transaction.userId}>\nType: \`${transaction.type}\``)
 				.addFields([
 					{
 						name: '__**Wallet**__',

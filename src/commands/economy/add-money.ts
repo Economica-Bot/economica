@@ -45,6 +45,7 @@ export default class implements EconomicaCommand {
 			ctx.client,
 			ctx.interaction.guildId,
 			member.id,
+			ctx.interaction.user.id,
 			TransactionTypes.Add_Money,
 			target === 'wallet' ? amount : 0,
 			target === 'treasury' ? amount : 0,
@@ -55,9 +56,7 @@ export default class implements EconomicaCommand {
 			.setColor('GREEN')
 			.setAuthor({ name: member.user.username, url: member.user.displayAvatarURL() })
 			.setDescription(
-				`Added ${currency}${parse_number(amount)} to <@!${
-					member.user.id
-				}>'s \`${target}\`.`
+				`Added ${currency}${parse_number(amount)} to <@!${member.user.id}>'s \`${target}\`.`
 			);
 
 		return await ctx.interaction.reply({ embeds: [embed] });

@@ -14,7 +14,15 @@ export enum TransactionTypes {
 	Loan_Accept = 'LOAN_ACCEPT',
 	Loan_Decline = 'LOAN_DECLINE',
 	Loan_Delete = 'LOAN_DELETE',
+	Loan_Give_Repayment = 'LOAN_GIVE_REPAYMENT',
+	Loan_Receive_Repayment = 'LOAN_RECEIVE_REPAYMENT',
 	Work = 'WORK',
+	Beg = 'BEG',
+	Crime_Success = 'CRIME_SUCCESS',
+	Crime_Fine = 'CRIME_FINE',
+	Rob_Success = 'ROB_SUCCESS',
+	Rob_Victim = 'ROB_VICTIM',
+	Rob_Fine = 'ROB_FINE',
 }
 
 export enum InfractionTypes {

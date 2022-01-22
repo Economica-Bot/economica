@@ -51,6 +51,7 @@ export default class implements EconomicaCommand {
 			ctx.client,
 			ctx.interaction.guild.id,
 			member.id,
+			ctx.interaction.user.id,
 			TransactionTypes.Set_Money,
 			target === 'wallet' ? difference : 0,
 			target === 'treasury' ? difference : 0,
