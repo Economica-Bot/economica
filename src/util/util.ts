@@ -34,7 +34,7 @@ export function embedify(
 ): Discord.MessageEmbed {
 	const embed = new Discord.MessageEmbed().setColor(color);
 	if (icon_url) {
-		embed.setAuthor({ name: title, url: icon_url });
+		embed.setAuthor({ name: title, iconURL: icon_url });
 	} else if (title) embed.setTitle(title);
 	if (description) embed.setDescription(description);
 	if (footer) embed.setFooter({ text: footer });
@@ -168,10 +168,6 @@ export async function transaction(
 				treasury,
 				total,
 			},
-		},
-		{
-			new: true,
-			upsert: true,
 		}
 	);
 

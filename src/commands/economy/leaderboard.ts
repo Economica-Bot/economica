@@ -63,7 +63,7 @@ export default class implements EconomicaCommand {
 
 			const embed = new MessageEmbed()
 				.setAuthor({
-					name: `${ctx.interaction.guild}'s ${type} Leaderboard`,
+					name: `Leaderboard (${type})`,
 					iconURL: ctx.interaction.guild.iconURL(),
 				})
 				.setColor('BLUE')
