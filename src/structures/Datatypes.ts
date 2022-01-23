@@ -87,3 +87,11 @@ export interface IncomeCommandProperties {
 	minFine: number;
 	maxFine: number;
 }
+
+export const GuildAuthDataObj = {
+	type: {
+		mod: Array<string>(),
+		manager: Array<string>(),
+		admin: Array<string>()
+	}
+}

@@ -5,6 +5,9 @@ import {
 	ModuleSetting,
 	RoleSetting,
 	ReqString,
+	ReqStringArr,
+	GuildAuthData,
+	GuildAuthDataObj
 } from '../structures/index';
 
 interface Guild {
@@ -12,6 +15,7 @@ interface Guild {
 	currency: string;
 	transactionLogChannel: string;
 	infractionLogChannel: string;
+	auth: GuildAuthData;
 }
 
 const Schema = new mongoose.Schema<Guild>(
@@ -20,6 +24,7 @@ const Schema = new mongoose.Schema<Guild>(
 		currency: ReqString,
 		transactionLogChannel: ReqString,
 		infractionLogChannel: ReqString,
+		auth: GuildAuthDataObj
 	},
 	{
 		strict: true,

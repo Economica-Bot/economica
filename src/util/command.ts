@@ -1,10 +1,13 @@
-import { CommandInteraction, Guild, GuildMember, PermissionString, TextChannel } from 'discord.js';
+import { CommandInteraction, Guild, GuildMember, PermissionString, Role, TextChannel } from 'discord.js';
 import {
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
 	PermissionRole,
 } from '../structures';
+import {
+	GuildModel
+} from '../models/index'
 
 export async function commandCheck(
 	interaction: CommandInteraction,
@@ -45,9 +48,11 @@ const permissionCheck = async (
 	const userPermissions: PermissionString[] = [];
 	const clientPermissions: PermissionString[] = [];
 	const roles: PermissionRole[] = [];
+	let authority: 'mod' | 'admin' | 'manager' = null;
 	const missingUserPermissions: PermissionString[] = [];
 	const missingClientPermissions: PermissionString[] = [];
 	const missingRoles: PermissionRole[] = [];
+	let missingAuthority: 'mod' | 'admin' | 'manager' = null;
 
 	if (
 		process.env.OWNERID.includes(member.id) ||
@@ -60,6 +65,7 @@ const permissionCheck = async (
 	if (data.userPermissions) userPermissions.push(...data.userPermissions);
 	if (data.clientPermissions) clientPermissions.push(...data.clientPermissions);
 	if (data.roles) roles.push(...data.roles);
+	if (data.authority) authority = (data.authority);
 	if (group?.userPermissions) userPermissions.push(...group.userPermissions);
 	if (group?.clientPermissions) clientPermissions.push(...group.clientPermissions);
 	if (group?.roles) roles.push(...group.roles);
@@ -69,7 +75,7 @@ const permissionCheck = async (
 
 	for (const permission of userPermissions)
 		if (!member.permissionsIn(channel).has(permission)) missingUserPermissions.push(permission);
-	for (const permission of userPermissions)
+	for (const permission of clientPermissions)
 		if (!clientMember.permissionsIn(channel).has(permission))
 			missingClientPermissions.push(permission);
 	for (const role of roles) {
@@ -82,8 +88,19 @@ const permissionCheck = async (
 			);
 		else if (role.required && !member.roles.cache.has(guildRole.id)) missingRoles.push(role);
 	}
+	if (authority) {
+		const { auth } = await GuildModel.findOne({
+			guildID: interaction.guildId
+		})
 
-	if (missingClientPermissions.length || missingUserPermissions.length || missingRoles.length)
+		const userRoles = member.roles.cache
+		const authorizedRoleIds = auth[authority]
+
+		if (!(userRoles.hasAny(...authorizedRoleIds)))
+			missingAuthority = authority
+	}
+
+	if (missingClientPermissions.length || missingUserPermissions.length || missingRoles.length || missingAuthority)
 		return false;
 	return true;
 };

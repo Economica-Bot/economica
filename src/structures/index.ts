@@ -11,7 +11,7 @@ export {
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from './EconomicaSlashCommandSubcommands';
 export { ModuleSetting, RoleSetting, ChannelSetting, CommandSetting } from './Settings';
-export { TransactionTypes, InfractionTypes } from './Types';
+export { TransactionTypes, InfractionTypes, GuildAuthData } from './Types';
 export {
 	CommandData,
 	InventoryItem,
@@ -29,5 +29,6 @@ export {
 	ReqInventoryItemArr,
 	ReqStringArr,
 	TransactionType,
+	GuildAuthDataObj,
 } from './Datatypes';
 export { PermissionRole } from './CommandOptions';

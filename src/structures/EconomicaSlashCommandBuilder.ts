@@ -20,6 +20,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	global: boolean = false;
 	devOnly: boolean = false;
 	enabled: boolean = true;
+	authority: 'mod' | 'manager' | 'admin' = null;
 
 	setGlobal(global: boolean): this {
 		this.global = global;
@@ -63,6 +64,11 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 
 	setDevOnly(devOnly: boolean): this {
 		this.devOnly = devOnly;
+		return this;
+	}
+
+	setAuthority(level: 'mod' | 'manager' | 'admin'): this {
+		this.authority = level;
 		return this;
 	}
 

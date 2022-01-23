@@ -18,3 +18,9 @@ export enum InfractionTypes {
 	Unban = 'moderation:UNBAN',
 	Untimeout = 'moderation:UNTIMEOUT',
 }
+
+export interface GuildAuthData {
+	mod: string[];
+	manager: string[];
+	admin: string[];
+}
