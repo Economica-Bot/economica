@@ -470,6 +470,6 @@ export async function runtimeError(
 	icon_url = client.user.displayAvatarURL();
 	description = `\`\`\`js\n${error.stack}\`\`\``;
 	const embed = embedify('RED', title, icon_url, description);
-	const channel = (await client.channels.cache.get(process.env.BOT_LOG_Id)) as Discord.TextChannel;
+	const channel = (await client.channels.cache.get(process.env.BOT_LOG_ID)) as Discord.TextChannel;
 	channel.send({ embeds: [embed] });
 }
