@@ -168,10 +168,6 @@ export async function transaction(
 				treasury,
 				total,
 			},
-		},
-		{
-			new: true,
-			upsert: true,
 		}
 	);
 
