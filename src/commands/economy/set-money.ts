@@ -45,7 +45,6 @@ export default class implements EconomicaCommand {
 			ctx.interaction.user.id
 		);
 		const difference = target === 'wallet' ? amount - wallet : amount - treasury;
-		console.log(difference);
 		if (!amount) return await ctx.interaction.reply(`Invalid amount: \`${amount}\``);
 		await transaction(
 			ctx.client,
