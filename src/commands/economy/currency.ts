@@ -40,8 +40,9 @@ export default class implements EconomicaCommand {
 		if (subcommand === 'view') {
 			return await ctx.interaction.reply(`Currency symbol: ${currency}`);
 		} else if (subcommand === 'set') {
-			await GuildModel.findOneAndUpdate({ guildId }, { currency });
-			return await ctx.interaction.reply(`Currency symbol set to ${currency}`);
+			const newCurrency = ctx.interaction.options.getString('currency');
+			await GuildModel.findOneAndUpdate({ guildId }, { currency: newCurrency });
+			return await ctx.interaction.reply(`Currency symbol set to ${newCurrency}`);
 		} else if (subcommand === 'reset') {
 			const currency = config.cSymbol;
 			await GuildModel.findOneAndUpdate({ guildId }, { currency });
