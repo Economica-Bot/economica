@@ -1,5 +1,4 @@
-import { CommandInteraction } from 'discord.js';
-import { EconomicaClient, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -81,7 +80,7 @@ export default class implements EconomicaCommand {
 			subcommand.setName('test18subcommand').setDescription('test8desc')
 		);
 
-	execute = async function (client: EconomicaClient, interaction: CommandInteraction) {
-		interaction.reply('test');
+	execute = async function (ctx: Context) {
+		ctx.interaction.reply('test');
 	};
 }

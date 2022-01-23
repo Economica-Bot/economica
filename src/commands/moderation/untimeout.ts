@@ -1,9 +1,10 @@
-import { CommandInteraction, GuildMember } from 'discord.js';
+import { GuildMember } from 'discord.js';
 import { InfractionModel } from '../../models/infractions';
 import {
-	EconomicaClient,
+	Context,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
+	InfractionTypes,
 } from '../../structures/index';
 
 export default class implements EconomicaCommand {
@@ -20,33 +21,35 @@ export default class implements EconomicaCommand {
 			option.setName('target').setDescription('Specify a target.').setRequired(true)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction): Promise<any> => {
-		const member = (await interaction.guild.members.fetch(client.user.id)) as GuildMember;
-		const target = interaction.options.getMember('target') as GuildMember;
+	execute = async (ctx: Context) => {
+		const member = (await ctx.interaction.guild.members.fetch(ctx.client.user.id)) as GuildMember;
+		const target = ctx.interaction.options.getMember('target') as GuildMember;
 
 		if (target.roles.highest.position > member.roles.highest.position) {
-			return await interaction.reply('Insufficient permissions.');
+			return await ctx.interaction.reply('Insufficient permissions.');
 		}
 
 		if (!target.moderatable) {
-			return await interaction.reply(`<@!${target.id}> is not moderatable.`);
+			return await ctx.interaction.reply(`<@!${target.id}> is not moderatable.`);
 		}
 
-		if (!target.communicationDisabledUntil) {
-			return await interaction.reply(`<@!${target.id}> is not in a timeout.`);
+		if (target.isCommunicationDisabled) {
+			return await ctx.interaction.reply(`<@!${target.id}> is not in a timeout.`);
 		}
 
 		await target
-			.send(`Your timeout has been canceled in **${interaction.guild.name}**`)
-			.catch(async (err) => await interaction.reply(`Could not dm ${target.user.tag}\n\`${err}\``));
+			.send(`Your timeout has been canceled in **${ctx.interaction.guild.name}**`)
+			.catch(
+				async (err) => await ctx.interaction.reply(`Could not dm ${target.user.tag}\n\`${err}\``)
+			);
 
 		await target.timeout(null);
 
 		await InfractionModel.updateMany(
 			{
-				userID: target.id,
-				guildID: interaction.guild.id,
-				type: 'mute',
+				userId: target.id,
+				guildId: ctx.interaction.guild.id,
+				type: InfractionTypes.Untimeout,
 				active: true,
 			},
 			{
@@ -54,10 +57,9 @@ export default class implements EconomicaCommand {
 			}
 		);
 
-		if (interaction.replied) {
-			interaction.followUp(`Timeout canceled for ${target.user.tag}`);
-		} else {
-			interaction.reply(`Timeout canceled for ${target.user.tag}`);
-		}
+		const content = `Timeout canceled for ${target.user.tag}`;
+		return await (ctx.interaction.replied
+			? ctx.interaction.followUp(content)
+			: ctx.interaction.reply(content));
 	};
 }

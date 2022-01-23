@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 import { ReqBoolean, ReqDate, ReqNum, ReqString, ReqStringArr } from '../structures/index';
 
 interface Shop {
-	guildID: string;
+	guildId: string;
 	type: string;
 	name: string;
 	price: number;
@@ -23,7 +23,7 @@ interface Shop {
 
 const Schema = new mongoose.Schema<Shop>(
 	{
-		guildID: ReqString,
+		guildId: ReqString,
 		type: ReqString,
 		name: ReqString,
 		price: ReqNum,

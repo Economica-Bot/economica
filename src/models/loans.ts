@@ -2,9 +2,9 @@ import * as mongoose from 'mongoose';
 import { ReqBoolean, ReqDate, ReqNum, ReqString } from '../structures/index';
 
 interface Loan {
-	guildID: string;
-	borrowerID: string;
-	lenderID: string;
+	guildId: string;
+	borrowerId: string;
+	lenderId: string;
 	principal: number;
 	repayment: number;
 	expires: Date;
@@ -16,9 +16,9 @@ interface Loan {
 
 const Schema = new mongoose.Schema<Loan>(
 	{
-		guildID: ReqString,
-		borrowerID: ReqString,
-		lenderID: ReqString,
+		guildId: ReqString,
+		borrowerId: ReqString,
+		lenderId: ReqString,
 		principal: ReqNum,
 		repayment: ReqNum,
 		expires: ReqDate,

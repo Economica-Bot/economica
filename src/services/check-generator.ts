@@ -1,10 +1,9 @@
-import { Client } from 'discord.js';
-import { EconomicaService } from '../structures';
+import { EconomicaClient, EconomicaService } from '../structures';
 import { ShopModel, MemberModel } from '../models';
 
 export default class implements EconomicaService {
 	name = 'check-generator';
-	execute = (client: Client) => {
+	execute = (client: EconomicaClient) => {
 		setInterval(async () => {
 			console.log(`Executing service ${this.name}`);
 			const now = new Date();
@@ -12,7 +11,7 @@ export default class implements EconomicaService {
 			for (const member of members) {
 				for (const item of member.inventory) {
 					const shopItem = await ShopModel.findOne({
-						guildID: String(member.guildID),
+						guildId: String(member.guildId),
 						name: item.name,
 					});
 
@@ -30,8 +29,8 @@ export default class implements EconomicaService {
 
 					await MemberModel.findOneAndUpdate(
 						{
-							guildID: member.guildID,
-							userID: member.userID,
+							guildId: member.guildId,
+							userId: member.userId,
 							'inventory.name': item.name,
 						},
 						{

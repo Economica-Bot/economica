@@ -1,13 +1,13 @@
-import { parse_string } from '@adrastopoulos/number-parser';
-import { CommandInteraction, GuildMember, MessageEmbed } from 'discord.js';
+import { parse_number, parse_string } from '@adrastopoulos/number-parser';
+import { GuildMember, MessageEmbed } from 'discord.js';
 import {
-	EconomicaClient,
+	Context,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	PermissionRole,
 	TransactionTypes,
 } from '../../structures';
-import { getCurrencySymbol, transaction } from '../../util/util';
+import { transaction } from '../../util/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -35,18 +35,18 @@ export default class implements EconomicaCommand {
 				.setRequired(true)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		const member = interaction.options.getMember('user') as GuildMember;
-		const amount = parse_string(interaction.options.getString('amount'));
-		const target = interaction.options.getString('target');
-		const cSymbol = await getCurrencySymbol(interaction.guild.id);
-		if (!amount) return await interaction.reply(`Invalid amount: \`${amount}\``);
+	execute = async (ctx: Context) => {
+		const member = ctx.interaction.options.getMember('user') as GuildMember;
+		const { currency } = ctx.guildDocument;
+		const amount = parse_string(ctx.interaction.options.getString('amount'));
+		const target = ctx.interaction.options.getString('target');
+		if (!amount) return await ctx.interaction.reply(`Invalid amount: \`${amount}\``);
 		await transaction(
-			client,
-			interaction.guild.id,
+			ctx.client,
+			ctx.interaction.guildId,
 			member.id,
+			ctx.interaction.user.id,
 			TransactionTypes.Add_Money,
-			`add-money | <@!${interaction.member.user.id}>`,
 			target === 'wallet' ? amount : 0,
 			target === 'treasury' ? amount : 0,
 			amount
@@ -56,9 +56,9 @@ export default class implements EconomicaCommand {
 			.setColor('GREEN')
 			.setAuthor({ name: member.user.username, url: member.user.displayAvatarURL() })
 			.setDescription(
-				`Added ${cSymbol}${amount.toLocaleString()} to <@!${member.user.id}>'s \`${target}\`.`
+				`Added ${currency}${parse_number(amount)} to <@!${member.user.id}>'s \`${target}\`.`
 			);
 
-		return await interaction.reply({ embeds: [embed] });
+		return await ctx.interaction.reply({ embeds: [embed] });
 	};
 }

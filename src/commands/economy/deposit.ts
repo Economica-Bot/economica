@@ -1,12 +1,12 @@
 import { parse_string } from '@adrastopoulos/number-parser';
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import {
-	EconomicaClient,
+	Context,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	TransactionTypes,
 } from '../../structures';
-import { getCurrencySymbol, getEconInfo, transaction } from '../../util/util';
+import { getEconInfo, transaction } from '../../util/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -20,32 +20,32 @@ export default class implements EconomicaCommand {
 			option.setName('amount').setDescription('Specify an amount').setRequired(true)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		const cSymbol = await getCurrencySymbol(interaction.guildId);
-		const { wallet } = await getEconInfo(interaction.guildId, interaction.user.id);
-		const amount = interaction.options.getString('amount');
+	execute = async (ctx: Context) => {
+		const { currency } = ctx.guildDocument;
+		const { wallet } = await getEconInfo(ctx.interaction.guildId, ctx.interaction.user.id);
+		const amount = ctx.interaction.options.getString('amount');
 		const result = amount === 'all' ? wallet : parse_string(amount);
 
 		if (result) {
 			if (result < 1) {
-				return await interaction.reply(`Invalid amount: ${result}\nAmount less than 0`);
+				return await ctx.interaction.reply(`Invalid amount: ${result}\nAmount less than 0`);
 			}
 
 			if (result > wallet) {
-				return await interaction.reply(
-					`Invalid amount: ${amount}\nExceeds current wallet:${cSymbol}${wallet}`
+				return await ctx.interaction.reply(
+					`Invalid amount: ${amount}\nExceeds current wallet:${currency}${wallet}`
 				);
 			}
 		} else {
-			return await interaction.reply(`Invalid amount: \`${result}\``);
+			return await ctx.interaction.reply(`Invalid amount: \`${result}\``);
 		}
 
 		await transaction(
-			client,
-			interaction.guildId,
-			interaction.user.id,
+			ctx.client,
+			ctx.interaction.guildId,
+			ctx.interaction.user.id,
+			ctx.interaction.user.id,
 			TransactionTypes.Deposit,
-			'`system`',
 			-result,
 			result,
 			0
@@ -53,9 +53,12 @@ export default class implements EconomicaCommand {
 
 		const embed = new MessageEmbed()
 			.setColor('GREEN')
-			.setAuthor({ name: interaction.user.username, url: interaction.user.displayAvatarURL() })
-			.setDescription(`Deposited ${cSymbol}${result.toLocaleString()}`);
+			.setAuthor({
+				name: ctx.interaction.user.username,
+				url: ctx.interaction.user.displayAvatarURL(),
+			})
+			.setDescription(`Deposited ${currency}${result.toLocaleString()}`);
 
-		return await interaction.reply({ embeds: [embed] });
+		return await ctx.interaction.reply({ embeds: [embed] });
 	};
 }

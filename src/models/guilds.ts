@@ -10,8 +10,8 @@ import {
 	GuildAuthDataObj
 } from '../structures/index';
 
-interface Guild {
-	guildID: string;
+export interface Guild {
+	guildId: string;
 	currency: string;
 	transactionLogChannel: string;
 	infractionLogChannel: string;
@@ -20,7 +20,7 @@ interface Guild {
 
 const Schema = new mongoose.Schema<Guild>(
 	{
-		guildID: ReqString,
+		guildId: ReqString,
 		currency: ReqString,
 		transactionLogChannel: ReqString,
 		infractionLogChannel: ReqString,

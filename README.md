@@ -1,10 +1,10 @@
 <div align="center">
 
-![Economica Logo](https://media.discordapp.net/attachments/796906162548637780/797184525330284655/ecnmca-logo2.png?width=200&height=200)
+<img src="ecnmca-logo2.png" width="200" height="200">
 
 # Economica
 
-</div>
+</div> 
 
 ## Economica is the best new Discord economy bot
 Centerpiece Features:

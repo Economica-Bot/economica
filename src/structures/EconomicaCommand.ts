@@ -1,4 +1,5 @@
 import { CommandInteraction } from 'discord.js';
+import { Context } from './Context';
 import {
 	EconomicaClient,
 	EconomicaSlashCommandBuilder,
@@ -16,5 +17,5 @@ export class EconomicaCommand {
 		| EconomicaSlashCommandSubcommandsOnlyBuilder
 		| EconomicaSlashCommandOptionsOnlyBuilder
 		| Omit<EconomicaSlashCommandBuilder, 'addEconomicaSubcommand' | 'addEconomicaSubcommandGroup'>;
-	execute: (client: EconomicaClient, interaction: CommandInteraction) => Promise<any>;
+	execute: (ctx: Context) => Promise<any>;
 }

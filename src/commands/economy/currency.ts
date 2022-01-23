@@ -1,7 +1,6 @@
-import { CommandInteraction, Guild } from 'discord.js';
 import { GuildModel } from '../../models';
 import {
-	EconomicaClient,
+	Context,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	PermissionRole,
@@ -34,20 +33,20 @@ export default class implements EconomicaCommand {
 				.setRoles([new PermissionRole('ECONOMY MANAGER', true)])
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		const subcommand = interaction.options.getSubcommand();
-		const guildID = interaction.guildId;
+	execute = async (ctx: Context) => {
+		const subcommand = ctx.interaction.options.getSubcommand();
+		const guildId = ctx.interaction.guildId;
+		const { currency } = ctx.guildDocument;
 		if (subcommand === 'view') {
-			const currency = (await GuildModel.findOne({ guildID })).currency;
-			return await interaction.reply(`Currency symbol: ${currency}`);
+			return await ctx.interaction.reply(`Currency symbol: ${currency}`);
 		} else if (subcommand === 'set') {
-			const currency = interaction.options.getString('currency');
-			await GuildModel.findOneAndUpdate({ guildID }, { currency });
-			return await interaction.reply(`Currency symbol set to ${currency}`);
+			const newCurrency = ctx.interaction.options.getString('currency');
+			await GuildModel.findOneAndUpdate({ guildId }, { currency: newCurrency });
+			return await ctx.interaction.reply(`Currency symbol set to ${newCurrency}`);
 		} else if (subcommand === 'reset') {
 			const currency = config.cSymbol;
-			await GuildModel.findOneAndUpdate({ guildID }, { currency });
-			return await interaction.reply(`Currency symbol reset: ${currency}`);
+			await GuildModel.findOneAndUpdate({ guildId }, { currency });
+			return await ctx.interaction.reply(`Currency symbol reset: ${currency}`);
 		}
 	};
 }

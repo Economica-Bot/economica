@@ -1,6 +1,6 @@
-import { CommandInteraction, GuildMember } from 'discord.js';
+import { GuildMember } from 'discord.js';
 import {
-	EconomicaClient,
+	Context,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	InfractionTypes,
@@ -33,56 +33,58 @@ export default class implements EconomicaCommand {
 			option.setName('reason').setDescription('Specify a reason.').setRequired(false)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction): Promise<any> => {
-		const member = (await interaction.guild.members.fetch(client.user.id)) as GuildMember;
-		const target = interaction.options.getMember('target') as GuildMember;
-		const duration = interaction.options.getString('duration') as string;
-		const reason = (interaction.options.getString('reason') as string) ?? 'No reason provided';
+	execute = async (ctx: Context) => {
+		const member = (await ctx.interaction.guild.members.fetch(ctx.client.user.id)) as GuildMember;
+		const target = ctx.interaction.options.getMember('target') as GuildMember;
+		const duration = ctx.interaction.options.getString('duration') as string;
+		const reason = (ctx.interaction.options.getString('reason') as string) ?? 'No reason provided';
 
-		if (target.id === interaction.user.id) {
-			return await interaction.reply('You cannot timeout yourself.');
+		if (target.id === ctx.interaction.user.id) {
+			return await ctx.interaction.reply('You cannot timeout yourself.');
 		}
 
-		if (target.id === client.user.id) {
-			return await interaction.reply('I cannot timeout myself.');
+		if (target.id === ctx.client.user.id) {
+			return await ctx.interaction.reply('I cannot timeout myself.');
 		}
 
 		if (target.roles.highest.position > member.roles.highest.position) {
-			return await interaction.reply('Insufficient permissions.');
+			return await ctx.interaction.reply('Insufficient permissions.');
 		}
 
 		if (!target.moderatable) {
-			return await interaction.reply(`<@!${target.id}> is not moderatable.`);
+			return await ctx.interaction.reply(`<@!${target.id}> is not moderatable.`);
 		}
 
 		if (
 			target.communicationDisabledUntil &&
 			target.communicationDisabledUntil.getTime() > Date.now()
 		) {
-			return await interaction.reply(`<@!${target.id}> is already in a timeout.`);
+			return await ctx.interaction.reply(`<@!${target.id}> is already in a timeout.`);
 		}
 
 		const milliseconds = ms(duration);
 
 		if (!milliseconds || milliseconds < 0) {
-			return interaction.reply('Invalid duration.');
+			return ctx.interaction.reply('Invalid duration.');
 		}
 
 		await target
 			.send(
 				`You have been placed under a timeout for \`${reason}\` for ${ms(milliseconds)} in **${
-					interaction.guild.name
+					ctx.interaction.guild.name
 				}**`
 			)
-			.catch(async (err) => await interaction.reply(`Could not dm ${target.user.tag}\n\`${err}\``));
+			.catch(
+				async (err) => await ctx.interaction.reply(`Could not dm ${target.user.tag}\n\`${err}\``)
+			);
 
 		await target.timeout(milliseconds, reason);
 
 		await infraction(
-			client,
-			interaction.guildId,
+			ctx.client,
+			ctx.interaction.guildId,
 			target.id,
-			interaction.user.id,
+			ctx.interaction.user.id,
 			InfractionTypes.Timeout,
 			reason,
 			duration === 'Permanent' ? true : false,
@@ -90,10 +92,9 @@ export default class implements EconomicaCommand {
 			milliseconds
 		);
 
-		if (interaction.replied) {
-			interaction.followUp(`Placed ${target.user.tag} under a timeout for ${ms(milliseconds)}.`);
-		} else {
-			interaction.reply(`Placed ${target.user.tag} under a timeout for ${ms(milliseconds)}.`);
-		}
+		const content = `Placed ${target.user.tag} under a timeout for ${ms(milliseconds)}.`;
+		return await (ctx.interaction.replied
+			? ctx.interaction.followUp(content)
+			: ctx.interaction.reply(content));
 	};
 }

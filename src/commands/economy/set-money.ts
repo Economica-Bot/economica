@@ -1,13 +1,13 @@
-import {parse_string} from '@adrastopoulos/number-parser';
-import { CommandInteraction, GuildMember, MessageEmbed } from 'discord.js';
+import { parse_string } from '@adrastopoulos/number-parser';
+import { GuildMember, MessageEmbed } from 'discord.js';
 import {
-	EconomicaClient,
+	Context,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	PermissionRole,
 	TransactionTypes,
 } from '../../structures';
-import { getCurrencySymbol, getEconInfo, transaction } from '../../util/util';
+import { getEconInfo, transaction } from '../../util/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -35,21 +35,24 @@ export default class implements EconomicaCommand {
 				.setRequired(true)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		const cSymbol = await getCurrencySymbol(interaction.guild.id);
-		const member = interaction.options.getMember('user') as GuildMember;
-		const amount = parse_string(interaction.options.getString('amount'));
-		const target = interaction.options.getString('target');
-		const { wallet, treasury } = await getEconInfo(interaction.guildId, interaction.user.id);
+	execute = async (ctx: Context) => {
+		const { currency } = ctx.guildDocument;
+		const member = ctx.interaction.options.getMember('user') as GuildMember;
+		const amount = parse_string(ctx.interaction.options.getString('amount'));
+		const target = ctx.interaction.options.getString('target');
+		const { wallet, treasury } = await getEconInfo(
+			ctx.interaction.guildId,
+			ctx.interaction.user.id
+		);
 		const difference = target === 'wallet' ? amount - wallet : amount - treasury;
-		console.log(difference)
-		if (!amount) return await interaction.reply(`Invalid amount: \`${amount}\``);
+		console.log(difference);
+		if (!amount) return await ctx.interaction.reply(`Invalid amount: \`${amount}\``);
 		await transaction(
-			client,
-			interaction.guild.id,
+			ctx.client,
+			ctx.interaction.guild.id,
 			member.id,
+			ctx.interaction.user.id,
 			TransactionTypes.Set_Money,
-			`set-money | <@!${interaction.member.user.id}>`,
 			target === 'wallet' ? difference : 0,
 			target === 'treasury' ? difference : 0,
 			difference
@@ -59,9 +62,9 @@ export default class implements EconomicaCommand {
 			.setColor('GREEN')
 			.setAuthor({ name: member.user.username, url: member.user.displayAvatarURL() })
 			.setDescription(
-				`Set <@!${member.user.id}>'s \`${target}\` to ${cSymbol}${amount.toLocaleString()}.`
+				`Set <@!${member.user.id}>'s \`${target}\` to ${currency}${amount.toLocaleString()}.`
 			);
 
-		return await interaction.reply({ embeds: [embed] });
+		return await ctx.interaction.reply({ embeds: [embed] });
 	};
 }

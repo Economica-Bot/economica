@@ -1,19 +1,12 @@
 import * as mongoose from 'mongoose';
-import {
-	ReqNum,
-	ReqString,
-	NonReqString,
-	ReqDate,
-	TransactionType,
-	TransactionTypes,
-} from '../structures/index';
+import { ReqNum, ReqString, TransactionType, TransactionTypes } from '../structures/index';
 
 interface Transaction {
 	_id: mongoose.Types.ObjectId;
-	guildID: string;
-	userID: string;
-	transactionType: TransactionTypes;
-	memo: string;
+	guildId: string;
+	userId: string;
+	agentId: string;
+	type: TransactionTypes;
 	wallet: number;
 	treasury: number;
 	total: number;
@@ -22,10 +15,10 @@ interface Transaction {
 
 const Schema = new mongoose.Schema<Transaction>(
 	{
-		guildID: ReqString,
-		userID: ReqString,
-		transaction_type: TransactionType,
-		memo: ReqString,
+		guildId: ReqString,
+		userId: ReqString,
+		agentId: ReqString,
+		type: TransactionType,
 		wallet: ReqNum,
 		treasury: ReqNum,
 		total: ReqNum,

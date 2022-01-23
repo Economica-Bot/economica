@@ -92,20 +92,20 @@ export function success(
 
 /**
  * Gets a user's economy information.
- * @param {string} guildID - GuildModel id.
- * @param {string} userID - User id.
+ * @param {string} guildId - guild id.
+ * @param {string} userId - User id.
  * @returns {Promise<EconomyInfo>} wallet, treasury, total, rank
  */
-export async function getEconInfo(guildID: string, userID: string): Promise<EconomyInfo> {
+export async function getEconInfo(guildId: string, userId: string): Promise<EconomyInfo> {
 	let rank = 0,
 		wallet = 0,
 		treasury = 0,
 		total = 0,
 		found = false;
-	const balances = await MemberModel.find({ guildID }).sort({ total: -1 });
+	const balances = await MemberModel.find({ guildId }).sort({ total: -1 });
 	if (balances.length) {
 		for (let rankIndex = 0; rankIndex < balances.length; rankIndex++) {
-			rank = balances[rankIndex].userID === userID ? rankIndex + 1 : rank++;
+			rank = balances[rankIndex].userId === userId ? rankIndex + 1 : rank++;
 		}
 
 		if (balances[rank - 1]) {
@@ -117,13 +117,13 @@ export async function getEconInfo(guildID: string, userID: string): Promise<Econ
 	}
 
 	if (!found) {
-		await new MemberModel({
-			guildID,
-			userID,
+		await MemberModel.create({
+			guildId,
+			userId,
 			wallet,
 			treasury,
 			total,
-		}).save();
+		});
 	}
 
 	return {
@@ -136,31 +136,31 @@ export async function getEconInfo(guildID: string, userID: string): Promise<Econ
 
 /**
  * Changes a user's economy info.
- * @param {string} guildID - Guild id.
- * @param {string} userID - User id.
- * @param {TransactionTypes} transaction_type - The transaction type.
- * @param {string} memo - The transaction dispatcher.
- * @param {Number} wallet - The value to be added to the user's wallet.
- * @param {Number} treasury - The value to be added to the user's treasury.
- * @param {Number} total - The value to be added to the user's total.
- * @returns {Number} total.
+ * @param {EconomicaClient} - Economica Client.
+ * @param {string} guildId - Guild id.
+ * @param {string} userId - User id.
+ * @param {TransactionTypes} type - The transaction type.
+ * @param {number} wallet - The value to be added to the user's wallet.
+ * @param {number} treasury - The value to be added to the user's treasury.
+ * @param {number} total - The value to be added to the user's total.
+ * @returns {Promise<number>} total.
  */
 export async function transaction(
-	client: Discord.Client,
-	guildID: string,
-	userID: string,
-	transaction_type: TransactionTypes,
-	memo: string,
-	wallet: Number,
-	treasury: Number,
-	total: Number
-): Promise<Number> {
+	client: EconomicaClient,
+	guildId: string,
+	userId: string,
+	agentId: string,
+	type: TransactionTypes,
+	wallet: number,
+	treasury: number,
+	total: number
+): Promise<number> {
 	//Init
-	await getEconInfo(guildID, userID);
+	await getEconInfo(guildId, userId);
 	const result = await MemberModel.findOneAndUpdate(
 		{
-			guildID,
-			userID,
+			guildId,
+			userId,
 		},
 		{
 			$inc: {
@@ -175,27 +175,27 @@ export async function transaction(
 		}
 	);
 
-	const transaction = await new TransactionModel({
-		guildID,
-		userID,
-		transaction_type,
-		memo,
+	const transaction = await TransactionModel.create({
+		guildId,
+		userId,
+		agentId,
+		type,
 		wallet,
 		treasury,
 		total,
-	}).save();
-
-	const guildSetting = await GuildModel.findOne({
-		guildID,
 	});
 
-	const channelID = guildSetting?.transactionLogChannel;
+	const guildSetting = await GuildModel.findOne({
+		guildId,
+	});
 
-	if (channelID) {
-		const cSymbol = await getCurrencySymbol(guildID);
-		const channel = client.channels.cache.get(channelID) as Discord.TextChannel;
+	const channelId = guildSetting?.transactionLogChannel;
+
+	if (channelId) {
+		const cSymbol = guildSetting.currency;
+		const channel = client.channels.cache.get(channelId) as Discord.TextChannel;
 		const guild = channel.guild;
-		const description = `Transaction for <@!${userID}>\nType: \`${transaction_type}\` | ${memo}`;
+		const description = `Transaction for <@!${userId}>\nPerformed by:<@!${agentId}>\nType: \`${type}\``;
 		channel.send({
 			embeds: [
 				embedify('GOLD', `${transaction._id}`, guild.iconURL(), description)
@@ -226,9 +226,10 @@ export async function transaction(
 
 /**
  * Record an infraction.
- * @param {string} guildID - GuildModel id.
- * @param {string} userID - User id.
- * @param {string} staffID - Staff id.
+ * @param {EconomicaClient} client - The Client.
+ * @param {string} guildId - Guild id.
+ * @param {string} userId - User id.
+ * @param {string} agentId - Agent/Staff id.
  * @param {string} type - The punishment for the infraction.
  * @param {string} reason - The reason for the punishment.
  * @param {boolean} permanent - Whether the punishment is permanent.
@@ -237,64 +238,51 @@ export async function transaction(
  */
 export async function infraction(
 	client: Discord.Client,
-	guildID: string,
-	userID: string,
-	staffID: string,
+	guildId: string,
+	userId: string,
+	agentId: string,
 	type: string,
 	reason: string,
 	permanent?: boolean,
 	active?: boolean,
 	duration?: number
 ) {
-	const infraction = await new InfractionModel({
-		guildID,
-		userID,
-		staffID,
+	const infraction = await InfractionModel.create({
+		guildId,
+		userId,
+		agentId,
 		type,
 		reason,
 		permanent,
 		active,
 		duration,
-	}).save();
-
-	const guildSetting = await GuildModel.findOne({
-		guildiD: `${guildID}`,
 	});
 
-	const channelID = guildSetting?.infractionLogChannel;
+	const guildSetting = await GuildModel.findOne({
+		guildId: `${guildId}`,
+	});
 
-	if (channelID) {
-		const channel = client.channels.cache.get(channelID) as Discord.TextChannel;
+	const channelId = guildSetting?.infractionLogChannel;
+
+	if (channelId) {
+		const channel = client.channels.cache.get(channelId) as Discord.TextChannel;
 		const guild = channel.guild;
-		const description = `Infraction for <@!${userID}> | Executed by <@!${staffID}>\nType: \`${type}\`\n${reason}`;
+		const description = `Infraction for <@!${userId}> | Executed by <@!${agentId}>\nType: \`${type}\`\n${reason}`;
 		channel.send({
-			embeds: [
-				this.embedify('RED', `${infraction._id}`, guild.iconURL(), description).setTimestamp(),
-			],
+			embeds: [embedify('RED', `${infraction._id}`, guild.iconURL(), description).setTimestamp()],
 		});
 	}
 }
 
 /**
- * Gets currency symbol.
- * @param {string} guildID - Guild id.
- * @returns {string} Guild currency symbol
- */
-export async function getCurrencySymbol(guildID: string): Promise<String> {
-	return await (
-		await GuildModel.findOne({ guildID })
-	).currency;
-}
-
-/**
  * Updates the min and max payout for the specified income command
- * @param {String} guildID - Guild id.
+ * @param {String} guildId - Guild id.
  * @param {String} command - Income command.
  * @param {IncomeCommandProperties} properties - Command properties.
  */
-export async function setCommandStats(guildID: string, properties: IncomeCommandProperties) {
+export async function setCommandStats(guildId: string, properties: IncomeCommandProperties) {
 	await GuildModel.findOneAndUpdate(
-		{ guildID },
+		{ guildId },
 		{
 			$pull: {
 				commands: {
@@ -308,7 +296,7 @@ export async function setCommandStats(guildID: string, properties: IncomeCommand
 	);
 
 	await GuildModel.findOneAndUpdate(
-		{ guildID },
+		{ guildId },
 		{
 			$push: {
 				commands: {
@@ -320,25 +308,6 @@ export async function setCommandStats(guildID: string, properties: IncomeCommand
 			upsert: true,
 		}
 	);
-}
-
-/**
- * @param {number} min - min value in range
- * @param {number} max - max value in range
- * @returns {number} Random value between two inputs
- */
-export function intInRange(min: number, max: number) {
-	return Math.ceil(Math.random() * (max - min) + min);
-}
-
-/**
- * Returns whether income command is successful.
- * @param {object} properties - the command properties
- * @returns {boolean} Whether income command is successful
- */
-export function isSuccess(properties: IncomeCommandProperties): boolean {
-	const { chance } = properties;
-	return this.intInRange(0, 100) < chance ? true : false;
 }
 
 /**
@@ -384,15 +353,19 @@ export function num(num: number) {
  * Initiates a pagination embed display.
  * @param {Discord.CommandInteraction} interaction
  * @param {[Discord.MessageEmbed]} embeds
- * @param {number} page
+ * @param {number} index
  */
 export async function paginate(
 	interaction: Discord.CommandInteraction,
 	embeds: Discord.MessageEmbed[],
-	page: number = 0
+	index: number = 0
 ) {
-	if (page > embeds.length - 1) {
-		interaction.editReply(this.error('Page number out of bounds!'));
+	if (!interaction.deferred) {
+		await interaction.deferReply();
+	}
+
+	if (index > embeds.length - 1) {
+		interaction.editReply(error('Page number out of bounds!'));
 		return;
 	}
 
@@ -403,18 +376,18 @@ export async function paginate(
 				.setCustomId('previous_page')
 				.setLabel('Previous')
 				.setStyle('SECONDARY')
-				.setDisabled(page == 0 ? true : false)
+				.setDisabled(index == 0 ? true : false)
 		)
 		.addComponents(
 			new Discord.MessageButton()
 				.setCustomId('next_page')
 				.setLabel('Next')
 				.setStyle('PRIMARY')
-				.setDisabled(page == embeds.length - 1 ? true : false)
+				.setDisabled(index == embeds.length - 1 ? true : false)
 		);
 
 	const msg = (await interaction.editReply({
-		embeds: [embeds[page]],
+		embeds: [embeds[index]],
 		components: [row],
 	})) as Discord.Message;
 
@@ -428,44 +401,44 @@ export async function paginate(
 	});
 
 	collector.on('collect', async (i) => {
-		if (page < embeds.length - 1 && page >= 0 && i.customId === 'next_page') {
-			page++;
+		if (index < embeds.length - 1 && index >= 0 && i.customId === 'next_page') {
+			index++;
 			row = new Discord.MessageActionRow()
 				.addComponents(
 					new Discord.MessageButton()
 						.setCustomId('previous_page')
 						.setLabel('Previous')
 						.setStyle('SECONDARY')
-						.setDisabled(page == 0 ? true : false)
+						.setDisabled(index == 0 ? true : false)
 				)
 				.addComponents(
 					new Discord.MessageButton()
 						.setCustomId('next_page')
 						.setLabel('Next')
 						.setStyle('PRIMARY')
-						.setDisabled(page == embeds.length - 1 ? true : false)
+						.setDisabled(index == embeds.length - 1 ? true : false)
 				);
-		} else if (page > 0 && page < embeds.length && i.customId === 'previous_page') {
-			page--;
+		} else if (index > 0 && index < embeds.length && i.customId === 'previous_page') {
+			index--;
 			row = new Discord.MessageActionRow()
 				.addComponents(
 					new Discord.MessageButton()
 						.setCustomId('previous_page')
 						.setLabel('Previous')
 						.setStyle('SECONDARY')
-						.setDisabled(page == 0 ? true : false)
+						.setDisabled(index == 0 ? true : false)
 				)
 				.addComponents(
 					new Discord.MessageButton()
 						.setCustomId('next_page')
 						.setLabel('Next')
 						.setStyle('PRIMARY')
-						.setDisabled(page == embeds.length - 1 ? true : false)
+						.setDisabled(index == embeds.length - 1 ? true : false)
 				);
 		}
 
 		await i.update({
-			embeds: [embeds[page]],
+			embeds: [embeds[index]],
 			components: [row],
 		});
 	});
@@ -501,6 +474,6 @@ export async function runtimeError(
 	icon_url = client.user.displayAvatarURL();
 	description = `\`\`\`js\n${error.stack}\`\`\``;
 	const embed = embedify('RED', title, icon_url, description);
-	const channel = (await client.channels.cache.get(process.env.BOT_LOG_ID)) as Discord.TextChannel;
+	const channel = (await client.channels.cache.get(process.env.BOT_LOG_Id)) as Discord.TextChannel;
 	channel.send({ embeds: [embed] });
 }

@@ -1,6 +1,6 @@
-import { CommandInteraction, GuildMember } from 'discord.js';
+import { GuildMember } from 'discord.js';
 import {
-	EconomicaClient,
+	Context,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	InfractionTypes,
@@ -24,46 +24,47 @@ export default class implements EconomicaCommand {
 			option.setName('reason').setDescription('Specify a reason.').setRequired(false)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction): Promise<any> => {
-		const member = (await interaction.guild.members.fetch(client.user.id)) as GuildMember;
-		const target = interaction.options.getMember('target') as GuildMember;
-		const reason = (interaction.options.getString('reason') as string) ?? 'No reason provided';
+	execute = async (ctx: Context) => {
+		const member = (await ctx.interaction.guild.members.fetch(ctx.client.user.id)) as GuildMember;
+		const target = ctx.interaction.options.getMember('target') as GuildMember;
+		const reason = (ctx.interaction.options.getString('reason') as string) ?? 'No reason provided';
 
-		if (target.id === interaction.user.id) {
-			return await interaction.reply('You cannot kick yourself.');
+		if (target.id === ctx.interaction.user.id) {
+			return await ctx.interaction.reply('You cannot kick yourself.');
 		}
 
-		if (target.id === client.user.id) {
-			return await interaction.reply('I cannot kick myself.');
+		if (target.id === ctx.client.user.id) {
+			return await ctx.interaction.reply('I cannot kick myself.');
 		}
 
 		if (target.roles.highest.position > member.roles.highest.position) {
-			return await interaction.reply('Insufficient permissions.');
+			return await ctx.interaction.reply('Insufficient permissions.');
 		}
 
 		if (!target.kickable) {
-			return await interaction.reply(`<@!${target.id}> is not kickable.`);
+			return await ctx.interaction.reply(`<@!${target.id}> is not kickable.`);
 		}
 
 		await target
-			.send(`You have been kicked for \`${reason}\` from **${interaction.guild.name}**`)
-			.catch(async (err) => await interaction.reply(`Could not dm ${target.user.tag}\n\`${err}\``));
+			.send(`You have been kicked for \`${reason}\` from **${ctx.interaction.guild.name}**`)
+			.catch(
+				async (err) => await ctx.interaction.reply(`Could not dm ${target.user.tag}\n\`${err}\``)
+			);
 
 		await target.kick(reason);
 
 		await infraction(
-			client,
-			interaction.guildId,
+			ctx.client,
+			ctx.interaction.guildId,
 			target.id,
-			interaction.user.id,
+			ctx.interaction.user.id,
 			InfractionTypes.Kick,
 			reason
 		);
 
-		if (interaction.replied) {
-			return await interaction.followUp(`Kicked ${target.user.tag}`);
-		} else {
-			return await interaction.reply(`Kicked ${target.user.tag}`);
-		}
+		const content = `Kicked ${target.user.tag}`;
+		return await (ctx.interaction.replied
+			? ctx.interaction.followUp(content)
+			: ctx.interaction.reply(content));
 	};
 }

@@ -1,12 +1,8 @@
-import { CommandInteraction, MessageEmbed } from 'discord.js';
-import {
-    EconomicaClient,
-    EconomicaCommand,
-    EconomicaSlashCommandBuilder,
-} from '../../structures/index';
-import { ShopModel, GuildModel, MemberModel } from '../../models/index'
-import * as util from '../../util/util'
-import { hyperlinks, authors } from '../../util/index'
+import { MessageEmbed } from 'discord.js';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures/index';
+import { ShopModel, GuildModel, MemberModel } from '../../models/index';
+import * as util from '../../util/util';
+import { hyperlinks, authors } from '../../util/index';
 
 export default class implements EconomicaCommand {
     data = new EconomicaSlashCommandBuilder()
@@ -46,7 +42,7 @@ export default class implements EconomicaCommand {
                 )
         )
 
-    execute = async (client: EconomicaClient, interaction: CommandInteraction): Promise<any> => {
+        execute = async ({ interaction }: Context): Promise<any> => {
         const subcommand = interaction.options.getSubcommand();
 
         // Array of shop items in this guild

@@ -1,12 +1,11 @@
 import { parse_string } from '@adrastopoulos/number-parser';
-import { CommandInteraction } from 'discord.js';
 import {
-	EconomicaClient,
+	Context,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	TransactionTypes,
 } from '../../structures';
-import { getCurrencySymbol, getEconInfo, transaction } from '../../util/util';
+import { getEconInfo, transaction } from '../../util/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -23,49 +22,51 @@ export default class implements EconomicaCommand {
 			option.setName('amount').setDescription('Specify an amount').setRequired(true)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		const cSymbol = await getCurrencySymbol(interaction.guildId);
-		const user = interaction.options.getUser('user');
-		const { wallet } = await getEconInfo(interaction.guildId, user.id);
-		const amount = interaction.options.getString('amount');
+	execute = async (ctx: Context) => {
+		const { currency } = ctx.guildDocument;
+		const user = ctx.interaction.options.getUser('user');
+		const { wallet } = await getEconInfo(ctx.interaction.guildId, user.id);
+		const amount = ctx.interaction.options.getString('amount');
 		const result = amount === 'all' ? wallet : parse_string(amount);
 
 		if (result) {
 			if (result < 1) {
-				return await interaction.reply(`Invalid amount: ${result}\nAmount less than 0`);
+				return await ctx.interaction.reply(`Invalid amount: ${result}\nAmount less than 0`);
 			}
 
 			if (result > wallet) {
-				return await interaction.reply(
-					`Invalid amount: ${amount}\nExceeds current wallet:${cSymbol}${wallet}`
+				return await ctx.interaction.reply(
+					`Invalid amount: ${amount}\nExceeds current wallet:${currency}${wallet}`
 				);
 			}
 		} else {
-			return await interaction.reply(`Invalid amount: \`${result}\``);
+			return await ctx.interaction.reply(`Invalid amount: \`${result}\``);
 		}
 
 		await transaction(
-			client,
-			interaction.guildId,
-			interaction.user.id,
-			TransactionTypes.Pay,
-			`Payment to  <@!${user.id}>`,
+			ctx.client,
+			ctx.interaction.guildId,
+			ctx.interaction.user.id,
+			user.id,
+			TransactionTypes.Give_Payment,
 			-result,
 			0,
 			-result
 		);
 
 		await transaction(
-			client,
-			interaction.guild.id,
+			ctx.client,
+			ctx.interaction.guild.id,
 			user.id,
-			TransactionTypes.Pay,
-			`Payment from  <@!${interaction.id}>`,
+			ctx.interaction.user.id,
+			TransactionTypes.Receive_Payment,
 			result,
 			0,
 			result
 		);
 
-		return await interaction.reply(`Payed <@!${user.id}> ${cSymbol}${amount.toLocaleString()}`);
+		return await ctx.interaction.reply(
+			`Paid <@!${user.id}> ${currency}${amount.toLocaleString()}`
+		);
 	};
 }

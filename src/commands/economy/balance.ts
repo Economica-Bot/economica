@@ -1,6 +1,6 @@
-import { CommandInteraction, MessageEmbed } from 'discord.js';
-import { EconomicaClient, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-import { getCurrencySymbol, getEconInfo } from '../../util/util';
+import { MessageEmbed } from 'discord.js';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { getEconInfo } from '../../util/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -14,19 +14,31 @@ export default class implements EconomicaCommand {
 			option.setName('user').setDescription('Specify a user.').setRequired(false)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		const user = interaction.options.getUser('user') ?? interaction.user;
-		const cSymbol = await getCurrencySymbol(interaction.guild.id);
-		const { wallet, treasury, total, rank } = await getEconInfo(interaction.guildId, user.id);
+	execute = async (ctx: Context) => {
+		const user = ctx.interaction.options.getUser('user') ?? ctx.interaction.user;
+		const { currency } = ctx.guildDocument;
+		const { wallet, treasury, total, rank } = await getEconInfo(ctx.interaction.guildId, user.id);
 		const embed = new MessageEmbed()
 			.setColor('GOLD')
 			.setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
 			.setFooter({ text: `🏆 Rank ${rank}` })
 			.addFields(
-				{ name: 'Wallet', value: `${cSymbol}${wallet.toLocaleString()}`, inline: true },
-				{ name: 'Treasury', value: `${cSymbol}${treasury.toLocaleString()}`, inline: true },
-				{ name: 'Total', value: `${cSymbol}${total.toLocaleString()}`, inline: true }
+				{
+					name: 'Wallet',
+					value: `${currency}${wallet.toLocaleString()}`,
+					inline: true,
+				},
+				{
+					name: 'Treasury',
+					value: `${currency}${treasury.toLocaleString()}`,
+					inline: true,
+				},
+				{
+					name: 'Total',
+					value: `${currency}${total.toLocaleString()}`,
+					inline: true,
+				}
 			);
-		return await interaction.reply({ embeds: [embed] });
+		return await ctx.interaction.reply({ embeds: [embed] });
 	};
 }

@@ -1,6 +1,11 @@
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import { TransactionModel } from '../../models';
-import { EconomicaClient, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import {
+	Context,
+	EconomicaClient,
+	EconomicaCommand,
+	EconomicaSlashCommandBuilder,
+} from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -17,21 +22,21 @@ export default class implements EconomicaCommand {
 				)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		const user = interaction.options.getUser('user');
+	execute = async (ctx: Context) => {
+		const user = ctx.interaction.options.getUser('user');
 		const wallets: number[] = [];
 		const treasuries: number[] = [];
 		const totals: number[] = [];
 		const dates: string[] = [];
 
-		if (interaction.options.getSubcommand() === 'balance') {
+		if (ctx.interaction.options.getSubcommand() === 'balance') {
 			const transactions = user
 				? await TransactionModel.find({
-						guildID: interaction.guild.id,
-						userID: user.id,
+						guildId: ctx.interaction.guild.id,
+						userId: user.id,
 				  })
 				: await TransactionModel.find({
-						guildID: interaction.guild.id,
+						guildId: ctx.interaction.guild.id,
 				  });
 
 			transactions.forEach((transaction) => {
@@ -163,13 +168,13 @@ export default class implements EconomicaCommand {
 				.setColor('GOLD')
 				.setAuthor({
 					name: 'Balance Statistics',
-					url: user?.displayAvatarURL() ?? interaction.guild.iconURL(),
+					url: user?.displayAvatarURL() ?? ctx.interaction.guild.iconURL(),
 				})
 				.setDescription(`Total transactions: \`${transactions.length}\``)
 				.setImage(url)
 				.setFooter(url);
 
-			await interaction.reply({ embeds: [embed] });
+			await ctx.interaction.reply({ embeds: [embed] });
 		}
 	};
 }

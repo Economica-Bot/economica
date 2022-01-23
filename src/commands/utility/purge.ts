@@ -1,10 +1,5 @@
-import { ChannelType } from 'discord-api-types';
-import { CommandInteraction, GuildTextBasedChannel } from 'discord.js';
-import {
-	EconomicaClient,
-	EconomicaCommand,
-	EconomicaSlashCommandBuilder,
-} from '../../structures/index';
+import { GuildTextBasedChannel } from 'discord.js';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures/index';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -32,12 +27,12 @@ export default class implements EconomicaCommand {
 				.setMaxValue(100)
 				.setRequired(false)
 		);
-	execute = async (client: EconomicaClient, interaction: CommandInteraction): Promise<any> => {
-		const channel = (interaction.options.getChannel('channel') ??
-			interaction.channel) as GuildTextBasedChannel;
-		const amount = interaction.options.getNumber('amount') ?? 100;
+	execute = async (ctx: Context) => {
+		const channel = (ctx.interaction.options.getChannel('channel') ??
+			ctx.interaction.channel) as GuildTextBasedChannel;
+		const amount = ctx.interaction.options.getNumber('amount') ?? 100;
 		await channel.bulkDelete(amount, true).then(async (count) => {
-			interaction.reply(`Deleted \`${count.size}\` messages.`);
+			ctx.interaction.reply(`Deleted \`${count.size}\` messages.`);
 		});
 	};
 }

@@ -1,7 +1,6 @@
-import { CommandInteraction } from 'discord.js';
 import { InfractionModel } from '../../models/infractions';
 import {
-	EconomicaClient,
+	Context,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
 	InfractionTypes,
@@ -21,25 +20,25 @@ export default class implements EconomicaCommand {
 			option.setName('target').setDescription('Specify a target.').setRequired(true)
 		);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction): Promise<any> => {
-		const target = interaction.options.getUser('target');
-		const ban = (await interaction.guild.bans.fetch()).get(target.id);
+	execute = async (ctx: Context) => {
+		const target = ctx.interaction.options.getUser('target');
+		const ban = (await ctx.interaction.guild.bans.fetch()).get(target.id);
 
 		if (!ban) {
-			return await interaction.reply(`Could not find banned user with ID \`${target.id}\`.`);
+			return await ctx.interaction.reply(`Could not find banned user with Id \`${target.id}\`.`);
 		}
 
 		await target
-			.send(`You have been unbanned on **${interaction.guild.name}**`)
-			.catch(async (err) => await interaction.reply(`Could not dm ${target.tag}\n\`${err}\``));
+			.send(`You have been unbanned on **${ctx.interaction.guild.name}**`)
+			.catch(async (err) => await ctx.interaction.reply(`Could not dm ${target.tag}\n\`${err}\``));
 
-		await interaction.guild.members.unban(target);
+		await ctx.interaction.guild.members.unban(target);
 
 		await InfractionModel.updateMany(
 			{
-				userID: target.id,
-				guildID: interaction.guild.id,
-				type: 'ban',
+				userId: target.id,
+				guildId: ctx.interaction.guild.id,
+				type: InfractionTypes.Ban,
 				active: true,
 			},
 			{
@@ -47,10 +46,9 @@ export default class implements EconomicaCommand {
 			}
 		);
 
-		if (interaction.replied) {
-			interaction.followUp(`Unbanned ${target.tag}`);
-		} else {
-			interaction.reply(`Unbanned ${target.tag}`);
-		}
+		const content = `Unbanned ${target.tag}`;
+		return await (ctx.interaction.replied
+			? ctx.interaction.followUp(content)
+			: ctx.interaction.reply(content));
 	};
 }

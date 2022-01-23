@@ -13,7 +13,7 @@ export async function commandCheck(
 	interaction: CommandInteraction,
 	data: EconomicaSlashCommandBuilder
 ): Promise<boolean> {
-	if (data.devOnly && !process.env.OWNERID.includes(interaction.user.id)) {
+	if (data.devOnly && !process.env.OWNERId.includes(interaction.user.id)) {
 		interaction.reply({ content: 'This command is dev only.', ephemeral: true });
 		return false;
 	}
@@ -55,7 +55,7 @@ const permissionCheck = async (
 	let missingAuthority: 'mod' | 'admin' | 'manager' = null;
 
 	if (
-		process.env.OWNERID.includes(member.id) ||
+		process.env.OWNERId.includes(member.id) ||
 		interaction.guild.ownerId === member.id ||
 		member.permissions.has('MANAGE_GUILD')
 	) {

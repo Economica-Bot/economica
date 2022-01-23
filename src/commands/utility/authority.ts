@@ -4,6 +4,7 @@ import {
 	EconomicaClient,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
+	Context
 } from '../../structures';
 import {
 	getAuthLevel,
@@ -55,7 +56,7 @@ export default class implements EconomicaCommand {
 				)
 		)
 	
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
+	execute = async ({ interaction }: Context) => {
 		const subcommand = interaction.options.getSubcommand()
 
 		if (subcommand == 'view') {

@@ -1,9 +1,4 @@
-import { CommandInteraction } from 'discord.js';
-import {
-	EconomicaClient,
-	EconomicaCommand,
-	EconomicaSlashCommandBuilder,
-} from '../../structures/index';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures/index';
 import * as util from '../../util/util';
 
 export default class implements EconomicaCommand {
@@ -13,14 +8,14 @@ export default class implements EconomicaCommand {
 		.setGroup('utility')
 		.setGlobal(true);
 
-	execute = async (client: EconomicaClient, interaction: CommandInteraction) => {
-		await interaction.reply({
+	execute = async (ctx: Context) => {
+		await ctx.interaction.reply({
 			embeds: [
 				util.embedify(
 					'GREEN',
-					interaction.user.tag,
-					interaction.user.displayAvatarURL(),
-					`Pong! \`${client.ws.ping}ms\``
+					ctx.interaction.user.tag,
+					ctx.interaction.user.displayAvatarURL(),
+					`Pong! \`${ctx.client.ws.ping}ms\``
 				),
 			],
 		});
