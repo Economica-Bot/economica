@@ -14,6 +14,7 @@ export default class implements EconomicaCommand {
         .setDescription('Interact with the server\'s shop.')
         .setFormat('<view | clear>')
         .setGroup('shop')
+        .setGlobal(false)
         .addEconomicaSubcommand(subcommand =>
             subcommand
                 .setName('view')
@@ -29,12 +30,12 @@ export default class implements EconomicaCommand {
             subcommand
                 .setName('clear')
                 .setDescription('Delete all items in the shop.')
-                .addStringOption(options =>
+                .addNumberOption(options =>
                     options
                         .setName('confirm')
                         .setDescription('This action cannot be undone.')
-                        .addChoice('Yes, delete all shop items forever.', 'CONFIRMED')
-                        .addChoice('No, keep our shop items.', 'NOT CONFIRMED')
+                        .addChoice('Yes, delete all shop items forever.', 1)
+                        .addChoice('No, keep our shop items.', 0)
                         .setRequired(true)
                 )
                 .addBooleanOption(options =>
@@ -135,7 +136,7 @@ export default class implements EconomicaCommand {
 
         } else if (subcommand == 'clear') {
             // The user did not confirm the purge
-            if (!(interaction.options.getString('confirm') === 'CONFIRMED'))
+            if (!interaction.options.getString('confirm'))
                 return await interaction.reply({
                     embeds: [
                         new MessageEmbed()
