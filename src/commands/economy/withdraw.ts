@@ -46,8 +46,8 @@ export default class implements EconomicaCommand {
 			ctx.interaction.user.id,
 			ctx.interaction.user.id,
 			TransactionTypes.Withdraw,
-			-result,
 			result,
+			-result,
 			0
 		);
 
