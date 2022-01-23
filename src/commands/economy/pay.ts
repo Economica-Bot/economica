@@ -47,7 +47,7 @@ export default class implements EconomicaCommand {
 			ctx.client,
 			ctx.interaction.guildId,
 			ctx.interaction.user.id,
-			user.id,
+			ctx.interaction.user.id,
 			TransactionTypes.Give_Payment,
 			-result,
 			0,
@@ -65,8 +65,6 @@ export default class implements EconomicaCommand {
 			result
 		);
 
-		return await ctx.interaction.reply(
-			`Paid <@!${user.id}> ${currency}${amount.toLocaleString()}`
-		);
+		return await ctx.interaction.reply(`Paid <@!${user.id}> ${currency}${amount.toLocaleString()}`);
 	};
 }
