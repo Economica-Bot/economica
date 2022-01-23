@@ -1,4 +1,3 @@
-import { GuildModel } from '../../models';
 import {
 	Context,
 	EconomicaCommand,
@@ -10,7 +9,7 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('transaction-log')
 		.setDescription('Manage the transaction logging channel.')
-		.setGroup('econonomy')
+		.setGroup('economy')
 		.setFormat('<view | set | reset> [channel]')
 		.setExamples([
 			'transaction-log view',
@@ -47,16 +46,11 @@ export default class implements EconomicaCommand {
 			}
 		} else if (subcommand === 'set') {
 			const channel = ctx.interaction.options.getChannel('channel');
-			await GuildModel.findOneAndUpdate(
-				{ guildId: ctx.interaction.guildId },
-				{ transactionLogChannel: channel.id }
-			);
+			await ctx.guildDocument.update({ transactionLogChannel: channel.id });
 			return await ctx.interaction.reply(`Transaction log set to ${channel}`);
 		} else if (subcommand === 'reset') {
-			await GuildModel.findOneAndUpdate(
-				{ guildId: ctx.interaction.guildId },
-				{ transactionLogChannel: null }
-			);
+			await ctx.guildDocument.update({ transactionLogChannel: null });
+			return await ctx.interaction.reply('Transaction log reset.');
 		}
 	};
 }
