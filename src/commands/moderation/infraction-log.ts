@@ -8,7 +8,7 @@ export default class implements EconomicaCommand {
 		.setFormat('<view | set | reset> [channel]')
 		.setExamples([
 			'infraction-log view',
-			'infraction-log set @infraction-logs',
+			'infraction-log set #infraction-logs',
 			'infraction-log reset',
 		])
 		.setGlobal(false)
