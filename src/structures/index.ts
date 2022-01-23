@@ -1,6 +1,6 @@
 export { EconomicaClient } from './EconomicaClient';
 export { EconomicaCommand } from './EconomicaCommand';
-export { Context } from './Context'
+export { Context } from './Context';
 export { EconomicaService } from './EconomicaService';
 export {
 	EconomicaSlashCommandBuilder,
@@ -12,7 +12,7 @@ export {
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from './EconomicaSlashCommandSubcommands';
 export { ModuleSetting, RoleSetting, ChannelSetting, CommandSetting } from './Settings';
-export { TransactionTypes, InfractionTypes, GuildAuthData, BalanceTypes } from './Types';
+export { Group, TransactionTypes, InfractionTypes, GuildAuthData, BalanceTypes } from './Types';
 
 export {
 	CommandData,
