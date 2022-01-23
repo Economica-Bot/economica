@@ -138,7 +138,7 @@ export default class implements EconomicaCommand {
 				return await ctx.interaction.reply('Invalid length.');
 			}
 
-			const loan = await new LoanModel({
+			const loan = await LoanModel.create({
 				guildId: ctx.guildDocument.guildId,
 				borrowerId: borrower.id,
 				lenderId: ctx.interaction.user.id,
@@ -148,7 +148,7 @@ export default class implements EconomicaCommand {
 				pending: true,
 				active: true,
 				complete: false,
-			}).save();
+			});
 
 			await transaction(
 				ctx.client,

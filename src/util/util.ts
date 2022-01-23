@@ -117,13 +117,13 @@ export async function getEconInfo(guildId: string, userId: string): Promise<Econ
 	}
 
 	if (!found) {
-		await new MemberModel({
+		await MemberModel.create({
 			guildId,
 			userId,
 			wallet,
 			treasury,
 			total,
-		}).save();
+		});
 	}
 
 	return {
@@ -247,7 +247,7 @@ export async function infraction(
 	active?: boolean,
 	duration?: number
 ) {
-	const infraction = await new InfractionModel({
+	const infraction = await InfractionModel.create({
 		guildId,
 		userId,
 		agentId,
@@ -256,7 +256,7 @@ export async function infraction(
 		permanent,
 		active,
 		duration,
-	}).save();
+	});
 
 	const guildSetting = await GuildModel.findOne({
 		guildId: `${guildId}`,
