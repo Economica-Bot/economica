@@ -132,7 +132,7 @@ export default class implements EconomicaCommand {
 
 		} else if (subcommand == 'clear') {
 			// The user did not confirm the purge
-			if (!interaction.options.getString('confirm'))
+			if (!interaction.options.getNumber('confirm'))
 				return await interaction.reply({
 					embeds: [
 						new MessageEmbed()
