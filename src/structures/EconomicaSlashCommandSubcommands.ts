@@ -3,6 +3,7 @@ import {
 	SlashCommandSubcommandGroupBuilder,
 } from '@discordjs/builders';
 import { PermissionString } from 'discord.js';
+import { AuthLevelTypes } from '.';
 import { PermissionRole } from './CommandOptions';
 
 export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSubcommandGroupBuilder {
@@ -55,6 +56,7 @@ export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcomma
 	userPermissions: PermissionString[];
 	clientPermissions: PermissionString[];
 	roles: PermissionRole[];
+	authority: AuthLevelTypes
 
 	setFormat(format: string): this {
 		this.format = format;
@@ -78,6 +80,11 @@ export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcomma
 
 	setRoles(roles: PermissionRole[]): this {
 		this.roles = roles;
+		return this;
+	}
+
+	setAuthority(authority: AuthLevelTypes): this {
+		this.authority = authority
 		return this;
 	}
 

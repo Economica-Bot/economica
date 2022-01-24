@@ -12,7 +12,7 @@ export {
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from './EconomicaSlashCommandSubcommands';
 export { ModuleSetting, RoleSetting, ChannelSetting, CommandSetting } from './Settings';
-export { TransactionTypes, InfractionTypes, GuildAuthData, BalanceTypes } from './Types';
+export { TransactionTypes, InfractionTypes, GuildAuthData, BalanceTypes, AuthLevelTypes } from './Types';
 
 export {
 	CommandData,

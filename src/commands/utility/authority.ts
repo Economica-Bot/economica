@@ -4,12 +4,14 @@ import {
 	EconomicaClient,
 	EconomicaCommand,
 	EconomicaSlashCommandBuilder,
-	Context
+	Context,
+	AuthLevelTypes
 } from '../../structures';
 import {
 	getAuthLevel,
 	authors,
-	hyperlinks
+	hyperlinks,
+	removeAuthRole
 } from '../../util'
 
 export default class implements EconomicaCommand {
@@ -18,7 +20,7 @@ export default class implements EconomicaCommand {
 		.setDescription('Interact with the economy-permission roles')
 		.setGroup('utility')
 		.setFormat('<view | set | reset> [...options]')
-		.addEconomicaSubcommand(options => 
+		.addEconomicaSubcommand(options =>
 			options
 				.setName('view')
 				.setDescription('View the economy authority of roles.')
@@ -32,7 +34,7 @@ export default class implements EconomicaCommand {
 					option
 						.setName('role')
 						.setDescription('The target role to grant authority to.')
-						.setRequired(true)	
+						.setRequired(true)
 				)
 				.addIntegerOption(option =>
 					option
@@ -55,14 +57,14 @@ export default class implements EconomicaCommand {
 						.setRequired(true)
 				)
 		)
-	
+
 	execute = async ({ interaction }: Context) => {
 		const subcommand = interaction.options.getSubcommand()
 
 		if (subcommand == 'view') {
 			// Get the auth roles from db
 			const { auth } = await GuildModel.findOne({
-				guildID: interaction.guildId
+				guildId: interaction.guildId
 			})
 
 			const modRoles: string[] = []
@@ -91,24 +93,25 @@ export default class implements EconomicaCommand {
 						.setDescription('Running a server economy on your own is no easy task. Build and customize your economy team with Economica\'s authority utility!')
 						.addField('__Economy Mod__', 'Keep your economy safe and cheater-free!')
 						.addField('Description', `Economy mods can manage the economy blacklists (economy blacklist, loans blacklist, etc...)\n`, true)
-						.addField('Roles', `${modRoles.length? `\`${modRoles.join(', `')}\`\n` : 'No Authorized Roles\n'}`, true)
+						.addField('Roles', `${modRoles.length ? `\`${modRoles.join('`, `')}\`\n` : 'No Authorized Roles\n'}`, true)
 						.addField('__Economy Manager__', 'Update your economy with fresh new content!')
 						.addField('Description', `Economy managers can manage the economy as a whole (shop, users, inventories, etc...). They also have all the permissions of Economy Mods.\n`, true)
-						.addField('Roles', `${managerRoles.length? `\`${managerRoles.join(', \`')}\``: 'No Authorized roles\n*Note: Any user with a role called `Economy Manager` (caps insensitive) is automatically considered an economy manager.\n'}`, true)
+						.addField('Roles', `${managerRoles.length ? `\`${managerRoles.join('`, \`')}\`` : 'No Authorized roles\n*Note: Any user with a role called `Economy Manager` (caps insensitive) is automatically considered an economy manager.\n'}`, true)
 						.addField('__Economy Admin__', 'Lead your economy team!')
 						.addField('Description', `Economy Admins can do anything with regards to the economy (reset economy, manage economy ranks and permissions, etc...)\n`, true)
-						.addField('Roles', `${adminRoles.length? `\`${adminRoles.join(', `')}` : 'No Authorized Roles\n*Note: Any user with the `ADMINISTRATOR` permission is automatically considered an Economy Admin.\n'}`, true)
+						.addField('Roles', `${adminRoles.length ? `\`${adminRoles.join('`, `')}\`` : 'No Authorized Roles\n*Note: Any user with the `ADMINISTRATOR` permission is automatically considered an Economy Admin.\n'}`, true)
 				]
 			})
 		} else if (subcommand == 'set') {
 			const setAuthInt = interaction.options.getInteger('level')
-			const targetRole = interaction.options.getRole('role')
-
-			const { auth } = await GuildModel.findOne({
-				guildID: interaction.guild.id
-			})
+			const targetRole = interaction.options.getRole('role') as Role
 
 			const currentAuthLevel = await getAuthLevel(interaction.guild, targetRole)
+			console.log(currentAuthLevel)
+
+			let { auth } = await GuildModel.findOne({
+				guildId: interaction.guild.id
+			})
 
 			// Return this role's authority to base state (e.g remove it from guild authority)
 			if (!setAuthInt) {
@@ -123,11 +126,7 @@ export default class implements EconomicaCommand {
 						]
 					})
 				} else {
-					// Remove the role from authority level.
-					auth[currentAuthLevel].forEach(rId => {
-						if (rId == targetRole.id)
-							auth[currentAuthLevel].splice(auth[currentAuthLevel].indexOf(rId), 1)
-					})
+					await removeAuthRole(interaction.guild, targetRole)
 
 					return await interaction.reply({
 						embeds: [
@@ -141,13 +140,61 @@ export default class implements EconomicaCommand {
 				}
 			} else {
 				// Map integer auth value to string auth level
-				const setAuthLevel: string = {
-					1: 'mod',
-					2: 'manager',
-					3: 'admin'
+				const setAuthLevel: AuthLevelTypes = {
+					1: 'mod' as AuthLevelTypes,
+					2: 'manager' as AuthLevelTypes,
+					3: 'admin' as AuthLevelTypes
 				}[setAuthInt]
 
-				
+				if (currentAuthLevel == setAuthLevel) {
+					return await interaction.reply({
+						embeds: [
+							new MessageEmbed()
+								.setColor('YELLOW')
+								.setAuthor(authors.warning)
+								.setTitle('Utility:authority set')
+								.setDescription(`Role \`${targetRole.name}\` already has authority \`${setAuthLevel[0].toUpperCase() + setAuthLevel.substring(1)}\`\n\n${hyperlinks.insertAll()}`)
+						]
+					})
+				} else {
+					if (currentAuthLevel) {
+						await removeAuthRole(interaction.guild, targetRole)
+					}
+
+					auth = (await GuildModel.findOne({
+						guildId: interaction.guild.id
+					})).auth
+
+					if (auth) {
+						if (!auth[setAuthLevel].includes(targetRole.id))
+							auth[setAuthLevel].push(targetRole.id)
+					} else {
+						auth = {
+							mod: [],
+							manager: [],
+							admin: []
+						}
+						auth[setAuthLevel].push(targetRole.id)
+					}
+
+					await interaction.reply({
+						embeds: [
+							new MessageEmbed()
+								.setColor('GREEN')
+								.setAuthor(authors.success)
+								.setTitle('Utility:authority set')
+								.setDescription(`Role \`${targetRole.name}\` has been set to \`${setAuthLevel[0].toUpperCase() + setAuthLevel.substring(1)}\` from \`${currentAuthLevel}\`.\n\n${hyperlinks.insertAll()}`)
+						]
+					})
+
+					return await GuildModel.updateOne({
+						guildId: interaction.guildId
+					}, {
+						$set: {
+							auth
+						}
+					})
+				}
 			}
 		}
 	}

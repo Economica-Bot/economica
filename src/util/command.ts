@@ -1,4 +1,4 @@
-import { CommandInteraction, Guild, GuildMember, PermissionString, Role, TextChannel } from 'discord.js';
+import { CommandInteraction, Guild, GuildMember, MessageEmbed, PermissionString, Role, TextChannel } from 'discord.js';
 import {
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
@@ -8,6 +8,7 @@ import {
 import {
 	GuildModel
 } from '../models/index'
+import { authors, hyperlinks } from './common';
 
 export async function commandCheck(
 	interaction: CommandInteraction,
@@ -23,8 +24,11 @@ export async function commandCheck(
 		return false;
 	}
 
-	if (interaction.member && !(await permissionCheck(interaction, data))) {
-		interaction.reply({ content: 'Insufficient permissions.', ephemeral: true });
+	const permissionResponse = await permissionCheck(interaction, data)
+	if (interaction.member && !(permissionResponse.status)) {
+		interaction.reply({ embeds: [
+			permissionResponse.message
+		], ephemeral: true });
 		return false;
 	}
 
@@ -34,7 +38,10 @@ export async function commandCheck(
 const permissionCheck = async (
 	interaction: CommandInteraction,
 	data: EconomicaSlashCommandBuilder
-): Promise<boolean> => {
+): Promise<{
+	message?: MessageEmbed,
+	status: boolean
+}> => {
 	const member = interaction.member as GuildMember;
 	const guild = interaction.guild as Guild;
 	const clientMember = (await guild.members.fetch(interaction.client.user.id)) as GuildMember;
@@ -55,11 +62,13 @@ const permissionCheck = async (
 	let missingAuthority: 'mod' | 'admin' | 'manager' = null;
 
 	if (
-		process.env.OWNERId.includes(member.id) ||
+		process.env.OWNERID.includes(member.id) ||
 		interaction.guild.ownerId === member.id ||
 		member.permissions.has('MANAGE_GUILD')
 	) {
-		return true;
+		return {
+			status: true
+		};
 	}
 
 	if (data.userPermissions) userPermissions.push(...data.userPermissions);
@@ -72,6 +81,7 @@ const permissionCheck = async (
 	if (subcommand?.userPermissions) userPermissions.push(...subcommand.userPermissions);
 	if (subcommand?.clientPermissions) clientPermissions.push(...subcommand.clientPermissions);
 	if (subcommand?.roles) roles.push(...subcommand.roles);
+	if (subcommand?.authority) authority = subcommand.authority;
 
 	for (const permission of userPermissions)
 		if (!member.permissionsIn(channel).has(permission)) missingUserPermissions.push(permission);
@@ -90,7 +100,7 @@ const permissionCheck = async (
 	}
 	if (authority) {
 		const { auth } = await GuildModel.findOne({
-			guildID: interaction.guildId
+			guildId: interaction.guildId
 		})
 
 		const userRoles = member.roles.cache
@@ -100,7 +110,29 @@ const permissionCheck = async (
 			missingAuthority = authority
 	}
 
-	if (missingClientPermissions.length || missingUserPermissions.length || missingRoles.length || missingAuthority)
-		return false;
-	return true;
+	if (missingClientPermissions.length || missingUserPermissions.length || missingRoles.length || missingAuthority) {
+		let message = new MessageEmbed()
+			.setTitle('Insufficient Permissions')
+			.setColor('RED')
+			.setAuthor(authors.error)
+			.setDescription(hyperlinks.insertAll())
+
+		if (missingClientPermissions.length) 
+			message.addField('Missing Bot Permissions', `\`${missingClientPermissions.join('`, `')}\``)
+		if (missingUserPermissions.length)
+			message.addField('Missing User Permissions', `\`${missingUserPermissions.join('`, `')}\``)
+		if (missingRoles.length)
+			message.addField('Missing User Roles', `\`${missingRoles.join('`, `')}\``)
+		if (missingAuthority.length) {
+			message.addField('Missing User Economy Authority', `\`Economy ${missingAuthority[0].toUpperCase() + missingAuthority.substring(1)}\``)
+		}
+
+		return {
+			message,
+			status: false
+		}
+	}
+	return {
+		status: true
+	};
 };
