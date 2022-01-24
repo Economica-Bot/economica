@@ -3,7 +3,8 @@ import {
 	SlashCommandOptionsOnlyBuilder,
 	SlashCommandSubcommandsOnlyBuilder,
 } from '@discordjs/builders';
-import { CommandInteraction, PermissionString } from 'discord.js';
+import { PermissionString } from 'discord.js';
+import { Group } from '.';
 import { PermissionRole } from './CommandOptions';
 import {
 	EconomicaSlashCommandSubcommandBuilder,
@@ -11,7 +12,7 @@ import {
 } from './EconomicaSlashCommandSubcommands';
 
 export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
-	group: string;
+	group: Group;
 	format: string;
 	examples: string[];
 	userPermissions: PermissionString[];
@@ -27,7 +28,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	setGroup(group: string): this {
+	setGroup(group: Group): this {
 		this.group = group;
 		return this;
 	}

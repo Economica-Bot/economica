@@ -1,3 +1,12 @@
+export type Group =
+	| 'application'
+	| 'economy'
+	| 'income'
+	| 'moderation'
+	| 'shop'
+	| 'statistics'
+	| 'utility';
+
 export enum TransactionTypes {
 	Deposit = 'DEPOSIT',
 	Withdraw = 'WITHDRAW',
