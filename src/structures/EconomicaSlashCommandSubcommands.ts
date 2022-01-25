@@ -10,6 +10,7 @@ export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSub
 	userPermissions: PermissionString[];
 	clientPermissions: PermissionString[];
 	roles: PermissionRole[];
+	authority: AuthLevelTypes
 
 	setUserPermissions(userPermissions: PermissionString[]): this {
 		this.userPermissions = userPermissions;
@@ -23,6 +24,11 @@ export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSub
 
 	setRoles(roles: PermissionRole[]): this {
 		this.roles = roles;
+		return this;
+	}
+
+	setAuthority(authority: AuthLevelTypes): this {
+		this.authority = authority
 		return this;
 	}
 

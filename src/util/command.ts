@@ -26,9 +26,11 @@ export async function commandCheck(
 
 	const permissionResponse = await permissionCheck(interaction, data)
 	if (interaction.member && !(permissionResponse.status)) {
-		interaction.reply({ embeds: [
-			permissionResponse.message
-		], ephemeral: true });
+		interaction.reply({
+			embeds: [
+				permissionResponse.message
+			], ephemeral: true
+		});
 		return false;
 	}
 
@@ -61,7 +63,7 @@ const permissionCheck = async (
 	const missingRoles: PermissionRole[] = [];
 	let missingAuthority: 'mod' | 'admin' | 'manager' = null;
 
-	if (
+	/* if (
 		process.env.OWNERID.includes(member.id) ||
 		interaction.guild.ownerId === member.id ||
 		member.permissions.has('ADMINISTRATOR')
@@ -69,7 +71,7 @@ const permissionCheck = async (
 		return {
 			status: true
 		};
-	}
+	} */
 
 	if (data.userPermissions) userPermissions.push(...data.userPermissions);
 	if (data.clientPermissions) clientPermissions.push(...data.clientPermissions);
@@ -78,6 +80,7 @@ const permissionCheck = async (
 	if (group?.userPermissions) userPermissions.push(...group.userPermissions);
 	if (group?.clientPermissions) clientPermissions.push(...group.clientPermissions);
 	if (group?.roles) roles.push(...group.roles);
+	if (group?.authority) authority = group.authority;
 	if (subcommand?.userPermissions) userPermissions.push(...subcommand.userPermissions);
 	if (subcommand?.clientPermissions) clientPermissions.push(...subcommand.clientPermissions);
 	if (subcommand?.roles) roles.push(...subcommand.roles);
@@ -106,6 +109,15 @@ const permissionCheck = async (
 		const userRoles = member.roles.cache
 		const authorizedRoleIds = auth[authority]
 
+		if (authority == 'mod') {
+			// if authority is mod, also allow manager authority
+			authorizedRoleIds.push(...auth['manager'])
+		}
+
+		// allow admin authority no matter what, but do not overlap if they were already pushed
+		if (authority != 'admin')
+			authorizedRoleIds.push(...auth['admin'])
+
 		if (!(userRoles.hasAny(...authorizedRoleIds)))
 			missingAuthority = authority
 	}
@@ -117,7 +129,7 @@ const permissionCheck = async (
 			.setAuthor(authors.error)
 			.setDescription(hyperlinks.insertAll())
 
-		if (missingClientPermissions.length) 
+		if (missingClientPermissions.length)
 			message.addField('Missing Bot Permissions', `\`${missingClientPermissions.join('`, `')}\``)
 		if (missingUserPermissions.length)
 			message.addField('Missing User Permissions', `\`${missingUserPermissions.join('`, `')}\``)
