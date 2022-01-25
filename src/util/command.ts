@@ -63,7 +63,7 @@ const permissionCheck = async (
 	const missingRoles: PermissionRole[] = [];
 	let missingAuthority: 'mod' | 'admin' | 'manager' = null;
 
-	/* if (
+	if (
 		process.env.OWNERID.includes(member.id) ||
 		interaction.guild.ownerId === member.id ||
 		member.permissions.has('ADMINISTRATOR')
@@ -71,7 +71,7 @@ const permissionCheck = async (
 		return {
 			status: true
 		};
-	} */
+	}
 
 	if (data.userPermissions) userPermissions.push(...data.userPermissions);
 	if (data.clientPermissions) clientPermissions.push(...data.clientPermissions);
