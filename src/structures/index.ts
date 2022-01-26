@@ -12,8 +12,7 @@ export {
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from './EconomicaSlashCommandSubcommands';
 export { ModuleSetting, RoleSetting, ChannelSetting, CommandSetting } from './Settings';
-export { Group, TransactionTypes, InfractionTypes, GuildAuthData, BalanceTypes, AuthLevelTypes } from './Types';
-
+export { Group, TransactionTypes, InfractionTypes, BalanceTypes, Authority } from './Types';
 export {
 	CommandData,
 	InventoryItem,
@@ -31,6 +30,7 @@ export {
 	ReqInventoryItemArr,
 	ReqStringArr,
 	TransactionType,
-	GuildAuthDataObj,
+	RoleAuthority,
+	ReqRoleAuthorityArr,
 } from './Datatypes';
 export { PermissionRole } from './CommandOptions';

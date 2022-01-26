@@ -1,13 +1,19 @@
-import { CommandInteraction, Guild, GuildMember, MessageEmbed, PermissionString, Role, TextChannel } from 'discord.js';
 import {
+	CommandInteraction,
+	Guild,
+	GuildMember,
+	MessageEmbed,
+	PermissionString,
+	TextChannel,
+} from 'discord.js';
+import {
+	Authority,
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
 	PermissionRole,
 } from '../structures';
-import {
-	GuildModel
-} from '../models/index'
+import { GuildModel } from '../models';
 import { authors, hyperlinks } from './common';
 
 export async function commandCheck(
@@ -24,12 +30,11 @@ export async function commandCheck(
 		return false;
 	}
 
-	const permissionResponse = await permissionCheck(interaction, data)
-	if (interaction.member && !(permissionResponse.status)) {
+	const permissionResponse = await permissionCheck(interaction, data);
+	if (interaction.member && !permissionResponse.status) {
 		interaction.reply({
-			embeds: [
-				permissionResponse.message
-			], ephemeral: true
+			embeds: [permissionResponse.embed],
+			ephemeral: true,
 		});
 		return false;
 	}
@@ -41,8 +46,8 @@ const permissionCheck = async (
 	interaction: CommandInteraction,
 	data: EconomicaSlashCommandBuilder
 ): Promise<{
-	message?: MessageEmbed,
-	status: boolean
+	embed?: MessageEmbed;
+	status: boolean;
 }> => {
 	const member = interaction.member as GuildMember;
 	const guild = interaction.guild as Guild;
@@ -57,11 +62,10 @@ const permissionCheck = async (
 	const userPermissions: PermissionString[] = [];
 	const clientPermissions: PermissionString[] = [];
 	const roles: PermissionRole[] = [];
-	let authority: 'mod' | 'admin' | 'manager' = null;
 	const missingUserPermissions: PermissionString[] = [];
 	const missingClientPermissions: PermissionString[] = [];
 	const missingRoles: PermissionRole[] = [];
-	let missingAuthority: 'mod' | 'admin' | 'manager' = null;
+	let missingAuthority: Authority;
 
 	if (
 		process.env.OWNERID.includes(member.id) ||
@@ -69,82 +73,82 @@ const permissionCheck = async (
 		member.permissions.has('ADMINISTRATOR')
 	) {
 		return {
-			status: true
+			status: true,
 		};
 	}
 
+	const authority = subcommand.authority ?? group.authority ?? data.authority;
 	if (data.userPermissions) userPermissions.push(...data.userPermissions);
 	if (data.clientPermissions) clientPermissions.push(...data.clientPermissions);
 	if (data.roles) roles.push(...data.roles);
-	if (data.authority) authority = (data.authority);
 	if (group?.userPermissions) userPermissions.push(...group.userPermissions);
 	if (group?.clientPermissions) clientPermissions.push(...group.clientPermissions);
 	if (group?.roles) roles.push(...group.roles);
-	if (group?.authority) authority = group.authority;
 	if (subcommand?.userPermissions) userPermissions.push(...subcommand.userPermissions);
 	if (subcommand?.clientPermissions) clientPermissions.push(...subcommand.clientPermissions);
 	if (subcommand?.roles) roles.push(...subcommand.roles);
-	if (subcommand?.authority) authority = subcommand.authority;
 
 	for (const permission of userPermissions)
 		if (!member.permissionsIn(channel).has(permission)) missingUserPermissions.push(permission);
 	for (const permission of clientPermissions)
 		if (!clientMember.permissionsIn(channel).has(permission))
 			missingClientPermissions.push(permission);
+	await guild.roles.fetch();
 	for (const role of roles) {
-		const guildRole = (await guild.roles.fetch()).find(
+		const guildRole = guild.roles.cache.find(
 			(r) => r.name.toLowerCase() === role.name.toLowerCase()
 		);
-		if (!guildRole)
+		if (!guildRole) {
 			missingRoles.push(
 				new PermissionRole(`Please create an \`${role.name}\` role. Case insensitive.`, true)
 			);
-		else if (role.required && !member.roles.cache.has(guildRole.id)) missingRoles.push(role);
+		} else if (role.required && !member.roles.cache.has(guildRole.id)) missingRoles.push(role);
 	}
+
 	if (authority) {
 		const { auth } = await GuildModel.findOne({
-			guildId: interaction.guildId
-		})
+			guildId: interaction.guildId,
+		});
 
-		const userRoles = member.roles.cache
-		const authorizedRoleIds = auth[authority]
-
-		if (authority == 'mod') {
-			// if authority is mod, also allow manager authority
-			authorizedRoleIds.push(...auth['manager'])
+		const roleAuth = auth.filter(
+			(r) => r.authority === authority && member.roles.cache.has(r.roleId)
+		);
+		if (!roleAuth.length) {
+			missingAuthority = authority;
 		}
-
-		// allow admin authority no matter what, but do not overlap if they were already pushed
-		if (authority != 'admin')
-			authorizedRoleIds.push(...auth['admin'])
-
-		if (!(userRoles.hasAny(...authorizedRoleIds)))
-			missingAuthority = authority
 	}
 
-	if (missingClientPermissions.length || missingUserPermissions.length || missingRoles.length || missingAuthority) {
-		let message = new MessageEmbed()
+	if (
+		missingClientPermissions.length ||
+		missingUserPermissions.length ||
+		missingRoles.length ||
+		missingAuthority
+	) {
+		const embed = new MessageEmbed()
 			.setTitle('Insufficient Permissions')
 			.setColor('RED')
 			.setAuthor(authors.error)
-			.setDescription(hyperlinks.insertAll())
+			.setDescription(hyperlinks.insertAll());
 
 		if (missingClientPermissions.length)
-			message.addField('Missing Bot Permissions', `\`${missingClientPermissions.join('`, `')}\``)
+			embed.addField('Missing Bot Permissions', `\`${missingClientPermissions.join('`, `')}\``);
 		if (missingUserPermissions.length)
-			message.addField('Missing User Permissions', `\`${missingUserPermissions.join('`, `')}\``)
+			embed.addField('Missing User Permissions', `\`${missingUserPermissions.join('`, `')}\``);
 		if (missingRoles.length)
-			message.addField('Missing User Roles', `\`${missingRoles.join('`, `')}\``)
+			embed.addField('Missing User Roles', `\`${missingRoles.join('`, `')}\``);
 		if (missingAuthority.length) {
-			message.addField('Missing User Economy Authority', `\`Economy ${missingAuthority[0].toUpperCase() + missingAuthority.substring(1)}\``)
+			embed.addField(
+				'Missing User Economy Authority',
+				`\`Economy ${missingAuthority[0].toUpperCase() + missingAuthority.substring(1)}\``
+			);
 		}
 
 		return {
-			message,
-			status: false
-		}
+			embed,
+			status: false,
+		};
 	}
 	return {
-		status: true
+		status: true,
 	};
 };

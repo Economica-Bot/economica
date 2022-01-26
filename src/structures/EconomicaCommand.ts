@@ -1,7 +1,5 @@
-import { CommandInteraction } from 'discord.js';
 import { Context } from './Context';
 import {
-	EconomicaClient,
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandOptionsOnlyBuilder,
 	EconomicaSlashCommandSubcommandsOnlyBuilder,

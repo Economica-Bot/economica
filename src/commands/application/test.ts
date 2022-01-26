@@ -5,9 +5,10 @@ export default class implements EconomicaCommand {
 		.setName('test')
 		.setDescription('test command')
 		.setGroup('application')
-		.setDevOnly(true)
+		.setAuthority('mod')
 		.addEconomicaSubcommandGroup((subcommandgroup) =>
 			subcommandgroup
+				.setAuthority('manager')
 				.setName('test1group')
 				.setDescription('test1desc')
 				.addEconomicaSubcommand((subcommand) =>

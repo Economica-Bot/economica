@@ -1,4 +1,4 @@
-import { InfractionTypes } from '.';
+import { Authority, InfractionTypes } from '.';
 import { TransactionTypes } from './Types';
 
 export interface CommandData {
@@ -94,10 +94,12 @@ export interface IncomeCommandProperties {
 	maxFine: number;
 }
 
-export const GuildAuthDataObj = {
-	type: {
-		mod: Array<string>(),
-		manager: Array<string>(),
-		admin: Array<string>()
-	}
+export interface RoleAuthority {
+	roleId: string;
+	authority: Authority;
+}
+
+export const ReqRoleAuthorityArr = {
+	type: Array<RoleAuthority>(),
+	required: true,
 }

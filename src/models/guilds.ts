@@ -1,21 +1,12 @@
 import * as mongoose from 'mongoose';
-import {
-	ChannelSetting,
-	CommandSetting,
-	ModuleSetting,
-	RoleSetting,
-	ReqString,
-	ReqStringArr,
-	GuildAuthData,
-	GuildAuthDataObj
-} from '../structures/index';
+import { ReqString, RoleAuthority, ReqRoleAuthorityArr } from '../structures';
 
 export interface Guild {
 	guildId: string;
 	currency: string;
 	transactionLogChannel: string;
 	infractionLogChannel: string;
-	auth: GuildAuthData;
+	auth: Array<RoleAuthority>;
 }
 
 const Schema = new mongoose.Schema<Guild>(
@@ -24,7 +15,7 @@ const Schema = new mongoose.Schema<Guild>(
 		currency: ReqString,
 		transactionLogChannel: ReqString,
 		infractionLogChannel: ReqString,
-		auth: GuildAuthDataObj
+		auth: ReqRoleAuthorityArr,
 	},
 	{
 		strict: true,

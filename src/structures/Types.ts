@@ -42,11 +42,6 @@ export enum InfractionTypes {
 	Untimeout = 'moderation:UNTIMEOUT',
 }
 
-export interface GuildAuthData {
-	mod: string[];
-	manager: string[];
-	admin: string[];
-}
 export type BalanceTypes = 'wallet' | 'treasury' | 'total';
 
-export type AuthLevelTypes = 'mod' | 'manager' | 'admin' & string;
+export type Authority = 'user' | 'mod' | 'manager' | 'admin';

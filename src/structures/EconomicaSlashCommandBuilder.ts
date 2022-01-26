@@ -4,7 +4,7 @@ import {
 	SlashCommandSubcommandsOnlyBuilder,
 } from '@discordjs/builders';
 import { PermissionString } from 'discord.js';
-import { Group } from '.';
+import { Authority, Group } from '.';
 import { PermissionRole } from './CommandOptions';
 import {
 	EconomicaSlashCommandSubcommandBuilder,
@@ -21,7 +21,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	global: boolean = false;
 	devOnly: boolean = false;
 	enabled: boolean = true;
-	authority: 'mod' | 'manager' | 'admin' = null;
+	authority: Authority;
 
 	setGlobal(global: boolean): this {
 		this.global = global;
