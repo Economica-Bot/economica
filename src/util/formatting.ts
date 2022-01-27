@@ -4,9 +4,6 @@
  * @param link - The actual hyperlink destination.
  * @returns Hyperlink string.
  */
- export function insertHL(
-	text: string,
-	link: string
-): string {
-	return `[${text}](${link})`
+export function insertHL(text: string, link: string): string {
+	return `[${text}](${link})`;
 }

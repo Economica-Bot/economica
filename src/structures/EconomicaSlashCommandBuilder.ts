@@ -4,7 +4,8 @@ import {
 	SlashCommandSubcommandsOnlyBuilder,
 } from '@discordjs/builders';
 import { PermissionString } from 'discord.js';
-import { Authority, Group } from '.';
+
+import { Authority, GroupString } from '.';
 import { PermissionRole } from './CommandOptions';
 import {
 	EconomicaSlashCommandSubcommandBuilder,
@@ -12,7 +13,7 @@ import {
 } from './EconomicaSlashCommandSubcommands';
 
 export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
-	group: Group;
+	group: GroupString;
 	format: string;
 	examples: string[];
 	userPermissions: PermissionString[];
@@ -28,7 +29,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	setGroup(group: Group): this {
+	setGroup(group: GroupString): this {
 		this.group = group;
 		return this;
 	}
@@ -68,15 +69,13 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	setAuthority(level: 'mod' | 'manager' | 'admin'): this {
+	setAuthority(level: Authority): this {
 		this.authority = level;
 		return this;
 	}
 
 	addEconomicaSubcommandGroup(
-		input: (
-			subcommandGroup: EconomicaSlashCommandSubcommandGroupBuilder
-		) => EconomicaSlashCommandSubcommandGroupBuilder
+		input: (subcommandGroup: EconomicaSlashCommandSubcommandGroupBuilder) => EconomicaSlashCommandSubcommandGroupBuilder
 	): EconomicaSlashCommandSubcommandsOnlyBuilder {
 		const { options } = this;
 		const result = input(new EconomicaSlashCommandSubcommandGroupBuilder());
@@ -85,9 +84,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	}
 
 	addEconomicaSubcommand(
-		input: (
-			subcommandGroup: EconomicaSlashCommandSubcommandBuilder
-		) => EconomicaSlashCommandSubcommandBuilder
+		input: (subcommandGroup: EconomicaSlashCommandSubcommandBuilder) => EconomicaSlashCommandSubcommandBuilder
 	): EconomicaSlashCommandSubcommandsOnlyBuilder {
 		const { options } = this;
 		const result = input(new EconomicaSlashCommandSubcommandBuilder());
@@ -108,8 +105,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 				builder instanceof EconomicaSlashCommandSubcommandGroupBuilder &&
 				(builder.name === query ||
 					builder.options.find(
-						(subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) =>
-							subcommandbuilder.name === query
+						(subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) => subcommandbuilder.name === query
 					))
 			);
 		}) as EconomicaSlashCommandSubcommandGroupBuilder;
@@ -128,8 +124,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 			return (
 				(builder instanceof EconomicaSlashCommandSubcommandGroupBuilder &&
 					builder.options.find(
-						(subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) =>
-							subcommandbuilder.name === query
+						(subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) => subcommandbuilder.name === query
 					)) ||
 				(builder instanceof EconomicaSlashCommandSubcommandBuilder && builder.name === query)
 			);
@@ -138,8 +133,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		if (builder && builder instanceof EconomicaSlashCommandSubcommandGroupBuilder) {
 			return (
 				(builder.options.find(
-					(subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) =>
-						subcommandbuilder.name === query
+					(subcommandbuilder: EconomicaSlashCommandSubcommandBuilder) => subcommandbuilder.name === query
 				) as EconomicaSlashCommandSubcommandBuilder) ?? undefined
 			);
 		} else if (builder instanceof EconomicaSlashCommandSubcommandBuilder) {
@@ -163,14 +157,8 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 export interface EconomicaSlashCommandBuilder extends SlashCommandBuilder {}
 
 export interface EconomicaSlashCommandSubcommandsOnlyBuilder
-	extends Omit<
-			SlashCommandSubcommandsOnlyBuilder,
-			'toJSON' | 'addSubcommand' | 'addSubcommandGroup'
-		>,
-		Pick<
-			EconomicaSlashCommandBuilder,
-			'toJSON' | 'addEconomicaSubcommand' | 'addEconomicaSubcommandGroup'
-		> {}
+	extends Omit<SlashCommandSubcommandsOnlyBuilder, 'toJSON' | 'addSubcommand' | 'addSubcommandGroup'>,
+		Pick<EconomicaSlashCommandBuilder, 'toJSON' | 'addEconomicaSubcommand' | 'addEconomicaSubcommandGroup'> {}
 
 export interface EconomicaSlashCommandOptionsOnlyBuilder
 	extends Omit<SlashCommandOptionsOnlyBuilder, 'toJSON'>,

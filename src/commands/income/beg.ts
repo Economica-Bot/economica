@@ -1,11 +1,5 @@
-import { MessageEmbed } from 'discord.js';
-import * as config from '../../../config.json';
-import {
-	Context,
-	EconomicaCommand,
-	EconomicaSlashCommandBuilder,
-	TransactionTypes,
-} from '../../structures';
+import { economyDefaults } from '../../config';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 import { transaction } from '../../util/util';
 
 export default class implements EconomicaCommand {
@@ -16,41 +10,23 @@ export default class implements EconomicaCommand {
 		.setGlobal(false);
 
 	execute = async (ctx: Context) => {
-		const { min, max, chance } = config.commands.beg;
-		if (Math.random() * 100 > chance) {
-			const embed = new MessageEmbed()
-				.setColor('GOLD')
-				.setAuthor({
-					name: ctx.interaction.user.tag,
-					iconURL: ctx.interaction.user.displayAvatarURL(),
-				})
-				.setDescription('You begged and earned nothing :sad:');
-
-			return await ctx.interaction.reply({ embeds: [embed] });
-		}
-
+		const { currency } = ctx.guildDocument;
+		const { min, max, chance } = economyDefaults.beg;
 		const amount = Math.ceil(Math.random() * (max - min) + min);
+
+		if (Math.random() * 100 > chance) return await ctx.embedify('warn', 'user', 'You begged and earned nothing :cry:');
+
 		await transaction(
 			ctx.client,
 			ctx.interaction.guildId,
 			ctx.interaction.user.id,
 			ctx.client.user.id,
-			TransactionTypes.Beg,
+			'BEG',
 			amount,
 			0,
 			amount
 		);
 
-		const embed = new MessageEmbed()
-			.setColor('GOLD')
-			.setAuthor({
-				name: ctx.interaction.user.tag,
-				iconURL: ctx.interaction.user.displayAvatarURL(),
-			})
-			.setDescription(
-				`You begged and earned ${ctx.guildDocument.currency}${amount.toLocaleString()}`
-			);
-
-		await ctx.interaction.reply({ embeds: [embed] });
+		return await ctx.embedify('success', 'user', `You begged and earned ${currency}${amount.toLocaleString()}`);
 	};
 }

@@ -1,12 +1,12 @@
 import * as mongoose from 'mongoose';
-import { InfractionType } from '../structures/Datatypes';
-import { InfractionTypes, NonReqBoolean, NonReqNum, ReqString } from '../structures/index';
+
+import { InfractionString, NonReqBoolean, NonReqNum, ReqString } from '../structures';
 
 interface Infraction {
 	guildId: string;
 	userId: string;
 	agentId: string;
-	type: InfractionTypes;
+	type: InfractionString;
 	reason: string;
 	permanent: boolean;
 	active: boolean;
@@ -18,7 +18,7 @@ const Schema = new mongoose.Schema<Infraction>(
 		guildId: ReqString,
 		userId: ReqString,
 		agentId: ReqString,
-		type: InfractionType,
+		type: ReqString,
 		reason: ReqString,
 		permanent: NonReqBoolean,
 		active: NonReqBoolean,

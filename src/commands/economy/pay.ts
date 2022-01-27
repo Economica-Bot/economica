@@ -1,10 +1,6 @@
 import { parse_string } from '@adrastopoulos/number-parser';
-import {
-	Context,
-	EconomicaCommand,
-	EconomicaSlashCommandBuilder,
-	TransactionTypes,
-} from '../../structures';
+
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 import { getEconInfo, transaction } from '../../util/util';
 
 export default class implements EconomicaCommand {
@@ -15,12 +11,8 @@ export default class implements EconomicaCommand {
 		.setFormat('<user> <amount | all>')
 		.setExamples(['pay @Wumpus all', 'pay @JohnDoe 100'])
 		.setGlobal(false)
-		.addUserOption((option) =>
-			option.setName('user').setDescription('Specify a user').setRequired(true)
-		)
-		.addStringOption((option) =>
-			option.setName('amount').setDescription('Specify an amount').setRequired(true)
-		);
+		.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(true))
+		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true));
 
 	execute = async (ctx: Context) => {
 		const { currency } = ctx.guildDocument;
@@ -30,17 +22,10 @@ export default class implements EconomicaCommand {
 		const result = amount === 'all' ? wallet : parse_string(amount);
 
 		if (result) {
-			if (result < 1) {
-				return await ctx.interaction.reply(`Invalid amount: ${result}\nAmount less than 0`);
-			}
-
-			if (result > wallet) {
-				return await ctx.interaction.reply(
-					`Invalid amount: ${amount}\nExceeds current wallet:${currency}${wallet}`
-				);
-			}
+			if (result < 1) return await ctx.embedify('error', 'user', `Amount less than 0`);
+			if (result > wallet) return await ctx.embedify('error', 'user', `Exceeds current wallet:${currency}${wallet}`);
 		} else {
-			return await ctx.interaction.reply(`Invalid amount: \`${result}\``);
+			return await ctx.embedify('error', 'user', 'Please enter a valid amount.');
 		}
 
 		await transaction(
@@ -48,7 +33,7 @@ export default class implements EconomicaCommand {
 			ctx.interaction.guildId,
 			ctx.interaction.user.id,
 			ctx.interaction.user.id,
-			TransactionTypes.Give_Payment,
+			'GIVE_PAYMENT',
 			-result,
 			0,
 			-result
@@ -59,12 +44,12 @@ export default class implements EconomicaCommand {
 			ctx.interaction.guild.id,
 			user.id,
 			ctx.interaction.user.id,
-			TransactionTypes.Receive_Payment,
+			'RECEIVE_PAYMENT',
 			result,
 			0,
 			result
 		);
 
-		return await ctx.interaction.reply(`Paid <@!${user.id}> ${currency}${amount.toLocaleString()}`);
+		return await ctx.embedify('success', 'user', `Paid ${user} ${currency}${amount.toLocaleString()}`);
 	};
 }

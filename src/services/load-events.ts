@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+
 import { EconomicaClient, EconomicaService } from '../structures';
 
 export default class implements EconomicaService {

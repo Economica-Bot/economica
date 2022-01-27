@@ -1,4 +1,5 @@
 import { Guild, Role, RoleResolvable } from 'discord.js';
+
 import { GuildModel } from '../models';
 import { Authority, RoleAuthority } from '../structures';
 
@@ -23,10 +24,7 @@ export const getAuthLevel = async (guild: Guild, role: RoleResolvable): Promise<
  * @param {Role} - The Role object or id of the role whose authority level is to be returned
  * @returns guildAuthData
  */
-export const removeAuthRole = async (
-	guild: Guild,
-	role: RoleResolvable
-): Promise<RoleAuthority[]> => {
+export const removeAuthRole = async (guild: Guild, role: RoleResolvable): Promise<RoleAuthority[]> => {
 	if (role instanceof Role) role = role.id;
 	const guildDocument = await GuildModel.findOne({
 		guildId: guild.id,
@@ -42,11 +40,7 @@ export const removeAuthRole = async (
  * @param {Authority} auth
  * @returns Promise<RoleAuthority>
  */
-export const setAuthRole = async (
-	guild: Guild,
-	role: RoleResolvable,
-	auth: Authority
-): Promise<RoleAuthority> => {
+export const setAuthRole = async (guild: Guild, role: RoleResolvable, auth: Authority): Promise<RoleAuthority> => {
 	if (role instanceof Role) role = role.id;
 	const authority: RoleAuthority = { roleId: role, authority: auth };
 	const guildDocument = await GuildModel.findOne({ guildId: guild.id });

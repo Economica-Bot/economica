@@ -1,0 +1,23 @@
+{
+	"commands": {
+		"application": {
+			"register-commands": {
+				"guildNotFound": "Could not find guild with that id."
+			}
+		},
+		"utility": {
+			"ping": {
+				"author": {
+					"name": "Pong 🏓",
+					"iconURL": "{iconURL}"
+				},
+				"description": "Pong! `{ping}ms`"
+			}
+		}
+	},
+	"events": {
+		"transaction": {
+			
+		}
+	}
+}

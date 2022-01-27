@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { inviteOptions } from '../../config';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -10,15 +10,7 @@ export default class implements EconomicaCommand {
 		.setEnabled(false);
 
 	execute = async (ctx: Context) => {
-		return await ctx.interaction.reply({
-			embeds: [
-				new MessageEmbed()
-					.setColor('GOLD')
-					.setAuthor({ name: ctx.client.user.username, url: ctx.client.user.displayAvatarURL() })
-					.setDescription(
-						`Invite link: __[Click Here](${process.env.INVITE_LINK} 'Invite Economica')__`
-					),
-			],
-		});
+		const invite = await ctx.client.generateInvite(inviteOptions);
+		return await ctx.embedify('info', 'bot', `Invite link: __[Click Here](${invite} 'Invite Economica')__`);
 	};
 }

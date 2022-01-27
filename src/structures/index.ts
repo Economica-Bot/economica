@@ -11,13 +11,23 @@ export {
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from './EconomicaSlashCommandSubcommands';
-export { ModuleSetting, RoleSetting, ChannelSetting, CommandSetting } from './Settings';
-export { Group, TransactionTypes, InfractionTypes, BalanceTypes, Authority } from './Types';
+export {
+	GroupString,
+	ReplyString,
+	TitleString,
+	TransactionString,
+	InfractionString,
+	BalanceString,
+	Author,
+	Authority,
+} from './Types';
+
 export {
 	CommandData,
 	InventoryItem,
 	EconomyInfo,
 	IncomeCommandProperties,
+	RoleAuthority,
 	ReqString,
 	NonReqString,
 	ReqNum,
@@ -29,8 +39,6 @@ export {
 	ReqCommandDataArr,
 	ReqInventoryItemArr,
 	ReqStringArr,
-	TransactionType,
-	RoleAuthority,
 	ReqRoleAuthorityArr,
 } from './Datatypes';
 export { PermissionRole } from './CommandOptions';

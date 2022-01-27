@@ -6,11 +6,7 @@ export default class implements EconomicaCommand {
 		.setDescription('Manage the infraction logging channel.')
 		.setGroup('moderation')
 		.setFormat('<view | set | reset> [channel]')
-		.setExamples([
-			'infraction-log view',
-			'infraction-log set #infraction-logs',
-			'infraction-log reset',
-		])
+		.setExamples(['infraction-log view', 'infraction-log set #infraction-logs', 'infraction-log reset'])
 		.setGlobal(false)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand.setName('view').setDescription('View the infraction log channel.')
@@ -20,9 +16,7 @@ export default class implements EconomicaCommand {
 				.setName('set')
 				.setDescription('Set the infraction log channel.')
 				.setUserPermissions(['ADMINISTRATOR'])
-				.addChannelOption((option) =>
-					option.setName('channel').setDescription('Specify a channel').addChannelType(0)
-				)
+				.addChannelOption((option) => option.setName('channel').setDescription('Specify a channel').addChannelType(0))
 		)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
@@ -36,17 +30,17 @@ export default class implements EconomicaCommand {
 			case 'view':
 				const channelId = ctx.guildDocument.infractionLogChannel;
 				if (channelId) {
-					return await ctx.interaction.reply(`The current infraction log is <#${channelId}>`);
+					return await ctx.embedify('info', 'user', `The current infraction log is <#${channelId}>.`);
 				} else {
-					return await ctx.interaction.reply('There is no infraction log.');
+					return await ctx.embedify('info', 'user', 'There is no infraction log.');
 				}
 			case 'set':
 				const channel = ctx.interaction.options.getChannel('channel');
 				await ctx.guildDocument.update({ infractionLogChannel: channel.id });
-				return await ctx.interaction.reply(`Infraction log set to ${channel}`);
+				return await ctx.embedify('success', 'user', `Infraction log set to ${channel}.`);
 			case 'reset':
 				await ctx.guildDocument.update({ infractionLogChannel: null });
-				return await ctx.interaction.reply('Infraction log reset.');
+				return await ctx.embedify('success', 'user', 'Infraction log reset.');
 		}
 	};
 }

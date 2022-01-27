@@ -1,11 +1,7 @@
-import { MessageEmbed } from 'discord.js';
+import { Message, MessageEmbed } from 'discord.js';
+
 import { TransactionModel } from '../../models';
-import {
-	Context,
-	EconomicaClient,
-	EconomicaCommand,
-	EconomicaSlashCommandBuilder,
-} from '../../structures';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -17,9 +13,7 @@ export default class implements EconomicaCommand {
 			subcommand
 				.setName('balance')
 				.setDescription('View statistics for user balance.')
-				.addUserOption((option) =>
-					option.setName('user').setDescription('Specify a user.').setRequired(false)
-				)
+				.addUserOption((option) => option.setName('user').setDescription('Specify a user.').setRequired(false))
 		);
 
 	execute = async (ctx: Context) => {
@@ -164,16 +158,17 @@ export default class implements EconomicaCommand {
 				.setBackgroundColor('#2f3136');
 
 			const url = await chart.getShortUrl();
-			const embed = new MessageEmbed()
-				.setColor('GOLD')
-				.setAuthor({
+			const embed: MessageEmbed = await ctx.embedify(
+				'info',
+				{
 					name: 'Balance Statistics',
-					url: user?.displayAvatarURL() ?? ctx.interaction.guild.iconURL(),
-				})
-				.setDescription(`Total transactions: \`${transactions.length}\``)
-				.setImage(url)
-				.setFooter(url);
+					iconURL: user?.displayAvatarURL() ?? ctx.interaction.guild.iconURL(),
+				},
+				null,
+				false
+			);
 
+			embed.setImage(url);
 			await ctx.interaction.reply({ embeds: [embed] });
 		}
 	};

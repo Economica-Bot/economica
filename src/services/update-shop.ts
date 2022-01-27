@@ -1,5 +1,5 @@
-import { EconomicaClient, EconomicaService } from '../structures';
 import { ShopModel } from '../models';
+import { EconomicaClient, EconomicaService } from '../structures';
 
 export default class implements EconomicaService {
 	name = 'update-shop';

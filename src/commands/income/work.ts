@@ -1,11 +1,7 @@
 import { MessageEmbed } from 'discord.js';
-import * as config from '../../../config.json';
-import {
-	Context,
-	EconomicaCommand,
-	EconomicaSlashCommandBuilder,
-	TransactionTypes,
-} from '../../structures';
+
+import { economyDefaults } from '../../config';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 import { transaction } from '../../util/util';
 
 export default class implements EconomicaCommand {
@@ -16,14 +12,14 @@ export default class implements EconomicaCommand {
 		.setGlobal(false);
 
 	execute = async (ctx: Context) => {
-		const { min, max } = config.commands.work;
+		const { min, max } = economyDefaults.work;
 		const amount = Math.ceil(Math.random() * (max - min) + min);
 		await transaction(
 			ctx.client,
 			ctx.interaction.guildId,
 			ctx.interaction.user.id,
 			ctx.client.user.id,
-			TransactionTypes.Work,
+			'WORK',
 			amount,
 			0,
 			amount
@@ -35,9 +31,7 @@ export default class implements EconomicaCommand {
 				name: ctx.interaction.user.tag,
 				iconURL: ctx.interaction.user.displayAvatarURL(),
 			})
-			.setDescription(
-				`You worked and earned ${ctx.guildDocument.currency}${amount.toLocaleString()}`
-			);
+			.setDescription(`You worked and earned ${ctx.guildDocument.currency}${amount.toLocaleString()}`);
 
 		await ctx.interaction.reply({ embeds: [embed] });
 	};

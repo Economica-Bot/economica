@@ -1,12 +1,8 @@
-import { MessageEmbed } from 'discord.js';
 import { parse_number } from '@adrastopoulos/number-parser';
+import { MessageEmbed } from 'discord.js';
+
 import { MemberModel } from '../../models';
-import {
-	EconomicaCommand,
-	EconomicaSlashCommandBuilder,
-	BalanceTypes,
-	Context,
-} from '../../structures';
+import { BalanceString, Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 import { paginate } from '../../util/util';
 
 export default class implements EconomicaCommand {
@@ -32,19 +28,16 @@ export default class implements EconomicaCommand {
 			option.setName('page').setDescription('Specify a page.').setMinValue(1).setRequired(false)
 		);
 	execute = async (ctx: Context) => {
-		const type = ctx.interaction.options.getString('type') as BalanceTypes;
-		const page = ctx.interaction.options.getInteger('page') || 1;
+		const type = ctx.interaction.options.getString('type') as BalanceString;
+		const page = ctx.interaction.options.getInteger('page', false) ?? 1;
 		const { currency } = ctx.guildDocument;
-
-		const members = await MemberModel.find({ guildId: ctx.guildDocument.guildId }).sort({
-			[type]: -1,
-		});
+		const members = await MemberModel.find({ guildId: ctx.guildDocument.guildId }).sort({ [type]: -1 });
 
 		let entryCount = 10;
 		const pageCount = Math.ceil(members.length / entryCount);
 		const leaderBoardEntries: string[] = [];
 		let rank = 1;
-
+		
 		members.forEach((member) => {
 			const userId = member.userId;
 			const balance = parse_number(member[type]);

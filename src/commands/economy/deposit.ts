@@ -1,11 +1,6 @@
 import { parse_string } from '@adrastopoulos/number-parser';
-import { MessageEmbed } from 'discord.js';
-import {
-	Context,
-	EconomicaCommand,
-	EconomicaSlashCommandBuilder,
-	TransactionTypes,
-} from '../../structures';
+
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 import { getEconInfo, transaction } from '../../util/util';
 
 export default class implements EconomicaCommand {
@@ -16,9 +11,7 @@ export default class implements EconomicaCommand {
 		.setFormat('<amount | all>')
 		.setExamples(['deposit all', 'deposit 100'])
 		.setGlobal(false)
-		.addStringOption((option) =>
-			option.setName('amount').setDescription('Specify an amount').setRequired(true)
-		);
+		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true));
 
 	execute = async (ctx: Context) => {
 		const { currency } = ctx.guildDocument;
@@ -27,17 +20,11 @@ export default class implements EconomicaCommand {
 		const result = amount === 'all' ? wallet : parse_string(amount);
 
 		if (result) {
-			if (result < 1) {
-				return await ctx.interaction.reply(`Invalid amount: ${result}\nAmount less than 0`);
-			}
-
-			if (result > wallet) {
-				return await ctx.interaction.reply(
-					`Invalid amount: ${amount}\nExceeds current wallet:${currency}${wallet}`
-				);
-			}
+			if (result < 1) return await ctx.embedify('error', 'user', `Amount less than 0`);
+			if (result > wallet)
+				return await ctx.embedify('error', 'user', `Exceeds current wallet:${currency}${wallet.toLocaleString()}`);
 		} else {
-			return await ctx.interaction.reply(`Invalid amount: \`${result}\``);
+			return await ctx.embedify('error', 'user', 'Please enter a valid amount.');
 		}
 
 		await transaction(
@@ -45,20 +32,12 @@ export default class implements EconomicaCommand {
 			ctx.interaction.guildId,
 			ctx.interaction.user.id,
 			ctx.interaction.user.id,
-			TransactionTypes.Deposit,
+			'DEPOSIT',
 			-result,
 			result,
 			0
 		);
 
-		const embed = new MessageEmbed()
-			.setColor('GREEN')
-			.setAuthor({
-				name: ctx.interaction.user.username,
-				url: ctx.interaction.user.displayAvatarURL(),
-			})
-			.setDescription(`Deposited ${currency}${result.toLocaleString()}`);
-
-		return await ctx.interaction.reply({ embeds: [embed] });
+		return await ctx.embedify('success', 'user', `Deposited ${currency}${result.toLocaleString()}`);
 	};
 }

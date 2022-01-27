@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+
+import { MONGO_PATH } from '../config';
 import { EconomicaClient, EconomicaService } from '../structures';
 
 export default class implements EconomicaService {
@@ -11,6 +13,6 @@ export default class implements EconomicaService {
 			useFindAndModify: false,
 		};
 
-		await mongoose.connect(process.env.MONGOPATH, options);
+		await mongoose.connect(MONGO_PATH, options);
 	};
 }

@@ -1,9 +1,4 @@
-import {
-	Context,
-	EconomicaCommand,
-	EconomicaSlashCommandBuilder,
-	PermissionRole,
-} from '../../structures';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder, PermissionRole } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -11,11 +6,7 @@ export default class implements EconomicaCommand {
 		.setDescription('Manage the transaction logging channel.')
 		.setGroup('economy')
 		.setFormat('<view | set | reset> [channel]')
-		.setExamples([
-			'transaction-log view',
-			'transaction-log set @transaction-logs',
-			'transaction-log reset',
-		])
+		.setExamples(['transaction-log view', 'transaction-log set @transaction-logs', 'transaction-log reset'])
 		.setGlobal(false)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand.setName('view').setDescription('View the transaction log channel.')
@@ -25,9 +16,7 @@ export default class implements EconomicaCommand {
 				.setName('set')
 				.setDescription('Set the transaction log channel.')
 				.setRoles([new PermissionRole('ECONOMY MANAGER', true)])
-				.addChannelOption((option) =>
-					option.setName('channel').setDescription('Specify a channel').addChannelType(0)
-				)
+				.addChannelOption((option) => option.setName('channel').setDescription('Specify a channel').addChannelType(0))
 		)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
@@ -40,17 +29,17 @@ export default class implements EconomicaCommand {
 		if (subcommand === 'view') {
 			const channelId = ctx.guildDocument.transactionLogChannel;
 			if (channelId) {
-				return await ctx.interaction.reply(`The current transaction log is <#${channelId}>`);
+				return await ctx.embedify('info', 'user', `The current transaction log is <#${channelId}>.`);
 			} else {
-				return await ctx.interaction.reply('There is no transaction log.');
+				return await ctx.embedify('warn', 'user', 'There is no transaction log.');
 			}
 		} else if (subcommand === 'set') {
 			const channel = ctx.interaction.options.getChannel('channel');
 			await ctx.guildDocument.update({ transactionLogChannel: channel.id });
-			return await ctx.interaction.reply(`Transaction log set to ${channel}`);
+			return await ctx.embedify('success', 'user', `Transaction log set to ${channel}.`);
 		} else if (subcommand === 'reset') {
 			await ctx.guildDocument.update({ transactionLogChannel: null });
-			return await ctx.interaction.reply('Transaction log reset.');
+			return await ctx.embedify('success', 'user', 'Transaction log reset.');
 		}
 	};
 }

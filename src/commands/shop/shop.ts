@@ -1,229 +1,152 @@
-import { MessageEmbed } from 'discord.js';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures/index';
-import { ShopModel, GuildModel, MemberModel } from '../../models/index';
+import { EmbedFieldData, MessageEmbed } from 'discord.js';
+
+import { MemberModel, ShopModel } from '../../models';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 import * as util from '../../util/util';
-import { hyperlinks, authors } from '../../util/index';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('shop')
-		.setDescription('Interact with the server\'s shop.')
-		.setFormat('<view | clear>')
+		.setDescription("Interact with the server's shop.")
+		.setFormat('<view | clear | disable | delete> [...options]')
 		.setGroup('shop')
 		.setGlobal(false)
-		.addEconomicaSubcommand(subcommand =>
+		.addEconomicaSubcommand((subcommand) =>
 			subcommand
 				.setName('view')
-				.setDescription('View the items in the server\'s shop')
-				.addIntegerOption(options =>
-					options
-						.setName('page')
-						.setDescription('The page of the shop to view.')
-						.setRequired(false) // default: 1
+				.setDescription("View the items in the server's shop")
+				.addIntegerOption(
+					(options) => options.setName('page').setDescription('The page of the shop to view.').setRequired(false) // default: 1
 				)
 		)
-		.addEconomicaSubcommand(subcommand =>
+		.addEconomicaSubcommand((subcommand) =>
 			subcommand
-				.setName('clear')
-				.setDescription('Delete all items in the shop.')
-				.addNumberOption(options =>
-					options
-						.setName('confirm')
-						.setDescription('This action cannot be undone.')
-						.addChoice('Yes, delete all shop items forever.', 1)
-						.addChoice('No, keep our shop items.', 0)
-						.setRequired(true)
-				)
-				.addBooleanOption(options =>
-					options
-						.setName('remove_from_members')
-						.setDescription('Also remove all CURRENT shop items from members.')
-						.setRequired(false) // default: FALSE
+				.setName('enable')
+				.setDescription('Enable a shop item.')
+				.addStringOption((option) =>
+					option.setName('name').setDescription('Specify the name of the item.').setRequired(true)
 				)
 		)
+		.addEconomicaSubcommandGroup((subcommandgroup) =>
+			subcommandgroup
+				.setName('disable')
+				.setDescription('Disable shop items.')
+				.addEconomicaSubcommand((subcommand) =>
+					subcommand
+						.setName('single')
+						.setDescription('Disable a single shop item.')
+						.addStringOption((option) =>
+							option.setName('name').setDescription('Specify the name of the item.').setRequired(true)
+						)
+				)
+				.addEconomicaSubcommand((subcommand) => subcommand.setName('all').setDescription('Disable all shop items.'))
+		)
+		.addEconomicaSubcommandGroup((subcommandgroup) =>
+			subcommandgroup
+				.setName('delete')
+				.setDescription('Delete shop items.')
+				.addEconomicaSubcommand((subcommand) =>
+					subcommand
+						.setName('single')
+						.setDescription('Delete a single shop item.')
+						.addStringOption((option) =>
+							option.setName('name').setDescription('Specify the name of the item.').setRequired(true)
+						)
+				)
+				.addEconomicaSubcommand((subcommand) => subcommand.setName('all').setDescription('Delete all shop items.'))
+		);
 
-	execute = async ({ interaction }: Context): Promise<any> => {
-		const subcommand = interaction.options.getSubcommand();
+	execute = async (ctx: Context): Promise<any> => {
+		const { currency } = ctx.guildDocument;
+		const subcommand = ctx.interaction.options.getSubcommand();
+		const subcommandGroup = ctx.interaction.options.getSubcommandGroup(false);
+		const page = ctx.interaction.options.getInteger('page', false) ?? 1;
+		const name = ctx.interaction.options.getString('name', false);
 
-		// Array of shop items in this guild
-		const shop = await ShopModel.find({
-			guildID: interaction.guildId
-		});
+		const embeds: MessageEmbed[] = [];
+		const maxEntries = 15;
+		const shopEntries: EmbedFieldData[] = [];
+		const pageCount = Math.ceil(shopEntries.length / maxEntries) || 1;
+		const shop = await ShopModel.find({ guildId: ctx.interaction.guildId }).sort({ price: -1 });
 
-		// Order items by ascending price
-		shop.sort((a, b) => a.price - b.price)
+		if (subcommand === 'view') {
+			shop.forEach((item) => {
+				if (item.active) {
+					const field: EmbedFieldData = {
+						name: `${currency}${item.price ?? 'Free'} • ${item.name}`,
+						value: util.cut(item.description ?? 'An interesting item', 150) + `\nIn-stock: \`${item.stock ?? '∞'}\``,
+						inline: item.description?.length <= 75,
+					};
 
-		if (subcommand == 'view') {
-			// Whether there are items in the shop or not, these embed attributes will be constant
-			// Note: hence, changing these attributes will also affect the pages!
-			const page = new MessageEmbed()
-				.setAuthor({
-					name: interaction.guild.name,
-					iconURL: interaction.guild.iconURL()
-				})
-				.setColor('BLUE')
+					shopEntries.push(field);
+				}
+			});
 
-			// There are no items in the shop
-			if (!shop.length)
-				return await interaction.reply({
-					embeds: [
-						page
-							.setDescription(`There are currently no items in the ${interaction.guild.name} shop. Ask your economy manager to add some!`)
-							.setFooter({
-								text: 'Page 1 of 1'
-							})
-					]
-				})
-
-			// The currency symbol for prices
-			const { currency } = await GuildModel.findOne({
-				guildID: interaction.guildId
-			})
-			// The page number to display
-			const pageNumber = interaction.options.getInteger('page') ?? 1
-			// page[]
-			const embeds: MessageEmbed[] = []
-			// Max items on each page
-			const maxEntries = 15
-			// Collection of items to be displayed
-			const filteredEntries: any[] = []
-
-			shop.forEach(item => {
-				if (item.active)
-					filteredEntries.push(item)
-			})
-
-			// Total number of pages
-			const pageCount = Math.ceil(filteredEntries.length / maxEntries)
-
-			// Nested count
-			let c = 0
-
-			// Outer loop: contruct each page
+			let k = 0;
 			for (let i = 0; i < pageCount; i++) {
-				// Reset page info
-				page.setFields([])
-				page.setFooter({
-					text: `Page ${i + 1} of ${pageCount}`
-				})
-
-				// Inner loop: push each item to page
-				for (let j = 0; j < maxEntries; j++) {
-					// One individual Shop_Items document
-					const item = filteredEntries[c]
-
-					// No more items
-					if (!item)
-						break
-
-					page.setDescription(`There are currently \`${filteredEntries.length}\` items in the ${interaction.guild.name} shop.`)
-					//             Display item price and name                         Shortened description and stock                                                                    Inline if small desc.
-					page.addField(`${currency}${item.price ?? 'Free'} • ${item.name}`, util.cut(item.description ?? 'An interesting item', 150) + `\nIn-stock: \`${item.stock ?? '∞'}\``, item.description?.length <= 75)
-
-					c++
+				const embed = ctx.embedify(
+					'info',
+					'guild',
+					`There are \`${shopEntries.length}\` items in the shop.`,
+					false
+				) as MessageEmbed;
+				for (let j = 0; j < maxEntries; j++, j++) {
+					if (shopEntries[k]) {
+						//todo: replace with addField(EmbedFieldData) (not deprecated)
+						embed.addFields([shopEntries[k]]);
+					}
 				}
 
-				// Push completed page to page list
-				embeds.push(page)
+				embeds.push(embed);
 			}
 
-			// Unpaginated **
-			return interaction.options.getInteger('page') ? await interaction.reply({ embeds: [embeds[pageNumber - 1]] }) : await interaction.reply({ embeds })
+			await util.paginate(ctx.interaction, embeds, page - 1);
+		} else if (subcommand === 'enable') {
+			const shopItem = await ShopModel.findOneAndUpdate({ name }, { active: true });
+			if (!shopItem) {
+				return await ctx.embedify('error', 'user', 'Could not find an item with that name.');
+			}
 
-		} else if (subcommand == 'clear') {
-			// The user did not confirm the purge
-			if (!interaction.options.getNumber('confirm'))
-				return await interaction.reply({
-					embeds: [
-						new MessageEmbed()
-							.setColor('YELLOW')
-							.setAuthor(authors.abort)
-							.setTitle('Shop:shop clear')
-							.setDescription(`Shop clearing process was intentionally aborted because you did not confirm the data deletion. Be sure to select \`Yes\` on the \`confirm\` option if this was a mistake.\n\n${hyperlinks.insertAll()}`)
-					],
-					ephemeral: true
-				})
+			return await ctx.embedify('success', 'user', 'Item enabled.');
+		} else if (subcommandGroup === 'disable') {
+			if (subcommand === 'single') {
+				const shopItem = await ShopModel.findOneAndUpdate(
+					{ guildId: ctx.interaction.guildId, name },
+					{ active: false }
+				);
+				if (!shopItem) {
+					return await ctx.embedify('error', 'user', 'Could not find a shop item with that name.');
+				}
 
-			// The user confirmed the purge.
+				return await ctx.embedify('success', 'user', 'Item disabled.');
+			} else if (subcommand === 'all') {
+				const shopItems = await ShopModel.updateMany({ guildId: ctx.interaction.guildId }, { active: false });
+				return await ctx.embedify('success', 'user', `Enabled ${shopItems.nModified} shop items.`);
+			}
+		} else if (subcommandGroup === 'delete') {
+			if (subcommand === 'single') {
+				const shopItem = await ShopModel.deleteOne({ guildId: ctx.interaction.guildId, name });
+				if (!shopItem) {
+					return await ctx.embedify('error', 'user', 'Could not find a shop item with that name.');
+				}
 
-			// There are no items.
-			if (!shop.length)
-				return await interaction.reply({
-					embeds: [
-						new MessageEmbed()
-							.setColor('YELLOW')
-							.setAuthor(authors.abort)
-							.setTitle('Shop:shop clear')
-							.setDescription(`Shop clearing process was intentionally aborted because there are no items in the shop to clear.\n\n${hyperlinks.insertAll()}`)
-					]
-				})
-
-			// Clear all shop items from members' inventories.
-			if (interaction.options.getBoolean('remove_from_members')) {
-				// Counts
-				let deletedItems = 0
-
-				// Outer loop: clear all items in the shop.
-				shop.forEach(item => {
-					// Inner loop: clear item from all members in the guild.
-					interaction.guild.members.cache.forEach(async member => {
-						// The member's schema object.
-						const { inventory } = await MemberModel.findOne({
-							guildID: interaction.guildId,
-							userID: member.id
-						})
-
-						// Check if the member has the item in his inventory
-						inventory.forEach(async inventoryItem => {
-							// If so, delete it
-							if (inventoryItem.name == item.name) {
-								delete inventory[inventory.indexOf(inventoryItem)]
-
-								// And update the document
-								await MemberModel.updateOne({
-									guildID: interaction.guildId,
-									userID: member.id
-								}, {
-									inventory
-								})
-							}
-
-							deletedItems++
-						})
-
-						// Delete the item
-						await ShopModel.deleteOne({
-							guildID: interaction.guildId,
-							name: item.name
-						})
-					})
-				})
-
-				return await interaction.reply({
-					embeds: [
-						new MessageEmbed()
-							.setColor('GREEN')
-							.setAuthor(authors.success)
-							.setTitle('Shop:shop clear')
-							.setDescription(`• \`${shop.length}\` items were successfully deleted from the ${interaction.guild.name} shop by \`${interaction.user.tag}\`\n• \`${deletedItems}\` were removed from members' inventories by \`${interaction.user.tag}\`\n\n${hyperlinks.insertAll()}`)
-					]
-				})
-			} else {
-				// Clear all items in the shop
-				await ShopModel.deleteMany({
-					guildID: interaction.guildId
-				})
-
-				return await interaction.reply({
-					embeds: [
-						new MessageEmbed()
-							.setColor('GREEN')
-							.setAuthor(authors.success)
-							.setTitle('Shop:shop clear')
-							.setDescription(`\`${shop.length}\` items were successfully deleted from the ${interaction.guild.name} shop by \`${interaction.user.tag}\`\n\n${hyperlinks.insertAll()}`)
-					]
-				})
+				const updates = await MemberModel.updateMany(
+					{ guildId: ctx.interaction.guildId },
+					{ $pull: { inventory: { name } } }
+				);
+				return await ctx.embedify('success', 'user', `Item deleted. ${updates.nModified} removed from inventories.`);
+			} else if (subcommand === 'all') {
+				const shopItems = await ShopModel.deleteMany({ guildId: ctx.interaction.guildId });
+				const updates = await MemberModel.updateMany(
+					{ guildId: ctx.interaction.guildId },
+					{ $pull: { inventory: { name } } }
+				);
+				return await ctx.embedify(
+					'success',
+					'user',
+					`${shopItems.deletedCount} items deleted. ${updates.nModified} removed from inventories.`
+				);
 			}
 		}
-	}
+	};
 }

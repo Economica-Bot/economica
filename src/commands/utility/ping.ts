@@ -1,5 +1,5 @@
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures/index';
-import * as util from '../../util/util';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import i18n from '../../config';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -7,17 +7,11 @@ export default class implements EconomicaCommand {
 		.setDescription("Get Economica's latency.")
 		.setGroup('utility')
 		.setGlobal(true);
-
 	execute = async (ctx: Context) => {
-		await ctx.interaction.reply({
-			embeds: [
-				util.embedify(
-					'GREEN',
-					ctx.interaction.user.tag,
-					ctx.interaction.user.displayAvatarURL(),
-					`Pong! \`${ctx.client.ws.ping}ms\``
-				),
-			],
-		});
+		return await ctx.embedify(
+			'success',
+			'user',
+			i18n.__mf('commands.utility.ping.description', { ping: ctx.client.ws.ping })
+		);
 	};
 }

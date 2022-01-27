@@ -1,5 +1,5 @@
-import { EconomicaClient, EconomicaService, TransactionTypes } from '../structures';
 import { LoanModel } from '../models';
+import { EconomicaClient, EconomicaService } from '../structures';
 import * as util from '../util/util';
 
 export default class implements EconomicaService {
@@ -26,8 +26,8 @@ export default class implements EconomicaService {
 						client,
 						guildId,
 						borrowerId,
-						lenderId, 
-						TransactionTypes.Loan_Give_Repayment,
+						lenderId,
+						'LOAN_GIVE_REPAYMENT',
 						0,
 						-repayment,
 						-repayment
@@ -38,7 +38,7 @@ export default class implements EconomicaService {
 						guildId,
 						lenderId,
 						borrowerId,
-						TransactionTypes.Loan_Receive_Repayment,
+						'LOAN_RECEIVE_REPAYMENT',
 						0,
 						repayment,
 						repayment

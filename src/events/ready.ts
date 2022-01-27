@@ -1,4 +1,4 @@
-import { EconomicaClient } from '../structures/index';
+import { EconomicaClient } from '../structures';
 
 export const name = 'ready';
 

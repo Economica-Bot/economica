@@ -1,6 +1,5 @@
+import { economyDefaults } from '../../config';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-import * as config from '../../../config.json';
-import { Interaction, MessageEmbed } from 'discord.js';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -10,7 +9,7 @@ export default class implements EconomicaCommand {
 
 	execute = async (ctx: Context) => {
 		const description: string[] = [];
-		for (const [k, v] of Object.entries(config.commands)) {
+		for (const [k, v] of Object.entries(economyDefaults)) {
 			const desc = [];
 			for (const [k1, v1] of Object.entries(v)) {
 				desc.push(`\`${k1}: ${v1}\``);
@@ -18,14 +17,6 @@ export default class implements EconomicaCommand {
 			description.push(`**${k}**\n${desc.join('\n')}`);
 		}
 
-		const embed = new MessageEmbed()
-			.setColor('GOLD')
-			.setAuthor({
-				name: `${ctx.interaction.guild.name} Income Commands`,
-				iconURL: ctx.interaction.guild.iconURL(),
-			})
-			.setDescription(description.join('\n'));
-
-		return await ctx.interaction.reply({ embeds: [embed] });
+		return await ctx.embedify('info', 'guild', description.join('\n'));
 	};
 }

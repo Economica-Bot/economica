@@ -1,7 +1,9 @@
+import { Collection } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
-import { Collection } from 'discord.js';
-import { EconomicaClient, EconomicaCommand, EconomicaService } from '../structures/index';
+import { DEVELOPMENT_GUILD } from '../config';
+
+import { EconomicaClient, EconomicaService } from '../structures';
 
 export default class implements EconomicaService {
 	name = 'register-commands';
@@ -17,9 +19,7 @@ export default class implements EconomicaService {
 				.filter((f: string) => f.endsWith('ts'));
 
 			for (const commandFile of commandFiles) {
-				const command = new (
-					await import(`../commands/${commandDirectory}/${commandFile}`)
-				).default();
+				const command = new (await import(`../commands/${commandDirectory}/${commandFile}`)).default();
 
 				if (!command.data.group) {
 					throw new Error(`Command ${command.data.name} missing group!`);
@@ -32,7 +32,10 @@ export default class implements EconomicaService {
 		}
 
 		client.once('ready', async () => {
-			await (await client.guilds.fetch(process.env.GUILD_ID)).commands.set(commands);
+			DEVELOPMENT_GUILD.forEach(async (guildId) => {
+				const guild = await client.guilds.fetch(guildId);
+				await guild.commands.set(commands);
+			});
 			//await client.commands.set(commands); //Global
 		});
 

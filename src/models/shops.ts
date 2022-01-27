@@ -1,5 +1,6 @@
 import * as mongoose from 'mongoose';
-import { ReqBoolean, ReqDate, ReqNum, ReqString, ReqStringArr } from '../structures/index';
+
+import { ReqBoolean, ReqDate, ReqNum, ReqString, ReqStringArr } from '../structures';
 
 interface Shop {
 	guildId: string;

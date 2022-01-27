@@ -1,5 +1,4 @@
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures/index';
-import { embedify } from '../../util/util';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -11,15 +10,6 @@ export default class implements EconomicaCommand {
 		await ctx.interaction.deferReply({ ephemeral: true });
 		await ctx.interaction.guild.commands.set([]);
 		await ctx.client.application.commands.set([]);
-		await ctx.interaction.editReply({
-			embeds: [
-				embedify(
-					'GREEN',
-					ctx.interaction.user.username,
-					ctx.interaction.user.avatarURL(),
-					'`RESET ALL SLASH COMMANDS`'
-				),
-			],
-		});
+		return await ctx.embedify('success', 'bot', '`Reset all slash commands.`');
 	};
 }

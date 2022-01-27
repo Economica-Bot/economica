@@ -1,5 +1,4 @@
-import { Authority, InfractionTypes } from '.';
-import { TransactionTypes } from './Types';
+import { Authority } from '.';
 
 export interface CommandData {
 	command: string;
@@ -65,16 +64,6 @@ export const ReqInventoryItemArr = {
 
 export const ReqStringArr = {
 	type: Array<string>(),
-	required: true,
-};
-
-export const TransactionType = {
-	type: TransactionTypes,
-	required: true,
-};
-
-export const InfractionType = {
-	type: InfractionTypes,
 	required: true,
 };
 

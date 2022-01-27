@@ -1,8 +1,6 @@
-import {
-	SlashCommandSubcommandBuilder,
-	SlashCommandSubcommandGroupBuilder,
-} from '@discordjs/builders';
+import { SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from '@discordjs/builders';
 import { PermissionString } from 'discord.js';
+
 import { Authority, PermissionRole } from '.';
 
 export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSubcommandGroupBuilder {
@@ -32,9 +30,7 @@ export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSub
 	}
 
 	addEconomicaSubcommand(
-		input: (
-			subcommandGroup: EconomicaSlashCommandSubcommandBuilder
-		) => EconomicaSlashCommandSubcommandBuilder
+		input: (subcommandGroup: EconomicaSlashCommandSubcommandBuilder) => EconomicaSlashCommandSubcommandBuilder
 	): this {
 		const { options } = this;
 		const result = input(new EconomicaSlashCommandSubcommandBuilder());
@@ -52,8 +48,7 @@ export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSub
 	}
 }
 
-export interface EconomicaSlashCommandSubcommandGroupBuilder
-	extends SlashCommandSubcommandGroupBuilder {}
+export interface EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSubcommandGroupBuilder {}
 
 export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcommandBuilder {
 	format: string;

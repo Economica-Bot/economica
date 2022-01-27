@@ -1,11 +1,11 @@
-import { Context } from './Context';
 import {
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandOptionsOnlyBuilder,
-	EconomicaSlashCommandSubcommandsOnlyBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
-} from './index';
+	EconomicaSlashCommandSubcommandsOnlyBuilder,
+} from '.';
+import { Context } from './Context';
 
 export class EconomicaCommand {
 	data:

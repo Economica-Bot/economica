@@ -1,11 +1,6 @@
+import { CURRENCY } from '../../config';
 import { GuildModel } from '../../models';
-import {
-	Context,
-	EconomicaCommand,
-	EconomicaSlashCommandBuilder,
-	PermissionRole,
-} from '../../structures';
-import config from '../../../config.json';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder, PermissionRole } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -22,9 +17,7 @@ export default class implements EconomicaCommand {
 				.setName('set')
 				.setDescription('Set the currency symbol')
 				.setRoles([new PermissionRole('ECONOMY MANAGER', true)])
-				.addStringOption((option) =>
-					option.setName('currency').setDescription('Specify a symbol.').setRequired(true)
-				)
+				.addStringOption((option) => option.setName('currency').setDescription('Specify a symbol.').setRequired(true))
 		)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
@@ -38,15 +31,14 @@ export default class implements EconomicaCommand {
 		const guildId = ctx.interaction.guildId;
 		const { currency } = ctx.guildDocument;
 		if (subcommand === 'view') {
-			return await ctx.interaction.reply(`Currency symbol: ${currency}`);
+			return await ctx.embedify('success', 'guild', `Currency symbol: ${currency}`);
 		} else if (subcommand === 'set') {
 			const newCurrency = ctx.interaction.options.getString('currency');
 			await GuildModel.findOneAndUpdate({ guildId }, { currency: newCurrency });
-			return await ctx.interaction.reply(`Currency symbol set to ${newCurrency}`);
+			return await ctx.embedify('success', 'guild', `Currency symbol set to ${newCurrency}`);
 		} else if (subcommand === 'reset') {
-			const currency = config.cSymbol;
-			await GuildModel.findOneAndUpdate({ guildId }, { currency });
-			return await ctx.interaction.reply(`Currency symbol reset: ${currency}`);
+			await GuildModel.findOneAndUpdate({ guildId }, { currency: CURRENCY });
+			return await ctx.embedify('success', 'guild', `Currency symbol reset: ${currency}`);
 		}
 	};
 }

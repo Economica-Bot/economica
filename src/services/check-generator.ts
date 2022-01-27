@@ -1,5 +1,5 @@
+import { MemberModel, ShopModel } from '../models';
 import { EconomicaClient, EconomicaService } from '../structures';
-import { ShopModel, MemberModel } from '../models';
 
 export default class implements EconomicaService {
 	name = 'check-generator';

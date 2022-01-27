@@ -4,7 +4,7 @@ import {
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
-} from '../../structures/index';
+} from '../../structures';
 import { embedify } from '../../util/util';
 
 export default class implements EconomicaCommand {
@@ -13,9 +13,7 @@ export default class implements EconomicaCommand {
 		.setDescription('See the permissions of a command.')
 		.setGroup('utility')
 		.setFormat('<command>')
-		.addStringOption((option) =>
-			option.setName('command').setDescription('Specify a command.').setRequired(true)
-		);
+		.addStringOption((option) => option.setName('command').setDescription('Specify a command.').setRequired(true));
 
 	execute = async (ctx: Context) => {
 		const commandInput = ctx.interaction.options.getString('command');
@@ -33,37 +31,25 @@ export default class implements EconomicaCommand {
 		}\`\n\n`;
 
 		if (data.getSubcommandGroup()) {
-			(data.getSubcommandGroup() as EconomicaSlashCommandSubcommandGroupBuilder[]).forEach(
-				(subcommandGroupData) => {
-					description += `**${
-						subcommandGroupData.name
-					} Subcommand Group Permissions**\n__User Permissions:__\n\`${
-						subcommandGroupData.userPermissions ?? '`None`'
-					}\`\n__Client Permissions:__\n\`${
-						subcommandGroupData.clientPermissions ?? '`None`'
-					}\`\n__Roles:__\n\`${subcommandGroupData.roles ?? '`None`'}\`\n\n`;
-				}
-			);
+			(data.getSubcommandGroup() as EconomicaSlashCommandSubcommandGroupBuilder[]).forEach((subcommandGroupData) => {
+				description += `**${subcommandGroupData.name} Subcommand Group Permissions**\n__User Permissions:__\n\`${
+					subcommandGroupData.userPermissions ?? '`None`'
+				}\`\n__Client Permissions:__\n\`${subcommandGroupData.clientPermissions ?? '`None`'}\`\n__Roles:__\n\`${
+					subcommandGroupData.roles ?? '`None`'
+				}\`\n\n`;
+			});
 		}
 
 		if (data.getSubcommand()) {
-			(data.getSubcommand() as EconomicaSlashCommandSubcommandBuilder[]).forEach(
-				(subcommandData) => {
-					description += `**${
-						subcommandData.name
-					} Subcommand Permissions**\n__User Permissions:__\n\`${
-						subcommandData.userPermissions ?? '`None`'
-					}\`\n__Client Permissions:__\n\`${
-						subcommandData.clientPermissions ?? '`None`'
-					}\`\n__Roles:__\n\`${subcommandData.roles ?? '`None`'}\`\n\n`;
-				}
-			);
+			(data.getSubcommand() as EconomicaSlashCommandSubcommandBuilder[]).forEach((subcommandData) => {
+				description += `**${subcommandData.name} Subcommand Permissions**\n__User Permissions:__\n\`${
+					subcommandData.userPermissions ?? '`None`'
+				}\`\n__Client Permissions:__\n\`${subcommandData.clientPermissions ?? '`None`'}\`\n__Roles:__\n\`${
+					subcommandData.roles ?? '`None`'
+				}\`\n\n`;
+			});
 		}
 
-		return await ctx.interaction.reply({
-			embeds: [
-				embedify('BLUE', `Permission Hierarchy for ${command.data.name}`, null, description),
-			],
-		});
+		return await ctx.embedify('info', 'bot', description);
 	};
 }

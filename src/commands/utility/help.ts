@@ -1,8 +1,6 @@
-import {
-	SlashCommandSubcommandBuilder,
-	SlashCommandSubcommandGroupBuilder,
-} from '@discordjs/builders';
+import { SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from '@discordjs/builders';
 import { MessageEmbed } from 'discord.js';
+
 import {
 	Context,
 	EconomicaCommand,
@@ -14,18 +12,13 @@ import {
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('help')
-		.setDescription(
-			'List commands, or information about a command group, command, subcommand group, or subcommand.'
-		)
+		.setDescription('List commands, or information about a command group, command, subcommand group, or subcommand.')
 		.setGroup('utility')
 		.setFormat('[command]')
 		.setExamples(['help', 'help ban'])
 		.setGlobal(true)
 		.addStringOption((option) =>
-			option
-				.setName('query')
-				.setDescription('Specify a group, command, or subcommand.')
-				.setRequired(false)
+			option.setName('query').setDescription('Specify a group, command, or subcommand.').setRequired(false)
 		);
 
 	execute = async (ctx: Context) => {
@@ -41,12 +34,7 @@ export default class implements EconomicaCommand {
 				commands.push(data);
 			});
 
-			const embed = new MessageEmbed()
-				.setAuthor({
-					name: `${ctx.client.user.username} Commands`,
-					iconURL: ctx.client.user.displayAvatarURL(),
-				})
-				.setColor('YELLOW');
+			const embed: MessageEmbed = await ctx.embedify('info', 'guild', 'Command List.', false);
 
 			for (const group of groups) {
 				const list: string[] = [];
@@ -70,10 +58,7 @@ export default class implements EconomicaCommand {
 		const subcommandGroup = (
 			ctx.client.commands.find((command) => {
 				const data = command.data as EconomicaSlashCommandBuilder;
-				return (
-					data.getSubcommand(subcommand?.name) !== undefined ||
-					data.getSubcommandGroup(query) !== undefined
-				);
+				return data.getSubcommand(subcommand?.name) !== undefined || data.getSubcommandGroup(query) !== undefined;
 			})?.data as EconomicaSlashCommandBuilder
 		)?.getSubcommandGroup(subcommand?.name || query) as EconomicaSlashCommandSubcommandGroupBuilder;
 
@@ -97,19 +82,11 @@ export default class implements EconomicaCommand {
 		})?.data as EconomicaSlashCommandBuilder;
 
 		if (group && !command) {
-			const embed = new MessageEmbed()
-				.setAuthor({
-					name: `${group}`,
-					iconURL: ctx.client.user.displayAvatarURL(),
-				})
-				.setColor('YELLOW');
+			const embed: MessageEmbed = await ctx.embedify('info', 'user', null, false)
 			for (const command of ctx.client.commands) {
 				const data = command[1].data as EconomicaSlashCommandBuilder;
 				if (data.group === group) {
-					embed.addField(
-						data.name,
-						`>>> *${data.description}* \n${data.format ? `Format: \`${data.format}\`` : ''}`
-					);
+					embed.addField(data.name, `>>> *${data.description}* \n${data.format ? `Format: \`${data.format}\`` : ''}`);
 				}
 			}
 
@@ -158,9 +135,7 @@ export default class implements EconomicaCommand {
 			for (const subcommand of subcommandGroup.options as EconomicaSlashCommandSubcommandBuilder[]) {
 				embed.addField(
 					subcommand.name,
-					`> *${subcommand.description}* \n${
-						subcommand.format ? `Format: \`${subcommand.format}\`` : ''
-					}`
+					`> *${subcommand.description}* \n${subcommand.format ? `Format: \`${subcommand.format}\`` : ''}`
 				);
 			}
 
@@ -177,11 +152,7 @@ export default class implements EconomicaCommand {
 				.setColor('YELLOW')
 				.setDescription(subcommand.description)
 				.addField('Format', subcommand.format ? `\`${subcommand.format}\`` : 'None', true)
-				.addField(
-					'Examples',
-					subcommand.examples ? `\`${subcommand.examples.join('`\n`')}\`` : 'None',
-					true
-				);
+				.addField('Examples', subcommand.examples ? `\`${subcommand.examples.join('`\n`')}\`` : 'None', true);
 
 			return await ctx.interaction.reply({ embeds: [embed] });
 		}

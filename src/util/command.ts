@@ -1,11 +1,6 @@
-import {
-	CommandInteraction,
-	Guild,
-	GuildMember,
-	MessageEmbed,
-	PermissionString,
-	TextChannel,
-} from 'discord.js';
+import { OWNERS } from '../config';
+import { GuildModel } from '../models';
+import { CommandInteraction, Guild, GuildMember, MessageEmbed, PermissionString, TextChannel } from 'discord.js';
 import {
 	Authority,
 	EconomicaSlashCommandBuilder,
@@ -13,14 +8,13 @@ import {
 	EconomicaSlashCommandSubcommandGroupBuilder,
 	PermissionRole,
 } from '../structures';
-import { GuildModel } from '../models';
-import { authors, hyperlinks } from './common';
+import { authors, hyperlinks } from '.';
 
 export async function commandCheck(
 	interaction: CommandInteraction,
 	data: EconomicaSlashCommandBuilder
 ): Promise<boolean> {
-	if (data.devOnly && !process.env.OWNERID.includes(interaction.user.id)) {
+	if (data.devOnly && !OWNERS.includes(interaction.user.id)) {
 		interaction.reply({ content: 'This command is dev only.', ephemeral: true });
 		return false;
 	}
@@ -67,14 +61,8 @@ const permissionCheck = async (
 	const missingRoles: PermissionRole[] = [];
 	let missingAuthority: Authority;
 
-	if (
-		process.env.OWNERID.includes(member.id) ||
-		interaction.guild.ownerId === member.id ||
-		member.permissions.has('ADMINISTRATOR')
-	) {
-		return {
-			status: true,
-		};
+	if (OWNERS.includes(member.id) || interaction.guild.ownerId === member.id || member.permissions.has('MANAGE_GUILD')) {
+		return { status: true };
 	}
 
 	const authority = subcommand.authority ?? group.authority ?? data.authority;
@@ -91,39 +79,21 @@ const permissionCheck = async (
 	for (const permission of userPermissions)
 		if (!member.permissionsIn(channel).has(permission)) missingUserPermissions.push(permission);
 	for (const permission of clientPermissions)
-		if (!clientMember.permissionsIn(channel).has(permission))
-			missingClientPermissions.push(permission);
-	await guild.roles.fetch();
+		if (!clientMember.permissionsIn(channel).has(permission)) missingClientPermissions.push(permission);
 	for (const role of roles) {
-		const guildRole = guild.roles.cache.find(
-			(r) => r.name.toLowerCase() === role.name.toLowerCase()
-		);
-		if (!guildRole) {
-			missingRoles.push(
-				new PermissionRole(`Please create an \`${role.name}\` role. Case insensitive.`, true)
-			);
-		} else if (role.required && !member.roles.cache.has(guildRole.id)) missingRoles.push(role);
+		const guildRole = (await guild.roles.fetch()).find((r) => r.name.toLowerCase() === role.name.toLowerCase());
+		if (!guildRole)
+			missingRoles.push(new PermissionRole(`Please create an \`${role.name}\` role. Case insensitive.`, true));
+		else if (role.required && !member.roles.cache.has(guildRole.id)) missingRoles.push(role);
 	}
 
 	if (authority) {
-		const { auth } = await GuildModel.findOne({
-			guildId: interaction.guildId,
-		});
-
-		const roleAuth = auth.filter(
-			(r) => r.authority === authority && member.roles.cache.has(r.roleId)
-		);
-		if (!roleAuth.length) {
-			missingAuthority = authority;
-		}
+		const { auth } = await GuildModel.findOne({ guildId: interaction.guildId });
+		const roleAuth = auth.filter((r) => r.authority === authority && member.roles.cache.has(r.roleId));
+		if (!roleAuth.length) missingAuthority = authority;
 	}
 
-	if (
-		missingClientPermissions.length ||
-		missingUserPermissions.length ||
-		missingRoles.length ||
-		missingAuthority
-	) {
+	if (missingClientPermissions.length || missingUserPermissions.length || missingRoles.length || missingAuthority) {
 		const embed = new MessageEmbed()
 			.setTitle('Insufficient Permissions')
 			.setColor('RED')
@@ -134,8 +104,7 @@ const permissionCheck = async (
 			embed.addField('Missing Bot Permissions', `\`${missingClientPermissions.join('`, `')}\``);
 		if (missingUserPermissions.length)
 			embed.addField('Missing User Permissions', `\`${missingUserPermissions.join('`, `')}\``);
-		if (missingRoles.length)
-			embed.addField('Missing User Roles', `\`${missingRoles.join('`, `')}\``);
+		if (missingRoles.length) embed.addField('Missing User Roles', `\`${missingRoles.join('`, `')}\``);
 		if (missingAuthority.length) {
 			embed.addField(
 				'Missing User Economy Authority',

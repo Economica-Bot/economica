@@ -11,23 +11,19 @@ export default class implements EconomicaCommand {
 			subcommand
 				.setName('guild')
 				.setDescription('Refresh server commands.')
-				.addStringOption((option) =>
-					option.setName('guild_id').setDescription('Specify a server id').setRequired(true)
-				)
+				.addStringOption((option) => option.setName('guild_id').setDescription('Specify a server id').setRequired(true))
 		)
-		.addEconomicaSubcommand((subcommand) =>
-			subcommand.setName('global').setDescription('Refresh global commands.')
-		);
+		.addEconomicaSubcommand((subcommand) => subcommand.setName('global').setDescription('Refresh global commands.'));
 
 	execute = async (ctx: Context) => {
 		await ctx.interaction.deferReply({ ephemeral: true });
-		const guild_id = ctx.interaction.options.getString('guild_id');
+		const guildId = ctx.interaction.options.getString('guild_id');
 		const global = ctx.interaction.options.getSubcommand() === 'global' ? true : false;
-		if (!(await ctx.client.guilds.fetch()).has(guild_id)) {
-			return await ctx.interaction.editReply(`Could not find guild with Id \`${guild_id}\``);
+		if (!(await ctx.client.guilds.fetch()).has(guildId)) {
+			return await ctx.embedify('error', 'user', 'Could not find guild with that id.');
 		}
 
-		await new registerCommands().execute(ctx.client, guild_id, global);
-		return await ctx.interaction.editReply('Commands refreshed.');
+		await new registerCommands().execute(ctx.client, guildId, global);
+		return await ctx.embedify('success', 'bot', 'Commands refreshed.');
 	};
 }

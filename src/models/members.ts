@@ -1,12 +1,6 @@
 import * as mongoose from 'mongoose';
-import {
-	CommandData,
-	InventoryItem,
-	ReqCommandDataArr,
-	ReqInventoryItemArr,
-	ReqNum,
-	ReqString,
-} from '../structures/index';
+
+import { CommandData, InventoryItem, ReqCommandDataArr, ReqInventoryItemArr, ReqNum, ReqString } from '../structures';
 
 interface Member {
 	guildId: string;

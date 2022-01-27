@@ -1,5 +1,6 @@
 import * as mongoose from 'mongoose';
-import { ReqBoolean, ReqDate, ReqNum, ReqString } from '../structures/index';
+
+import { ReqBoolean, ReqDate, ReqNum, ReqString } from '../structures';
 
 interface Loan {
 	guildId: string;

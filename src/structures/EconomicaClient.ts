@@ -1,4 +1,5 @@
 import { Client, ClientOptions, Collection } from 'discord.js';
+
 import { EconomicaCommand } from './EconomicaCommand';
 
 export class EconomicaClient extends Client {

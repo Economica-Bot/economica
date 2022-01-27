@@ -1,20 +1,14 @@
-const config = require('../../config.json');
 import * as Discord from 'discord.js';
-import {
-	GuildModel,
-	InfractionModel,
-	LoanModel,
-	MarketModel,
-	MemberModel,
-	ShopModel,
-	TransactionModel,
-} from '../models/index';
+
+import { BOT_LOG_CHANNEL, DISCORD_URL } from '../config';
+import { GuildModel, InfractionModel, MemberModel, TransactionModel } from '../models';
 import {
 	EconomicaClient,
 	EconomyInfo,
 	IncomeCommandProperties,
-	TransactionTypes,
-} from '../structures/index';
+	InfractionString,
+	TransactionString,
+} from '../structures';
 
 /**
  * Returns a message embed object.
@@ -42,10 +36,7 @@ export function embedify(
 	return embed;
 }
 
-export function error(
-	description: string,
-	title: string = 'Input Error'
-): Discord.InteractionReplyOptions {
+export function error(description: string, title: string = 'Input Error'): Discord.InteractionReplyOptions {
 	return {
 		embeds: [
 			{
@@ -58,10 +49,7 @@ export function error(
 	};
 }
 
-export function warning(
-	description: string,
-	title: string = 'Warning'
-): Discord.InteractionReplyOptions {
+export function warning(description: string, title: string = 'Warning'): Discord.InteractionReplyOptions {
 	return {
 		embeds: [
 			{
@@ -74,10 +62,7 @@ export function warning(
 	};
 }
 
-export function success(
-	description: string,
-	title: string = 'Success'
-): Discord.InteractionReplyOptions {
+export function success(description: string, title: string = 'Success'): Discord.InteractionReplyOptions {
 	return {
 		embeds: [
 			{
@@ -136,10 +121,10 @@ export async function getEconInfo(guildId: string, userId: string): Promise<Econ
 
 /**
  * Changes a user's economy info.
- * @param {EconomicaClient} - Economica Client.
+ * @param {EconomicaClient} client - Economica Client.
  * @param {string} guildId - Guild id.
  * @param {string} userId - User id.
- * @param {TransactionTypes} type - The transaction type.
+ * @param {TransactionString} type - The transaction type.
  * @param {number} wallet - The value to be added to the user's wallet.
  * @param {number} treasury - The value to be added to the user's treasury.
  * @param {number} total - The value to be added to the user's total.
@@ -150,7 +135,7 @@ export async function transaction(
 	guildId: string,
 	userId: string,
 	agentId: string,
-	type: TransactionTypes,
+	type: TransactionString,
 	wallet: number,
 	treasury: number,
 	total: number
@@ -237,7 +222,7 @@ export async function infraction(
 	guildId: string,
 	userId: string,
 	agentId: string,
-	type: string,
+	type: InfractionString,
 	reason: string,
 	permanent?: boolean,
 	active?: boolean,
@@ -451,13 +436,14 @@ export async function runtimeError(
 	error: Error,
 	interaction: Discord.CommandInteraction = null
 ) {
+	console.error(error);
 	let description, title, icon_url;
 	if (interaction) {
 		title = interaction.user.tag;
 		icon_url = interaction.user.displayAvatarURL();
 		description = `**Command**: \`${interaction.commandName}\`\n\`\`\`js\n${error}\`\`\`
     You've encountered an error.
-    Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](${process.env.DISCORD}).`;
+    Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](${DISCORD_URL}).`;
 		const embed = embedify('RED', title, icon_url, description);
 		if (interaction.replied || interaction.deferred) {
 			await interaction.followUp({ embeds: [embed], ephemeral: true });
@@ -466,10 +452,17 @@ export async function runtimeError(
 		}
 	}
 
-	title = error.name;
-	icon_url = client.user.displayAvatarURL();
-	description = `\`\`\`js\n${error.stack}\`\`\``;
-	const embed = embedify('RED', title, icon_url, description);
-	const channel = (await client.channels.cache.get(process.env.BOT_LOG_ID)) as Discord.TextChannel;
-	channel.send({ embeds: [embed] });
+	const channel = (await client.channels.cache.get(BOT_LOG_CHANNEL)) as Discord.TextChannel;
+	if (
+		channel &&
+		channel
+			.permissionsFor(await client.guilds.cache.get(client.user.id).members.cache.get(client.user.id))
+			.has('SEND_MESSAGES')
+	) {
+		title = error.name;
+		icon_url = client.user.displayAvatarURL();
+		description = `\`\`\`js\n${error.stack}\`\`\``;
+		const embed = embedify('RED', title, icon_url, description);
+		channel.send({ embeds: [embed] }).catch(console.error);
+	}
 }

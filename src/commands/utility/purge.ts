@@ -1,5 +1,6 @@
 import { GuildTextBasedChannel } from 'discord.js';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures/index';
+
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -20,19 +21,13 @@ export default class implements EconomicaCommand {
 				.setRequired(false)
 		)
 		.addNumberOption((option) =>
-			option
-				.setName('amount')
-				.setDescription('Specify an amount.')
-				.setMinValue(1)
-				.setMaxValue(100)
-				.setRequired(false)
+			option.setName('amount').setDescription('Specify an amount.').setMinValue(1).setMaxValue(100).setRequired(false)
 		);
 	execute = async (ctx: Context) => {
-		const channel = (ctx.interaction.options.getChannel('channel') ??
-			ctx.interaction.channel) as GuildTextBasedChannel;
+		const channel = (ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel) as GuildTextBasedChannel;
 		const amount = ctx.interaction.options.getNumber('amount') ?? 100;
 		await channel.bulkDelete(amount, true).then(async (count) => {
-			ctx.interaction.reply(`Deleted \`${count.size}\` messages.`);
+			return await ctx.embedify('success', 'user', `Deleted \`${count.size}\` messages.`);
 		});
 	};
 }
