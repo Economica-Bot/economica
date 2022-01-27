@@ -2,8 +2,8 @@ import { CommandInteraction } from 'discord.js';
 
 import { GuildModel } from '../models';
 import { Context, EconomicaClient, EconomicaCommand, EconomicaSlashCommandBuilder } from '../structures';
-import { commandCheck } from '../util/command';
-import { runtimeError } from '../util/util';
+import { commandCheck } from '../lib/command';
+import { runtimeError } from '../lib/util';
 
 export const name = 'interactionCreate';
 

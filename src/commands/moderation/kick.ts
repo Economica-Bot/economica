@@ -1,7 +1,7 @@
 import { GuildMember } from 'discord.js';
 
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-import { infraction } from '../../util/util';
+import { infraction } from '../../lib/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()

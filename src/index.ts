@@ -13,7 +13,7 @@ import path from 'path';
 
 import { clientOptions } from './config';
 import { EconomicaClient, EconomicaService } from './structures';
-import { runtimeError } from './util/util';
+import { runtimeError } from './lib/util';
 
 const client = new EconomicaClient(clientOptions);
 

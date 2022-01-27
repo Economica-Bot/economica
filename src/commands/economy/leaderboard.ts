@@ -3,7 +3,7 @@ import { MessageEmbed } from 'discord.js';
 
 import { MemberModel } from '../../models';
 import { BalanceString, Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-import { paginate } from '../../util/util';
+import { paginate } from '../../lib/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()

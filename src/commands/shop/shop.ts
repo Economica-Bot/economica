@@ -2,7 +2,7 @@ import { EmbedFieldData, MessageEmbed } from 'discord.js';
 
 import { MemberModel, ShopModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-import * as util from '../../util/util';
+import * as util from '../../lib/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()

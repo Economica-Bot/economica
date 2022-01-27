@@ -2,7 +2,7 @@ import { parse_string } from '@adrastopoulos/number-parser';
 import { GuildMember } from 'discord.js';
 
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder, PermissionRole } from '../../structures';
-import { getEconInfo, transaction } from '../../util/util';
+import { getEconInfo, transaction } from '../../lib/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()

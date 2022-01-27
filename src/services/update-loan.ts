@@ -1,6 +1,6 @@
 import { LoanModel } from '../models';
 import { EconomicaClient, EconomicaService } from '../structures';
-import * as util from '../util/util';
+import * as util from '../lib/util';
 
 export default class implements EconomicaService {
 	name = 'update-loan';

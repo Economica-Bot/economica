@@ -1,6 +1,6 @@
 import { economyDefaults } from '../../config';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-import { transaction } from '../../util/util';
+import { transaction } from '../../lib/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()

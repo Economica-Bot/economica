@@ -3,7 +3,7 @@ import ms from 'ms';
 
 import { LoanModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder, PermissionRole } from '../../structures';
-import { getEconInfo, transaction } from '../../util/util';
+import { getEconInfo, transaction } from '../../lib/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
