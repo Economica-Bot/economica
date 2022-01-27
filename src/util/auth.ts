@@ -22,7 +22,7 @@ export const getAuthLevel = async (guild: Guild, role: RoleResolvable): Promise<
  * Remove a role from an authority level in a guild
  * @param {Guild} - The Guild in which the interaction took place
  * @param {Role} - The Role object or id of the role whose authority level is to be returned
- * @returns guildAuthData
+ * @returns {RoleAuthority[]}
  */
 export const removeAuthRole = async (guild: Guild, role: RoleResolvable): Promise<RoleAuthority[]> => {
 	if (role instanceof Role) role = role.id;
@@ -38,7 +38,7 @@ export const removeAuthRole = async (guild: Guild, role: RoleResolvable): Promis
  * @param {Guild} guild
  * @param {Role}  role
  * @param {Authority} auth
- * @returns Promise<RoleAuthority>
+ * @returns {Promise<RoleAuthority>}
  */
 export const setAuthRole = async (guild: Guild, role: RoleResolvable, auth: Authority): Promise<RoleAuthority> => {
 	if (role instanceof Role) role = role.id;

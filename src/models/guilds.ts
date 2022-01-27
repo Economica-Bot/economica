@@ -2,12 +2,6 @@ import * as mongoose from 'mongoose';
 
 import { ReqRoleAuthorityArr, ReqString, RoleAuthority } from '../structures';
 
-export interface GuildAuthData {
-	mod: string[];
-	manager: string[];
-	admin: string[];
-}
-
 export interface Guild {
 	guildId: string;
 	currency: string;
