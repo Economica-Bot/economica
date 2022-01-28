@@ -1,16 +1,15 @@
 import { parseString } from '@adrastopoulos/number-parser';
 
 import { getEconInfo, transaction } from '../../lib/util';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { Context, EconomicaSlashCommandBuilder, EconomyCommand } from '../../structures';
 
-export default class implements EconomicaCommand {
+export default class extends EconomyCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('pay')
 		.setDescription('Pay funds to another user.')
-		.setGroup('economy')
+		.setGroup('ECONOMY')
 		.setFormat('<user> <amount | all>')
 		.setExamples(['pay @Wumpus all', 'pay @JohnDoe 100'])
-		.setGlobal(false)
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(true))
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true));
 

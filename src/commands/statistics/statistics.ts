@@ -7,7 +7,7 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('statistics')
 		.setDescription('View statistics')
-		.setGroup('statistics')
+		.setGroup('STATISTICS')
 		.setFormat('<balance> [user]')
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand

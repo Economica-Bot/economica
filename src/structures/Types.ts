@@ -1,9 +1,11 @@
 import { EmbedAuthorData } from 'discord.js';
 
-export type GroupString = 'application' | 'economy' | 'income' | 'moderation' | 'shop' | 'statistics' | 'utility';
-
-export type ReplyString = 'success' | 'info' | 'warn' | 'error';
-
+export type GroupString = 'APPLICATION' | 'ECONOMY' | 'INCOME' | 'MODERATION' | 'SHOP' | 'STATISTICS' | 'UTILITY';
+export type ReplyString = 'success' | 'info' | 'warn' | 'error'
+export type InfractionString = 'BAN' | 'KICK' | 'TIMEOUT' | 'UNBAN' | 'UNTIMEOUT';
+export type BalanceString = 'wallet' | 'treasury' | 'total';
+export type Author = 'bot' | 'user' | 'guild' | EmbedAuthorData;
+export type Authority = 'USER' | 'MODERATOR' | 'MANAGER' | 'ADMINISTRATOR' | 'DEVELOPER';
 export type TitleString =
 	| 'register:GUILD_NOT_FOUND'
 	| 'test:TEST'
@@ -95,7 +97,6 @@ export type TitleString =
 	| 'permissions:VIEW_COMMAND_PERMISSION_HIERARCHY'
 	| 'ping:VIEW_PING'
 	| 'purge:MESSAGES_DELETED';
-
 export type TransactionString =
 	| 'DEPOSIT'
 	| 'WITHDRAW'
@@ -121,11 +122,3 @@ export type TransactionString =
 	| 'ROB_SUCCESS'
 	| 'ROB_VICTIM'
 	| 'ROB_FINE';
-
-export type InfractionString = 'BAN' | 'KICK' | 'TIMEOUT' | 'UNBAN' | 'UNTIMEOUT';
-
-export type BalanceString = 'wallet' | 'treasury' | 'total';
-
-export type Author = 'bot' | 'user' | 'guild' | EmbedAuthorData;
-
-export type Authority = 'user' | 'mod' | 'manager' | 'admin';

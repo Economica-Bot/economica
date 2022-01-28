@@ -5,12 +5,11 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('unban')
 		.setDescription('Unban a member.')
-		.setGroup('moderation')
+		.setGroup('MODERATION')
 		.setFormat('<member>')
 		.setExamples(['unban 796906750569611294'])
-		.setGlobal(false)
-		.setUserPermissions(['BAN_MEMBERS'])
 		.setClientPermissions(['BAN_MEMBERS'])
+		.setAuthority('MODERATOR')
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true));
 
 	execute = async (ctx: Context) => {
@@ -22,7 +21,7 @@ export default class implements EconomicaCommand {
 
 		await target
 			.send(`You have been unbanned on **${ctx.interaction.guild.name}**`)
-			.catch(() => messagedUser = false);
+			.catch(() => (messagedUser = false));
 		await ctx.interaction.guild.members.unban(target);
 		await InfractionModel.updateMany(
 			{

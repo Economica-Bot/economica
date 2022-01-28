@@ -1,13 +1,13 @@
 import { isValidObjectId } from 'mongoose';
 
 import { TransactionModel } from '../../models';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder, PermissionRole } from '../../structures';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('transaction')
 		.setDescription('View and delete transactions.')
-		.setGroup('economy')
+		.setGroup('ECONOMY')
 		.setFormat('(view <transaction_id> | delete <id | user | all> [transaction_id | user])')
 		.setExamples([
 			'transaction view 615a88b83f908631d40632c1',
@@ -15,7 +15,6 @@ export default class implements EconomicaCommand {
 			'transaction delete user @Wumpus',
 			'transaction delete all',
 		])
-		.setGlobal(false)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
 				.setName('view')
@@ -28,7 +27,7 @@ export default class implements EconomicaCommand {
 			subcommandgroup
 				.setName('delete')
 				.setDescription('Delete transaction data.')
-				.setRoles([new PermissionRole('ECONOMY MANAGER', true)])
+				.setAuthority('MANAGER')
 				.addEconomicaSubcommand((subcommand) =>
 					subcommand
 						.setName('id')

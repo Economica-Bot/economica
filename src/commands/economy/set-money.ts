@@ -2,17 +2,16 @@ import { parseString } from '@adrastopoulos/number-parser';
 import { GuildMember } from 'discord.js';
 
 import { getEconInfo, transaction } from '../../lib/util';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder, PermissionRole } from '../../structures';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('set-money')
 		.setDescription('Set a balance.')
-		.setGroup('economy')
+		.setGroup('ECONOMY')
 		.setFormat('<user> <amount> <target>')
 		.setExamples(['set-money @JohnDoe 300 wallet', 'set-money @Wumpus 100 treasury'])
-		.setRoles([new PermissionRole('ECONOMY MANAGER', true)])
-		.setGlobal(false)
+		.setAuthority('MANAGER')
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(true))
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true))
 		.addStringOption((option) =>

@@ -8,8 +8,7 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('work')
 		.setDescription('Work to earn a sum.')
-		.setGroup('income')
-		.setGlobal(false);
+		.setGroup('INCOME')
 
 	execute = async (ctx: Context) => {
 		const { min, max } = economyDefaults.work;

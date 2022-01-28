@@ -5,7 +5,7 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('income')
 		.setDescription('View income commands and their stats.')
-		.setGroup('income');
+		.setGroup('INCOME');
 
 	execute = async (ctx: Context) => {
 		const description: string[] = [];

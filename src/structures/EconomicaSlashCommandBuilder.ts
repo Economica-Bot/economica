@@ -6,7 +6,6 @@ import {
 import { PermissionString } from 'discord.js';
 
 import { Authority, GroupString } from '.';
-import { PermissionRole } from './CommandOptions';
 import {
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
@@ -16,11 +15,8 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	group: GroupString;
 	format: string;
 	examples: string[];
-	userPermissions: PermissionString[];
 	clientPermissions: PermissionString[];
-	roles: PermissionRole[];
 	global: boolean = false;
-	devOnly: boolean = false;
 	enabled: boolean = true;
 	authority: Authority;
 
@@ -44,33 +40,18 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	setUserPermissions(userPermissions: PermissionString[]): this {
-		this.userPermissions = userPermissions;
-		return this;
-	}
-
 	setClientPermissions(clientPermissions: PermissionString[]): this {
 		this.clientPermissions = clientPermissions;
 		return this;
 	}
 
-	setRoles(roles: PermissionRole[]): this {
-		this.roles = roles;
+	setAuthority(level: Authority): this {
+		this.authority = level;
 		return this;
 	}
 
 	setEnabled(enabled: boolean): this {
 		this.enabled = enabled;
-		return this;
-	}
-
-	setDevOnly(devOnly: boolean): this {
-		this.devOnly = devOnly;
-		return this;
-	}
-
-	setAuthority(level: Authority): this {
-		this.authority = level;
 		return this;
 	}
 
@@ -147,9 +128,8 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 			global: this.global,
 			group: this.group,
 			format: this.format,
-			userPermissions: this.userPermissions,
 			clientPermissions: this.clientPermissions,
-			roles: this.roles,
+			authority: this.authority,
 		};
 	}
 }

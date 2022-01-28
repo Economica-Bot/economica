@@ -8,16 +8,15 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('authority')
 		.setDescription('Interact with the economy-permission roles')
-		.setGroup('utility')
+		.setGroup('UTILITY')
 		.setFormat('<view | set | reset> [...options]')
-		.setUserPermissions(['ADMINISTRATOR'])
-		.setGlobal(false)
 		.addEconomicaSubcommand((options) => options.setName('view').setDescription('View the economy authority of roles.'))
 		.addEconomicaSubcommand((options) =>
 			options
 				.setName('set')
 				.setDescription("Set a role's authority level")
 				.setFormat('<role> <user | mod | manager | admin>')
+				.setAuthority('ADMINISTRATOR')
 				.addRoleOption((option) =>
 					option.setName('role').setDescription('The target role to grant authority to.').setRequired(true)
 				)
@@ -38,6 +37,7 @@ export default class implements EconomicaCommand {
 			options
 				.setName('reset')
 				.setDescription("Reset a role's authority level.")
+				.setAuthority('ADMINISTRATOR')
 				.addRoleOption((option) => option.setName('role').setDescription('Specify a role.').setRequired(true))
 		);
 
@@ -52,9 +52,9 @@ export default class implements EconomicaCommand {
 			const adminRoles = Array<string>();
 			auth.forEach((r) => {
 				const auth = r.authority;
-				if (auth === 'mod') modRoles.push(r.roleId);
-				else if (auth === 'manager') managerRoles.push(r.roleId);
-				else if (auth === 'admin') adminRoles.push(r.roleId);
+				if (auth === 'MODERATOR') modRoles.push(r.roleId);
+				else if (auth === 'MANAGER') managerRoles.push(r.roleId);
+				else if (auth === 'ADMINISTRATOR') adminRoles.push(r.roleId);
 			});
 
 			const embed = new MessageEmbed()

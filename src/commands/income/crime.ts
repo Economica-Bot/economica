@@ -6,8 +6,7 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('crime')
 		.setDescription('Commit a crime to earn a sum.')
-		.setGroup('income')
-		.setGlobal(false);
+		.setGroup('INCOME')
 
 	execute = async (ctx: Context) => {
 		const { currency } = ctx.guildDocument;
@@ -41,6 +40,10 @@ export default class implements EconomicaCommand {
 			amount
 		);
 
-		return await ctx.embedify('success', 'user', `You comitted a crime and earned ${currency}${amount.toLocaleString()}.`);
+		return await ctx.embedify(
+			'success',
+			'user',
+			`You comitted a crime and earned ${currency}${amount.toLocaleString()}.`
+		);
 	};
 }

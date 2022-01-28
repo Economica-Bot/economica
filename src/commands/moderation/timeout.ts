@@ -8,7 +8,7 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('timeout')
 		.setDescription('Timeout a member.')
-		.setGroup('moderation')
+		.setGroup('MODERATION')
 		.setFormat('<member> [duration] [reason]')
 		.setExamples([
 			'timeout @JohnDoe',
@@ -16,9 +16,8 @@ export default class implements EconomicaCommand {
 			'timeout @Wumpus Spamming',
 			'timeout @YourMom420 2d Megalomania',
 		])
-		.setGlobal(false)
-		.setUserPermissions(['MODERATE_MEMBERS'])
 		.setClientPermissions(['MODERATE_MEMBERS'])
+		.setAuthority('MODERATOR')
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))
 		.addStringOption((option) => option.setName('duration').setDescription('Specify a length.').setRequired(true))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason.').setRequired(false));
@@ -32,16 +31,22 @@ export default class implements EconomicaCommand {
 		const reason = (ctx.interaction.options.getString('reason') as string) ?? 'No reason provided';
 		let messagedUser = true;
 
-		if (target.id === ctx.interaction.user.id) return await ctx.embedify('info', 'user', 'You cannot timeout yourself.');
+		if (target.id === ctx.interaction.user.id)
+			return await ctx.embedify('info', 'user', 'You cannot timeout yourself.');
 		if (target.id === ctx.client.user.id) return await ctx.embedify('warn', 'user', 'You cannot timeout me!');
-		if (target.roles.highest.position > member.roles.highest.position) return await ctx.embedify('warn', 'user', 'Insufficient permissions.');
+		if (target.roles.highest.position > member.roles.highest.position)
+			return await ctx.embedify('warn', 'user', 'Insufficient permissions.');
 		if (!target.moderatable) return await ctx.embedify('warn', 'user', 'Target is not moderatable.');
-		if (target.communicationDisabledUntil && target.communicationDisabledUntil.getTime() > Date.now()) return await ctx.embedify('warn', 'user', `Target is already in a timeout.`);
-		if (duration !== 'Permanent' && (!milliseconds || milliseconds < 0)) return ctx.embedify('warn', 'user', 'Invalid duration.');
+		if (target.communicationDisabledUntil && target.communicationDisabledUntil.getTime() > Date.now())
+			return await ctx.embedify('warn', 'user', `Target is already in a timeout.`);
+		if (duration !== 'Permanent' && (!milliseconds || milliseconds < 0))
+			return ctx.embedify('warn', 'user', 'Invalid duration.');
 
 		await target
-			.send(`You have been placed under a timeout for \`${reason}\` ${formattedDuration} from **${ctx.interaction.guild.name}**`)
-			.catch(() =>  messagedUser = false );
+			.send(
+				`You have been placed under a timeout for \`${reason}\` ${formattedDuration} from **${ctx.interaction.guild.name}**`
+			)
+			.catch(() => (messagedUser = false));
 		await target.timeout(milliseconds, reason);
 		await infraction(
 			ctx.client,
@@ -55,7 +60,9 @@ export default class implements EconomicaCommand {
 			milliseconds
 		);
 
-		const content = `Placed ${target} under a timeout for ${ms(milliseconds)}.${messagedUser ? '\nUser notified' : '\nCould not notify user'}`;
+		const content = `Placed ${target} under a timeout for ${ms(milliseconds)}.${
+			messagedUser ? '\nUser notified' : '\nCould not notify user'
+		}`;
 		return await ctx.embedify('success', 'user', content);
 	};
 }

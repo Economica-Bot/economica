@@ -5,19 +5,15 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('register-commands')
 		.setDescription('Register economica commands.')
-		.setGroup('application')
-		.setDevOnly(true)
+		.setGroup('APPLICATION')
+		.setAuthority('DEVELOPER')
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
 				.setName('guild')
 				.setDescription('Refresh server commands.')
-				.addStringOption((option) =>
-					option.setName('guild_id').setDescription('Specify a server id').setRequired(true)
-				)
+				.addStringOption((option) => option.setName('guild_id').setDescription('Specify a server id').setRequired(true))
 		)
-		.addEconomicaSubcommand((subcommand) =>
-			subcommand.setName('global').setDescription('Refresh global commands.')
-		);
+		.addEconomicaSubcommand((subcommand) => subcommand.setName('global').setDescription('Refresh global commands.'));
 
 	execute = async (ctx: Context) => {
 		await ctx.interaction.deferReply({ ephemeral: true });
@@ -28,6 +24,6 @@ export default class implements EconomicaCommand {
 		}
 
 		await new registerCommands().execute(ctx.client);
-		return await ctx.embedify('success', 'bot', 'Commands refreshed.');
+		return await ctx.embedify('error', 'bot', 'Commands refreshed.');
 	};
 }

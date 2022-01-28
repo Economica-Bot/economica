@@ -7,12 +7,11 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('untimeout')
 		.setDescription('Untimeout a member.')
-		.setGroup('moderation')
+		.setGroup('MODERATION')
 		.setFormat('<member>')
 		.setExamples(['untimeout @JohnDoe'])
-		.setGlobal(false)
-		.setUserPermissions(['MODERATE_MEMBERS'])
 		.setClientPermissions(['MODERATE_MEMBERS'])
+		.setAuthority('MODERATOR')
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true));
 
 	execute = async (ctx: Context) => {
@@ -20,13 +19,14 @@ export default class implements EconomicaCommand {
 		const target = ctx.interaction.options.getMember('target') as GuildMember;
 		let messagedUser = true;
 
-		if (target.roles.highest.position > member.roles.highest.position) return await ctx.embedify('warn', 'user', 'Insufficient permissions.');
+		if (target.roles.highest.position > member.roles.highest.position)
+			return await ctx.embedify('warn', 'user', 'Insufficient permissions.');
 		if (!target.moderatable) return await ctx.embedify('warn', 'user', 'Target is not moderatable.');
 		if (target.isCommunicationDisabled) return await ctx.embedify('warn', 'user', 'Target is not in a timeout.');
-		
+
 		await target
 			.send(`Your timeout has been canceled in **${ctx.interaction.guild.name}**`)
-			.catch(() => messagedUser = false );
+			.catch(() => (messagedUser = false));
 		await target.timeout(null);
 		await InfractionModel.updateMany(
 			{
@@ -40,7 +40,9 @@ export default class implements EconomicaCommand {
 			}
 		);
 
-		const content = `Timeout canceled for ${target.user.tag}${messagedUser ? '\nUser notified' : '\nCould not notify user'}`;
+		const content = `Timeout canceled for ${target.user.tag}${
+			messagedUser ? '\nUser notified' : '\nCould not notify user'
+		}`;
 		return await ctx.embedify('success', 'user', content);
 	};
 }

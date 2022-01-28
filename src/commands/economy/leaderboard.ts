@@ -9,10 +9,9 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('leaderboard')
 		.setDescription('View top funds.')
-		.setGroup('economy')
+		.setGroup('ECONOMY')
 		.setFormat('<wallet | treasury | total> [page]')
 		.setExamples(['leaderboard wallet', 'leaderboard total 3'])
-		.setGlobal(false)
 		.addStringOption((option) =>
 			option
 				.setName('type')

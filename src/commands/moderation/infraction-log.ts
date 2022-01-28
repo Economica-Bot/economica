@@ -4,10 +4,9 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('infraction-log')
 		.setDescription('Manage the infraction logging channel.')
-		.setGroup('moderation')
+		.setGroup('MODERATION')
 		.setFormat('<view | set | reset> [channel]')
 		.setExamples(['infraction-log view', 'infraction-log set #infraction-logs', 'infraction-log reset'])
-		.setGlobal(false)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand.setName('view').setDescription('View the infraction log channel.')
 		)
@@ -15,14 +14,11 @@ export default class implements EconomicaCommand {
 			subcommand
 				.setName('set')
 				.setDescription('Set the infraction log channel.')
-				.setUserPermissions(['ADMINISTRATOR'])
+				.setAuthority('ADMINISTRATOR')
 				.addChannelOption((option) => option.setName('channel').setDescription('Specify a channel').addChannelType(0))
 		)
 		.addEconomicaSubcommand((subcommand) =>
-			subcommand
-				.setName('reset')
-				.setDescription('Reset the infraction log channel.')
-				.setUserPermissions(['ADMINISTRATOR'])
+			subcommand.setName('reset').setDescription('Reset the infraction log channel.').setAuthority('ADMINISTRATOR')
 		);
 
 	execute = async (ctx: Context) => {

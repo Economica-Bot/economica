@@ -9,8 +9,7 @@ export default class implements EconomicaCommand {
 		.setName('shop')
 		.setDescription("Interact with the server's shop.")
 		.setFormat('<view | clear | disable | delete> [...options]')
-		.setGroup('shop')
-		.setGlobal(false)
+		.setGroup('SHOP')
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
 				.setName('view')
@@ -23,6 +22,7 @@ export default class implements EconomicaCommand {
 			subcommand
 				.setName('enable')
 				.setDescription('Enable a shop item.')
+				.setAuthority('MANAGER')
 				.addStringOption((option) =>
 					option.setName('name').setDescription('Specify the name of the item.').setRequired(true)
 				)
@@ -31,6 +31,7 @@ export default class implements EconomicaCommand {
 			subcommandgroup
 				.setName('disable')
 				.setDescription('Disable shop items.')
+				.setAuthority('MANAGER')
 				.addEconomicaSubcommand((subcommand) =>
 					subcommand
 						.setName('single')
@@ -45,6 +46,7 @@ export default class implements EconomicaCommand {
 			subcommandgroup
 				.setName('delete')
 				.setDescription('Delete shop items.')
+				.setAuthority('MANAGER')
 				.addEconomicaSubcommand((subcommand) =>
 					subcommand
 						.setName('single')

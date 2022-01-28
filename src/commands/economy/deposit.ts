@@ -1,32 +1,19 @@
-import { parseString } from '@adrastopoulos/number-parser';
+import { transaction } from '../../lib/util';
+import { Context, EconomicaSlashCommandBuilder, EconomyCommand } from '../../structures';
 
-import { getEconInfo, transaction } from '../../lib/util';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-
-export default class implements EconomicaCommand {
+export default class extends EconomyCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('deposit')
 		.setDescription('Deposit funds from your wallet to your treasury.')
-		.setGroup('economy')
+		.setGroup('ECONOMY')
 		.setFormat('<amount | all>')
 		.setExamples(['deposit all', 'deposit 100'])
-		.setGlobal(false)
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true));
 
 	execute = async (ctx: Context) => {
 		const { currency } = ctx.guildDocument;
-		const { wallet } = await getEconInfo(ctx.interaction.guildId, ctx.interaction.user.id);
-		const amount = ctx.interaction.options.getString('amount');
-		const result = amount === 'all' ? wallet : parseString(amount);
-
-		if (result) {
-			if (result < 1) return await ctx.embedify('error', 'user', `Amount less than 0`);
-			if (result > wallet)
-				return await ctx.embedify('error', 'user', `Exceeds current wallet:${currency}${wallet.toLocaleString()}`);
-		} else {
-			return await ctx.embedify('error', 'user', 'Please enter a valid amount.');
-		}
-
+		const { validated, result } = await this.validateAmount(ctx, 'wallet');
+		if (!validated) return;
 		await transaction(
 			ctx.client,
 			ctx.interaction.guildId,

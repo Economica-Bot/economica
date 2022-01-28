@@ -7,12 +7,11 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('kick')
 		.setDescription('Kick a member.')
-		.setGroup('moderation')
+		.setGroup('MODERATION')
 		.setFormat('<target> [reason]')
 		.setExamples(['kick @JohnDoe', 'kick @Pepe Harrassment'])
-		.setGlobal(false)
-		.setUserPermissions(['KICK_MEMBERS'])
 		.setClientPermissions(['KICK_MEMBERS'])
+		.setAuthority('MODERATOR')
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason.').setRequired(false));
 
@@ -24,12 +23,13 @@ export default class implements EconomicaCommand {
 
 		if (target.id === ctx.interaction.user.id) return await ctx.embedify('warn', 'user', 'You cannot kick yourself.');
 		if (target.id === ctx.client.user.id) return await ctx.embedify('warn', 'user', 'You cannot kick me!');
-		if (target.roles.highest.position > member.roles.highest.position) return await ctx.embedify('warn', 'user', "Target's roles are too high.");
+		if (target.roles.highest.position > member.roles.highest.position)
+			return await ctx.embedify('warn', 'user', "Target's roles are too high.");
 		if (!target.kickable) return await ctx.embedify('warn', 'user', 'Target is unkickable.');
 
 		await target
 			.send(`You have been kicked for \`${reason}\` from **${ctx.interaction.guild.name}**`)
-			.catch(() => messagedUser = false );
+			.catch(() => (messagedUser = false));
 		await target.kick(reason);
 		await infraction(ctx.client, ctx.interaction.guildId, target.id, ctx.interaction.user.id, 'KICK', reason);
 

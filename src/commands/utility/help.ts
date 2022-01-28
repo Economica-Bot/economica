@@ -13,7 +13,7 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('help')
 		.setDescription('List commands, or information about a command group, command, subcommand group, or subcommand.')
-		.setGroup('utility')
+		.setGroup('UTILITY')
 		.setFormat('[command]')
 		.setExamples(['help', 'help ban'])
 		.setGlobal(true)
@@ -82,7 +82,7 @@ export default class implements EconomicaCommand {
 		})?.data as EconomicaSlashCommandBuilder;
 
 		if (group && !command) {
-			const embed: MessageEmbed = await ctx.embedify('info', 'user', null, false)
+			const embed: MessageEmbed = await ctx.embedify('info', 'user', null, false);
 			for (const command of ctx.client.commands) {
 				const data = command[1].data as EconomicaSlashCommandBuilder;
 				if (data.group === group) {

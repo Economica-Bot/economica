@@ -1,13 +1,12 @@
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder, PermissionRole } from '../../structures';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('transaction-log')
 		.setDescription('Manage the transaction logging channel.')
-		.setGroup('economy')
+		.setGroup('ECONOMY')
 		.setFormat('<view | set | reset> [channel]')
 		.setExamples(['transaction-log view', 'transaction-log set @transaction-logs', 'transaction-log reset'])
-		.setGlobal(false)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand.setName('view').setDescription('View the transaction log channel.')
 		)
@@ -15,14 +14,14 @@ export default class implements EconomicaCommand {
 			subcommand
 				.setName('set')
 				.setDescription('Set the transaction log channel.')
-				.setRoles([new PermissionRole('ECONOMY MANAGER', true)])
+				.setAuthority('MANAGER')
 				.addChannelOption((option) => option.setName('channel').setDescription('Specify a channel').addChannelType(0))
 		)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
 				.setName('reset')
 				.setDescription('Reset the transaction log channel.')
-				.setRoles([new PermissionRole('ECONOMY MANAGER', true)])
+				.setAuthority('MANAGER')
 		);
 
 	execute = async (ctx: Context) => {

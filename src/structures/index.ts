@@ -41,4 +41,4 @@ export {
 	ReqStringArr,
 	ReqRoleAuthorityArr,
 } from './Datatypes';
-export { PermissionRole } from './CommandOptions';
+export { EconomyCommand } from './Commands';

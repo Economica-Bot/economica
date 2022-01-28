@@ -10,7 +10,7 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('permission')
 		.setDescription('See the permissions of a command.')
-		.setGroup('utility')
+		.setGroup('UTILITY')
 		.setFormat('<command>')
 		.addStringOption((option) => option.setName('command').setDescription('Specify a command.').setRequired(true));
 
@@ -23,28 +23,22 @@ export default class implements EconomicaCommand {
 
 		const data = command.data as EconomicaSlashCommandBuilder;
 
-		let description = `**${data.name} Command Permissions**\n__User Permissions__:\n\`${
-			data.userPermissions ?? '`None`'
-		}\`\n__Client Permissions:__\n\`${data.clientPermissions ?? '`None`'}\`\n__Roles:__\n\`${
-			data.roles ?? '`None`'
-		}\`\n\n`;
+		let description = `**${data.name} Command Permissions**\n__Client Permissions:__\n\`${
+			data.clientPermissions ?? '`None`'
+		}\`\n`;
 
 		if (data.getSubcommandGroup()) {
 			(data.getSubcommandGroup() as EconomicaSlashCommandSubcommandGroupBuilder[]).forEach((subcommandGroupData) => {
-				description += `**${subcommandGroupData.name} Subcommand Group Permissions**\n__User Permissions:__\n\`${
-					subcommandGroupData.userPermissions ?? '`None`'
-				}\`\n__Client Permissions:__\n\`${subcommandGroupData.clientPermissions ?? '`None`'}\`\n__Roles:__\n\`${
-					subcommandGroupData.roles ?? '`None`'
-				}\`\n\n`;
+				description += `**${subcommandGroupData.name} Subcommand Group Permissions**\n__Client Permissions:__\n\`${
+					subcommandGroupData.clientPermissions ?? '`None`'
+				}\`\n`;
 			});
 		}
 
 		if (data.getSubcommand()) {
 			(data.getSubcommand() as EconomicaSlashCommandSubcommandBuilder[]).forEach((subcommandData) => {
-				description += `**${subcommandData.name} Subcommand Permissions**\n__User Permissions:__\n\`${
-					subcommandData.userPermissions ?? '`None`'
-				}\`\n__Client Permissions:__\n\`${subcommandData.clientPermissions ?? '`None`'}\`\n__Roles:__\n\`${
-					subcommandData.roles ?? '`None`'
+				description += `**${subcommandData.name} Subcommand Permissions**\n__Client Permissions:__\n\`${
+					subcommandData.clientPermissions ?? '`None`'
 				}\`\n\n`;
 			});
 		}

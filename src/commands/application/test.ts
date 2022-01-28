@@ -4,11 +4,11 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('test')
 		.setDescription('test command')
-		.setGroup('application')
-		.setAuthority('mod')
+		.setGroup('APPLICATION')
+		.setAuthority('MODERATOR')
 		.addEconomicaSubcommandGroup((subcommandgroup) =>
 			subcommandgroup
-				.setAuthority('manager')
+				.setAuthority('MANAGER')
 				.setName('test1group')
 				.setDescription('test1desc')
 				.addEconomicaSubcommand((subcommand) =>

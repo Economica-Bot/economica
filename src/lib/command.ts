@@ -8,14 +8,13 @@ import {
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
-	PermissionRole,
 } from '../structures';
 
 export async function commandCheck(
 	interaction: CommandInteraction,
 	data: EconomicaSlashCommandBuilder
 ): Promise<boolean> {
-	if (data.devOnly && !DEVELOPER_IDS.includes(interaction.user.id)) {
+	if (data.authority === 'DEVELOPER' && !DEVELOPER_IDS.includes(interaction.user.id)) {
 		interaction.reply({ content: 'This command is dev only.', ephemeral: true });
 		return false;
 	}
@@ -56,10 +55,7 @@ const permissionCheck = async (
 	) as EconomicaSlashCommandSubcommandBuilder;
 	const userPermissions: PermissionString[] = [];
 	const clientPermissions: PermissionString[] = [];
-	const roles: PermissionRole[] = [];
-	const missingUserPermissions: PermissionString[] = [];
 	const missingClientPermissions: PermissionString[] = [];
-	const missingRoles: PermissionRole[] = [];
 	let missingAuthority: Authority;
 
 	if (
@@ -71,34 +67,21 @@ const permissionCheck = async (
 	}
 
 	const authority = subcommand.authority ?? group.authority ?? data.authority;
-	if (data.userPermissions) userPermissions.push(...data.userPermissions);
 	if (data.clientPermissions) clientPermissions.push(...data.clientPermissions);
-	if (data.roles) roles.push(...data.roles);
-	if (group?.userPermissions) userPermissions.push(...group.userPermissions);
 	if (group?.clientPermissions) clientPermissions.push(...group.clientPermissions);
-	if (group?.roles) roles.push(...group.roles);
-	if (subcommand?.userPermissions) userPermissions.push(...subcommand.userPermissions);
 	if (subcommand?.clientPermissions) clientPermissions.push(...subcommand.clientPermissions);
-	if (subcommand?.roles) roles.push(...subcommand.roles);
 
-	for (const permission of userPermissions)
-		if (!member.permissionsIn(channel).has(permission)) missingUserPermissions.push(permission);
 	for (const permission of clientPermissions)
 		if (!clientMember.permissionsIn(channel).has(permission)) missingClientPermissions.push(permission);
-	for (const role of roles) {
-		const guildRole = (await guild.roles.fetch()).find((r) => r.name.toLowerCase() === role.name.toLowerCase());
-		if (!guildRole)
-			missingRoles.push(new PermissionRole(`Please create an \`${role.name}\` role. Case insensitive.`, true));
-		else if (role.required && !member.roles.cache.has(guildRole.id)) missingRoles.push(role);
-	}
 
 	if (authority) {
 		const { auth } = await GuildModel.findOne({ guildId: interaction.guildId });
 		const roleAuth = auth.filter((r) => r.authority === authority && member.roles.cache.has(r.roleId));
 		if (!roleAuth.length) missingAuthority = authority;
+		if (DEVELOPER_IDS.includes(member.id)) missingAuthority = null;
 	}
 
-	if (missingClientPermissions.length || missingUserPermissions.length || missingRoles.length || missingAuthority) {
+	if (missingClientPermissions.length || missingAuthority) {
 		const embed = new MessageEmbed()
 			.setTitle('Insufficient Permissions')
 			.setColor('RED')
@@ -107,9 +90,6 @@ const permissionCheck = async (
 
 		if (missingClientPermissions.length)
 			embed.addField('Missing Bot Permissions', `\`${missingClientPermissions.join('`, `')}\``);
-		if (missingUserPermissions.length)
-			embed.addField('Missing User Permissions', `\`${missingUserPermissions.join('`, `')}\``);
-		if (missingRoles.length) embed.addField('Missing User Roles', `\`${missingRoles.join('`, `')}\``);
 		if (missingAuthority.length) {
 			embed.addField(
 				'Missing User Economy Authority',

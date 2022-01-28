@@ -6,10 +6,9 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('rob')
 		.setDescription('Rob a user to earn a sum.')
-		.setGroup('income')
+		.setGroup('INCOME')
 		.setFormat('<user>')
 		.setExamples(['rob @Wumpus'])
-		.setGlobal(false)
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user.').setRequired(true));
 
 	execute = async (ctx: Context) => {

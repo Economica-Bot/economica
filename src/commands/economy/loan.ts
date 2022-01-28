@@ -3,13 +3,13 @@ import ms from 'ms';
 
 import { getEconInfo, transaction } from '../../lib/util';
 import { LoanModel } from '../../models';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder, PermissionRole } from '../../structures';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('loan')
 		.setDescription('Loan money to other users.')
-		.setGroup('economy')
+		.setGroup('ECONOMY')
 		.setFormat('<propose | cancel | accept | decline | view> [...options]')
 		.setExamples([
 			'loan propose @Wumpus 1000 1200 2d',
@@ -19,7 +19,6 @@ export default class implements EconomicaCommand {
 			'loan view 61199fcedfa37a179c65c37b',
 			'loan view @Wumpus',
 		])
-		.setGlobal(false)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
 				.setName('propose')
@@ -64,7 +63,7 @@ export default class implements EconomicaCommand {
 			subcommandgroup
 				.setName('delete')
 				.setDescription('Delete loan data.')
-				.setRoles([new PermissionRole('ECONOMY MANAGER', true)])
+				.setAuthority('MANAGER')
 				.addEconomicaSubcommand((subcommand) =>
 					subcommand
 						.setName('id')
@@ -105,8 +104,9 @@ export default class implements EconomicaCommand {
 
 		if (subcommand === 'propose') {
 			// prettier-ignore
-			if (user.id === ctx.interaction.user.id) return await ctx.embedify('error', 'user', 'You cannot give yourself a loan!');
+			if (user.id === ctx.interaction.user.id) return await ctx.embedify('error', 'user', 'You cannot give yourself a loan.');
 			if (principal > treasury) return await ctx.embedify('error', 'user', 'Please enter a smaller amount.');
+			if (principal < 1) return await ctx.embedify('error', 'user', 'Principal cannot be less than 1.');
 			if (!ms(duration)) return await ctx.embedify('error', 'user', 'Please enter a valid length.');
 
 			const loan = await LoanModel.create({

@@ -1,19 +1,18 @@
-import { GuildMember, MessageEmbed } from 'discord.js';
+import { GuildMember } from 'discord.js';
 import ms from 'ms';
 
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 import { infraction } from '../../lib/util';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('ban')
 		.setDescription('Ban a member.')
-		.setGroup('moderation')
+		.setGroup('MODERATION')
 		.setFormat('<member> [length] [reason]')
 		.setExamples(['ban @JohnDoe', 'ban @Pepe 3h', 'ban @Wumpus Spamming', 'ban @YourMom420 2d Megalomania'])
-		.setGlobal(false)
-		.setUserPermissions(['BAN_MEMBERS'])
 		.setClientPermissions(['BAN_MEMBERS'])
+		.setAuthority('MODERATOR')
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))
 		.addStringOption((option) => option.setName('duration').setDescription('Specify a duration.').setRequired(false))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason.').setRequired(false))

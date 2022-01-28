@@ -1,14 +1,13 @@
 import { CURRENCY_SYMBOL } from '../../config';
 import { GuildModel } from '../../models';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder, PermissionRole } from '../../structures';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('currency')
 		.setDescription('View or update the currency symbol.')
-		.setGroup('economy')
+		.setGroup('ECONOMY')
 		.setFormat('<view | set | reset> [currency]')
-		.setGlobal(false)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand.setName('view').setDescription('View the current currency symbol.')
 		)
@@ -16,14 +15,11 @@ export default class implements EconomicaCommand {
 			subcommand
 				.setName('set')
 				.setDescription('Set the currency symbol')
-				.setRoles([new PermissionRole('ECONOMY MANAGER', true)])
+				.setAuthority('MANAGER')
 				.addStringOption((option) => option.setName('currency').setDescription('Specify a symbol.').setRequired(true))
 		)
 		.addEconomicaSubcommand((subcommand) =>
-			subcommand
-				.setName('reset')
-				.setDescription('Reset the currency symbol.')
-				.setRoles([new PermissionRole('ECONOMY MANAGER', true)])
+			subcommand.setName('reset').setDescription('Reset the currency symbol.').setAuthority('MANAGER')
 		);
 
 	execute = async (ctx: Context) => {

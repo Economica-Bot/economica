@@ -1,26 +1,14 @@
 import { SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from '@discordjs/builders';
 import { PermissionString } from 'discord.js';
 
-import { Authority, PermissionRole } from '.';
+import { Authority } from '.';
 
 export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSubcommandGroupBuilder {
-	userPermissions: PermissionString[];
 	clientPermissions: PermissionString[];
-	roles: PermissionRole[];
 	authority: Authority;
-
-	setUserPermissions(userPermissions: PermissionString[]): this {
-		this.userPermissions = userPermissions;
-		return this;
-	}
 
 	setClientPermissions(clientPermissions: PermissionString[]): this {
 		this.clientPermissions = clientPermissions;
-		return this;
-	}
-
-	setRoles(roles: PermissionRole[]): this {
-		this.roles = roles;
 		return this;
 	}
 
@@ -41,9 +29,8 @@ export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSub
 	toJSON() {
 		return {
 			...super.toJSON(),
-			userPermissions: this.userPermissions,
 			clientPermissions: this.clientPermissions,
-			roles: this.roles,
+			authority: this.authority,
 		};
 	}
 }
@@ -53,9 +40,7 @@ export interface EconomicaSlashCommandSubcommandGroupBuilder extends SlashComman
 export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcommandBuilder {
 	format: string;
 	examples: string[];
-	userPermissions: PermissionString[];
 	clientPermissions: PermissionString[];
-	roles: PermissionRole[];
 	authority: Authority;
 
 	setFormat(format: string): this {
@@ -68,18 +53,8 @@ export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcomma
 		return this;
 	}
 
-	setUserPermissions(userPermissions: PermissionString[]): this {
-		this.userPermissions = userPermissions;
-		return this;
-	}
-
 	setClientPermissions(clientPermissions: PermissionString[]): this {
 		this.clientPermissions = clientPermissions;
-		return this;
-	}
-
-	setRoles(roles: PermissionRole[]): this {
-		this.roles = roles;
 		return this;
 	}
 
@@ -91,9 +66,8 @@ export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcomma
 	toJSON() {
 		return {
 			...super.toJSON(),
-			userPermissions: this.userPermissions,
 			clientPermissions: this.clientPermissions,
-			roles: this.roles,
+			authority: this.authority,
 		};
 	}
 }
