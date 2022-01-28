@@ -1,7 +1,7 @@
-import { parse_string } from '@adrastopoulos/number-parser';
+import { parseString } from '@adrastopoulos/number-parser';
 
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 import { getEconInfo, transaction } from '../../lib/util';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -19,7 +19,7 @@ export default class implements EconomicaCommand {
 		const user = ctx.interaction.options.getUser('user');
 		const { wallet } = await getEconInfo(ctx.interaction.guildId, user.id);
 		const amount = ctx.interaction.options.getString('amount');
-		const result = amount === 'all' ? wallet : parse_string(amount);
+		const result = amount === 'all' ? wallet : parseString(amount);
 
 		if (result) {
 			if (result < 1) return await ctx.embedify('error', 'user', `Amount less than 0`);

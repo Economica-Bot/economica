@@ -1,9 +1,9 @@
-import { parse_number } from '@adrastopoulos/number-parser';
+import { parseNumber } from '@adrastopoulos/number-parser';
 import { MessageEmbed } from 'discord.js';
 
+import { paginate } from '../../lib/util';
 import { MemberModel } from '../../models';
 import { BalanceString, Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-import { paginate } from '../../lib/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -27,6 +27,7 @@ export default class implements EconomicaCommand {
 		.addIntegerOption((option) =>
 			option.setName('page').setDescription('Specify a page.').setMinValue(1).setRequired(false)
 		);
+
 	execute = async (ctx: Context) => {
 		const type = ctx.interaction.options.getString('type') as BalanceString;
 		const page = ctx.interaction.options.getInteger('page', false) ?? 1;
@@ -37,10 +38,10 @@ export default class implements EconomicaCommand {
 		const pageCount = Math.ceil(members.length / entryCount);
 		const leaderBoardEntries: string[] = [];
 		let rank = 1;
-		
+
 		members.forEach((member) => {
 			const userId = member.userId;
-			const balance = parse_number(member[type]);
+			const balance = parseNumber(member[type]);
 			leaderBoardEntries.push(`\`${rank++}\` • <@${userId}> | ${currency}${balance}\n`);
 		});
 

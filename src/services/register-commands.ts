@@ -1,13 +1,13 @@
 import { Collection } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
-import { DEVELOPMENT_GUILD } from '../config';
 
+import { DEVELOPMENT_GUILD_IDS, PRODUCTION } from '../config';
 import { EconomicaClient, EconomicaService } from '../structures';
 
 export default class implements EconomicaService {
 	name = 'register-commands';
-	execute = async (client: EconomicaClient, guild_id?: string, global?: boolean) => {
+	execute = async (client: EconomicaClient) => {
 		console.log(`Executing service ${this.name}`);
 		client.commands = new Collection();
 		const commands = new Array();
@@ -19,7 +19,9 @@ export default class implements EconomicaService {
 				.filter((f: string) => f.endsWith('ts'));
 
 			for (const commandFile of commandFiles) {
-				const command = new (await import(`../commands/${commandDirectory}/${commandFile}`)).default();
+				const command = new (
+					await import(`../commands/${commandDirectory}/${commandFile}`)
+				).default();
 
 				if (!command.data.group) {
 					throw new Error(`Command ${command.data.name} missing group!`);
@@ -32,19 +34,15 @@ export default class implements EconomicaService {
 		}
 
 		client.once('ready', async () => {
-			DEVELOPMENT_GUILD.forEach(async (guildId) => {
+			DEVELOPMENT_GUILD_IDS.forEach(async (guildId) => {
 				const guild = await client.guilds.fetch(guildId);
 				await guild.commands.set(commands);
 			});
-			//await client.commands.set(commands); //Global
-		});
 
-		if (guild_id) {
-			const guild = await client.guilds.fetch(guild_id);
-			await guild.commands.set(commands); //Server
-		} else if (global) {
-			await client.application.commands.set(commands); //Global
-		}
+			if (PRODUCTION) {
+				await client.application.commands.set(commands);
+			}
+		});
 
 		console.log('Commands registered');
 	};

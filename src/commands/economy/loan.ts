@@ -1,9 +1,9 @@
 import { isValidObjectId } from 'mongoose';
 import ms from 'ms';
 
+import { getEconInfo, transaction } from '../../lib/util';
 import { LoanModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder, PermissionRole } from '../../structures';
-import { getEconInfo, transaction } from '../../lib/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()

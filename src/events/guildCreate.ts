@@ -1,6 +1,6 @@
 import { Guild } from 'discord.js';
 
-import { CURRENCY } from '../config';
+import { CURRENCY_SYMBOL } from '../config';
 import { GuildModel } from '../models';
 import { EconomicaClient } from '../structures';
 
@@ -12,7 +12,7 @@ export async function execute(client: EconomicaClient, guild: Guild) {
 			guildId: guild.id,
 		},
 		{
-			currency: CURRENCY,
+			currency: CURRENCY_SYMBOL,
 			transactionLogChannel: null,
 			infractionLogChannel: null,
 			auth: [],

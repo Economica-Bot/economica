@@ -1,8 +1,8 @@
-import { parse_string } from '@adrastopoulos/number-parser';
+import { parseString } from '@adrastopoulos/number-parser';
 import { GuildMember } from 'discord.js';
 
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder, PermissionRole } from '../../structures';
 import { getEconInfo, transaction } from '../../lib/util';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder, PermissionRole } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -29,7 +29,7 @@ export default class implements EconomicaCommand {
 	execute = async (ctx: Context) => {
 		const { currency } = ctx.guildDocument;
 		const member = ctx.interaction.options.getMember('user') as GuildMember;
-		const amount = parse_string(ctx.interaction.options.getString('amount'));
+		const amount = parseString(ctx.interaction.options.getString('amount'));
 		const target = ctx.interaction.options.getString('target');
 		const { wallet, treasury } = await getEconInfo(ctx.interaction.guildId, ctx.interaction.user.id);
 		const difference = target === 'wallet' ? amount - wallet : amount - treasury;

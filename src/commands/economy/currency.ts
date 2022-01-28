@@ -1,4 +1,4 @@
-import { CURRENCY } from '../../config';
+import { CURRENCY_SYMBOL } from '../../config';
 import { GuildModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder, PermissionRole } from '../../structures';
 
@@ -37,7 +37,7 @@ export default class implements EconomicaCommand {
 			await GuildModel.findOneAndUpdate({ guildId }, { currency: newCurrency });
 			return await ctx.embedify('success', 'guild', `Currency symbol set to ${newCurrency}`);
 		} else if (subcommand === 'reset') {
-			await GuildModel.findOneAndUpdate({ guildId }, { currency: CURRENCY });
+			await GuildModel.findOneAndUpdate({ guildId }, { currency: CURRENCY_SYMBOL });
 			return await ctx.embedify('success', 'guild', `Currency symbol reset: ${currency}`);
 		}
 	};

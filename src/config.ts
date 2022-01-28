@@ -3,17 +3,25 @@ import { ActivityTypes } from 'discord.js/typings/enums';
 import i18n from 'i18n';
 import path from 'path';
 
-export const DISCORD_URL = process.env.DISCORD_URL;
-export const DEVELOPMENT_GUILD: string[] = JSON.parse(process.env.GUILD_ID);
-export const OWNERS: string[] = JSON.parse(process.env.OWNER_ID);
-export const PRODUCTION = Boolean(process.env.PRODUCTION);
+// Required
+export const BOT_TOKEN = process.env.ECON_ALPHA_TOKEN;
+export const DEVELOPER_IDS: string[] = JSON.parse(process.env.DEVELOPER_IDS);
+export const DEVELOPMENT_GUILD_IDS: string[] = JSON.parse(process.env.DEVELOPMENT_GUILD_IDS);
+export const PUBLIC_GUILD_ID = process.env.PUBLIC_GUILD_ID;
+export const DISCORD_INVITE_URL = process.env.DISCORD_INVITE_URL;
+export const WEBHOOK_URLS: string[] = JSON.parse(process.env.WEBHOOK_URLS);
+export const PRODUCTION = process.env.PRODUCTION === 'true';
 export const DEVELOPMENT = !PRODUCTION;
-export const BOT_LOG_CHANNEL = process.env.BOT_LOG_ID;
-export const MONGO_PATH = process.env.MONGO_PATH;
+export const DEBUG = process.env.DEBUG === 'true';
+export const MONGO_URI = process.env.MONGO_URI;
+export const CURRENCY_SYMBOL = process.env.CURRENCY_SYMBOL;
+
+// Optional
 export const WEBSITE_URL = process.env.WEBSITE_URL;
 export const ACTIVITY_NAME = process.env.ACTIVITY_NAME;
 export const ACTIVITY_TYPE = process.env.ACTIVITY_TYPE as ExcludeEnum<typeof ActivityTypes, 'CUSTOM'>;
 
+// Constants
 export const clientOptions: ClientOptions = {
 	presence: {
 		activities: [
@@ -41,7 +49,6 @@ export const inviteOptions: InviteGenerationOptions = {
 	],
 };
 
-export const CURRENCY = process.env.CURRENCY_SYMBOL;
 export const economyDefaults = {
 	work: {
 		min: 100,

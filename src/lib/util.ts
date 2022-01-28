@@ -1,6 +1,5 @@
 import * as Discord from 'discord.js';
 
-import { BOT_LOG_CHANNEL, DISCORD_URL } from '../config';
 import { GuildModel, InfractionModel, MemberModel, TransactionModel } from '../models';
 import {
 	EconomicaClient,
@@ -36,7 +35,10 @@ export function embedify(
 	return embed;
 }
 
-export function error(description: string, title: string = 'Input Error'): Discord.InteractionReplyOptions {
+export function error(
+	description: string,
+	title: string = 'Input Error'
+): Discord.InteractionReplyOptions {
 	return {
 		embeds: [
 			{
@@ -49,7 +51,10 @@ export function error(description: string, title: string = 'Input Error'): Disco
 	};
 }
 
-export function warning(description: string, title: string = 'Warning'): Discord.InteractionReplyOptions {
+export function warning(
+	description: string,
+	title: string = 'Warning'
+): Discord.InteractionReplyOptions {
 	return {
 		embeds: [
 			{
@@ -62,7 +67,10 @@ export function warning(description: string, title: string = 'Warning'): Discord
 	};
 }
 
-export function success(description: string, title: string = 'Success'): Discord.InteractionReplyOptions {
+export function success(
+	description: string,
+	title: string = 'Success'
+): Discord.InteractionReplyOptions {
 	return {
 		embeds: [
 			{
@@ -429,40 +437,4 @@ export async function paginate(
 			components: [],
 		});
 	});
-}
-
-export async function runtimeError(
-	client: EconomicaClient,
-	error: Error,
-	interaction: Discord.CommandInteraction = null
-) {
-	console.error(error);
-	let description, title, icon_url;
-	if (interaction) {
-		title = interaction.user.tag;
-		icon_url = interaction.user.displayAvatarURL();
-		description = `**Command**: \`${interaction.commandName}\`\n\`\`\`js\n${error}\`\`\`
-    You've encountered an error.
-    Report this to Adrastopoulos#2753 or QiNG-agar#0540 in [Economica](${DISCORD_URL}).`;
-		const embed = embedify('RED', title, icon_url, description);
-		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ embeds: [embed], ephemeral: true });
-		} else {
-			await interaction.reply({ embeds: [embed], ephemeral: true });
-		}
-	}
-
-	const channel = (await client.channels.cache.get(BOT_LOG_CHANNEL)) as Discord.TextChannel;
-	if (
-		channel &&
-		channel
-			.permissionsFor(await client.guilds.cache.get(client.user.id).members.cache.get(client.user.id))
-			.has('SEND_MESSAGES')
-	) {
-		title = error.name;
-		icon_url = client.user.displayAvatarURL();
-		description = `\`\`\`js\n${error.stack}\`\`\``;
-		const embed = embedify('RED', title, icon_url, description);
-		channel.send({ embeds: [embed] }).catch(console.error);
-	}
 }

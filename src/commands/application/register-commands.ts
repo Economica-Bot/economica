@@ -11,9 +11,13 @@ export default class implements EconomicaCommand {
 			subcommand
 				.setName('guild')
 				.setDescription('Refresh server commands.')
-				.addStringOption((option) => option.setName('guild_id').setDescription('Specify a server id').setRequired(true))
+				.addStringOption((option) =>
+					option.setName('guild_id').setDescription('Specify a server id').setRequired(true)
+				)
 		)
-		.addEconomicaSubcommand((subcommand) => subcommand.setName('global').setDescription('Refresh global commands.'));
+		.addEconomicaSubcommand((subcommand) =>
+			subcommand.setName('global').setDescription('Refresh global commands.')
+		);
 
 	execute = async (ctx: Context) => {
 		await ctx.interaction.deferReply({ ephemeral: true });
@@ -23,7 +27,7 @@ export default class implements EconomicaCommand {
 			return await ctx.embedify('error', 'user', 'Could not find guild with that id.');
 		}
 
-		await new registerCommands().execute(ctx.client, guildId, global);
+		await new registerCommands().execute(ctx.client);
 		return await ctx.embedify('success', 'bot', 'Commands refreshed.');
 	};
 }

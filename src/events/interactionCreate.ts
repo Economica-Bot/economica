@@ -1,9 +1,13 @@
 import { CommandInteraction } from 'discord.js';
 
-import { GuildModel } from '../models';
-import { Context, EconomicaClient, EconomicaCommand, EconomicaSlashCommandBuilder } from '../structures';
 import { commandCheck } from '../lib/command';
-import { runtimeError } from '../lib/util';
+import { GuildModel } from '../models';
+import {
+	Context,
+	EconomicaClient,
+	EconomicaCommand,
+	EconomicaSlashCommandBuilder,
+} from '../structures';
 
 export const name = 'interactionCreate';
 
@@ -13,13 +17,7 @@ export async function execute(client: EconomicaClient, interaction: CommandInter
 	}
 
 	const command = client.commands.get(interaction.commandName) as EconomicaCommand;
-	try {
-		if (!command) {
-			throw new Error(`There was an error while executing this command`);
-		}
-	} catch (err) {
-		runtimeError(client, err, interaction);
-	}
+	if (!command) throw new Error(`There was an error while executing this command`);
 
 	const data = command.data as EconomicaSlashCommandBuilder;
 	const check = await commandCheck(interaction, data);
@@ -27,10 +25,6 @@ export async function execute(client: EconomicaClient, interaction: CommandInter
 	if (check) {
 		const guildDocument = await GuildModel.findOne({ guildId: interaction.guildId });
 		const context = new Context(client, interaction, guildDocument);
-		try {
-			await command?.execute(context);
-		} catch (err) {
-			runtimeError(client, err, interaction);
-		}
+		await command?.execute(context);
 	}
 }

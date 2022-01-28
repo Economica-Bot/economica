@@ -1,7 +1,5 @@
-import { MessageEmbed } from 'discord.js';
-
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 import { getEconInfo } from '../../lib/util';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()

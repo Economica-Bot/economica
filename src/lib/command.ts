@@ -1,6 +1,8 @@
-import { OWNERS } from '../config';
-import { GuildModel } from '../models';
 import { CommandInteraction, Guild, GuildMember, MessageEmbed, PermissionString, TextChannel } from 'discord.js';
+
+import { authors, hyperlinks } from '.';
+import { DEVELOPER_IDS } from '../config';
+import { GuildModel } from '../models';
 import {
 	Authority,
 	EconomicaSlashCommandBuilder,
@@ -8,13 +10,12 @@ import {
 	EconomicaSlashCommandSubcommandGroupBuilder,
 	PermissionRole,
 } from '../structures';
-import { authors, hyperlinks } from '.';
 
 export async function commandCheck(
 	interaction: CommandInteraction,
 	data: EconomicaSlashCommandBuilder
 ): Promise<boolean> {
-	if (data.devOnly && !OWNERS.includes(interaction.user.id)) {
+	if (data.devOnly && !DEVELOPER_IDS.includes(interaction.user.id)) {
 		interaction.reply({ content: 'This command is dev only.', ephemeral: true });
 		return false;
 	}
@@ -61,7 +62,11 @@ const permissionCheck = async (
 	const missingRoles: PermissionRole[] = [];
 	let missingAuthority: Authority;
 
-	if (OWNERS.includes(member.id) || interaction.guild.ownerId === member.id || member.permissions.has('MANAGE_GUILD')) {
+	if (
+		DEVELOPER_IDS.includes(member.id) ||
+		interaction.guild.ownerId === member.id ||
+		member.permissions.has('MANAGE_GUILD')
+	) {
 		return { status: true };
 	}
 
