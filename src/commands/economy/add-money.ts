@@ -7,7 +7,7 @@ import { Context, EconomicaCommand, EconomicaSlashCommandBuilder, PermissionRole
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('add-money')
-		.setDescription('Add/remove funds from a balance.')
+		.setDescription('Add/remove money from a balance.')
 		.setGroup('economy')
 		.setFormat('<user> <amount> <target>')
 		.setExamples(['add-money @JohnDoe 300 wallet', 'add-money @Wumpus 100 treasury'])
