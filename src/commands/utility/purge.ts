@@ -23,6 +23,7 @@ export default class implements EconomicaCommand {
 		.addNumberOption((option) =>
 			option.setName('amount').setDescription('Specify an amount.').setMinValue(1).setMaxValue(100).setRequired(false)
 		);
+
 	execute = async (ctx: Context) => {
 		const channel = (ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel) as GuildTextBasedChannel;
 		const amount = ctx.interaction.options.getNumber('amount') ?? 100;

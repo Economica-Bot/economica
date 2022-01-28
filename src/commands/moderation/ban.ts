@@ -25,6 +25,7 @@ export default class implements EconomicaCommand {
 				.setMaxValue(7)
 				.setRequired(false)
 		);
+
 	execute = async (ctx: Context) => {
 		const member = (await ctx.interaction.guild.members.fetch(ctx.client.user.id)) as GuildMember;
 		const target = ctx.interaction.options.getMember('target') as GuildMember;
@@ -37,13 +38,15 @@ export default class implements EconomicaCommand {
 
 		if (target.id === ctx.interaction.user.id) return await ctx.embedify('warn', 'user', 'You cannot ban yourself.');
 		if (target.id === ctx.client.user.id) return await ctx.embedify('warn', 'user', 'You cannot ban me!');
-		if (target.roles.highest.position > member.roles.highest.position) return await ctx.embedify('warn', 'user', "Target's roles are too high.");
+		if (target.roles.highest.position > member.roles.highest.position)
+			return await ctx.embedify('warn', 'user', "Target's roles are too high.");
 		if (!target.bannable) return await ctx.embedify('warn', 'user', 'Target is unbannable.');
-		if (duration !== 'Permanent' && (!milliseconds || milliseconds < 0)) return ctx.embedify('warn', 'user', 'Invalid duration.');
-		
+		if (duration !== 'Permanent' && (!milliseconds || milliseconds < 0))
+			return ctx.embedify('warn', 'user', 'Invalid duration.');
+
 		await target
 			.send(`You have been banned for \`${reason}\` ${formattedDuration} from **${ctx.interaction.guild.name}**`)
-			.catch(() =>  messagedUser = false );
+			.catch(() => (messagedUser = false));
 		await target.ban({ days, reason });
 		await infraction(
 			ctx.client,
@@ -57,7 +60,9 @@ export default class implements EconomicaCommand {
 			milliseconds
 		);
 
-		const content = `Banned ${target.user.tag} ${formattedDuration}.${messagedUser ? '\nUser notified' : '\nCould not notify user'}`
+		const content = `Banned ${target.user.tag} ${formattedDuration}.${
+			messagedUser ? '\nUser notified' : '\nCould not notify user'
+		}`;
 		return await ctx.embedify('success', 'user', content);
 	};
 }

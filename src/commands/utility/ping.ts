@@ -7,6 +7,7 @@ export default class implements EconomicaCommand {
 		.setDescription("Get Economica's latency.")
 		.setGroup('utility')
 		.setGlobal(true);
+
 	execute = async (ctx: Context) => {
 		return await ctx.embedify(
 			'success',

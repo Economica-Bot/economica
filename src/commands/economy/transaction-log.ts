@@ -24,6 +24,7 @@ export default class implements EconomicaCommand {
 				.setDescription('Reset the transaction log channel.')
 				.setRoles([new PermissionRole('ECONOMY MANAGER', true)])
 		);
+
 	execute = async (ctx: Context) => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		if (subcommand === 'view') {

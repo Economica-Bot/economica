@@ -40,6 +40,7 @@ export default class implements EconomicaCommand {
 				.setDescription("Reset a role's authority level.")
 				.addRoleOption((option) => option.setName('role').setDescription('Specify a role.').setRequired(true))
 		);
+
 	execute = async (ctx: Context) => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 

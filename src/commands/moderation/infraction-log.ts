@@ -24,6 +24,7 @@ export default class implements EconomicaCommand {
 				.setDescription('Reset the infraction log channel.')
 				.setUserPermissions(['ADMINISTRATOR'])
 		);
+
 	execute = async (ctx: Context) => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		switch (subcommand) {

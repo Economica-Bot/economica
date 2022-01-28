@@ -6,6 +6,7 @@ export default class implements EconomicaCommand {
 		.setDescription('Reset all slash commands')
 		.setGroup('application')
 		.setDevOnly(true);
+
 	execute = async (ctx: Context) => {
 		await ctx.interaction.deferReply({ ephemeral: true });
 		await ctx.interaction.guild.commands.set([]);
