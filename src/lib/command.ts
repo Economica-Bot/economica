@@ -61,7 +61,7 @@ const permissionCheck = async (
 	if (
 		DEVELOPER_IDS.includes(member.id) ||
 		interaction.guild.ownerId === member.id ||
-		member.permissions.has('MANAGE_GUILD')
+		member.permissions.has('ADMINISTRATOR')
 	) {
 		return { status: true };
 	}
