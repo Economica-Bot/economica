@@ -15,7 +15,9 @@ export default class implements EconomicaCommand {
 				.setName('set')
 				.setDescription('Set the transaction log channel.')
 				.setAuthority('MANAGER')
-				.addChannelOption((option) => option.setName('channel').setDescription('Specify a channel').addChannelType(0))
+				.addChannelOption((option) =>
+					option.setName('channel').setDescription('Specify a channel').addChannelType(0).setRequired(true)
+				)
 		)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand.setName('reset').setDescription('Reset the transaction log channel.').setAuthority('MANAGER')
@@ -32,10 +34,10 @@ export default class implements EconomicaCommand {
 			}
 		} else if (subcommand === 'set') {
 			const channel = ctx.interaction.options.getChannel('channel');
-			await ctx.guildDocument.update({ transactionLogChannel: channel.id });
+			await ctx.guildDocument.updateOne({ transactionLogChannel: channel.id });
 			return await ctx.embedify('success', 'user', `Transaction log set to ${channel}.`);
 		} else if (subcommand === 'reset') {
-			await ctx.guildDocument.update({ transactionLogChannel: null });
+			await ctx.guildDocument.updateOne({ transactionLogChannel: null });
 			return await ctx.embedify('success', 'user', 'Transaction log reset.');
 		}
 	};

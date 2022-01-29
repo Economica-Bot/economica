@@ -15,7 +15,9 @@ export default class implements EconomicaCommand {
 				.setName('set')
 				.setDescription('Set the infraction log channel.')
 				.setAuthority('ADMINISTRATOR')
-				.addChannelOption((option) => option.setName('channel').setDescription('Specify a channel').addChannelType(0))
+				.addChannelOption((option) =>
+					option.setName('channel').setDescription('Specify a channel').addChannelType(0).setRequired(true)
+				)
 		)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand.setName('reset').setDescription('Reset the infraction log channel.').setAuthority('ADMINISTRATOR')
