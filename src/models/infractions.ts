@@ -11,6 +11,7 @@ interface Infraction {
 	permanent: boolean;
 	active: boolean;
 	duration: number;
+	createdAt: Date;
 }
 
 const Schema = new mongoose.Schema<Infraction>(
