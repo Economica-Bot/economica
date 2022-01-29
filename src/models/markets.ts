@@ -24,4 +24,4 @@ const Schema = new mongoose.Schema<Market>(
 	}
 );
 
-export const MarketModel: mongoose.Model<Market> = mongoose.model('Market_Items', Schema);
+export const MarketModel: mongoose.Model<Market> = mongoose.model('Markets', Schema);

@@ -46,4 +46,4 @@ const Schema = new mongoose.Schema<Shop>(
 	}
 );
 
-export const ShopModel: mongoose.Model<Shop> = mongoose.model('Shop_Items', Schema);
+export const ShopModel: mongoose.Model<Shop> = mongoose.model('Shops', Schema);
