@@ -1,6 +1,5 @@
 export { getAuthLevel, removeAuthRole, setAuthRole } from './auth';
 export { commandCheck } from './command';
-export { hyperlinks, authors } from './common';
 export { insertHL } from './formatting';
 export {
 	embedify,
