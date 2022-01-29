@@ -3,7 +3,7 @@ import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../s
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
-		.setName('income')
+		.setName('view-income')
 		.setDescription('View income commands and their stats.')
 		.setGroup('INCOME');
 
