@@ -4,29 +4,32 @@ import { authors, hyperlinks } from '.';
 import { DEVELOPER_IDS } from '../config';
 import { GuildModel } from '../models';
 import {
+	Context,
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from '../structures';
 import { Authority } from '../typings';
 
-export async function commandCheck(
-	interaction: CommandInteraction,
-	data: EconomicaSlashCommandBuilder
-): Promise<boolean> {
-	if (data.authority === 'DEVELOPER' && !DEVELOPER_IDS.includes(interaction.user.id)) {
-		interaction.reply({ content: 'This command is dev only.', ephemeral: true });
+export async function commandCheck(ctx: Context): Promise<boolean> {
+	if (!ctx.data.enabled) {
+		await ctx.embedify('error', 'user', 'This command is disabled.');
 		return false;
 	}
 
-	if (!data.global && !interaction.guild) {
-		interaction.reply({ content: 'This command is server only.', ephemeral: true });
+	if (ctx.data.authority === 'DEVELOPER' && !DEVELOPER_IDS.includes(ctx.interaction.user.id)) {
+		await ctx.embedify('error', 'user', 'This command is dev only.');
 		return false;
 	}
 
-	const permissionResponse = await permissionCheck(interaction, data);
-	if (interaction.member && !permissionResponse.status) {
-		interaction.reply({
+	if (!ctx.data.global && !ctx.interaction.guild) {
+		await ctx.embedify('error', 'user', 'This command may only be used within servers.');
+		return false;
+	}
+
+	const permissionResponse = await permissionCheck(ctx.interaction, ctx.data);
+	if (ctx.interaction.member && !permissionResponse.status) {
+		ctx.interaction.reply({
 			embeds: [permissionResponse.embed],
 			ephemeral: true,
 		});

@@ -14,12 +14,12 @@ export async function execute(client: EconomicaClient, interaction: CommandInter
 	const command = client.commands.get(interaction.commandName) as EconomicaCommand;
 	if (!command) throw new Error(`There was an error while executing this command`);
 
+	const guildDocument = await GuildModel.findOne({ guildId: interaction.guildId });
 	const data = command.data as EconomicaSlashCommandBuilder;
-	const check = await commandCheck(interaction, data);
+	const ctx = new Context(client, interaction, guildDocument, data);
+	const check = await commandCheck(ctx);
 
 	if (check) {
-		const guildDocument = await GuildModel.findOne({ guildId: interaction.guildId });
-		const context = new Context(client, interaction, guildDocument);
-		await command?.execute(context);
+		await command?.execute(ctx);
 	}
 }
