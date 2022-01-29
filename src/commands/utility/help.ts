@@ -48,41 +48,28 @@ export default class implements EconomicaCommand {
 			return await ctx.interaction.reply({ embeds: [embed] });
 		}
 
-		const subcommand = (
-			ctx.client.commands.find((command) => {
-				const data = command.data as EconomicaSlashCommandBuilder;
-				return data.getSubcommand(query) !== undefined;
-			})?.data as EconomicaSlashCommandBuilder
-		)?.getSubcommand(query) as EconomicaSlashCommandSubcommandBuilder;
-
-		const subcommandGroup = (
-			ctx.client.commands.find((command) => {
-				const data = command.data as EconomicaSlashCommandBuilder;
-				return data.getSubcommand(subcommand?.name) !== undefined || data.getSubcommandGroup(query) !== undefined;
-			})?.data as EconomicaSlashCommandBuilder
-		)?.getSubcommandGroup(subcommand?.name || query) as EconomicaSlashCommandSubcommandGroupBuilder;
-
 		const command = ctx.client.commands.find((command) => {
 			const data = command.data as EconomicaSlashCommandBuilder;
-			return (
-				data.name === query ||
-				data.getSubcommand(subcommand?.name) !== undefined ||
-				data.getSubcommandGroup(subcommandGroup?.name) !== undefined
-			);
-		});
-
-		const { group } = ctx.client.commands.find((cmd) => {
-			const data = cmd.data as EconomicaSlashCommandBuilder;
-			return (
-				data.group === query ||
-				data.getSubcommand(subcommand?.name) !== undefined ||
-				data.getSubcommandGroup(subcommandGroup?.name) !== undefined ||
-				data.name === command?.data?.name
-			);
+			return data.name.toLowerCase() === query.toLowerCase();
 		})?.data as EconomicaSlashCommandBuilder;
 
+		const group = (
+			ctx.client.commands.find((cmd) => {
+				const data = cmd.data as EconomicaSlashCommandBuilder;
+				return (
+					data.group.toLocaleLowerCase() === query.toLowerCase() ||
+					data.name.toLowerCase() === command?.name?.toLocaleLowerCase()
+				);
+			})?.data as EconomicaSlashCommandBuilder
+		)?.group;
+
 		if (group && !command) {
-			const embed: MessageEmbed = await ctx.embedify('info', 'user', null, false);
+			const embed: MessageEmbed = await ctx.embedify(
+				'info',
+				{ name: group, iconURL: ctx.client.user.displayAvatarURL() },
+				null,
+				false
+			);
 			for (const command of ctx.client.commands) {
 				const data = command[1].data as EconomicaSlashCommandBuilder;
 				if (data.group === group) {
@@ -93,20 +80,19 @@ export default class implements EconomicaCommand {
 			return await ctx.interaction.reply({ embeds: [embed] });
 		}
 
-		if (command && !subcommandGroup) {
-			const data = command.data as EconomicaSlashCommandBuilder;
+		if (command) {
 			const embed = new MessageEmbed()
 				.setAuthor({
-					name: `${group}:${data.name}`,
+					name: `${group}:${command.name}`,
 					iconURL: ctx.client.user.displayAvatarURL(),
 				})
 				.setColor('YELLOW')
-				.setDescription(`${data.description}`)
-				.addField('Format', data.format ? `\`${data.format}\`` : 'none', true)
-				.addField('Examples', data.examples ? `\`${data.examples.join('`\n`')}\`` : 'none', true)
-				.addField('Servers Only?', data.global ? '`False`' : '`True`', true);
+				.setDescription(`${command.description}`)
+				.addField('Format', command.format ? `\`${command.format}\`` : 'none', true)
+				.addField('Examples', command.examples ? `\`${command.examples.join('`\n`')}\`` : 'none', true)
+				.addField('Servers Only?', command.global ? '`False`' : '`True`', true);
 
-			data.options.forEach((option) => {
+			command.options.forEach((option) => {
 				if (option instanceof SlashCommandSubcommandGroupBuilder) {
 					const scsgb = option;
 					const subcommands: string[] = [];
@@ -123,42 +109,6 @@ export default class implements EconomicaCommand {
 			return await ctx.interaction.reply({ embeds: [embed] });
 		}
 
-		if (subcommandGroup && !subcommand) {
-			const data = command.data as EconomicaSlashCommandBuilder;
-			const embed = new MessageEmbed()
-				.setAuthor({
-					name: `${group}:${data.name}:${subcommandGroup.name}`,
-					iconURL: ctx.client.user.displayAvatarURL(),
-				})
-				.setColor('YELLOW')
-				.setDescription(`${subcommandGroup.description}`);
-			for (const subcommand of subcommandGroup.options as EconomicaSlashCommandSubcommandBuilder[]) {
-				embed.addField(
-					subcommand.name,
-					`> *${subcommand.description}* \n${subcommand.format ? `Format: \`${subcommand.format}\`` : ''}`
-				);
-			}
-
-			return await ctx.interaction.reply({ embeds: [embed] });
-		}
-
-		if (subcommand) {
-			const data = command.data as EconomicaSlashCommandBuilder;
-			const embed = new MessageEmbed()
-				.setAuthor({
-					name: `${group}:${data.name}:${subcommandGroup.name}:${subcommand.name}`,
-					iconURL: ctx.client.user.displayAvatarURL(),
-				})
-				.setColor('YELLOW')
-				.setDescription(subcommand.description)
-				.addField('Format', subcommand.format ? `\`${subcommand.format}\`` : 'None', true)
-				.addField('Examples', subcommand.examples ? `\`${subcommand.examples.join('`\n`')}\`` : 'None', true);
-
-			return await ctx.interaction.reply({ embeds: [embed] });
-		}
-
-		return await ctx.interaction.reply(
-			`Could not find any groups, commands, subcommand groups, or subcommands matching \`${query}\`.`
-		);
+		return await ctx.embedify('error', 'user', `Could not find any groups or commands matching \`${query}\`.`);
 	};
 }
