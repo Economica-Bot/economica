@@ -49,6 +49,39 @@ export const inviteOptions: InviteGenerationOptions = {
 	],
 };
 
+export const hyperlinks = {
+	help: '[Help Me Understand](https://discord.gg/57rQ7aHTpX)',
+	bug: '[Report An Issue](https://discord.gg/qEXKFth3vY)',
+	suggest: '[Suggest An Improvement](https://discord.gg/Rez4Etbf9X)',
+	insertAll: () => `${hyperlinks.help}\n${hyperlinks.bug}\n${hyperlinks.suggest}`,
+};
+
+export const icons = {
+	success: 'https://cdn.discordapp.com/emojis/843390419261194300.webp?size=96&quality=lossless',
+	warning: 'https://cdn.discordapp.com/emojis/843390419270107136.webp?size=96&quality=lossless',
+	abort: 'https://cdn.discordapp.com/emojis/843390419270107136.webp?size=96&quality=lossless',
+	error: 'https://cdn.discordapp.com/emojis/843390419303661569.webp?size=96&quality=lossless',
+};
+
+export const authors = {
+	success: {
+		name: 'Process Executed Successfully',
+		iconURL: icons.success,
+	},
+	warning: {
+		name: 'Process Executed With Issues',
+		iconURL: icons.warning,
+	},
+	abort: {
+		name: 'Process Aborted',
+		iconURL: icons.abort,
+	},
+	error: {
+		name: 'Process Error',
+		iconURL: icons.error,
+	},
+};
+
 export const economyDefaults = {
 	work: {
 		min: 100,
