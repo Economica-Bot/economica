@@ -29,7 +29,7 @@ export default class implements EconomicaCommand {
 		if (!(await validateTarget(ctx))) return;
 
 		const target = ctx.interaction.options.getMember('target') as GuildMember;
-		const duration = ctx.interaction.options.getString('length') ?? 'Permanent';
+		const duration = ctx.interaction.options.getString('duration') ?? 'Permanent';
 		const milliseconds = ms(duration);
 		const formattedDuration = milliseconds ? `for ${ms(milliseconds)}` : 'permanently';
 		const reason = ctx.interaction.options.getString('reason') ?? 'No reason provided';
