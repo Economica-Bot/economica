@@ -1,7 +1,7 @@
 import { ColorResolvable, CommandInteraction, MessageEmbed } from 'discord.js';
 import { Document } from 'mongoose';
 
-import { EconomicaClient } from '.';
+import { EconomicaClient, EconomicaSlashCommandBuilder } from '.';
 import { Guild } from '../models/guilds';
 import { Author, ReplyString } from '../typings';
 
@@ -16,11 +16,18 @@ export class Context {
 	public client: EconomicaClient;
 	public interaction: CommandInteraction;
 	public guildDocument: Guild & Document<Guild>;
+	public data: EconomicaSlashCommandBuilder;
 
-	public constructor(client: EconomicaClient, interaction: CommandInteraction, guildDocument: Guild & Document<Guild>) {
+	public constructor(
+		client: EconomicaClient,
+		interaction: CommandInteraction,
+		guildDocument: Guild & Document<Guild>,
+		data: EconomicaSlashCommandBuilder
+	) {
 		this.client = client;
 		this.interaction = interaction;
 		this.guildDocument = guildDocument;
+		this.data = data;
 	}
 
 	public embedify(
@@ -29,6 +36,7 @@ export class Context {
 		content: string | null,
 		send: boolean = true
 	): MessageEmbed | Promise<any> {
+		const ephemeral = type === 'error' || type === 'warn';
 		const embed = new MessageEmbed().setColor(EmbedColors[type]);
 
 		if (content) {
@@ -58,9 +66,9 @@ export class Context {
 			if (this.interaction.deferred) {
 				return this.interaction.editReply({ embeds: [embed] });
 			} else if (this.interaction.replied) {
-				return this.interaction.followUp({ embeds: [embed] });
+				return this.interaction.followUp({ embeds: [embed], ephemeral });
 			} else {
-				return this.interaction.reply({ embeds: [embed] });
+				return this.interaction.reply({ embeds: [embed], ephemeral });
 			}
 		} else return embed;
 	}
