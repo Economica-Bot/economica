@@ -11,7 +11,7 @@ export default class implements EconomicaService {
 			for (const member of members) {
 				for (const item of member.inventory) {
 					const shopItem = await ShopModel.findOne({
-						guildId: String(member.guildId),
+						guildId: member.guildId,
 						name: item.name,
 					});
 
