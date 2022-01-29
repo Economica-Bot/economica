@@ -3,14 +3,7 @@ import * as Discord from 'discord.js';
 
 import { GuildModel, InfractionModel, MemberModel, TransactionModel } from '../models';
 import { Context, EconomicaClient } from '../structures';
-import {
-	BalanceString,
-	EconomyInfo,
-	IncomeCommandProperties,
-	InfractionString,
-	Moderation,
-	TransactionString,
-} from '../typings';
+import { EconomyInfo, IncomeCommandProperties, InfractionString, Moderation, TransactionString } from '../typings';
 
 /**
  * Returns a message embed object.
@@ -435,24 +428,24 @@ export async function paginate(
 
 export async function validateAmount(
 	ctx: Context,
-	target: BalanceString
+	target: 'wallet' | 'treasury'
 ): Promise<{ validated: boolean; result?: number }> {
 	const { [target]: balance } = await getEconInfo(ctx.interaction.guildId, ctx.interaction.user.id);
 	const amount = ctx.interaction.options.getString('amount');
 	const result = amount === 'all' ? balance : parseString(amount);
 
-	if (!result) {
-		await ctx.embedify('error', 'user', 'Please enter a valid amount.');
+	if (!result && result !== 0) {
+		await ctx.embedify('error', 'user', 'Please enter a valid input.');
 		return { validated: false };
 	} else {
 		if (result < 1) {
-			await ctx.embedify('error', 'user', `Amount less than 0`);
+			await ctx.embedify('error', 'user', `Input less than 1.`);
 			return { validated: false };
 		} else if (result > balance) {
 			await ctx.embedify(
 				'error',
 				'user',
-				`Exceeds current ${target}:${ctx.guildDocument.currency}${balance.toLocaleString()}`
+				`Input exceeds current ${target}: ${ctx.guildDocument.currency}${balance.toLocaleString()}`
 			);
 
 			return { validated: false };
