@@ -1,7 +1,5 @@
 import * as mongoose from 'mongoose';
 
-import { ReqBoolean, ReqDate, ReqNum, ReqString, ReqStringArr } from '../structures';
-
 interface Shop {
 	guildId: string;
 	type: string;
@@ -24,23 +22,23 @@ interface Shop {
 
 const Schema = new mongoose.Schema<Shop>(
 	{
-		guildId: ReqString,
-		type: ReqString,
-		name: ReqString,
-		price: ReqNum,
-		active: ReqBoolean,
-		description: ReqString,
-		duration: ReqNum,
-		stackable: ReqBoolean,
-		stock: ReqNum,
-		rolesGiven: ReqStringArr,
-		rolesRemoved: ReqStringArr,
-		requiredRoles: ReqStringArr,
-		requiredItems: ReqStringArr,
-		requiredBank: ReqNum,
-		generatorPeriod: ReqNum, // generator intervals (ms)
-		generatorAmount: ReqNum,
-		createdAt: ReqDate,
+		guildId: { type: String, required: true },
+		type: { type: String, required: true },
+		name: { type: String, required: true },
+		price: { type: Number, required: true },
+		active: { type: Boolean, required: true },
+		description: { type: String, required: true },
+		duration: { type: Number, required: true },
+		stackable: { type: Boolean, required: true },
+		stock: { type: Number, required: true },
+		rolesGiven: { type: Array<String>(), required: true },
+		rolesRemoved: { type: Array<String>(), required: true },
+		requiredRoles: { type: Array<String>(), required: true },
+		requiredItems: { type: Array<String>(), required: true },
+		requiredBank: { type: Number, required: true },
+		generatorPeriod: { type: Number, required: true },
+		generatorAmount: { type: Number, required: true },
+		createdAt: { type: Date, required: true },
 	},
 	{
 		timestamps: true,

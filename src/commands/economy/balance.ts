@@ -1,4 +1,4 @@
-import { getEconInfo } from '../../lib/util';
+import { getEconInfo } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {

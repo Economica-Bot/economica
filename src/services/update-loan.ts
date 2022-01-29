@@ -1,4 +1,4 @@
-import * as util from '../lib/util';
+import * as util from '../lib';
 import { LoanModel } from '../models';
 import { EconomicaClient, EconomicaService } from '../structures';
 

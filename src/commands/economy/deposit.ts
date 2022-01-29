@@ -1,7 +1,7 @@
-import { transaction } from '../../lib/util';
-import { Context, EconomicaSlashCommandBuilder, EconomyCommand } from '../../structures';
+import { transaction, validateAmount } from '../../lib';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
-export default class extends EconomyCommand {
+export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('deposit')
 		.setDescription('Deposit funds from your wallet to your treasury.')
@@ -12,7 +12,7 @@ export default class extends EconomyCommand {
 
 	execute = async (ctx: Context) => {
 		const { currency } = ctx.guildDocument;
-		const { validated, result } = await this.validateAmount(ctx, 'wallet');
+		const { validated, result } = await validateAmount(ctx, 'wallet');
 		if (!validated) return;
 		await transaction(
 			ctx.client,

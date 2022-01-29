@@ -1,11 +1,12 @@
 import { EmbedAuthorData } from 'discord.js';
 
 export type GroupString = 'APPLICATION' | 'ECONOMY' | 'INCOME' | 'MODERATION' | 'SHOP' | 'STATISTICS' | 'UTILITY';
-export type ReplyString = 'success' | 'info' | 'warn' | 'error'
+export type ReplyString = 'success' | 'info' | 'warn' | 'error';
 export type InfractionString = 'BAN' | 'KICK' | 'TIMEOUT' | 'UNBAN' | 'UNTIMEOUT';
 export type BalanceString = 'wallet' | 'treasury' | 'total';
 export type Author = 'bot' | 'user' | 'guild' | EmbedAuthorData;
 export type Authority = 'USER' | 'MODERATOR' | 'MANAGER' | 'ADMINISTRATOR' | 'DEVELOPER';
+export type Moderation = 'ban' | 'kick' | 'timeout' | 'unban' | 'untimeout';
 export type TitleString =
 	| 'register:GUILD_NOT_FOUND'
 	| 'test:TEST'
@@ -122,3 +123,5 @@ export type TransactionString =
 	| 'ROB_SUCCESS'
 	| 'ROB_VICTIM'
 	| 'ROB_FINE';
+
+export { CommandData, InventoryItem, EconomyInfo, IncomeCommandProperties, RoleAuthority } from './interfaces';

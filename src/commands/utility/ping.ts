@@ -1,5 +1,5 @@
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 import i18n from '../../config';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()

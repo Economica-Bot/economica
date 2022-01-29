@@ -1,15 +1,9 @@
-import { ColorResolvable, CommandInteraction, MessageEmbed, EmbedAuthorData } from 'discord.js';
+import { ColorResolvable, CommandInteraction, MessageEmbed } from 'discord.js';
 import { Document } from 'mongoose';
 
-import {
-	Author,
-	EconomicaClient,
-	EconomicaSlashCommandBuilder,
-	EconomicaSlashCommandSubcommandBuilder,
-	EconomicaSlashCommandSubcommandGroupBuilder,
-} from '.';
+import { EconomicaClient } from '.';
 import { Guild } from '../models/guilds';
-import { ReplyString } from './Types';
+import { Author, ReplyString } from '../typings';
 
 const EmbedColors: Record<ReplyString, ColorResolvable> = {
 	success: 'GREEN',

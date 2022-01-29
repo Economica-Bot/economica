@@ -1,7 +1,5 @@
 import * as mongoose from 'mongoose';
 
-import { ReqBoolean, ReqString } from '../structures';
-
 interface Market {
 	userId: string;
 	guildId: string;
@@ -13,12 +11,12 @@ interface Market {
 
 const Schema = new mongoose.Schema<Market>(
 	{
-		userId: ReqString,
-		guildId: ReqString,
-		item: ReqString,
-		price: ReqString,
-		description: ReqString,
-		active: ReqBoolean,
+		userId: { type: String, required: true },
+		guildId: { type: String, required: true },
+		item: { type: String, required: true },
+		price: { type: String, required: true },
+		description: { type: String, required: true },
+		active: { type: Boolean, required: true },
 	},
 	{
 		timestamps: true,

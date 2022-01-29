@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 
 import { TransactionModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';

@@ -1,7 +1,7 @@
 import { isValidObjectId } from 'mongoose';
 import ms from 'ms';
 
-import { getEconInfo, transaction } from '../../lib/util';
+import { getEconInfo, transaction } from '../../lib';
 import { LoanModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 

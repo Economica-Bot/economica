@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 
-import { ReqRoleAuthorityArr, ReqString, RoleAuthority } from '../structures';
+import { RoleAuthority } from '../typings';
 
 export interface Guild {
 	guildId: string;
@@ -12,11 +12,11 @@ export interface Guild {
 
 const Schema = new mongoose.Schema<Guild>(
 	{
-		guildId: ReqString,
-		currency: ReqString,
-		transactionLogChannel: ReqString,
-		infractionLogChannel: ReqString,
-		auth: ReqRoleAuthorityArr,
+		guildId: { type: String, required: true },
+		currency: { type: String, required: true },
+		transactionLogChannel: { type: String, required: true },
+		infractionLogChannel: { type: String, required: true },
+		auth: { type: Array<RoleAuthority>(), required: true },
 	},
 	{
 		strict: true,

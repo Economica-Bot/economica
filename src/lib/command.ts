@@ -4,11 +4,11 @@ import { authors, hyperlinks } from '.';
 import { DEVELOPER_IDS } from '../config';
 import { GuildModel } from '../models';
 import {
-	Authority,
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from '../structures';
+import { Authority } from '../typings';
 
 export async function commandCheck(
 	interaction: CommandInteraction,
@@ -53,7 +53,6 @@ const permissionCheck = async (
 	const subcommand = data.getSubcommand(
 		interaction.options.getSubcommand(false)
 	) as EconomicaSlashCommandSubcommandBuilder;
-	const userPermissions: PermissionString[] = [];
 	const clientPermissions: PermissionString[] = [];
 	const missingClientPermissions: PermissionString[] = [];
 	let missingAuthority: Authority;

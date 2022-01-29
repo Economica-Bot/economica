@@ -1,7 +1,5 @@
 import * as mongoose from 'mongoose';
 
-import { ReqBoolean, ReqDate, ReqNum, ReqString } from '../structures';
-
 interface Loan {
 	guildId: string;
 	borrowerId: string;
@@ -17,15 +15,15 @@ interface Loan {
 
 const Schema = new mongoose.Schema<Loan>(
 	{
-		guildId: ReqString,
-		borrowerId: ReqString,
-		lenderId: ReqString,
-		principal: ReqNum,
-		repayment: ReqNum,
-		expires: ReqDate,
-		pending: ReqBoolean,
-		active: ReqBoolean,
-		complete: ReqBoolean,
+		guildId: { type: String, required: true },
+		borrowerId: { type: String, required: true },
+		lenderId: { type: String, required: true },
+		principal: { type: Number, required: true },
+		repayment: { type: Number, required: true },
+		expires: { type: Date, required: true },
+		pending: { type: Boolean, required: true },
+		active: { type: Boolean, required: true },
+		complete: { type: Boolean, required: true },
 	},
 	{
 		timestamps: true,

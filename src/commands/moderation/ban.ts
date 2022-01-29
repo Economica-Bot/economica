@@ -1,7 +1,7 @@
 import { GuildMember } from 'discord.js';
 import ms from 'ms';
 
-import { infraction } from '../../lib/util';
+import { infraction, validateTarget } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -26,7 +26,8 @@ export default class implements EconomicaCommand {
 		);
 
 	execute = async (ctx: Context) => {
-		const member = (await ctx.interaction.guild.members.fetch(ctx.client.user.id)) as GuildMember;
+		if (!(await validateTarget(ctx))) return;
+
 		const target = ctx.interaction.options.getMember('target') as GuildMember;
 		const duration = ctx.interaction.options.getString('length') ?? 'Permanent';
 		const milliseconds = ms(duration);
@@ -34,14 +35,6 @@ export default class implements EconomicaCommand {
 		const reason = ctx.interaction.options.getString('reason') ?? 'No reason provided';
 		const days = ctx.interaction.options.getNumber('days') ?? 0;
 		let messagedUser = true;
-
-		if (target.id === ctx.interaction.user.id) return await ctx.embedify('warn', 'user', 'You cannot ban yourself.');
-		if (target.id === ctx.client.user.id) return await ctx.embedify('warn', 'user', 'You cannot ban me!');
-		if (target.roles.highest.position > member.roles.highest.position)
-			return await ctx.embedify('warn', 'user', "Target's roles are too high.");
-		if (!target.bannable) return await ctx.embedify('warn', 'user', 'Target is unbannable.');
-		if (duration !== 'Permanent' && (!milliseconds || milliseconds < 0))
-			return ctx.embedify('warn', 'user', 'Invalid duration.');
 
 		await target
 			.send(`You have been banned for \`${reason}\` ${formattedDuration} from **${ctx.interaction.guild.name}**`)

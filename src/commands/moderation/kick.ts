@@ -1,7 +1,7 @@
 import { GuildMember } from 'discord.js';
 
+import { infraction, validateTarget } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-import { infraction } from '../../lib/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -16,16 +16,11 @@ export default class implements EconomicaCommand {
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason.').setRequired(false));
 
 	execute = async (ctx: Context) => {
-		const member = (await ctx.interaction.guild.members.fetch(ctx.client.user.id)) as GuildMember;
+		if (!(await validateTarget(ctx))) return;
+
 		const target = ctx.interaction.options.getMember('target') as GuildMember;
 		const reason = (ctx.interaction.options.getString('reason') as string) ?? 'No reason provided';
 		let messagedUser = true;
-
-		if (target.id === ctx.interaction.user.id) return await ctx.embedify('warn', 'user', 'You cannot kick yourself.');
-		if (target.id === ctx.client.user.id) return await ctx.embedify('warn', 'user', 'You cannot kick me!');
-		if (target.roles.highest.position > member.roles.highest.position)
-			return await ctx.embedify('warn', 'user', "Target's roles are too high.");
-		if (!target.kickable) return await ctx.embedify('warn', 'user', 'Target is unkickable.');
 
 		await target
 			.send(`You have been kicked for \`${reason}\` from **${ctx.interaction.guild.name}**`)

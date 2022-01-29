@@ -1,9 +1,9 @@
 import { parseString } from '@adrastopoulos/number-parser';
 
-import { getEconInfo, transaction } from '../../lib/util';
-import { Context, EconomicaSlashCommandBuilder, EconomyCommand } from '../../structures';
+import { getEconInfo, transaction } from '../../lib';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
-export default class extends EconomyCommand {
+export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('pay')
 		.setDescription('Pay funds to another user.')

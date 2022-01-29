@@ -1,9 +1,10 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 import { MessageEmbed } from 'discord.js';
 
-import { paginate } from '../../lib/util';
+import { paginate } from '../../lib';
 import { MemberModel } from '../../models';
-import { BalanceString, Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { BalanceString } from '../../typings';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()

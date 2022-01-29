@@ -1,12 +1,9 @@
 import { economyDefaults } from '../../config';
-import { transaction } from '../../lib/util';
+import { transaction } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
-		.setName('beg')
-		.setDescription('Beg to earn a sum.')
-		.setGroup('INCOME')
+	data = new EconomicaSlashCommandBuilder().setName('beg').setDescription('Beg to earn a sum.').setGroup('INCOME');
 
 	execute = async (ctx: Context) => {
 		const { currency } = ctx.guildDocument;

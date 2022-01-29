@@ -19,9 +19,7 @@ export default class implements EconomicaService {
 				.filter((f: string) => f.endsWith('ts'));
 
 			for (const commandFile of commandFiles) {
-				const command = new (
-					await import(`../commands/${commandDirectory}/${commandFile}`)
-				).default();
+				const command = new (await import(`../commands/${commandDirectory}/${commandFile}`)).default();
 
 				if (!command.data.group) {
 					throw new Error(`Command ${command.data.name} missing group!`);

@@ -1,13 +1,16 @@
+import { parseString } from '@adrastopoulos/number-parser';
 import * as Discord from 'discord.js';
 
 import { GuildModel, InfractionModel, MemberModel, TransactionModel } from '../models';
+import { Context, EconomicaClient } from '../structures';
 import {
-	EconomicaClient,
+	BalanceString,
 	EconomyInfo,
 	IncomeCommandProperties,
 	InfractionString,
+	Moderation,
 	TransactionString,
-} from '../structures';
+} from '../typings';
 
 /**
  * Returns a message embed object.
@@ -35,10 +38,7 @@ export function embedify(
 	return embed;
 }
 
-export function error(
-	description: string,
-	title: string = 'Input Error'
-): Discord.InteractionReplyOptions {
+export function error(description: string, title: string = 'Input Error'): Discord.InteractionReplyOptions {
 	return {
 		embeds: [
 			{
@@ -51,10 +51,7 @@ export function error(
 	};
 }
 
-export function warning(
-	description: string,
-	title: string = 'Warning'
-): Discord.InteractionReplyOptions {
+export function warning(description: string, title: string = 'Warning'): Discord.InteractionReplyOptions {
 	return {
 		embeds: [
 			{
@@ -67,10 +64,7 @@ export function warning(
 	};
 }
 
-export function success(
-	description: string,
-	title: string = 'Success'
-): Discord.InteractionReplyOptions {
+export function success(description: string, title: string = 'Success'): Discord.InteractionReplyOptions {
 	return {
 		embeds: [
 			{
@@ -437,4 +431,71 @@ export async function paginate(
 			components: [],
 		});
 	});
+}
+
+export async function validateAmount(
+	ctx: Context,
+	target: BalanceString
+): Promise<{ validated: boolean; result?: number }> {
+	const { [target]: balance } = await getEconInfo(ctx.interaction.guildId, ctx.interaction.user.id);
+	const amount = ctx.interaction.options.getString('amount');
+	const result = amount === 'all' ? balance : parseString(amount);
+
+	if (!result) {
+		await ctx.embedify('error', 'user', 'Please enter a valid amount.');
+		return { validated: false };
+	} else {
+		if (result < 1) {
+			await ctx.embedify('error', 'user', `Amount less than 0`);
+			return { validated: false };
+		} else if (result > balance) {
+			await ctx.embedify(
+				'error',
+				'user',
+				`Exceeds current ${target}:${ctx.guildDocument.currency}${balance.toLocaleString()}`
+			);
+
+			return { validated: false };
+		} else {
+			return { validated: true, result };
+		}
+	}
+}
+
+export async function validateTarget(ctx: Context): Promise<boolean> {
+	const type = ctx.interaction.commandName as Moderation;
+	const member = (await ctx.interaction.guild.members.fetch(ctx.client.user.id)) as Discord.GuildMember;
+	const target = ctx.interaction.options.getMember('target') as Discord.GuildMember;
+
+	if (target.id === ctx.interaction.user.id) {
+		await ctx.embedify('warn', 'user', 'You cannot target yourself.');
+		return false;
+	} else if (target.id === ctx.client.user.id) {
+		await ctx.embedify('warn', 'user', 'You cannot target me.');
+		return false;
+	} else if (target.roles.highest.position > member.roles.highest.position) {
+		await ctx.embedify('warn', 'user', "Target's roles are too high.");
+		return false;
+	} else if (type === 'ban' && !target.bannable) {
+		await ctx.embedify('warn', 'user', 'Target is unbannable.');
+		return false;
+	} else if (type === 'kick' && !target.kickable) {
+		await ctx.embedify('warn', 'user', 'Target is unkickable.');
+		return false;
+	} else if (type === 'timeout') {
+		if (!target.moderatable) {
+			await ctx.embedify('warn', 'user', 'Target is unmoderatable.');
+			return false;
+		} else if (target.communicationDisabledUntil && target.communicationDisabledUntil.getTime() > Date.now()) {
+			await ctx.embedify('warn', 'user', `Target is already in a timeout.`);
+			return false;
+		}
+	} else if (type === 'untimeout') {
+		if (target.isCommunicationDisabled) {
+			await ctx.embedify('warn', 'user', 'Target is not in a timeout.');
+			return false;
+		}
+	}
+
+	return true;
 }

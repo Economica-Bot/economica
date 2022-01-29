@@ -1,7 +1,7 @@
 import { Guild, Role, RoleResolvable } from 'discord.js';
 
 import { GuildModel } from '../models';
-import { Authority, RoleAuthority } from '../structures';
+import { Authority, RoleAuthority } from '../typings';
 
 /**
  * Get the authority level of a role in a guild.

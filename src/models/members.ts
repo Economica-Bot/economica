@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 
-import { CommandData, InventoryItem, ReqCommandDataArr, ReqInventoryItemArr, ReqNum, ReqString } from '../structures';
+import { CommandData, InventoryItem } from '../typings';
 
 interface Member {
 	guildId: string;
@@ -14,13 +14,13 @@ interface Member {
 
 const Schema = new mongoose.Schema<Member>(
 	{
-		guildId: ReqString,
-		userId: ReqString,
-		wallet: ReqNum,
-		treasury: ReqNum,
-		total: ReqNum,
-		commands: ReqCommandDataArr,
-		inventory: ReqInventoryItemArr,
+		guildId: { type: String, required: true },
+		userId: { type: String, required: true },
+		wallet: { type: Number, required: true },
+		treasury: { type: Number, required: true },
+		total: { type: Number, required: true },
+		commands: { type: Array<CommandData>(), required: true },
+		inventory: { type: Array<InventoryItem>(), required: true },
 	},
 	{
 		versionKey: false,

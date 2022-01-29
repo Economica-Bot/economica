@@ -1,7 +1,7 @@
 import { parseNumber, parseString } from '@adrastopoulos/number-parser';
 import { GuildMember } from 'discord.js';
 
-import { transaction } from '../../lib/util';
+import { transaction } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {

@@ -1,7 +1,7 @@
 import { CommandInteraction, WebhookClient } from 'discord.js';
 
 import { DEBUG, DISCORD_INVITE_URL, PUBLIC_GUILD_ID, WEBHOOK_URLS } from '../config';
-import { embedify } from '../lib/util';
+import { embedify } from '../lib';
 import { EconomicaClient, EconomicaService } from '../structures';
 
 export default class implements EconomicaService {

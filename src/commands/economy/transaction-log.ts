@@ -18,10 +18,7 @@ export default class implements EconomicaCommand {
 				.addChannelOption((option) => option.setName('channel').setDescription('Specify a channel').addChannelType(0))
 		)
 		.addEconomicaSubcommand((subcommand) =>
-			subcommand
-				.setName('reset')
-				.setDescription('Reset the transaction log channel.')
-				.setAuthority('MANAGER')
+			subcommand.setName('reset').setDescription('Reset the transaction log channel.').setAuthority('MANAGER')
 		);
 
 	execute = async (ctx: Context) => {

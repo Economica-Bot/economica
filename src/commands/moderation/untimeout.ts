@@ -1,5 +1,6 @@
 import { GuildMember } from 'discord.js';
 
+import { validateTarget } from '../../lib';
 import { InfractionModel } from '../../models/infractions';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
@@ -15,14 +16,10 @@ export default class implements EconomicaCommand {
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true));
 
 	execute = async (ctx: Context) => {
-		const member = (await ctx.interaction.guild.members.fetch(ctx.client.user.id)) as GuildMember;
+		if (!(await validateTarget(ctx))) return;
+
 		const target = ctx.interaction.options.getMember('target') as GuildMember;
 		let messagedUser = true;
-
-		if (target.roles.highest.position > member.roles.highest.position)
-			return await ctx.embedify('warn', 'user', 'Insufficient permissions.');
-		if (!target.moderatable) return await ctx.embedify('warn', 'user', 'Target is not moderatable.');
-		if (target.isCommunicationDisabled) return await ctx.embedify('warn', 'user', 'Target is not in a timeout.');
 
 		await target
 			.send(`Your timeout has been canceled in **${ctx.interaction.guild.name}**`)

@@ -1,8 +1,8 @@
 import { GuildMember } from 'discord.js';
 import ms from 'ms';
 
+import { infraction, validateTarget } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-import { infraction } from '../../lib/util';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
@@ -23,7 +23,8 @@ export default class implements EconomicaCommand {
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason.').setRequired(false));
 
 	execute = async (ctx: Context) => {
-		const member = (await ctx.interaction.guild.members.fetch(ctx.client.user.id)) as GuildMember;
+		if (!(await validateTarget(ctx))) return;
+
 		const target = ctx.interaction.options.getMember('target') as GuildMember;
 		const duration = ctx.interaction.options.getString('duration') as string;
 		const milliseconds = ms(duration);
@@ -31,14 +32,6 @@ export default class implements EconomicaCommand {
 		const reason = (ctx.interaction.options.getString('reason') as string) ?? 'No reason provided';
 		let messagedUser = true;
 
-		if (target.id === ctx.interaction.user.id)
-			return await ctx.embedify('info', 'user', 'You cannot timeout yourself.');
-		if (target.id === ctx.client.user.id) return await ctx.embedify('warn', 'user', 'You cannot timeout me!');
-		if (target.roles.highest.position > member.roles.highest.position)
-			return await ctx.embedify('warn', 'user', 'Insufficient permissions.');
-		if (!target.moderatable) return await ctx.embedify('warn', 'user', 'Target is not moderatable.');
-		if (target.communicationDisabledUntil && target.communicationDisabledUntil.getTime() > Date.now())
-			return await ctx.embedify('warn', 'user', `Target is already in a timeout.`);
 		if (duration !== 'Permanent' && (!milliseconds || milliseconds < 0))
 			return ctx.embedify('warn', 'user', 'Invalid duration.');
 

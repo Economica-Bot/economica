@@ -1,8 +1,8 @@
 import { MessageEmbed, Role } from 'discord.js';
 
-import { Authority, Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-import { removeAuthRole } from '../../lib';
-import { setAuthRole } from '../../lib/auth';
+import { removeAuthRole, setAuthRole } from '../../lib';
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { Authority } from '../../typings';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
