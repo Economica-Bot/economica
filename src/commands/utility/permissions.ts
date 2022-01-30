@@ -1,3 +1,4 @@
+import { icons } from '../../config';
 import {
 	Context,
 	EconomicaCommand,
@@ -17,32 +18,41 @@ export default class implements EconomicaCommand {
 	execute = async (ctx: Context) => {
 		const commandInput = ctx.interaction.options.getString('command');
 		const command = ctx.client.commands.get(commandInput);
-		if (!command) {
-			return await ctx.interaction.reply('Could not find that command.');
-		}
+		if (!command) return await ctx.embedify('error', 'user', 'Could not find that command.');
 
 		const data = command.data as EconomicaSlashCommandBuilder;
+		const embed = ctx.embedify('info', { name: `Permissions for ${data.name}`, iconURL: icons.info });
+		embed.addField(
+			'Base',
+			`Client Permissions: \`${data.clientPermissions ?? '`None`'}\`
+		    Authority Level: \`${data.authority ?? '`None`'}\``
+		);
 
-		let description = `**${data.name} Command Permissions**\n__Client Permissions:__\n\`${
-			data.clientPermissions ?? '`None`'
-		}\`\n`;
+		data.options.forEach((option) => {
+			if (option instanceof EconomicaSlashCommandSubcommandBuilder) {
+				embed.addField(
+					`${data.name}:${option.name}`,
+					`Client Permissions: \`${option.clientPermissions ?? '`None`'}\`
+					Authority Level: \`${option.authority ?? '`None`'}\``,
+					true
+				);
+			} else if (option instanceof EconomicaSlashCommandSubcommandGroupBuilder) {
+				embed.addField(
+					`${data.name}:${option.name}`,
+					`Client Permissions: \`${option.clientPermissions ?? '`None`'}\`
+					Authority Level: \`${option.authority ?? '`None`'}\``
+				);
+				option.options.forEach((opt: EconomicaSlashCommandSubcommandBuilder) => {
+					embed.addField(
+						`${data.name}:${option.name}:${opt.name}`,
+						`Client Permissions: \`${opt.clientPermissions ?? '`None`'}\`
+						Authority Level: \`${opt.authority ?? '`None`'}\``,
+						true
+					);
+				});
+			}
+		});
 
-		if (data.getSubcommandGroup()) {
-			(data.getSubcommandGroup() as EconomicaSlashCommandSubcommandGroupBuilder[]).forEach((subcommandGroupData) => {
-				description += `**${subcommandGroupData.name} Subcommand Group Permissions**\n__Client Permissions:__\n\`${
-					subcommandGroupData.clientPermissions ?? '`None`'
-				}\`\n`;
-			});
-		}
-
-		if (data.getSubcommand()) {
-			(data.getSubcommand() as EconomicaSlashCommandSubcommandBuilder[]).forEach((subcommandData) => {
-				description += `**${subcommandData.name} Subcommand Permissions**\n__Client Permissions:__\n\`${
-					subcommandData.clientPermissions ?? '`None`'
-				}\`\n\n`;
-			});
-		}
-
-		return await ctx.embedify('info', 'bot', description);
+		return await ctx.interaction.reply({ embeds: [embed] });
 	};
 }
