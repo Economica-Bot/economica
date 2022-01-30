@@ -86,12 +86,7 @@ export default class implements EconomicaCommand {
 
 			let k = 0;
 			for (let i = 0; i < pageCount; i++) {
-				const embed = ctx.embedify(
-					'info',
-					'guild',
-					`There are \`${shopEntries.length}\` items in the shop.`,
-					false
-				) as MessageEmbed;
+				const embed = ctx.embedify('info', 'guild', `There are \`${shopEntries.length}\` items in the shop.`);
 				for (let j = 0; j < maxEntries; j++, j++) {
 					if (shopEntries[k]) {
 						//todo: replace with addField(EmbedFieldData) (not deprecated)

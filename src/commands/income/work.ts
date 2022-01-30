@@ -21,14 +21,10 @@ export default class implements EconomicaCommand {
 			amount
 		);
 
-		const embed = new MessageEmbed()
-			.setColor('GOLD')
-			.setAuthor({
-				name: ctx.interaction.user.tag,
-				iconURL: ctx.interaction.user.displayAvatarURL(),
-			})
-			.setDescription(`You worked and earned ${ctx.guildDocument.currency}${amount.toLocaleString()}`);
-
-		await ctx.interaction.reply({ embeds: [embed] });
+		return await ctx.embedify(
+			'success',
+			'user',
+			`You worked and earned ${ctx.guildDocument.currency}${amount.toLocaleString()}`
+		);
 	};
 }

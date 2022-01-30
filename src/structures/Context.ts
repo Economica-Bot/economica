@@ -30,6 +30,8 @@ export class Context {
 		this.data = data;
 	}
 
+	public embedify(type: ReplyString, author: Author, content?: string | null): MessageEmbed;
+	public embedify(type: ReplyString, author: Author, content: string | null, send: boolean): Promise<any>;
 	public embedify(
 		type: ReplyString,
 		author: Author,

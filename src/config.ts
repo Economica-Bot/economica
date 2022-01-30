@@ -58,6 +58,7 @@ export const hyperlinks = {
 
 export const icons = {
 	success: 'https://cdn.discordapp.com/emojis/843390419261194300.webp?size=96&quality=lossless',
+	info: 'https://cdn.discordapp.com/emojis/843390419429883924.webp?size=96&quality=lossless',
 	warning: 'https://cdn.discordapp.com/emojis/843390419270107136.webp?size=96&quality=lossless',
 	abort: 'https://cdn.discordapp.com/emojis/843390419270107136.webp?size=96&quality=lossless',
 	error: 'https://cdn.discordapp.com/emojis/843390419303661569.webp?size=96&quality=lossless',
