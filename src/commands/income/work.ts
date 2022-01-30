@@ -1,6 +1,3 @@
-import { MessageEmbed } from 'discord.js';
-
-import { economyDefaults } from '../../config';
 import { transaction } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
@@ -8,7 +5,7 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder().setName('work').setDescription('Work to earn a sum.').setGroup('INCOME');
 
 	execute = async (ctx: Context) => {
-		const { min, max } = economyDefaults.work;
+		const { min, max } = ctx.guildDocument.income.work;
 		const amount = Math.ceil(Math.random() * (max - min) + min);
 		await transaction(
 			ctx.client,

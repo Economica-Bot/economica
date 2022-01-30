@@ -83,7 +83,7 @@ export const authors = {
 	},
 };
 
-export const economyDefaults = {
+export const income = {
 	work: {
 		min: 100,
 		max: 500,
