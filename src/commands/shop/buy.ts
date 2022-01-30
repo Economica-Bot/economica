@@ -9,6 +9,7 @@ export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('buy')
 		.setDescription('Buy an item.')
+		.setGroup('SHOP')
 		.addStringOption((option) => option.setName('item').setDescription('Specify an item.').setRequired(true));
 
 	execute = async (ctx: Context) => {
