@@ -1,11 +1,9 @@
-import { CommandInteraction, Guild, GuildMember, MessageEmbed, PermissionString, TextChannel } from 'discord.js';
+import { Guild, GuildMember, PermissionString, TextChannel } from 'discord.js';
 
-import { authors, hyperlinks } from '.';
-import { DEVELOPER_IDS } from '../config';
+import { DEVELOPER_IDS, icons } from '../config';
 import { GuildModel } from '../models';
 import {
 	Context,
-	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from '../structures';
@@ -15,96 +13,70 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 	if (!ctx.data.enabled) {
 		await ctx.embedify('error', 'user', 'This command is disabled.');
 		return false;
-	}
-
-	if (ctx.data.authority === 'DEVELOPER' && !DEVELOPER_IDS.includes(ctx.interaction.user.id)) {
+	} else if (ctx.data.authority === 'DEVELOPER' && !DEVELOPER_IDS.includes(ctx.interaction.user.id)) {
 		await ctx.embedify('error', 'user', 'This command is dev only.');
 		return false;
-	}
-
-	if (!ctx.data.global && !ctx.interaction.guild) {
+	} else if (!ctx.data.global && !ctx.interaction.guild) {
 		await ctx.embedify('error', 'user', 'This command may only be used within servers.');
 		return false;
 	}
 
-	const permissionResponse = await permissionCheck(ctx.interaction, ctx.data);
-	if (ctx.interaction.member && !permissionResponse.status) {
-		ctx.interaction.reply({
-			embeds: [permissionResponse.embed],
-			ephemeral: true,
-		});
+	const hasPermission = await permissionCheck(ctx);
+	if (ctx.interaction.member && !hasPermission) {
 		return false;
+	} else {
+		return true;
 	}
-
-	return true;
 }
 
-const permissionCheck = async (
-	interaction: CommandInteraction,
-	data: EconomicaSlashCommandBuilder
-): Promise<{
-	embed?: MessageEmbed;
-	status: boolean;
-}> => {
-	const member = interaction.member as GuildMember;
-	const guild = interaction.guild as Guild;
-	const clientMember = (await guild.members.fetch(interaction.client.user.id)) as GuildMember;
-	const channel = interaction.channel as TextChannel;
-	const group = data.getSubcommandGroup(
-		interaction.options.getSubcommandGroup(false)
+const permissionCheck = async (ctx: Context): Promise<boolean> => {
+	const member = ctx.interaction.member as GuildMember;
+	const guild = ctx.interaction.guild as Guild;
+	const clientMember = (await guild.members.fetch(ctx.interaction.client.user.id)) as GuildMember;
+	const channel = ctx.interaction.channel as TextChannel;
+	const group = ctx.data.getSubcommandGroup(
+		ctx.interaction.options.getSubcommandGroup(false)
 	) as EconomicaSlashCommandSubcommandGroupBuilder;
-	const subcommand = data.getSubcommand(
-		interaction.options.getSubcommand(false)
+	const subcommand = ctx.data.getSubcommand(
+		ctx.interaction.options.getSubcommand(false)
 	) as EconomicaSlashCommandSubcommandBuilder;
 	const clientPermissions: PermissionString[] = [];
 	const missingClientPermissions: PermissionString[] = [];
 	let missingAuthority: Authority;
 
-	if (
-		DEVELOPER_IDS.includes(member.id) ||
-		interaction.guild.ownerId === member.id ||
-		member.permissions.has('ADMINISTRATOR')
-	) {
-		return { status: true };
-	}
-
-	const authority = subcommand.authority ?? group.authority ?? data.authority;
-	if (data.clientPermissions) clientPermissions.push(...data.clientPermissions);
+	const authority = subcommand.authority ?? group.authority ?? ctx.data.authority;
+	if (ctx.data.clientPermissions) clientPermissions.push(...ctx.data.clientPermissions);
 	if (group?.clientPermissions) clientPermissions.push(...group.clientPermissions);
 	if (subcommand?.clientPermissions) clientPermissions.push(...subcommand.clientPermissions);
 
-	for (const permission of clientPermissions)
+	for (const permission of clientPermissions) {
 		if (!clientMember.permissionsIn(channel).has(permission)) missingClientPermissions.push(permission);
+	}
+
+	if (missingClientPermissions.length) {
+		await ctx.embedify('warn', 'bot', `Missing Bot Permissions: \`${missingClientPermissions}\``);
+		return false;
+	}
+
+	if (
+		DEVELOPER_IDS.includes(member.id) ||
+		ctx.interaction.guild.ownerId === member.id ||
+		member.permissions.has('ADMINISTRATOR')
+	) {
+		return true;
+	}
 
 	if (authority) {
-		const { auth } = await GuildModel.findOne({ guildId: interaction.guildId });
+		const { auth } = await GuildModel.findOne({ guildId: ctx.interaction.guildId });
 		const roleAuth = auth.filter((r) => r.authority === authority && member.roles.cache.has(r.roleId));
 		if (!roleAuth.length) missingAuthority = authority;
-		if (DEVELOPER_IDS.includes(member.id)) missingAuthority = null;
 	}
 
-	if (missingClientPermissions.length || missingAuthority) {
-		const embed = new MessageEmbed()
-			.setTitle('Insufficient Permissions')
-			.setColor('RED')
-			.setAuthor(authors.error)
-			.setDescription(hyperlinks.insertAll());
-
-		if (missingClientPermissions.length)
-			embed.addField('Missing Bot Permissions', `\`${missingClientPermissions.join('`, `')}\``);
-		if (missingAuthority.length) {
-			embed.addField(
-				'Missing User Economy Authority',
-				`\`Economy ${missingAuthority[0].toUpperCase() + missingAuthority.substring(1)}\``
-			);
-		}
-
-		return {
-			embed,
-			status: false,
-		};
+	if (missingAuthority) {
+		const description = `Missing authority: \`${missingAuthority}\``;
+		await ctx.embedify('error', { name: 'Insufficient Permissions', iconURL: icons.warning }, description);
+		return false;
 	}
-	return {
-		status: true,
-	};
+
+	return true;
 };
