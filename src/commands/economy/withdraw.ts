@@ -1,6 +1,4 @@
-import { parseString } from '@adrastopoulos/number-parser';
-
-import { getEconInfo, transaction } from '../../lib';
+import { transaction, validateAmount } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -14,17 +12,7 @@ export default class implements EconomicaCommand {
 
 	execute = async (ctx: Context) => {
 		const { currency } = ctx.guildDocument;
-		const { treasury } = await getEconInfo(ctx.interaction.guildId, ctx.interaction.user.id);
-		const amount = ctx.interaction.options.getString('amount');
-		const result = amount === 'all' ? treasury : parseString(amount);
-
-		if (result) {
-			if (result < 1) return await ctx.embedify('error', 'user', `Amount less than 0`);
-			if (result > treasury)
-				return await ctx.embedify('error', 'user', `Exceeds current treasury:${currency}${treasury.toLocaleString()}`);
-		} else {
-			return await ctx.embedify('error', 'user', 'Please enter a valid amount.');
-		}
+		const { validated, result } = await validateAmount(ctx, 'treasury');
 
 		await transaction(
 			ctx.client,

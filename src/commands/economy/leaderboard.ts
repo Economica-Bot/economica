@@ -50,20 +50,12 @@ export default class implements EconomicaCommand {
 		for (let i = 0; i < pageCount; i++) {
 			let description = '';
 			for (let j = 0; j < entryCount; j++, k++) {
-				if (leaderBoardEntries[k]) {
-					description += leaderBoardEntries[k];
-				}
+				if (leaderBoardEntries[k]) description += leaderBoardEntries[k];
 			}
 
-			const embed = new MessageEmbed()
-				.setAuthor({
-					name: `Leaderboard (${type})`,
-					iconURL: ctx.interaction.guild.iconURL(),
-				})
-				.setColor('BLUE')
-				.setDescription(description)
+			const embed = ctx
+				.embedify('info', { name: `Leaderboard (${type})`, iconURL: ctx.interaction.guild.iconURL() }, description)
 				.setFooter({ text: `page ${i + 1} of ${pageCount}` });
-
 			embeds.push(embed);
 		}
 

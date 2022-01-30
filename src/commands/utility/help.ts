@@ -1,6 +1,7 @@
 import { SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from '@discordjs/builders';
 import { MessageEmbed } from 'discord.js';
 
+import { icons } from '../../config';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -28,7 +29,7 @@ export default class implements EconomicaCommand {
 				commands.push(data);
 			});
 
-			const embed: MessageEmbed = await ctx.embedify('info', 'guild', 'Command List.', false);
+			const embed: MessageEmbed = await ctx.embedify('info', 'bot', 'Command List.', false);
 
 			for (const group of groups) {
 				const list: string[] = [];
@@ -58,16 +59,11 @@ export default class implements EconomicaCommand {
 		)?.group;
 
 		if (group && !command) {
-			const embed: MessageEmbed = await ctx.embedify(
-				'info',
-				{ name: group, iconURL: ctx.client.user.displayAvatarURL() },
-				null,
-				false
-			);
+			const embed = ctx.embedify('info', { name: group, iconURL: ctx.client.user.displayAvatarURL() });
 			for (const command of ctx.client.commands) {
 				const data = command[1].data as EconomicaSlashCommandBuilder;
 				if (data.group === group) {
-					embed.addField(data.name, `>>> *${data.description}* \n${data.format ? `Format: \`${data.format}\`` : ''}`);
+					embed.addField(data.name, `>>> *${data.description}*${data.format ? `\nFormat: \`${data.format}\`` : ''}`);
 				}
 			}
 
@@ -75,13 +71,8 @@ export default class implements EconomicaCommand {
 		}
 
 		if (command) {
-			const embed = new MessageEmbed()
-				.setAuthor({
-					name: `${group}:${command.name}`,
-					iconURL: ctx.client.user.displayAvatarURL(),
-				})
-				.setColor('YELLOW')
-				.setDescription(`${command.description}`)
+			const embed = ctx
+				.embedify('info', { name: `${group}:${command.name}`, iconURL: icons.info }, command.description)
 				.addField('Format', command.format ? `\`${command.format}\`` : 'none', true)
 				.addField('Examples', command.examples ? `\`${command.examples.join('`\n`')}\`` : 'none', true)
 				.addField('Servers Only?', command.global ? '`False`' : '`True`', true);

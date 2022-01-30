@@ -90,12 +90,13 @@ export default class implements EconomicaCommand {
 		const lender = ctx.interaction.options.getUser('lender', false);
 		const borrower = ctx.interaction.options.getUser('borrower', false);
 		const _id = ctx.interaction.options.getString('loan_id', false);
+
 		if (_id && !isValidObjectId(_id)) {
 			return await ctx.embedify('error', 'user', 'Please enter a valid loan id.');
 		} else if (_id) {
 			const loan = LoanModel.find({ _id });
 			if (!loan) {
-				await ctx.embedify('error', 'user', "Use Loan view to find loan id's.");
+				await ctx.embedify('error', 'user', 'Use Loan view to find loan ids.');
 			}
 		}
 
@@ -227,7 +228,7 @@ export default class implements EconomicaCommand {
 					guildId: ctx.guildDocument.guildId,
 					borrowerId: user.id,
 				});
-				let description = 'No loans found.';
+				let description = '';
 
 				outgoingLoans.forEach((loan) => {
 					// prettier-ignore
@@ -249,7 +250,7 @@ export default class implements EconomicaCommand {
 						Principal: ${currency}${loan.principal} | Repayment: ${currency}${loan.repayment}\n\n`;
 				});
 
-				ctx.embedify('success', 'user', description);
+				return await ctx.embedify('success', 'user', description ?? 'No loans found.');
 			}
 		} else if (subcommandgroup === 'delete') {
 			let description;
@@ -260,8 +261,9 @@ export default class implements EconomicaCommand {
 				});
 				if (!transaction) {
 					return await ctx.embedify('error', 'user', `Could not find loan with Id \`${_id}\``);
+				} else {
+					description = `Deleted loan \`${_id}\``;
 				}
-				description = `Deleted loan \`${_id}\``;
 			} else if (subcommand === 'user') {
 				const loans = lender
 					? await LoanModel.deleteMany({

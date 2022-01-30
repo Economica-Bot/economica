@@ -1,6 +1,4 @@
-import { parseString } from '@adrastopoulos/number-parser';
-
-import { getEconInfo, transaction } from '../../lib';
+import { transaction, validateAmount } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -16,17 +14,8 @@ export default class implements EconomicaCommand {
 	execute = async (ctx: Context) => {
 		const { currency } = ctx.guildDocument;
 		const user = ctx.interaction.options.getUser('user');
-		const { wallet } = await getEconInfo(ctx.interaction.guildId, user.id);
-		const amount = ctx.interaction.options.getString('amount');
-		const result = amount === 'all' ? wallet : parseString(amount);
-
-		if (result) {
-			if (result < 1) return await ctx.embedify('error', 'user', `Amount less than 0`);
-			if (result > wallet) return await ctx.embedify('error', 'user', `Exceeds current wallet:${currency}${wallet}`);
-		} else {
-			return await ctx.embedify('error', 'user', 'Please enter a valid amount.');
-		}
-
+		const { validated, result } = await validateAmount(ctx, 'wallet');
+		if (!validated) return;
 		await transaction(
 			ctx.client,
 			ctx.interaction.guildId,
@@ -49,6 +38,6 @@ export default class implements EconomicaCommand {
 			result
 		);
 
-		return await ctx.embedify('success', 'user', `Paid ${user} ${currency}${amount.toLocaleString()}`);
+		return await ctx.embedify('success', 'user', `Paid ${user} ${currency}${result.toLocaleString()}`);
 	};
 }
