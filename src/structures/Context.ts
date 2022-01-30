@@ -3,6 +3,7 @@ import { Document } from 'mongoose';
 
 import { EconomicaClient, EconomicaSlashCommandBuilder } from '.';
 import { Guild } from '../models/guilds';
+import { Member } from '../models/members';
 import { Author, ReplyString } from '../typings';
 
 const EmbedColors: Record<ReplyString, ColorResolvable> = {
@@ -15,19 +16,22 @@ const EmbedColors: Record<ReplyString, ColorResolvable> = {
 export class Context {
 	public client: EconomicaClient;
 	public interaction: CommandInteraction;
-	public guildDocument: Guild & Document<Guild>;
 	public data: EconomicaSlashCommandBuilder;
+	public guildDocument: Guild & Document<Guild>;
+	public memberDocument: Member & Document<Member>;
 
 	public constructor(
 		client: EconomicaClient,
 		interaction: CommandInteraction,
+		data: EconomicaSlashCommandBuilder,
 		guildDocument: Guild & Document<Guild>,
-		data: EconomicaSlashCommandBuilder
+		memberDocument: Member & Document<Member>
 	) {
 		this.client = client;
 		this.interaction = interaction;
-		this.guildDocument = guildDocument;
 		this.data = data;
+		this.guildDocument = guildDocument;
+		this.memberDocument = memberDocument;
 	}
 
 	public embedify(type: ReplyString, author: Author, content?: string | null): MessageEmbed;
