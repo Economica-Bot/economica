@@ -1,5 +1,6 @@
 import * as mongoose from 'mongoose';
 
+import { income } from '../config';
 import { RoleAuthority } from '../typings';
 
 export interface Guild {
@@ -8,6 +9,7 @@ export interface Guild {
 	transactionLogChannel: string;
 	infractionLogChannel: string;
 	auth: Array<RoleAuthority>;
+	income: typeof income;
 }
 
 const Schema = new mongoose.Schema<Guild>(
@@ -17,6 +19,7 @@ const Schema = new mongoose.Schema<Guild>(
 		transactionLogChannel: { type: String, required: true },
 		infractionLogChannel: { type: String, required: true },
 		auth: { type: Array<RoleAuthority>(), required: true },
+		income: { type: Object, required: true },
 	},
 	{
 		strict: true,

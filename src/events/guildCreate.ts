@@ -1,6 +1,6 @@
 import { Guild } from 'discord.js';
 
-import { CURRENCY_SYMBOL } from '../config';
+import { CURRENCY_SYMBOL, income } from '../config';
 import { GuildModel } from '../models';
 import { EconomicaClient } from '../structures';
 
@@ -16,6 +16,7 @@ export async function execute(client: EconomicaClient, guild: Guild) {
 			transactionLogChannel: null,
 			infractionLogChannel: null,
 			auth: [],
+			income,
 		},
 		{
 			upsert: true,
