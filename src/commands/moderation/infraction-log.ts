@@ -35,7 +35,7 @@ export default class implements EconomicaCommand {
 				}
 			case 'set':
 				const channel = ctx.interaction.options.getChannel('channel');
-				await ctx.guildDocument.update({ infractionLogChannel: channel.id });
+				await ctx.guildDocument.updateOne({ infractionLogChannel: channel.id });
 				return await ctx.embedify('success', 'user', `Infraction log set to ${channel}.`);
 			case 'reset':
 				await ctx.guildDocument.update({ infractionLogChannel: null });
