@@ -7,10 +7,10 @@ import { Authority } from '../../typings';
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('authority')
-		.setDescription('Interact with the economy-permission roles')
+		.setDescription('Interact with the economy authority role hierarchy.')
 		.setGroup('UTILITY')
 		.setFormat('<view | set | reset> [...options]')
-		.addEconomicaSubcommand((options) => options.setName('view').setDescription('View the economy authority of roles.'))
+		.addEconomicaSubcommand((options) => options.setName('view').setDescription('View the economy authority hierarchy.'))
 		.addEconomicaSubcommand((options) =>
 			options
 				.setName('set')
@@ -18,17 +18,17 @@ export default class implements EconomicaCommand {
 				.setFormat('<role> <user | mod | manager | admin>')
 				.setAuthority('ADMINISTRATOR')
 				.addRoleOption((option) =>
-					option.setName('role').setDescription('The target role to grant authority to.').setRequired(true)
+					option.setName('role').setDescription('Specify a role.').setRequired(true)
 				)
 				.addStringOption((option) =>
 					option
 						.setName('level')
 						.setDescription('The level of authority to be given to `role`')
 						.addChoices([
-							['User', 'user'],
-							['Mod', 'mod'],
-							['Economy Manager', 'manager'],
-							['Admin', 'admin'],
+							['User', 'USER'],
+							['Moderator', 'MODERATOR'],
+							['Manager', 'MANAGER'],
+							['Administrator', 'ADMINISTRATOR'],
 						])
 						.setRequired(true)
 				)
@@ -36,9 +36,9 @@ export default class implements EconomicaCommand {
 		.addEconomicaSubcommand((options) =>
 			options
 				.setName('reset')
-				.setDescription("Reset a role's authority level.")
+				.setDescription('Reset role authority levels.')
 				.setAuthority('ADMINISTRATOR')
-				.addRoleOption((option) => option.setName('role').setDescription('Specify a role.').setRequired(true))
+				.addRoleOption((option) => option.setName('role').setDescription('Specify a role.'))
 		);
 
 	execute = async (ctx: Context) => {
@@ -60,7 +60,7 @@ export default class implements EconomicaCommand {
 			const embed = new MessageEmbed()
 				.setColor('BLURPLE')
 				.setAuthor({
-					name: `${ctx.interaction.guild.name} Economy Authority Hierarchy`,
+					name: `${ctx.interaction.guild.name} Authority Hierarchy`,
 					iconURL: ctx.interaction.guild.iconURL(),
 				})
 				.setDescription(
@@ -112,9 +112,14 @@ export default class implements EconomicaCommand {
 			await setAuthRole(ctx.interaction.guild, targetRole, level);
 			return await ctx.embedify('success', 'bot', `${targetRole} has been set to \`${level}\`.`);
 		} else if (subcommand === 'reset') {
-			const targetRole = ctx.interaction.options.getRole('role') as Role;
-			await removeAuthRole(ctx.interaction.guild, targetRole);
-			return await ctx.embedify('success', 'bot', `${targetRole} has been reset.`);
+			const targetRole = ctx.interaction.options.getRole('role', false) as Role;
+			if (targetRole) {
+				await removeAuthRole(ctx.interaction.guild, targetRole);
+				return await ctx.embedify('success', 'bot', `${targetRole} has been reset.`);
+			} else {
+				ctx.guildDocument.updateOne({ auth: [] });
+				return await ctx.embedify('success', 'bot', 'All roles have been reset.');
+			}
 		}
 	};
 }
