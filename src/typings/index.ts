@@ -7,6 +7,7 @@ export type BalanceString = 'wallet' | 'treasury' | 'total';
 export type Author = 'bot' | 'user' | 'guild' | EmbedAuthorData;
 export type Authority = 'USER' | 'MODERATOR' | 'MANAGER' | 'ADMINISTRATOR' | 'DEVELOPER';
 export type Moderation = 'ban' | 'kick' | 'timeout' | 'unban' | 'untimeout';
+export type ShopItem = 'ITEM' | 'GENERATOR';
 export type TitleString =
 	| 'register:GUILD_NOT_FOUND'
 	| 'test:TEST'
@@ -103,7 +104,7 @@ export type TransactionString =
 	| 'WITHDRAW'
 	| 'GIVE_PAYMENT'
 	| 'RECEIVE_PAYMENT'
-	| 'PURCHASE'
+	| 'BUY'
 	| 'SELL'
 	| 'GENERATOR'
 	| 'INCOME'

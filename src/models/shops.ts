@@ -1,10 +1,12 @@
 import * as mongoose from 'mongoose';
+import { ShopItem } from '../typings';
 
 interface Shop {
 	guildId: string;
-	type: string;
+	type: ShopItem;
 	name: string;
 	price: number;
+	treasuryRequired: number;
 	active: boolean;
 	description: string;
 	duration: number;
@@ -14,7 +16,6 @@ interface Shop {
 	rolesRemoved: string[];
 	rolesRequired: string[];
 	itemsRequired: string[];
-	bankRequired: number;
 	generatorPeriod: number;
 	generatorAmount: number;
 	createdAt: Date;
@@ -26,6 +27,7 @@ const Schema = new mongoose.Schema<Shop>(
 		type: { type: String, required: true },
 		name: { type: String, required: true },
 		price: { type: Number, required: true },
+		treasuryRequired: { type: Number, required: true },
 		active: { type: Boolean, required: true },
 		description: { type: String, required: true },
 		duration: { type: Number, required: true },
@@ -35,7 +37,6 @@ const Schema = new mongoose.Schema<Shop>(
 		rolesRemoved: { type: Array<String>(), required: true },
 		requiredRoles: { type: Array<String>(), required: true },
 		requiredItems: { type: Array<String>(), required: true },
-		requiredBank: { type: Number, required: true },
 		generatorPeriod: { type: Number, required: true },
 		generatorAmount: { type: Number, required: true },
 		createdAt: { type: Date, required: true },

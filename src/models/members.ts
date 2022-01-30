@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 
 import { CommandData, InventoryItem } from '../typings';
 
-interface Member {
+export interface Member {
 	guildId: string;
 	userId: string;
 	wallet: number;
