@@ -1,7 +1,7 @@
-export { GuildModel } from './guilds';
-export { InfractionModel } from './infractions';
-export { LoanModel } from './loans';
-export { MarketModel } from './markets';
-export { MemberModel } from './members';
-export { ShopModel } from './shops';
-export { TransactionModel } from './transactions';
+export { GuildModel, Guild } from './guilds';
+export { InfractionModel, Infraction } from './infractions';
+export { LoanModel, Loan } from './loans';
+export { MarketModel, Market } from './markets';
+export { MemberModel, Member } from './members';
+export { ShopModel, Shop } from './shops';
+export { TransactionModel, Transaction } from './transactions';

@@ -1,3 +1,5 @@
+import { Message } from 'discord.js';
+
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -45,7 +47,7 @@ export default class implements EconomicaCommand {
 		.addEconomicaSubcommand((subcommand) => subcommand.setName('test17subcommand').setDescription('test7desc'))
 		.addEconomicaSubcommand((subcommand) => subcommand.setName('test18subcommand').setDescription('test8desc'));
 
-	execute = async function (ctx: Context) {
-		return await ctx.embedify('info', 'user', 'test');
+	execute = async (ctx: Context): Promise<Message> => {
+		return await ctx.embedify('info', 'user', 'test', true);
 	};
 }

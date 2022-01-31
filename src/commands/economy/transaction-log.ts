@@ -1,3 +1,5 @@
+import { Message } from 'discord.js';
+
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -23,22 +25,22 @@ export default class implements EconomicaCommand {
 			subcommand.setName('reset').setDescription('Reset the transaction log channel.').setAuthority('MANAGER')
 		);
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		if (subcommand === 'view') {
 			const channelId = ctx.guildDocument.transactionLogChannel;
 			if (channelId) {
-				return await ctx.embedify('info', 'user', `The current transaction log is <#${channelId}>.`);
+				return await ctx.embedify('info', 'user', `The current transaction log is <#${channelId}>.`, false);
 			} else {
-				return await ctx.embedify('warn', 'user', 'There is no transaction log.');
+				return await ctx.embedify('warn', 'user', 'There is no transaction log.', false);
 			}
 		} else if (subcommand === 'set') {
 			const channel = ctx.interaction.options.getChannel('channel');
 			await ctx.guildDocument.updateOne({ transactionLogChannel: channel.id });
-			return await ctx.embedify('success', 'user', `Transaction log set to ${channel}.`);
+			return await ctx.embedify('success', 'user', `Transaction log set to ${channel}.`, false);
 		} else if (subcommand === 'reset') {
 			await ctx.guildDocument.updateOne({ transactionLogChannel: null });
-			return await ctx.embedify('success', 'user', 'Transaction log reset.');
+			return await ctx.embedify('success', 'user', 'Transaction log reset.', false);
 		}
 	};
 }

@@ -1,3 +1,4 @@
+import { Message } from 'discord.js';
 import { icons } from '../../config';
 import {
 	Context,
@@ -15,10 +16,10 @@ export default class implements EconomicaCommand {
 		.setFormat('<command>')
 		.addStringOption((option) => option.setName('command').setDescription('Specify a command.').setRequired(true));
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message | void> => {
 		const commandInput = ctx.interaction.options.getString('command');
 		const command = ctx.client.commands.get(commandInput);
-		if (!command) return await ctx.embedify('error', 'user', 'Could not find that command.');
+		if (!command) return await ctx.embedify('error', 'user', 'Could not find that command.', true);
 
 		const data = command.data as EconomicaSlashCommandBuilder;
 		const embed = ctx.embedify('info', { name: `Permissions for ${data.name}`, iconURL: icons.info });

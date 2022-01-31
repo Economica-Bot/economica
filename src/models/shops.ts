@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 import { ShopItem } from '../typings';
 
-interface Shop {
+export interface Shop {
 	guildId: string;
 	type: ShopItem;
 	name: string;

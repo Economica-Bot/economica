@@ -28,17 +28,15 @@ export default class implements EconomicaService {
 		});
 
 		await testClient.login(token).catch((err) => {
-			console.error(err);
 			testClient.destroy();
-			process.exit(1);
+			throw new Error(err);
 		});
 
 		// DEVELOPER_IDS
 		console.info('Validating DEVELOPER_IDS...');
 		for (const DEVELOPER_ID of DEVELOPER_IDS) {
 			await testClient.users.fetch(DEVELOPER_ID).catch((err) => {
-				console.error(err);
-				process.exit(1);
+				throw new Error(err);
 			});
 		}
 
@@ -47,8 +45,7 @@ export default class implements EconomicaService {
 		for (const DEVELOPMENT_GUILD_ID of DEVELOPMENT_GUILD_IDS) {
 			const guild = (await testClient.guilds.fetch()).get(DEVELOPMENT_GUILD_ID);
 			if (!guild) {
-				console.error(`The bot is not in a guild with id ${DEVELOPMENT_GUILD_ID}.`);
-				process.exit(1);
+				throw new Error(`The bot is not in a guild with id ${DEVELOPMENT_GUILD_ID}.`);
 			}
 		}
 
@@ -56,8 +53,7 @@ export default class implements EconomicaService {
 		console.info('Validating PUBLIC_GUILD_ID...');
 		const guild = (await testClient.guilds.fetch()).get(PUBLIC_GUILD_ID);
 		if (!guild) {
-			console.error(`The bot is not in a guild with id ${PUBLIC_GUILD_ID}.`);
-			process.exit(1);
+			throw new Error(`The bot is not in a guild with id ${PUBLIC_GUILD_ID}.`);
 		}
 
 		// DISCORD_INVITE_URL
@@ -65,8 +61,7 @@ export default class implements EconomicaService {
 			const url = new URL(DISCORD_INVITE_URL);
 			if (url.toString() !== DISCORD_INVITE_URL) throw Error;
 		} catch (_) {
-			console.error(`Invalid URL ${DISCORD_INVITE_URL}.`);
-			process.exit(1);
+			throw new Error(`Invalid URL ${DISCORD_INVITE_URL}.`);
 		}
 
 		// WEBHOOK_URLS
@@ -74,16 +69,14 @@ export default class implements EconomicaService {
 		for (const WEBHOOK_URL of WEBHOOK_URLS) {
 			const webhookClient = new WebhookClient({ url: WEBHOOK_URL });
 			if (!webhookClient) {
-				console.error(`Could not create Webhook with URL ${WEBHOOK_URL}.`);
-				process.exit(1);
+				throw new Error(`Could not create Webhook with URL ${WEBHOOK_URL}.`);
 			}
 		}
 
 		// MONGO_URI
 		console.info('Validating MONGO_URI...');
 		await connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true }).catch((err) => {
-			console.error('Could not connect to mongo. Check the MONGO_URI.');
-			process.exit(1);
+			throw new Error('Could not connect to mongo. Check the MONGO_URI.');
 		});
 		await disconnect();
 

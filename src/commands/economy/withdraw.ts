@@ -1,3 +1,5 @@
+import { Message } from 'discord.js';
+
 import { transaction, validateAmount } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
@@ -10,11 +12,11 @@ export default class implements EconomicaCommand {
 		.setExamples(['withdraw all', 'withdraw 100'])
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true));
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message> => {
 		const { currency } = ctx.guildDocument;
 		const { validated, result } = await validateAmount(ctx, 'treasury');
-
-		await transaction(
+		if (!validated) return;
+		transaction(
 			ctx.client,
 			ctx.interaction.guildId,
 			ctx.interaction.user.id,
@@ -25,6 +27,6 @@ export default class implements EconomicaCommand {
 			0
 		);
 
-		return await ctx.embedify('success', 'user', `Withdrew ${currency}${result.toLocaleString()}`);
+		return await ctx.embedify('success', 'user', `Withdrew ${currency}${result.toLocaleString()}`, false);
 	};
 }

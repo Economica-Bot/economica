@@ -21,6 +21,6 @@ export async function execute(client: EconomicaClient, interaction: CommandInter
 	const check = await commandCheck(ctx);
 
 	if (check) {
-		await command?.execute(ctx);
+		await command.execute(ctx)
 	}
 }

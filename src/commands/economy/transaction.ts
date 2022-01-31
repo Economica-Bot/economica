@@ -1,6 +1,6 @@
-import { isValidObjectId } from 'mongoose';
+import { Message } from 'discord.js';
 
-import { TransactionModel } from '../../models';
+import { validateObjectId } from '../../lib/validate';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -45,62 +45,52 @@ export default class implements EconomicaCommand {
 				.addEconomicaSubcommand((subcommand) => subcommand.setName('all').setDescription('Delete all transactions.'))
 		);
 
-	execute = async (ctx: Context) => {
-		const { currency } = ctx.guildDocument;
+	execute = async (ctx: Context): Promise<Message | void> => {
 		const subcommandgroup = ctx.interaction.options.getSubcommandGroup(false);
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const user = ctx.interaction.options.getUser('user', false);
-		const _id = ctx.interaction.options.getString('transaction_id', false);
-		if (_id && !isValidObjectId(_id)) {
-			return await ctx.embedify('error', 'user', 'Please enter a valid transaction id.');
-		}
+		const { valid, document, model } = await validateObjectId(ctx, 'transaction');
+		if (!valid) return;
 
-		const transaction = await TransactionModel.findOne({ _id });
-		if (!transaction) {
-			return await ctx.interaction.reply(`Could not find transaction with id \`${_id}\``);
-		}
+		const { currency } = ctx.guildDocument;
 
 		if (subcommand === 'view') {
-			const embed = await ctx.embedify(
-				'info',
-				'guild',
-				`Transaction for <@!${transaction.userId}>\nType: \`${transaction.type}\``,
-				false
-			);
-			embed.addFields([
-				{
-					name: '__**Wallet**__',
-					value: `${currency}${transaction.wallet.toLocaleString()}`,
-					inline: true,
-				},
-				{
-					name: '__**Treasury**__',
-					value: `${currency}${transaction.treasury.toLocaleString()}`,
-					inline: true,
-				},
-				{
-					name: '__**Total**__',
-					value: `${currency}${transaction.total.toLocaleString()}`,
-					inline: true,
-				},
-			]);
+			const embed = await ctx
+				.embedify('info', 'guild', `Transaction for <@!${document.userId}>\nType: \`${document.type}\``)
+				.addFields([
+					{
+						name: '__**Wallet**__',
+						value: `${currency}${document.wallet.toLocaleString()}`,
+						inline: true,
+					},
+					{
+						name: '__**Treasury**__',
+						value: `${currency}${document.treasury.toLocaleString()}`,
+						inline: true,
+					},
+					{
+						name: '__**Total**__',
+						value: `${currency}${document.total.toLocaleString()}`,
+						inline: true,
+					},
+				]);
 
 			return await ctx.interaction.reply({ embeds: [embed] });
 		} else if (subcommandgroup === 'delete') {
 			if (subcommand === 'id') {
-				transaction.deleteOne();
-				return await ctx.embedify('success', 'guild', `Deleted transaction \`${_id}\``);
+				document.deleteOne();
+				return await ctx.embedify('success', 'guild', `Deleted transaction \`${document._id}\``, true);
 			} else if (subcommand === 'user') {
-				const transactions = await TransactionModel.deleteMany({
+				const transactions = await model.deleteMany({
 					guildId: ctx.interaction.guildId,
 					userId: user.id,
 				});
-				return await ctx.embedify('success', 'guild', `Deleted \`${transactions.deletedCount}\` transactions.`);
+				return await ctx.embedify('success', 'guild', `Deleted \`${transactions.deletedCount}\` transactions.`, true);
 			} else if (subcommand === 'all') {
-				const transactions = await TransactionModel.deleteMany({
+				const transactions = await model.deleteMany({
 					guildId: ctx.interaction.guildId,
 				});
-				return await ctx.embedify('success', 'guild', `Deleted \`${transactions.deletedCount}\` transactions.`);
+				return await ctx.embedify('success', 'guild', `Deleted \`${transactions.deletedCount}\` transactions.`, true);
 			}
 		}
 	};

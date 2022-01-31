@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 
 import { TransactionString } from '../typings';
 
-interface Transaction {
+export interface Transaction {
 	_id: mongoose.Types.ObjectId;
 	guildId: string;
 	userId: string;

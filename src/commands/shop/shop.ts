@@ -1,4 +1,4 @@
-import { EmbedFieldData, MessageEmbed } from 'discord.js';
+import { EmbedFieldData, Message, MessageEmbed } from 'discord.js';
 
 import * as util from '../../lib';
 import { MemberModel, ShopModel } from '../../models';
@@ -58,7 +58,7 @@ export default class implements EconomicaCommand {
 				.addEconomicaSubcommand((subcommand) => subcommand.setName('all').setDescription('Delete all shop items.'))
 		);
 
-	execute = async (ctx: Context): Promise<any> => {
+	execute = async (ctx: Context): Promise<Message | void> => {
 		const { currency } = ctx.guildDocument;
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const subcommandGroup = ctx.interaction.options.getSubcommandGroup(false);
@@ -97,14 +97,14 @@ export default class implements EconomicaCommand {
 				embeds.push(embed);
 			}
 
-			await util.paginate(ctx.interaction, embeds, page - 1);
+			return await util.paginate(ctx.interaction, embeds, page - 1);
 		} else if (subcommand === 'enable') {
 			const shopItem = await ShopModel.findOneAndUpdate({ name }, { active: true });
 			if (!shopItem) {
-				return await ctx.embedify('error', 'user', 'Could not find an item with that name.');
+				return await ctx.embedify('error', 'user', 'Could not find an item with that name.', true);
+			} else {
+				return await ctx.embedify('success', 'user', 'Item enabled.', false);
 			}
-
-			return await ctx.embedify('success', 'user', 'Item enabled.');
 		} else if (subcommandGroup === 'disable') {
 			if (subcommand === 'single') {
 				const shopItem = await ShopModel.findOneAndUpdate(
@@ -112,26 +112,31 @@ export default class implements EconomicaCommand {
 					{ active: false }
 				);
 				if (!shopItem) {
-					return await ctx.embedify('error', 'user', 'Could not find a shop item with that name.');
+					return await ctx.embedify('error', 'user', 'Could not find a shop item with that name.', true);
+				} else {
+					return await ctx.embedify('success', 'user', 'Item disabled.', false);
 				}
-
-				return await ctx.embedify('success', 'user', 'Item disabled.');
 			} else if (subcommand === 'all') {
 				const shopItems = await ShopModel.updateMany({ guildId: ctx.interaction.guildId }, { active: false });
-				return await ctx.embedify('success', 'user', `Enabled ${shopItems.nModified} shop items.`);
+				return await ctx.embedify('success', 'user', `Enabled ${shopItems.nModified} shop items.`, false);
 			}
 		} else if (subcommandGroup === 'delete') {
 			if (subcommand === 'single') {
 				const shopItem = await ShopModel.deleteOne({ guildId: ctx.interaction.guildId, name });
 				if (!shopItem) {
-					return await ctx.embedify('error', 'user', 'Could not find a shop item with that name.');
+					return await ctx.embedify('error', 'user', 'Could not find a shop item with that name.', true);
+				} else {
+					const updates = await MemberModel.updateMany(
+						{ guildId: ctx.interaction.guildId },
+						{ $pull: { inventory: { name } } }
+					);
+					return await ctx.embedify(
+						'success',
+						'user',
+						`Item deleted. ${updates.nModified} removed from inventories.`,
+						false
+					);
 				}
-
-				const updates = await MemberModel.updateMany(
-					{ guildId: ctx.interaction.guildId },
-					{ $pull: { inventory: { name } } }
-				);
-				return await ctx.embedify('success', 'user', `Item deleted. ${updates.nModified} removed from inventories.`);
 			} else if (subcommand === 'all') {
 				const shopItems = await ShopModel.deleteMany({ guildId: ctx.interaction.guildId });
 				const updates = await MemberModel.updateMany(
@@ -141,7 +146,8 @@ export default class implements EconomicaCommand {
 				return await ctx.embedify(
 					'success',
 					'user',
-					`${shopItems.deletedCount} items deleted. ${updates.nModified} removed from inventories.`
+					`${shopItems.deletedCount} items deleted. ${updates.nModified} removed from inventories.`,
+					false
 				);
 			}
 		}

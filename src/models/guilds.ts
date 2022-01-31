@@ -8,6 +8,7 @@ export interface Guild {
 	currency: string;
 	transactionLogChannel: string;
 	infractionLogChannel: string;
+	botLogChannel: string;
 	auth: Array<RoleAuthority>;
 	income: typeof income;
 }
@@ -18,6 +19,7 @@ const Schema = new mongoose.Schema<Guild>(
 		currency: { type: String, required: true },
 		transactionLogChannel: { type: String, required: true },
 		infractionLogChannel: { type: String, required: true },
+		botLogChanne: { type: String, required: true },
 		auth: { type: Array<RoleAuthority>(), required: true },
 		income: { type: Object, required: true },
 	},

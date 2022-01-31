@@ -1,4 +1,4 @@
-import { GuildMemberRoleManager } from 'discord.js';
+import { GuildMemberRoleManager, Message } from 'discord.js';
 
 import { getEconInfo, transaction } from '../../lib';
 import { MemberModel, ShopModel } from '../../models';
@@ -12,39 +12,47 @@ export default class implements EconomicaCommand {
 		.setGroup('SHOP')
 		.addStringOption((option) => option.setName('item').setDescription('Specify an item.').setRequired(true));
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message> => {
 		const query = ctx.interaction.options.getString('item');
 		const item = await ShopModel.findOne({ guildId: ctx.interaction.guildId, name: query, active: true });
 		const hasItem = ctx.memberDocument.inventory.some((i) => i.name === item.name);
+		
 		const { currency } = ctx.guildDocument;
 		const { wallet, treasury } = await getEconInfo(ctx.interaction.guildId, ctx.interaction.user.id);
-
-		if (!item) return await ctx.embedify('error', 'user', 'Could not find an item with that name.');
-		if (item.price > wallet) return await ctx.embedify('warn', 'user', 'You cannot afford this item.');
-		if (item.treasuryRequired > treasury)
-			return await ctx.embedify('warn', 'user', `You need ${currency}${item.treasuryRequired.toLocaleString()}`);
+		const missingRoles = new Array<String>();
+		const missingItems = new Array<String>();
 
 		item.rolesRequired.forEach(async (roleId) => {
 			if (!(ctx.interaction.member.roles as GuildMemberRoleManager).cache.has(roleId)) {
-				return await ctx.embedify('warn', 'user', `You are missing <@&${roleId}>.`);
+				missingRoles.push(roleId);
 			}
 		});
+
+		item.itemsRequired.forEach(async (item) => {
+			if (!ctx.memberDocument.inventory.some((entry) => entry.name === item)) {
+				missingItems.push(item);
+			}
+		});
+
+		if (!item) {
+			return await ctx.embedify('error', 'user', 'Could not find an item with that name.', true);
+		} else if (item.price > wallet) {
+			return await ctx.embedify('warn', 'user', 'You cannot afford this item.', true);
+		} else if (item.treasuryRequired > treasury) {
+			return await ctx.embedify('warn', 'user', `You need ${currency}${item.treasuryRequired.toLocaleString()} in your treasury.`, true);
+		} else if (missingItems.length) {
+			return await ctx.embedify('warn', 'user', `You are missing \`${missingItems.join('`, `')}\`.`, true);
+		} else if (missingRoles.length) {
+			return await ctx.embedify('warn', 'user', `You are missing <${missingRoles.join('>, <@&')}>.`, true);
+		} else if (hasItem && !item.stackable) {
+			return await ctx.embedify('warn', 'user', 'This item is not stackable.', true);
+		}
 
 		item.rolesRemoved.forEach(async (roleId) => {
 			(ctx.interaction.member.roles as GuildMemberRoleManager).remove(roleId);
 		});
 
-		item.itemsRequired.forEach(async (item) => {
-			if (!ctx.memberDocument.inventory.some((entry) => entry.name === item)) {
-				return await ctx.embedify('warn', 'user', `You are missing prerequisite item \`${item}\`.`);
-			}
-		});
-
-		if (hasItem && !item.stackable) {
-			return await ctx.embedify('warn', 'user', 'This item is not stackable.');
-		}
-
-		await transaction(
+		transaction(
 			ctx.client,
 			ctx.interaction.guildId,
 			ctx.interaction.user.id,
@@ -81,7 +89,7 @@ export default class implements EconomicaCommand {
 		return await ctx.embedify(
 			'success',
 			'user',
-			`Purchased \`${item.name}\` for ${currency}${item.price.toLocaleString()}`
+			`Purchased \`${item.name}\` for ${currency}${item.price.toLocaleString()}`, false
 		);
 	};
 }

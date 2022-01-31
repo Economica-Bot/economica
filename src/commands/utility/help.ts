@@ -1,5 +1,5 @@
 import { SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from '@discordjs/builders';
-import { MessageEmbed } from 'discord.js';
+import { Message, MessageEmbed } from 'discord.js';
 
 import { icons } from '../../config';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
@@ -16,7 +16,7 @@ export default class implements EconomicaCommand {
 			option.setName('query').setDescription('Specify a group, command, or subcommand.').setRequired(false)
 		);
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message | void> => {
 		const query = ctx.interaction.options.getString('query');
 
 		if (!query) {
@@ -29,7 +29,7 @@ export default class implements EconomicaCommand {
 				commands.push(data);
 			});
 
-			const embed: MessageEmbed = await ctx.embedify('info', 'bot', 'Command List.', false);
+			const embed = ctx.embedify('info', 'bot', 'Command List.');
 
 			for (const group of groups) {
 				const list: string[] = [];
@@ -40,7 +40,7 @@ export default class implements EconomicaCommand {
 				embed.addField(group, `\`${list.join('`, `')}\``);
 			}
 
-			return await ctx.interaction.reply({ embeds: [embed] });
+			return await ctx.interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 
 		const command = ctx.client.commands.find((command) => {
@@ -67,7 +67,7 @@ export default class implements EconomicaCommand {
 				}
 			}
 
-			return await ctx.interaction.reply({ embeds: [embed] });
+			return await ctx.interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 
 		if (command) {
@@ -91,9 +91,9 @@ export default class implements EconomicaCommand {
 				}
 			});
 
-			return await ctx.interaction.reply({ embeds: [embed] });
+			return await ctx.interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 
-		return await ctx.embedify('error', 'user', `Could not find any groups or commands matching \`${query}\`.`);
+		return await ctx.embedify('error', 'user', `Could not find any groups or commands matching \`${query}\`.`, true);
 	};
 }

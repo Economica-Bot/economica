@@ -1,4 +1,4 @@
-import { GuildMember } from 'discord.js';
+import { GuildMember, Message } from 'discord.js';
 
 import { infraction, validateTarget } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
@@ -15,7 +15,7 @@ export default class implements EconomicaCommand {
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason.').setRequired(false));
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message> => {
 		if (!(await validateTarget(ctx))) return;
 
 		const target = ctx.interaction.options.getMember('target') as GuildMember;
@@ -29,6 +29,6 @@ export default class implements EconomicaCommand {
 		await infraction(ctx.client, ctx.interaction.guildId, target.id, ctx.interaction.user.id, 'KICK', reason);
 
 		const content = `Kicked ${target.user.tag}${messagedUser ? '\nUser notified' : '\nCould not notify user'}`;
-		return await ctx.embedify('success', 'user', content);
+		return await ctx.embedify('success', 'user', content, false);
 	};
 }

@@ -1,4 +1,4 @@
-import { GuildMember } from 'discord.js';
+import { GuildMember, Message } from 'discord.js';
 import ms from 'ms';
 
 import { infraction, validateTarget } from '../../lib';
@@ -22,7 +22,7 @@ export default class implements EconomicaCommand {
 		.addStringOption((option) => option.setName('duration').setDescription('Specify a length.').setRequired(true))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason.').setRequired(false));
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message> => {
 		if (!(await validateTarget(ctx))) return;
 
 		const target = ctx.interaction.options.getMember('target') as GuildMember;
@@ -33,7 +33,7 @@ export default class implements EconomicaCommand {
 		let messagedUser = true;
 
 		if (duration !== 'Permanent' && (!milliseconds || milliseconds < 0))
-			return ctx.embedify('warn', 'user', 'Invalid duration.');
+			return ctx.embedify('warn', 'user', 'Invalid duration.', true);
 
 		await target
 			.send(
@@ -53,9 +53,8 @@ export default class implements EconomicaCommand {
 			milliseconds
 		);
 
-		const content = `Placed ${target} under a timeout for ${ms(milliseconds)}.${
-			messagedUser ? '\nUser notified' : '\nCould not notify user'
-		}`;
-		return await ctx.embedify('success', 'user', content);
+		// prettier-ignore
+		const content = `Placed ${target} under a timeout ${formattedDuration}.${messagedUser ? '\nUser notified' : '\nCould not notify user'}`;
+		return await ctx.embedify('success', 'user', content, false);
 	};
 }

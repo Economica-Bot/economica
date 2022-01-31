@@ -1,4 +1,4 @@
-import { MessageEmbed, Role } from 'discord.js';
+import { Message, MessageEmbed, Role } from 'discord.js';
 
 import { removeAuthRole, setAuthRole } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
@@ -10,16 +10,16 @@ export default class implements EconomicaCommand {
 		.setDescription('Interact with the economy authority role hierarchy.')
 		.setGroup('UTILITY')
 		.setFormat('<view | set | reset> [...options]')
-		.addEconomicaSubcommand((options) => options.setName('view').setDescription('View the economy authority hierarchy.'))
+		.addEconomicaSubcommand((options) =>
+			options.setName('view').setDescription('View the economy authority hierarchy.')
+		)
 		.addEconomicaSubcommand((options) =>
 			options
 				.setName('set')
 				.setDescription("Set a role's authority level")
 				.setFormat('<role> <user | mod | manager | admin>')
 				.setAuthority('ADMINISTRATOR')
-				.addRoleOption((option) =>
-					option.setName('role').setDescription('Specify a role.').setRequired(true)
-				)
+				.addRoleOption((option) => option.setName('role').setDescription('Specify a role.').setRequired(true))
 				.addStringOption((option) =>
 					option
 						.setName('level')
@@ -41,7 +41,7 @@ export default class implements EconomicaCommand {
 				.addRoleOption((option) => option.setName('role').setDescription('Specify a role.'))
 		);
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message | void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 
 		if (subcommand === 'view') {
@@ -110,15 +110,15 @@ export default class implements EconomicaCommand {
 			const targetRole = ctx.interaction.options.getRole('role') as Role;
 			await removeAuthRole(ctx.interaction.guild, targetRole);
 			await setAuthRole(ctx.interaction.guild, targetRole, level);
-			return await ctx.embedify('success', 'bot', `${targetRole} has been set to \`${level}\`.`);
+			return await ctx.embedify('success', 'bot', `${targetRole} has been set to \`${level}\`.`, false);
 		} else if (subcommand === 'reset') {
 			const targetRole = ctx.interaction.options.getRole('role', false) as Role;
 			if (targetRole) {
 				await removeAuthRole(ctx.interaction.guild, targetRole);
-				return await ctx.embedify('success', 'bot', `${targetRole} has been reset.`);
+				return await ctx.embedify('success', 'bot', `${targetRole} has been reset.`, false);
 			} else {
 				ctx.guildDocument.updateOne({ auth: [] });
-				return await ctx.embedify('success', 'bot', 'All roles have been reset.');
+				return await ctx.embedify('success', 'bot', 'All roles have been reset.', false);
 			}
 		}
 	};

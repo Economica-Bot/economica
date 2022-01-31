@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 
 import { InfractionString } from '../typings';
 
-interface Infraction {
+export interface Infraction {
 	guildId: string;
 	userId: string;
 	agentId: string;

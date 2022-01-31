@@ -1,5 +1,3 @@
-import { MessageEmbed } from 'discord.js';
-
 import { TransactionModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
@@ -16,7 +14,7 @@ export default class implements EconomicaCommand {
 				.addUserOption((option) => option.setName('user').setDescription('Specify a user.').setRequired(false))
 		);
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<void> => {
 		const user = ctx.interaction.options.getUser('user');
 		const wallets: number[] = [];
 		const treasuries: number[] = [];
@@ -158,18 +156,17 @@ export default class implements EconomicaCommand {
 				.setBackgroundColor('#2f3136');
 
 			const url = await chart.getShortUrl();
-			const embed: MessageEmbed = await ctx.embedify(
-				'info',
-				{
-					name: 'Balance Statistics',
-					iconURL: user?.displayAvatarURL() ?? ctx.interaction.guild.iconURL(),
-				},
-				null,
-				false
-			);
-
-			embed.setImage(url);
-			await ctx.interaction.reply({ embeds: [embed] });
+			const embed = ctx
+				.embedify(
+					'info',
+					{
+						name: 'Balance Statistics',
+						iconURL: user?.displayAvatarURL() ?? ctx.interaction.guild.iconURL(),
+					},
+					null
+				)
+				.setImage(url);
+			return await ctx.interaction.reply({ embeds: [embed] });
 		}
 	};
 }

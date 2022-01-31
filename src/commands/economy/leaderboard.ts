@@ -1,5 +1,5 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
-import { MessageEmbed } from 'discord.js';
+import { Message, MessageEmbed } from 'discord.js';
 
 import { paginate } from '../../lib';
 import { MemberModel } from '../../models';
@@ -28,7 +28,7 @@ export default class implements EconomicaCommand {
 			option.setName('page').setDescription('Specify a page.').setMinValue(1).setRequired(false)
 		);
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<void> => {
 		const type = ctx.interaction.options.getString('type') as BalanceString;
 		const page = ctx.interaction.options.getInteger('page', false) ?? 1;
 		const { currency } = ctx.guildDocument;

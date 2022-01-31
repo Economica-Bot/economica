@@ -1,3 +1,5 @@
+import { Message } from 'discord.js';
+
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -29,7 +31,7 @@ export default class implements EconomicaCommand {
 				)
 		);
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 
 		if (subcommand === 'view') {
@@ -42,7 +44,7 @@ export default class implements EconomicaCommand {
 				description.push(`**${k}**\n${desc.join('\n')}`);
 			}
 
-			return await ctx.embedify('info', 'guild', description.join('\n'));
+			return await ctx.embedify('info', 'guild', description.join('\n'), false);
 		} else if (subcommand === 'edit') {
 			const min = ctx.interaction.options.getInteger('minimum', false);
 			const max = ctx.interaction.options.getInteger('maximum', false);
@@ -52,12 +54,12 @@ export default class implements EconomicaCommand {
 			const command = ctx.interaction.options.getString('command');
 			const inter = ctx.client.commands.get(command);
 			if (!inter) {
-				return await ctx.embedify('error', 'user', 'Could not find that command.');
+				return await ctx.embedify('error', 'user', 'Could not find that command.', true);
 			}
 
 			const data = inter.data as EconomicaSlashCommandBuilder;
 			if (data.group !== 'INCOME') {
-				return await ctx.embedify('error', 'user', `That is not an \`INCOME\` command.`);
+				return await ctx.embedify('error', 'user', `That is not an \`INCOME\` command.`, true);
 			}
 
 			const income = ctx.guildDocument.income;
@@ -74,7 +76,7 @@ export default class implements EconomicaCommand {
 			}
 
 			await ctx.guildDocument.updateOne({ income });
-			return await ctx.embedify('success', 'user', `Updated \`${command}\`.`);
+			return await ctx.embedify('success', 'user', `Updated \`${command}\`.`, false);
 		}
 	};
 }

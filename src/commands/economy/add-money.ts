@@ -1,5 +1,5 @@
 import { parseNumber, parseString } from '@adrastopoulos/number-parser';
-import { GuildMember } from 'discord.js';
+import { GuildMember, Message } from 'discord.js';
 
 import { transaction } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
@@ -25,15 +25,16 @@ export default class implements EconomicaCommand {
 				.setRequired(true)
 		);
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message> => {
 		const member = ctx.interaction.options.getMember('user') as GuildMember;
-		const { currency } = ctx.guildDocument;
 		const amount = ctx.interaction.options.getString('amount');
 		const parsedAmount = parseString(amount);
 		const target = ctx.interaction.options.getString('target');
 		if (!parsedAmount) {
-			return await ctx.embedify('error', 'user', `Invalid amount: \`${amount}\``);
+			return await ctx.embedify('error', 'user', `Invalid amount: \`${amount}\``, true);
 		}
+
+		const { currency } = ctx.guildDocument;
 
 		await transaction(
 			ctx.client,
@@ -49,7 +50,8 @@ export default class implements EconomicaCommand {
 		return await ctx.embedify(
 			'success',
 			'user',
-			`Added ${currency}${parseNumber(parsedAmount)} to <@!${member.user.id}>'s \`${target}\`.`
+			`Added ${currency}${parseNumber(parsedAmount)} to <@!${member.user.id}>'s \`${target}\`.`,
+			false
 		);
 	};
 }

@@ -1,4 +1,4 @@
-import { ColorResolvable, CommandInteraction, MessageEmbed } from 'discord.js';
+import { ColorResolvable, CommandInteraction, Message, MessageEmbed } from 'discord.js';
 import { Document } from 'mongoose';
 
 import { EconomicaClient, EconomicaSlashCommandBuilder } from '.';
@@ -34,19 +34,18 @@ export class Context {
 		this.memberDocument = memberDocument;
 	}
 
-	public embedify(type: ReplyString, author: Author, content?: string | null): MessageEmbed;
-	public embedify(type: ReplyString, author: Author, content: string | null, send: boolean): Promise<any>;
+	public embedify(type: ReplyString, author: Author, description?: string | null): MessageEmbed;
+	public embedify(type: ReplyString, author: Author, description: string | null, ephemeral: boolean): Promise<Message>;
 	public embedify(
 		type: ReplyString,
 		author: Author,
-		content: string | null,
-		send: boolean = true
+		description: string | null,
+		ephemeral?: boolean
 	): MessageEmbed | Promise<any> {
-		const ephemeral = type === 'error' || type === 'warn';
 		const embed = new MessageEmbed().setColor(EmbedColors[type]);
 
-		if (content) {
-			embed.setDescription(content);
+		if (description) {
+			embed.setDescription(description);
 		}
 
 		if (author === 'bot') {
@@ -68,7 +67,7 @@ export class Context {
 			embed.setAuthor(author);
 		}
 
-		if (send) {
+		if (typeof ephemeral !== 'undefined') {
 			if (this.interaction.deferred) {
 				return this.interaction.editReply({ embeds: [embed] });
 			} else if (this.interaction.replied) {

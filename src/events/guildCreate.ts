@@ -15,6 +15,7 @@ export async function execute(client: EconomicaClient, guild: Guild) {
 			currency: CURRENCY_SYMBOL,
 			transactionLogChannel: null,
 			infractionLogChannel: null,
+			botLogChannel: null,
 			auth: [],
 			income,
 		},

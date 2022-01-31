@@ -1,4 +1,4 @@
-import { GuildMember } from 'discord.js';
+import { GuildMember, Message } from 'discord.js';
 import ms from 'ms';
 
 import { infraction, validateTarget } from '../../lib';
@@ -25,7 +25,7 @@ export default class implements EconomicaCommand {
 				.setRequired(false)
 		);
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message> => {
 		if (!(await validateTarget(ctx))) return;
 
 		const target = ctx.interaction.options.getMember('target') as GuildMember;
@@ -52,9 +52,8 @@ export default class implements EconomicaCommand {
 			milliseconds
 		);
 
-		const content = `Banned ${target.user.tag} ${formattedDuration}.${
-			messagedUser ? '\nUser notified' : '\nCould not notify user'
-		}`;
-		return await ctx.embedify('success', 'user', content);
+		// prettier-ignore
+		const content = `Banned ${target.user.tag} ${formattedDuration}.${messagedUser ? '\nUser notified' : '\nCould not notify user'}`;
+		return await ctx.embedify('success', 'user', content, false);
 	};
 }

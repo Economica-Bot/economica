@@ -1,3 +1,5 @@
+import { Message } from 'discord.js';
+
 import {
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandOptionsOnlyBuilder,
@@ -15,5 +17,5 @@ export class EconomicaCommand {
 		| EconomicaSlashCommandSubcommandsOnlyBuilder
 		| EconomicaSlashCommandOptionsOnlyBuilder
 		| Omit<EconomicaSlashCommandBuilder, 'addEconomicaSubcommand' | 'addEconomicaSubcommandGroup'>;
-	execute: (ctx: Context) => Promise<any>;
+	execute: (ctx: Context) => Promise<Message | void>;
 }

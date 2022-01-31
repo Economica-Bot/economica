@@ -15,7 +15,7 @@ export default class implements EconomicaService {
 						name: item.name,
 					});
 
-					if (shopItem.type == 'generator') {
+					if (shopItem.type === 'GENERATOR') {
 						if (!item.hasOwnProperty('lastGenerateAt')) {
 							item.lastGenerateAt = now.getTime();
 						}

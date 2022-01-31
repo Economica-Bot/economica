@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 
-interface Loan {
+export interface Loan {
 	guildId: string;
 	borrowerId: string;
 	lenderId: string;

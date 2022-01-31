@@ -1,13 +1,18 @@
-import { Client, ClientOptions, Collection } from 'discord.js';
+import { Client, ClientOptions, Collection, WebhookClient } from 'discord.js';
 import { EconomicaSlashCommandBuilder } from '.';
+import { WEBHOOK_URLS } from '../config';
 
 import { EconomicaCommand } from './EconomicaCommand';
 
 export class EconomicaClient extends Client {
 	commands: Collection<String, EconomicaCommand>;
+	webhooks: WebhookClient[] = [];
 	constructor(options: ClientOptions) {
 		super(options);
 		this.commands = new Collection();
+		WEBHOOK_URLS.forEach((WEBHOOK_URL) => {
+			this.webhooks.push(new WebhookClient({ url: WEBHOOK_URL }));
+		});
 	}
 
 	public getCommandData(query: string): EconomicaSlashCommandBuilder {

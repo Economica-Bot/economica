@@ -1,13 +1,15 @@
+import { Message } from 'discord.js';
+
 import { transaction } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder().setName('work').setDescription('Work to earn a sum.').setGroup('INCOME');
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message> => {
 		const { min, max } = ctx.guildDocument.income.work;
 		const amount = Math.ceil(Math.random() * (max - min) + min);
-		await transaction(
+		transaction(
 			ctx.client,
 			ctx.interaction.guildId,
 			ctx.interaction.user.id,
@@ -21,7 +23,8 @@ export default class implements EconomicaCommand {
 		return await ctx.embedify(
 			'success',
 			'user',
-			`You worked and earned ${ctx.guildDocument.currency}${amount.toLocaleString()}`
+			`You worked and earned ${ctx.guildDocument.currency}${amount.toLocaleString()}`,
+			false
 		);
 	};
 }

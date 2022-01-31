@@ -1,5 +1,5 @@
 import { parseString } from '@adrastopoulos/number-parser';
-import { GuildMember } from 'discord.js';
+import { GuildMember, Message } from 'discord.js';
 
 import { getEconInfo, transaction } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
@@ -25,7 +25,7 @@ export default class implements EconomicaCommand {
 				.setRequired(true)
 		);
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message> => {
 		const { currency } = ctx.guildDocument;
 		const member = ctx.interaction.options.getMember('user') as GuildMember;
 		const amount = parseString(ctx.interaction.options.getString('amount'));
@@ -34,10 +34,10 @@ export default class implements EconomicaCommand {
 		const difference = target === 'wallet' ? amount - wallet : amount - treasury;
 
 		if (!amount) {
-			return await ctx.embedify('error', 'user', 'Please enter a valid amount.');
+			return await ctx.embedify('error', 'user', 'Please enter a valid amount.', true);
 		}
 
-		await transaction(
+		transaction(
 			ctx.client,
 			ctx.interaction.guild.id,
 			member.id,
@@ -51,7 +51,8 @@ export default class implements EconomicaCommand {
 		return await ctx.embedify(
 			'success',
 			'user',
-			`Set ${member}'s \`${target}\` to ${currency}${amount.toLocaleString()}.`
+			`Set ${member}'s \`${target}\` to ${currency}${amount.toLocaleString()}.`,
+			false
 		);
 	};
 }

@@ -1,3 +1,5 @@
+import { Message } from 'discord.js';
+
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -23,23 +25,23 @@ export default class implements EconomicaCommand {
 			subcommand.setName('reset').setDescription('Reset the infraction log channel.').setAuthority('ADMINISTRATOR')
 		);
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		switch (subcommand) {
 			case 'view':
 				const channelId = ctx.guildDocument.infractionLogChannel;
 				if (channelId) {
-					return await ctx.embedify('info', 'user', `The current infraction log is <#${channelId}>.`);
+					return await ctx.embedify('info', 'user', `The current infraction log is <#${channelId}>.`, false);
 				} else {
-					return await ctx.embedify('info', 'user', 'There is no infraction log.');
+					return await ctx.embedify('info', 'user', 'There is no infraction log.', false);
 				}
 			case 'set':
 				const channel = ctx.interaction.options.getChannel('channel');
 				await ctx.guildDocument.updateOne({ infractionLogChannel: channel.id });
-				return await ctx.embedify('success', 'user', `Infraction log set to ${channel}.`);
+				return await ctx.embedify('success', 'user', `Infraction log set to ${channel}.`, false);
 			case 'reset':
 				await ctx.guildDocument.update({ infractionLogChannel: null });
-				return await ctx.embedify('success', 'user', 'Infraction log reset.');
+				return await ctx.embedify('success', 'user', 'Infraction log reset.', false);
 		}
 	};
 }

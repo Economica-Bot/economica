@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 
-interface Market {
+export interface Market {
 	userId: string;
 	guildId: string;
 	item: string;

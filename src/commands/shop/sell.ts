@@ -1,4 +1,4 @@
-import { GuildMemberRoleManager } from 'discord.js';
+import { GuildMemberRoleManager, Message } from 'discord.js';
 
 import { transaction } from '../../lib';
 import { MemberModel, ShopModel } from '../../models';
@@ -11,20 +11,20 @@ export default class implements EconomicaCommand {
 		.setGroup('SHOP')
 		.addStringOption((option) => option.setName('item').setDescription('Specify an item.').setRequired(true));
 
-	execute = async (ctx: Context) => {
+	execute = async (ctx: Context): Promise<Message> => {
 		const query = ctx.interaction.options.getString('item');
 		const item = await ShopModel.findOne({ guildId: ctx.interaction.guildId, name: query, active: true });
 		const hasItem = ctx.memberDocument.inventory.some((i) => i.name === item.name);
 		const invItem = ctx.memberDocument.inventory.find((i) => i.name === item.name);
 		const { currency } = ctx.guildDocument;
 
-		if (!item) return await ctx.embedify('error', 'user', 'Could not find an item with that name.');
-
-		if (!hasItem) {
-			return await ctx.embedify('warn', 'user', 'You do not have this item.');
+		if (!item) {
+			return await ctx.embedify('error', 'user', 'Could not find an item with that name.', true);
+		} else if (!hasItem) {
+			return await ctx.embedify('warn', 'user', 'You do not have this item.', true);
 		}
 
-		await transaction(
+		transaction(
 			ctx.client,
 			ctx.interaction.guildId,
 			ctx.interaction.user.id,
@@ -51,6 +51,11 @@ export default class implements EconomicaCommand {
 
 		item.updateOne({ $inc: { stock: 1 } });
 
-		return await ctx.embedify('success', 'user', `Sold \`${item.name}\` for ${currency}${item.price.toLocaleString()}`);
+		return await ctx.embedify(
+			'success',
+			'user',
+			`Sold \`${item.name}\` for ${currency}${item.price.toLocaleString()}`,
+			false
+		);
 	};
 }
