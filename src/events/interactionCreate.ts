@@ -12,7 +12,14 @@ export async function execute(client: EconomicaClient, interaction: CommandInter
 	}
 
 	const command = client.commands.get(interaction.commandName) as EconomicaCommand;
-	if (!command) throw new Error(`There was an error while executing this command`);
+	client.commands.delete(interaction.commandName);
+	if (!command) {
+		interaction.reply({
+			content: 'There was an error while executing this command. Attempting restart...',
+			ephemeral: true,
+		});
+		throw new Error(`There was an error while executing this command`);
+	}
 
 	const guildDocument = await GuildModel.findOne({ guildId: interaction.guildId });
 	const memberDocument = await MemberModel.findOne({ guildId: interaction.guildId, userId: interaction.user.id });
@@ -21,6 +28,6 @@ export async function execute(client: EconomicaClient, interaction: CommandInter
 	const check = await commandCheck(ctx);
 
 	if (check) {
-		await command.execute(ctx)
+		await command.execute(ctx);
 	}
 }

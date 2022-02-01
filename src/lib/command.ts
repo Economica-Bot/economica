@@ -11,13 +11,13 @@ import { Authority } from '../typings';
 
 export async function commandCheck(ctx: Context): Promise<boolean> {
 	if (!ctx.data.enabled) {
-		await ctx.embedify('error', 'user', 'This command is disabled.');
+		await ctx.embedify('error', 'user', 'This command is disabled.', true);
 		return false;
 	} else if (ctx.data.authority === 'DEVELOPER' && !DEVELOPER_IDS.includes(ctx.interaction.user.id)) {
-		await ctx.embedify('error', 'user', 'This command is dev only.');
+		await ctx.embedify('error', 'user', 'This command is dev only.', true);
 		return false;
 	} else if (!ctx.data.global && !ctx.interaction.guild) {
-		await ctx.embedify('error', 'user', 'This command may only be used within servers.');
+		await ctx.embedify('error', 'user', 'This command may only be used within servers.', true);
 		return false;
 	}
 
@@ -54,7 +54,7 @@ const permissionCheck = async (ctx: Context): Promise<boolean> => {
 	}
 
 	if (missingClientPermissions.length) {
-		await ctx.embedify('warn', 'bot', `Missing Bot Permissions: \`${missingClientPermissions}\``);
+		await ctx.embedify('warn', 'bot', `Missing Bot Permissions: \`${missingClientPermissions}\``, true);
 		return false;
 	}
 
@@ -74,7 +74,7 @@ const permissionCheck = async (ctx: Context): Promise<boolean> => {
 
 	if (missingAuthority) {
 		const description = `Missing authority: \`${missingAuthority}\``;
-		await ctx.embedify('error', { name: 'Insufficient Permissions', iconURL: icons.warning }, description);
+		await ctx.embedify('error', { name: 'Insufficient Permissions', iconURL: icons.warning }, description, true);
 		return false;
 	}
 
