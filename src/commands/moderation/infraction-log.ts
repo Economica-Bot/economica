@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Message, TextChannel } from 'discord.js';
 
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
@@ -36,9 +36,13 @@ export default class implements EconomicaCommand {
 					return await ctx.embedify('info', 'user', 'There is no infraction log.', false);
 				}
 			case 'set':
-				const channel = ctx.interaction.options.getChannel('channel');
-				await ctx.guildDocument.updateOne({ infractionLogChannelId: channel.id });
-				return await ctx.embedify('success', 'user', `Infraction log set to ${channel}.`, false);
+				const channel = ctx.interaction.options.getChannel('channel') as TextChannel;
+				if (!channel.permissionsFor(ctx.member).has('SEND_MESSAGES')) {
+					return await ctx.embedify('error', 'user', 'I do not have `SEND_MESSAGES` in that channel.', true);
+				} else {
+					await ctx.guildDocument.updateOne({ infractionLogChannelId: channel.id });
+					return await ctx.embedify('success', 'user', `Infraction log set to ${channel}.`, false);
+				}
 			case 'reset':
 				await ctx.guildDocument.update({ infractionLogChannelId: null });
 				return await ctx.embedify('success', 'user', 'Infraction log reset.', false);

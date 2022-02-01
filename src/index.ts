@@ -11,4 +11,4 @@ require('dotenv/config');
 
 import { EconomicaClient } from './structures';
 
-new EconomicaClient();
+new EconomicaClient().init();

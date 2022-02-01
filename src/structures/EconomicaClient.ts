@@ -30,10 +30,9 @@ export class EconomicaClient extends Client {
 		this.commands = new Collection<String, EconomicaCommand>();
 		this.webhooks = [];
 		this.services = [];
-		this.initialize();
 	}
 
-	private async initialize() {
+	public async init() {
 		await this.validateSettings();
 		await this.initWebHooks();
 		await this.errorHandler();
