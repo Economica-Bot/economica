@@ -29,7 +29,7 @@ export default class implements EconomicaCommand {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		switch (subcommand) {
 			case 'view':
-				const channelId = ctx.guildDocument.infractionLogChannel;
+				const channelId = ctx.guildDocument.infractionLogChannelId;
 				if (channelId) {
 					return await ctx.embedify('info', 'user', `The current infraction log is <#${channelId}>.`, false);
 				} else {
@@ -37,10 +37,10 @@ export default class implements EconomicaCommand {
 				}
 			case 'set':
 				const channel = ctx.interaction.options.getChannel('channel');
-				await ctx.guildDocument.updateOne({ infractionLogChannel: channel.id });
+				await ctx.guildDocument.updateOne({ infractionLogChannelId: channel.id });
 				return await ctx.embedify('success', 'user', `Infraction log set to ${channel}.`, false);
 			case 'reset':
-				await ctx.guildDocument.update({ infractionLogChannel: null });
+				await ctx.guildDocument.update({ infractionLogChannelId: null });
 				return await ctx.embedify('success', 'user', 'Infraction log reset.', false);
 		}
 	};

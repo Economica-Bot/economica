@@ -121,14 +121,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	}
 
 	public toJSON() {
-		return {
-			...super.toJSON(),
-			global: this.global,
-			group: this.group,
-			format: this.format,
-			clientPermissions: this.clientPermissions,
-			authority: this.authority,
-		};
+		return super.toJSON()
 	}
 }
 

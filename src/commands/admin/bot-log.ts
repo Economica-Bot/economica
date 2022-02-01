@@ -5,11 +5,13 @@ import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../s
 export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('bot-log')
-		.setDescription('Manage the bot logging channel.')
-		.setGroup('MODERATION')
+		.setDescription('Manage the infraction logging channel.')
+		.setGroup('ADMIN')
 		.setFormat('<view | set | reset> [channel]')
 		.setExamples(['bot-log view', 'bot-log set #bot-logs', 'bot-log reset'])
-		.addEconomicaSubcommand((subcommand) => subcommand.setName('view').setDescription('View the bot log channel.'))
+		.addEconomicaSubcommand((subcommand) =>
+			subcommand.setName('view').setDescription('View the infraction log channel.')
+		)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
 				.setName('set')
@@ -27,7 +29,7 @@ export default class implements EconomicaCommand {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		switch (subcommand) {
 			case 'view':
-				const channelId = ctx.guildDocument.botLogChannel;
+				const channelId = ctx.guildDocument.botLogChannelId;
 				if (channelId) {
 					return await ctx.embedify('info', 'user', `The current bot log is <#${channelId}>.`, false);
 				} else {
@@ -35,11 +37,11 @@ export default class implements EconomicaCommand {
 				}
 			case 'set':
 				const channel = ctx.interaction.options.getChannel('channel');
-				await ctx.guildDocument.updateOne({ botLogChannel: channel.id });
-				return await ctx.embedify('success', 'user', `bot log set to ${channel}.`, false);
+				await ctx.guildDocument.updateOne({ botLogChannelId: channel.id });
+				return await ctx.embedify('success', 'user', `Bot log set to ${channel}.`, false);
 			case 'reset':
-				await ctx.guildDocument.update({ botLogChannel: null });
-				return await ctx.embedify('success', 'user', 'bot log reset.', false);
+				await ctx.guildDocument.updateOne({ botLogChannelId: null });
+				return await ctx.embedify('success', 'user', 'Bot log reset.', false);
 		}
 	};
 }

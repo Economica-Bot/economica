@@ -6,9 +6,9 @@ import { RoleAuthority } from '../typings';
 export interface Guild {
 	guildId: string;
 	currency: string;
-	transactionLogChannel: string;
-	infractionLogChannel: string;
-	botLogChannel: string;
+	transactionLogChannelId: string;
+	infractionLogChannelId: string;
+	botLogChannelId: string;
 	auth: Array<RoleAuthority>;
 	income: typeof income;
 }
@@ -17,11 +17,11 @@ const Schema = new mongoose.Schema<Guild>(
 	{
 		guildId: { type: String, required: true },
 		currency: { type: String, required: true },
-		transactionLogChannel: { type: String, required: true },
-		infractionLogChannel: { type: String, required: true },
-		botLogChanne: { type: String, required: true },
+		transactionLogChannelId: { type: String, required: true },
+		infractionLogChannelId: { type: String, required: true },
+		botLogChannelId: { type: String, required: true },
 		auth: { type: Array<RoleAuthority>(), required: true },
-		income: { type: Object, required: true },
+		income: { type: Object, required: true, default: income },
 	},
 	{
 		strict: true,

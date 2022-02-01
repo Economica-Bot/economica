@@ -39,10 +39,10 @@ export async function infraction(
 	});
 
 	const guildSetting = await GuildModel.findOne({ guildId });
-	const { infractionLogChannel } = guildSetting;
+	const { infractionLogChannelId } = guildSetting;
 
-	if (infractionLogChannel) {
-		const channel = client.channels.cache.get(infractionLogChannel) as TextChannel;
+	if (infractionLogChannelId) {
+		const channel = client.channels.cache.get(infractionLogChannelId) as TextChannel;
 		const guild = channel.guild;
 		const description = `Infraction for <@!${userId}> | Executed by <@!${agentId}>\nType: \`${type}\`\n${reason}`;
 		const embed = new MessageEmbed()

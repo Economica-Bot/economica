@@ -28,7 +28,7 @@ export default class implements EconomicaCommand {
 	execute = async (ctx: Context): Promise<Message> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		if (subcommand === 'view') {
-			const channelId = ctx.guildDocument.transactionLogChannel;
+			const channelId = ctx.guildDocument.transactionLogChannelId;
 			if (channelId) {
 				return await ctx.embedify('info', 'user', `The current transaction log is <#${channelId}>.`, false);
 			} else {
@@ -36,10 +36,10 @@ export default class implements EconomicaCommand {
 			}
 		} else if (subcommand === 'set') {
 			const channel = ctx.interaction.options.getChannel('channel');
-			await ctx.guildDocument.updateOne({ transactionLogChannel: channel.id });
+			await ctx.guildDocument.updateOne({ transactionLogChannelId: channel.id });
 			return await ctx.embedify('success', 'user', `Transaction log set to ${channel}.`, false);
 		} else if (subcommand === 'reset') {
-			await ctx.guildDocument.updateOne({ transactionLogChannel: null });
+			await ctx.guildDocument.updateOne({ transactionLogChannelId: null });
 			return await ctx.embedify('success', 'user', 'Transaction log reset.', false);
 		}
 	};

@@ -1,6 +1,14 @@
 import { EmbedAuthorData } from 'discord.js';
 
-export type GroupString = 'APPLICATION' | 'ECONOMY' | 'INCOME' | 'MODERATION' | 'SHOP' | 'STATISTICS' | 'UTILITY';
+export type GroupString =
+	| 'APPLICATION'
+	| 'ADMIN'
+	| 'ECONOMY'
+	| 'INCOME'
+	| 'MODERATION'
+	| 'SHOP'
+	| 'STATISTICS'
+	| 'UTILITY';
 export type ReplyString = 'success' | 'info' | 'warn' | 'error';
 export type InfractionString = 'BAN' | 'KICK' | 'TIMEOUT' | 'UNBAN' | 'UNTIMEOUT';
 export type BalanceString = 'wallet' | 'treasury' | 'total';

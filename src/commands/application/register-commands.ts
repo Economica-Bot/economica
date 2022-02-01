@@ -1,6 +1,5 @@
 import { Message } from 'discord.js';
 
-import registerCommands from '../../services/register-commands';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -25,7 +24,7 @@ export default class implements EconomicaCommand {
 			return await ctx.embedify('error', 'user', 'Could not find guild with that id.', true);
 		}
 
-		await new registerCommands().execute(ctx.client);
+		await ctx.client.registerCommands();
 		return await ctx.embedify('error', 'bot', 'Commands refreshed.', true);
 	};
 }

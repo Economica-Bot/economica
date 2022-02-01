@@ -53,11 +53,11 @@ export async function transaction(
 	});
 
 	const guildSetting = await GuildModel.findOne({ guildId });
-	const { transactionLogChannel } = guildSetting;
+	const { transactionLogChannelId } = guildSetting;
 
-	if (transactionLogChannel) {
+	if (transactionLogChannelId) {
 		const cSymbol = guildSetting.currency;
-		const channel = client.channels.cache.get(transactionLogChannel) as TextChannel;
+		const channel = client.channels.cache.get(transactionLogChannelId) as TextChannel;
 		const guild = channel.guild;
 		const description = `Transaction for <@!${userId}>\nPerformed by:<@!${agentId}>\nType: \`${type}\``;
 		const embed = new MessageEmbed()

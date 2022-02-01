@@ -1,6 +1,7 @@
 import { ClientOptions, ExcludeEnum, Intents, InviteGenerationOptions, Permissions } from 'discord.js';
 import { ActivityTypes } from 'discord.js/typings/enums';
-import i18n from 'i18n';
+import * as i18n from 'i18n';
+import { ConnectOptions } from 'mongoose';
 import path from 'path';
 
 // Required
@@ -48,6 +49,21 @@ export const inviteOptions: InviteGenerationOptions = {
 		Permissions.FLAGS.USE_EXTERNAL_EMOJIS,
 	],
 };
+
+export const mongoOptions: ConnectOptions = {
+	useUnifiedTopology: true,
+	useNewUrlParser: true,
+	useFindAndModify: false,
+};
+
+export enum SERVICE_COOLDOWNS {
+	DEV = 1000 * 10,
+	UPDATE_BANS = 1000 * 60 * 5,
+	UPDATE_BOT_LOG = 1000 * 60 * 10,
+	UPDATE_GENERATORS = 1000 * 60 * 5,
+	UPDATE_LOANS = 1000 * 60 * 5,
+	UPDATE_SHOP = 1000 * 60 * 5,
+}
 
 export const hyperlinks = {
 	help: '[Help Me Understand](https://discord.gg/57rQ7aHTpX)',
@@ -118,4 +134,4 @@ i18n.configure({
 	objectNotation: true,
 });
 
-export default i18n;
+export { i18n };
