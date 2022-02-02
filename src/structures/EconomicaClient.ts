@@ -3,7 +3,7 @@ import { readdirSync } from 'fs';
 import { connect, disconnect } from 'mongoose';
 import path from 'path';
 
-import { EconomicaCommand, EconomicaService, EconomicaSlashCommandBuilder } from '.';
+import { EconomicaCommand, EconomicaEvent, EconomicaService, EconomicaSlashCommandBuilder } from '.';
 import {
 	ACTIVITY_NAME,
 	ACTIVITY_TYPE,
@@ -156,7 +156,7 @@ export class EconomicaClient extends Client {
 	private async registerEvents() {
 		const eventFiles = readdirSync(path.join(__dirname, '../events'));
 		eventFiles.forEach(async (file: string) => {
-			const event = require(`../events/${file}`);
+			const event = new (await import(`../events/${file}`)).default() as EconomicaEvent;
 			this.on(event.name, async (...args) => {
 				await event.execute(this, ...args);
 			});

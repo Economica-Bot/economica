@@ -1,19 +1,20 @@
 import { CommandInteraction } from 'discord.js';
 
 import { commandCheck } from '../lib';
-import { Context, EconomicaClient } from '../structures';
+import { Context, EconomicaClient, EconomicaEvent } from '../structures';
 
-export const name = 'interactionCreate';
+export default class implements EconomicaEvent {
+	public name = 'interactionCreate' as const;
+	public async execute(client: EconomicaClient, interaction: CommandInteraction): Promise<void> {
+		if (!interaction.isCommand()) {
+			return;
+		}
 
-export async function execute(client: EconomicaClient, interaction: CommandInteraction) {
-	if (!interaction.isCommand()) {
-		return;
-	}
+		const ctx = await new Context(client, interaction).init();
+		const check = await commandCheck(ctx);
 
-	const ctx = await new Context(client, interaction).init();
-	const check = await commandCheck(ctx);
-
-	if (check) {
-		await client.commands.get(interaction.commandName).execute(ctx);
+		if (check) {
+			await client.commands.get(interaction.commandName).execute(ctx);
+		}
 	}
 }
