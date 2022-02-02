@@ -63,7 +63,7 @@ export const loggerOptions: ISettingsParam = {
 	overwriteConsole: true,
 	dateTimeTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 	displayInstanceName: true,
-	minLevel: PRODUCTION ? 'info' : 'silly',
+	minLevel: DEBUG ? 'info' : 'silly',
 };
 
 export enum SERVICE_COOLDOWNS {
