@@ -4,6 +4,7 @@ import * as i18n from 'i18n';
 import { ConnectOptions } from 'mongoose';
 import path from 'path';
 import { ReplyString } from './typings';
+import { ISettingsParam } from 'tslog';
 
 // Required
 export const BOT_TOKEN = process.env.ECON_ALPHA_TOKEN;
@@ -55,6 +56,13 @@ export const mongoOptions: ConnectOptions = {
 	useUnifiedTopology: true,
 	useNewUrlParser: true,
 	useFindAndModify: false,
+};
+
+export const loggerOptions: ISettingsParam = {
+	instanceName: 'Economica_Bot',
+	overwriteConsole: true,
+	dateTimeTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+	displayInstanceName: true,
 };
 
 export enum SERVICE_COOLDOWNS {

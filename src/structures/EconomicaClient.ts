@@ -2,6 +2,7 @@ import { Client, Collection, MessageEmbed, WebhookClient } from 'discord.js';
 import { readdirSync } from 'fs';
 import { connect, disconnect } from 'mongoose';
 import path from 'path';
+import { Logger } from 'tslog';
 
 import { EconomicaCommand, EconomicaEvent, EconomicaService, EconomicaSlashCommandBuilder } from '.';
 import {
@@ -19,18 +20,21 @@ import {
 	PUBLIC_GUILD_ID,
 	SERVICE_COOLDOWNS,
 	WEBHOOK_URLS,
+	loggerOptions,
 } from '../config';
 
 export class EconomicaClient extends Client {
 	public commands: Collection<String, EconomicaCommand>;
 	public webhooks: WebhookClient[];
 	private services: EconomicaService[];
+	public log: Logger;
 
 	public constructor() {
 		super(clientOptions);
 		this.commands = new Collection<String, EconomicaCommand>();
 		this.webhooks = [];
 		this.services = [];
+		this.log = new Logger(loggerOptions);
 	}
 
 	public async init() {
@@ -42,13 +46,13 @@ export class EconomicaClient extends Client {
 		await this.registerCommands();
 		await this.runServices();
 		await this.login(BOT_TOKEN).then(() => {
-			console.log(`${this.user.username} logged in`);
+			this.log.info(`${this.user.username} logged in`);
 		});
 	}
 
 	private async validateSettings(): Promise<void> {
 		// BOT_TOKEN
-		console.info('Validating BOT_TOKEN...');
+		this.log.debug('Validating BOT_TOKEN');
 		const token = BOT_TOKEN;
 		const testClient = new Client({
 			intents: [],
@@ -57,65 +61,77 @@ export class EconomicaClient extends Client {
 
 		await testClient.login(token).catch((err) => {
 			testClient.destroy();
-			throw new Error(err);
+			this.log.fatal(new Error(err));
+			process.exit(1);
 		});
 
 		// DEVELOPER_IDS
-		console.info('Validating DEVELOPER_IDS...');
+		this.log.debug('Validating DEVELOPER_IDS');
 		for (const DEVELOPER_ID of DEVELOPER_IDS) {
 			await testClient.users.fetch(DEVELOPER_ID).catch((err) => {
-				throw new Error(err);
+				this.log.fatal(new Error(err));
+				process.exit(1);
 			});
 		}
 
 		// DEVELOPMENT_GUILD_IDS
-		console.info('Validating DEVELOPMENT_GUILD_IDS...');
+		this.log.debug('Validating DEVELOPMENT_GUILD_IDS');
 		for (const DEVELOPMENT_GUILD_ID of DEVELOPMENT_GUILD_IDS) {
 			const guild = (await testClient.guilds.fetch()).get(DEVELOPMENT_GUILD_ID);
 			if (!guild) {
-				throw new Error(`The bot is not in a guild with id ${DEVELOPMENT_GUILD_ID}.`);
+				this.log.fatal(new Error(`The bot is not in a guild with id ${DEVELOPMENT_GUILD_ID}`));
+				process.exit(1);
 			}
 		}
 
 		// PUBLIC_GUILD_ID
-		console.info('Validating PUBLIC_GUILD_ID...');
+		this.log.debug('Validating PUBLIC_GUILD_ID');
 		const guild = (await testClient.guilds.fetch()).get(PUBLIC_GUILD_ID);
 		if (!guild) {
-			throw new Error(`The bot is not in a guild with id ${PUBLIC_GUILD_ID}.`);
+			this.log.fatal(new Error(`The bot is not in a guild with id ${PUBLIC_GUILD_ID}`));
 		}
 
 		// DISCORD_INVITE_URL
+		this.log.debug('Validating DISCORD_INVITE_URL');
 		try {
 			const url = new URL(DISCORD_INVITE_URL);
-			if (url.toString() !== DISCORD_INVITE_URL) throw Error;
+			if (url.toString() !== DISCORD_INVITE_URL) {
+				this.log.fatal(new Error(`Could not validate URL ${url}`));
+				process.exit(1);
+			}
 		} catch (_) {
-			throw new Error(`Invalid URL ${DISCORD_INVITE_URL}.`);
+			this.log.fatal(new Error(`Invalid URL ${DISCORD_INVITE_URL}`));
+			process.exit(1);
 		}
 
 		// WEBHOOK_URLS
-		console.info('Validating WEBHOOK_URLS...');
+		this.log.debug('Validating WEBHOOK_URLS');
 		for (const WEBHOOK_URL of WEBHOOK_URLS) {
 			const webhookClient = new WebhookClient({ url: WEBHOOK_URL });
 			if (!webhookClient) {
-				throw new Error(`Could not create Webhook with URL ${WEBHOOK_URL}.`);
+				this.log.fatal(new Error(`Could not create Webhook with URL ${WEBHOOK_URL}`));
+				process.exit(1);
 			}
 		}
 
 		// MONGO_URI
-		console.info('Validating MONGO_URI...');
-		await connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true }).catch((err) => {
-			throw new Error('Could not connect to mongo. Check the MONGO_URI.');
-		});
-		await disconnect();
+		this.log.debug('Validating MONGO_URI');
+		await connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+			.then(async () => await disconnect())
+			.catch((err) => {
+				this.log.fatal(new Error('Could not connect to mongo'));
+			});
 
 		testClient.destroy();
-		console.log('Settings validated.');
+		this.log.info('Settings validated');
 	}
 
 	private async initWebHooks(): Promise<void> {
+		this.log.debug('Initializing webhooks');
 		WEBHOOK_URLS.forEach((WEBHOOK_URL) => {
 			this.webhooks.push(new WebhookClient({ url: WEBHOOK_URL }));
 		});
+		this.log.info('Webhooks initialized');
 	}
 
 	private async errorHandler(): Promise<void> {
@@ -125,8 +141,10 @@ export class EconomicaClient extends Client {
 
 	private async unhandledRejection(err: Error): Promise<void> {
 		if (DEBUG) {
-			console.error(err);
+			this.log.fatal(err);
 			process.exit(1);
+		} else {
+			this.log.error(err);
 		}
 
 		const description = '```ts\n' + err.stack + '```';
@@ -135,37 +153,46 @@ export class EconomicaClient extends Client {
 			.setAuthor({ name: 'Unhandled Rejection' })
 			.setDescription(description)
 			.setTimestamp();
-		this.webhooks.forEach(async (webhook) => await webhook.send({ embeds: [embed] }));
+		this.webhooks.forEach(
+			async (webhook) => await webhook.send({ embeds: [embed] }).catch((err) => this.log.error(err))
+		);
 	}
 
 	private async uncaughtException(err: Error, origin: string) {
-		console.error(err);
+		this.log.fatal(err);
 		const embed = new MessageEmbed()
 			.setColor('RED')
 			.setAuthor({ name: 'CRITICAL | Uncaught Exception' })
 			.setDescription(`Caught exception: ${err}\nException origin: ${origin}`)
 			.setTimestamp();
-		this.webhooks.forEach((webhook) => webhook.send({ embeds: [embed] }).catch);
+		this.webhooks.forEach((webhook) => webhook.send({ embeds: [embed] }).catch((err) => this.log.error(err)));
 		if (DEVELOPMENT) process.exit(1);
 	}
 
 	private async connectMongo() {
-		connect(MONGO_URI, mongoOptions);
+		this.log.debug('Connecting to Mongo');
+		await connect(MONGO_URI, mongoOptions);
+		this.log.info('Connected to Mongo');
 	}
 
 	private async registerEvents() {
+		this.log.debug('Registering events');
 		const eventFiles = readdirSync(path.join(__dirname, '../events'));
+
+//CONST
+
 		eventFiles.forEach(async (file: string) => {
 			const event = new (await import(`../events/${file}`)).default() as EconomicaEvent;
+			this.log.debug(`Loading event ${event.name}`);
 			this.on(event.name, async (...args) => {
 				await event.execute(this, ...args);
 			});
-
-			console.log(`Loading event ${event.name}`);
 		});
+		this.log.info('Events loaded');
 	}
 
 	public async registerCommands() {
+		this.log.debug('Registering commands');
 		const commandDirectories = readdirSync(path.join(__dirname, '../commands'));
 		for (const commandDirectory of commandDirectories) {
 			const commandFiles = readdirSync(path.join(__dirname, `../commands/${commandDirectory}/`));
@@ -179,23 +206,27 @@ export class EconomicaClient extends Client {
 					throw new Error(`Command ${data.name} missing group!`);
 				}
 
+				this.log.debug(`Registering command ${data.name}`);
 				this.commands.set(data.name, command);
-				console.log(`Loaded command ${data.name}`);
 			}
 		}
+
+		this.log.info('Commands registered.');
 	}
 
 	private async runServices() {
+		this.log.debug('Loading services');
 		const serviceFiles = readdirSync(path.join(__dirname, '../services')).sort();
 		for (const file of serviceFiles) {
 			const service = new (await import(`../services/${file}`)).default() as EconomicaService;
+			this.log.debug(`Loading service ${service.name}`);
 			this.services.push(service);
 		}
 
 		this.services.forEach((service) => {
 			setInterval(
 				async () => {
-					console.log('Executing service ' + service.name);
+					this.log.debug('Executing service ' + service.name);
 					await service.execute(this);
 				},
 				DEVELOPMENT ? SERVICE_COOLDOWNS.DEV : service.cooldown

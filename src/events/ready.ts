@@ -18,7 +18,7 @@ export default class implements EconomicaEvent {
 			await client.application.commands.set(commandData);
 		}
 
-		console.log('Commands registered');
-		console.log(`${client.user.tag} Ready`);
+		client.log.info('Commands registered');
+		client.log.info(`${client.user.tag} Ready`);
 	}
 }
