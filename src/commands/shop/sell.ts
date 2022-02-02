@@ -5,13 +5,13 @@ import { MemberModel, ShopModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('sell')
 		.setDescription('Sell an item.')
 		.setGroup('SHOP')
 		.addStringOption((option) => option.setName('item').setDescription('Specify an item.').setRequired(true));
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		const query = ctx.interaction.options.getString('item');
 		const item = await ShopModel.findOne({ guildId: ctx.interaction.guildId, name: query, active: true });
 		const hasItem = ctx.memberDocument.inventory.some((i) => i.name === item.name);

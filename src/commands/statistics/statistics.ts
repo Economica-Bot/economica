@@ -2,7 +2,7 @@ import { TransactionModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('statistics')
 		.setDescription('View statistics')
 		.setGroup('STATISTICS')
@@ -14,7 +14,7 @@ export default class implements EconomicaCommand {
 				.addUserOption((option) => option.setName('user').setDescription('Specify a user.').setRequired(false))
 		);
 
-	execute = async (ctx: Context): Promise<void> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		const user = ctx.interaction.options.getUser('user');
 		const wallets: number[] = [];
 		const treasuries: number[] = [];

@@ -3,10 +3,9 @@ import { ShopModel } from '../models';
 import { EconomicaClient, EconomicaService } from '../structures';
 
 export default class implements EconomicaService {
-	name = 'update-shop';
-	once: false;
-	cooldown = SERVICE_COOLDOWNS.UPDATE_SHOP;
-	execute = async (client: EconomicaClient): Promise<void> => {
+	public name = 'update-shop';
+	public cooldown = SERVICE_COOLDOWNS.UPDATE_SHOP;
+	public execute = async (client: EconomicaClient): Promise<void> => {
 		const now = new Date();
 		const conditional = {
 			active: true,

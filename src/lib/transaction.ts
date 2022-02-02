@@ -59,6 +59,11 @@ export async function transaction(
 		const cSymbol = guildSetting.currency;
 		const channel = client.channels.cache.get(transactionLogChannelId) as TextChannel;
 		const guild = channel.guild;
+		const member = guild.members.cache.get(client.user.id);
+		if (!channel.permissionsFor(member).has('SEND_MESSAGES') || !channel.permissionsFor(member).has('EMBED_LINKS')) {
+			return;
+		}
+
 		const description = `Transaction for <@!${userId}>\nPerformed by:<@!${agentId}>\nType: \`${type}\``;
 		const embed = new MessageEmbed()
 			.setColor('GOLD')

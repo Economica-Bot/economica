@@ -5,7 +5,7 @@ import { getEconInfo, transaction } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('set-money')
 		.setDescription('Set a balance.')
 		.setGroup('ECONOMY')
@@ -25,7 +25,7 @@ export default class implements EconomicaCommand {
 				.setRequired(true)
 		);
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		const { currency } = ctx.guildDocument;
 		const member = ctx.interaction.options.getMember('user') as GuildMember;
 		const amount = parseString(ctx.interaction.options.getString('amount'));

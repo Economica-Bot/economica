@@ -4,7 +4,7 @@ import { validateObjectId } from '../../lib/validate';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('transaction')
 		.setDescription('View and delete transactions.')
 		.setGroup('ECONOMY')
@@ -45,7 +45,7 @@ export default class implements EconomicaCommand {
 				.addEconomicaSubcommand((subcommand) => subcommand.setName('all').setDescription('Delete all transactions.'))
 		);
 
-	execute = async (ctx: Context): Promise<Message | void> => {
+	public execute = async (ctx: Context): Promise<Message | void> => {
 		const subcommandgroup = ctx.interaction.options.getSubcommandGroup(false);
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const user = ctx.interaction.options.getUser('user', false);

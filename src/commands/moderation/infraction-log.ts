@@ -3,7 +3,7 @@ import { Message, TextChannel } from 'discord.js';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('infraction-log')
 		.setDescription('Manage the infraction logging channel.')
 		.setGroup('MODERATION')
@@ -25,7 +25,7 @@ export default class implements EconomicaCommand {
 			subcommand.setName('reset').setDescription('Reset the infraction log channel.').setAuthority('ADMINISTRATOR')
 		);
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		switch (subcommand) {
 			case 'view':
@@ -37,8 +37,11 @@ export default class implements EconomicaCommand {
 				}
 			case 'set':
 				const channel = ctx.interaction.options.getChannel('channel') as TextChannel;
-				if (!channel.permissionsFor(ctx.member).has('SEND_MESSAGES')) {
-					return await ctx.embedify('error', 'user', 'I do not have `SEND_MESSAGES` in that channel.', true);
+				if (
+					!channel.permissionsFor(ctx.member).has('SEND_MESSAGES') ||
+					!channel.permissionsFor(ctx.member).has('EMBED_LINKS')
+				) {
+					return await ctx.embedify('error', 'user', 'I need `SEND_MESSAGES` and `EMBED_LINKS` in that channel.', true);
 				} else {
 					await ctx.guildDocument.updateOne({ infractionLogChannelId: channel.id });
 					return await ctx.embedify('success', 'user', `Infraction log set to ${channel}.`, false);

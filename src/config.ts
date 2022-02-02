@@ -1,8 +1,9 @@
-import { ClientOptions, ExcludeEnum, Intents, InviteGenerationOptions, Permissions } from 'discord.js';
+import { ClientOptions, ColorResolvable, ExcludeEnum, Intents, InviteGenerationOptions, Permissions } from 'discord.js';
 import { ActivityTypes } from 'discord.js/typings/enums';
 import * as i18n from 'i18n';
 import { ConnectOptions } from 'mongoose';
 import path from 'path';
+import { ReplyString } from './typings';
 
 // Required
 export const BOT_TOKEN = process.env.ECON_ALPHA_TOKEN;
@@ -64,6 +65,13 @@ export enum SERVICE_COOLDOWNS {
 	UPDATE_LOANS = 1000 * 60 * 5,
 	UPDATE_SHOP = 1000 * 60 * 5,
 }
+
+export const EmbedColors: Record<ReplyString, ColorResolvable> = {
+	success: 'GREEN',
+	info: 'BLURPLE',
+	warn: 'YELLOW',
+	error: 'RED',
+};
 
 export const hyperlinks = {
 	help: '[Help Me Understand](https://discord.gg/57rQ7aHTpX)',

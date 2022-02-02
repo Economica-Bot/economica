@@ -3,7 +3,7 @@ import { Message } from 'discord.js';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('register-commands')
 		.setDescription('Register economica commands.')
 		.setGroup('APPLICATION')
@@ -16,7 +16,7 @@ export default class implements EconomicaCommand {
 		)
 		.addEconomicaSubcommand((subcommand) => subcommand.setName('global').setDescription('Refresh global commands.'));
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		await ctx.interaction.deferReply({ ephemeral: true });
 		const guildId = ctx.interaction.options.getString('guild_id');
 		const global = ctx.interaction.options.getSubcommand() === 'global' ? true : false;

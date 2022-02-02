@@ -3,13 +3,13 @@ import { Message } from 'discord.js';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('reset')
 		.setDescription('Reset all slash commands')
 		.setGroup('APPLICATION')
 		.setAuthority('DEVELOPER');
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		await ctx.interaction.deferReply({ ephemeral: true });
 		await ctx.interaction.guild.commands.set([]);
 		await ctx.client.application.commands.set([]);

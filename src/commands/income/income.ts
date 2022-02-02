@@ -3,7 +3,7 @@ import { Message } from 'discord.js';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('income')
 		.setDescription('Configure income commands and their settings.')
 		.setGroup('INCOME')
@@ -31,7 +31,7 @@ export default class implements EconomicaCommand {
 				)
 		);
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 
 		if (subcommand === 'view') {

@@ -9,14 +9,14 @@ import {
 } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('permission')
 		.setDescription('See the permissions of a command.')
 		.setGroup('UTILITY')
 		.setFormat('<command>')
 		.addStringOption((option) => option.setName('command').setDescription('Specify a command.').setRequired(true));
 
-	execute = async (ctx: Context): Promise<Message | void> => {
+	public execute = async (ctx: Context): Promise<Message | void> => {
 		const commandInput = ctx.interaction.options.getString('command');
 		const command = ctx.client.commands.get(commandInput);
 		if (!command) return await ctx.embedify('error', 'user', 'Could not find that command.', true);

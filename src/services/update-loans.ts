@@ -4,10 +4,9 @@ import { LoanModel } from '../models';
 import { EconomicaClient, EconomicaService } from '../structures';
 
 export default class implements EconomicaService {
-	name = 'update-loans';
-	once: false;
-	cooldown = SERVICE_COOLDOWNS.UPDATE_LOANS;
-	execute = async (client: EconomicaClient): Promise<void> => {
+	public name = 'update-loans';
+	public cooldown = SERVICE_COOLDOWNS.UPDATE_LOANS;
+	public execute = async (client: EconomicaClient): Promise<void> => {
 		const now = new Date();
 		const loans = await LoanModel.find({
 			expires: {

@@ -22,10 +22,11 @@ import {
 } from '../config';
 
 export class EconomicaClient extends Client {
-	commands: Collection<String, EconomicaCommand>;
-	webhooks: WebhookClient[];
-	services: EconomicaService[];
-	constructor() {
+	public commands: Collection<String, EconomicaCommand>;
+	public webhooks: WebhookClient[];
+	private services: EconomicaService[];
+
+	public constructor() {
 		super(clientOptions);
 		this.commands = new Collection<String, EconomicaCommand>();
 		this.webhooks = [];
@@ -45,7 +46,7 @@ export class EconomicaClient extends Client {
 		});
 	}
 
-	private async validateSettings() {
+	private async validateSettings(): Promise<void> {
 		// BOT_TOKEN
 		console.info('Validating BOT_TOKEN...');
 		const token = BOT_TOKEN;
@@ -111,18 +112,18 @@ export class EconomicaClient extends Client {
 		console.log('Settings validated.');
 	}
 
-	private async initWebHooks() {
+	private async initWebHooks(): Promise<void> {
 		WEBHOOK_URLS.forEach((WEBHOOK_URL) => {
 			this.webhooks.push(new WebhookClient({ url: WEBHOOK_URL }));
 		});
 	}
 
-	private async errorHandler() {
+	private async errorHandler(): Promise<void> {
 		process.on('unhandledRejection', async (err: Error) => await this.unhandledRejection(err));
 		process.on('uncaughtException', async (err, origin) => await this.uncaughtException(err, origin));
 	}
 
-	private async unhandledRejection(err: Error) {
+	private async unhandledRejection(err: Error): Promise<void> {
 		if (DEBUG) {
 			console.error(err);
 			process.exit(1);

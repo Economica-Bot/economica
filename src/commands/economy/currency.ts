@@ -5,7 +5,7 @@ import { GuildModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('currency')
 		.setDescription('View or update the currency symbol.')
 		.setGroup('ECONOMY')
@@ -24,7 +24,7 @@ export default class implements EconomicaCommand {
 			subcommand.setName('reset').setDescription('Reset the currency symbol.').setAuthority('MANAGER')
 		);
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const guildId = ctx.interaction.guildId;
 		const { currency } = ctx.guildDocument;

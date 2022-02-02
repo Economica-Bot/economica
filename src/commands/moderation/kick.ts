@@ -4,7 +4,7 @@ import { infraction, validateTarget } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('kick')
 		.setDescription('Kick a member.')
 		.setGroup('MODERATION')
@@ -15,7 +15,7 @@ export default class implements EconomicaCommand {
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason.').setRequired(false));
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		if (!(await validateTarget(ctx))) return;
 
 		const target = ctx.interaction.options.getMember('target') as GuildMember;

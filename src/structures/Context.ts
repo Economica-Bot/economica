@@ -1,18 +1,12 @@
-import { ColorResolvable, CommandInteraction, GuildMember, Message, MessageEmbed } from 'discord.js';
+import { CommandInteraction, GuildMember, Message, MessageEmbed } from 'discord.js';
 import { Document } from 'mongoose';
 
 import { EconomicaClient, EconomicaCommand, EconomicaSlashCommandBuilder } from '.';
+import { EmbedColors } from '../config';
 import { GuildModel, MemberModel } from '../models';
 import { Guild } from '../models/guilds';
 import { Member } from '../models/members';
 import { Author, ReplyString } from '../typings';
-
-const EmbedColors: Record<ReplyString, ColorResolvable> = {
-	success: 'GREEN',
-	error: 'RED',
-	info: 'BLURPLE',
-	warn: 'YELLOW',
-};
 
 export class Context {
 	public client: EconomicaClient;

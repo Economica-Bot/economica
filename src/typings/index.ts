@@ -9,6 +9,7 @@ export type GroupString =
 	| 'SHOP'
 	| 'STATISTICS'
 	| 'UTILITY';
+export type Documents = 'guilds' | 'infractions' | 'loans' | 'markets' | 'members' | 'shops' | 'transactions';
 export type ReplyString = 'success' | 'info' | 'warn' | 'error';
 export type InfractionString = 'BAN' | 'KICK' | 'TIMEOUT' | 'UNBAN' | 'UNTIMEOUT';
 export type BalanceString = 'wallet' | 'treasury' | 'total';

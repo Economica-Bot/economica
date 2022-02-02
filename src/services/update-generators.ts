@@ -3,10 +3,9 @@ import { MemberModel, ShopModel } from '../models';
 import { EconomicaClient, EconomicaService } from '../structures';
 
 export default class implements EconomicaService {
-	name = 'update-generators';
-	once: false;
-	cooldown = SERVICE_COOLDOWNS.UPDATE_GENERATORS;
-	execute = async (client: EconomicaClient): Promise<void> => {
+	public name = 'update-generators';
+	public cooldown = SERVICE_COOLDOWNS.UPDATE_GENERATORS;
+	public execute = async (client: EconomicaClient): Promise<void> => {
 		const now = new Date();
 		const members = await MemberModel.find();
 		for (const member of members) {

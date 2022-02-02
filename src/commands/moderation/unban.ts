@@ -3,7 +3,7 @@ import { InfractionModel } from '../../models/infractions';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('unban')
 		.setDescription('Unban a member.')
 		.setGroup('MODERATION')
@@ -14,7 +14,7 @@ export default class implements EconomicaCommand {
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))
 		.addStringOption((option) => option.setName('string').setDescription('Specify a reason.'));
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		const target = ctx.interaction.options.getUser('target');
 		const reason = ctx.interaction.options.getString('reason', false) || 'No reason provided';
 		const ban = (await ctx.interaction.guild.bans.fetch()).get(target.id);

@@ -44,6 +44,11 @@ export async function infraction(
 	if (infractionLogChannelId) {
 		const channel = client.channels.cache.get(infractionLogChannelId) as TextChannel;
 		const guild = channel.guild;
+		const member = guild.members.cache.get(client.user.id);
+		if (!channel.permissionsFor(member).has('SEND_MESSAGES') || !channel.permissionsFor(member).has('EMBED_LINKS')) {
+			return;
+		}
+
 		const description = `Infraction for <@!${userId}> | Executed by <@!${agentId}>\nType: \`${type}\`\n${reason}`;
 		const embed = new MessageEmbed()
 			.setColor('RED')

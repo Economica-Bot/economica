@@ -4,7 +4,7 @@ import { getEconInfo, transaction } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('rob')
 		.setDescription('Rob a user to earn a sum.')
 		.setGroup('INCOME')
@@ -12,7 +12,7 @@ export default class implements EconomicaCommand {
 		.setExamples(['rob @Wumpus'])
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user.').setRequired(true));
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		const target = ctx.interaction.options.getUser('user');
 		const { wallet: targetWallet } = await getEconInfo(ctx.interaction.guildId, target.id);
 		const amount = Math.ceil(Math.random() * targetWallet);

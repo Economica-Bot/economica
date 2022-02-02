@@ -3,9 +3,9 @@ import { InfractionModel } from '../models';
 import { EconomicaClient, EconomicaService } from '../structures';
 
 export default class implements EconomicaService {
-	name = 'update-bans';
-	cooldown = SERVICE_COOLDOWNS.UPDATE_BANS;
-	execute = async (client: EconomicaClient) => {
+	public name = 'update-bans';
+	public cooldown = SERVICE_COOLDOWNS.UPDATE_BANS;
+	public execute = async (client: EconomicaClient) => {
 		const now = new Date();
 		const bans = await InfractionModel.find({ type: 'BAN', active: true, permanent: false });
 		bans.forEach(async (ban) => {

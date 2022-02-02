@@ -5,7 +5,7 @@ import { InfractionModel } from '../../models/infractions';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('untimeout')
 		.setDescription('Untimeout a member.')
 		.setGroup('MODERATION')
@@ -15,7 +15,7 @@ export default class implements EconomicaCommand {
 		.setAuthority('MODERATOR')
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true));
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		if (!(await validateTarget(ctx))) return;
 
 		const target = ctx.interaction.options.getMember('target') as GuildMember;
