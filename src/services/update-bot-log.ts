@@ -71,12 +71,9 @@ export default class implements EconomicaService {
 			if (errors.length) {
 				embed.addField('Errors', errors.join('\n'));
 			}
-			if (insights.length) {
-				embed.addField('Insights', insights.join('\n'));
-			}
 
 			embed.setAuthor({ name: 'BOT STATUS UPDATE', iconURL: embed.fields.length ? icons.warning : icons.success });
-			embed.setDescription(`\`${embed.fields.length}\` warnings.`);
+			embed.setDescription(`\`${warnings.length + errors.length}\` warnings.`);
 
 			await botLogChannel.send({ embeds: [embed] }).catch();
 		}

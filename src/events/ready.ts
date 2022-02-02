@@ -9,13 +9,15 @@ export default class implements EconomicaEvent {
 			commandData.push(command.data.toJSON());
 		});
 
-		DEVELOPMENT_GUILD_IDS.forEach(async (guildId) => {
-			const guild = await client.guilds.fetch(guildId);
+		for (const DEVELOPMENT_GUILD_ID of DEVELOPMENT_GUILD_IDS) {
+			const guild = await client.guilds.fetch(DEVELOPMENT_GUILD_ID);
 			await guild.commands.set(commandData);
-		});
+			client.log.debug(`Registered commands in dev guild ${guild.name}`);
+		}
 
 		if (PRODUCTION) {
 			await client.application.commands.set(commandData);
+			client.log.debug('Registered global commands');
 		}
 
 		client.log.info('Commands registered');

@@ -1,6 +1,7 @@
 import { CommandInteraction } from 'discord.js';
 
 import { commandCheck } from '../lib';
+import { CommandModel } from '../models/commands';
 import { Context, EconomicaClient, EconomicaEvent } from '../structures';
 
 export default class implements EconomicaEvent {
@@ -15,6 +16,11 @@ export default class implements EconomicaEvent {
 
 		if (check) {
 			await client.commands.get(interaction.commandName).execute(ctx);
+			new CommandModel({
+				guildId: interaction.guild?.id || null,
+				userId: interaction.user.id,
+				command: interaction.commandName,
+			}).save();
 		}
 	}
 }

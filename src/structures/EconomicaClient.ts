@@ -15,25 +15,26 @@ import {
 	DEVELOPMENT,
 	DEVELOPMENT_GUILD_IDS,
 	DISCORD_INVITE_URL,
+	loggerOptions,
 	MONGO_URI,
 	mongoOptions,
 	PUBLIC_GUILD_ID,
 	SERVICE_COOLDOWNS,
 	WEBHOOK_URLS,
-	loggerOptions,
+	PRODUCTION,
 } from '../config';
 
 export class EconomicaClient extends Client {
-	public commands: Collection<String, EconomicaCommand>;
+	public commands: Collection<string, EconomicaCommand>;
 	public webhooks: WebhookClient[];
-	private services: EconomicaService[];
+	public services: Collection<string, EconomicaService>;
 	public log: Logger;
 
 	public constructor() {
 		super(clientOptions);
-		this.commands = new Collection<String, EconomicaCommand>();
+		this.commands = new Collection<string, EconomicaCommand>();
 		this.webhooks = [];
-		this.services = [];
+		this.services = new Collection<string, EconomicaService>();
 		this.log = new Logger(loggerOptions);
 	}
 
@@ -178,16 +179,14 @@ export class EconomicaClient extends Client {
 	private async registerEvents() {
 		this.log.debug('Registering events');
 		const eventFiles = readdirSync(path.join(__dirname, '../events'));
-
-//CONST
-
-		eventFiles.forEach(async (file: string) => {
-			const event = new (await import(`../events/${file}`)).default() as EconomicaEvent;
+		for (const eventFile of eventFiles) {
+			const event = new (await import(`../events/${eventFile}`)).default() as EconomicaEvent;
 			this.log.debug(`Loading event ${event.name}`);
 			this.on(event.name, async (...args) => {
 				await event.execute(this, ...args);
 			});
-		});
+		}
+
 		this.log.info('Events loaded');
 	}
 
@@ -215,22 +214,22 @@ export class EconomicaClient extends Client {
 	}
 
 	private async runServices() {
-		this.log.debug('Loading services');
+		this.log.info('Loading services');
 		const serviceFiles = readdirSync(path.join(__dirname, '../services')).sort();
 		for (const file of serviceFiles) {
+			this.log.debug(`Loading service ${file}`);
 			const service = new (await import(`../services/${file}`)).default() as EconomicaService;
-			this.log.debug(`Loading service ${service.name}`);
-			this.services.push(service);
+			this.services.set(service.name, service);
 		}
 
-		this.services.forEach((service) => {
-			setInterval(
-				async () => {
-					this.log.debug('Executing service ' + service.name);
-					await service.execute(this);
-				},
-				DEVELOPMENT ? SERVICE_COOLDOWNS.DEV : service.cooldown
-			);
-		});
+		this.log.info('Services loaded');
+
+		for (const [name, service] of this.services) {
+			const cooldown = PRODUCTION ? service.cooldown : SERVICE_COOLDOWNS.DEV;
+			setInterval(async () => {
+				this.log.info('Executing service ' + name);
+				await service.execute(this);
+			}, cooldown);
+		}
 	}
 }

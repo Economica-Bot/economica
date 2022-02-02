@@ -8,8 +8,8 @@ export default class implements EconomicaCommand {
 		.setName('invite')
 		.setDescription('Get the invite link for Economica.')
 		.setGroup('UTILITY')
-		.setGlobal(true)
-		.setEnabled(false);
+		.setAuthority('DEVELOPER')
+		.setGlobal(true);
 
 	public execute = async (ctx: Context): Promise<Message> => {
 		const invite = await ctx.client.generateInvite(inviteOptions);
