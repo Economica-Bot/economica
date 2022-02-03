@@ -1,3 +1,4 @@
+import { ChannelType } from 'discord-api-types';
 import { GuildTextBasedChannel, Message } from 'discord.js';
 
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
@@ -15,8 +16,7 @@ export default class implements EconomicaCommand {
 			option
 				.setName('channel')
 				.setDescription('Specify a channel')
-				.addChannelType(0)
-				//.addChannelType(ChannelType.GuildText)
+				.addChannelType(ChannelType.GuildText)
 				.setRequired(false)
 		)
 		.addNumberOption((option) =>

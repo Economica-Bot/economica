@@ -1,3 +1,4 @@
+import { ChannelType } from 'discord-api-types';
 import { Message, TextChannel } from 'discord.js';
 
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
@@ -18,7 +19,11 @@ export default class implements EconomicaCommand {
 				.setDescription('Set the infraction log channel.')
 				.setAuthority('ADMINISTRATOR')
 				.addChannelOption((option) =>
-					option.setName('channel').setDescription('Specify a channel').addChannelType(0).setRequired(true)
+					option
+						.setName('channel')
+						.setDescription('Specify a channel')
+						.addChannelType(ChannelType.GuildText)
+						.setRequired(true)
 				)
 		)
 		.addEconomicaSubcommand((subcommand) =>
