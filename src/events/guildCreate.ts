@@ -7,7 +7,7 @@ import { EconomicaClient, EconomicaEvent } from '../structures';
 export default class implements EconomicaEvent {
 	public name = 'guildCreate' as const;
 	public async execute(client: EconomicaClient, guild: Guild): Promise<void> {
-		const guildSettings = await GuildModel.findOneAndUpdate(
+		await GuildModel.findOneAndUpdate(
 			{
 				guildId: guild.id,
 			},
