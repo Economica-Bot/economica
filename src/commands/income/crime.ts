@@ -40,7 +40,7 @@ export default class implements EconomicaCommand {
 			ctx.interaction.guildId,
 			ctx.interaction.user.id,
 			ctx.client.user.id,
-			'CRIME_FINE',
+			'CRIME_SUCCESS',
 			amount,
 			0,
 			amount
