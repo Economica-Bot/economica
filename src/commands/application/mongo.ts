@@ -49,7 +49,7 @@ export default class implements EconomicaCommand {
 					subcommand
 						.setName('guild')
 						.setDescription('Reload guild document.')
-						.addStringOption((option) => option.setName('_id').setDescription('Specify the id'))
+						.addStringOption((option) => option.setName('id').setDescription('Specify the guild id.'))
 				)
 		);
 
@@ -151,7 +151,7 @@ export default class implements EconomicaCommand {
 		} else if (subcommandgroup === 'reload') {
 			if (subcommand === 'guild') {
 				let guild = ctx.interaction.guild;
-				const guildId = ctx.interaction.options.getString('guild', false);
+				const guildId = ctx.interaction.options.getString('id', false);
 				if (guildId) {
 					guild = ctx.client.guilds.cache.get(guildId);
 					if (!guild) {
@@ -160,7 +160,7 @@ export default class implements EconomicaCommand {
 				}
 
 				await new guildCreate.default().execute(ctx.client, guild);
-				return await ctx.embedify('success', 'user', `Reset guild doc in ${guild}.`, true);
+				return await ctx.embedify('success', 'user', `Reset guild doc in \`${guild}\`.`, true);
 			}
 		}
 	};
