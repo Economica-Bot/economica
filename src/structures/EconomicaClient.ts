@@ -1,4 +1,4 @@
-import { Client, Collection, MessageEmbed, WebhookClient } from 'discord.js';
+import { Client, Collection, CommandInteraction, MessageEmbed, WebhookClient } from 'discord.js';
 import { readdirSync } from 'fs';
 import { connect, disconnect } from 'mongoose';
 import path from 'path';
@@ -18,14 +18,15 @@ import {
 	loggerOptions,
 	MONGO_URI,
 	mongoOptions,
+	PRODUCTION,
 	PUBLIC_GUILD_ID,
 	SERVICE_COOLDOWNS,
 	WEBHOOK_URLS,
-	PRODUCTION,
 } from '../config';
 
 export class EconomicaClient extends Client {
 	public commands: Collection<string, EconomicaCommand>;
+	public cooldowns: Collection<string, CommandInteraction>;
 	public webhooks: WebhookClient[];
 	public services: Collection<string, EconomicaService>;
 	public log: Logger;
@@ -33,7 +34,8 @@ export class EconomicaClient extends Client {
 	public constructor() {
 		super(clientOptions);
 		this.commands = new Collection<string, EconomicaCommand>();
-		this.webhooks = [];
+		this.cooldowns = new Collection<string, CommandInteraction>();
+		this.webhooks = new Array<WebhookClient>();
 		this.services = new Collection<string, EconomicaService>();
 		this.log = new Logger(loggerOptions);
 	}
@@ -214,7 +216,7 @@ export class EconomicaClient extends Client {
 	}
 
 	private async runServices() {
-		this.log.info('Loading services');
+		this.log.debug('Loading services');
 		const serviceFiles = readdirSync(path.join(__dirname, '../services')).sort();
 		for (const file of serviceFiles) {
 			this.log.debug(`Loading service ${file}`);

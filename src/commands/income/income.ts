@@ -1,4 +1,5 @@
 import { Message } from 'discord.js';
+import ms from 'ms';
 
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
@@ -22,56 +23,59 @@ export default class implements EconomicaCommand {
 				.addIntegerOption((option) =>
 					option.setName('maximum').setDescription('Specify the maximum value.').setMinValue(1)
 				)
-				.addIntegerOption((option) => option.setName('chance').setDescription('Specify a chance.').setMinValue(1))
+				.addIntegerOption((option) =>
+					option.setName('chance').setDescription('Specify a chance.').setMinValue(1).setMaxValue(100)
+				)
 				.addIntegerOption((option) =>
 					option.setName('minfine').setDescription('Specify the minimum fine.').setMinValue(0)
 				)
 				.addIntegerOption((option) =>
-					option.setName('maxfine').setDescription('Specify the maximum fine.').setMinValue(1)
+					option.setName('maxfine').setDescription('Specify the maximum fine.').setMinValue(1).setMaxValue(100)
 				)
+				.addStringOption((option) => option.setName('cooldown').setDescription('Specify the cooldown.'))
 		);
 
-	public execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message | void> => {
+		let income = ctx.guildDocument.income;
 		const subcommand = ctx.interaction.options.getSubcommand();
-
+		const embed = ctx.embedify('info', 'guild', 'Income command information.');
 		if (subcommand === 'view') {
 			const description: string[] = [];
-			for (const [k, v] of Object.entries(ctx.guildDocument.income)) {
-				const desc = [];
+			for (const [k, v] of Object.entries(income)) {
+				const description = [];
 				for (const [k1, v1] of Object.entries(v)) {
-					desc.push(`\`${k1}: ${v1}\``);
+					description.push(`\`${k1}: ${v1}\``);
 				}
-				description.push(`**${k}**\n${desc.join('\n')}`);
+
+				embed.addField(k, `${description.join('\n')}`);
 			}
 
-			return await ctx.embedify('info', 'guild', description.join('\n'), false);
+			return await ctx.interaction.reply({ embeds: [embed] });
 		} else if (subcommand === 'edit') {
 			const min = ctx.interaction.options.getInteger('minimum', false);
 			const max = ctx.interaction.options.getInteger('maximum', false);
 			const chance = ctx.interaction.options.getInteger('chance', false);
 			const minfine = ctx.interaction.options.getInteger('minfine', false);
 			const maxfine = ctx.interaction.options.getInteger('maxfine', false);
+			const cooldown = ctx.interaction.options.getString('cooldown', false);
 			const command = ctx.interaction.options.getString('command');
 			const inter = ctx.client.commands.get(command);
+
 			if (!inter) {
 				return await ctx.embedify('error', 'user', 'Could not find that command.', true);
-			}
-
-			const data = inter.data as EconomicaSlashCommandBuilder;
-			if (data.group !== 'INCOME') {
+			} else if (inter.data.name in Object.keys(income)) {
 				return await ctx.embedify('error', 'user', `That is not an \`INCOME\` command.`, true);
 			}
 
-			const income = ctx.guildDocument.income;
-			let c: keyof typeof income;
-			for (c in income) {
-				if (c === command) {
-					const obj = income[c];
-					if (min && min !== 0 && 'min' in obj) obj.min = min;
-					if (max && max !== 0 && 'max' in obj) obj.max = max;
-					if (chance && chance !== 0 && 'chance' in obj) obj.chance = chance;
-					if (minfine && minfine !== 0 && 'minfine' in obj) obj.minfine = minfine;
-					if (maxfine && maxfine !== 0 && 'maxfine' in obj) obj.maxfine = maxfine;
+			let k: keyof typeof income;
+			for (k in income) {
+				if (k === command) {
+					if (min && 'min' in income[k]) income[k].min = min;
+					if (max && 'max' in income[k]) income[k].max = max;
+					if (chance && 'chance' in income[k]) income[k].chance = chance;
+					if (minfine && 'minfine' in income[k]) income[k].minfine = minfine;
+					if (maxfine && 'maxfine' in income[k]) income[k].maxfine = maxfine;
+					if (cooldown && 'cooldown' in income[k] && ms(cooldown)) income[k].cooldown = ms(cooldown);
 				}
 			}
 

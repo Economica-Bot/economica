@@ -32,3 +32,12 @@ export interface RoleAuthority {
 	roleId: string;
 	authority: Authority;
 }
+
+export interface command {
+	min?: number;
+	max?: number;
+	chance?: number;
+	minfine?: number;
+	maxfine?: number;
+	cooldown: number;
+}

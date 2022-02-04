@@ -134,4 +134,4 @@ export type TransactionString =
 	| 'ROB_VICTIM'
 	| 'ROB_FINE';
 
-export { CommandData, InventoryItem, EconomyInfo, IncomeCommandProperties, RoleAuthority } from './interfaces';
+export { CommandData, InventoryItem, EconomyInfo, IncomeCommandProperties, RoleAuthority, command } from './interfaces';

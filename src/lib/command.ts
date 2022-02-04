@@ -1,4 +1,5 @@
 import { Guild, GuildMember, PermissionString, TextChannel } from 'discord.js';
+import ms from 'ms';
 
 import { DEVELOPER_IDS, icons } from '../config';
 import { GuildModel } from '../models';
@@ -21,6 +22,11 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 		return false;
 	}
 
+	const cooldown = await cooldownCheck(ctx);
+	if (!cooldown) {
+		return false;
+	}
+
 	const hasPermission = await permissionCheck(ctx);
 	if (ctx.interaction.member && !hasPermission) {
 		return false;
@@ -29,7 +35,7 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 	}
 }
 
-const permissionCheck = async (ctx: Context): Promise<boolean> => {
+async function permissionCheck(ctx: Context): Promise<boolean> {
 	const member = ctx.interaction.member as GuildMember;
 	const guild = ctx.interaction.guild as Guild;
 	const clientMember = (await guild.members.fetch(ctx.interaction.client.user.id)) as GuildMember;
@@ -79,4 +85,36 @@ const permissionCheck = async (ctx: Context): Promise<boolean> => {
 	}
 
 	return true;
-};
+}
+
+async function cooldownCheck(ctx: Context): Promise<boolean> {
+	const key = `${ctx.interaction.user.id}-${ctx.interaction.commandName}`;
+	const inter = ctx.client.cooldowns.get(key);
+	if (!inter) {
+		ctx.client.cooldowns.set(key, ctx.interaction);
+		return true;
+	}
+
+	const income = ctx.guildDocument.income;
+	if (!(ctx.interaction.commandName in income)) {
+		return true;
+	}
+
+	let cooldown;
+	for (const obj of Object.entries(income)) {
+		if (obj[0] === ctx.interaction.commandName) {
+			cooldown = obj[1].cooldown;
+		}
+	}
+
+	if (inter.createdTimestamp + cooldown > Date.now()) {
+		const embed = ctx
+			.embedify('warn', 'user', `Please run this command in \`${ms(inter.createdTimestamp + cooldown - Date.now())}\``)
+			.setFooter({ text: `Cooldown: ${ms(cooldown)}` });
+		ctx.interaction.reply({ embeds: [embed], ephemeral: true });
+		return false;
+	} else {
+		ctx.client.cooldowns.set(key, ctx.interaction);
+		return true;
+	}
+}
