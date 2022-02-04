@@ -40,7 +40,6 @@ export default class implements EconomicaCommand {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const embed = ctx.embedify('info', 'guild', 'Income command information.');
 		if (subcommand === 'view') {
-			const description: string[] = [];
 			for (const [k, v] of Object.entries(income)) {
 				const description = [];
 				for (const [k1, v1] of Object.entries(v)) {
