@@ -7,7 +7,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('transaction')
 		.setDescription('View and delete transactions.')
-		.setGroup('ECONOMY')
+		.setModule('ECONOMY')
 		.setFormat('(view <transaction_id> | delete <id | user | all> [transaction_id | user])')
 		.setExamples([
 			'transaction view 615a88b83f908631d40632c1',

@@ -7,7 +7,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('income')
 		.setDescription('Configure income commands and their settings.')
-		.setGroup('INCOME')
+		.setModule('INCOME')
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand.setName('view').setDescription('View income command configurations.')
 		)

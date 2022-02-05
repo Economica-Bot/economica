@@ -7,7 +7,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('beg')
 		.setDescription('Beg to earn a sum.')
-		.setGroup('INCOME');
+		.setModule('INCOME');
 
 	public execute = async (ctx: Context): Promise<Message> => {
 		const { currency } = ctx.guildDocument;

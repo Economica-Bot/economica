@@ -7,7 +7,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('ping')
 		.setDescription("Get Economica's latency.")
-		.setGroup('UTILITY')
+		.setModule('UTILITY')
 		.setGlobal(true);
 
 	public execute = async (ctx: Context): Promise<Message> => {

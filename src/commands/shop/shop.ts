@@ -9,7 +9,7 @@ export default class implements EconomicaCommand {
 		.setName('shop')
 		.setDescription("Interact with the server's shop.")
 		.setFormat('<view | clear | disable | delete> [...options]')
-		.setGroup('SHOP')
+		.setModule('SHOP')
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
 				.setName('view')

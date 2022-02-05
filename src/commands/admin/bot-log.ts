@@ -7,7 +7,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('bot-log')
 		.setDescription('Manage the infraction logging channel.')
-		.setGroup('ADMIN')
+		.setModule('ADMIN')
 		.setFormat('<view | set | reset> [channel]')
 		.setExamples(['bot-log view', 'bot-log set #bot-logs', 'bot-log reset'])
 		.addEconomicaSubcommand((subcommand) =>

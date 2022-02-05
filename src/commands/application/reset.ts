@@ -6,7 +6,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('reset')
 		.setDescription('Reset all slash commands')
-		.setGroup('APPLICATION')
+		.setModule('APPLICATION')
 		.setAuthority('DEVELOPER');
 
 	public execute = async (ctx: Context): Promise<Message> => {

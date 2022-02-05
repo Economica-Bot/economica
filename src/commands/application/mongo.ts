@@ -18,7 +18,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('mongo')
 		.setDescription('Manipulate database.')
-		.setGroup('APPLICATION')
+		.setModule('APPLICATION')
 		.setAuthority('DEVELOPER')
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand

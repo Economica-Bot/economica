@@ -8,7 +8,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('help')
 		.setDescription('List commands, or information about a command group, command, subcommand group, or subcommand.')
-		.setGroup('UTILITY')
+		.setModule('UTILITY')
 		.setFormat('[command]')
 		.setExamples(['help', 'help ban'])
 		.setGlobal(true)

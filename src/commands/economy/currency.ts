@@ -8,7 +8,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('currency')
 		.setDescription('View or update the currency symbol.')
-		.setGroup('ECONOMY')
+		.setModule('ECONOMY')
 		.setFormat('<view | set | reset> [currency]')
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand.setName('view').setDescription('View the current currency symbol.')

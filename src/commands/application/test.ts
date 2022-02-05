@@ -6,7 +6,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('test')
 		.setDescription('test command')
-		.setGroup('APPLICATION')
+		.setModule('APPLICATION')
 		.setAuthority('MODERATOR')
 		.addEconomicaSubcommandGroup((subcommandgroup) =>
 			subcommandgroup

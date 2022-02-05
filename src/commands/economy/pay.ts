@@ -7,7 +7,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('pay')
 		.setDescription('Pay funds to another user.')
-		.setGroup('ECONOMY')
+		.setModule('ECONOMY')
 		.setFormat('<user> <amount | all>')
 		.setExamples(['pay @Wumpus all', 'pay @JohnDoe 100'])
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(true))
