@@ -11,7 +11,7 @@ export default class implements EconomicaCommand {
 
 	public execute = async (ctx: Context): Promise<Message> => {
 		const { currency } = ctx.guildDocument;
-		const { min, max, chance } = ctx.guildDocument.income.beg;
+		const { min, max, chance } = ctx.guildDocument.incomes.beg;
 		const amount = Math.ceil(Math.random() * (max - min) + min);
 
 		if (Math.random() * 100 > chance)

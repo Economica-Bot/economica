@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 
-import { income } from '../config';
-import { RoleAuthority } from '../typings';
+import { defaultIncomes, defaultModules } from '../config';
+import { Module, RoleAuthority } from '../typings';
 
 export interface Guild {
 	guildId: string;
@@ -10,7 +10,8 @@ export interface Guild {
 	infractionLogChannelId: string;
 	botLogChannelId: string;
 	auth: Array<RoleAuthority>;
-	income: typeof income;
+	incomes: typeof defaultIncomes;
+	modules: typeof defaultModules;
 }
 
 const Schema = new mongoose.Schema<Guild>(
@@ -21,12 +22,10 @@ const Schema = new mongoose.Schema<Guild>(
 		infractionLogChannelId: { type: String, required: true },
 		botLogChannelId: { type: String, required: true },
 		auth: { type: Array<RoleAuthority>(), required: true },
-		income: { type: Object, required: true, default: income },
+		incomes: { type: Object, required: true, default: defaultIncomes },
+		modules: { type: Array<Module>(), required: true, default: defaultModules },
 	},
-	{
-		strict: true,
-		versionKey: false,
-	}
+	{ strict: true, versionKey: false }
 );
 
 export const GuildModel: mongoose.Model<Guild> = mongoose.model('Guilds', Schema);

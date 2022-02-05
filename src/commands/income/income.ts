@@ -36,7 +36,7 @@ export default class implements EconomicaCommand {
 		);
 
 	public execute = async (ctx: Context): Promise<Message | void> => {
-		let income = ctx.guildDocument.income;
+		let income = ctx.guildDocument.incomes;
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const embed = ctx.embedify('info', 'guild', 'Income command information.');
 		if (subcommand === 'view') {

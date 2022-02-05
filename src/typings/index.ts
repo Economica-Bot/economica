@@ -1,6 +1,7 @@
 import { EmbedAuthorData } from 'discord.js';
 
-export type GroupString =
+export type Module = DefaultModule & SpecialModule;
+export type DefaultModule =
 	| 'APPLICATION'
 	| 'ADMIN'
 	| 'ECONOMY'
@@ -9,6 +10,7 @@ export type GroupString =
 	| 'SHOP'
 	| 'STATISTICS'
 	| 'UTILITY';
+export type SpecialModule = {};
 export type Documents = 'guilds' | 'infractions' | 'loans' | 'markets' | 'members' | 'shops' | 'transactions';
 export type ReplyString = 'success' | 'info' | 'warn' | 'error';
 export type InfractionString = 'BAN' | 'KICK' | 'TIMEOUT' | 'UNBAN' | 'UNTIMEOUT';
@@ -134,4 +136,12 @@ export type TransactionString =
 	| 'ROB_VICTIM'
 	| 'ROB_FINE';
 
-export { CommandData, InventoryItem, EconomyInfo, IncomeCommandProperties, RoleAuthority, command } from './interfaces';
+export {
+	CommandData,
+	InventoryItem,
+	EconomyInfo,
+	IncomeCommandProperties,
+	RoleAuthority,
+	Command,
+	ModuleOwnership,
+} from './interfaces';

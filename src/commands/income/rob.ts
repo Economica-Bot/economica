@@ -17,7 +17,7 @@ export default class implements EconomicaCommand {
 		const { wallet: targetWallet } = await getEconInfo(ctx.interaction.guildId, target.id);
 		const amount = Math.ceil(Math.random() * targetWallet);
 		const { currency } = ctx.guildDocument;
-		const { chance, minfine, maxfine } = ctx.guildDocument.income.rob;
+		const { chance, minfine, maxfine } = ctx.guildDocument.incomes.rob;
 		const fine = Math.ceil(Math.random() * (maxfine - minfine) + minfine);
 
 		if (target.id === ctx.client.user.id) return await ctx.embedify('warn', 'user', `You cannot rob me!`, true);

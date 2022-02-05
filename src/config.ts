@@ -3,9 +3,9 @@ import { ActivityTypes } from 'discord.js/typings/enums';
 import * as i18n from 'i18n';
 import { ConnectOptions } from 'mongoose';
 import path from 'path';
-import { command, ReplyString } from './typings';
 import { ISettingsParam } from 'tslog';
-import { commandCheck } from './lib';
+
+import { Command, Module, ReplyString } from './typings';
 
 // Required
 export const BOT_TOKEN = process.env.ECON_ALPHA_TOKEN;
@@ -117,7 +117,7 @@ export const authors = {
 	},
 };
 
-export const income: { work: command; beg: command; crime: command; rob: command } = {
+export const defaultIncomes: { work: Command; beg: Command; crime: Command; rob: Command } = {
 	work: {
 		min: 100,
 		max: 500,
@@ -144,6 +144,17 @@ export const income: { work: command; beg: command; crime: command; rob: command
 		cooldown: 1000 * 60,
 	},
 };
+
+export const defaultModules: Array<Module> = [
+	'ADMIN',
+	'APPLICATION',
+	'ECONOMY',
+	'INCOME',
+	'MODERATION',
+	'SHOP',
+	'STATISTICS',
+	'UTILITY',
+];
 
 i18n.configure({
 	defaultLocale: 'en',

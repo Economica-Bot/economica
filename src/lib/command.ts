@@ -95,7 +95,7 @@ async function cooldownCheck(ctx: Context): Promise<boolean> {
 		return true;
 	}
 
-	const income = ctx.guildDocument.income;
+	const income = ctx.guildDocument.incomes;
 	if (!(ctx.interaction.commandName in income)) {
 		return true;
 	}

@@ -1,6 +1,6 @@
 import { Guild } from 'discord.js';
 
-import { CURRENCY_SYMBOL, income } from '../config';
+import { CURRENCY_SYMBOL, defaultIncomes, defaultModules } from '../config';
 import { GuildModel } from '../models';
 import { EconomicaClient, EconomicaEvent } from '../structures';
 
@@ -17,7 +17,8 @@ export default class implements EconomicaEvent {
 				infractionLogChannel: null,
 				botLogChannel: null,
 				auth: [],
-				income,
+				incomes: defaultIncomes,
+				modules: defaultModules,
 			},
 			{
 				upsert: true,
