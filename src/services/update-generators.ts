@@ -10,11 +10,7 @@ export default class implements EconomicaService {
 		const members = await MemberModel.find();
 		for (const member of members) {
 			for (const item of member.inventory) {
-				const shopItem = await ShopModel.findOne({
-					guildId: member.guildId,
-					name: item.name,
-				});
-
+				const shopItem = await ShopModel.findOne({ _id: item.refId });
 				if (shopItem.type === 'GENERATOR') {
 					if (!item.hasOwnProperty('lastGenerateAt')) {
 						item.lastGenerateAt = now.getTime();
@@ -31,7 +27,7 @@ export default class implements EconomicaService {
 					{
 						guildId: member.guildId,
 						userId: member.userId,
-						'inventory.name': item.name,
+						'inventory.refId': item.refId,
 					},
 					{
 						$set: {
