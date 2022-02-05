@@ -14,8 +14,8 @@ export interface Shop {
 	stock: number;
 	rolesGiven: string[];
 	rolesRemoved: string[];
-	rolesRequired: string[];
-	itemsRequired: string[];
+	requiredRoles: string[];
+	requiredItems: string[];
 	generatorPeriod: number;
 	generatorAmount: number;
 	createdAt: Date;
@@ -37,8 +37,8 @@ const Schema = new mongoose.Schema<Shop>(
 		rolesRemoved: { type: Array<String>(), required: true },
 		requiredRoles: { type: Array<String>(), required: true },
 		requiredItems: { type: Array<String>(), required: true },
-		generatorPeriod: { type: Number, required: true },
-		generatorAmount: { type: Number, required: true },
+		generatorPeriod: { type: Number, required: false },
+		generatorAmount: { type: Number, required: false },
 		createdAt: { type: Date, required: true },
 	},
 	{
