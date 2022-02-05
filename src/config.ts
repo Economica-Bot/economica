@@ -4,7 +4,7 @@ import i18n from 'i18n';
 import path from 'path';
 
 // Required
-export const BOT_TOKEN = process.env.ECON_ALPHA_TOKEN;
+export const BOT_TOKEN = process.env.ECON_CHAD_TOKEN;
 export const DEVELOPER_IDS: string[] = JSON.parse(process.env.DEVELOPER_IDS);
 export const DEVELOPMENT_GUILD_IDS: string[] = JSON.parse(process.env.DEVELOPMENT_GUILD_IDS);
 export const PUBLIC_GUILD_ID = process.env.PUBLIC_GUILD_ID;

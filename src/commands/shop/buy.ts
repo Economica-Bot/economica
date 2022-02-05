@@ -21,16 +21,17 @@ export default class implements EconomicaCommand {
 		const { wallet, treasury } = await getEconInfo(ctx.interaction.guildId, ctx.interaction.user.id);
 		const missingRoles = new Array<String>();
 		const missingItems = new Array<String>();
+		const shop = await ShopModel.find({guildId: ctx.interaction.guildId})
 
-		item.rolesRequired.forEach(async (roleId) => {
+		item.requiredRoles.forEach(async (roleId) => {
 			if (!(ctx.interaction.member.roles as GuildMemberRoleManager).cache.has(roleId)) {
-				missingRoles.push(roleId);
+				missingRoles.push(shop.find(item => item._id == roleId).name);
 			}
 		});
 
-		item.itemsRequired.forEach(async (item) => {
-			if (!ctx.memberDocument.inventory.some((entry) => entry.name === item)) {
-				missingItems.push(item);
+		item.requiredItems.forEach(async (itemId) => {
+			if (!ctx.memberDocument.inventory.some((entry) => entry.refId === itemId)) {
+				missingItems.push();
 			}
 		});
 
@@ -68,6 +69,7 @@ export default class implements EconomicaCommand {
 		});
 
 		const itemobj: InventoryItem = {
+			refId: item._id,
 			name: item.name,
 			amount: 1,
 			lastGenerateAt: item.type === 'GENERATOR' ? Date.now() : null,

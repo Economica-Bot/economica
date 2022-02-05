@@ -6,7 +6,7 @@ export interface CommandData {
 }
 
 export interface InventoryItem {
-	name: string;
+	refId: string;
 	amount: number;
 	lastGenerateAt: number | null;
 	collected: boolean | null;
