@@ -4,7 +4,7 @@ import { transaction, validateAmount } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('withdraw')
 		.setDescription('Withdraw funds from your treasury to your wallet.')
 		.setGroup('ECONOMY')
@@ -12,7 +12,7 @@ export default class implements EconomicaCommand {
 		.setExamples(['withdraw all', 'withdraw 100'])
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true));
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		const { currency } = ctx.guildDocument;
 		const { validated, result } = await validateAmount(ctx, 'treasury');
 		if (!validated) return;

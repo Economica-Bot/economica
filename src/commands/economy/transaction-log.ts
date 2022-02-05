@@ -1,9 +1,10 @@
-import { Message } from 'discord.js';
+import { ChannelType } from 'discord-api-types';
+import { Message, TextChannel } from 'discord.js';
 
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('transaction-log')
 		.setDescription('Manage the transaction logging channel.')
 		.setGroup('ECONOMY')
@@ -18,28 +19,39 @@ export default class implements EconomicaCommand {
 				.setDescription('Set the transaction log channel.')
 				.setAuthority('MANAGER')
 				.addChannelOption((option) =>
-					option.setName('channel').setDescription('Specify a channel').addChannelType(0).setRequired(true)
+					option
+						.setName('channel')
+						.setDescription('Specify a channel')
+						.addChannelType(ChannelType.GuildText)
+						.setRequired(true)
 				)
 		)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand.setName('reset').setDescription('Reset the transaction log channel.').setAuthority('MANAGER')
 		);
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		if (subcommand === 'view') {
-			const channelId = ctx.guildDocument.transactionLogChannel;
+			const channelId = ctx.guildDocument.transactionLogChannelId;
 			if (channelId) {
 				return await ctx.embedify('info', 'user', `The current transaction log is <#${channelId}>.`, false);
 			} else {
 				return await ctx.embedify('warn', 'user', 'There is no transaction log.', false);
 			}
 		} else if (subcommand === 'set') {
-			const channel = ctx.interaction.options.getChannel('channel');
-			await ctx.guildDocument.updateOne({ transactionLogChannel: channel.id });
-			return await ctx.embedify('success', 'user', `Transaction log set to ${channel}.`, false);
+			const channel = ctx.interaction.options.getChannel('channel') as TextChannel;
+			if (
+				!channel.permissionsFor(ctx.member).has('SEND_MESSAGES') ||
+				!channel.permissionsFor(ctx.member).has('EMBED_LINKS')
+			) {
+				return await ctx.embedify('error', 'user', 'I need `SEND_MESSAGES` and `EMBED_LINKS` in that channel.', true);
+			} else {
+				await ctx.guildDocument.updateOne({ transactionLogChannelId: channel.id });
+				return await ctx.embedify('success', 'user', `Transaction log set to ${channel}.`, false);
+			}
 		} else if (subcommand === 'reset') {
-			await ctx.guildDocument.updateOne({ transactionLogChannel: null });
+			await ctx.guildDocument.updateOne({ transactionLogChannelId: null });
 			return await ctx.embedify('success', 'user', 'Transaction log reset.', false);
 		}
 	};

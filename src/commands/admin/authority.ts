@@ -5,10 +5,10 @@ import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../s
 import { Authority } from '../../typings';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('authority')
 		.setDescription('Interact with the economy authority role hierarchy.')
-		.setGroup('UTILITY')
+		.setGroup('ADMIN')
 		.setFormat('<view | set | reset> [...options]')
 		.addEconomicaSubcommand((options) =>
 			options.setName('view').setDescription('View the economy authority hierarchy.')
@@ -41,7 +41,7 @@ export default class implements EconomicaCommand {
 				.addRoleOption((option) => option.setName('role').setDescription('Specify a role.'))
 		);
 
-	execute = async (ctx: Context): Promise<Message | void> => {
+	public execute = async (ctx: Context): Promise<Message | void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 
 		if (subcommand === 'view') {

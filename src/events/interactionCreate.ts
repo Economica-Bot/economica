@@ -1,26 +1,26 @@
 import { CommandInteraction } from 'discord.js';
 
 import { commandCheck } from '../lib';
-import { GuildModel, MemberModel } from '../models';
-import { Context, EconomicaClient, EconomicaCommand, EconomicaSlashCommandBuilder } from '../structures';
+import { CommandModel } from '../models/commands';
+import { Context, EconomicaClient, EconomicaEvent } from '../structures';
 
-export const name = 'interactionCreate';
+export default class implements EconomicaEvent {
+	public name = 'interactionCreate' as const;
+	public async execute(client: EconomicaClient, interaction: CommandInteraction): Promise<void> {
+		if (!interaction.isCommand()) {
+			return;
+		}
 
-export async function execute(client: EconomicaClient, interaction: CommandInteraction) {
-	if (!interaction.isCommand()) {
-		return;
-	}
+		const ctx = await new Context(client, interaction).init();
+		const check = await commandCheck(ctx);
 
-	const command = client.commands.get(interaction.commandName) as EconomicaCommand;
-	if (!command) throw new Error(`There was an error while executing this command`);
-
-	const guildDocument = await GuildModel.findOne({ guildId: interaction.guildId });
-	const memberDocument = await MemberModel.findOne({ guildId: interaction.guildId, userId: interaction.user.id });
-	const data = command.data as EconomicaSlashCommandBuilder;
-	const ctx = new Context(client, interaction, data, guildDocument, memberDocument);
-	const check = await commandCheck(ctx);
-
-	if (check) {
-		await command.execute(ctx)
+		if (check) {
+			await client.commands.get(interaction.commandName).execute(ctx);
+			new CommandModel({
+				guildId: interaction.guild?.id || null,
+				userId: interaction.user.id,
+				command: interaction.commandName,
+			}).save();
+		}
 	}
 }

@@ -5,7 +5,7 @@ import { icons } from '../../config';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('help')
 		.setDescription('List commands, or information about a command group, command, subcommand group, or subcommand.')
 		.setGroup('UTILITY')
@@ -16,7 +16,7 @@ export default class implements EconomicaCommand {
 			option.setName('query').setDescription('Specify a group, command, or subcommand.').setRequired(false)
 		);
 
-	execute = async (ctx: Context): Promise<Message | void> => {
+	public execute = async (ctx: Context): Promise<Message | void> => {
 		const query = ctx.interaction.options.getString('query');
 
 		if (!query) {

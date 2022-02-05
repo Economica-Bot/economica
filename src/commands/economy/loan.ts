@@ -7,7 +7,7 @@ import { LoanModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('loan')
 		.setDescription('Loan money to other users.')
 		.setGroup('ECONOMY')
@@ -81,7 +81,7 @@ export default class implements EconomicaCommand {
 				.addEconomicaSubcommand((subcommand) => subcommand.setName('all').setDescription('Delete all loans.'))
 		);
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		const subcommandgroup = ctx.interaction.options.getSubcommandGroup(false);
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const principal = ctx.interaction.options.getInteger('principal', false);

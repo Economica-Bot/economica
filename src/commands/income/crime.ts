@@ -4,12 +4,12 @@ import { transaction } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('crime')
 		.setDescription('Commit a crime to earn a sum.')
 		.setGroup('INCOME');
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		const { currency } = ctx.guildDocument;
 		const { min, max, chance, minfine, maxfine } = ctx.guildDocument.income.crime;
 		const amount = Math.ceil(Math.random() * (max - min) + min);
@@ -40,7 +40,7 @@ export default class implements EconomicaCommand {
 			ctx.interaction.guildId,
 			ctx.interaction.user.id,
 			ctx.client.user.id,
-			'CRIME_FINE',
+			'CRIME_SUCCESS',
 			amount,
 			0,
 			amount

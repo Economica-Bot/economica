@@ -1,7 +1,11 @@
-import { ClientOptions, ExcludeEnum, Intents, InviteGenerationOptions, Permissions } from 'discord.js';
+import { ClientOptions, ColorResolvable, ExcludeEnum, Intents, InviteGenerationOptions, Permissions } from 'discord.js';
 import { ActivityTypes } from 'discord.js/typings/enums';
-import i18n from 'i18n';
+import * as i18n from 'i18n';
+import { ConnectOptions } from 'mongoose';
 import path from 'path';
+import { command, ReplyString } from './typings';
+import { ISettingsParam } from 'tslog';
+import { commandCheck } from './lib';
 
 // Required
 export const BOT_TOKEN = process.env.ECON_CHAD_TOKEN;
@@ -49,6 +53,36 @@ export const inviteOptions: InviteGenerationOptions = {
 	],
 };
 
+export const mongoOptions: ConnectOptions = {
+	useUnifiedTopology: true,
+	useNewUrlParser: true,
+	useFindAndModify: false,
+};
+
+export const loggerOptions: ISettingsParam = {
+	instanceName: 'Economica_Bot',
+	overwriteConsole: true,
+	dateTimeTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+	displayInstanceName: true,
+	minLevel: DEBUG ? 'silly' : 'info',
+};
+
+export enum SERVICE_COOLDOWNS {
+	DEV = 1000 * 10,
+	UPDATE_BANS = 1000 * 60 * 5,
+	UPDATE_BOT_LOG = 1000 * 60 * 10,
+	UPDATE_GENERATORS = 1000 * 60 * 5,
+	UPDATE_LOANS = 1000 * 60 * 5,
+	UPDATE_SHOP = 1000 * 60 * 5,
+}
+
+export const EmbedColors: Record<ReplyString, ColorResolvable> = {
+	success: 'GREEN',
+	info: 'BLURPLE',
+	warn: 'YELLOW',
+	error: 'RED',
+};
+
 export const hyperlinks = {
 	help: '[Help Me Understand](https://discord.gg/57rQ7aHTpX)',
 	bug: '[Report An Issue](https://discord.gg/qEXKFth3vY)',
@@ -83,15 +117,17 @@ export const authors = {
 	},
 };
 
-export const income = {
+export const income: { work: command; beg: command; crime: command; rob: command } = {
 	work: {
 		min: 100,
 		max: 500,
+		cooldown: 1000 * 30,
 	},
 	beg: {
 		min: 25,
 		max: 125,
 		chance: 40,
+		cooldown: 1000 * 30,
 	},
 	crime: {
 		min: 300,
@@ -99,14 +135,13 @@ export const income = {
 		chance: 60,
 		minfine: 300,
 		maxfine: 1500,
+		cooldown: 1000 * 60,
 	},
 	rob: {
 		chance: 20,
 		minfine: 500,
 		maxfine: 2000,
-	},
-	coinflip: {
-		chance: 50,
+		cooldown: 1000 * 60,
 	},
 };
 
@@ -118,4 +153,4 @@ i18n.configure({
 	objectNotation: true,
 });
 
-export default i18n;
+export { i18n };

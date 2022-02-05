@@ -10,12 +10,13 @@ import {
 import { Context } from './Context';
 
 export class EconomicaCommand {
-	data:
+	public data:
 		| EconomicaSlashCommandBuilder
 		| EconomicaSlashCommandSubcommandGroupBuilder
 		| EconomicaSlashCommandSubcommandBuilder
 		| EconomicaSlashCommandSubcommandsOnlyBuilder
 		| EconomicaSlashCommandOptionsOnlyBuilder
 		| Omit<EconomicaSlashCommandBuilder, 'addEconomicaSubcommand' | 'addEconomicaSubcommandGroup'>;
-	execute: (ctx: Context) => Promise<Message | void>;
+
+	public execute: (ctx: Context) => Promise<Message | void>;
 }

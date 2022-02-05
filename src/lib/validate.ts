@@ -43,31 +43,31 @@ export async function validateTarget(ctx: Context): Promise<boolean> {
 	const target = ctx.interaction.options.getMember('target') as GuildMember;
 
 	if (target.id === ctx.interaction.user.id) {
-		await ctx.embedify('warn', 'user', 'You cannot target yourself.');
+		await ctx.embedify('warn', 'user', 'You cannot target yourself.', true);
 		return false;
 	} else if (target.id === ctx.client.user.id) {
-		await ctx.embedify('warn', 'user', 'You cannot target me.');
+		await ctx.embedify('warn', 'user', 'You cannot target me.', true);
 		return false;
 	} else if (target.roles.highest.position > member.roles.highest.position) {
-		await ctx.embedify('warn', 'user', "Target's roles are too high.");
+		await ctx.embedify('warn', 'user', "Target's roles are too high.", true);
 		return false;
 	} else if (type === 'ban' && !target.bannable) {
-		await ctx.embedify('warn', 'user', 'Target is unbannable.');
+		await ctx.embedify('warn', 'user', 'Target is unbannable.', true);
 		return false;
 	} else if (type === 'kick' && !target.kickable) {
-		await ctx.embedify('warn', 'user', 'Target is unkickable.');
+		await ctx.embedify('warn', 'user', 'Target is unkickable.', true);
 		return false;
 	} else if (type === 'timeout') {
 		if (!target.moderatable) {
-			await ctx.embedify('warn', 'user', 'Target is unmoderatable.');
+			await ctx.embedify('warn', 'user', 'Target is unmoderatable.', true);
 			return false;
 		} else if (target.communicationDisabledUntil && target.communicationDisabledUntil.getTime() > Date.now()) {
-			await ctx.embedify('warn', 'user', `Target is already in a timeout.`);
+			await ctx.embedify('warn', 'user', `Target is already in a timeout.`, true);
 			return false;
 		}
 	} else if (type === 'untimeout') {
 		if (target.isCommunicationDisabled) {
-			await ctx.embedify('warn', 'user', 'Target is not in a timeout.');
+			await ctx.embedify('warn', 'user', 'Target is not in a timeout.', true);
 			return false;
 		}
 	}

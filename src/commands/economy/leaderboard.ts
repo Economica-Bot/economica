@@ -7,7 +7,7 @@ import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../s
 import { BalanceString } from '../../typings';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('leaderboard')
 		.setDescription('View top funds.')
 		.setGroup('ECONOMY')
@@ -28,7 +28,7 @@ export default class implements EconomicaCommand {
 			option.setName('page').setDescription('Specify a page.').setMinValue(1).setRequired(false)
 		);
 
-	execute = async (ctx: Context): Promise<void> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		const type = ctx.interaction.options.getString('type') as BalanceString;
 		const page = ctx.interaction.options.getInteger('page', false) ?? 1;
 		const { currency } = ctx.guildDocument;

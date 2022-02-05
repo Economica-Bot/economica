@@ -1,4 +1,5 @@
 import { Guild, GuildMember, PermissionString, TextChannel } from 'discord.js';
+import ms from 'ms';
 
 import { DEVELOPER_IDS, icons } from '../config';
 import { GuildModel } from '../models';
@@ -11,13 +12,18 @@ import { Authority } from '../typings';
 
 export async function commandCheck(ctx: Context): Promise<boolean> {
 	if (!ctx.data.enabled) {
-		await ctx.embedify('error', 'user', 'This command is disabled.');
+		await ctx.embedify('error', 'user', 'This command is disabled.', true);
 		return false;
 	} else if (ctx.data.authority === 'DEVELOPER' && !DEVELOPER_IDS.includes(ctx.interaction.user.id)) {
-		await ctx.embedify('error', 'user', 'This command is dev only.');
+		await ctx.embedify('error', 'user', 'This command is dev only.', true);
 		return false;
 	} else if (!ctx.data.global && !ctx.interaction.guild) {
-		await ctx.embedify('error', 'user', 'This command may only be used within servers.');
+		await ctx.embedify('error', 'user', 'This command may only be used within servers.', true);
+		return false;
+	}
+
+	const cooldown = await cooldownCheck(ctx);
+	if (!cooldown) {
 		return false;
 	}
 
@@ -29,7 +35,7 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 	}
 }
 
-const permissionCheck = async (ctx: Context): Promise<boolean> => {
+async function permissionCheck(ctx: Context): Promise<boolean> {
 	const member = ctx.interaction.member as GuildMember;
 	const guild = ctx.interaction.guild as Guild;
 	const clientMember = (await guild.members.fetch(ctx.interaction.client.user.id)) as GuildMember;
@@ -54,7 +60,7 @@ const permissionCheck = async (ctx: Context): Promise<boolean> => {
 	}
 
 	if (missingClientPermissions.length) {
-		await ctx.embedify('warn', 'bot', `Missing Bot Permissions: \`${missingClientPermissions}\``);
+		await ctx.embedify('warn', 'bot', `Missing Bot Permissions: \`${missingClientPermissions}\``, true);
 		return false;
 	}
 
@@ -74,9 +80,41 @@ const permissionCheck = async (ctx: Context): Promise<boolean> => {
 
 	if (missingAuthority) {
 		const description = `Missing authority: \`${missingAuthority}\``;
-		await ctx.embedify('error', { name: 'Insufficient Permissions', iconURL: icons.warning }, description);
+		await ctx.embedify('error', { name: 'Insufficient Permissions', iconURL: icons.warning }, description, true);
 		return false;
 	}
 
 	return true;
-};
+}
+
+async function cooldownCheck(ctx: Context): Promise<boolean> {
+	const key = `${ctx.interaction.user.id}-${ctx.interaction.commandName}`;
+	const inter = ctx.client.cooldowns.get(key);
+	if (!inter) {
+		ctx.client.cooldowns.set(key, ctx.interaction);
+		return true;
+	}
+
+	const income = ctx.guildDocument.income;
+	if (!(ctx.interaction.commandName in income)) {
+		return true;
+	}
+
+	let cooldown;
+	for (const obj of Object.entries(income)) {
+		if (obj[0] === ctx.interaction.commandName) {
+			cooldown = obj[1].cooldown;
+		}
+	}
+
+	if (inter.createdTimestamp + cooldown > Date.now()) {
+		const embed = ctx
+			.embedify('warn', 'user', `Please run this command in \`${ms(inter.createdTimestamp + cooldown - Date.now())}\``)
+			.setFooter({ text: `Cooldown: ${ms(cooldown)}` });
+		ctx.interaction.reply({ embeds: [embed], ephemeral: true });
+		return false;
+	} else {
+		ctx.client.cooldowns.set(key, ctx.interaction);
+		return true;
+	}
+}

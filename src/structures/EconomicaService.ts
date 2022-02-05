@@ -1,4 +1,7 @@
+import { EconomicaClient } from '.';
+
 export class EconomicaService {
-	name: string;
-	execute: Function;
+	public name: string;
+	public cooldown: number;
+	public execute: (client: EconomicaClient) => Promise<void>;
 }

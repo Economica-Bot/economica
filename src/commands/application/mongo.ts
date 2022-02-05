@@ -1,6 +1,7 @@
 import { Message } from 'discord.js';
 import { isValidObjectId } from 'mongoose';
 
+import * as guildCreate from '../../events/guildCreate';
 import {
 	GuildModel,
 	InfractionModel,
@@ -11,11 +12,10 @@ import {
 	TransactionModel,
 } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-
-type Documents = 'guilds' | 'infractions' | 'loans' | 'markets' | 'members' | 'shops' | 'transactions';
+import { Documents } from '../../typings';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('mongo')
 		.setDescription('Manipulate database.')
 		.setGroup('APPLICATION')
@@ -40,9 +40,21 @@ export default class implements EconomicaCommand {
 						.setRequired(true)
 				)
 				.addStringOption((option) => option.setName('_id').setDescription('Specify the id.'))
+		)
+		.addEconomicaSubcommandGroup((subcommandgroup) =>
+			subcommandgroup
+				.setName('reload')
+				.setDescription('Reload mongoose documents.')
+				.addEconomicaSubcommand((subcommand) =>
+					subcommand
+						.setName('guild')
+						.setDescription('Reload guild document.')
+						.addStringOption((option) => option.setName('id').setDescription('Specify the guild id.'))
+				)
 		);
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
+		const subcommandgroup = ctx.interaction.options.getSubcommandGroup(false);
 		const subcommand = ctx.interaction.options.getSubcommand();
 
 		if (subcommand === 'delete') {
@@ -136,6 +148,20 @@ export default class implements EconomicaCommand {
 			}
 
 			return ctx.embedify('success', 'user', description, true);
+		} else if (subcommandgroup === 'reload') {
+			if (subcommand === 'guild') {
+				let guild = ctx.interaction.guild;
+				const guildId = ctx.interaction.options.getString('id', false);
+				if (guildId) {
+					guild = ctx.client.guilds.cache.get(guildId);
+					if (!guild) {
+						return await ctx.embedify('error', 'user', 'Invalid guild id.', true);
+					}
+				}
+
+				await new guildCreate.default().execute(ctx.client, guild);
+				return await ctx.embedify('success', 'user', `Reset guild doc in \`${guild}\`.`, true);
+			}
 		}
 	};
 }

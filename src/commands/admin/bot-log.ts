@@ -5,18 +5,18 @@ import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../s
 
 export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
-		.setName('infraction-log')
+		.setName('bot-log')
 		.setDescription('Manage the infraction logging channel.')
-		.setGroup('MODERATION')
+		.setGroup('ADMIN')
 		.setFormat('<view | set | reset> [channel]')
-		.setExamples(['infraction-log view', 'infraction-log set #infraction-logs', 'infraction-log reset'])
+		.setExamples(['bot-log view', 'bot-log set #bot-logs', 'bot-log reset'])
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand.setName('view').setDescription('View the infraction log channel.')
 		)
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
 				.setName('set')
-				.setDescription('Set the infraction log channel.')
+				.setDescription('Set the bot log channel.')
 				.setAuthority('ADMINISTRATOR')
 				.addChannelOption((option) =>
 					option
@@ -27,18 +27,18 @@ export default class implements EconomicaCommand {
 				)
 		)
 		.addEconomicaSubcommand((subcommand) =>
-			subcommand.setName('reset').setDescription('Reset the infraction log channel.').setAuthority('ADMINISTRATOR')
+			subcommand.setName('reset').setDescription('Reset the bot log channel.').setAuthority('ADMINISTRATOR')
 		);
 
 	public execute = async (ctx: Context): Promise<Message> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		switch (subcommand) {
 			case 'view':
-				const channelId = ctx.guildDocument.infractionLogChannelId;
+				const channelId = ctx.guildDocument.botLogChannelId;
 				if (channelId) {
-					return await ctx.embedify('info', 'user', `The current infraction log is <#${channelId}>.`, false);
+					return await ctx.embedify('info', 'user', `The current bot log is <#${channelId}>.`, false);
 				} else {
-					return await ctx.embedify('info', 'user', 'There is no infraction log.', false);
+					return await ctx.embedify('info', 'user', 'There is no bot log.', false);
 				}
 			case 'set':
 				const channel = ctx.interaction.options.getChannel('channel') as TextChannel;
@@ -48,12 +48,12 @@ export default class implements EconomicaCommand {
 				) {
 					return await ctx.embedify('error', 'user', 'I need `SEND_MESSAGES` and `EMBED_LINKS` in that channel.', true);
 				} else {
-					await ctx.guildDocument.updateOne({ infractionLogChannelId: channel.id });
-					return await ctx.embedify('success', 'user', `Infraction log set to ${channel}.`, false);
+					await ctx.guildDocument.updateOne({ botLogChannelId: channel.id });
+					return await ctx.embedify('success', 'user', `Bot log set to ${channel}.`, false);
 				}
 			case 'reset':
-				await ctx.guildDocument.update({ infractionLogChannelId: null });
-				return await ctx.embedify('success', 'user', 'Infraction log reset.', false);
+				await ctx.guildDocument.updateOne({ botLogChannelId: null });
+				return await ctx.embedify('success', 'user', 'Bot log reset.', false);
 		}
 	};
 }

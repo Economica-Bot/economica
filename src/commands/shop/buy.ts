@@ -6,17 +6,17 @@ import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../s
 import { InventoryItem } from '../../typings';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('buy')
 		.setDescription('Buy an item.')
 		.setGroup('SHOP')
 		.addStringOption((option) => option.setName('item').setDescription('Specify an item.').setRequired(true));
 
-	execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<Message> => {
 		const query = ctx.interaction.options.getString('item');
 		const item = await ShopModel.findOne({ guildId: ctx.interaction.guildId, name: query, active: true });
 		const hasItem = ctx.memberDocument.inventory.some((i) => i.name === item.name);
-		
+
 		const { currency } = ctx.guildDocument;
 		const { wallet, treasury } = await getEconInfo(ctx.interaction.guildId, ctx.interaction.user.id);
 		const missingRoles = new Array<String>();
@@ -40,7 +40,12 @@ export default class implements EconomicaCommand {
 		} else if (item.price > wallet) {
 			return await ctx.embedify('warn', 'user', 'You cannot afford this item.', true);
 		} else if (item.treasuryRequired > treasury) {
-			return await ctx.embedify('warn', 'user', `You need ${currency}${item.treasuryRequired.toLocaleString()} in your treasury.`, true);
+			return await ctx.embedify(
+				'warn',
+				'user',
+				`You need ${currency}${item.treasuryRequired.toLocaleString()} in your treasury.`,
+				true
+			);
 		} else if (missingItems.length) {
 			return await ctx.embedify('warn', 'user', `You are missing \`${missingItems.join('`, `')}\`.`, true);
 		} else if (missingRoles.length) {
@@ -91,7 +96,8 @@ export default class implements EconomicaCommand {
 		return await ctx.embedify(
 			'success',
 			'user',
-			`Purchased \`${item.name}\` for ${currency}${item.price.toLocaleString()}`, false
+			`Purchased \`${item.name}\` for ${currency}${item.price.toLocaleString()}`,
+			false
 		);
 	};
 }

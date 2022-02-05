@@ -10,50 +10,50 @@ import { PermissionString } from 'discord.js';
 import { Authority, GroupString } from '../typings';
 
 export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
-	group: GroupString;
-	format: string;
-	examples: string[];
-	clientPermissions: PermissionString[];
-	global: boolean = false;
-	enabled: boolean = true;
-	authority: Authority;
+	public group: GroupString;
+	public format: string;
+	public examples: string[];
+	public clientPermissions: PermissionString[];
+	public global: boolean = false;
+	public enabled: boolean = true;
+	public authority: Authority;
 
-	setGlobal(global: boolean): this {
+	public setGlobal(global: boolean): this {
 		this.global = global;
 		return this;
 	}
 
-	setGroup(group: GroupString): this {
+	public setGroup(group: GroupString): this {
 		this.group = group;
 		return this;
 	}
 
-	setFormat(format: string): this {
+	public setFormat(format: string): this {
 		this.format = format;
 		return this;
 	}
 
-	setExamples(examples: string[]): this {
+	public setExamples(examples: string[]): this {
 		this.examples = examples;
 		return this;
 	}
 
-	setClientPermissions(clientPermissions: PermissionString[]): this {
+	public setClientPermissions(clientPermissions: PermissionString[]): this {
 		this.clientPermissions = clientPermissions;
 		return this;
 	}
 
-	setAuthority(level: Authority): this {
+	public setAuthority(level: Authority): this {
 		this.authority = level;
 		return this;
 	}
 
-	setEnabled(enabled: boolean): this {
+	public setEnabled(enabled: boolean): this {
 		this.enabled = enabled;
 		return this;
 	}
 
-	addEconomicaSubcommandGroup(
+	public addEconomicaSubcommandGroup(
 		input: (subcommandGroup: EconomicaSlashCommandSubcommandGroupBuilder) => EconomicaSlashCommandSubcommandGroupBuilder
 	): EconomicaSlashCommandSubcommandsOnlyBuilder {
 		const { options } = this;
@@ -62,7 +62,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	addEconomicaSubcommand(
+	public addEconomicaSubcommand(
 		input: (subcommandGroup: EconomicaSlashCommandSubcommandBuilder) => EconomicaSlashCommandSubcommandBuilder
 	): EconomicaSlashCommandSubcommandsOnlyBuilder {
 		const { options } = this;
@@ -121,32 +121,25 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	}
 
 	public toJSON() {
-		return {
-			...super.toJSON(),
-			global: this.global,
-			group: this.group,
-			format: this.format,
-			clientPermissions: this.clientPermissions,
-			authority: this.authority,
-		};
+		return super.toJSON()
 	}
 }
 
 export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSubcommandGroupBuilder {
-	clientPermissions: PermissionString[];
-	authority: Authority;
+	public clientPermissions: PermissionString[];
+	public authority: Authority;
 
-	setClientPermissions(clientPermissions: PermissionString[]): this {
+	public setClientPermissions(clientPermissions: PermissionString[]): this {
 		this.clientPermissions = clientPermissions;
 		return this;
 	}
 
-	setAuthority(authority: Authority): this {
+	public setAuthority(authority: Authority): this {
 		this.authority = authority;
 		return this;
 	}
 
-	addEconomicaSubcommand(
+	public addEconomicaSubcommand(
 		input: (subcommandGroup: EconomicaSlashCommandSubcommandBuilder) => EconomicaSlashCommandSubcommandBuilder
 	): this {
 		const { options } = this;
@@ -155,7 +148,7 @@ export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSub
 		return this;
 	}
 
-	toJSON() {
+	public toJSON() {
 		return {
 			...super.toJSON(),
 			clientPermissions: this.clientPermissions,
@@ -167,34 +160,36 @@ export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSub
 export interface EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSubcommandGroupBuilder {}
 
 export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcommandBuilder {
-	format: string;
-	examples: string[];
-	clientPermissions: PermissionString[];
-	authority: Authority;
+	public format: string;
+	public examples: string[];
+	public clientPermissions: PermissionString[];
+	public authority: Authority;
 
-	setFormat(format: string): this {
+	public setFormat(format: string): this {
 		this.format = format;
 		return this;
 	}
 
-	setExamples(examples: string[]): this {
+	public setExamples(examples: string[]): this {
 		this.examples = examples;
 		return this;
 	}
 
-	setClientPermissions(clientPermissions: PermissionString[]): this {
+	public setClientPermissions(clientPermissions: PermissionString[]): this {
 		this.clientPermissions = clientPermissions;
 		return this;
 	}
 
-	setAuthority(authority: Authority): this {
+	public setAuthority(authority: Authority): this {
 		this.authority = authority;
 		return this;
 	}
 
-	toJSON() {
+	public toJSON() {
 		return {
 			...super.toJSON(),
+			format: this.format, 
+			examples: this.examples,
 			clientPermissions: this.clientPermissions,
 			authority: this.authority,
 		};

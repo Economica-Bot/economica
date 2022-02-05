@@ -6,7 +6,7 @@ import { MemberModel, ShopModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('shop')
 		.setDescription("Interact with the server's shop.")
 		.setFormat('<view | clear | disable | delete> [...options]')
@@ -75,7 +75,7 @@ export default class implements EconomicaCommand {
 				.addEconomicaSubcommand((subcommand) => subcommand.setName('all').setDescription('Delete all shop items.'))
 		);
 
-	execute = async (ctx: Context): Promise<Message | void> => {
+	public execute = async (ctx: Context): Promise<Message | void> => {
 		const { currency } = ctx.guildDocument;
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const subcommandGroup = ctx.interaction.options.getSubcommandGroup(false);

@@ -1,17 +1,12 @@
-import { ColorResolvable, CommandInteraction, Message, MessageEmbed } from 'discord.js';
+import { CommandInteraction, GuildMember, Message, MessageEmbed } from 'discord.js';
 import { Document } from 'mongoose';
 
-import { EconomicaClient, EconomicaSlashCommandBuilder } from '.';
+import { EconomicaClient, EconomicaCommand, EconomicaSlashCommandBuilder } from '.';
+import { EmbedColors } from '../config';
+import { GuildModel, MemberModel } from '../models';
 import { Guild } from '../models/guilds';
 import { Member } from '../models/members';
 import { Author, ReplyString } from '../typings';
-
-const EmbedColors: Record<ReplyString, ColorResolvable> = {
-	success: 'GREEN',
-	error: 'RED',
-	info: 'BLURPLE',
-	warn: 'YELLOW',
-};
 
 export class Context {
 	public client: EconomicaClient;
@@ -19,19 +14,31 @@ export class Context {
 	public data: EconomicaSlashCommandBuilder;
 	public guildDocument: Guild & Document<Guild>;
 	public memberDocument: Member & Document<Member>;
+	public member: GuildMember;
 
-	public constructor(
-		client: EconomicaClient,
-		interaction: CommandInteraction,
-		data: EconomicaSlashCommandBuilder,
-		guildDocument: Guild & Document<Guild>,
-		memberDocument: Member & Document<Member>
-	) {
+	public constructor(client: EconomicaClient, interaction: CommandInteraction) {
 		this.client = client;
 		this.interaction = interaction;
-		this.data = data;
-		this.guildDocument = guildDocument;
-		this.memberDocument = memberDocument;
+	}
+
+	public async init(): Promise<this> {
+		const command = this.client.commands.get(this.interaction.commandName) as EconomicaCommand;
+		if (!command) {
+			this.interaction.reply({
+				content: 'There was an error while executing this command. Attempting restart...',
+				ephemeral: true,
+			});
+			throw new Error(`There was an error while executing this command`);
+		}
+
+		this.data = command.data as EconomicaSlashCommandBuilder;
+		this.guildDocument = await GuildModel.findOne({ guildId: this.interaction.guildId });
+		this.memberDocument = await MemberModel.findOne({
+			guildId: this.interaction.guildId,
+			userId: this.interaction.user.id,
+		});
+		this.member = this.client.guilds.cache.get(this.interaction.guildId).members.cache.get(this.client.user.id);
+		return this;
 	}
 
 	public embedify(type: ReplyString, author: Author, description?: string | null): MessageEmbed;

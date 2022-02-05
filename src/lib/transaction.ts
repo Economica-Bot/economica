@@ -53,12 +53,17 @@ export async function transaction(
 	});
 
 	const guildSetting = await GuildModel.findOne({ guildId });
-	const { transactionLogChannel } = guildSetting;
+	const { transactionLogChannelId } = guildSetting;
 
-	if (transactionLogChannel) {
+	if (transactionLogChannelId) {
 		const cSymbol = guildSetting.currency;
-		const channel = client.channels.cache.get(transactionLogChannel) as TextChannel;
+		const channel = client.channels.cache.get(transactionLogChannelId) as TextChannel;
 		const guild = channel.guild;
+		const member = guild.members.cache.get(client.user.id);
+		if (!channel.permissionsFor(member).has('SEND_MESSAGES') || !channel.permissionsFor(member).has('EMBED_LINKS')) {
+			return;
+		}
+
 		const description = `Transaction for <@!${userId}>\nPerformed by:<@!${agentId}>\nType: \`${type}\``;
 		const embed = new MessageEmbed()
 			.setColor('GOLD')
