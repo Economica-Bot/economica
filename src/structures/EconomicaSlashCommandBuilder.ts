@@ -7,7 +7,8 @@ import {
 } from '@discordjs/builders';
 import { PermissionString } from 'discord.js';
 
-import { Authority, Module } from '../typings';
+import { Module } from '../config';
+import { Authority } from '../typings';
 
 export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	public group: Module;

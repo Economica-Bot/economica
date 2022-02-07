@@ -5,7 +5,7 @@ import { ConnectOptions } from 'mongoose';
 import path from 'path';
 import { ISettingsParam } from 'tslog';
 
-import { Command, Module, ReplyString } from './typings';
+import { Command, ReplyString } from './typings';
 
 // Required
 export const BOT_TOKEN = process.env.ECON_ALPHA_TOKEN;
@@ -117,44 +117,19 @@ export const authors = {
 	},
 };
 
-export const defaultIncomes: { work: Command; beg: Command; crime: Command; rob: Command } = {
-	work: {
-		min: 100,
-		max: 500,
-		cooldown: 1000 * 30,
-	},
-	beg: {
-		min: 25,
-		max: 125,
-		chance: 40,
-		cooldown: 1000 * 30,
-	},
-	crime: {
-		min: 300,
-		max: 1500,
-		chance: 60,
-		minfine: 300,
-		maxfine: 1500,
-		cooldown: 1000 * 60,
-	},
-	rob: {
-		chance: 20,
-		minfine: 500,
-		maxfine: 2000,
-		cooldown: 1000 * 60,
-	},
-};
+export type defaultIncomes = { work: Command; beg: Command; crime: Command; rob: Command };
 
-export const defaultModules: Array<Module> = [
-	'ADMIN',
-	'APPLICATION',
-	'ECONOMY',
-	'INCOME',
-	'MODERATION',
-	'SHOP',
-	'STATISTICS',
-	'UTILITY',
-];
+export type defaultModule =
+	| 'APPLICATION'
+	| 'ADMIN'
+	| 'ECONOMY'
+	| 'INCOME'
+	| 'MODERATION'
+	| 'SHOP'
+	| 'STATISTICS'
+	| 'UTILITY';
+export type specialModule = 'TESTMODULE';
+export type Module = defaultModule | specialModule;
 
 i18n.configure({
 	defaultLocale: 'en',

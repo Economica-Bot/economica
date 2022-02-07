@@ -1,17 +1,5 @@
 import { EmbedAuthorData } from 'discord.js';
 
-export type Module = DefaultModule & SpecialModule;
-export type DefaultModule =
-	| 'APPLICATION'
-	| 'ADMIN'
-	| 'ECONOMY'
-	| 'INCOME'
-	| 'MODERATION'
-	| 'SHOP'
-	| 'STATISTICS'
-	| 'UTILITY';
-export type SpecialModule = {};
-export type Documents = 'guilds' | 'infractions' | 'loans' | 'markets' | 'members' | 'shops' | 'transactions';
 export type ReplyString = 'success' | 'info' | 'warn' | 'error';
 export type InfractionString = 'BAN' | 'KICK' | 'TIMEOUT' | 'UNBAN' | 'UNTIMEOUT';
 export type BalanceString = 'wallet' | 'treasury' | 'total';
