@@ -130,6 +130,7 @@ export {
 	EconomyInfo,
 	IncomeCommandProperties,
 	RoleAuthority,
-	Command,
-	ModuleOwnership,
+	IncomeCommand,
+	UserModule,
+	GuildModule,
 } from './interfaces';

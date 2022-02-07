@@ -5,7 +5,7 @@ import { ConnectOptions } from 'mongoose';
 import path from 'path';
 import { ISettingsParam } from 'tslog';
 
-import { Command, ReplyString } from './typings';
+import { IncomeCommand, ReplyString } from './typings';
 
 // Required
 export const BOT_TOKEN = process.env.ECON_ALPHA_TOKEN;
@@ -117,7 +117,7 @@ export const authors = {
 	},
 };
 
-export type defaultIncomes = { work: Command; beg: Command; crime: Command; rob: Command };
+export type defaultIncomes = { work: IncomeCommand; beg: IncomeCommand; crime: IncomeCommand; rob: IncomeCommand };
 
 export type defaultModule =
 	| 'APPLICATION'

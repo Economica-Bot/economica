@@ -2,7 +2,6 @@ import * as mongoose from 'mongoose';
 
 import { CURRENCY_SYMBOL, defaultIncomes, Module } from '../config';
 import { RoleAuthority } from '../typings';
-import { IncomeCommand } from '../typings/interfaces';
 
 export const defaultModulesArr: Module[] = [
 	'ADMIN',
