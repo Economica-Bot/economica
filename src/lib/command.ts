@@ -95,13 +95,13 @@ async function cooldownCheck(ctx: Context): Promise<boolean> {
 		return true;
 	}
 
-	const income = ctx.guildDocument?.incomes;
-	if (!(ctx.interaction.commandName in income)) {
+	const incomes = ctx.guildDocument?.incomes;
+	if (!incomes || !(ctx.interaction.commandName in incomes)) {
 		return true;
 	}
 
 	let cooldown;
-	for (const obj of Object.entries(income)) {
+	for (const obj of Object.entries(incomes)) {
 		if (obj[0] === ctx.interaction.commandName) {
 			cooldown = obj[1].cooldown;
 		}

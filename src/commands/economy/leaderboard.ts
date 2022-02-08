@@ -1,5 +1,5 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
-import { Message, MessageEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 
 import { paginate } from '../../lib';
 import { MemberModel } from '../../models';
