@@ -5,7 +5,7 @@ import { ConnectOptions } from 'mongoose';
 import path from 'path';
 import { ISettingsParam } from 'tslog';
 
-import { IncomeCommand, ReplyString } from './typings';
+import { IncomeCommand, IntervalCommand, ReplyString } from './typings';
 
 // Required
 export const BOT_TOKEN = process.env.ECON_ALPHA_TOKEN;
@@ -117,10 +117,25 @@ export const authors = {
 	},
 };
 
-export type defaultIncomes = { work: IncomeCommand; beg: IncomeCommand; crime: IncomeCommand; rob: IncomeCommand };
+export type defaultIncomes = { 
+	work: IncomeCommand; 
+	beg: IncomeCommand; 
+	crime: IncomeCommand; 
+	rob: IncomeCommand 
+};
 
+export type defaultIntervals = {
+	minutely: IntervalCommand;
+	hourly: IntervalCommand;
+	daily: IntervalCommand;
+	weekly: IntervalCommand;
+	fortnightly: IntervalCommand;
+	monthly: IntervalCommand;
+};
+
+// Check guild model when updating
 export type defaultModule = 'ADMIN' | 'ECONOMY' | 'INCOME' | 'MODERATION' | 'SHOP' | 'UTILITY';
-export type specialModule = 'INSIGHTS';
+export type specialModule = 'INSIGHTS' | 'INTERVAL';
 export type devModule = 'APPLICATION';
 export type Module = defaultModule | specialModule | devModule;
 

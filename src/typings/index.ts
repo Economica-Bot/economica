@@ -122,7 +122,13 @@ export type TransactionString =
 	| 'CRIME_FINE'
 	| 'ROB_SUCCESS'
 	| 'ROB_VICTIM'
-	| 'ROB_FINE';
+	| 'ROB_FINE'
+	| 'INTERVAL_MINUTE'
+	| 'INTERVAL_HOUR'
+	| 'INTERVAL_DAY'
+	| 'INTERVAL_WEEK'
+	| 'INTERVAL_FORTNIGHT'
+	| 'INTERVAL_MONTH';
 
 export {
 	CommandData,
@@ -131,6 +137,7 @@ export {
 	IncomeCommandProperties,
 	RoleAuthority,
 	IncomeCommand,
+	IntervalCommand,
 	UserModule,
 	GuildModule,
 } from './interfaces';

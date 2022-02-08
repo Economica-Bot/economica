@@ -7,3 +7,4 @@ export { infraction } from './infraction';
 export { cut } from './cut';
 export { paginate } from './paginate';
 export { validateAmount, validateTarget } from './validate';
+export { interval } from './interval';

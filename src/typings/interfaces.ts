@@ -45,6 +45,11 @@ export interface IncomeCommand {
 	cooldown: number;
 }
 
+export interface IntervalCommand {
+	amount: number;
+	cooldown: number;
+}
+
 export interface UserModule {
 	guildId: Snowflake;
 	module: Module;

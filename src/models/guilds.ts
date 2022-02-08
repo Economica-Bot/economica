@@ -1,15 +1,17 @@
 import * as mongoose from 'mongoose';
 
-import { CURRENCY_SYMBOL, defaultIncomes, defaultModule, Module } from '../config';
+import { CURRENCY_SYMBOL, defaultIncomes, defaultIntervals, defaultModule, Module, specialModule } from '../config';
 import { RoleAuthority } from '../typings';
 
 export const defaultModulesArr: defaultModule[] = ['ADMIN', 'ECONOMY', 'INCOME', 'MODERATION', 'SHOP', 'UTILITY'];
+export const specialModulesArr: specialModule[] = ['INSIGHTS', 'INTERVAL'];
 export const modulesArr: Module[] = [
 	'ADMIN',
 	'APPLICATION',
 	'ECONOMY',
 	'INCOME',
 	'INSIGHTS',
+	'INTERVAL',
 	'MODERATION',
 	'SHOP',
 	'UTILITY',
@@ -43,6 +45,33 @@ const defaultIncomesObj: defaultIncomes = {
 	},
 };
 
+const defaultIntervalsObj: defaultIntervals = {
+	minutely: {
+		amount: 50,
+		cooldown: 1000 * 60,
+	},
+	hourly: {
+		amount: 500,
+		cooldown: 1000 * 60 * 60,
+	},
+	daily: {
+		amount: 5_000,
+		cooldown: 1000 * 60 * 60 * 24,
+	},
+	weekly: {
+		amount: 50_000,
+		cooldown: 1000 * 60 * 60 * 24 * 7,
+	},
+	fortnightly: {
+		amount: 125_000,
+		cooldown: 1000 * 60 * 60 * 24 * 7 * 2,
+	},
+	monthly: {
+		amount: 300_000,
+		cooldown: 1000 * 60 * 60 * 24 * 7 * 4,
+	},
+};
+
 export interface Guild {
 	guildId: string;
 	currency: string;
@@ -51,6 +80,7 @@ export interface Guild {
 	botLogChannelId: string;
 	auth: RoleAuthority[];
 	incomes: typeof defaultIncomesObj;
+	intervals: typeof defaultIntervalsObj;
 	modules: Module[];
 }
 
@@ -63,6 +93,7 @@ const Schema = new mongoose.Schema<Guild>(
 		botLogChannelId: { type: mongoose.Schema.Types.String, default: null },
 		auth: { type: mongoose.Schema.Types.Array, default: [] },
 		incomes: { type: Object, default: defaultIncomesObj },
+		intervals: { type: Object, default: defaultIntervalsObj },
 		modules: { type: mongoose.Schema.Types.Array, default: defaultModulesArr },
 	},
 	{ strict: true, versionKey: false }
