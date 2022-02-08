@@ -11,12 +11,12 @@ export interface Market {
 
 const Schema = new mongoose.Schema<Market>(
 	{
-		userId: { type: String, required: true },
-		guildId: { type: String, required: true },
-		item: { type: String, required: true },
-		price: { type: String, required: true },
-		description: { type: String, required: true },
-		active: { type: Boolean, required: true },
+		userId: { type: mongoose.Schema.Types.String, required: true },
+		guildId: { type: mongoose.Schema.Types.String, required: true },
+		item: { type: mongoose.Schema.Types.String, required: true },
+		price: { type: mongoose.Schema.Types.String, required: true },
+		description: { type: mongoose.Schema.Types.String, required: true },
+		active: { type: mongoose.Schema.Types.Boolean, required: true },
 	},
 	{
 		timestamps: true,

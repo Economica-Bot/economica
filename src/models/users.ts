@@ -10,9 +10,9 @@ export interface User {
 
 const Schema = new mongoose.Schema<User>(
 	{
-		userId: { type: String, required: true },
-		keys: { type: Number, default: 0 },
-		modules: { type: Array<UserModule>(), default: [] },
+		userId: { type: mongoose.Schema.Types.String, required: true },
+		keys: { type: mongoose.Schema.Types.Number, default: 0 },
+		modules: { type: mongoose.Schema.Types.Array, default: [] },
 	},
 	{ strict: true, versionKey: false }
 );

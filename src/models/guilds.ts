@@ -66,14 +66,14 @@ export interface Guild {
 
 const Schema = new mongoose.Schema<Guild>(
 	{
-		guildId: { type: String, required: true },
-		currency: { type: String, default: CURRENCY_SYMBOL },
-		transactionLogChannelId: { type: String, default: null },
-		infractionLogChannelId: { type: String, default: null },
-		botLogChannelId: { type: String, default: null },
-		auth: { type: Array<RoleAuthority>(), default: [] },
+		guildId: { type: mongoose.Schema.Types.String, required: true },
+		currency: { type: mongoose.Schema.Types.String, default: CURRENCY_SYMBOL },
+		transactionLogChannelId: { type: mongoose.Schema.Types.String, default: null },
+		infractionLogChannelId: { type: mongoose.Schema.Types.String, default: null },
+		botLogChannelId: { type: mongoose.Schema.Types.String, default: null },
+		auth: { type: mongoose.Schema.Types.Array, default: [] },
 		incomes: { type: Object, default: defaultIncomesObj },
-		modules: { type: Array<Module>(), default: defaultModulesArr },
+		modules: { type: mongoose.Schema.Types.Array, default: defaultModulesArr },
 	},
 	{ strict: true, versionKey: false }
 );

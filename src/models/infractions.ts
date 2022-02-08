@@ -16,14 +16,14 @@ export interface Infraction {
 
 const Schema = new mongoose.Schema<Infraction>(
 	{
-		guildId: { type: String, required: true },
-		userId: { type: String, required: true },
-		agentId: { type: String, required: true },
-		type: { type: String, required: true },
-		reason: { type: String, required: true },
-		permanent: { type: Boolean, required: false },
-		active: { type: Boolean, required: false },
-		duration: { type: Number, required: false },
+		guildId: { type: mongoose.Schema.Types.String, required: true },
+		userId: { type: mongoose.Schema.Types.String, required: true },
+		agentId: { type: mongoose.Schema.Types.String, required: true },
+		type: { type: mongoose.Schema.Types.String, required: true },
+		reason: { type: mongoose.Schema.Types.String, required: true },
+		permanent: { type: mongoose.Schema.Types.Boolean, required: false },
+		active: { type: mongoose.Schema.Types.Boolean, required: false },
+		duration: { type: mongoose.Schema.Types.Number, required: false },
 	},
 	{
 		timestamps: true,
