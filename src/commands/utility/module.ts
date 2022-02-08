@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 
 import { UserModel } from '../../models';
-import { defaultModulesArr, modulesArr } from '../../models/guilds';
+import { modulesArr, specialModulesArr } from '../../models/guilds';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 import { UserModule } from '../../typings/interfaces';
 
@@ -52,12 +52,11 @@ export default class implements EconomicaCommand {
 			return await ctx.interaction.reply({ embeds: [embed] });
 		}
 
-		const formattedModule = modulesArr.find((v) => v.toLowerCase() === module.toLowerCase());
+		const formattedModule = specialModulesArr.find((v) => v.toLowerCase() === module.toLowerCase());
 		if (!formattedModule) {
 			return await ctx.embedify('error', 'user', `Invalid module: \`${module}\``, true);
-		} else if (defaultModulesArr.some((v) => v === formattedModule)) {
-			return await ctx.embedify('warn', 'user', 'That is a default module.', true);
 		}
+
 		if (subcommand === 'add') {
 			const { keys } = userDocument;
 			if (keys < 1) {
