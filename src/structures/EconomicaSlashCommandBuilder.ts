@@ -11,7 +11,7 @@ import { Module } from '../config';
 import { Authority } from '../typings';
 
 export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
-	public group: Module;
+	public module: Module;
 	public format: string;
 	public examples: string[];
 	public clientPermissions: PermissionString[];
@@ -24,8 +24,8 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	public setModule(group: Module): this {
-		this.group = group;
+	public setModule(module: Module): this {
+		this.module = module;
 		return this;
 	}
 

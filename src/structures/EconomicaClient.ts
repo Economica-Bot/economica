@@ -203,8 +203,9 @@ export class EconomicaClient extends Client {
 				).default() as EconomicaCommand;
 				const data = command.data as EconomicaSlashCommandBuilder;
 
-				if (!data.group) {
-					throw new Error(`Command ${data.name} missing group!`);
+				// Command validation
+				if (!data.module) {
+					throw new Error(`Command ${data.name} missing module!`);
 				}
 
 				this.log.debug(`Registering command ${data.name}`);

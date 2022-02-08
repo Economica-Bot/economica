@@ -1,28 +1,18 @@
 import * as mongoose from 'mongoose';
 
-import { CURRENCY_SYMBOL, defaultIncomes, Module } from '../config';
+import { CURRENCY_SYMBOL, defaultIncomes, defaultModule, Module } from '../config';
 import { RoleAuthority } from '../typings';
 
-export const defaultModulesArr: Module[] = [
-	'ADMIN',
-	'APPLICATION',
-	'ECONOMY',
-	'INCOME',
-	'MODERATION',
-	'SHOP',
-	'STATISTICS',
-	'UTILITY',
-];
-
+export const defaultModulesArr: defaultModule[] = ['ADMIN', 'ECONOMY', 'INCOME', 'MODERATION', 'SHOP', 'UTILITY'];
 export const modulesArr: Module[] = [
 	'ADMIN',
 	'APPLICATION',
 	'ECONOMY',
 	'INCOME',
+	'INSIGHTS',
 	'MODERATION',
 	'SHOP',
 	'UTILITY',
-	'TESTMODULE',
 ];
 
 const defaultIncomesObj: defaultIncomes = {

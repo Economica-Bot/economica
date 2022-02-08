@@ -119,17 +119,10 @@ export const authors = {
 
 export type defaultIncomes = { work: IncomeCommand; beg: IncomeCommand; crime: IncomeCommand; rob: IncomeCommand };
 
-export type defaultModule =
-	| 'APPLICATION'
-	| 'ADMIN'
-	| 'ECONOMY'
-	| 'INCOME'
-	| 'MODERATION'
-	| 'SHOP'
-	| 'STATISTICS'
-	| 'UTILITY';
-export type specialModule = 'TESTMODULE';
-export type Module = defaultModule | specialModule;
+export type defaultModule = 'ADMIN' | 'ECONOMY' | 'INCOME' | 'MODERATION' | 'SHOP' | 'UTILITY';
+export type specialModule = 'INSIGHTS';
+export type devModule = 'APPLICATION';
+export type Module = defaultModule | specialModule | devModule;
 
 i18n.configure({
 	defaultLocale: 'en',
