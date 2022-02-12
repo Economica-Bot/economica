@@ -7,7 +7,7 @@ import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../s
 export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('sell')
-		.setDescription('Sell an item.')
+		.setDescription('Sell an item back to the shop for HALF PRICE.')
 		.setModule('SHOP')
 		.addStringOption((option) => option.setName('item').setDescription('Specify an item.').setRequired(true));
 
@@ -30,14 +30,10 @@ export default class implements EconomicaCommand {
 			ctx.interaction.user.id,
 			ctx.client.user.id,
 			'SELL',
-			item.price,
+			item.price/2,
 			0,
-			item.price
+			item.price/2
 		);
-
-		item.rolesGiven.forEach((roleId) => {
-			(ctx.interaction.member.roles as GuildMemberRoleManager).add(roleId, `Purchased ${item.name}`);
-		});
 
 		if (invItem.amount === 1) {
 			ctx.memberDocument.updateOne({ $pull: { inventory: { name: item.name } } });
@@ -54,7 +50,7 @@ export default class implements EconomicaCommand {
 		return await ctx.embedify(
 			'success',
 			'user',
-			`Sold \`${item.name}\` for ${currency}${item.price.toLocaleString()}`,
+			`Sold \`${item.name}\` for ${currency}${(item.price/2).toLocaleString()}`,
 			false
 		);
 	};
