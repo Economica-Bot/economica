@@ -53,10 +53,6 @@ export default class implements EconomicaCommand {
 			return await ctx.embedify('warn', 'user', `\`${query}\` is not stackable.`, true);
 		}
 
-		item.rolesRemoved.forEach(async (roleId) => {
-			(ctx.interaction.member.roles as GuildMemberRoleManager).remove(roleId, `Purchased ${item.name}`);
-		});
-
 		transaction(
 			ctx.client,
 			ctx.interaction.guildId,
@@ -90,7 +86,7 @@ export default class implements EconomicaCommand {
 				{ 'inventory.amount': 1 }, 
 				{ $inc: { 'inventory.$.amount': 1 } 
 			});
-		} else {
+		} else if (item.usability != 'Instant') { // If the item wasn't already used onBuy
 			const itemobj: InventoryItem = {
 				refId: item._id,
 				amount: 1,
@@ -106,7 +102,7 @@ export default class implements EconomicaCommand {
 		return await ctx.embedify(
 			'success',
 			'user',
-			`Purchased \`${item.name}\` for ${currency}${item.price.toLocaleString()}`,
+			`Purchased \`${item.name}\` for ${currency}${item.price?.toLocaleString() || 0}`,
 			false
 		);
 	};
