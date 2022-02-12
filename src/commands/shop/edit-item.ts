@@ -11,7 +11,7 @@ export default class extends EconomicaCommand {
 		.setName('edit-item')
 		.setDescription('Edit properties of an item. Some properties are unchangeable.')
 		.setAuthority('MANAGER')
-		.setGroup('SHOP')
+		.setModule('SHOP')
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
 				.setName('classic')
@@ -210,6 +210,14 @@ export default class extends EconomicaCommand {
 		const subcommand = interaction.options.getSubcommand();
 		const edit_mode = interaction.options.getString('edit-mode');
 
+		// There's no item, dumbass
+		if (!
+			await ShopModel.findOne({
+				guildId: interaction.guildId,
+				name: interaction.options.getString('name')
+			})
+		) return await ctx.embedify('error', 'user', `No item with name \`${interaction.options.getString('name')}\` found.`, true)
+
 		if (edit_mode == 'replace') {
 			const missingRequiredArgs: string[] = []
 
@@ -240,15 +248,18 @@ export default class extends EconomicaCommand {
 		})
 		if (sameNameItem)
 			return ctx.embedify('error', 'user', `An item with name \`${sameNameItem.name}\` already exists. You can use the \`delete-item\` command to delete it.`, true);
-		else editedItem['name'] = interaction.options.getString('new_name')
+		else if (interaction.options.getString('new_name'))
+			editedItem['name'] = interaction.options.getString('new_name')
 
 		if (interaction.options.getNumber('price') && interaction.options.getNumber('price') < 0)
 			return ctx.embedify('error', 'user', 'Item price cannot be less than 0.', true);
-		else editedItem['price'] = interaction.options.getNumber('price')
+		else if (interaction.options.getNumber('price'))
+			editedItem['price'] = interaction.options.getNumber('price')
 
 		if (interaction.options.getString('description')?.length > 250)
 			return ctx.embedify('error', 'user', 'Item description cannot be more than 250 characters.', true);
-		else editedItem['descriptions'] = interaction.options.getString('description')
+		else if (interaction.options.getString('description'))
+			editedItem['descriptions'] = interaction.options.getString('description')
 
 		if (interaction.options.getNumber('required_treasury') < 0)
 			return ctx.embedify('error', 'user', 'Required treasury balance cannot be less than 0.', true);
@@ -339,20 +350,20 @@ export default class extends EconomicaCommand {
 				return ctx.embedify('error', 'user', `\`generator_period\` can't be less than 10 seconds!`, true)
 		}
 
-		let item: Shop & Document<any, any, Shop>;
-		console.log(edit_mode)
-
 		if (edit_mode == 'layered') {
-			item = await ShopModel.findOneAndUpdate({
+			Object.keys(editedItem).forEach(key => {
+				if (!editedItem[key] || !editedItem[key]?.length)
+					delete editedItem[key];
+			})
+
+			await ShopModel.findOneAndUpdate({
 				guildId: interaction.guildId,
 				name: interaction.options.getString('name')
 			}, editedItem)
-
-			console.log('1' + item)
 		}
 		else if (edit_mode == 'replace') {
 			if (subcommand == 'classic') {
-				item = await ShopModel.findOneAndUpdate({
+				await ShopModel.findOneAndUpdate({
 					guildId: interaction.guildId,
 					name: interaction.options.getString('name')
 				}, {
@@ -370,11 +381,9 @@ export default class extends EconomicaCommand {
 					requiredRoles,
 					requiredItems
 				})
-
-				console.log('2' + item)
 			}
 				else if (subcommand == 'generator') {
-					item = await ShopModel.findOneAndUpdate({
+					await ShopModel.findOneAndUpdate({
 						guildId: interaction.guildId,
 						name: interaction.options.getString('name')
 					}, {
@@ -394,12 +403,13 @@ export default class extends EconomicaCommand {
 						generatorPeriod,
 						generator_amount: interaction.options.getNumber('generator_amount')
 					})
-
-					console.log('2' + item)
 				}
 		}
 
-		console.log(item)
+		const item = await ShopModel.findOne({
+			guildId: interaction.guildId,
+			name: interaction.options.getString('new_name')
+		})
 
 		return await ctx.interaction.reply({
 			embeds: [(await itemInfo(ctx, item)).setFooter({
