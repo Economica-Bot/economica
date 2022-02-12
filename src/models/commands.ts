@@ -9,9 +9,9 @@ export interface Command {
 
 const Schema = new mongoose.Schema<Command>(
 	{
-		guildId: { type: String, required: true },
-		userId: { type: String, required: true },
-		command: { type: String, required: true },
+		guildId: { type: mongoose.Schema.Types.String, required: true },
+		userId: { type: mongoose.Schema.Types.String, required: true },
+		command: { type: mongoose.Schema.Types.String, required: true },
 	},
 	{
 		timestamps: true,

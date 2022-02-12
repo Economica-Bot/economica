@@ -1,15 +1,5 @@
 import { EmbedAuthorData } from 'discord.js';
 
-export type GroupString =
-	| 'APPLICATION'
-	| 'ADMIN'
-	| 'ECONOMY'
-	| 'INCOME'
-	| 'MODERATION'
-	| 'SHOP'
-	| 'STATISTICS'
-	| 'UTILITY';
-export type Documents = 'guilds' | 'infractions' | 'loans' | 'markets' | 'members' | 'shops' | 'transactions';
 export type ReplyString = 'success' | 'info' | 'warn' | 'error';
 export type InfractionString = 'BAN' | 'KICK' | 'TIMEOUT' | 'UNBAN' | 'UNTIMEOUT';
 export type BalanceString = 'wallet' | 'treasury' | 'total';
@@ -132,6 +122,22 @@ export type TransactionString =
 	| 'CRIME_FINE'
 	| 'ROB_SUCCESS'
 	| 'ROB_VICTIM'
-	| 'ROB_FINE';
+	| 'ROB_FINE'
+	| 'INTERVAL_MINUTE'
+	| 'INTERVAL_HOUR'
+	| 'INTERVAL_DAY'
+	| 'INTERVAL_WEEK'
+	| 'INTERVAL_FORTNIGHT'
+	| 'INTERVAL_MONTH';
 
-export { CommandData, InventoryItem, EconomyInfo, IncomeCommandProperties, RoleAuthority, command } from './interfaces';
+export {
+	CommandData,
+	InventoryItem,
+	EconomyInfo,
+	IncomeCommandProperties,
+	RoleAuthority,
+	IncomeCommand,
+	IntervalCommand,
+	UserModule,
+	GuildModule,
+} from './interfaces';

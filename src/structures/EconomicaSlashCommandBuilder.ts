@@ -7,10 +7,11 @@ import {
 } from '@discordjs/builders';
 import { PermissionString } from 'discord.js';
 
-import { Authority, GroupString } from '../typings';
+import { Module } from '../config';
+import { Authority } from '../typings';
 
 export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
-	public group: GroupString;
+	public module: Module;
 	public format: string;
 	public examples: string[];
 	public clientPermissions: PermissionString[];
@@ -23,8 +24,8 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	public setGroup(group: GroupString): this {
-		this.group = group;
+	public setModule(module: Module): this {
+		this.module = module;
 		return this;
 	}
 
@@ -121,7 +122,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	}
 
 	public toJSON() {
-		return super.toJSON()
+		return super.toJSON();
 	}
 }
 
@@ -188,7 +189,7 @@ export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcomma
 	public toJSON() {
 		return {
 			...super.toJSON(),
-			format: this.format, 
+			format: this.format,
 			examples: this.examples,
 			clientPermissions: this.clientPermissions,
 			authority: this.authority,

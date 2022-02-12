@@ -9,5 +9,9 @@
     "strictNullChecks": false,
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    // "forceConsistentCasingInFileNames": true,
+    // "noImplicitReturns": true,
+    // "strict": true,
+    // "noUnusedLocals": true
   }
 }

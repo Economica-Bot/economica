@@ -9,3 +9,4 @@ export { paginate } from './paginate';
 export { validateAmount, validateTarget } from './validate';
 export { itemInfo } from './iteminfo';
 export { itemRegExp } from './itemRegExp';
+export { interval } from './interval';

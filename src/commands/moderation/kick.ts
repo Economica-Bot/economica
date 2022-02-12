@@ -7,7 +7,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('kick')
 		.setDescription('Kick a member.')
-		.setGroup('MODERATION')
+		.setModule('MODERATION')
 		.setFormat('<target> [reason]')
 		.setExamples(['kick @JohnDoe', 'kick @Pepe Harrassment'])
 		.setClientPermissions(['KICK_MEMBERS'])

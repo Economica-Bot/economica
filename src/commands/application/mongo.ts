@@ -12,13 +12,12 @@ import {
 	TransactionModel,
 } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-import { Documents } from '../../typings';
 
 export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('mongo')
 		.setDescription('Manipulate database.')
-		.setGroup('APPLICATION')
+		.setModule('APPLICATION')
 		.setAuthority('DEVELOPER')
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
@@ -58,7 +57,7 @@ export default class implements EconomicaCommand {
 		const subcommand = ctx.interaction.options.getSubcommand();
 
 		if (subcommand === 'delete') {
-			const collection = ctx.interaction.options.getString('collection') as Documents;
+			const collection = ctx.interaction.options.getString('collection');
 			const _id = ctx.interaction.options.getString('_id', false);
 
 			let description;

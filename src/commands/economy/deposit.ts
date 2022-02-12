@@ -7,7 +7,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('deposit')
 		.setDescription('Deposit funds from your wallet to your treasury.')
-		.setGroup('ECONOMY')
+		.setModule('ECONOMY')
 		.setFormat('<amount | all>')
 		.setExamples(['deposit all', 'deposit 100'])
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true));

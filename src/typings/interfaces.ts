@@ -1,4 +1,7 @@
+import { Snowflake } from 'discord.js';
+
 import { Authority } from '.';
+import { Module } from '../config';
 
 export interface CommandData {
 	command: string;
@@ -33,11 +36,26 @@ export interface RoleAuthority {
 	authority: Authority;
 }
 
-export interface command {
+export interface IncomeCommand {
 	min?: number;
 	max?: number;
 	chance?: number;
 	minfine?: number;
 	maxfine?: number;
 	cooldown: number;
+}
+
+export interface IntervalCommand {
+	amount: number;
+	cooldown: number;
+}
+
+export interface UserModule {
+	guildId: Snowflake;
+	module: Module;
+}
+
+export interface GuildModule {
+	userId: Snowflake;
+	module: Module;
 }

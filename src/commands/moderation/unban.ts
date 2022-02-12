@@ -6,7 +6,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('unban')
 		.setDescription('Unban a member.')
-		.setGroup('MODERATION')
+		.setModule('MODERATION')
 		.setFormat('<member>')
 		.setExamples(['unban 796906750569611294'])
 		.setClientPermissions(['BAN_MEMBERS'])

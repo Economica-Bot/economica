@@ -11,9 +11,9 @@ export default class implements EconomicaCommand {
 		.setName('create-item')
 		.setDescription('Add a new item to the guild shop!')
 		.setAuthority('MANAGER')
-		.setGroup('SHOP')
 		.setFormat('<classic | generator> <name, price> [<generator_period, generator_amount>] [...optional params]')
 		.setExamples(['classic <name: Role I> <price: 150> [roles_given: @VIP]', 'classic <name: Role II> <price: 500> [roles_required: @VIP] [roles_given: @VIP+]', 'generator <name: Factory I> <price: 1000> <generator_amount: 50> <generator_period: 1h>', 'generator <name: Factory II> <price: 2000> <generator_amount: 100> <generator_period: 1h> [required_items: Factory I]'])
+		.setModule('SHOP')
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
 				.setName('classic')

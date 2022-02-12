@@ -7,13 +7,13 @@ import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../s
 export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('help')
-		.setDescription('List commands, or information about a command group, command, subcommand group, or subcommand.')
-		.setGroup('UTILITY')
+		.setDescription('List commands, or information about a command module, command, subcommand module, or subcommand.')
+		.setModule('UTILITY')
 		.setFormat('[command]')
 		.setExamples(['help', 'help ban'])
 		.setGlobal(true)
 		.addStringOption((option) =>
-			option.setName('query').setDescription('Specify a group, command, or subcommand.').setRequired(false)
+			option.setName('query').setDescription('Specify a module, command, or subcommand.').setRequired(false)
 		);
 
 	public execute = async (ctx: Context): Promise<Message | void> => {
@@ -21,23 +21,23 @@ export default class implements EconomicaCommand {
 
 		if (!query) {
 			const commands: EconomicaSlashCommandBuilder[] = [];
-			const groups: string[] = [];
+			const modules: string[] = [];
 
 			ctx.client.commands.forEach((command) => {
 				const data = command.data as EconomicaSlashCommandBuilder;
-				if (!groups.includes(data.group)) groups.push(data.group);
+				if (!modules.includes(data.module)) modules.push(data.module);
 				commands.push(data);
 			});
 
 			const embed = ctx.embedify('info', 'bot', 'Command List.');
 
-			for (const group of groups) {
+			for (const module of modules) {
 				const list: string[] = [];
 				for (const command of commands) {
-					if (command.group === group) list.push(command.name);
+					if (command.module === module) list.push(command.name);
 				}
 
-				embed.addField(group, `\`${list.join('`, `')}\``);
+				embed.addField(module, `\`${list.join('`, `')}\``);
 			}
 
 			return await ctx.interaction.reply({ embeds: [embed], ephemeral: true });
@@ -48,21 +48,21 @@ export default class implements EconomicaCommand {
 			return data.name.toLowerCase() === query.toLowerCase();
 		})?.data as EconomicaSlashCommandBuilder;
 
-		const group = (
+		const module = (
 			ctx.client.commands.find((cmd) => {
 				const data = cmd.data as EconomicaSlashCommandBuilder;
 				return (
-					data.group.toLocaleLowerCase() === query.toLowerCase() ||
+					data.module.toLocaleLowerCase() === query.toLowerCase() ||
 					data.name.toLowerCase() === command?.name?.toLocaleLowerCase()
 				);
 			})?.data as EconomicaSlashCommandBuilder
-		)?.group;
+		)?.module;
 
-		if (group && !command) {
-			const embed = ctx.embedify('info', { name: group, iconURL: ctx.client.user.displayAvatarURL() });
+		if (module && !command) {
+			const embed = ctx.embedify('info', { name: module, iconURL: ctx.client.user.displayAvatarURL() });
 			for (const command of ctx.client.commands) {
 				const data = command[1].data as EconomicaSlashCommandBuilder;
-				if (data.group === group) {
+				if (data.module === module) {
 					embed.addField(data.name, `>>> *${data.description}*${data.format ? `\nFormat: \`${data.format}\`` : ''}`);
 				}
 			}
@@ -72,7 +72,7 @@ export default class implements EconomicaCommand {
 
 		if (command) {
 			const embed = ctx
-				.embedify('info', { name: `${group}:${command.name}`, iconURL: icons.info }, command.description)
+				.embedify('info', { name: `${module}:${command.name}`, iconURL: icons.info }, command.description)
 				.addField('Format', command.format ? `\`${command.format}\`` : 'none', true)
 				.addField('Examples', command.examples ? `\`${command.examples.join('`\n`')}\`` : 'none', true)
 				.addField('Servers Only?', command.global ? '`False`' : '`True`', true);
@@ -94,6 +94,6 @@ export default class implements EconomicaCommand {
 			return await ctx.interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 
-		return await ctx.embedify('error', 'user', `Could not find any groups or commands matching \`${query}\`.`, true);
+		return await ctx.embedify('error', 'user', `Could not find any modules or commands matching \`${query}\`.`, true);
 	};
 }

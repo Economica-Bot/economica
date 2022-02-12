@@ -11,14 +11,19 @@ import {
 import { Authority } from '../typings';
 
 export async function commandCheck(ctx: Context): Promise<boolean> {
-	if (!ctx.data.enabled) {
-		await ctx.embedify('error', 'user', 'This command is disabled.', true);
+	if (DEVELOPER_IDS.includes(ctx.interaction.user.id)) {
+		return true;
+	} else if (!ctx.data.enabled) {
+		await ctx.embedify('warn', 'user', 'This command is disabled.', true);
 		return false;
 	} else if (ctx.data.authority === 'DEVELOPER' && !DEVELOPER_IDS.includes(ctx.interaction.user.id)) {
-		await ctx.embedify('error', 'user', 'This command is dev only.', true);
+		await ctx.embedify('warn', 'user', 'This command is dev only.', true);
 		return false;
 	} else if (!ctx.data.global && !ctx.interaction.guild) {
-		await ctx.embedify('error', 'user', 'This command may only be used within servers.', true);
+		await ctx.embedify('warn', 'user', 'This command may only be used within servers.', true);
+		return false;
+	} else if (ctx.guildDocument?.modules && !ctx.guildDocument.modules.includes(ctx.data.module)) {
+		await ctx.embedify('warn', 'user', `The \`${ctx.data.module}\` module is not enabled in this server.`, true);
 		return false;
 	}
 
@@ -64,11 +69,7 @@ async function permissionCheck(ctx: Context): Promise<boolean> {
 		return false;
 	}
 
-	if (
-		DEVELOPER_IDS.includes(member.id) ||
-		ctx.interaction.guild.ownerId === member.id ||
-		member.permissions.has('ADMINISTRATOR')
-	) {
+	if (ctx.interaction.guild.ownerId === member.id || member.permissions.has('ADMINISTRATOR')) {
 		return true;
 	}
 
@@ -88,33 +89,44 @@ async function permissionCheck(ctx: Context): Promise<boolean> {
 }
 
 async function cooldownCheck(ctx: Context): Promise<boolean> {
-	const key = `${ctx.interaction.user.id}-${ctx.interaction.commandName}`;
-	const inter = ctx.client.cooldowns.get(key);
-	if (!inter) {
-		ctx.client.cooldowns.set(key, ctx.interaction);
-		return true;
-	}
+	const incomes = ctx.guildDocument?.incomes;
+	const intervals = ctx.guildDocument?.intervals;
+	const key = `${ctx.interaction.guildId}-${ctx.interaction.user.id}-${ctx.interaction.commandName}`;
 
-	const income = ctx.guildDocument.income;
-	if (!(ctx.interaction.commandName in income)) {
-		return true;
-	}
+	if (ctx.interaction.commandName in { ...incomes, ...intervals }) {
+		const date = ctx.client.cooldowns.get(key);
+		let cooldown: number;
 
-	let cooldown;
-	for (const obj of Object.entries(income)) {
-		if (obj[0] === ctx.interaction.commandName) {
-			cooldown = obj[1].cooldown;
+		if (!date) {
+			ctx.client.cooldowns.set(key, new Date());
+			return true;
 		}
-	}
 
-	if (inter.createdTimestamp + cooldown > Date.now()) {
-		const embed = ctx
-			.embedify('warn', 'user', `Please run this command in \`${ms(inter.createdTimestamp + cooldown - Date.now())}\``)
-			.setFooter({ text: `Cooldown: ${ms(cooldown)}` });
-		ctx.interaction.reply({ embeds: [embed], ephemeral: true });
-		return false;
+		if (ctx.interaction.commandName in incomes) {
+			for (const obj of Object.entries(incomes)) {
+				if (obj[0] === ctx.interaction.commandName) {
+					cooldown = obj[1].cooldown;
+				}
+			}
+		} else if (ctx.interaction.commandName in intervals) {
+			for (const obj of Object.entries(intervals)) {
+				if (obj[0] === ctx.interaction.commandName) {
+					cooldown = obj[1].cooldown;
+				}
+			}
+		}
+
+		if (date.getTime() + cooldown > Date.now()) {
+			const embed = ctx
+				.embedify('warn', 'user', `You may run this command in \`${ms(date.getTime() + cooldown - Date.now())}\``)
+				.setFooter({ text: `Cooldown: ${ms(cooldown)}` });
+			ctx.interaction.reply({ embeds: [embed], ephemeral: true });
+			return false;
+		} else {
+			ctx.client.cooldowns.set(key, new Date());
+			return true;
+		}
 	} else {
-		ctx.client.cooldowns.set(key, ctx.interaction);
 		return true;
 	}
 }

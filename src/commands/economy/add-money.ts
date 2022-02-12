@@ -8,7 +8,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('add-money')
 		.setDescription('Add/remove money from a balance.')
-		.setGroup('ECONOMY')
+		.setModule('ECONOMY')
 		.setFormat('<user> <amount> <target>')
 		.setExamples(['add-money @JohnDoe 300 wallet', 'add-money @Wumpus 100 treasury'])
 		.setAuthority('MANAGER')

@@ -7,7 +7,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('invite')
 		.setDescription('Get the invite link for Economica.')
-		.setGroup('UTILITY')
+		.setModule('UTILITY')
 		.setAuthority('DEVELOPER')
 		.setGlobal(true);
 

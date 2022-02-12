@@ -3,12 +3,12 @@ import { ActivityTypes } from 'discord.js/typings/enums';
 import * as i18n from 'i18n';
 import { ConnectOptions } from 'mongoose';
 import path from 'path';
-import { command, ReplyString } from './typings';
 import { ISettingsParam } from 'tslog';
-import { commandCheck } from './lib';
+
+import { IncomeCommand, IntervalCommand, ReplyString } from './typings';
 
 // Required
-export const BOT_TOKEN = process.env.ECON_CHAD_TOKEN;
+export const BOT_TOKEN = process.env.ECON_ALPHA_TOKEN;
 export const DEVELOPER_IDS: string[] = JSON.parse(process.env.DEVELOPER_IDS);
 export const DEVELOPMENT_GUILD_IDS: string[] = JSON.parse(process.env.DEVELOPMENT_GUILD_IDS);
 export const PUBLIC_GUILD_ID = process.env.PUBLIC_GUILD_ID;
@@ -117,33 +117,27 @@ export const authors = {
 	},
 };
 
-export const income: { work: command; beg: command; crime: command; rob: command } = {
-	work: {
-		min: 100,
-		max: 500,
-		cooldown: 1000 * 30,
-	},
-	beg: {
-		min: 25,
-		max: 125,
-		chance: 40,
-		cooldown: 1000 * 30,
-	},
-	crime: {
-		min: 300,
-		max: 1500,
-		chance: 60,
-		minfine: 300,
-		maxfine: 1500,
-		cooldown: 1000 * 60,
-	},
-	rob: {
-		chance: 20,
-		minfine: 500,
-		maxfine: 2000,
-		cooldown: 1000 * 60,
-	},
+export type defaultIncomes = { 
+	work: IncomeCommand; 
+	beg: IncomeCommand; 
+	crime: IncomeCommand; 
+	rob: IncomeCommand 
 };
+
+export type defaultIntervals = {
+	minutely: IntervalCommand;
+	hourly: IntervalCommand;
+	daily: IntervalCommand;
+	weekly: IntervalCommand;
+	fortnightly: IntervalCommand;
+	monthly: IntervalCommand;
+};
+
+// Check guild model when updating
+export type defaultModule = 'ADMIN' | 'ECONOMY' | 'INCOME' | 'MODERATION' | 'SHOP' | 'UTILITY';
+export type specialModule = 'INSIGHTS' | 'INTERVAL';
+export type devModule = 'APPLICATION';
+export type Module = defaultModule | specialModule | devModule;
 
 i18n.configure({
 	defaultLocale: 'en',

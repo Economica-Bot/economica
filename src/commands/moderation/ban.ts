@@ -8,7 +8,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('ban')
 		.setDescription('Ban a member.')
-		.setGroup('MODERATION')
+		.setModule('MODERATION')
 		.setFormat('<member> [length] [reason]')
 		.setExamples(['ban @JohnDoe', 'ban @Pepe 3h', 'ban @Wumpus Spamming', 'ban @YourMom420 2d Megalomania'])
 		.setClientPermissions(['BAN_MEMBERS'])

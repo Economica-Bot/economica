@@ -7,10 +7,10 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('work')
 		.setDescription('Work to earn a sum.')
-		.setGroup('INCOME');
+		.setModule('INCOME');
 
 	public execute = async (ctx: Context): Promise<Message> => {
-		const { min, max } = ctx.guildDocument.income.work;
+		const { min, max } = ctx.guildDocument.incomes.work;
 		const amount = Math.ceil(Math.random() * (max - min) + min);
 		transaction(
 			ctx.client,

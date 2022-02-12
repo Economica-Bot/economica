@@ -8,7 +8,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('timeout')
 		.setDescription('Timeout a member.')
-		.setGroup('MODERATION')
+		.setModule('MODERATION')
 		.setFormat('<member> [duration] [reason]')
 		.setExamples([
 			'timeout @JohnDoe',

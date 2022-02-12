@@ -5,3 +5,4 @@ export { MarketModel, Market } from './markets';
 export { MemberModel, Member } from './members';
 export { ShopModel, Shop } from './shops';
 export { TransactionModel, Transaction } from './transactions';
+export { UserModel, User } from './users';

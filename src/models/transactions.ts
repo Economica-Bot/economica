@@ -16,13 +16,13 @@ export interface Transaction {
 
 const Schema = new mongoose.Schema<Transaction>(
 	{
-		guildId: { type: String, required: true },
-		userId: { type: String, required: true },
-		agentId: { type: String, required: true },
-		type: { type: String, required: true },
-		wallet: { type: Number, required: true },
-		treasury: { type: Number, required: true },
-		total: { type: Number, required: true },
+		guildId: { type: mongoose.Schema.Types.String, required: true },
+		userId: { type: mongoose.Schema.Types.String, required: true },
+		agentId: { type: mongoose.Schema.Types.String, required: true },
+		type: { type: mongoose.Schema.Types.String, required: true },
+		wallet: { type: mongoose.Schema.Types.Number, required: true },
+		treasury: { type: mongoose.Schema.Types.Number, required: true },
+		total: { type: mongoose.Schema.Types.Number, required: true },
 	},
 	{
 		timestamps: true,

@@ -7,7 +7,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('income')
 		.setDescription('Configure income commands and their settings.')
-		.setGroup('INCOME')
+		.setModule('INCOME')
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand.setName('view').setDescription('View income command configurations.')
 		)
@@ -36,17 +36,17 @@ export default class implements EconomicaCommand {
 		);
 
 	public execute = async (ctx: Context): Promise<Message | void> => {
-		let income = ctx.guildDocument.income;
+		const incomes = ctx.guildDocument.incomes;
 		const subcommand = ctx.interaction.options.getSubcommand();
-		const embed = ctx.embedify('info', 'guild', 'Income command information.');
 		if (subcommand === 'view') {
-			for (const [k, v] of Object.entries(income)) {
+			const embed = ctx.embedify('info', 'guild', 'Income command information');
+			for (const [k, v] of Object.entries(incomes)) {
 				const description = [];
 				for (const [k1, v1] of Object.entries(v)) {
 					description.push(`\`${k1}: ${v1}\``);
 				}
 
-				embed.addField(k, `${description.join('\n')}`);
+				embed.addField(k, `${description.join('\n')}`, true);
 			}
 
 			return await ctx.interaction.reply({ embeds: [embed] });
@@ -62,23 +62,23 @@ export default class implements EconomicaCommand {
 
 			if (!inter) {
 				return await ctx.embedify('error', 'user', 'Could not find that command.', true);
-			} else if (inter.data.name in Object.keys(income)) {
+			} else if (inter.data.name in Object.keys(incomes)) {
 				return await ctx.embedify('error', 'user', `That is not an \`INCOME\` command.`, true);
 			}
 
-			let k: keyof typeof income;
-			for (k in income) {
+			let k: keyof typeof incomes;
+			for (k in incomes) {
 				if (k === command) {
-					if (min && 'min' in income[k]) income[k].min = min;
-					if (max && 'max' in income[k]) income[k].max = max;
-					if (chance && 'chance' in income[k]) income[k].chance = chance;
-					if (minfine && 'minfine' in income[k]) income[k].minfine = minfine;
-					if (maxfine && 'maxfine' in income[k]) income[k].maxfine = maxfine;
-					if (cooldown && 'cooldown' in income[k] && ms(cooldown)) income[k].cooldown = ms(cooldown);
+					if (min && 'min' in incomes[k]) incomes[k].min = min;
+					if (max && 'max' in incomes[k]) incomes[k].max = max;
+					if (chance && 'chance' in incomes[k]) incomes[k].chance = chance;
+					if (minfine && 'minfine' in incomes[k]) incomes[k].minfine = minfine;
+					if (maxfine && 'maxfine' in incomes[k]) incomes[k].maxfine = maxfine;
+					if (cooldown && 'cooldown' in incomes[k] && ms(cooldown)) incomes[k].cooldown = ms(cooldown);
 				}
 			}
 
-			await ctx.guildDocument.updateOne({ income });
+			await ctx.guildDocument.updateOne({ incomes });
 			return await ctx.embedify('success', 'user', `Updated \`${command}\`.`, false);
 		}
 	};

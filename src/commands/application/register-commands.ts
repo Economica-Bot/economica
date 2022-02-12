@@ -6,7 +6,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('register-commands')
 		.setDescription('Register economica commands.')
-		.setGroup('APPLICATION')
+		.setModule('APPLICATION')
 		.setAuthority('DEVELOPER')
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand

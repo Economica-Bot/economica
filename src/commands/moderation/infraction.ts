@@ -8,7 +8,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('infraction')
 		.setDescription('View and delete infractions.')
-		.setGroup('ECONOMY')
+		.setModule('ECONOMY')
 		.setFormat('(view <infraction_id> | delete <id | user | all> [infraction_id | user])')
 		.setExamples([
 			'infraction view 615a88b83f908631d40632c1',

@@ -7,7 +7,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('purge')
 		.setDescription('Purge messages from a channel.')
-		.setGroup('UTILITY')
+		.setModule('UTILITY')
 		.setFormat('[channel] [amount]')
 		.setExamples(['purge', 'purge #general', 'purge #general 50'])
 		.setClientPermissions(['MANAGE_MESSAGES'])

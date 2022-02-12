@@ -10,7 +10,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('loan')
 		.setDescription('Loan money to other users.')
-		.setGroup('ECONOMY')
+		.setModule('ECONOMY')
 		.setFormat('<propose | cancel | accept | decline | view> [...options]')
 		.setExamples([
 			'loan propose @Wumpus 1000 1200 2d',

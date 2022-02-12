@@ -16,11 +16,11 @@ export default class implements EconomicaEvent {
 
 		if (check) {
 			await client.commands.get(interaction.commandName).execute(ctx);
-			new CommandModel({
+			await CommandModel.create({
 				guildId: interaction.guild?.id || null,
 				userId: interaction.user.id,
 				command: interaction.commandName,
-			}).save();
+			});
 		}
 	}
 }

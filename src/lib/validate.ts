@@ -1,6 +1,6 @@
 import { parseString } from '@adrastopoulos/number-parser';
 import { GuildMember } from 'discord.js';
-import { Collection, Document, isValidObjectId, Model } from 'mongoose';
+import { Document, isValidObjectId, Model } from 'mongoose';
 
 import { getEconInfo } from '.';
 import { Infraction, InfractionModel, Loan, LoanModel, Transaction, TransactionModel } from '../models';

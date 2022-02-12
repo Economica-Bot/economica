@@ -8,19 +8,19 @@ export interface Member {
 	wallet: number;
 	treasury: number;
 	total: number;
-	commands: Array<CommandData>;
-	inventory: Array<InventoryItem>;
+	commands: CommandData[];
+	inventory: InventoryItem[];
 }
 
 const Schema = new mongoose.Schema<Member>(
 	{
-		guildId: { type: String, required: true },
-		userId: { type: String, required: true },
-		wallet: { type: Number, required: true },
-		treasury: { type: Number, required: true },
-		total: { type: Number, required: true },
-		commands: { type: Array<CommandData>(), required: true },
-		inventory: { type: Array<InventoryItem>(), required: true },
+		guildId: { type: mongoose.Schema.Types.String, required: true },
+		userId: { type: mongoose.Schema.Types.String, required: true },
+		wallet: { type: mongoose.Schema.Types.Number, required: true },
+		treasury: { type: mongoose.Schema.Types.Number, required: true },
+		total: { type: mongoose.Schema.Types.Number, required: true },
+		commands: { type: mongoose.Schema.Types.Array, required: true },
+		inventory: { type: mongoose.Schema.Types.Array, required: true },
 	},
 	{
 		versionKey: false,

@@ -8,7 +8,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('authority')
 		.setDescription('Interact with the economy authority role hierarchy.')
-		.setGroup('ADMIN')
+		.setModule('ADMIN')
 		.setFormat('<view | set | reset> [...options]')
 		.addEconomicaSubcommand((options) =>
 			options.setName('view').setDescription('View the economy authority hierarchy.')

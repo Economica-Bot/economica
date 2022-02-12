@@ -7,7 +7,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('transaction-log')
 		.setDescription('Manage the transaction logging channel.')
-		.setGroup('ECONOMY')
+		.setModule('ECONOMY')
 		.setFormat('<view | set | reset> [channel]')
 		.setExamples(['transaction-log view', 'transaction-log set @transaction-logs', 'transaction-log reset'])
 		.addEconomicaSubcommand((subcommand) =>

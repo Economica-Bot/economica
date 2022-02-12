@@ -5,7 +5,7 @@ export default class extends EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('balance')
 		.setDescription('View a balance.')
-		.setGroup('ECONOMY')
+		.setModule('ECONOMY')
 		.setFormat('[user]')
 		.setExamples(['balance', 'balance @JohnDoe'])
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user.').setRequired(false));

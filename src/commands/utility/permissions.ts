@@ -12,7 +12,7 @@ export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('permission')
 		.setDescription('See the permissions of a command.')
-		.setGroup('UTILITY')
+		.setModule('UTILITY')
 		.setFormat('<command>')
 		.addStringOption((option) => option.setName('command').setDescription('Specify a command.').setRequired(true));
 

@@ -15,15 +15,15 @@ export interface Loan {
 
 const Schema = new mongoose.Schema<Loan>(
 	{
-		guildId: { type: String, required: true },
-		borrowerId: { type: String, required: true },
-		lenderId: { type: String, required: true },
-		principal: { type: Number, required: true },
-		repayment: { type: Number, required: true },
-		expires: { type: Date, required: true },
-		pending: { type: Boolean, required: true },
-		active: { type: Boolean, required: true },
-		complete: { type: Boolean, required: true },
+		guildId: { type: mongoose.Schema.Types.String, required: true },
+		borrowerId: { type: mongoose.Schema.Types.String, required: true },
+		lenderId: { type: mongoose.Schema.Types.String, required: true },
+		principal: { type: mongoose.Schema.Types.Number, required: true },
+		repayment: { type: mongoose.Schema.Types.Number, required: true },
+		expires: { type: mongoose.Schema.Types.Date, required: true },
+		pending: { type: mongoose.Schema.Types.Boolean, required: true },
+		active: { type: mongoose.Schema.Types.Boolean, required: true },
+		complete: { type: mongoose.Schema.Types.Boolean, required: true },
 	},
 	{
 		timestamps: true,
