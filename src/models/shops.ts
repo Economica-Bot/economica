@@ -6,6 +6,7 @@ export interface Shop {
 	type: ShopItem;
 	name: string;
 	price: number;
+	usability: string;
 	treasuryRequired: number;
 	active: boolean;
 	description: string;
@@ -27,6 +28,7 @@ const Schema = new mongoose.Schema<Shop>(
 		type: { type: String, required: true },
 		name: { type: String, required: true },
 		price: { type: Number, required: true },
+		usability: { type: String, required: true },
 		treasuryRequired: { type: Number, required: true },
 		active: { type: Boolean, required: true },
 		description: { type: String, required: true },

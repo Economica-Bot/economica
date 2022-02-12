@@ -1,0 +1,1 @@
+export const itemRegExp = (patt: string): RegExp => new RegExp('^' + patt + '$', 'i')

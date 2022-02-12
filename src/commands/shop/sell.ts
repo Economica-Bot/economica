@@ -14,14 +14,14 @@ export default class implements EconomicaCommand {
 	public execute = async (ctx: Context): Promise<Message> => {
 		const query = ctx.interaction.options.getString('item');
 		const item = await ShopModel.findOne({ guildId: ctx.interaction.guildId, name: query, active: true });
-		const hasItem = ctx.memberDocument.inventory.some((i) => i.name === item.name);
-		const invItem = ctx.memberDocument.inventory.find((i) => i.name === item.name);
+		const hasItem = ctx.memberDocument.inventory.some((i) => i.refId === item._id);
+		const invItem = ctx.memberDocument.inventory.find((i) => i.refId === item._id);
 		const { currency } = ctx.guildDocument;
 
 		if (!item) {
-			return await ctx.embedify('error', 'user', 'Could not find an item with that name.', true);
+			return await ctx.embedify('error', 'user', `No item with name \`${query}\` found (case-insensitive)`, true);
 		} else if (!hasItem) {
-			return await ctx.embedify('warn', 'user', 'You do not have this item.', true);
+			return await ctx.embedify('warn', 'user', `You do not have any \`${query}\`.`, true);
 		}
 
 		transaction(

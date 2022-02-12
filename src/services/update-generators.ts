@@ -12,7 +12,7 @@ export default class implements EconomicaService {
 			for (const item of member.inventory) {
 				const shopItem = await ShopModel.findOne({
 					guildId: member.guildId,
-					name: item.name,
+					_id: item.refId,
 				});
 
 				if (shopItem.type === 'GENERATOR') {
@@ -31,7 +31,7 @@ export default class implements EconomicaService {
 					{
 						guildId: member.guildId,
 						userId: member.userId,
-						'inventory.name': item.name,
+						'inventory.refId': item.refId,
 					},
 					{
 						$set: {

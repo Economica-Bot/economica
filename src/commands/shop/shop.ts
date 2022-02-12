@@ -1,9 +1,12 @@
 import { EmbedFieldData, Message, MessageEmbed } from 'discord.js';
 import ms from 'ms'
+import * as num from '@adrastopoulos/number-parser'
 
 import * as util from '../../lib';
-import { MemberModel, ShopModel } from '../../models';
+import { itemInfo, itemRegExp } from '../../lib';
+import { MemberModel, Shop, ShopModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { InventoryItem } from '../../typings';
 
 export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
@@ -117,45 +120,27 @@ export default class implements EconomicaCommand {
 	
 				await util.paginate(ctx.interaction, embeds, page - 1);
 			} else if (subcommand === 'single') {
-				const item = shop.find(item => item.name.toLowerCase() === ctx.interaction.options.getString('name').toLowerCase());
+				const item = await ShopModel.findOne({ guildId: ctx.interaction.guildId, name: itemRegExp(name)});
 
 				if (!item)
-					return ctx.embedify('error', 'user', `No item with name \`${ctx.interaction.options.getString('name')}\` found (case-insensitive).`, true)
-
-				const embed = ctx.embedify('info', 'user', `${item.description}`)
-					.setTitle(item.name)
-					// Global fields
-					.setFields([
-						{ name: 'Type', value: `\`${item.type}\``, inline: false },
-						{ name: 'Active?', value: `\`${item.active}\``, inline: true },
-						{ name: 'Price', value: `${ctx.guildDocument.currency}${item.price || 'Free'}`, inline: true },
-						{ name: 'Required Treasury', value: `${ctx.guildDocument.currency}${item.treasuryRequired}+`, inline: true },
-						{ name: 'Shop Duration Left', value: `${item.duration != Number.POSITIVE_INFINITY && item.active? ms((item.createdAt.getTime() + item.duration) - Date.now()) : 'Infinite'}`, inline: true },
-						{ name: 'Stock Left', value: `${item.stock}`, inline: true },
-						{ name: 'Roles Given', value: item.rolesGiven.length? `<@&${item.rolesGiven.join('>, <@&')}>` : 'None', inline: true },
-						{ name: 'Roles Removed', value: item.rolesRemoved.length? `<@&${item.rolesRemoved.join('>, <@&')}>` : 'None', inline: true },
-						{ name: 'Required Roles', value: item.requiredRoles.length? `@&${item.requiredRoles.join('>, <@&')}>` : 'None', inline: true },
-						{ name: 'Required Inventory Items', value: item.requiredItems.length? `\`${item.requiredItems.map(itemId => itemId = shop.find(item => item._id == itemId).name).join('`, `')}\`` : 'None', inline: true }
-					]);
-
-				if (item.type === 'GENERATOR')
-					embed.addFields([
-						{ name: 'Generator', value: `Generates ${ctx.guildDocument.currency}${item.generatorAmount} every ${ms(item.generatorPeriod)}`}
-					])
+					return await ctx.embedify('error', 'user', `No item with name \`${ctx.interaction.options.getString('name')}\` found (case-insensitive).`, true)
+				
+				// Returns an embed of item info.
+				const embed = await itemInfo(ctx, item);
 				
 				return await ctx.interaction.reply({ embeds: [embed] });
 			}
 		} else if (subcommand === 'enable') {
-			const shopItem = await ShopModel.findOneAndUpdate({ name }, { active: true });
+			const shopItem = await ShopModel.findOneAndUpdate({ name: itemRegExp(name) }, { active: true });
 			if (!shopItem) {
-				return await ctx.embedify('error', 'user', 'Could not find an item with that name.', true);
+				return await ctx.embedify('error', 'user', `No item with name \`${ctx.interaction.options.getString('name')}\` found (case-insensitive)`, true);
 			} else {
 				return await ctx.embedify('success', 'user', 'Item enabled.', false);
 			}
 		} else if (subcommandGroup === 'disable') {
 			if (subcommand === 'single') {
 				const shopItem = await ShopModel.findOneAndUpdate(
-					{ guildId: ctx.interaction.guildId, name },
+					{ guildId: ctx.interaction.guildId, name: itemRegExp(name) },
 					{ active: false }
 				);
 				if (!shopItem) {
@@ -169,13 +154,14 @@ export default class implements EconomicaCommand {
 			}
 		} else if (subcommandGroup === 'delete') {
 			if (subcommand === 'single') {
-				const shopItem = await ShopModel.deleteOne({ guildId: ctx.interaction.guildId, name });
+				const cachedItem = await ShopModel.findOne({ guildId: ctx.interaction.guildId, name: itemRegExp(name) })
+				const shopItem = await ShopModel.deleteOne({ guildId: ctx.interaction.guildId, name: itemRegExp(name) });
 				if (!shopItem) {
-					return await ctx.embedify('error', 'user', 'Could not find a shop item with that name.', true);
+					return await ctx.embedify('error', 'user', `No item with name \`${ctx.interaction.options.getString('name')}\` found (case-insensitive)`, true);
 				} else {
 					const updates = await MemberModel.updateMany(
 						{ guildId: ctx.interaction.guildId },
-						{ $pull: { inventory: { name } } }
+						{ $pull: { inventory: { refId: cachedItem._id } } }
 					);
 					return await ctx.embedify(
 						'success',

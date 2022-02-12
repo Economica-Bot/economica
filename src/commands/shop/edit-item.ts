@@ -1,35 +1,46 @@
-import { GuildMemberRoleManager, Role } from 'discord.js';
-import ms from 'ms';
+import { Message } from "discord.js";
+import ms from "ms";
+import { itemInfo, itemRegExp } from "../../lib";
+import { Shop, ShopModel } from "../../models";
+import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from "../../structures";
+import { Document } from 'mongoose';
 
-import { getEconInfo, itemInfo, itemRegExp, transaction } from '../../lib';
-import { MemberModel, Shop, ShopModel } from '../../models';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-import { InventoryItem } from '../../typings';
 
-export default class implements EconomicaCommand {
+export default class extends EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
-		.setName('create-item')
-		.setDescription('Add a new item to the guild shop!')
+		.setName('edit-item')
+		.setDescription('Edit properties of an item. Some properties are unchangeable.')
 		.setAuthority('MANAGER')
 		.setGroup('SHOP')
-		.setFormat('<classic | generator> <name, price> [<generator_period, generator_amount>] [...optional params]')
-		.setExamples(['classic <name: Role I> <price: 150> [roles_given: @VIP]', 'classic <name: Role II> <price: 500> [roles_required: @VIP] [roles_given: @VIP+]', 'generator <name: Factory I> <price: 1000> <generator_amount: 50> <generator_period: 1h>', 'generator <name: Factory II> <price: 2000> <generator_amount: 100> <generator_period: 1h> [required_items: Factory I]'])
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
 				.setName('classic')
-				.setDescription('Blueprint for a simple shop item.')
-				.setFormat('<name> <price> [...optional params]')
+				.setDescription('Modify a type-classic item in the shop.')
+				.addStringOption((options) =>
+					options
+						.setName('edit-mode')
+						.setDescription('How your changes will be applied to the item.')
+						.addChoices([
+							['Layered - Only change the passed options.', 'layered'],
+							['Replace - Only change the passed options AND reset others to global defaults.', 'replace']
+						])
+						.setRequired(true)
+				)
+				.addStringOption((options) =>
+					options
+						.setName('name')
+						.setDescription('The name of the item to find to edit. This does not change the name.')
+						.setRequired(true)
+				)
 				.addStringOption((option) =>
 					option
-						.setName('name')
-						.setDescription('The name of the item.')
-						.setRequired(true)
+						.setName('new_name')
+						.setDescription('The new name of the item to change it to.')
 				)
 				.addNumberOption((options) =>
 					options
 						.setName('price')
 						.setDescription('How much it will cost users to obtain this item.')
-						.setRequired(true)
 				)
 				.addStringOption((options) =>
 					options
@@ -40,7 +51,6 @@ export default class implements EconomicaCommand {
 							['Usable - item is stored in inventory and removed upon /use.', 'Usable'],
 							['Unusable - item is stored in inventory and can\'t be /use(d).', 'Unusable']
 						])
-						.setRequired(true)
 				)
 				.addStringOption((options) =>
 					options
@@ -96,31 +106,42 @@ export default class implements EconomicaCommand {
 		.addEconomicaSubcommand((subcommand) =>
 			subcommand
 				.setName('generator')
-				.setDescription('Blueprint for a generator shop item.')
-				.setFormat('<name> <price> <generator_period> <generator_amount> [...optional params]')
+				.setDescription('Modify a type-generator item in the shop.')
+				.addStringOption((options) =>
+					options
+						.setName('edit-mode')
+						.setDescription('How your changes will be applied to the item.')
+						.addChoices([
+							['Layered - Only change the passed options.', 'layered'],
+							['Replace - Only change the passed options AND reset others to global defaults.', 'replace']
+						])
+						.setRequired(true)
+				)
+				.addStringOption((options) =>
+					options
+						.setName('name')
+						.setDescription('The name of the item to find to edit. This does not change the name.')
+						.setRequired(true)
+				)
 				.addStringOption((option) =>
 					option
-						.setName('name')
-						.setDescription('The name of the item.')
-						.setRequired(true)
+						.setName('new_name')
+						.setDescription('The new name of the item to change it to.')
 				)
 				.addNumberOption((options) =>
 					options
 						.setName('price')
 						.setDescription('How much it will cost users to obtain this item.')
-						.setRequired(true)
 				)
 				.addNumberOption((options) =>
-						options
-							.setName('generator_amount')
-							.setDescription('Amount the generator owner will receive per generator period.')
-							.setRequired(true)
+					options
+						.setName('generator_amount')
+						.setDescription('Amount the generator owner will receive per generator period.')
 				)
 				.addStringOption((options) =>
-						options
-							.setName('generator_period')
-							.setDescription('How often the generator owner will earn `generator_amount`.')
-							.setRequired(true)
+					options
+						.setName('generator_period')
+						.setDescription('How often the generator owner will earn `generator_amount`.')
 				)
 				.addStringOption((options) =>
 					options
@@ -129,9 +150,8 @@ export default class implements EconomicaCommand {
 						.addChoices([
 							['Instant - item is used on purchase and is not stored in inventory.', 'Instant'],
 							['Usable - item is stored in inventory and removed upon /use.', 'Usable'],
-							['Unusable - item is stored in inventory and can\'t be /use(d)', 'Unusable']
+							['Unusable - item is stored in inventory and can\'t be /use(d).', 'Unusable']
 						])
-						.setRequired(true)
 				)
 				.addStringOption((options) =>
 					options
@@ -185,29 +205,59 @@ export default class implements EconomicaCommand {
 				)
 		)
 
-	execute = async (ctx: Context) => {
-		const { interaction, guildDocument } = ctx;
-		const { currency } = guildDocument;
+	public execute = async (ctx: Context) => {
+		const { interaction } = ctx;
 		const subcommand = interaction.options.getSubcommand();
+		const edit_mode = interaction.options.getString('edit-mode');
+
+		if (edit_mode == 'replace') {
+			const missingRequiredArgs: string[] = []
+
+			if (!interaction.options.getString('new_name'))
+				missingRequiredArgs.push('new_name')
+			if (!interaction.options.getString('price'))
+				missingRequiredArgs.push('price')
+			if (!interaction.options.getString('usability'))
+				missingRequiredArgs.push('usability')
+
+			if (subcommand == 'generator') {
+				if (!interaction.options.getNumber('generator_amount'))
+					missingRequiredArgs.push('generator_amount')
+				if (!interaction.options.getString('generator_period'))
+					missingRequiredArgs.push('generator_period')
+			}
+
+			if (missingRequiredArgs.length)
+				return await ctx.embedify('error', 'user', `\`${missingRequiredArgs.join('`, `')}\` are required arguments for **edit-item ${subcommand}** with the \`edit-mode\` set as \`Layered\`.\n\nPlease provide a value for these.`, true)
+		}
+
+		let editedItem: any = {}
 
 		// Checks and formatting.
 		const sameNameItem = await ShopModel.findOne({
 			guildId: interaction.guildId,
-			name: itemRegExp(interaction.options.getString('name'))
+			name: itemRegExp(interaction.options.getString('new_name'))
 		})
 		if (sameNameItem)
 			return ctx.embedify('error', 'user', `An item with name \`${sameNameItem.name}\` already exists. You can use the \`delete-item\` command to delete it.`, true);
-		if (interaction.options.getNumber('price') < 0)
+		else editedItem['name'] = interaction.options.getString('new_name')
+
+		if (interaction.options.getNumber('price') && interaction.options.getNumber('price') < 0)
 			return ctx.embedify('error', 'user', 'Item price cannot be less than 0.', true);
+		else editedItem['price'] = interaction.options.getNumber('price')
+
 		if (interaction.options.getString('description')?.length > 250)
 			return ctx.embedify('error', 'user', 'Item description cannot be more than 250 characters.', true);
+		else editedItem['descriptions'] = interaction.options.getString('description')
+
 		if (interaction.options.getNumber('required_treasury') < 0)
 			return ctx.embedify('error', 'user', 'Required treasury balance cannot be less than 0.', true);
+		else editedItem['required_treasury'] = interaction.options.getNumber('required_treasuru')
 
 		const duration = interaction.options.getString('duration')
 		let numDuration: number
 		if (duration) {
-			
+
 			numDuration = ms(duration) ?? parseInt(duration)
 
 			if (!duration)
@@ -216,8 +266,11 @@ export default class implements EconomicaCommand {
 
 		if (numDuration < 0)
 			return ctx.embedify('error', 'user', 'Item duration cannot be less than zero.', true);
+		else editedItem['duration'] = duration
+
 		if (interaction.options.getInteger('stock') < 0)
 			return ctx.embedify('error', 'user', 'Item stock cannot be less than 0.', true);
+		else editedItem['stock'] = interaction.options.getInteger('stock')
 
 		const requiredRolesIds = interaction.options.getString('required_roles')?.split(',')
 		const requiredRoles: string[] = []
@@ -230,6 +283,7 @@ export default class implements EconomicaCommand {
 
 			requiredRoles.push(role.id)
 		})
+		editedItem['requiredRoles'] = requiredRoles
 
 		const rolesGivenIds = interaction.options.getString('roles_given')?.split(',')
 		const rolesGiven: string[] = []
@@ -242,6 +296,7 @@ export default class implements EconomicaCommand {
 
 			rolesGiven.push(role.id)
 		})
+		editedItem['rolesGiven'] = rolesGiven
 
 		const rolesRemovedIds = interaction.options.getString('roles_removed')?.split(',')
 		const rolesRemoved: string[] = []
@@ -254,6 +309,7 @@ export default class implements EconomicaCommand {
 
 			rolesRemoved.push(role.id)
 		})
+		editedItem['rolesRemoved'] = rolesRemoved
 
 		const requiredItemsUF = interaction.options.getString('required_items')?.split(',')
 		const requiredItems: string[] = []
@@ -270,61 +326,85 @@ export default class implements EconomicaCommand {
 
 			requiredItems.push(item._id)
 		})
+		editedItem['requiredItems'] = requiredItems
 
-		let item = null;
-		if (subcommand == 'classic')
-			item = await ShopModel.create({
-				guildId: interaction.guildId,
-				type: 'ITEM',
-				name: interaction.options.getString('name'),
-				price: interaction.options.getNumber('price'),
-				usability: interaction.options.getString('usability'),
-				treasuryRequired: interaction.options.getNumber('required_treasury') ?? 0,
-				active: interaction.options.getBoolean('active') ?? true,
-				description: interaction.options.getString('description') ?? 'A very interesting item.',
-				duration: numDuration ?? Number.POSITIVE_INFINITY,
-				stackable: interaction.options.getBoolean('stackable') ?? true,
-				stock: interaction.options.getInteger('stock') ?? Number.POSITIVE_INFINITY,
-				rolesGiven,
-				rolesRemoved,
-				requiredRoles,
-				requiredItems,
-				createdAt: Date.now()
-			})
+		let generatorPeriod: number;
+		if (subcommand == 'generator') {
+			generatorPeriod = ms(interaction.options.getString('generator_period')) ?? parseInt(interaction.options.getString('generator_period'))
 
-		else if (subcommand == 'generator') {
-			const generatorPeriod = ms(interaction.options.getString('generator_period')) ?? parseInt(interaction.options.getString('generator_period'))
-			
 			if (!generatorPeriod)
 				return ctx.embedify('error', 'user', `\`${interaction.options.getString('generatorPeriod')}\` is not a parseable duration value.\n\nExample: 10000, 10s, 10m, 10h, 10d.`, true)
-			
+
 			if (generatorPeriod < 10000)
 				return ctx.embedify('error', 'user', `\`generator_period\` can't be less than 10 seconds!`, true)
-
-			item = await ShopModel.create({
-				guildId: interaction.guildId,
-				type: 'GENERATOR',
-				name: interaction.options.getString('name'),
-				price: interaction.options.getNumber('price'),
-				usability: interaction.options.getString('usability'),
-				treasuryRequired: interaction.options.getNumber('required_treasury') ?? 0,
-				active: interaction.options.getBoolean('active') ?? true,
-				description: interaction.options.getString('description') ?? 'A very interesting item.',
-				duration: numDuration ?? Number.POSITIVE_INFINITY,
-				stackable: interaction.options.getBoolean('stackable') ?? true,
-				stock: interaction.options.getInteger('stock') ?? Number.POSITIVE_INFINITY,
-				rolesGiven,
-				rolesRemoved,
-				requiredRoles,
-				requiredItems,
-				createdAt: Date.now(),
-				generatorPeriod,
-				generator_amount: interaction.options.getNumber('generator_amount')
-			})
 		}
 
+		let item: Shop & Document<any, any, Shop>;
+		console.log(edit_mode)
+
+		if (edit_mode == 'layered') {
+			item = await ShopModel.findOneAndUpdate({
+				guildId: interaction.guildId,
+				name: interaction.options.getString('name')
+			}, editedItem)
+
+			console.log('1' + item)
+		}
+		else if (edit_mode == 'replace') {
+			if (subcommand == 'classic') {
+				item = await ShopModel.findOneAndUpdate({
+					guildId: interaction.guildId,
+					name: interaction.options.getString('name')
+				}, {
+					name: interaction.options.getString('new_name'),
+					price: interaction.options.getNumber('price'),
+					usability: interaction.options.getString('usability'),
+					treasuryRequired: interaction.options.getNumber('required_treasury') ?? 0,
+					active: interaction.options.getBoolean('active') ?? true,
+					description: interaction.options.getString('description') ?? 'A very interesting item.',
+					duration: numDuration ?? Number.POSITIVE_INFINITY,
+					stackable: interaction.options.getBoolean('stackable') ?? true,
+					stock: interaction.options.getInteger('stock') ?? Number.POSITIVE_INFINITY,
+					rolesGiven,
+					rolesRemoved,
+					requiredRoles,
+					requiredItems
+				})
+
+				console.log('2' + item)
+			}
+				else if (subcommand == 'generator') {
+					item = await ShopModel.findOneAndUpdate({
+						guildId: interaction.guildId,
+						name: interaction.options.getString('name')
+					}, {
+						name: interaction.options.getString('new_name'),
+						price: interaction.options.getNumber('price'),
+						usability: interaction.options.getString('usability'),
+						treasuryRequired: interaction.options.getNumber('required_treasury') ?? 0,
+						active: interaction.options.getBoolean('active') ?? true,
+						description: interaction.options.getString('description') ?? 'A very interesting item.',
+						duration: numDuration ?? Number.POSITIVE_INFINITY,
+						stackable: interaction.options.getBoolean('stackable') ?? true,
+						stock: interaction.options.getInteger('stock') ?? Number.POSITIVE_INFINITY,
+						rolesGiven,
+						rolesRemoved,
+						requiredRoles,
+						requiredItems,
+						generatorPeriod,
+						generator_amount: interaction.options.getNumber('generator_amount')
+					})
+
+					console.log('2' + item)
+				}
+		}
+
+		console.log(item)
+
 		return await ctx.interaction.reply({
-			embeds: [await itemInfo(ctx, item)]
+			embeds: [(await itemInfo(ctx, item)).setFooter({
+				text: `Edit for the following was successful: ${Object.keys(editedItem).join(', ')}.`
+			})]
 		});
 	}
 }
