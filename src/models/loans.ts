@@ -1,9 +1,11 @@
 import * as mongoose from 'mongoose';
 
-export interface Loan {
-	guildId: string;
-	borrowerId: string;
-	lenderId: string;
+import { Guild, Member } from '.';
+
+export interface Loan extends mongoose.Document {
+	guild: mongoose.PopulatedDoc<Guild>;
+	borrower: mongoose.PopulatedDoc<Member>;
+	lender: mongoose.PopulatedDoc<Member>;
 	principal: number;
 	repayment: number;
 	expires: Date;
@@ -13,11 +15,11 @@ export interface Loan {
 	createdAt: Date;
 }
 
-const Schema = new mongoose.Schema<Loan>(
+export const LoanSchema = new mongoose.Schema<Loan>(
 	{
-		guildId: { type: mongoose.Schema.Types.String, required: true },
-		borrowerId: { type: mongoose.Schema.Types.String, required: true },
-		lenderId: { type: mongoose.Schema.Types.String, required: true },
+		guild: { type: mongoose.Schema.Types.ObjectId, ref: 'Guild', required: true },
+		borrower: { type: mongoose.Schema.Types.ObjectId, ref: 'Member', required: true },
+		lender: { type: mongoose.Schema.Types.ObjectId, ref: 'Member', required: true },
 		principal: { type: mongoose.Schema.Types.Number, required: true },
 		repayment: { type: mongoose.Schema.Types.Number, required: true },
 		expires: { type: mongoose.Schema.Types.Date, required: true },
@@ -26,9 +28,9 @@ const Schema = new mongoose.Schema<Loan>(
 		complete: { type: mongoose.Schema.Types.Boolean, required: true },
 	},
 	{
-		timestamps: true,
+		timestamps: { createdAt: true, updatedAt: false },
 		versionKey: false,
 	}
 );
 
-export const LoanModel: mongoose.Model<Loan> = mongoose.model('Loans', Schema);
+export const LoanModel: mongoose.Model<Loan> = mongoose.model('Loan', LoanSchema, 'Loan');

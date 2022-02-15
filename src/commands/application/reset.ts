@@ -1,5 +1,3 @@
-import { Message } from 'discord.js';
-
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -9,7 +7,7 @@ export default class implements EconomicaCommand {
 		.setModule('APPLICATION')
 		.setAuthority('DEVELOPER');
 
-	public execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		await ctx.interaction.deferReply({ ephemeral: true });
 		await ctx.interaction.guild.commands.set([]);
 		await ctx.client.application.commands.set([]);

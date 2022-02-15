@@ -44,7 +44,7 @@ export default class implements EconomicaCommand {
 			if (!inter) {
 				return await ctx.embedify('error', 'user', 'Could not find that command.', true);
 			} else if (inter.data.name in Object.keys(intervals)) {
-				return await ctx.embedify('error', 'user', `That is not an \`INCOME\` command.`, true);
+				return await ctx.embedify('error', 'user', `That is not an \`INTERVAL\` command.`, true);
 			}
 
 			let k: keyof typeof intervals;

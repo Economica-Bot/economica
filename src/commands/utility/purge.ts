@@ -1,5 +1,5 @@
 import { ChannelType } from 'discord-api-types';
-import { GuildTextBasedChannel, Message } from 'discord.js';
+import { GuildTextBasedChannel } from 'discord.js';
 
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
@@ -23,7 +23,7 @@ export default class implements EconomicaCommand {
 			option.setName('amount').setDescription('Specify an amount.').setMinValue(1).setMaxValue(100).setRequired(false)
 		);
 
-	public execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		const channel = (ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel) as GuildTextBasedChannel;
 		const amount = ctx.interaction.options.getNumber('amount') ?? 100;
 		return await channel.bulkDelete(amount, true).then(async (count) => {

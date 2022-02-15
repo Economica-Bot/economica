@@ -1,22 +1,18 @@
 import * as mongoose from 'mongoose';
 
-export interface Command {
-	guildId: string;
-	userId: string;
+export interface Command extends mongoose.Types.Subdocument {
 	command: string;
 	createdAt: Date;
 }
 
-const Schema = new mongoose.Schema<Command>(
+export const CommandSchema = new mongoose.Schema<Command>(
 	{
-		guildId: { type: mongoose.Schema.Types.String, required: true },
-		userId: { type: mongoose.Schema.Types.String, required: true },
 		command: { type: mongoose.Schema.Types.String, required: true },
 	},
 	{
-		timestamps: true,
+		timestamps: { createdAt: true, updatedAt: false },
 		versionKey: false,
 	}
 );
 
-export const CommandModel: mongoose.Model<Command> = mongoose.model('Commands', Schema);
+export const CommandModel: mongoose.Model<Command> = mongoose.model('Command', CommandSchema);

@@ -1,13 +1,21 @@
 import * as mongoose from 'mongoose';
 
-import { CURRENCY_SYMBOL, defaultIncomes, defaultIntervals, defaultModule, Module, specialModule } from '../config';
+import {
+	CURRENCY_SYMBOL,
+	defaultIncomes,
+	defaultIntervals,
+	DefaultModuleString,
+	ModuleString,
+	SpecialModuleString,
+} from '../config';
 import { RoleAuthority } from '../typings';
 
-export const defaultModulesArr: defaultModule[] = ['ADMIN', 'ECONOMY', 'INCOME', 'MODERATION', 'SHOP', 'UTILITY'];
-export const specialModulesArr: specialModule[] = ['INSIGHTS', 'INTERVAL'];
-export const modulesArr: Module[] = [
+export const defaultModulesArr: DefaultModuleString[] = ['ADMIN', 'ECONOMY', 'INCOME', 'MODERATION', 'SHOP', 'UTILITY'];
+export const specialModulesArr: SpecialModuleString[] = ['INSIGHTS', 'INTERVAL', 'CORPORATION'];
+export const modulesArr: ModuleString[] = [
 	'ADMIN',
 	'APPLICATION',
+	'CORPORATION',
 	'ECONOMY',
 	'INCOME',
 	'INSIGHTS',
@@ -72,7 +80,7 @@ const defaultIntervalsObj: defaultIntervals = {
 	},
 };
 
-export interface Guild {
+export interface Guild extends mongoose.Document {
 	guildId: string;
 	currency: string;
 	transactionLogChannelId: string;
@@ -81,10 +89,10 @@ export interface Guild {
 	auth: RoleAuthority[];
 	incomes: typeof defaultIncomesObj;
 	intervals: typeof defaultIntervalsObj;
-	modules: Module[];
+	modules: typeof modulesArr;
 }
 
-const Schema = new mongoose.Schema<Guild>(
+export const GuildSchema = new mongoose.Schema<Guild>(
 	{
 		guildId: { type: mongoose.Schema.Types.String, required: true },
 		currency: { type: mongoose.Schema.Types.String, default: CURRENCY_SYMBOL },
@@ -96,7 +104,10 @@ const Schema = new mongoose.Schema<Guild>(
 		intervals: { type: Object, default: defaultIntervalsObj },
 		modules: { type: mongoose.Schema.Types.Array, default: defaultModulesArr },
 	},
-	{ strict: true, versionKey: false }
+	{
+		strict: true,
+		versionKey: false,
+	}
 );
 
-export const GuildModel: mongoose.Model<Guild> = mongoose.model('Guilds', Schema);
+export const GuildModel: mongoose.Model<Guild> = mongoose.model('Guild', GuildSchema);

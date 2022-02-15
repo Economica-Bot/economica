@@ -2,9 +2,8 @@ import { parseNumber } from '@adrastopoulos/number-parser';
 import { MessageEmbed } from 'discord.js';
 
 import { paginate } from '../../lib';
-import { MemberModel } from '../../models';
+import { Member, MemberModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-import { BalanceString } from '../../typings';
 
 export default class implements EconomicaCommand {
 	public data = new EconomicaSlashCommandBuilder()
@@ -12,38 +11,42 @@ export default class implements EconomicaCommand {
 		.setDescription('View top funds.')
 		.setModule('ECONOMY')
 		.setFormat('<wallet | treasury | total> [page]')
-		.setExamples(['leaderboard wallet', 'leaderboard total 3'])
-		.addStringOption((option) =>
-			option
-				.setName('type')
-				.setDescription('Specify the type.')
-				.addChoices([
-					['Wallet', 'wallet'],
-					['Treasury', 'treasury'],
-					['Total', 'total'],
-				])
-				.setRequired(true)
-		)
+		.setExamples(['leaderboard', 'leaderboard 3'])
 		.addIntegerOption((option) =>
 			option.setName('page').setDescription('Specify a page.').setMinValue(1).setRequired(false)
 		);
 
 	public execute = async (ctx: Context): Promise<void> => {
-		const type = ctx.interaction.options.getString('type') as BalanceString;
 		const page = ctx.interaction.options.getInteger('page', false) ?? 1;
 		const { currency } = ctx.guildDocument;
-		const members = await MemberModel.find({ guildId: ctx.guildDocument.guildId }).sort({ [type]: -1 });
+		const memberDocuments: Member[] = await MemberModel.aggregate([
+			{
+				$project: {
+					userId: 1,
+					wallet: 1,
+					treasury: 1,
+					total: {
+						$add: ['$wallet', '$treasury'],
+					},
+				},
+			},
+			{
+				$sort: {
+					total: -1,
+				},
+			},
+		]);
 
 		let entryCount = 10;
-		const pageCount = Math.ceil(members.length / entryCount);
+		const pageCount = Math.ceil(memberDocuments.length / entryCount);
 		const leaderBoardEntries: string[] = [];
 		let rank = 1;
 
-		members.forEach((member) => {
-			const userId = member.userId;
-			const balance = parseNumber(member[type]);
+		for (const memberDocument of memberDocuments) {
+			const userId = memberDocument.userId;
+			const balance = parseNumber(memberDocument.wallet + memberDocument.treasury);
 			leaderBoardEntries.push(`\`${rank++}\` • <@${userId}> | ${currency}${balance}\n`);
-		});
+		}
 
 		const embeds: MessageEmbed[] = [];
 		let k = 0;
@@ -54,7 +57,11 @@ export default class implements EconomicaCommand {
 			}
 
 			const embed = ctx
-				.embedify('info', { name: `Leaderboard (${type})`, iconURL: ctx.interaction.guild.iconURL() }, description)
+				.embedify(
+					'info',
+					{ name: `${ctx.interaction.guild}'s Leaderboard`, iconURL: ctx.interaction.guild.iconURL() },
+					description
+				)
 				.setFooter({ text: `page ${i + 1} of ${pageCount}` });
 			embeds.push(embed);
 		}

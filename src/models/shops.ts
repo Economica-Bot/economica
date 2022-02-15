@@ -1,8 +1,9 @@
 import * as mongoose from 'mongoose';
+
+import { Guild } from '.';
 import { ShopItem } from '../typings';
 
-export interface Shop {
-	guildId: string;
+export interface Shop extends mongoose.Document {
 	type: ShopItem;
 	name: string;
 	price: number;
@@ -16,15 +17,14 @@ export interface Shop {
 	rolesGiven: string[];
 	rolesRemoved: string[];
 	requiredRoles: string[];
-	requiredItems: string[];
+	requiredItems: mongoose.Types.DocumentArray<Shop>;
 	generatorPeriod: number;
 	generatorAmount: number;
 	createdAt: Date;
 }
 
-const Schema = new mongoose.Schema<Shop>(
+export const ShopSchema = new mongoose.Schema<Shop>(
 	{
-		guildId: { type: mongoose.Schema.Types.String, required: true },
 		type: { type: mongoose.Schema.Types.String, required: true },
 		name: { type: mongoose.Schema.Types.String, required: true },
 		price: { type: mongoose.Schema.Types.Number, required: true },
@@ -38,15 +38,14 @@ const Schema = new mongoose.Schema<Shop>(
 		rolesGiven: { type: mongoose.Schema.Types.Array, required: true },
 		rolesRemoved: { type: mongoose.Schema.Types.Array, required: true },
 		requiredRoles: { type: mongoose.Schema.Types.Array, required: true },
-		requiredItems: { type: mongoose.Schema.Types.Array, required: true },
+		requiredItems: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true }],
 		generatorPeriod: { type: mongoose.Schema.Types.Number, required: false },
 		generatorAmount: { type: mongoose.Schema.Types.Number, required: false },
-		createdAt: { type: mongoose.Schema.Types.Date, required: true },
 	},
 	{
-		timestamps: true,
+		timestamps: { createdAt: true, updatedAt: false },
 		versionKey: false,
 	}
 );
 
-export const ShopModel: mongoose.Model<Shop> = mongoose.model('Shops', Schema);
+export const ShopModel: mongoose.Model<Shop> = mongoose.model('Shop', ShopSchema);

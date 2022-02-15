@@ -1,4 +1,4 @@
-import { MemberModel } from '../models';
+import { Member, MemberModel } from '../models';
 import { EconomyInfo } from '../typings';
 
 /**
@@ -7,34 +7,36 @@ import { EconomyInfo } from '../typings';
  * @param {string} userId - User id.
  * @returns {Promise<EconomyInfo>} wallet, treasury, total, rank
  */
-export async function getEconInfo(guildId: string, userId: string): Promise<EconomyInfo> {
-	let rank = 0,
+export async function getEconInfo(member: Member): Promise<EconomyInfo> {
+	const balances: Member[] = await MemberModel.aggregate([
+		{
+			$project: {
+				userId: 1,
+				wallet: 1,
+				treasury: 1,
+				total: {
+					$add: ['$wallet', '$treasury'],
+				},
+			},
+		},
+		{
+			$sort: {
+				total: -1,
+			},
+		},
+	]);
+
+	let rank = 1,
 		wallet = 0,
 		treasury = 0,
-		total = 0,
-		found = false;
-	const balances = await MemberModel.find({ guildId }).sort({ total: -1 });
-	if (balances.length) {
-		for (let rankIndex = 0; rankIndex < balances.length; rankIndex++) {
-			rank = balances[rankIndex].userId === userId ? rankIndex + 1 : rank++;
+		total = 0;
+	for (let i = 0; i < balances.length; i++) {
+		if (balances[i].userId === member.userId) {
+			wallet = balances[i].wallet;
+			treasury = balances[i].treasury;
+			total = wallet + treasury;
+			rank = i + 1;
 		}
-
-		if (balances[rank - 1]) {
-			found = true;
-			wallet = balances[rank - 1].wallet;
-			treasury = balances[rank - 1].treasury;
-			total = balances[rank - 1].total;
-		}
-	}
-
-	if (!found) {
-		await MemberModel.create({
-			guildId,
-			userId,
-			wallet,
-			treasury,
-			total,
-		});
 	}
 
 	return {

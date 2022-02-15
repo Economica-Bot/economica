@@ -1,7 +1,8 @@
 import { Message } from 'discord.js';
 import ms from 'ms';
 
-import { validateObjectId } from '../../lib/validate';
+import { validateSubdocumentObjectId } from '../../lib';
+import { Member, MemberModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -46,16 +47,17 @@ export default class implements EconomicaCommand {
 				.addEconomicaSubcommand((subcommand) => subcommand.setName('all').setDescription('Delete all infractions.'))
 		);
 
-	public execute = async (ctx: Context): Promise<Message | void> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		const subcommandgroup = ctx.interaction.options.getSubcommandGroup(false);
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const user = ctx.interaction.options.getUser('user', false);
-		const { valid, document, model } = await validateObjectId(ctx, 'infraction');
-		if (!valid) return;
-
-		if (subcommand === 'view') {
+		const { valid, document } = await validateSubdocumentObjectId(ctx, 'Infraction', ctx.memberDocument);
+		if (!valid) {
+			return;
+		} else if (subcommand === 'view') {
+			const member = document.parent() as Member;
 			const embed = ctx
-				.embedify('info', 'guild', `Infraction for <@!${document.userId}>\nType: \`${document.type}\``)
+				.embedify('info', 'guild', `Infraction for <@!${member.userId}>\nType: \`${document.type}\``)
 				.addFields([
 					{
 						name: '__**Reason**__',
@@ -81,19 +83,15 @@ export default class implements EconomicaCommand {
 		} else if (subcommandgroup === 'delete') {
 			if (subcommand === 'id') {
 				document.deleteOne();
-				return await ctx.embedify('success', 'guild', `Deleted infraction \`${document._id}\``, true);
 			} else if (subcommand === 'user') {
-				const infractions = await model.deleteMany({
-					guildId: ctx.interaction.guildId,
-					userId: user.id,
-				});
-				return await ctx.embedify('success', 'guild', `Deleted \`${infractions.deletedCount}\` infractions.`, true);
+				const memberDocument = document.parent() as Member;
+				memberDocument.infractions.length = 0;
+				await memberDocument.save();
 			} else if (subcommand === 'all') {
-				const infractions = await model.deleteMany({
-					guildId: ctx.interaction.guildId,
-				});
-				return await ctx.embedify('success', 'guild', `Deleted \`${infractions.deletedCount}\` infractions.`, true);
+				await MemberModel.updateMany({ guild: ctx.guildDocument }, { $set: { infractions: [] } });
 			}
+
+			return await ctx.embedify('success', 'user', 'Infraction(s) removed.', true);
 		}
 	};
 }

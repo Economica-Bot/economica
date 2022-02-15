@@ -1,5 +1,3 @@
-import { Message } from 'discord.js';
-
 import { transaction } from '../../lib';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
@@ -9,24 +7,14 @@ export default class implements EconomicaCommand {
 		.setDescription('Commit a crime to earn a sum.')
 		.setModule('INCOME');
 
-	public execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		const { currency } = ctx.guildDocument;
 		const { min, max, chance, minfine, maxfine } = ctx.guildDocument.incomes.crime;
 		const amount = Math.ceil(Math.random() * (max - min) + min);
 		const fine = Math.ceil(Math.random() * (maxfine - minfine) + minfine);
 
 		if (Math.random() * 100 > chance) {
-			transaction(
-				ctx.client,
-				ctx.interaction.guildId,
-				ctx.interaction.user.id,
-				ctx.client.user.id,
-				'CRIME_FINE',
-				0,
-				-fine,
-				-fine
-			);
-
+			await transaction(ctx.client, ctx.guildDocument, ctx.memberDocument, ctx.clientDocument, 'CRIME_FINE', 0, -fine);
 			return await ctx.embedify(
 				'warn',
 				'user',
@@ -35,17 +23,15 @@ export default class implements EconomicaCommand {
 			);
 		}
 
-		transaction(
+		await transaction(
 			ctx.client,
-			ctx.interaction.guildId,
-			ctx.interaction.user.id,
-			ctx.client.user.id,
+			ctx.guildDocument,
+			ctx.memberDocument,
+			ctx.clientDocument,
 			'CRIME_SUCCESS',
 			amount,
-			0,
-			amount
+			0
 		);
-
 		return await ctx.embedify(
 			'success',
 			'user',

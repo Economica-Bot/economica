@@ -1,4 +1,3 @@
-import { Message } from 'discord.js';
 import { icons } from '../../config';
 import {
 	Context,
@@ -16,7 +15,7 @@ export default class implements EconomicaCommand {
 		.setFormat('<command>')
 		.addStringOption((option) => option.setName('command').setDescription('Specify a command.').setRequired(true));
 
-	public execute = async (ctx: Context): Promise<Message | void> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		const commandInput = ctx.interaction.options.getString('command');
 		const command = ctx.client.commands.get(commandInput);
 		if (!command) return await ctx.embedify('error', 'user', 'Could not find that command.', true);

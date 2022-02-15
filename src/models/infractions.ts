@@ -1,11 +1,10 @@
 import * as mongoose from 'mongoose';
 
+import { Member } from '.';
 import { InfractionString } from '../typings';
 
-export interface Infraction {
-	guildId: string;
-	userId: string;
-	agentId: string;
+export interface Infraction extends mongoose.Types.Subdocument {
+	agent: mongoose.PopulatedDoc<Member>;
 	type: InfractionString;
 	reason: string;
 	permanent: boolean;
@@ -14,11 +13,9 @@ export interface Infraction {
 	createdAt: Date;
 }
 
-const Schema = new mongoose.Schema<Infraction>(
+export const InfractionSchema = new mongoose.Schema<Infraction>(
 	{
-		guildId: { type: mongoose.Schema.Types.String, required: true },
-		userId: { type: mongoose.Schema.Types.String, required: true },
-		agentId: { type: mongoose.Schema.Types.String, required: true },
+		agent: { type: mongoose.Schema.Types.ObjectId, ref: 'Member' },
 		type: { type: mongoose.Schema.Types.String, required: true },
 		reason: { type: mongoose.Schema.Types.String, required: true },
 		permanent: { type: mongoose.Schema.Types.Boolean, required: false },
@@ -26,9 +23,9 @@ const Schema = new mongoose.Schema<Infraction>(
 		duration: { type: mongoose.Schema.Types.Number, required: false },
 	},
 	{
-		timestamps: true,
+		timestamps: { createdAt: true, updatedAt: false },
 		versionKey: false,
 	}
 );
 
-export const InfractionModel: mongoose.Model<Infraction> = mongoose.model('Infractions', Schema);
+export const InfractionModel: mongoose.Model<Infraction> = mongoose.model('Infraction', InfractionSchema);

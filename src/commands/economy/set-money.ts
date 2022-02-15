@@ -1,7 +1,8 @@
 import { parseString } from '@adrastopoulos/number-parser';
-import { GuildMember, Message } from 'discord.js';
+import { GuildMember } from 'discord.js';
 
 import { getEconInfo, transaction } from '../../lib';
+import { MemberModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -16,7 +17,7 @@ export default class implements EconomicaCommand {
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true))
 		.addStringOption((option) =>
 			option
-				.setName('target')
+				.setName('balance')
 				.setDescription('Specify where the money is added.')
 				.addChoices([
 					['wallet', 'wallet'],
@@ -25,33 +26,34 @@ export default class implements EconomicaCommand {
 				.setRequired(true)
 		);
 
-	public execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		const { currency } = ctx.guildDocument;
-		const member = ctx.interaction.options.getMember('user') as GuildMember;
-		const amount = parseString(ctx.interaction.options.getString('amount'));
-		const target = ctx.interaction.options.getString('target');
-		const { wallet, treasury } = await getEconInfo(ctx.interaction.guildId, ctx.interaction.user.id);
-		const difference = target === 'wallet' ? amount - wallet : amount - treasury;
-
-		if (!amount) {
-			return await ctx.embedify('error', 'user', 'Please enter a valid amount.', true);
-		}
-
-		transaction(
-			ctx.client,
-			ctx.interaction.guild.id,
-			member.id,
-			ctx.interaction.user.id,
-			'SET_MONEY',
-			target === 'wallet' ? difference : 0,
-			target === 'treasury' ? difference : 0,
-			difference
+		const target = ctx.interaction.options.getMember('user') as GuildMember;
+		const targetDocument = await MemberModel.findOneAndUpdate(
+			{ guild: ctx.guildDocument, userId: target.id },
+			{ guild: ctx.guildDocument, userId: target.id },
+			{ upsert: true, new: true, setDefaultsOnInsert: true }
 		);
-
+		const amount = parseString(ctx.interaction.options.getString('amount'));
+		const balance = ctx.interaction.options.getString('balance');
+		const { wallet, treasury } = await getEconInfo(ctx.memberDocument);
+		const difference = balance === 'wallet' ? amount - wallet : amount - treasury;
+		const wallet_ = balance === 'wallet' ? difference : 0;
+		const treasury_ = balance === 'treasury' ? difference : 0;
+		if (!amount) return await ctx.embedify('error', 'user', 'Please enter a valid amount.', true);
+		await transaction(
+			ctx.client,
+			ctx.guildDocument,
+			targetDocument,
+			ctx.memberDocument,
+			'SET_MONEY',
+			wallet_,
+			treasury_
+		);
 		return await ctx.embedify(
 			'success',
 			'user',
-			`Set ${member}'s \`${target}\` to ${currency}${amount.toLocaleString()}.`,
+			`Set ${target}'s \`${balance}\` to ${currency}${amount.toLocaleString()}.`,
 			false
 		);
 	};

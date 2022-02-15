@@ -1,6 +1,6 @@
 import { MessageEmbed, TextChannel } from 'discord.js';
 
-import { GuildModel, InfractionModel } from '../models';
+import { Guild, Infraction, Member } from '../models';
 import { EconomicaClient } from '../structures';
 import { InfractionString } from '../typings';
 
@@ -18,29 +18,27 @@ import { InfractionString } from '../typings';
  */
 export async function infraction(
 	client: EconomicaClient,
-	guildId: string,
-	userId: string,
-	agentId: string,
+	guild: Guild,
+	target: Member,
+	agent: Member,
 	type: InfractionString,
 	reason: string,
 	permanent?: boolean,
 	active?: boolean,
 	duration?: number
 ) {
-	const infraction = await InfractionModel.create({
-		guildId,
-		userId,
-		agentId,
+	target.infractions.push({
+		guild,
+		target,
+		agent,
 		type,
 		reason,
 		permanent,
 		active,
 		duration,
 	});
-
-	const guildSetting = await GuildModel.findOne({ guildId });
-	const { infractionLogChannelId } = guildSetting;
-
+	await target.save();
+	const { infractionLogChannelId } = guild;
 	if (infractionLogChannelId) {
 		const channel = client.channels.cache.get(infractionLogChannelId) as TextChannel;
 		const guild = channel.guild;
@@ -49,13 +47,12 @@ export async function infraction(
 			return;
 		}
 
-		const description = `Infraction for <@!${userId}> | Executed by <@!${agentId}>\nType: \`${type}\`\n${reason}`;
+		const description = `Infraction for <@!${target.userId}> | Executed by <@!${agent.userId}>\nType: \`${type}\`\n${reason}`;
 		const embed = new MessageEmbed()
 			.setColor('RED')
-			.setAuthor({ name: infraction._id.toString(), iconURL: guild.iconURL() })
-			.setDescription(description)
-			.setTimestamp();
-
+			.setAuthor({ name: 'Infraction', iconURL: guild.iconURL() })
+			.setDescription(description);
+			
 		channel.send({
 			embeds: [embed],
 		});

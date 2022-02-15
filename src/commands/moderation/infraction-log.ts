@@ -1,5 +1,5 @@
 import { ChannelType } from 'discord-api-types';
-import { Message, TextChannel } from 'discord.js';
+import { TextChannel } from 'discord.js';
 
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
@@ -30,7 +30,7 @@ export default class implements EconomicaCommand {
 			subcommand.setName('reset').setDescription('Reset the infraction log channel.').setAuthority('ADMINISTRATOR')
 		);
 
-	public execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		switch (subcommand) {
 			case 'view':

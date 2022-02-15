@@ -1,8 +1,7 @@
 import { Guild, GuildMember, PermissionString, TextChannel } from 'discord.js';
 import ms from 'ms';
 
-import { DEVELOPER_IDS, icons } from '../config';
-import { GuildModel } from '../models';
+import { DEVELOPER_IDS, DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEV_PERMISSION_EXEMPT, icons } from '../config';
 import {
 	Context,
 	EconomicaSlashCommandSubcommandBuilder,
@@ -11,29 +10,33 @@ import {
 import { Authority } from '../typings';
 
 export async function commandCheck(ctx: Context): Promise<boolean> {
-	if (DEVELOPER_IDS.includes(ctx.interaction.user.id)) {
-		return true;
-	} else if (!ctx.data.enabled) {
+	const isDeveloper = DEVELOPER_IDS.includes(ctx.interaction.user.id);
+	if (!ctx.data.enabled) {
 		await ctx.embedify('warn', 'user', 'This command is disabled.', true);
 		return false;
-	} else if (ctx.data.authority === 'DEVELOPER' && !DEVELOPER_IDS.includes(ctx.interaction.user.id)) {
+	} else if (ctx.data.authority === 'DEVELOPER' && !isDeveloper) {
 		await ctx.embedify('warn', 'user', 'This command is dev only.', true);
 		return false;
 	} else if (!ctx.data.global && !ctx.interaction.guild) {
 		await ctx.embedify('warn', 'user', 'This command may only be used within servers.', true);
 		return false;
-	} else if (ctx.guildDocument?.modules && !ctx.guildDocument.modules.includes(ctx.data.module)) {
+	} else if (!isDeveloper || !DEV_COOLDOWN_EXEMPT) {
+		const valid = await cooldownCheck(ctx);
+		if (!valid) return false;
+	} else if (!isDeveloper || !DEV_PERMISSION_EXEMPT) {
+		const valid = await permissionCheck(ctx);
+		if (!valid) return false;
+	} else if (!isDeveloper || !DEV_MODULE_EXEMPT) {
+		const valid = await moduleCheck(ctx);
+		if (!valid) return false;
+	}
+
+	return true;
+}
+
+async function moduleCheck(ctx: Context): Promise<boolean> {
+	if (!ctx.guildDocument.modules.includes(ctx.data.module)) {
 		await ctx.embedify('warn', 'user', `The \`${ctx.data.module}\` module is not enabled in this server.`, true);
-		return false;
-	}
-
-	const cooldown = await cooldownCheck(ctx);
-	if (!cooldown) {
-		return false;
-	}
-
-	const hasPermission = await permissionCheck(ctx);
-	if (ctx.interaction.member && !hasPermission) {
 		return false;
 	} else {
 		return true;
@@ -74,7 +77,7 @@ async function permissionCheck(ctx: Context): Promise<boolean> {
 	}
 
 	if (authority) {
-		const { auth } = await GuildModel.findOne({ guildId: ctx.interaction.guildId });
+		const { auth } = ctx.guildDocument;
 		const roleAuth = auth.filter((r) => r.authority === authority && member.roles.cache.has(r.roleId));
 		if (!roleAuth.length) missingAuthority = authority;
 	}
@@ -89,8 +92,8 @@ async function permissionCheck(ctx: Context): Promise<boolean> {
 }
 
 async function cooldownCheck(ctx: Context): Promise<boolean> {
-	const incomes = ctx.guildDocument?.incomes;
-	const intervals = ctx.guildDocument?.intervals;
+	const incomes = ctx.guildDocument.incomes;
+	const intervals = ctx.guildDocument.intervals;
 	const key = `${ctx.interaction.guildId}-${ctx.interaction.user.id}-${ctx.interaction.commandName}`;
 
 	if (ctx.interaction.commandName in { ...incomes, ...intervals }) {

@@ -1,20 +1,23 @@
 import * as mongoose from 'mongoose';
 
-import { UserModule } from '../typings';
+import { Module } from '.';
+import { ModuleSchema } from './modules';
 
-export interface User {
+export interface User extends mongoose.Document {
 	userId: string;
 	keys: number;
-	modules: UserModule[];
+	modules: mongoose.Types.DocumentArray<Module>;
 }
 
-const Schema = new mongoose.Schema<User>(
+export const UserSchema = new mongoose.Schema<User>(
 	{
 		userId: { type: mongoose.Schema.Types.String, required: true },
 		keys: { type: mongoose.Schema.Types.Number, default: 0 },
-		modules: { type: mongoose.Schema.Types.Array, default: [] },
+		modules: { type: [ModuleSchema], default: [] },
 	},
-	{ strict: true, versionKey: false }
+	{
+		versionKey: false,
+	}
 );
 
-export const UserModel: mongoose.Model<User> = mongoose.model('Users', Schema);
+export const UserModel: mongoose.Model<User> = mongoose.model('User', UserSchema);

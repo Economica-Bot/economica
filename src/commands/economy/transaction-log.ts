@@ -1,5 +1,5 @@
 import { ChannelType } from 'discord-api-types';
-import { Message, TextChannel } from 'discord.js';
+import { TextChannel } from 'discord.js';
 
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
@@ -30,7 +30,7 @@ export default class implements EconomicaCommand {
 			subcommand.setName('reset').setDescription('Reset the transaction log channel.').setAuthority('MANAGER')
 		);
 
-	public execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		if (subcommand === 'view') {
 			const channelId = ctx.guildDocument.transactionLogChannelId;
@@ -47,11 +47,13 @@ export default class implements EconomicaCommand {
 			) {
 				return await ctx.embedify('error', 'user', 'I need `SEND_MESSAGES` and `EMBED_LINKS` in that channel.', true);
 			} else {
-				await ctx.guildDocument.updateOne({ transactionLogChannelId: channel.id });
+				ctx.guildDocument.transactionLogChannelId = channel.id;
+				await ctx.guildDocument.save();
 				return await ctx.embedify('success', 'user', `Transaction log set to ${channel}.`, false);
 			}
 		} else if (subcommand === 'reset') {
-			await ctx.guildDocument.updateOne({ transactionLogChannelId: null });
+			ctx.guildDocument.transactionLogChannelId = null;
+			await ctx.guildDocument.save();
 			return await ctx.embedify('success', 'user', 'Transaction log reset.', false);
 		}
 	};

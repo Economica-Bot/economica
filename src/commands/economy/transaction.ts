@@ -1,5 +1,6 @@
 import { Message } from 'discord.js';
 
+import { displayTransaction } from '../../lib/transaction';
 import { validateObjectId } from '../../lib/validate';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
@@ -49,32 +50,10 @@ export default class implements EconomicaCommand {
 		const subcommandgroup = ctx.interaction.options.getSubcommandGroup(false);
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const user = ctx.interaction.options.getUser('user', false);
-		const { valid, document, model } = await validateObjectId(ctx, 'transaction');
+		const { valid, document, model } = await validateObjectId(ctx, 'Transaction');
 		if (!valid) return;
-
-		const { currency } = ctx.guildDocument;
-
 		if (subcommand === 'view') {
-			const embed = await ctx
-				.embedify('info', 'guild', `Transaction for <@!${document.userId}>\nType: \`${document.type}\``)
-				.addFields([
-					{
-						name: '__**Wallet**__',
-						value: `${currency}${document.wallet.toLocaleString()}`,
-						inline: true,
-					},
-					{
-						name: '__**Treasury**__',
-						value: `${currency}${document.treasury.toLocaleString()}`,
-						inline: true,
-					},
-					{
-						name: '__**Total**__',
-						value: `${currency}${document.total.toLocaleString()}`,
-						inline: true,
-					},
-				]);
-
+			const embed = await displayTransaction(document);
 			return await ctx.interaction.reply({ embeds: [embed] });
 		} else if (subcommandgroup === 'delete') {
 			if (subcommand === 'id') {

@@ -1,6 +1,5 @@
-import { Message } from 'discord.js';
-
 import { getEconInfo, transaction } from '../../lib';
+import { MemberModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -12,9 +11,14 @@ export default class implements EconomicaCommand {
 		.setExamples(['rob @Wumpus'])
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user.').setRequired(true));
 
-	public execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		const target = ctx.interaction.options.getUser('user');
-		const { wallet: targetWallet } = await getEconInfo(ctx.interaction.guildId, target.id);
+		const targetDocument = await MemberModel.findOneAndUpdate(
+			{ guild: ctx.guildDocument, userId: target.id },
+			{ guild: ctx.guildDocument, userId: target.id },
+			{ upsert: true, new: true, setDefaultsOnInsert: true }
+		);
+		const { wallet: targetWallet } = await getEconInfo(targetDocument);
 		const amount = Math.ceil(Math.random() * targetWallet);
 		const { currency } = ctx.guildDocument;
 		const { chance, minfine, maxfine } = ctx.guildDocument.incomes.rob;
@@ -26,42 +30,12 @@ export default class implements EconomicaCommand {
 		if (targetWallet <= 0) return await ctx.embedify('warn', 'user', `<@!${target.id}> has no money to rob!`, true);
 
 		if (Math.random() * 100 > chance) {
-			transaction(
-				ctx.client,
-				ctx.interaction.guildId,
-				ctx.interaction.user.id,
-				ctx.client.user.id,
-				'ROB_FINE',
-				0,
-				-fine,
-				-fine
-			);
-
+			await transaction(ctx.client, ctx.guildDocument, ctx.memberDocument, ctx.clientDocument, 'ROB_FINE', 0, -fine);
 			return await ctx.embedify('warn', 'user', `You were caught and fined ${currency}${fine.toLocaleString()}`, false);
 		}
 
-		transaction(
-			ctx.client,
-			ctx.interaction.guildId,
-			ctx.interaction.user.id,
-			target.id,
-			'ROB_SUCCESS',
-			amount,
-			0,
-			amount
-		);
-
-		transaction(
-			ctx.client,
-			ctx.interaction.guildId,
-			target.id,
-			ctx.interaction.user.id,
-			'ROB_VICTIM',
-			-amount,
-			0,
-			-amount
-		);
-
+		await transaction(ctx.client, ctx.guildDocument, ctx.memberDocument, targetDocument, 'ROB_SUCCESS', amount, 0);
+		await transaction(ctx.client, ctx.guildDocument, targetDocument, ctx.memberDocument, 'ROB_VICTIM', -amount, 0);
 		return await ctx.embedify(
 			'success',
 			'user',

@@ -1,6 +1,6 @@
 import { Client, Collection, MessageEmbed, WebhookClient } from 'discord.js';
 import { readdirSync } from 'fs';
-import { connect, disconnect } from 'mongoose';
+import { connect, disconnect, Mongoose } from 'mongoose';
 import path from 'path';
 import { Logger } from 'tslog';
 
@@ -26,9 +26,10 @@ import {
 
 export class EconomicaClient extends Client {
 	public commands: Collection<string, EconomicaCommand>;
-	public cooldowns: Collection<string, Date>;
-	public webhooks: WebhookClient[];
 	public services: Collection<string, EconomicaService>;
+	public cooldowns: Collection<string, Date>;
+	public mongoose: Mongoose;
+	public webhooks: WebhookClient[];
 	public log: Logger;
 
 	public constructor() {
@@ -174,7 +175,7 @@ export class EconomicaClient extends Client {
 
 	private async connectMongo() {
 		this.log.debug('Connecting to Mongo');
-		await connect(MONGO_URI, mongoOptions);
+		this.mongoose = await connect(MONGO_URI, mongoOptions);
 		this.log.info('Connected to Mongo');
 	}
 

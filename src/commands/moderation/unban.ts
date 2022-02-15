@@ -1,4 +1,5 @@
-import { Message } from 'discord.js';
+import { validateTarget } from '../../lib';
+import { MemberModel } from '../../models';
 import { InfractionModel } from '../../models/infractions';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
@@ -14,22 +15,28 @@ export default class implements EconomicaCommand {
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))
 		.addStringOption((option) => option.setName('string').setDescription('Specify a reason.'));
 
-	public execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<void> => {
+		if (!(await validateTarget(ctx))) return;
 		const target = ctx.interaction.options.getUser('target');
+		const targetDocument = await MemberModel.findOneAndUpdate(
+			{ guild: ctx.guildDocument, userId: target.id },
+			{ guild: ctx.guildDocument, userId: target.id },
+			{ upsert: true, new: true, setDefaultsOnInsert: true }
+		);
 		const reason = ctx.interaction.options.getString('reason', false) || 'No reason provided';
 		const ban = (await ctx.interaction.guild.bans.fetch()).get(target.id);
+		if (!ban) return await ctx.embedify('error', 'user', 'Could not find banned user.', true);
 		let messagedUser = true;
 
-		if (!ban) return await ctx.embedify('error', 'user', 'Could not find banned user with that id.', true);
-
-		await target
-			.send(`You have been unbanned on **${ctx.interaction.guild.name}** for ${reason}.`)
-			.catch(() => (messagedUser = false));
+		const dmEmbed = ctx
+			.embedify('warn', 'user', `You have been unbanned from **${ctx.interaction.guild.name}**`)
+			.addField('Reason', reason, true);
+		await target.send({ embeds: [dmEmbed] }).catch(() => (messagedUser = false));
 		await ctx.interaction.guild.members.unban(target, reason);
 		await InfractionModel.updateMany(
 			{
-				userId: target.id,
-				guildId: ctx.interaction.guild.id,
+				target: targetDocument,
+				guild: ctx.guildDocument,
 				type: 'BAN',
 				active: true,
 			},
@@ -38,8 +45,9 @@ export default class implements EconomicaCommand {
 			}
 		);
 
-		// prettier-ignore
-		const content = `Unbanned ${target.tag} for ${reason}.${messagedUser ? '\nUser notified' : '\nCould not notify user'}`;
-		return await ctx.embedify('success', 'user', content, false);
+		const embed = ctx
+			.embedify('success', 'user', `Unnanned \`${target.tag}\``)
+			.setFooter({ text: messagedUser ? 'User notified.' : 'Could not notify user.' });
+		return await ctx.interaction.reply({ embeds: [embed] });
 	};
 }

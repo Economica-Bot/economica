@@ -14,9 +14,10 @@ export class Context {
 	public data: EconomicaSlashCommandBuilder;
 	public guildDocument: Guild & Document<Guild>;
 	public memberDocument: Member & Document<Member>;
+	public clientDocument: Member & Document<Member>;
 	public member: GuildMember;
 
-	public constructor(client: EconomicaClient, interaction: CommandInteraction) {
+	public constructor(client: EconomicaClient, interaction?: CommandInteraction) {
 		this.client = client;
 		this.interaction = interaction;
 	}
@@ -25,24 +26,62 @@ export class Context {
 		const command = this.client.commands.get(this.interaction.commandName) as EconomicaCommand;
 		if (!command) {
 			this.interaction.reply({
-				content: 'There was an error while executing this command. Attempting restart...',
+				content: 'There was an error while executing this command.',
 				ephemeral: true,
 			});
 			throw new Error(`There was an error while executing this command`);
 		}
 
 		this.data = command.data as EconomicaSlashCommandBuilder;
-		this.guildDocument = await GuildModel.findOne({ guildId: this.interaction.guildId });
-		this.memberDocument = await MemberModel.findOne({
-			guildId: this.interaction.guildId,
-			userId: this.interaction.user.id,
-		});
+		this.guildDocument = await GuildModel.findOneAndUpdate(
+			{
+				guildId: this.interaction.guildId,
+			},
+			{
+				guildId: this.interaction.guildId,
+			},
+			{
+				upsert: true,
+				new: true,
+				setDefaultsOnInsert: true,
+			}
+		);
+		this.memberDocument = await MemberModel.findOneAndUpdate(
+			{
+				guild: this.guildDocument,
+				userId: this.interaction.user.id,
+			},
+			{
+				guild: this.guildDocument,
+				userId: this.interaction.user.id,
+			},
+			{
+				upsert: true,
+				new: true,
+				setDefaultsOnInsert: true,
+			}
+		);
+		this.clientDocument = await MemberModel.findOneAndUpdate(
+			{
+				guild: this.guildDocument,
+				userId: this.client.user.id,
+			},
+			{
+				guild: this.guildDocument,
+				userId: this.client.user.id,
+			},
+			{
+				upsert: true,
+				new: true,
+				setDefaultsOnInsert: true,
+			}
+		);
 		this.member = this.client.guilds.cache.get(this.interaction.guildId).members.cache.get(this.client.user.id);
 		return this;
 	}
 
 	public embedify(type: ReplyString, author: Author, description?: string | null): MessageEmbed;
-	public embedify(type: ReplyString, author: Author, description: string | null, ephemeral: boolean): Promise<Message>;
+	public embedify(type: ReplyString, author: Author, description: string | null, ephemeral: boolean): Promise<void>;
 	public embedify(
 		type: ReplyString,
 		author: Author,

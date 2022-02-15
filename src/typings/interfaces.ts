@@ -1,19 +1,4 @@
-import { Snowflake } from 'discord.js';
-
 import { Authority } from '.';
-import { Module } from '../config';
-
-export interface CommandData {
-	command: string;
-	timestamp: number;
-}
-
-export interface InventoryItem {
-	refId: string;
-	amount: number;
-	lastGenerateAt: number | null;
-	collected: boolean | null;
-}
 
 export interface EconomyInfo {
 	wallet: number;
@@ -48,14 +33,4 @@ export interface IncomeCommand {
 export interface IntervalCommand {
 	amount: number;
 	cooldown: number;
-}
-
-export interface UserModule {
-	guildId: Snowflake;
-	module: Module;
-}
-
-export interface GuildModule {
-	userId: Snowflake;
-	module: Module;
 }

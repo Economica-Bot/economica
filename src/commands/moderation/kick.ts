@@ -1,6 +1,7 @@
-import { GuildMember, Message } from 'discord.js';
+import { GuildMember } from 'discord.js';
 
 import { infraction, validateTarget } from '../../lib';
+import { MemberModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -15,20 +16,27 @@ export default class implements EconomicaCommand {
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason.').setRequired(false));
 
-	public execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		if (!(await validateTarget(ctx))) return;
-
 		const target = ctx.interaction.options.getMember('target') as GuildMember;
+		const targetDocument = await MemberModel.findOneAndUpdate(
+			{ guild: ctx.guildDocument, userId: target.id },
+			{ guild: ctx.guildDocument, userId: target.id },
+			{ upsert: true, new: true, setDefaultsOnInsert: true }
+		);
 		const reason = (ctx.interaction.options.getString('reason') as string) ?? 'No reason provided';
 		let messagedUser = true;
 
-		await target
-			.send(`You have been kicked for \`${reason}\` from **${ctx.interaction.guild.name}**`)
-			.catch(() => (messagedUser = false));
+		const dmEmbed = ctx
+			.embedify('warn', 'user', `You have been kicked from **${ctx.interaction.guild.name}**`)
+			.addField('Reason', reason, true);
+		await target.send({ embeds: [dmEmbed] }).catch(() => (messagedUser = false));
 		await target.kick(reason);
-		await infraction(ctx.client, ctx.interaction.guildId, target.id, ctx.interaction.user.id, 'KICK', reason);
+		await infraction(ctx.client, ctx.guildDocument, targetDocument, ctx.memberDocument, 'KICK', reason);
 
-		const content = `Kicked ${target.user.tag}${messagedUser ? '\nUser notified' : '\nCould not notify user'}`;
-		return await ctx.embedify('success', 'user', content, false);
+		const embed = ctx
+			.embedify('success', 'user', `Kicked \`${target.user.tag}\``)
+			.setFooter({ text: messagedUser ? 'User notified.' : 'Could not notify user.' });
+		return await ctx.interaction.reply({ embeds: [embed] });
 	};
 }

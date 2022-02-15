@@ -1,5 +1,3 @@
-import { Message } from 'discord.js';
-
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements EconomicaCommand {
@@ -16,7 +14,7 @@ export default class implements EconomicaCommand {
 		)
 		.addEconomicaSubcommand((subcommand) => subcommand.setName('global').setDescription('Refresh global commands.'));
 
-	public execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		await ctx.interaction.deferReply({ ephemeral: true });
 		const guildId = ctx.interaction.options.getString('guild_id');
 		const global = ctx.interaction.options.getSubcommand() === 'global' ? true : false;

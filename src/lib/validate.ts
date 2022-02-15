@@ -1,9 +1,10 @@
 import { parseString } from '@adrastopoulos/number-parser';
 import { GuildMember } from 'discord.js';
-import { Document, isValidObjectId, Model } from 'mongoose';
+import { connection, Document, isValidObjectId, Model } from 'mongoose';
 
 import { getEconInfo } from '.';
-import { Infraction, InfractionModel, Loan, LoanModel, Transaction, TransactionModel } from '../models';
+import { Application, Infraction, Loan, Member, Transaction } from '../models';
+import { Corporation } from '../models/corporations';
 import { Context } from '../structures';
 import { Moderation } from '../typings';
 
@@ -11,7 +12,7 @@ export async function validateAmount(
 	ctx: Context,
 	target: 'wallet' | 'treasury'
 ): Promise<{ validated: boolean; result?: number }> {
-	const { [target]: balance } = await getEconInfo(ctx.interaction.guildId, ctx.interaction.user.id);
+	const { [target]: balance } = await getEconInfo(ctx.memberDocument);
 	const amount = ctx.interaction.options.getString('amount');
 	const result = amount === 'all' ? balance : parseString(amount);
 
@@ -77,44 +78,87 @@ export async function validateTarget(ctx: Context): Promise<boolean> {
 
 export async function validateObjectId(
 	ctx: Context,
-	target: 'loan'
-): Promise<{ valid: boolean; document: Loan & Document<Loan>; model: Model<Loan> }>;
+	target: 'Loan'
+): Promise<{ valid: boolean; document?: Loan; model: Model<Loan> }>;
 export async function validateObjectId(
 	ctx: Context,
-	target: 'infraction'
-): Promise<{ valid: boolean; document: Infraction & Document<Infraction>; model: Model<Infraction> }>;
+	target: 'Infraction'
+): Promise<{ valid: boolean; document?: Infraction; model: Model<Infraction> }>;
 export async function validateObjectId(
 	ctx: Context,
-	target: 'transaction'
-): Promise<{ valid: boolean; document: Transaction & Document<Transaction>; model: Model<Transaction> }>;
+	target: 'Transaction'
+): Promise<{ valid: boolean; document?: Transaction; model: Model<Transaction> }>;
 export async function validateObjectId(
 	ctx: Context,
-	target: 'loan' | 'infraction' | 'transaction'
-): Promise<{ valid: boolean; document?: Document; model?: Model<Loan> | Model<Infraction> | Model<Transaction> }> {
-	const _id = ctx.interaction.options.getString(`${target}_id`, false);
+	target: 'Corporation'
+): Promise<{ valid: boolean; document?: Corporation; model: Model<Corporation> }>;
+export async function validateObjectId(
+	ctx: Context,
+	target: 'Loan' | 'Infraction' | 'Transaction' | 'Corporation' | 'Application'
+): Promise<{
+	valid: boolean;
+	document?: Document<any>;
+	model?: Model<Loan> | Model<Infraction> | Model<Transaction> | Model<Corporation> | Model<Application>;
+}> {
+	const _id = ctx.interaction.options.getString(`${target.toLowerCase()}_id`, false);
 	let document: Document;
 
 	if (_id && !isValidObjectId(_id)) {
 		await ctx.embedify('error', 'user', `Please enter a valid ${target} id.`, true);
 		return { valid: false };
 	} else if (_id) {
-		if (target === 'loan') {
-			document = await LoanModel.findOne({ _id });
-		} else if (target === 'infraction') {
-			document = await InfractionModel.findOne({ _id });
-		} else if (target === 'transaction') {
-			document = await TransactionModel.findOne({ _id });
-		}
-
+		const model = connection.models[target];
+		document = await model.findOne({ _id });
 		if (!document) {
-			await ctx.embedify('error', 'user', `Use ${target} view for a list of ids.`, true);
+			await ctx.embedify('error', 'user', `Use /${target} view for a list of ids.`, true);
 			return { valid: false };
 		}
 	} else {
-		if (target === 'loan') return { valid: true, document: null, model: LoanModel };
-		else if (target === 'infraction') return { valid: true, document: null, model: InfractionModel };
-		else if (target === 'transaction') return { valid: true, document: null, model: TransactionModel };
+		const model = connection.models[target];
+		return { valid: true, document: null, model };
 	}
 
 	return { valid: true, document };
+}
+
+export async function validateSubdocumentObjectId(ctx: Context, target: 'Application', parent: Corporation): Promise<{valid: boolean, document: Application}>;
+export async function validateSubdocumentObjectId(ctx: Context, target: 'Infraction', parent: Member): Promise<{valid: boolean, document: Infraction}>;
+export async function validateSubdocumentObjectId(
+	ctx: Context,
+	target: 'Infraction' | 'Application',
+	parent: Member | Corporation
+): Promise<{ valid: boolean; document?: Application | Infraction }> {
+	const _id = ctx.interaction.options.getString(`${target.toLowerCase()}_id`, false);
+	if (_id && !isValidObjectId(_id)) {
+		await ctx.embedify('error', 'user', `Please enter a valid ${target} id.`, true);
+		return { valid: false };
+	} else if (_id) {
+		let document;
+		if (target === 'Infraction') {
+			if (isMember(parent)) {
+				document = parent.infractions.find((doc: Document) => `${doc._id}` === _id);
+			}
+		} else if (target === 'Application') {
+			if (isCorporation(parent)) {
+				document = parent.applications.find((doc: Document) => `${doc._id}` === _id);
+			}
+		}
+
+		if (!document) {
+			await ctx.embedify('error', 'user', `Use /${target} view for a list of ids.`, true);
+			return { valid: false };
+		}
+
+		return { valid: true, document };
+	} else {
+		return { valid: true };
+	}
+}
+
+function isMember(parent: any): parent is Member {
+	return (parent as Member).infractions !== undefined;
+}
+
+function isCorporation(parent: any): parent is Corporation {
+	return (parent as Corporation).applications !== undefined;
 }

@@ -9,14 +9,13 @@ import {
 } from '.';
 import { Context } from './Context';
 
-export class EconomicaCommand {
-	public data:
+export interface EconomicaCommand {
+	data:
 		| EconomicaSlashCommandBuilder
-		| EconomicaSlashCommandSubcommandGroupBuilder
 		| EconomicaSlashCommandSubcommandBuilder
 		| EconomicaSlashCommandSubcommandsOnlyBuilder
 		| EconomicaSlashCommandOptionsOnlyBuilder
 		| Omit<EconomicaSlashCommandBuilder, 'addEconomicaSubcommand' | 'addEconomicaSubcommandGroup'>;
 
-	public execute: (ctx: Context) => Promise<Message | void>;
+	execute(ctx: Context): Promise<Message | void>;
 }

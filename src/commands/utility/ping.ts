@@ -1,5 +1,3 @@
-import { Message } from 'discord.js';
-
 import { i18n } from '../../config';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
@@ -10,7 +8,7 @@ export default class implements EconomicaCommand {
 		.setModule('UTILITY')
 		.setGlobal(true);
 
-	public execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		return await ctx.embedify(
 			'success',
 			'user',

@@ -36,11 +36,10 @@ export default class implements EconomicaCommand {
 		);
 
 	public execute = async (ctx: Context): Promise<Message | void> => {
-		const incomes = ctx.guildDocument.incomes;
 		const subcommand = ctx.interaction.options.getSubcommand();
 		if (subcommand === 'view') {
 			const embed = ctx.embedify('info', 'guild', 'Income command information');
-			for (const [k, v] of Object.entries(incomes)) {
+			for (const [k, v] of Object.entries(ctx.guildDocument.incomes)) {
 				const description = [];
 				for (const [k1, v1] of Object.entries(v)) {
 					description.push(`\`${k1}: ${v1}\``);
@@ -57,29 +56,31 @@ export default class implements EconomicaCommand {
 			const minfine = ctx.interaction.options.getInteger('minfine', false);
 			const maxfine = ctx.interaction.options.getInteger('maxfine', false);
 			const cooldown = ctx.interaction.options.getString('cooldown', false);
-			const command = ctx.interaction.options.getString('command');
-			const inter = ctx.client.commands.get(command);
+			const commandQuery = ctx.interaction.options.getString('command');
+			const command = ctx.client.commands.get(commandQuery);
 
-			if (!inter) {
+			if (!command) {
 				return await ctx.embedify('error', 'user', 'Could not find that command.', true);
-			} else if (inter.data.name in Object.keys(incomes)) {
+			} else if (command.data.name in Object.keys(ctx.guildDocument.incomes)) {
 				return await ctx.embedify('error', 'user', `That is not an \`INCOME\` command.`, true);
 			}
 
-			let k: keyof typeof incomes;
-			for (k in incomes) {
-				if (k === command) {
-					if (min && 'min' in incomes[k]) incomes[k].min = min;
-					if (max && 'max' in incomes[k]) incomes[k].max = max;
-					if (chance && 'chance' in incomes[k]) incomes[k].chance = chance;
-					if (minfine && 'minfine' in incomes[k]) incomes[k].minfine = minfine;
-					if (maxfine && 'maxfine' in incomes[k]) incomes[k].maxfine = maxfine;
-					if (cooldown && 'cooldown' in incomes[k] && ms(cooldown)) incomes[k].cooldown = ms(cooldown);
+			let k: keyof typeof ctx.guildDocument.incomes;
+			for (k in ctx.guildDocument.incomes) {
+				if (k === command.data.name) {
+					if (min && 'min' in ctx.guildDocument.incomes[k]) ctx.guildDocument.incomes[k].min = min;
+					if (max && 'max' in ctx.guildDocument.incomes[k]) ctx.guildDocument.incomes[k].max = max;
+					if (chance && 'chance' in ctx.guildDocument.incomes[k]) ctx.guildDocument.incomes[k].chance = chance;
+					if (minfine && 'minfine' in ctx.guildDocument.incomes[k]) ctx.guildDocument.incomes[k].minfine = minfine;
+					if (maxfine && 'maxfine' in ctx.guildDocument.incomes[k]) ctx.guildDocument.incomes[k].maxfine = maxfine;
+					if (cooldown && 'cooldown' in ctx.guildDocument.incomes[k] && ms(cooldown))
+						ctx.guildDocument.incomes[k].cooldown = ms(cooldown);
 				}
 			}
 
-			await ctx.guildDocument.updateOne({ incomes });
-			return await ctx.embedify('success', 'user', `Updated \`${command}\`.`, false);
+			ctx.guildDocument.markModified('incomes');
+			await ctx.guildDocument.save();
+			return await ctx.embedify('success', 'user', `Updated \`${command.data.name}\`.`, false);
 		}
 	};
 }

@@ -1,5 +1,3 @@
-import { Message } from 'discord.js';
-
 import { CURRENCY_SYMBOL } from '../../config';
 import { GuildModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
@@ -24,7 +22,7 @@ export default class implements EconomicaCommand {
 			subcommand.setName('reset').setDescription('Reset the currency symbol.').setAuthority('MANAGER')
 		);
 
-	public execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const guildId = ctx.interaction.guildId;
 		const { currency } = ctx.guildDocument;

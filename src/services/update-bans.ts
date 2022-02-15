@@ -1,5 +1,5 @@
 import { SERVICE_COOLDOWNS } from '../config';
-import { InfractionModel } from '../models';
+import { Guild, InfractionModel, Member } from '../models';
 import { EconomicaClient, EconomicaService } from '../structures';
 
 export default class implements EconomicaService {
@@ -11,8 +11,10 @@ export default class implements EconomicaService {
 		bans.forEach(async (ban) => {
 			if (ban.createdAt.getTime() + ban.duration < now.getTime()) {
 				await ban.updateOne({ active: false });
-				const guild = client.guilds.cache.get(ban.guildId);
-				await guild.members.unban(ban.userId, 'Economica: Ban expired.');
+				const memberDocument = ban.populate('target').parent() as Member;
+				const guildDocument = memberDocument.populate('guild').guild as Guild;
+				const guild = client.guilds.cache.get(guildDocument.guildId);
+				await guild.members.unban(memberDocument.userId, 'Economica: Ban expired.');
 			}
 		});
 	};

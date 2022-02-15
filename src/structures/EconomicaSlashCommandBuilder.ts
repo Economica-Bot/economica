@@ -7,11 +7,11 @@ import {
 } from '@discordjs/builders';
 import { PermissionString } from 'discord.js';
 
-import { Module } from '../config';
+import { ModuleString } from '../config';
 import { Authority } from '../typings';
 
 export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
-	public module: Module;
+	public module: ModuleString;
 	public format: string;
 	public examples: string[];
 	public clientPermissions: PermissionString[];
@@ -24,7 +24,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	public setModule(module: Module): this {
+	public setModule(module: ModuleString): this {
 		this.module = module;
 		return this;
 	}

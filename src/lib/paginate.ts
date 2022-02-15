@@ -1,5 +1,7 @@
 import * as Discord from 'discord.js';
 
+import { BUTTON_INTERACTION_COOLDOWN } from '../config';
+
 /**
  * Initiates a pagination embed display.
  * @param {Discord.CommandInteraction} interaction
@@ -15,7 +17,6 @@ export async function paginate(
 		await interaction.deferReply();
 	}
 
-	const time = 1000 * 15; //15 second on buttons
 	let row = new Discord.MessageActionRow()
 		.addComponents(
 			new Discord.MessageButton()
@@ -43,7 +44,7 @@ export async function paginate(
 
 	const collector = msg.createMessageComponentCollector<'BUTTON'>({
 		filter,
-		time,
+		time: BUTTON_INTERACTION_COOLDOWN,
 	});
 
 	collector.on('collect', async (i) => {

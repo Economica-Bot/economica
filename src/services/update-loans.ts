@@ -1,14 +1,14 @@
 import { SERVICE_COOLDOWNS } from '../config';
 import * as util from '../lib';
-import { LoanModel } from '../models';
-import { EconomicaClient, EconomicaService } from '../structures';
+import { Guild, LoanModel, Member } from '../models';
+import { Context, EconomicaClient, EconomicaService } from '../structures';
 
 export default class implements EconomicaService {
 	public name = 'update-loans';
 	public cooldown = SERVICE_COOLDOWNS.UPDATE_LOANS;
 	public execute = async (client: EconomicaClient): Promise<void> => {
 		const now = new Date();
-		const loans = await LoanModel.find({
+		const loanDocuments = await LoanModel.find({
 			expires: {
 				$lt: now,
 			},
@@ -18,22 +18,18 @@ export default class implements EconomicaService {
 		});
 
 		//Complete loan transaction.
-		if (loans && loans.length) {
-			for (const loan of loans) {
-				const { guildId, borrowerId, lenderId, repayment } = loan;
-
-				await util.transaction(client, guildId, borrowerId, lenderId, 'LOAN_GIVE_REPAYMENT', 0, -repayment, -repayment);
-
-				await util.transaction(
-					client,
-					guildId,
-					lenderId,
-					borrowerId,
-					'LOAN_RECEIVE_REPAYMENT',
-					0,
+		if (loanDocuments?.length) {
+			for (const loanDocument of loanDocuments) {
+				const {
+					guild,
+					borrower,
+					lender,
 					repayment,
-					repayment
-				);
+				}: { guild: Guild; borrower: Member; lender: Member; repayment: number } = loanDocument;
+				const ctx = new Context(client);
+
+				await util.transaction(ctx.client, ctx.guildDocument, borrower, lender, 'LOAN_GIVE_REPAYMENT', 0, -repayment);
+				await util.transaction(ctx.client, ctx.guildDocument, borrower, lender, 'LOAN_RECEIVE_REPAYMENT', 0, repayment);
 			}
 
 			await LoanModel.updateMany(

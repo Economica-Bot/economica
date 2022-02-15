@@ -7,8 +7,9 @@ import { ISettingsParam } from 'tslog';
 
 import { IncomeCommand, IntervalCommand, ReplyString } from './typings';
 
-// Required
-export const BOT_TOKEN = process.env.ECON_ALPHA_TOKEN;
+// Environment Vars
+
+export const BOT_TOKEN = process.env.BOT_TOKEN;
 export const DEVELOPER_IDS: string[] = JSON.parse(process.env.DEVELOPER_IDS);
 export const DEVELOPMENT_GUILD_IDS: string[] = JSON.parse(process.env.DEVELOPMENT_GUILD_IDS);
 export const PUBLIC_GUILD_ID = process.env.PUBLIC_GUILD_ID;
@@ -20,12 +21,20 @@ export const DEBUG = process.env.DEBUG === 'true';
 export const MONGO_URI = process.env.MONGO_URI;
 export const CURRENCY_SYMBOL = process.env.CURRENCY_SYMBOL;
 
+// Exemptions
+
+export const DEV_COOLDOWN_EXEMPT = process.env.DEV_COOLDOWN_EXEMPT === 'true';
+export const DEV_PERMISSION_EXEMPT = process.env.DEV_PERMISSION_EXEMPT === 'true';
+export const DEV_MODULE_EXEMPT = process.env.DEV_MODULE_EXEMPT === 'true';
+
 // Optional
+
 export const WEBSITE_URL = process.env.WEBSITE_URL;
 export const ACTIVITY_NAME = process.env.ACTIVITY_NAME;
 export const ACTIVITY_TYPE = process.env.ACTIVITY_TYPE as ExcludeEnum<typeof ActivityTypes, 'CUSTOM'>;
 
-// Constants
+// Configurations
+
 export const clientOptions: ClientOptions = {
 	presence: {
 		activities: [
@@ -66,6 +75,19 @@ export const loggerOptions: ISettingsParam = {
 	displayInstanceName: true,
 	minLevel: DEBUG ? 'silly' : 'info',
 };
+
+export const i18nOptions: i18n.ConfigurationOptions = {
+	defaultLocale: 'en',
+	directory: path.join(__dirname, '../locales'),
+	locales: ['en'],
+	updateFiles: false,
+	objectNotation: true,
+};
+
+i18n.configure(i18nOptions);
+export { i18n };
+
+// Constants
 
 export enum SERVICE_COOLDOWNS {
 	DEV = 1000 * 10,
@@ -117,11 +139,15 @@ export const authors = {
 	},
 };
 
-export type defaultIncomes = { 
-	work: IncomeCommand; 
-	beg: IncomeCommand; 
-	crime: IncomeCommand; 
-	rob: IncomeCommand 
+export const BUTTON_INTERACTION_COOLDOWN = 1000 * 15;
+
+// Types
+
+export type defaultIncomes = {
+	work: IncomeCommand;
+	beg: IncomeCommand;
+	crime: IncomeCommand;
+	rob: IncomeCommand;
 };
 
 export type defaultIntervals = {
@@ -133,18 +159,9 @@ export type defaultIntervals = {
 	monthly: IntervalCommand;
 };
 
-// Check guild model when updating
-export type defaultModule = 'ADMIN' | 'ECONOMY' | 'INCOME' | 'MODERATION' | 'SHOP' | 'UTILITY';
-export type specialModule = 'INSIGHTS' | 'INTERVAL';
-export type devModule = 'APPLICATION';
-export type Module = defaultModule | specialModule | devModule;
-
-i18n.configure({
-	defaultLocale: 'en',
-	directory: path.join(__dirname, '../locales'),
-	locales: ['en'],
-	updateFiles: false,
-	objectNotation: true,
-});
-
-export { i18n };
+// Check ../../models/guilds.ts when updating
+// Make into record
+export type DefaultModuleString = 'ADMIN' | 'ECONOMY' | 'INCOME' | 'MODERATION' | 'SHOP' | 'UTILITY';
+export type SpecialModuleString = 'INSIGHTS' | 'INTERVAL' | 'CORPORATION';
+export type DevModuleString = 'APPLICATION';
+export type ModuleString = DefaultModuleString | SpecialModuleString | DevModuleString;

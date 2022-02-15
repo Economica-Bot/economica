@@ -30,7 +30,7 @@ export default class implements EconomicaCommand {
 			subcommand.setName('reset').setDescription('Reset the bot log channel.').setAuthority('ADMINISTRATOR')
 		);
 
-	public execute = async (ctx: Context): Promise<Message> => {
+	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		switch (subcommand) {
 			case 'view':
@@ -48,11 +48,13 @@ export default class implements EconomicaCommand {
 				) {
 					return await ctx.embedify('error', 'user', 'I need `SEND_MESSAGES` and `EMBED_LINKS` in that channel.', true);
 				} else {
-					await ctx.guildDocument.updateOne({ botLogChannelId: channel.id });
+					ctx.guildDocument.botLogChannelId = channel.id;
+					await ctx.guildDocument.save();
 					return await ctx.embedify('success', 'user', `Bot log set to ${channel}.`, false);
 				}
 			case 'reset':
-				await ctx.guildDocument.updateOne({ botLogChannelId: null });
+				ctx.guildDocument.botLogChannelId = null;
+				ctx.guildDocument.save();
 				return await ctx.embedify('success', 'user', 'Bot log reset.', false);
 		}
 	};

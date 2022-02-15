@@ -2,7 +2,7 @@ import { EmbedAuthorData } from 'discord.js';
 
 export type ReplyString = 'success' | 'info' | 'warn' | 'error';
 export type InfractionString = 'BAN' | 'KICK' | 'TIMEOUT' | 'UNBAN' | 'UNTIMEOUT';
-export type BalanceString = 'wallet' | 'treasury' | 'total';
+export type BalanceString = 'wallet' | 'treasury';
 export type Author = 'bot' | 'user' | 'guild' | EmbedAuthorData;
 export type Authority = 'USER' | 'MODERATOR' | 'MANAGER' | 'ADMINISTRATOR' | 'DEVELOPER';
 export type Moderation = 'ban' | 'kick' | 'timeout' | 'unban' | 'untimeout';
@@ -130,14 +130,4 @@ export type TransactionString =
 	| 'INTERVAL_FORTNIGHT'
 	| 'INTERVAL_MONTH';
 
-export {
-	CommandData,
-	InventoryItem,
-	EconomyInfo,
-	IncomeCommandProperties,
-	RoleAuthority,
-	IncomeCommand,
-	IntervalCommand,
-	UserModule,
-	GuildModule,
-} from './interfaces';
+export { EconomyInfo, IncomeCommandProperties, RoleAuthority, IncomeCommand, IntervalCommand } from './interfaces';

@@ -1,5 +1,5 @@
 import { SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from '@discordjs/builders';
-import { Message, MessageEmbed } from 'discord.js';
+import { Message } from 'discord.js';
 
 import { icons } from '../../config';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
@@ -23,10 +23,17 @@ export default class implements EconomicaCommand {
 			const commands: EconomicaSlashCommandBuilder[] = [];
 			const modules: string[] = [];
 
-			ctx.client.commands.forEach((command) => {
-				const data = command.data as EconomicaSlashCommandBuilder;
-				if (!modules.includes(data.module)) modules.push(data.module);
-				commands.push(data);
+			ctx.guildDocument.modules.forEach((module) => {
+				const commands_ = ctx.client.commands.filter((cmd) => {
+					const data = cmd.data as EconomicaSlashCommandBuilder;
+					return data.module === module;
+				});
+
+				commands_.forEach((command) => {
+					const data = command.data as EconomicaSlashCommandBuilder;
+					if (!modules.includes(data.module)) modules.push(data.module);
+					commands.push(data);
+				});
 			});
 
 			const embed = ctx.embedify('info', 'bot', 'Command List.');
@@ -63,7 +70,7 @@ export default class implements EconomicaCommand {
 			for (const command of ctx.client.commands) {
 				const data = command[1].data as EconomicaSlashCommandBuilder;
 				if (data.module === module) {
-					embed.addField(data.name, `>>> *${data.description}*${data.format ? `\nFormat: \`${data.format}\`` : ''}`);
+					embed.addField(data.name, `> *${data.description}*${data.format ? `\n> Format: \`${data.format}\`` : ''}`);
 				}
 			}
 

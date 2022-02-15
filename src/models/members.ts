@@ -1,30 +1,29 @@
 import * as mongoose from 'mongoose';
 
-import { CommandData, InventoryItem } from '../typings';
+import { Command, CommandSchema, Guild, Infraction, InventoryItem, InventoryItemSchema } from '.';
 
-export interface Member {
-	guildId: string;
+export interface Member extends mongoose.Document {
+	guild: mongoose.PopulatedDoc<Guild>;
 	userId: string;
 	wallet: number;
 	treasury: number;
-	total: number;
-	commands: CommandData[];
-	inventory: InventoryItem[];
+	commands: mongoose.Types.DocumentArray<Command>;
+	infractions: mongoose.Types.DocumentArray<Infraction>;
+	inventory: mongoose.Types.DocumentArray<InventoryItem>;
 }
 
-const Schema = new mongoose.Schema<Member>(
+export const MemberSchema = new mongoose.Schema<Member>(
 	{
-		guildId: { type: mongoose.Schema.Types.String, required: true },
+		guild: { type: mongoose.Schema.Types.ObjectId, ref: 'Guild' },
 		userId: { type: mongoose.Schema.Types.String, required: true },
-		wallet: { type: mongoose.Schema.Types.Number, required: true },
-		treasury: { type: mongoose.Schema.Types.Number, required: true },
-		total: { type: mongoose.Schema.Types.Number, required: true },
-		commands: { type: mongoose.Schema.Types.Array, required: true },
-		inventory: { type: mongoose.Schema.Types.Array, required: true },
+		wallet: { type: mongoose.Schema.Types.Number, default: 0 },
+		treasury: { type: mongoose.Schema.Types.Number, default: 0 },
+		commands: { type: [CommandSchema], default: [] },
+		inventory: { type: [InventoryItemSchema], default: [] },
 	},
 	{
 		versionKey: false,
 	}
 );
 
-export const MemberModel: mongoose.Model<Member> = mongoose.model('Members', Schema);
+export const MemberModel: mongoose.Model<Member> = mongoose.model('Member', MemberSchema);
