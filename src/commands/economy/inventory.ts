@@ -71,7 +71,7 @@ export default class implements EconomicaCommand {
 						})
 						.setColor('BLUE')
 						.setTitle(`${user.tag}'s Inventory`)
-						.setDescription(`${user.username} has \`${entries.length}\` distinct items and a total volume of \`${}\` items.`)
+						.setDescription(`${user.username} has \`${entries.length}\` distinct items and a total volume of \`${total}\` items.`)
 						.setFields([
 							{ name: '\u200b', value: columns[0].length? columns[0] : '\u200b', inline: true },
 							{ name: '\u200b', value: columns[1].length? columns[1] : '\u200b', inline: true },
