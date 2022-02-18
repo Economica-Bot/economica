@@ -18,11 +18,11 @@ export default class implements EconomicaCommand {
 		const { interaction } = ctx;
 		const user = interaction.options.getUser('user') || interaction.user
 		const memberDocument = await MemberModel.findOne({
-			guildId: interaction.guildId,
-			userId: user.id
+			guild: ctx.guildDocument,
+			userId: user.id // user is not necessarily the command caller
 		})
 		const shop = await ShopModel.find({
-			guildId: interaction.guildId
+			guild: ctx.guildDocument
 		}).sort({ price: -1 })
 
 		if (!memberDocument.inventory.length)
@@ -43,10 +43,13 @@ export default class implements EconomicaCommand {
 			const maxEntries = 30;
 			const entries: string[] = []
 
+			let total = 0;
 			memberDocument.inventory.forEach(invItem => {
-				const item = shop.find(item => `${invItem.refId}` == `${item._id}`);
+				const item = shop.find(item => `${invItem.shop}` == `${item._id}`);
 
 				entries.push(`\`${item.name}\` (${invItem.amount})`); // forming three-column display (right-left top-down)
+
+				total += invItem.amount;
 			})
 
 			const pageCount = Math.ceil(entries.length / maxEntries) || 1;
@@ -57,7 +60,6 @@ export default class implements EconomicaCommand {
 					for (let j = 0; j < maxEntries && entries[k]; j++, k++) {
 						if (entries[k]) {
 							columns[k % 3] += entries[k] + '\n'
-							console.log(entries[k])
 						}
 					}
 	
@@ -69,7 +71,7 @@ export default class implements EconomicaCommand {
 						})
 						.setColor('BLUE')
 						.setTitle(`${user.tag}'s Inventory`)
-						.setDescription(`${user.username} has \`${entries.length}\` distinct items and a total volume of \`${k}\` items.`)
+						.setDescription(`${user.username} has \`${entries.length}\` distinct items and a total volume of \`${}\` items.`)
 						.setFields([
 							{ name: '\u200b', value: columns[0].length? columns[0] : '\u200b', inline: true },
 							{ name: '\u200b', value: columns[1].length? columns[1] : '\u200b', inline: true },
@@ -78,6 +80,6 @@ export default class implements EconomicaCommand {
 					)
 				}
 	
-				await paginate(ctx.interaction, embeds, 0);
+				return await paginate(ctx.interaction, embeds, 0);
 	}
 }

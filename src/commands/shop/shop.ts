@@ -83,7 +83,7 @@ export default class implements EconomicaCommand {
 		const maxEntries = 15;
 		const shopEntries: EmbedFieldData[] = [];
 		const pageCount = Math.ceil(shopEntries.length / maxEntries) || 1;
-		const shop = await ShopModel.find({ guildId: ctx.interaction.guildId }).sort({ price: -1 });
+		const shop = await ShopModel.find({ guild: ctx.guildDocument }).sort({ price: -1 });
 
 		if (subcommandGroup === 'view') {
 			if (subcommand === 'all') {
@@ -193,7 +193,7 @@ export default class implements EconomicaCommand {
 		} else if (subcommandGroup === 'disable') {
 			if (subcommand === 'single') {
 				const shopItem = await ShopModel.findOneAndUpdate(
-					{ guildId: ctx.interaction.guildId, name },
+					{ guild: ctx.guildDocument, name },
 					{ active: false }
 				);
 				if (!shopItem) {
@@ -202,12 +202,12 @@ export default class implements EconomicaCommand {
 					return await ctx.embedify('success', 'user', 'Item disabled.', false);
 				}
 			} else if (subcommand === 'all') {
-				const shopItems = await ShopModel.updateMany({ guildId: ctx.interaction.guildId }, { active: false });
+				const shopItems = await ShopModel.updateMany({ guild: ctx.guildDocument }, { active: false });
 				return await ctx.embedify('success', 'user', `Enabled ${shopItems.nModified} shop items.`, false);
 			}
 		} else if (subcommandGroup === 'delete') {
 			if (subcommand === 'single') {
-				const shopItem = await ShopModel.deleteOne({ guildId: ctx.interaction.guildId, name });
+				const shopItem = await ShopModel.deleteOne({ guild: ctx.guildDocument, name });
 				if (!shopItem) {
 					return await ctx.embedify('error', 'user', 'Could not find a shop item with that name.', true);
 				} else {

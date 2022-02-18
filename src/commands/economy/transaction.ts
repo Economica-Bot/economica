@@ -61,13 +61,13 @@ export default class implements EconomicaCommand {
 				return await ctx.embedify('success', 'guild', `Deleted transaction \`${document._id}\``, true);
 			} else if (subcommand === 'user') {
 				const transactions = await model.deleteMany({
-					guildId: ctx.interaction.guildId,
+					guild: ctx.guildDocument,
 					userId: user.id,
 				});
 				return await ctx.embedify('success', 'guild', `Deleted \`${transactions.deletedCount}\` transactions.`, true);
 			} else if (subcommand === 'all') {
 				const transactions = await model.deleteMany({
-					guildId: ctx.interaction.guildId,
+					guild: ctx.guildDocument,
 				});
 				return await ctx.embedify('success', 'guild', `Deleted \`${transactions.deletedCount}\` transactions.`, true);
 			}

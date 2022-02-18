@@ -12,9 +12,9 @@ export class Context {
 	public client: EconomicaClient;
 	public interaction: CommandInteraction;
 	public data: EconomicaSlashCommandBuilder;
-	public guildDocument: Guild & Document<Guild>;
-	public memberDocument: Member & Document<Member>;
-	public clientDocument: Member & Document<Member>;
+	public guildDocument: Guild;
+	public memberDocument: Member;
+	public clientDocument: Member;
 	public member: GuildMember;
 
 	public constructor(client: EconomicaClient, interaction?: CommandInteraction) {

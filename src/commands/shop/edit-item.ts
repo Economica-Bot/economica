@@ -3,10 +3,10 @@ import ms from "ms";
 import { itemInfo, itemRegExp } from "../../lib";
 import { Shop, ShopModel } from "../../models";
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from "../../structures";
-import { Document } from 'mongoose';
+import { Document, LeanDocument, Types } from 'mongoose';
 
 
-export default class extends EconomicaCommand {
+export default class implements EconomicaCommand {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('edit-item')
 		.setDescription('Edit properties of an item. Some properties are unchangeable.')
@@ -213,7 +213,7 @@ export default class extends EconomicaCommand {
 		// There's no item, dumbass
 		if (!
 			await ShopModel.findOne({
-				guildId: interaction.guildId,
+				guild: ctx.guildDocument,
 				name: interaction.options.getString('name')
 			})
 		) return await ctx.embedify('error', 'user', `No item with name \`${interaction.options.getString('name')}\` found.`, true)
@@ -243,7 +243,7 @@ export default class extends EconomicaCommand {
 
 		// Checks and formatting.
 		const sameNameItem = await ShopModel.findOne({
-			guildId: interaction.guildId,
+			guild: ctx.guildDocument,
 			name: itemRegExp(interaction.options.getString('new_name'))
 		})
 		if (sameNameItem)
@@ -323,10 +323,10 @@ export default class extends EconomicaCommand {
 		editedItem['rolesRemoved'] = rolesRemoved
 
 		const requiredItemsUF = interaction.options.getString('required_items')?.split(',')
-		const requiredItems: string[] = []
+		const requiredItems: Types.DocumentArray<Shop> = new Types.DocumentArray<Shop>([])
 
 		const items = await ShopModel.find({
-			guildId: interaction.guildId
+			guild: ctx.guildDocument
 		})
 
 		requiredItemsUF?.forEach(iName => {
@@ -335,7 +335,7 @@ export default class extends EconomicaCommand {
 			if (!item)
 				return ctx.embedify('error', 'user', `The string ${iName} could not be parsed as an inventory item, or an item with such name does not exist. Please pass a list of inventory item names (case-insensitive) separated by commas for \`required_items\`.`, true)
 
-			requiredItems.push(item._id)
+			requiredItems.push(item)
 		})
 		editedItem['requiredItems'] = requiredItems
 
@@ -357,14 +357,14 @@ export default class extends EconomicaCommand {
 			})
 
 			await ShopModel.findOneAndUpdate({
-				guildId: interaction.guildId,
+				guild: ctx.guildDocument,
 				name: interaction.options.getString('name')
 			}, editedItem)
 		}
 		else if (edit_mode == 'replace') {
 			if (subcommand == 'classic') {
 				await ShopModel.findOneAndUpdate({
-					guildId: interaction.guildId,
+					guild: ctx.guildDocument,
 					name: interaction.options.getString('name')
 				}, {
 					name: interaction.options.getString('new_name'),
@@ -384,7 +384,7 @@ export default class extends EconomicaCommand {
 			}
 				else if (subcommand == 'generator') {
 					await ShopModel.findOneAndUpdate({
-						guildId: interaction.guildId,
+						guild: ctx.guildDocument,
 						name: interaction.options.getString('name')
 					}, {
 						name: interaction.options.getString('new_name'),
@@ -407,7 +407,7 @@ export default class extends EconomicaCommand {
 		}
 
 		const item = await ShopModel.findOne({
-			guildId: interaction.guildId,
+			guild: ctx.guildDocument,
 			name: interaction.options.getString('new_name')
 		})
 

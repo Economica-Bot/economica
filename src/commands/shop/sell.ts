@@ -14,8 +14,13 @@ export default class implements EconomicaCommand {
 	public execute = async (ctx: Context): Promise<void> => {
 		const query = ctx.interaction.options.getString('item');
 		const shop = await ShopModel.findOne({ name: new RegExp(`^${query}`, 'i') });
-		const hasItem = ctx.memberDocument.inventory.some((inventoryItemDocument) => {
-			const _shop = inventoryItemDocument.populate('shop').shop as Shop;
+		const hasItem = ctx.memberDocument.inventory.some(async (inventoryItemDocument) => {
+			const _member = await ctx.memberDocument.populate({
+				path: `inventory.shop`,
+				model: 'Shop'
+			}).execPopulate()
+
+			const _shop = _member.inventory.find(item => item._id == inventoryItemDocument._id).shop as Shop
 			return _shop._id === shop;
 		});
 
@@ -27,11 +32,7 @@ export default class implements EconomicaCommand {
 			return await ctx.embedify('warn', 'user', 'You do not have this item.', true);
 		}
 
-		await transaction(ctx.client, ctx.guildDocument, ctx.memberDocument, ctx.clientDocument, 'SELL', shop.price, 0);
-
-		shop.rolesGiven.forEach((roleId) => {
-			(ctx.interaction.member.roles as GuildMemberRoleManager).remove(roleId, `Sold ${shop.name}`);
-		});
+		await transaction(ctx.client, ctx.guildDocument, ctx.memberDocument, ctx.clientDocument, 'SELL', (shop.price * ctx.guildDocument.sellRefund), 0);
 
 		ctx.memberDocument.inventory.map((entry) => {
 			if (entry.amount === 1) {
@@ -49,7 +50,7 @@ export default class implements EconomicaCommand {
 		return await ctx.embedify(
 			'success',
 			'user',
-			`Sold \`${shop.name}\` for ${currency}${shop.price.toLocaleString()}`,
+			`Sold \`${shop.name}\` for ${currency}${(shop.price * ctx.guildDocument.sellRefund).toLocaleString()}`,
 			false
 		);
 	};

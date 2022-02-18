@@ -86,6 +86,7 @@ export interface Guild extends mongoose.Document {
 	transactionLogChannelId: string;
 	infractionLogChannelId: string;
 	botLogChannelId: string;
+	sellRefund: number;
 	auth: RoleAuthority[];
 	incomes: typeof defaultIncomesObj;
 	intervals: typeof defaultIntervalsObj;
@@ -99,6 +100,7 @@ export const GuildSchema = new mongoose.Schema<Guild>(
 		transactionLogChannelId: { type: mongoose.Schema.Types.String, default: null },
 		infractionLogChannelId: { type: mongoose.Schema.Types.String, default: null },
 		botLogChannelId: { type: mongoose.Schema.Types.String, default: null },
+		sellRefund: { type: mongoose.Schema.Types.Number, default: 0.5 },
 		auth: { type: mongoose.Schema.Types.Array, default: [] },
 		incomes: { type: Object, default: defaultIncomesObj },
 		intervals: { type: Object, default: defaultIntervalsObj },

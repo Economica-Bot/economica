@@ -19,7 +19,7 @@ export default class implements EconomicaCommand {
 			const query = interaction.options.getString('name');
 
 			const item = await ShopModel.findOne({
-				guildId: interaction.guildId,
+				guild: ctx.guildDocument,
 				name: query	
 			})
 
@@ -28,7 +28,7 @@ export default class implements EconomicaCommand {
 			
 			const { inventory } = memberDocument;
 
-			const inventoryItem = inventory.find(invItem => `${invItem.refId}` == `${item._id}`)
+			const inventoryItem = inventory.find(invItem => `${invItem.shop}` == `${item._id}`)
 
 			if (!inventoryItem)
 				return await ctx.embedify('error', 'user', `No item with name \`${query}\` (case-insensitive) found in inventory.`, true)
@@ -50,6 +50,15 @@ export default class implements EconomicaCommand {
 
 					embed.addField('Roles Removed', `<@&${item.rolesRemoved.join('>, <@&')}>`)
 				}
+
+				// If item has amount, decrease; if not, delete.
+				ctx.memberDocument.inventory.map(item => {
+					if (item == inventoryItem)
+						item.amount > 1? item.amount -= 1 : item.remove()
+				})
+
+				ctx.memberDocument.markModified('inventory')
+				await ctx.memberDocument.save()
 					
 				return await interaction.reply({
 					embeds: [embed]

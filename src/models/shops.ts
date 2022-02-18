@@ -4,6 +4,7 @@ import { Guild } from '.';
 import { ShopItem } from '../typings';
 
 export interface Shop extends mongoose.Document {
+	guild: mongoose.PopulatedDoc<Guild>;
 	type: ShopItem;
 	name: string;
 	price: number;
@@ -25,6 +26,7 @@ export interface Shop extends mongoose.Document {
 
 export const ShopSchema = new mongoose.Schema<Shop>(
 	{
+		guild: { type: mongoose.Schema.Types.ObjectId, ref: 'Guild' },
 		type: { type: mongoose.Schema.Types.String, required: true },
 		name: { type: mongoose.Schema.Types.String, required: true },
 		price: { type: mongoose.Schema.Types.Number, required: true },

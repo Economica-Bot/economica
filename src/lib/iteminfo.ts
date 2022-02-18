@@ -12,7 +12,7 @@ import { Document } from 'mongoose';
  */
 export const itemInfo = async (ctx: Context, item: Shop & Document<any, any, Shop>): Promise<MessageEmbed> => {
 	const shop = await ShopModel.find({
-		guildId: ctx.interaction.guildId
+		guild: ctx.guildDocument
 	})
 	const requiredInventoryItems: any[] = [];
 
