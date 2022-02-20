@@ -10,3 +10,4 @@ export { itemRegExp } from './itemRegExp';
 export { interval } from './interval';
 export { transaction } from './transaction';
 export { validateAmount, validateTarget, validateObjectId, validateSubdocumentObjectId } from './validate';
+export { asyncSome } from './resolveAsync'
