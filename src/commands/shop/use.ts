@@ -1,4 +1,5 @@
 import { GuildMemberRoleManager, Message } from "discord.js";
+import { cut, itemRegExp } from "../../lib";
 import { MemberModel, ShopModel } from "../../models";
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from "../../structures";
 
@@ -20,18 +21,18 @@ export default class implements EconomicaCommand {
 
 			const item = await ShopModel.findOne({
 				guild: ctx.guildDocument,
-				name: query	
+				name: itemRegExp(query)
 			})
 
 			if (!item)
-				return await ctx.embedify('error', 'user', `No item with name \`${query}\` exists.`, true)
+				return await ctx.embedify('error', 'user', `No item with name \`${cut(query)}\` exists.`, true)
 			
 			const { inventory } = memberDocument;
 
 			const inventoryItem = inventory.find(invItem => `${invItem.shop}` == `${item._id}`)
 
 			if (!inventoryItem)
-				return await ctx.embedify('error', 'user', `No item with name \`${query}\` (case-insensitive) found in inventory.`, true)
+				return await ctx.embedify('error', 'user', `No item with name \`${cut(query)}\` (case-insensitive) found in inventory.`, true)
 
 			if (item.usability == 'Usable') {
 				const embed = ctx.embedify('success', 'user', `Used \`${item.name}\` x1`)

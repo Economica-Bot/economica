@@ -1,6 +1,6 @@
 import { GuildMemberRoleManager } from 'discord.js';
 
-import { getEconInfo, itemRegExp, transaction } from '../../lib';
+import { getEconInfo, itemRegExp, transaction, asyncSome } from '../../lib';
 import { Shop, ShopModel } from '../../models';
 import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
 
@@ -13,16 +13,28 @@ export default class implements EconomicaCommand {
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const query = ctx.interaction.options.getString('name');
-		const shop = await ShopModel.findOne({ guild: ctx.guildDocument, name: itemRegExp(query) });
-		const hasItem = ctx.memberDocument.inventory.some(async (inventoryItemDocument) => {
-			const _member = await ctx.memberDocument.populate({
+		const shop = await ShopModel.findOne({ guild: ctx.guildDocument, name: itemRegExp(query), active: true });
+
+		if (!shop)
+			return await ctx.embedify('error', 'user', `Could not find an item with name \`${query}\` (case-insensitive)`, true)
+
+		const hasItem = await asyncSome(ctx.memberDocument.inventory, (async (invItem) => {
+			ctx.memberDocument = await ctx.memberDocument.populate({
 				path: `inventory.shop`,
 				model: 'Shop'
 			}).execPopulate()
 
-			const _shop = _member.inventory.find(item => item._id == inventoryItemDocument._id).shop as Shop
-			return _shop._id === shop;
-		});
+			const inventoryItem = ctx.memberDocument.inventory.find(i => {
+				return `${i.shop._id}` == `${shop._id}`
+			})
+
+			if (inventoryItem) {
+				return true
+			}
+			else return false
+		}));
+
+		console.log(hasItem)
 
 		const { currency } = ctx.guildDocument;
 		const { wallet, treasury } = await getEconInfo(ctx.memberDocument);
@@ -68,14 +80,15 @@ export default class implements EconomicaCommand {
 			false
 		);
 
-		
-		shop.rolesRemoved.forEach(async (roleId) => {
-			(ctx.interaction.member.roles as GuildMemberRoleManager).remove(roleId, `Purchased ${shop.name}`);
-		});
+		if (shop.usability == 'Instant') {
+			shop.rolesRemoved.forEach(async (roleId) => {
+				(ctx.interaction.member.roles as GuildMemberRoleManager).remove(roleId, `Purchased ${shop.name}`);
+			});
 
-		shop.rolesGiven.forEach((roleId) => {
-			(ctx.interaction.member.roles as GuildMemberRoleManager).add(roleId, `Purchased ${shop.name}`);
-		});
+			shop.rolesGiven.forEach((roleId) => {
+				(ctx.interaction.member.roles as GuildMemberRoleManager).add(roleId, `Purchased ${shop.name}`);
+			});
+		}
 
 		await transaction(ctx.client, ctx.guildDocument, ctx.memberDocument, ctx.clientDocument, 'BUY', -shop.price, 0);
 

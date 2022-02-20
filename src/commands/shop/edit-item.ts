@@ -214,7 +214,7 @@ export default class implements EconomicaCommand {
 		if (!
 			await ShopModel.findOne({
 				guild: ctx.guildDocument,
-				name: interaction.options.getString('name')
+				name: itemRegExp(interaction.options.getString('name'))
 			})
 		) return await ctx.embedify('error', 'user', `No item with name \`${interaction.options.getString('name')}\` found.`, true)
 
@@ -248,6 +248,10 @@ export default class implements EconomicaCommand {
 		})
 		if (sameNameItem)
 			return ctx.embedify('error', 'user', `An item with name \`${sameNameItem.name}\` already exists. You can use the \`delete-item\` command to delete it.`, true);
+		else if (interaction.options.getString('new_name') == 'all')
+			return ctx.embedify('error', 'user', 'Item name cannot be `all` as it is a reserved query.', true)
+		else if (interaction.options.getString('new_name')?.indexOf(',') >= 0)
+			return ctx.embedify('error', 'user', 'Item name cannot include commas `,` as they would interfere with arguments that involve listing item names.', true)
 		else if (interaction.options.getString('new_name'))
 			editedItem['name'] = interaction.options.getString('new_name')
 
@@ -358,14 +362,14 @@ export default class implements EconomicaCommand {
 
 			await ShopModel.findOneAndUpdate({
 				guild: ctx.guildDocument,
-				name: interaction.options.getString('name')
+				name: itemRegExp(interaction.options.getString('name'))
 			}, editedItem)
 		}
 		else if (edit_mode == 'replace') {
 			if (subcommand == 'classic') {
 				await ShopModel.findOneAndUpdate({
 					guild: ctx.guildDocument,
-					name: interaction.options.getString('name')
+					name: itemRegExp(interaction.options.getString('name'))
 				}, {
 					name: interaction.options.getString('new_name'),
 					price: interaction.options.getNumber('price'),
@@ -382,38 +386,38 @@ export default class implements EconomicaCommand {
 					requiredItems
 				})
 			}
-				else if (subcommand == 'generator') {
-					await ShopModel.findOneAndUpdate({
-						guild: ctx.guildDocument,
-						name: interaction.options.getString('name')
-					}, {
-						name: interaction.options.getString('new_name'),
-						price: interaction.options.getNumber('price'),
-						usability: interaction.options.getString('usability'),
-						treasuryRequired: interaction.options.getNumber('required_treasury') ?? 0,
-						active: interaction.options.getBoolean('active') ?? true,
-						description: interaction.options.getString('description') ?? 'A very interesting item.',
-						duration: numDuration ?? Number.POSITIVE_INFINITY,
-						stackable: interaction.options.getBoolean('stackable') ?? true,
-						stock: interaction.options.getInteger('stock') ?? Number.POSITIVE_INFINITY,
-						rolesGiven,
-						rolesRemoved,
-						requiredRoles,
-						requiredItems,
-						generatorPeriod,
-						generator_amount: interaction.options.getNumber('generator_amount')
-					})
-				}
+			else if (subcommand == 'generator') {
+				await ShopModel.findOneAndUpdate({
+					guild: ctx.guildDocument,
+					name: itemRegExp(interaction.options.getString('name'))
+				}, {
+					name: interaction.options.getString('new_name'),
+					price: interaction.options.getNumber('price'),
+					usability: interaction.options.getString('usability'),
+					treasuryRequired: interaction.options.getNumber('required_treasury') ?? 0,
+					active: interaction.options.getBoolean('active') ?? true,
+					description: interaction.options.getString('description') ?? 'A very interesting item.',
+					duration: numDuration ?? Number.POSITIVE_INFINITY,
+					stackable: interaction.options.getBoolean('stackable') ?? true,
+					stock: interaction.options.getInteger('stock') ?? Number.POSITIVE_INFINITY,
+					rolesGiven,
+					rolesRemoved,
+					requiredRoles,
+					requiredItems,
+					generatorPeriod,
+					generatorAmount: interaction.options.getNumber('generator_amount')
+				})
+			}
 		}
 
 		const item = await ShopModel.findOne({
 			guild: ctx.guildDocument,
-			name: interaction.options.getString('new_name')
+			name: itemRegExp(interaction.options.getString('new_name') || interaction.options.getString('name'))
 		})
 
 		return await ctx.interaction.reply({
 			embeds: [(await itemInfo(ctx, item)).setFooter({
-				text: `Edit for the following was successful: ${Object.keys(editedItem).join(', ')}.`
+				text: `Edit for the following was successful: ${Object.keys(editedItem).join(', ') || 'Nothing was changed'}.`
 			})]
 		});
 	}

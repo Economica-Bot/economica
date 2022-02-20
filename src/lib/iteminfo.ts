@@ -16,12 +16,18 @@ export const itemInfo = async (ctx: Context, item: Shop & Document<any, any, Sho
 	})
 	const requiredInventoryItems: any[] = [];
 
-	item.requiredItems?.forEach(async (itemId: any) => {
-		const reqItem = shop.find(i => `${i._id}` == `${itemId}`)
-		requiredInventoryItems.push(reqItem.name)
+	item.requiredItems?.forEach(async (item: any) => {
+		const reqItem = shop.find(i => {
+			return `${i._id}` == `${item._id}`
+		})
+
+		console.log(reqItem)
+
+		if (reqItem)
+			requiredInventoryItems.push(reqItem.name)
 	})
 	const embed = ctx.embedify('info', 'user', `${item.description}`)
-		.setTitle(item.name)
+		.setTitle(`${item.name} ${item.active? '' : '<:ITEM_DISABLED:944737714274717746>'}`)
 		// Global fields
 		.setFields([
 			{ name: 'Type', value: `\`${item.type}\``, inline: false },

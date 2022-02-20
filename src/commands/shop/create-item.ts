@@ -197,6 +197,10 @@ export default class implements EconomicaCommand {
 		})
 		if (sameNameItem)
 			return ctx.embedify('error', 'user', `An item with name \`${sameNameItem.name}\` already exists. You can use the \`delete-item\` command to delete it.`, true);
+		if (interaction.options.getString('name') == 'all')
+			return ctx.embedify('error', 'user', 'Item name cannot be `all` as it is a reserved query.', true)
+		if (interaction.options.getString('name').indexOf(',') >= 0)
+			return ctx.embedify('error', 'user', 'Item name cannot include commas `,` as they would interfere with arguments that involve listing item names.', true)
 		if (interaction.options.getNumber('price') < 0)
 			return ctx.embedify('error', 'user', 'Item price cannot be less than 0.', true);
 		if (interaction.options.getString('description')?.length > 250)
@@ -319,7 +323,7 @@ export default class implements EconomicaCommand {
 				requiredItems,
 				createdAt: Date.now(),
 				generatorPeriod,
-				generator_amount: interaction.options.getNumber('generator_amount')
+				generatorAmount: interaction.options.getNumber('generator_amount')
 			})
 		}
 

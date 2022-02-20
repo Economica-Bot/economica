@@ -47,7 +47,11 @@ export default class implements EconomicaCommand {
 			memberDocument.inventory.forEach(invItem => {
 				const item = shop.find(item => `${invItem.shop}` == `${item._id}`);
 
-				entries.push(`\`${item.name}\` (${invItem.amount})`); // forming three-column display (right-left top-down)
+				if (item) {
+					entries.push(`\`${item.name}\` (${invItem.amount})`); // forming three-column display (right-left top-down)
+				} else {
+					entries.push(`\`*DB_ERROR (no shop ref)*\` (${invItem.amount})`);
+				}
 
 				total += invItem.amount;
 			})
