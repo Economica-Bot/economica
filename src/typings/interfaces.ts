@@ -1,3 +1,4 @@
+import { MessageEmbed } from 'discord.js';
 import { Authority } from '.';
 
 export interface EconomyInfo {
@@ -33,4 +34,10 @@ export interface IncomeCommand {
 export interface IntervalCommand {
 	amount: number;
 	cooldown: number;
+}
+
+export interface ConfirmModalEmbeds {
+	promptEmbed: MessageEmbed;
+	confirmEmbed: MessageEmbed;
+	cancelEmbed: MessageEmbed;
 }

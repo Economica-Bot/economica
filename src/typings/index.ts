@@ -130,4 +130,4 @@ export type TransactionString =
 	| 'INTERVAL_FORTNIGHT'
 	| 'INTERVAL_MONTH';
 
-export { EconomyInfo, IncomeCommandProperties, RoleAuthority, IncomeCommand, IntervalCommand } from './interfaces';
+export { EconomyInfo, IncomeCommandProperties, RoleAuthority, IncomeCommand, IntervalCommand, ConfirmModalEmbeds } from './interfaces';
