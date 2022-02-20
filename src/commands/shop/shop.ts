@@ -22,6 +22,12 @@ export default class implements EconomicaCommand {
 						.addIntegerOption(
 							(options) => options.setName('page').setDescription('The page of the shop to view.').setRequired(false) // default: 1
 						)
+						.addStringOption((options) =>
+							options
+								.setName('show_hidden')
+								.setDescription('Include disabled items as well')
+								.addChoice('Show Disabled Items', 'all')
+						)
 				)
 				.addEconomicaSubcommand((subcommand) =>
 					subcommand
@@ -32,46 +38,6 @@ export default class implements EconomicaCommand {
 						)
 				)
 		)
-		.addEconomicaSubcommand((subcommand) =>
-			subcommand
-				.setName('enable')
-				.setDescription('Enable a shop item.')
-				.setAuthority('MANAGER')
-				.addStringOption((option) =>
-					option.setName('name').setDescription('Specify the name of the item.').setRequired(true)
-				)
-		)
-		.addEconomicaSubcommandGroup((subcommandgroup) =>
-			subcommandgroup
-				.setName('disable')
-				.setDescription('Disable shop items.')
-				.setAuthority('MANAGER')
-				.addEconomicaSubcommand((subcommand) =>
-					subcommand
-						.setName('single')
-						.setDescription('Disable a single shop item.')
-						.addStringOption((option) =>
-							option.setName('name').setDescription('Specify the name of the item.').setRequired(true)
-						)
-				)
-				.addEconomicaSubcommand((subcommand) => subcommand.setName('all').setDescription('Disable all shop items.'))
-		)
-		.addEconomicaSubcommandGroup((subcommandgroup) =>
-			subcommandgroup
-				.setName('delete')
-				.setDescription('Delete shop items.')
-				.setAuthority('MANAGER')
-				.addEconomicaSubcommand((subcommand) =>
-					subcommand
-						.setName('single')
-						.setDescription('Delete a single shop item.')
-						.addStringOption((option) =>
-							option.setName('name').setDescription('Specify the name of the item.').setRequired(true)
-						)
-				)
-				.addEconomicaSubcommand((subcommand) => subcommand.setName('all').setDescription('Delete all shop items.'))
-		);
-
 	public execute = async (ctx: Context): Promise<Message | void> => {
 		const { currency } = ctx.guildDocument;
 		const subcommand = ctx.interaction.options.getSubcommand();
@@ -88,9 +54,9 @@ export default class implements EconomicaCommand {
 		if (subcommandGroup === 'view') {
 			if (subcommand === 'all') {
 				shop.forEach((item) => {
-					if (item.active) {
+					if (item.active || ctx.interaction.options.getString('show_hidden')) {
 						const field: EmbedFieldData = {
-							name: `${currency}${item.price ?? 'Free'} • ${item.name}`,
+							name: `${currency}${item.price ?? 'Free'} • ${item.name} ${item.active? '' : '<:ITEM_DISABLED:944737714274717746>'}`,
 							value: util.cut(item.description ?? 'An interesting item', 150) + `\nIn-stock: \`${item.stock ?? '∞'}\``,
 							inline: item.description?.length <= 75,
 						};
@@ -126,111 +92,7 @@ export default class implements EconomicaCommand {
 						true
 					);
 
-				const embed = ctx
-					.embedify('info', 'user', `${item.description}`)
-					.setTitle(item.name)
-					// Global fields
-					.setFields([
-						{ name: 'Type', value: `\`${item.type}\``, inline: false },
-						{ name: 'Active?', value: `\`${item.active}\``, inline: true },
-						{ name: 'Price', value: `${ctx.guildDocument.currency}${item.price || 'Free'}`, inline: true },
-						{
-							name: 'Required Treasury',
-							value: `${ctx.guildDocument.currency}${item.treasuryRequired}+`,
-							inline: true,
-						},
-						{
-							name: 'Shop Duration Left',
-							value: `${
-								item.duration != Number.POSITIVE_INFINITY && item.active
-									? ms(item.createdAt.getTime() + item.duration - Date.now())
-									: 'Infinite'
-							}`,
-							inline: true,
-						},
-						{ name: 'Stock Left', value: `${item.stock}`, inline: true },
-						{
-							name: 'Roles Given',
-							value: item.rolesGiven.length ? `<@&${item.rolesGiven.join('>, <@&')}>` : 'None',
-							inline: true,
-						},
-						{
-							name: 'Roles Removed',
-							value: item.rolesRemoved.length ? `<@&${item.rolesRemoved.join('>, <@&')}>` : 'None',
-							inline: true,
-						},
-						{
-							name: 'Required Roles',
-							value: item.requiredRoles.length ? `@&${item.requiredRoles.join('>, <@&')}>` : 'None',
-							inline: true,
-						},
-						{
-							name: 'Required Inventory Items',
-							value: item.requiredItems.length
-								? `\`${item.requiredItems.map((shop) => shop.name).join('`, `')}\``
-								: 'None',
-							inline: true,
-						},
-					]);
-
-				if (item.type === 'GENERATOR')
-					embed.addFields([
-						{
-							name: 'Generator',
-							value: `Generates ${ctx.guildDocument.currency}${item.generatorAmount} every ${ms(item.generatorPeriod)}`,
-						},
-					]);
-
-				return await ctx.interaction.reply({ embeds: [embed] });
-			}
-		} else if (subcommand === 'enable') {
-			const shopItem = await ShopModel.findOneAndUpdate({ name }, { active: true });
-			if (!shopItem) {
-				return await ctx.embedify('error', 'user', 'Could not find an item with that name.', true);
-			} else {
-				return await ctx.embedify('success', 'user', 'Item enabled.', false);
-			}
-		} else if (subcommandGroup === 'disable') {
-			if (subcommand === 'single') {
-				const shopItem = await ShopModel.findOneAndUpdate(
-					{ guild: ctx.guildDocument, name },
-					{ active: false }
-				);
-				if (!shopItem) {
-					return await ctx.embedify('error', 'user', 'Could not find a shop item with that name.', true);
-				} else {
-					return await ctx.embedify('success', 'user', 'Item disabled.', false);
-				}
-			} else if (subcommand === 'all') {
-				const shopItems = await ShopModel.updateMany({ guild: ctx.guildDocument }, { active: false });
-				return await ctx.embedify('success', 'user', `Enabled ${shopItems.nModified} shop items.`, false);
-			}
-		} else if (subcommandGroup === 'delete') {
-			if (subcommand === 'single') {
-				const shopItem = await ShopModel.deleteOne({ guild: ctx.guildDocument, name });
-				if (!shopItem) {
-					return await ctx.embedify('error', 'user', 'Could not find a shop item with that name.', true);
-				} else {
-					const updates = await MemberModel.updateMany(
-						{ guild: ctx.guildDocument },
-						{ $pull: { inventory: { name } } }
-					);
-					return await ctx.embedify(
-						'success',
-						'user',
-						`Item deleted. ${updates.nModified} removed from inventories.`,
-						false
-					);
-				}
-			} else if (subcommand === 'all') {
-				const shopItems = await ShopModel.deleteMany({ guild: ctx.guildDocument });
-				const updates = await MemberModel.updateMany({ guild: ctx.guildDocument }, { $pull: { inventory: { name } } });
-				return await ctx.embedify(
-					'success',
-					'user',
-					`${shopItems.deletedCount} items deleted. ${updates.nModified} removed from inventories.`,
-					false
-				);
+				return await ctx.interaction.reply({ embeds: [await util.itemInfo(ctx, item)] });
 			}
 		}
 	};
