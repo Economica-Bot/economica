@@ -21,6 +21,8 @@ export default class implements EconomicaCommand {
 			if (!shopItem) {
 				return await ctx.embedify('error', 'user', `No item with name ${cut(query)} found (case-insensitive).`, true);
 			} else {
+				if (!shopItem.active)
+					return await ctx.embedify('warn', 'user', `Item \`${shopItem.name}\` is already disabled!`, true)
 				return await ctx.embedify('success', 'user', `\`${shopItem.name}\` disabled.`, false);
 			}
 		} else {
