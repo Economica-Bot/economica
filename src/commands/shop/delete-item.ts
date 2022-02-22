@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from "discord.js";
+import { CommandInteraction, Message, MessageEmbed } from "discord.js";
 import { itemRegExp } from "../../lib";
 import { confirmModal } from "../../lib/confirmModal";
 import { MemberModel, ShopModel } from "../../models";
@@ -43,7 +43,7 @@ export default class implements EconomicaCommand {
 				promptEmbed: ctx.embedify('info', 'user', 'Are you sure you want to delete __all items__?'),
 				confirmEmbed: ctx.embedify('success', 'user', `Successfully deleted all items in the ${ctx.interaction.guild.name} shop.`),
 				cancelEmbed: ctx.embedify('warn', 'user', 'Action abandoned: cancelled by user.')
-			}, async (reply: Message<boolean>, confirmEmbed: MessageEmbed) => {
+			}, async (reply: CommandInteraction, confirmEmbed: MessageEmbed) => {
 				const deleted = await ShopModel.deleteMany({
 					guild: ctx.guildDocument
 				});
@@ -53,7 +53,7 @@ export default class implements EconomicaCommand {
 					{ $pull: { inventory: {} } }
 				);
 
-				reply.edit({
+				await reply.editReply({
 					embeds: [confirmEmbed.setDescription(`${confirmEmbed.description}\n\nItems Deleted: \`${deleted.deletedCount}\`\nInventories Affect: \`${updates.nModified}\``)]
 				});
 			}, true) // is ephemeral

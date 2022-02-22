@@ -10,7 +10,7 @@ import { ConfirmModalEmbeds } from "../typings";
  * @param {boolean} ephemeral - only the user can see?
  * @returns {boolean} confirmed?
  */
-export async function confirmModal(interaction: CommandInteraction, { promptEmbed, confirmEmbed, cancelEmbed }: ConfirmModalEmbeds, confirmCallback: (reply: Message<boolean>, confirmEmbed: MessageEmbed) => void, ephemeral?: boolean): Promise<boolean> {
+export async function confirmModal(interaction: CommandInteraction, { promptEmbed, confirmEmbed, cancelEmbed }: ConfirmModalEmbeds, confirmCallback: (reply: CommandInteraction, confirmEmbed: MessageEmbed) => Promise<void | Message<boolean>>, ephemeral?: boolean): Promise<boolean> {
 	let confirmed = false;
 
 	if (!interaction.deferred)
@@ -58,7 +58,7 @@ export async function confirmModal(interaction: CommandInteraction, { promptEmbe
 
 	collector.on('end', async() => {
 		if (confirmed)
-			await confirmCallback(reply, confirmEmbed);
+			await confirmCallback(interaction, confirmEmbed);
 		else
 			await interaction.editReply({
 				embeds: [cancelEmbed],
