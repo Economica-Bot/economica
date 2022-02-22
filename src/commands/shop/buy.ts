@@ -13,7 +13,10 @@ export default class implements EconomicaCommand {
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const query = ctx.interaction.options.getString('name');
-		const shop = await ShopModel.findOne({ guild: ctx.guildDocument, name: itemRegExp(query), active: true });
+		const shop = await ShopModel.findOne({ guild: ctx.guildDocument, name: itemRegExp(query) });
+
+		if (!shop.active)
+			return await ctx.embedify('error', 'user', `The item \`${shop.name}\` is not active. Contact your Economy Manager for more info.`, true)
 
 		if (!shop)
 			return await ctx.embedify('error', 'user', `Could not find an item with name \`${query}\` (case-insensitive)`, true)
