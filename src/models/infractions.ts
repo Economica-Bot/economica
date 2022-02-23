@@ -1,7 +1,7 @@
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
-import { Member } from '.';
-import { InfractionString } from '../typings';
+import { InfractionString } from '../typings/index.js';
+import { Member } from './index.js';
 
 export interface Infraction extends mongoose.Types.Subdocument {
 	agent: mongoose.PopulatedDoc<Member>;
@@ -25,7 +25,7 @@ export const InfractionSchema = new mongoose.Schema<Infraction>(
 	{
 		timestamps: { createdAt: true, updatedAt: false },
 		versionKey: false,
-	}
+	},
 );
 
 export const InfractionModel: mongoose.Model<Infraction> = mongoose.model('Infraction', InfractionSchema);

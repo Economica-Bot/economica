@@ -1,18 +1,19 @@
-import { TransactionModel } from '../../models';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import QuickChart from 'quickchart-js';
 
-export default class implements EconomicaCommand {
+import { TransactionModel } from '../../models/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+
+export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('statistics')
-		.setDescription('View statistics')
+		.setDescription('View economy statistics in a visual format')
 		.setModule('INSIGHTS')
-		.setFormat('<balance> [user]')
-		.addEconomicaSubcommand((subcommand) =>
-			subcommand
-				.setName('balance')
-				.setDescription('View statistics for user balance.')
-				.addUserOption((option) => option.setName('user').setDescription('Specify a user.').setRequired(false))
-		);
+		.setFormat('statistics balance [user]')
+		.setExamples(['statistics balance', 'statistics balance @user'])
+		.addSubcommand((subcommand) => subcommand
+			.setName('balance')
+			.setDescription('View statistics for user balance')
+			.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(false)));
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const user = ctx.interaction.options.getUser('user');
@@ -24,12 +25,12 @@ export default class implements EconomicaCommand {
 		if (ctx.interaction.options.getSubcommand() === 'balance') {
 			const transactions = user
 				? await TransactionModel.find({
-						guild: ctx.guildDocument,
-						member: ctx.memberDocument,
-				  })
+					guild: ctx.guildDocument,
+					member: ctx.memberDocument,
+				})
 				: await TransactionModel.find({
-						guild: ctx.guildDocument,
-				  });
+					guild: ctx.guildDocument,
+				});
 
 			transactions.forEach((transaction) => {
 				wallets.push(transaction.wallet);
@@ -60,7 +61,7 @@ export default class implements EconomicaCommand {
 						label: 'Wallet',
 						data: wallets1.length ? wallets1 : wallets,
 						borderColor: 'rgb(255, 99, 132)',
-						//backgroundColor: 'rgba(255, 99, 132, .5)',
+						// backgroundColor: 'rgba(255, 99, 132, .5)',
 						backgroundColor: 'transparent',
 						borderWidth: '3',
 						tension: 0,
@@ -70,7 +71,7 @@ export default class implements EconomicaCommand {
 						label: 'Treasury',
 						data: treasuries1.length ? treasuries1 : treasuries,
 						borderColor: 'rgb(54, 162, 235)',
-						//backgroundColor: 'rgba(54, 162, 235, .5)',
+						// backgroundColor: 'rgba(54, 162, 235, .5)',
 						backgroundColor: 'transparent',
 						borderWidth: '3',
 						tension: 0,
@@ -80,7 +81,7 @@ export default class implements EconomicaCommand {
 						label: 'Total',
 						data: totals1.length ? totals1 : totals,
 						borderColor: 'rgb(255, 205, 86)',
-						//backgroundColor: 'rgba(255, 205, 86, .5)',
+						// backgroundColor: 'rgba(255, 205, 86, .5)',
 						backgroundColor: 'transparent',
 						borderWidth: '3',
 						tension: 0,
@@ -143,30 +144,14 @@ export default class implements EconomicaCommand {
 				},
 			};
 
-			const QuickChart = require('quickchart-js');
-
 			const chart = new QuickChart()
-				.setConfig({
-					type: 'line',
-					data,
-					options: opt,
-				})
+				.setConfig({ type: 'line', data, options: opt })
 				.setWidth(600)
 				.setHeight(450)
 				.setBackgroundColor('#2f3136');
-
 			const url = await chart.getShortUrl();
-			const embed = ctx
-				.embedify(
-					'info',
-					{
-						name: 'Balance Statistics',
-						iconURL: user?.displayAvatarURL() ?? ctx.interaction.guild.iconURL(),
-					},
-					null
-				)
-				.setImage(url);
-			return await ctx.interaction.reply({ embeds: [embed] });
+			const embed = ctx.embedify('info', { name: 'Balance Statistics', iconURL: user?.displayAvatarURL() ?? ctx.interaction.guild.iconURL() }, null).setImage(url);
+			await ctx.interaction.reply({ embeds: [embed] });
 		}
 	};
 }

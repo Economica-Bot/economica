@@ -1,12 +1,12 @@
 import { MessageEmbed, TextChannel } from 'discord.js';
 
-import { Guild, Infraction, Member } from '../models';
-import { EconomicaClient } from '../structures';
-import { InfractionString } from '../typings';
+import { Guild, Member } from '../models/index.js';
+import { Economica } from '../structures/index.js';
+import { InfractionString } from '../typings/index.js';
 
 /**
  * Record an infraction.
- * @param {EconomicaClient} client - The Client.
+ * @param {Economica} client - The Client.
  * @param {string} guildId - Guild id.
  * @param {string} userId - User id.
  * @param {string} agentId - Agent/Staff id.
@@ -17,7 +17,7 @@ import { InfractionString } from '../typings';
  * @param {number} length - The length of the punishment.
  */
 export async function infraction(
-	client: EconomicaClient,
+	client: Economica,
 	guild: Guild,
 	target: Member,
 	agent: Member,
@@ -25,7 +25,7 @@ export async function infraction(
 	reason: string,
 	permanent?: boolean,
 	active?: boolean,
-	duration?: number
+	duration?: number,
 ) {
 	target.infractions.push({
 		guild,
@@ -38,10 +38,10 @@ export async function infraction(
 		duration,
 	});
 	await target.save();
-	const { infractionLogChannelId } = guild;
-	if (infractionLogChannelId) {
-		const channel = client.channels.cache.get(infractionLogChannelId) as TextChannel;
-		const guild = channel.guild;
+	const { infractionLogId } = guild;
+	if (infractionLogId) {
+		const channel = client.channels.cache.get(infractionLogId) as TextChannel;
+		const { guild } = channel;
 		const member = guild.members.cache.get(client.user.id);
 		if (!channel.permissionsFor(member).has('SEND_MESSAGES') || !channel.permissionsFor(member).has('EMBED_LINKS')) {
 			return;
@@ -52,7 +52,7 @@ export async function infraction(
 			.setColor('RED')
 			.setAuthor({ name: 'Infraction', iconURL: guild.iconURL() })
 			.setDescription(description);
-			
+
 		channel.send({
 			embeds: [embed],
 		});

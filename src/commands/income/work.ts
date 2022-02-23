@@ -1,10 +1,10 @@
-import { transaction } from '../../lib';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { transaction } from '../../lib/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
-export default class implements EconomicaCommand {
+export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('work')
-		.setDescription('Work to earn a sum.')
+		.setDescription('Work to earn a sum')
 		.setModule('INCOME');
 
 	public execute = async (ctx: Context): Promise<void> => {
@@ -12,6 +12,6 @@ export default class implements EconomicaCommand {
 		const { min, max } = ctx.guildDocument.incomes.work;
 		const amount = Math.ceil(Math.random() * (max - min) + min);
 		await transaction(ctx.client, ctx.guildDocument, ctx.memberDocument, ctx.clientDocument, 'WORK', amount, 0);
-		return await ctx.embedify('success', 'user', `You worked and earned ${currency}${amount.toLocaleString()}`, false);
+		await ctx.embedify('success', 'user', `You worked and earned ${currency}${amount.toLocaleString()}`, false);
 	};
 }

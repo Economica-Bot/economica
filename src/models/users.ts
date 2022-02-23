@@ -1,7 +1,6 @@
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
-import { Module } from '.';
-import { ModuleSchema } from './modules';
+import { Module, ModuleSchema } from './index.js';
 
 export interface User extends mongoose.Document {
 	userId: string;
@@ -17,7 +16,7 @@ export const UserSchema = new mongoose.Schema<User>(
 	},
 	{
 		versionKey: false,
-	}
+	},
 );
 
 export const UserModel: mongoose.Model<User> = mongoose.model('User', UserSchema);

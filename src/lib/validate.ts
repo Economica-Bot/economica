@@ -1,16 +1,15 @@
 import { parseString } from '@adrastopoulos/number-parser';
 import { GuildMember } from 'discord.js';
-import { connection, Document, isValidObjectId, Model } from 'mongoose';
+import mongoose from 'mongoose';
 
-import { getEconInfo } from '.';
-import { Application, Infraction, Loan, Member, Transaction } from '../models';
-import { Corporation } from '../models/corporations';
-import { Context } from '../structures';
-import { Moderation } from '../typings';
+import { getEconInfo } from './index.js';
+import { Application, Corporation, Infraction, Loan, Member, Transaction } from '../models/index.js';
+import { Context } from '../structures/index.js';
+import { Moderation } from '../typings/index.js';
 
 export async function validateAmount(
 	ctx: Context,
-	target: 'wallet' | 'treasury'
+	target: 'wallet' | 'treasury',
 ): Promise<{ validated: boolean; result?: number }> {
 	const { [target]: balance } = await getEconInfo(ctx.memberDocument);
 	const amount = ctx.interaction.options.getString('amount');
@@ -19,23 +18,21 @@ export async function validateAmount(
 	if (!result && result !== 0) {
 		await ctx.embedify('error', 'user', 'Please enter a valid input.', true);
 		return { validated: false };
-	} else {
-		if (result < 1) {
-			await ctx.embedify('error', 'user', `Input less than 1.`, true);
-			return { validated: false };
-		} else if (result > balance) {
-			await ctx.embedify(
-				'error',
-				'user',
-				`Input exceeds current ${target}: ${ctx.guildDocument.currency}${balance.toLocaleString()}`,
-				true
-			);
-
-			return { validated: false };
-		} else {
-			return { validated: true, result };
-		}
 	}
+	if (result < 1) {
+		await ctx.embedify('error', 'user', 'Input less than 1.', true);
+		return { validated: false };
+	} if (result > balance) {
+		await ctx.embedify(
+			'error',
+			'user',
+			`Input exceeds current ${target}: ${ctx.guildDocument.currency}${balance.toLocaleString()}`,
+			true,
+		);
+
+		return { validated: false };
+	}
+	return { validated: true, result };
 }
 
 export async function validateTarget(ctx: Context): Promise<boolean> {
@@ -46,24 +43,24 @@ export async function validateTarget(ctx: Context): Promise<boolean> {
 	if (target.id === ctx.interaction.user.id) {
 		await ctx.embedify('warn', 'user', 'You cannot target yourself.', true);
 		return false;
-	} else if (target.id === ctx.client.user.id) {
+	} if (target.id === ctx.client.user.id) {
 		await ctx.embedify('warn', 'user', 'You cannot target me.', true);
 		return false;
-	} else if (target.roles.highest.position > member.roles.highest.position) {
+	} if (target.roles.highest.position > member.roles.highest.position) {
 		await ctx.embedify('warn', 'user', "Target's roles are too high.", true);
 		return false;
-	} else if (type === 'ban' && !target.bannable) {
+	} if (type === 'ban' && !target.bannable) {
 		await ctx.embedify('warn', 'user', 'Target is unbannable.', true);
 		return false;
-	} else if (type === 'kick' && !target.kickable) {
+	} if (type === 'kick' && !target.kickable) {
 		await ctx.embedify('warn', 'user', 'Target is unkickable.', true);
 		return false;
-	} else if (type === 'timeout') {
+	} if (type === 'timeout') {
 		if (!target.moderatable) {
 			await ctx.embedify('warn', 'user', 'Target is unmoderatable.', true);
 			return false;
-		} else if (target.communicationDisabledUntil && target.communicationDisabledUntil.getTime() > Date.now()) {
-			await ctx.embedify('warn', 'user', `Target is already in a timeout.`, true);
+		} if (target.communicationDisabledUntil && target.communicationDisabledUntil.getTime() > Date.now()) {
+			await ctx.embedify('warn', 'user', 'Target is already in a timeout.', true);
 			return false;
 		}
 	} else if (type === 'untimeout') {
@@ -79,68 +76,89 @@ export async function validateTarget(ctx: Context): Promise<boolean> {
 export async function validateObjectId(
 	ctx: Context,
 	target: 'Loan'
-): Promise<{ valid: boolean; document?: Loan; model: Model<Loan> }>;
+): Promise<{ valid: boolean; document?: Loan; model: mongoose.Model<Loan> }>;
 export async function validateObjectId(
 	ctx: Context,
 	target: 'Infraction'
-): Promise<{ valid: boolean; document?: Infraction; model: Model<Infraction> }>;
+): Promise<{ valid: boolean; document?: Infraction; model: mongoose.Model<Infraction> }>;
 export async function validateObjectId(
 	ctx: Context,
 	target: 'Transaction'
-): Promise<{ valid: boolean; document?: Transaction; model: Model<Transaction> }>;
+): Promise<{ valid: boolean; document?: Transaction; model: mongoose.Model<Transaction> }>;
 export async function validateObjectId(
 	ctx: Context,
 	target: 'Corporation'
-): Promise<{ valid: boolean; document?: Corporation; model: Model<Corporation> }>;
+): Promise<{ valid: boolean; document?: Corporation; model: mongoose.Model<Corporation> }>;
 export async function validateObjectId(
 	ctx: Context,
-	target: 'Loan' | 'Infraction' | 'Transaction' | 'Corporation' | 'Application'
+	target: 'Loan' | 'Infraction' | 'Transaction' | 'Corporation' | 'Application',
 ): Promise<{
-	valid: boolean;
-	document?: Document<any>;
-	model?: Model<Loan> | Model<Infraction> | Model<Transaction> | Model<Corporation> | Model<Application>;
-}> {
+		valid: boolean;
+		document?: mongoose.Document;
+		model?:
+		| mongoose.Model<Loan>
+		| mongoose.Model<Infraction>
+		| mongoose.Model<Transaction>
+		| mongoose.Model<Corporation>
+		| mongoose.Model<Application>;
+	}> {
 	const _id = ctx.interaction.options.getString(`${target.toLowerCase()}_id`, false);
-	let document: Document;
+	let document: mongoose.Document;
 
-	if (_id && !isValidObjectId(_id)) {
+	if (_id && !mongoose.isValidObjectId(_id)) {
 		await ctx.embedify('error', 'user', `Please enter a valid ${target} id.`, true);
 		return { valid: false };
-	} else if (_id) {
-		const model = connection.models[target];
+	} if (_id) {
+		const model = ctx.client.mongoose.connection.models[target];
 		document = await model.findOne({ _id });
 		if (!document) {
 			await ctx.embedify('error', 'user', `Use /${target} view for a list of ids.`, true);
 			return { valid: false };
 		}
 	} else {
-		const model = connection.models[target];
+		const model = ctx.client.mongoose.connection.models[target];
 		return { valid: true, document: null, model };
 	}
 
 	return { valid: true, document };
 }
 
-export async function validateSubdocumentObjectId(ctx: Context, target: 'Application', parent: Corporation): Promise<{valid: boolean, document: Application}>;
-export async function validateSubdocumentObjectId(ctx: Context, target: 'Infraction', parent: Member): Promise<{valid: boolean, document: Infraction}>;
+function isMember(parent: unknown): parent is Member {
+	return (parent as Member).infractions !== undefined;
+}
+
+function isCorporation(parent: unknown): parent is Corporation {
+	return (parent as Corporation).applications !== undefined;
+}
+
+export async function validateSubdocumentObjectId(
+	ctx: Context,
+	target: 'Application',
+	parent: Corporation
+): Promise<{ valid: boolean; document: Application }>;
+export async function validateSubdocumentObjectId(
+	ctx: Context,
+	target: 'Infraction',
+	parent: Member
+): Promise<{ valid: boolean; document: Infraction }>;
 export async function validateSubdocumentObjectId(
 	ctx: Context,
 	target: 'Infraction' | 'Application',
-	parent: Member | Corporation
+	parent: Member | Corporation,
 ): Promise<{ valid: boolean; document?: Application | Infraction }> {
 	const _id = ctx.interaction.options.getString(`${target.toLowerCase()}_id`, false);
-	if (_id && !isValidObjectId(_id)) {
+	if (_id && !mongoose.isValidObjectId(_id)) {
 		await ctx.embedify('error', 'user', `Please enter a valid ${target} id.`, true);
 		return { valid: false };
-	} else if (_id) {
+	} if (_id) {
 		let document;
 		if (target === 'Infraction') {
 			if (isMember(parent)) {
-				document = parent.infractions.find((doc: Document) => `${doc._id}` === _id);
+				document = parent.infractions.find((doc: mongoose.Document) => `${doc._id}` === _id);
 			}
 		} else if (target === 'Application') {
 			if (isCorporation(parent)) {
-				document = parent.applications.find((doc: Document) => `${doc._id}` === _id);
+				document = parent.applications.find((doc: mongoose.Document) => `${doc._id}` === _id);
 			}
 		}
 
@@ -150,15 +168,6 @@ export async function validateSubdocumentObjectId(
 		}
 
 		return { valid: true, document };
-	} else {
-		return { valid: true };
 	}
-}
-
-function isMember(parent: any): parent is Member {
-	return (parent as Member).infractions !== undefined;
-}
-
-function isCorporation(parent: any): parent is Corporation {
-	return (parent as Corporation).applications !== undefined;
+	return { valid: true };
 }

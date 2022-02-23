@@ -1,6 +1,6 @@
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
-export default class implements EconomicaCommand {
+export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('reset')
 		.setDescription('Reset all slash commands')
@@ -11,6 +11,6 @@ export default class implements EconomicaCommand {
 		await ctx.interaction.deferReply({ ephemeral: true });
 		await ctx.interaction.guild.commands.set([]);
 		await ctx.client.application.commands.set([]);
-		return await ctx.embedify('success', 'bot', '`Reset all slash commands.`', true);
+		await ctx.embedify('success', 'bot', '`Reset all slash commands.`', true);
 	};
 }

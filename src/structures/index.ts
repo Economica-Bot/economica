@@ -1,12 +1,6 @@
-export { EconomicaClient } from './EconomicaClient';
-export { EconomicaCommand } from './EconomicaCommand';
-export { Context } from './Context';
-export { EconomicaService } from './EconomicaService';
-export { EconomicaEvent } from './EconomicaEvent';
-export {
-	EconomicaSlashCommandBuilder,
-	EconomicaSlashCommandOptionsOnlyBuilder,
-	EconomicaSlashCommandSubcommandsOnlyBuilder,
-	EconomicaSlashCommandSubcommandBuilder,
-	EconomicaSlashCommandSubcommandGroupBuilder,
-} from './EconomicaSlashCommandBuilder';
+export * from './Context.js';
+export * from './Economica.js';
+export * from './Command.js';
+export * from './Event.js';
+export * from './Service.js';
+export * from './Builders.js';

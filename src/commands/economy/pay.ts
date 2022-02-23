@@ -1,14 +1,14 @@
-import { transaction, validateAmount } from '../../lib';
-import { MemberModel } from '../../models';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { transaction, validateAmount } from '../../lib/index.js';
+import { MemberModel } from '../../models/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
-export default class implements EconomicaCommand {
+export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('pay')
-		.setDescription('Pay funds to another user.')
+		.setDescription('Transfer funds to another user')
 		.setModule('ECONOMY')
-		.setFormat('<user> <amount | all>')
-		.setExamples(['pay @Wumpus all', 'pay @JohnDoe 100'])
+		.setFormat('pay <user> <amount>')
+		.setExamples(['pay @user 100', 'pay @user all'])
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(true))
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true));
 
@@ -18,21 +18,12 @@ export default class implements EconomicaCommand {
 		const targetDocument = await MemberModel.findOneAndUpdate(
 			{ guild: ctx.guildDocument, userId: target.id },
 			{ guild: ctx.guildDocument, userId: target.id },
-			{ upsert: true, new: true, setDefaultsOnInsert: true }
+			{ upsert: true, new: true, setDefaultsOnInsert: true },
 		);
-
 		const { validated, result } = await validateAmount(ctx, 'wallet');
 		if (!validated) return;
-		await transaction(
-			ctx.client,
-			ctx.guildDocument,
-			ctx.memberDocument,
-			ctx.memberDocument,
-			'GIVE_PAYMENT',
-			-result,
-			0
-		);
+		await transaction(ctx.client, ctx.guildDocument, ctx.memberDocument, ctx.memberDocument, 'GIVE_PAYMENT', -result, 0);
 		await transaction(ctx.client, ctx.guildDocument, targetDocument, ctx.memberDocument, 'RECEIVE_PAYMENT', result, 0);
-		return await ctx.embedify('success', 'user', `Paid ${target} ${currency}${result.toLocaleString()}`, false);
+		await ctx.embedify('success', 'user', `Paid ${target} ${currency}${result.toLocaleString()}`, false);
 	};
 }

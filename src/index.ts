@@ -7,8 +7,6 @@
 // | $$$$$$$$|  $$$$$$$|  $$$$$$/| $$  | $$|  $$$$$$/| $$ | $$ | $$| $$|  $$$$$$$|  $$$$$$$
 // |________/ \_______/ \______/ |__/  |__/ \______/ |__/ |__/ |__/|__/ \_______/ \_______/
 
-require('dotenv/config');
+import { Economica } from './structures/index.js';
 
-import { EconomicaClient } from './structures';
-
-new EconomicaClient().init();
+new Economica().init();

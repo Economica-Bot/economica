@@ -1,51 +1,23 @@
-import { SERVICE_COOLDOWNS } from '../config';
-import * as util from '../lib';
-import { Guild, LoanModel, Member } from '../models';
-import { Context, EconomicaClient, EconomicaService } from '../structures';
+import { FilterQuery } from 'mongoose';
 
-export default class implements EconomicaService {
-	public name = 'update-loans';
+import * as util from '../lib/index.js';
+import { Loan, LoanModel } from '../models/index.js';
+import { Economica, Service } from '../structures/index.js';
+import { SERVICE_COOLDOWNS } from '../typings/constants.js';
+
+export default class implements Service {
+	public service = 'update-loans';
 	public cooldown = SERVICE_COOLDOWNS.UPDATE_LOANS;
-	public execute = async (client: EconomicaClient): Promise<void> => {
+	public execute = async (client: Economica): Promise<void> => {
 		const now = new Date();
-		const loanDocuments = await LoanModel.find({
-			expires: {
-				$lt: now,
-			},
-			pending: false,
-			active: true,
-			complete: false,
-		});
-
-		//Complete loan transaction.
+		const filter: FilterQuery<Loan> = { expires: { $lt: now }, pending: false, active: true, complete: false };
+		const loanDocuments = await LoanModel.find(filter);
 		if (loanDocuments?.length) {
-			for (const loanDocument of loanDocuments) {
-				const {
-					guild,
-					borrower,
-					lender,
-					repayment,
-				}: { guild: Guild; borrower: Member; lender: Member; repayment: number } = loanDocument;
-				const ctx = new Context(client);
-
-				await util.transaction(ctx.client, ctx.guildDocument, borrower, lender, 'LOAN_GIVE_REPAYMENT', 0, -repayment);
-				await util.transaction(ctx.client, ctx.guildDocument, borrower, lender, 'LOAN_RECEIVE_REPAYMENT', 0, repayment);
-			}
-
-			await LoanModel.updateMany(
-				{
-					expires: {
-						$lt: now,
-					},
-					pending: false,
-					active: true,
-					complete: false,
-				},
-				{
-					active: false,
-					complete: true,
-				}
-			);
+			loanDocuments.forEach(async ({ guild, borrower, lender, repayment }) => {
+				await util.transaction(client, guild, borrower, lender, 'LOAN_GIVE_REPAYMENT', 0, -repayment);
+				await util.transaction(client, guild, borrower, lender, 'LOAN_RECEIVE_REPAYMENT', 0, repayment);
+			});
+			await LoanModel.updateMany(filter, { active: false, complete: true });
 		}
 	};
 }

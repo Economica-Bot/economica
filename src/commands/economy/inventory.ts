@@ -1,89 +1,57 @@
-import { EmbedFieldData, Message, MessageEmbed } from "discord.js";
-import { paginate } from "../../lib";
-import { MemberModel, ShopModel } from "../../models";
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from "../../structures";
+import { MessageEmbed } from 'discord.js';
 
-export default class implements EconomicaCommand {
+import { paginate } from '../../lib/index.js';
+import { Listing, MemberModel } from '../../models/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+
+export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('inventory')
-		.setDescription('View yours or another member\'s inventory')
-		.setFormat('[user]')
+		.setDescription('View an inventory')
 		.setModule('ECONOMY')
-		.addUserOption((options) => 
-			options
-				.setName('user')
-				.setDescription('The target user whose inventory to shwow')
-		)
-	public execute = async(ctx: Context): Promise<void | Message<boolean>> => {
+		.setFormat('inventory [user]')
+		.setExamples(['inventory', 'inventory @user'])
+		.addUserOption((option) => option.setName('user').setDescription('Specify a user'));
+
+	public execute = async (ctx: Context): Promise<void> => {
 		const { interaction } = ctx;
-		const user = interaction.options.getUser('user') || interaction.user
+		const user = interaction.options.getUser('user') || interaction.user;
 		const memberDocument = await MemberModel.findOne({
 			guild: ctx.guildDocument,
-			userId: user.id // user is not necessarily the command caller
-		})
-		const shop = await ShopModel.find({
-			guild: ctx.guildDocument
-		}).sort({ price: -1 })
+			userId: user.id,
+		});
 
-		if (!memberDocument.inventory.length)
-			return interaction.reply({
-				embeds: [
-					new MessageEmbed()
-						.setAuthor({
-							name: interaction.user.tag,
-							iconURL: interaction.user.avatarURL()
-						})
-						.setColor('BLUE')
-						.setTitle(`${user.tag}'s Inventory`)
-						.setDescription(`${user.username} has no items`)
-				]
-			})
-		
-			const embeds: MessageEmbed[] = [];
-			const maxEntries = 30;
-			const entries: string[] = []
+		const embeds: MessageEmbed[] = [];
+		const maxEntries = 30;
+		const entries: string[] = [];
 
-			let total = 0;
-			memberDocument.inventory.forEach(invItem => {
-				const item = shop.find(item => `${invItem.shop}` == `${item._id}`);
+		let total = 0;
+		memberDocument.inventory.forEach(async (invItem) => {
+			const { listing }: { listing: Listing } = await invItem.populate('listing').execPopulate();
+			entries.push(`\`${listing.name}\` (${invItem.amount})`);
+			total += invItem.amount;
+		});
 
-				if (item) {
-					entries.push(`\`${item.name}\` (${invItem.amount})`); // forming three-column display (right-left top-down)
-				} else {
-					entries.push(`\`*DB_ERROR (no shop ref)*\` (${invItem.amount})`);
-				}
+		const pageCount = Math.ceil(entries.length / maxEntries) || 1;
 
-				total += invItem.amount;
-			})
+		let k = 0;
+		for (let i = 0; i < pageCount; i += 1) {
+			const columns: string[] = ['', '', ''];
+			for (let j = 0; j < maxEntries && entries[k]; j += 1, k += 1) {
+				if (entries[k]) columns[k % 3] += `${entries[k]}\n`;
+			}
 
-			const pageCount = Math.ceil(entries.length / maxEntries) || 1;
+			embeds.push(
+				ctx.embedify('info', 'user', `${user}'s inventory`)
+					.setDescription(`${user.username} has \`${entries.length}\` distinct items and a total volume of \`${total}\` items.`)
+					.setFields([
+						{ name: '\u200b', value: columns[0].length ? columns[0] : '\u200b', inline: true },
+						{ name: '\u200b', value: columns[1].length ? columns[1] : '\u200b', inline: true },
+						{ name: '\u200b', value: columns[2].length ? columns[2] : '\u200b', inline: true },
+					]),
+			);
+		}
 
-			let k = 0;
-				for (let i = 0; i < pageCount; i++) {
-					let columns: string[] = ['', '', '']
-					for (let j = 0; j < maxEntries && entries[k]; j++, k++) {
-						if (entries[k]) {
-							columns[k % 3] += entries[k] + '\n'
-						}
-					}
-	
-					embeds.push(
-						new MessageEmbed()
-						.setAuthor({
-							name: interaction.user.tag,
-							iconURL: interaction.user.avatarURL()
-						})
-						.setColor('BLUE')
-						.setTitle(`${user.tag}'s Inventory`)
-						.setDescription(`${user.username} has \`${entries.length}\` distinct items and a total volume of \`${total}\` items.`)
-						.setFields([
-							{ name: '\u200b', value: columns[0].length? columns[0] : '\u200b', inline: true },
-							{ name: '\u200b', value: columns[1].length? columns[1] : '\u200b', inline: true },
-							{ name: '\u200b', value: columns[2].length? columns[2] : '\u200b', inline: true }
-						])
-					)
-				}
-	
-				return await paginate(ctx.interaction, embeds, 0);
-	}
+		return paginate(ctx.interaction, embeds, 0);
+	};
 }

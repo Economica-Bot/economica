@@ -1,22 +1,22 @@
-import { getEconInfo } from '../../lib';
-import { MemberModel } from '../../models';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { getEconInfo } from '../../lib/index.js';
+import { MemberModel } from '../../models/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
-export default class implements EconomicaCommand {
+export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('balance')
-		.setDescription('View a balance.')
+		.setDescription('View a balance')
 		.setModule('ECONOMY')
-		.setFormat('[user]')
-		.setExamples(['balance', 'balance @JohnDoe'])
-		.addUserOption((option) => option.setName('user').setDescription('Specify a user.').setRequired(false));
+		.setFormat('balance [user]')
+		.setExamples(['balance', 'balance @user'])
+		.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(false));
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const user = ctx.interaction.options.getUser('user') ?? ctx.interaction.user;
 		const userDocument = await MemberModel.findOneAndUpdate(
 			{ guild: ctx.guildDocument, userId: user.id },
 			{ guild: ctx.guildDocument, userId: user.id },
-			{ upsert: true, new: true, setDefaultsOnInsert: true }
+			{ upsert: true, new: true, setDefaultsOnInsert: true },
 		);
 		const { currency } = ctx.guildDocument;
 		const { wallet, treasury, total, rank } = await getEconInfo(userDocument);
@@ -24,23 +24,10 @@ export default class implements EconomicaCommand {
 			.embedify('info', { name: user.username, iconURL: user.displayAvatarURL() })
 			.setFooter({ text: `🏆 Rank ${rank}` })
 			.addFields(
-				{
-					name: 'Wallet',
-					value: `${currency}${wallet.toLocaleString()}`,
-					inline: true,
-				},
-				{
-					name: 'Treasury',
-					value: `${currency}${treasury.toLocaleString()}`,
-					inline: true,
-				},
-				{
-					name: 'Total',
-					value: `${currency}${total.toLocaleString()}`,
-					inline: true,
-				}
+				{ name: 'Wallet', value: `${currency}${wallet.toLocaleString()}`, inline: true },
+				{ name: 'Treasury', value: `${currency}${treasury.toLocaleString()}`, inline: true },
+				{ name: 'Total', value: `${currency}${total.toLocaleString()}`, inline: true },
 			);
-
-		return await ctx.interaction.reply({ embeds: [embed] });
+		await ctx.interaction.reply({ embeds: [embed] });
 	};
 }

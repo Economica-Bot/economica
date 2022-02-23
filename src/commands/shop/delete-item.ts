@@ -1,62 +1,41 @@
-import { Message, MessageEmbed } from "discord.js";
-import { itemRegExp } from "../../lib";
-import { confirmModal } from "../../lib/confirmModal";
-import { MemberModel, ShopModel } from "../../models";
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from "../../structures";
+import { itemRegExp } from '../../lib/index.js';
+import { ListingModel, MemberModel } from '../../models/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
-export default class implements EconomicaCommand {
+export default class implements Command {
 	data = new EconomicaSlashCommandBuilder()
 		.setName('delete-item')
 		.setDescription('Delete shop items.')
 		.setAuthority('MANAGER')
 		.setModule('SHOP')
-		.addStringOption((options) =>
-			options
-				.setName('name')
-				.setDescription('The name of the item to delete or "all"')
-				.setRequired(true)
-		)
+		.addStringOption((options) => options
+			.setName('name')
+			.setDescription('The name of the item to delete or "all"')
+			.setRequired(true));
 
 	execute = async (ctx: Context) => {
-		const name = ctx.interaction.options.getString('name')
-		if (name != 'all') {
-			const shopItem = await ShopModel.findOne({ guild: ctx.guildDocument, name: itemRegExp(name)})
-			if (!shopItem) {
-				return await ctx.embedify('error', 'user', `Could not find an item with name \`${name}\` (case-insensitive).`, true);
-			} else {
-				const updates = await MemberModel.updateMany(
-					{ guild: ctx.guildDocument },
-					{ $pull: { inventory: { shop: shopItem._id } } }
-				);
+		const name = ctx.interaction.options.getString('name');
+		if (name !== 'all') {
+			const shopItem = await ListingModel.findOne({ guild: ctx.guildDocument, name: itemRegExp(name) });
+			if (!shopItem) return ctx.embedify('error', 'user', `Could not find an item with name \`${name}\` (case-insensitive).`, true);
+			const updates = await MemberModel.updateMany(
+				{ guild: ctx.guildDocument },
+				{ $pull: { inventory: { shop: shopItem._id } } },
+			);
 
-				await shopItem.deleteOne()
-
-				return await ctx.embedify(
-					'success',
-					'user',
-					`Item deleted. ${updates.nModified} inventories affected.`,
-					false
-				);
-			}
-		} else {
-			await confirmModal(ctx.interaction, {
-				promptEmbed: ctx.embedify('info', 'user', 'Are you sure you want to delete __all items__?'),
-				confirmEmbed: ctx.embedify('success', 'user', `Successfully deleted all items in the ${ctx.interaction.guild.name} shop.`),
-				cancelEmbed: ctx.embedify('warn', 'user', 'Action abandoned: cancelled by user.')
-			}, async (reply: Message<boolean>, confirmEmbed: MessageEmbed) => {
-				const deleted = await ShopModel.deleteMany({
-					guild: ctx.guildDocument
-				});
-
-				const updates = await MemberModel.updateMany(
-					{ guild: ctx.guildDocument },
-					{ $pull: { inventory: {} } }
-				);
-
-				reply.edit({
-					embeds: [confirmEmbed.setDescription(`${confirmEmbed.description}\n\nItems Deleted: \`${deleted.deletedCount}\`\nInventories Affect: \`${updates.nModified}\``)]
-				});
-			}, true) // is ephemeral
+			await shopItem.deleteOne();
+			return ctx.embedify('success', 'user', `Item deleted. ${updates.nModified} inventories affected.`, false);
 		}
-	}
+
+		const deleted = await ListingModel.deleteMany({
+			guild: ctx.guildDocument,
+		});
+
+		const updates = await MemberModel.updateMany(
+			{ guild: ctx.guildDocument },
+			{ $pull: { inventory: {} } },
+		);
+
+		return ctx.embedify('success', 'user', `Items Deleted: \`${deleted.deletedCount}\`\nInventories Affect: \`${updates.nModified}\``, true);
+	};
 }

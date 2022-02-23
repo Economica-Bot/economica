@@ -1,6 +1,6 @@
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
-import { Contract, ContractSchema, Member } from '.';
+import { Contract, ContractSchema, Member } from './index.js';
 
 export interface Employee extends mongoose.Types.Subdocument {
 	member: mongoose.PopulatedDoc<Member>;
@@ -19,7 +19,7 @@ export const EmployeeSchema = new mongoose.Schema<Employee>(
 	{
 		timestamps: true,
 		versionKey: false,
-	}
+	},
 );
 
 export const EmployeeModel: mongoose.Model<Employee> = mongoose.model('Employee', EmployeeSchema);

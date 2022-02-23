@@ -1,42 +1,39 @@
 import { AutocompleteInteraction, CommandInteraction, Interaction } from 'discord.js';
 
-import { commandCheck } from '../lib';
-import { OccupationArr } from '../models/applications';
-import { Context, EconomicaClient, EconomicaEvent } from '../structures';
+import { commandCheck } from '../lib/command.js';
+import { OccupationArr } from '../models/index.js';
+import { Context, Economica, Event } from '../structures/index.js';
 
-export default class implements EconomicaEvent {
-	public name = 'interactionCreate' as const;
-	public async execute(client: EconomicaClient, interaction: Interaction): Promise<void> {
+export default class implements Event {
+	public event = 'interactionCreate' as const;
+	public async execute(client: Economica, interaction: Interaction<'cached'>): Promise<void> {
 		if (interaction.isCommand()) {
-			return this.commandInteraction(client, interaction);
+			await this.commandInteraction(client, interaction);
 		} else if (interaction.isAutocomplete()) {
-			return this.autocompleteInteraction(client, interaction);
+			await this.autocompleteInteraction(client, interaction);
 		}
 	}
 
-	private async commandInteraction(client: EconomicaClient, interaction: CommandInteraction): Promise<void> {
+	private async commandInteraction(client: Economica, interaction: CommandInteraction<'cached'>): Promise<void> {
 		const ctx = await new Context(client, interaction).init();
 		const check = await commandCheck(ctx);
 		if (check) {
+			await client.commands.get(interaction.commandName).execute(ctx);
 			ctx.memberDocument.commands.push({
 				member: ctx.memberDocument,
 				command: interaction.commandName,
 			});
-
 			await ctx.memberDocument.save();
-			await client.commands.get(interaction.commandName).execute(ctx);
 		}
 	}
 
-	private async autocompleteInteraction(client: EconomicaClient, interaction: AutocompleteInteraction): Promise<void> {
-		let choices;
+	private async autocompleteInteraction(_client: Economica, interaction: AutocompleteInteraction): Promise<void> {
+		let choices: string[];
 		if (interaction.commandName === 'application') {
 			if (interaction.options.getSubcommand() === 'apply') {
 				const focusedOption = interaction.options.getFocused(true);
 				if (focusedOption.name === 'occupation') choices = OccupationArr;
-				const filtered = choices.filter((choice) =>
-					choice.toLowerCase().includes((focusedOption.value as string).toLowerCase())
-				);
+				const filtered = choices.filter((choice) => choice.toLowerCase().includes((focusedOption.value as string).toLowerCase()));
 				await interaction.respond(filtered.map((choice) => ({ name: choice, value: choice })));
 			}
 		}

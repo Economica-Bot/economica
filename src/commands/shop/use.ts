@@ -1,70 +1,46 @@
-import { GuildMemberRoleManager, Message } from "discord.js";
-import { cut, itemRegExp } from "../../lib";
-import { MemberModel, ShopModel } from "../../models";
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from "../../structures";
+import { GuildMemberRoleManager } from 'discord.js';
 
-export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+import { Listing } from '../../models/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+
+export default class implements Command {
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('use')
-		.setDescription('Use a usable inventory item.')
+		.setDescription('Use an inventory item')
 		.setModule('SHOP')
-		.addStringOption((options) => 
-			options
-				.setName('name')
-				.setDescription('The name of the item to use.')
-				.setRequired(true)
-		)
-	
-		public execute = async (ctx: Context): Promise<Message | void> => {
-			const { interaction, memberDocument } = ctx;
-			const query = interaction.options.getString('name');
+		.setFormat('use <item>')
+		.setExamples(['use Bike'])
+		.addStringOption((options) => options.setName('name').setDescription('Specify an item').setRequired(true));
 
-			const item = await ShopModel.findOne({
-				guild: ctx.guildDocument,
-				name: itemRegExp(query)
-			})
+	public execute = async (ctx: Context): Promise<void> => {
+		const query = ctx.interaction.options.getString('name');
+		await ctx.memberDocument.populate({ path: 'inventory', populate: { path: 'listing', model: 'Listings' } }).execPopulate();
+		const inventoryItem = ctx.memberDocument.inventory.find((listing) => listing.listing.name === query);
+		const { listing }: { listing: Listing } = inventoryItem;
+		if (!listing) return ctx.embedify('error', 'user', 'You do not have that item in your inventory.', true);
+		const embed = ctx.embedify('success', 'user', `Used \`${listing.name}\` x1`);
+		if (listing.rolesGiven.length) {
+			listing.rolesGiven.forEach((roleId) => {
+				(ctx.interaction.member.roles as GuildMemberRoleManager).add(roleId, `Purchased ${listing.name}`);
+			});
 
-			if (!item)
-				return await ctx.embedify('error', 'user', `No item with name \`${cut(query)}\` exists.`, true)
-			
-			const { inventory } = memberDocument;
-
-			const inventoryItem = inventory.find(invItem => `${invItem.shop}` == `${item._id}`)
-
-			if (!inventoryItem)
-				return await ctx.embedify('error', 'user', `No item with name \`${cut(query)}\` (case-insensitive) found in inventory.`, true)
-
-			if (item.usability == 'Usable') {
-				const embed = ctx.embedify('success', 'user', `Used \`${item.name}\` x1`)
-
-				if (item.rolesGiven.length) {
-					item.rolesGiven.forEach((roleId) => {
-						(ctx.interaction.member.roles as GuildMemberRoleManager).add(roleId, `Purchased ${item.name}`);
-					});
-
-					embed.addField('Roles Given', `<@&${item.rolesGiven.join('>, <@&')}>`)
-				}
-				if (item.rolesRemoved.length) {
-					item.rolesRemoved.forEach((roleId) => {
-						(ctx.interaction.member.roles as GuildMemberRoleManager).remove(roleId, `Purchased ${item.name}`);
-					})
-
-					embed.addField('Roles Removed', `<@&${item.rolesRemoved.join('>, <@&')}>`)
-				}
-
-				// If item has amount, decrease; if not, delete.
-				ctx.memberDocument.inventory.map(item => {
-					if (item == inventoryItem)
-						item.amount > 1? item.amount -= 1 : item.remove()
-				})
-
-				ctx.memberDocument.markModified('inventory')
-				await ctx.memberDocument.save()
-					
-				return await interaction.reply({
-					embeds: [embed]
-				})
-			} else if (item.usability == 'Unusable')
-				return await ctx.embedify('error', 'user', 'This item is unusable.', true)
+			embed.addField('Roles Given', `<@&${listing.rolesGiven.join('>, <@&')}>`);
 		}
+
+		if (listing.rolesRemoved.length) {
+			listing.rolesRemoved.forEach((roleId) => {
+				(ctx.interaction.member.roles as GuildMemberRoleManager).remove(roleId, `Purchased ${listing.name}`);
+			});
+
+			embed.addField('Roles Removed', `<@&${listing.rolesRemoved.join('>, <@&')}>`);
+		}
+
+		if (inventoryItem.amount === 1) inventoryItem.remove();
+		else inventoryItem.amount -= 1;
+		ctx.memberDocument.markModified('inventory');
+		await ctx.memberDocument.save();
+		return ctx.interaction.reply({
+			embeds: [embed],
+		});
+	};
 }

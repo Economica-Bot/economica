@@ -1,28 +1,29 @@
-import { DefaultModuleString, DEVELOPMENT_GUILD_IDS, PRODUCTION } from '../config';
-import { defaultModulesArr } from '../models/guilds';
-import { EconomicaClient, EconomicaEvent, EconomicaSlashCommandBuilder } from '../structures';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { DEVELOPMENT_GUILD_IDS, PRODUCTION } from '../config.js';
+import { Economica, EconomicaSlashCommandBuilder, Event } from '../structures/index.js';
+import { Modules } from '../typings/index.js';
 
-export default class implements EconomicaEvent {
-	public name = 'ready' as const;
-	public async execute(client: EconomicaClient) {
+export default class implements Event {
+	public event = 'ready' as const;
+	public async execute(client: Economica) {
 		const commandData: any[] = [];
 		const defaultCommandData: any[] = [];
 		client.commands.forEach((command) => {
 			const data = command.data as EconomicaSlashCommandBuilder;
 			commandData.push(data.toJSON());
-			if (defaultModulesArr.includes(data.module as DefaultModuleString)) {
+			if (Modules[data.module] === 'DEFAULT') {
 				defaultCommandData.push(data.toJSON());
 			}
 		});
 
-		for (const DEVELOPMENT_GUILD_ID of DEVELOPMENT_GUILD_IDS) {
-			const guild = await client.guilds.fetch(DEVELOPMENT_GUILD_ID);
+		DEVELOPMENT_GUILD_IDS.forEach(async (id) => {
+			const guild = await client.guilds.fetch(id);
 			await guild.commands.set(commandData);
 			client.log.debug(`Registered commands in dev guild ${guild.name}`);
-		}
+		});
 
 		if (PRODUCTION) {
-			await client.application.commands.set(commandData);
+			await client.application.commands.set(defaultCommandData);
 			client.log.debug('Registered global commands');
 		}
 

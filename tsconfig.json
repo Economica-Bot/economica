@@ -1,17 +1,48 @@
 {
-  "compilerOptions": {
-    "module": "CommonJS",
-    "target": "ESNext",
-    "noImplicitAny": true,
-    "removeComments": true,
-    "preserveConstEnums": true,
-    "sourceMap": true,
-    "strictNullChecks": false,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    // "forceConsistentCasingInFileNames": true,
-    // "noImplicitReturns": true,
-    // "strict": true,
-    // "noUnusedLocals": true
-  }
+	// Mapped from https://www.typescriptlang.org/tsconfig
+	"compilerOptions": {
+		// Type Checking
+		"allowUnreachableCode": false,
+		"allowUnusedLabels": false,
+		// TypeScript 4.4
+		// "exactOptionalPropertyTypes": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		// "strict": true,
+		// TypeScript 4.4
+		// "useUnknownInCatchVariables": true,
+
+		// Modules
+		"module": "ESNext",
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+
+		// Emit
+		"importHelpers": true,
+		// "importsNotUsedAsValues": "error",
+		"inlineSources": true,
+		"newLine": "lf",
+		"noEmitHelpers": true,
+		"outDir": "dist",
+		"preserveConstEnums": false,
+		"removeComments": false,
+		"sourceMap": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+
+		// Language and Environment
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"lib": ["ESNext"],
+		"target": "ESNext",
+		"useDefineForClassFields": true,
+
+		// Completeness
+		"skipLibCheck": true,
+		//"baseUrl": "./"
+	},
+	"include": ["src", "tsconfig.eslint.json"]
 }

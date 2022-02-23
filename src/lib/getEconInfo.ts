@@ -1,5 +1,5 @@
-import { Member, MemberModel } from '../models';
-import { EconomyInfo } from '../typings';
+import { Member, MemberModel } from '../models/index.js';
+import { EconomyInfo } from '../typings/index.js';
 
 /**
  * Gets a user's economy information.
@@ -26,10 +26,10 @@ export async function getEconInfo(member: Member): Promise<EconomyInfo> {
 		},
 	]);
 
-	let rank = 1,
-		wallet = 0,
-		treasury = 0,
-		total = 0;
+	let rank = 1;
+	let wallet = 0;
+	let treasury = 0;
+	let total = 0;
 	for (let i = 0; i < balances.length; i++) {
 		if (balances[i].userId === member.userId) {
 			wallet = balances[i].wallet;

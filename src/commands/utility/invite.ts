@@ -1,16 +1,18 @@
-import { inviteOptions } from '../../config';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { inviteOptions } from '../../config.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
-export default class implements EconomicaCommand {
+export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('invite')
-		.setDescription('Get the invite link for Economica.')
+		.setDescription('Get the invite link for Economica')
 		.setModule('UTILITY')
+		.setFormat('invite')
+		.setExamples(['invite'])
 		.setAuthority('DEVELOPER')
 		.setGlobal(true);
 
 	public execute = async (ctx: Context): Promise<void> => {
-		const invite = await ctx.client.generateInvite(inviteOptions);
-		return await ctx.embedify('info', 'bot', `Invite link: __[Click Here](${invite} 'Invite Economica')__`, false);
+		const invite = ctx.client.generateInvite(inviteOptions);
+		return ctx.embedify('info', 'bot', `Invite link: __[Click Here](${invite} 'Invite Economica')__`, false);
 	};
 }

@@ -1,7 +1,7 @@
 import { Guild, Role, RoleResolvable } from 'discord.js';
 
-import { GuildModel } from '../models';
-import { Authority, RoleAuthority } from '../typings';
+import { GuildModel } from '../models/index.js';
+import { Authorities, RoleAuthority } from '../typings/index.js';
 
 /**
  * Get the authority level of a role in a guild.
@@ -9,13 +9,9 @@ import { Authority, RoleAuthority } from '../typings';
  * @param {Role} - The Role object or id of the role whose authority level is to be returned
  * @returns currentAuthLevel
  */
-export const getAuthLevel = async (guild: Guild, role: RoleResolvable): Promise<Authority> | null => {
-	const { auth } = await GuildModel.findOne({
-		guildId: guild.id,
-	});
-
-	if (role instanceof Role) role = role.id;
-	return auth.find((r) => r.roleId === role).authority ?? null;
+export const getAuthLevel = async (guild: Guild, role: RoleResolvable): Promise<keyof typeof Authorities> | null => {
+	const { auth } = await GuildModel.findOne({ guildId: guild.id });
+	return auth.find((r) => (r.roleId === (role instanceof Role ? role.id : role))).authority ?? null;
 };
 
 /**
@@ -25,10 +21,7 @@ export const getAuthLevel = async (guild: Guild, role: RoleResolvable): Promise<
  * @returns {RoleAuthority[]}
  */
 export const removeAuthRole = async (guild: Guild, role: RoleResolvable): Promise<RoleAuthority[]> => {
-	if (role instanceof Role) role = role.id;
-	const guildDocument = await GuildModel.findOne({
-		guildId: guild.id,
-	});
+	const guildDocument = await GuildModel.findOne({ guildId: guild.id });
 	await guildDocument.updateOne({ $pull: { auth: { roleId: role } } });
 	return guildDocument.auth;
 };
@@ -40,9 +33,8 @@ export const removeAuthRole = async (guild: Guild, role: RoleResolvable): Promis
  * @param {Authority} auth
  * @returns {Promise<RoleAuthority>}
  */
-export const setAuthRole = async (guild: Guild, role: RoleResolvable, auth: Authority): Promise<RoleAuthority> => {
-	if (role instanceof Role) role = role.id;
-	const authority: RoleAuthority = { roleId: role, authority: auth };
+export const setAuthRole = async (guild: Guild, role: RoleResolvable, auth: keyof typeof Authorities): Promise<RoleAuthority> => {
+	const authority: RoleAuthority = { roleId: role instanceof Role ? role.id : role, authority: auth };
 	const guildDocument = await GuildModel.findOne({ guildId: guild.id });
 	await guildDocument.updateOne({ $push: { auth: authority } });
 	return authority;

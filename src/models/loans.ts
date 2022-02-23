@@ -1,6 +1,6 @@
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
-import { Guild, Member } from '.';
+import { Guild, Member } from './index.js';
 
 export interface Loan extends mongoose.Document {
 	guild: mongoose.PopulatedDoc<Guild>;
@@ -30,7 +30,7 @@ export const LoanSchema = new mongoose.Schema<Loan>(
 	{
 		timestamps: { createdAt: true, updatedAt: false },
 		versionKey: false,
-	}
+	},
 );
 
 export const LoanModel: mongoose.Model<Loan> = mongoose.model('Loan', LoanSchema, 'Loan');

@@ -1,6 +1,6 @@
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
-import { ModuleString } from '../config';
+import { ModuleString } from '../typings';
 
 export interface Module extends mongoose.Types.Subdocument {
 	guild: mongoose.Types.ObjectId;
@@ -18,7 +18,7 @@ export const ModuleSchema = new mongoose.Schema<Module>(
 		strict: true,
 		versionKey: false,
 		timestamps: false,
-	}
+	},
 );
 
 export const ModuleModel: mongoose.Model<Module> = mongoose.model('Module', ModuleSchema);

@@ -1,40 +1,35 @@
-import { CURRENCY_SYMBOL } from '../../config';
-import { GuildModel } from '../../models';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { CURRENCY_SYMBOL } from '../../config.js';
+import { GuildModel } from '../../models/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
-export default class implements EconomicaCommand {
+export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('currency')
-		.setDescription('View or update the currency symbol.')
+		.setDescription('Manage the currency symbol')
 		.setModule('ECONOMY')
-		.setFormat('<view | set | reset> [currency]')
-		.addEconomicaSubcommand((subcommand) =>
-			subcommand.setName('view').setDescription('View the current currency symbol.')
-		)
-		.addEconomicaSubcommand((subcommand) =>
-			subcommand
-				.setName('set')
-				.setDescription('Set the currency symbol')
-				.setAuthority('MANAGER')
-				.addStringOption((option) => option.setName('currency').setDescription('Specify a symbol.').setRequired(true))
-		)
-		.addEconomicaSubcommand((subcommand) =>
-			subcommand.setName('reset').setDescription('Reset the currency symbol.').setAuthority('MANAGER')
-		);
+		.setFormat('currency <view | set | reset> [currency]')
+		.setExamples(['currency view', 'currency set 💵', 'currency reset'])
+		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View the currency symbol'))
+		.addSubcommand((subcommand) => subcommand
+			.setName('set')
+			.setDescription('Set the currency symbol')
+			.setAuthority('MANAGER')
+			.addStringOption((option) => option.setName('currency').setDescription('Specify a symbol').setRequired(true)))
+		.addSubcommand((subcommand) => subcommand.setName('reset').setDescription('Reset the currency symbol').setAuthority('MANAGER'));
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
-		const guildId = ctx.interaction.guildId;
+		const { guildId } = ctx.interaction;
 		const { currency } = ctx.guildDocument;
 		if (subcommand === 'view') {
-			return await ctx.embedify('success', 'guild', `Currency symbol: ${currency}`, false);
+			await ctx.embedify('success', 'guild', `Currency symbol: ${currency}`, false);
 		} else if (subcommand === 'set') {
 			const newCurrency = ctx.interaction.options.getString('currency');
 			await GuildModel.findOneAndUpdate({ guildId }, { currency: newCurrency });
-			return await ctx.embedify('success', 'guild', `Currency symbol set to ${newCurrency}`, false);
+			await ctx.embedify('success', 'guild', `Currency symbol set to ${newCurrency}`, false);
 		} else if (subcommand === 'reset') {
 			await GuildModel.findOneAndUpdate({ guildId }, { currency: CURRENCY_SYMBOL });
-			return await ctx.embedify('success', 'guild', `Currency symbol reset: ${currency}`, false);
+			await ctx.embedify('success', 'guild', `Currency symbol reset: ${currency}`, false);
 		}
 	};
 }

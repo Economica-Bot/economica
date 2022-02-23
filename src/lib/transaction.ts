@@ -1,8 +1,39 @@
+/* eslint-disable no-param-reassign */
 import { MessageEmbed, TextChannel } from 'discord.js';
 
-import { Guild, Member, Transaction, TransactionModel } from '../models';
-import { Context, EconomicaClient } from '../structures';
-import { TransactionString } from '../typings';
+import { Guild, Member, Transaction, TransactionModel } from '../models/index.js';
+import { Economica } from '../structures/index.js';
+import { TransactionString } from '../typings/index.js';
+
+export async function displayTransaction(transaction: Transaction): Promise<MessageEmbed> {
+	await transaction.populate('target').populate('agent').populate('guild').execPopulate();
+	const { target, guild, agent, wallet, treasury } = transaction;
+	const total = wallet + treasury;
+	const description = `Target: <@!${target.userId}> | Agent: <@!${agent.userId}>`;
+	return new MessageEmbed()
+		.setColor('GOLD')
+		.setAuthor({ name: `Transaction | ${transaction.type}` })
+		.setDescription(description)
+		.addFields([
+			{
+				name: '__**Wallet**__',
+				value: `${guild.currency}${wallet.toLocaleString()}`,
+				inline: true,
+			},
+			{
+				name: '__**Treasury**__',
+				value: `${guild.currency}${treasury.toLocaleString()}`,
+				inline: true,
+			},
+			{
+				name: '__**Total**__',
+				value: `${guild.currency}${total.toLocaleString()}`,
+				inline: true,
+			},
+		])
+		.setFooter({ text: `ID: ${transaction._id.toString()}` })
+		.setTimestamp();
+}
 
 /**
  * Record a transaction
@@ -15,74 +46,24 @@ import { TransactionString } from '../typings';
  * @returns {Promise<number>} total.
  */
 export async function transaction(
-	client: EconomicaClient,
+	client: Economica,
 	guild: Guild,
 	target: Member,
 	agent: Member,
 	type: TransactionString,
 	wallet: number,
-	treasury: number
+	treasury: number,
 ): Promise<void> {
 	target.wallet += wallet;
 	target.treasury += treasury;
 	await target.save();
-
-	const transaction_ = {
-		guild,
-		target,
-		agent,
-		type,
-		wallet,
-		treasury,
-	} as Transaction;
-
-	const transaction = await (await TransactionModel.create(transaction_)).save();
-	const { transactionLogChannelId } = guild;
-	if (transactionLogChannelId) {
-		const channel = client.channels.cache.get(transactionLogChannelId) as TextChannel;
-		const guild = channel.guild;
-		const member = guild.members.cache.get(client.user.id);
-		if (!channel.permissionsFor(member).has('SEND_MESSAGES') || !channel.permissionsFor(member).has('EMBED_LINKS')) {
-			return;
-		}
-
-		const embed = await displayTransaction(transaction);
-		await channel.send({ embeds: [embed] }).catch((err) => {
-			throw new Error(err);
-		});
+	const transactionDocument = await TransactionModel.create({ guild, target, agent, type, wallet, treasury });
+	const { transactionLogId } = guild;
+	if (transactionLogId) {
+		const channel = client.channels.cache.get(transactionLogId) as TextChannel;
+		const member = channel.guild.members.cache.get(client.user.id);
+		if (!channel.permissionsFor(member).has('SEND_MESSAGES') || !channel.permissionsFor(member).has('EMBED_LINKS')) return;
+		const embed = await displayTransaction(transactionDocument);
+		await channel.send({ embeds: [embed] });
 	}
-}
-
-export async function displayTransaction(transaction: Transaction): Promise<MessageEmbed> {
-	const target = (await transaction.populate('target').execPopulate()).target as Member;
-	const agent = (await transaction.populate('agent').execPopulate()).agent as Member;
-	const guild = (await transaction.populate('guild').execPopulate()).guild as Guild;
-	const cSymbol = guild.currency;
-	const wallet = transaction.wallet;
-	const treasury = transaction.treasury;
-	const total = wallet + treasury;
-	const description = `Target: <@!${target.userId}>	|	Agent: <@!${agent.userId}>`;
-	return new MessageEmbed()
-		.setColor('GOLD')
-		.setAuthor({ name: `Transaction | ${transaction.type}` })
-		.setDescription(description)
-		.addFields([
-			{
-				name: '__**Wallet**__',
-				value: `${cSymbol}${wallet.toLocaleString()}`,
-				inline: true,
-			},
-			{
-				name: '__**Treasury**__',
-				value: `${cSymbol}${treasury.toLocaleString()}`,
-				inline: true,
-			},
-			{
-				name: '__**Total**__',
-				value: `${cSymbol}${total.toLocaleString()}`,
-				inline: true,
-			},
-		])
-		.setFooter({ text: `ID: ${transaction._id.toString()}` })
-		.setTimestamp();
 }

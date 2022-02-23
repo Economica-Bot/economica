@@ -1,6 +1,6 @@
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
-import { Member } from '.';
+import { Member } from './index.js';
 
 export type OccupationString =
 	| 'CEO'
@@ -49,7 +49,7 @@ export const ApplicationSchema = new mongoose.Schema<Application>(
 	{
 		timestamps: true,
 		versionKey: false,
-	}
+	},
 );
 
 export const ApplicationModel: mongoose.Model<Application> = mongoose.model('Application', ApplicationSchema);

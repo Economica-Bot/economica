@@ -1,60 +1,38 @@
-import { isValidObjectId } from 'mongoose';
+import mongoose from 'mongoose';
 
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
-export default class implements EconomicaCommand {
+export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('mongo')
 		.setDescription('Manipulate database.')
 		.setModule('APPLICATION')
 		.setAuthority('DEVELOPER')
-		.addEconomicaSubcommand((subcommand) =>
-			subcommand
-				.setName('delete')
-				.setDescription('Delete mongoose documents.')
-				.addStringOption((option) =>
-					option.setName('collection').setDescription('Specify the collection.').setRequired(true)
-				)
-				.addStringOption((option) => option.setName('_id').setDescription('Specify the id.'))
-		)
-		.addEconomicaSubcommand((subcommandgroup) =>
-			subcommandgroup
-				.setName('reload')
-				.setDescription('Reload mongoose documents.')
-				.addStringOption((option) =>
-					option.setName('collection').setDescription('Specify the collection.').setRequired(true)
-				)
-				.addStringOption((option) => option.setName('_id').setDescription('Specify the id.').setRequired(true))
-		);
+		.addSubcommand((subcommand) => subcommand
+			.setName('delete')
+			.setDescription('Delete mongoose documents.')
+			.addStringOption((option) => option.setName('collection').setDescription('Specify the collection.').setRequired(true))
+			.addStringOption((option) => option.setName('_id').setDescription('Specify the id.')));
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const collectionQuery = ctx.interaction.options.getString('collection');
-		const _id = ctx.interaction.options.getString('_id', false);
-		const collection = (await ctx.client.mongoose.connection.db.collections()).find(
-			(collection) => collection.collectionName.toLowerCase() === collectionQuery.toLowerCase()
-		);
+		const collection = ctx.client.mongoose.connection.collections[collectionQuery];
+		const id = ctx.interaction.options.getString('id', false);
 		if (!collection) {
-			return await ctx.embedify('error', 'user', 'Could not find that collection.', true);
-		}
-
-		if (subcommand === 'delete') {
-			let description;
-			if (_id) {
-				if (!isValidObjectId(_id)) {
-					return await ctx.embedify('error', 'user', 'Invalid object id.', true);
-				}
-
-				await collection.deleteOne({ _id }).then(async (res) => {
-					description = `Deleted \`${res.deletedCount}\` document.`;
-				});
-			} else {
+			await ctx.embedify('error', 'user', 'Could not find that collection.', true);
+		} else if (subcommand === 'delete') {
+			if (!id) {
 				await collection.deleteMany({}).then(async (res) => {
-					description = `Deleted \`${res.deletedCount}\` documents.`;
+					await ctx.embedify('success', 'user', `Deleted \`${res.deletedCount}\` document(s).`, true);
+				});
+			} else if (!mongoose.isValidObjectId(id)) {
+				await ctx.embedify('error', 'user', 'Invalid object id.', true);
+			} else {
+				await collection.deleteOne({ id }).then(async (res) => {
+					await ctx.embedify('success', 'user', `Deleted \`${res.deletedCount}\` document(s).`, true);
 				});
 			}
-
-			return ctx.embedify('success', 'user', description, true);
 		}
 	};
 }

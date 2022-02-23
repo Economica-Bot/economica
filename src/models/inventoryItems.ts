@@ -1,20 +1,20 @@
-import * as mongoose from 'mongoose';
-import { Shop } from '.';
+import mongoose from 'mongoose';
+import { Listing } from './index.js';
 
 export interface InventoryItem extends mongoose.Types.Subdocument {
-	shop: mongoose.PopulatedDoc<Shop>;
+	listing: mongoose.PopulatedDoc<Listing>;
 	amount: number;
 	createdAt: Date;
 }
 
 export const InventoryItemSchema = new mongoose.Schema<InventoryItem>(
 	{
-		shop: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop' },
+		listing: { type: mongoose.Schema.Types.ObjectId, ref: 'Listing' },
 		amount: { type: mongoose.Schema.Types.Number, required: true },
 	},
 	{
 		versionKey: false,
-	}
+	},
 );
 
 export const InventoryItemModel: mongoose.Model<InventoryItem> = mongoose.model('InventoryItem', InventoryItemSchema);

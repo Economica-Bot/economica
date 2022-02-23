@@ -1,6 +1,6 @@
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
-import { Command, CommandSchema, Guild, Infraction, InventoryItem, InventoryItemSchema } from '.';
+import { Command, CommandSchema, Guild, Infraction, InventoryItem, InventoryItemSchema } from './index.js';
 
 export interface Member extends mongoose.Document {
 	guild: mongoose.PopulatedDoc<Guild>;
@@ -23,7 +23,7 @@ export const MemberSchema = new mongoose.Schema<Member>(
 	},
 	{
 		versionKey: false,
-	}
+	},
 );
 
 export const MemberModel: mongoose.Model<Member> = mongoose.model('Member', MemberSchema);

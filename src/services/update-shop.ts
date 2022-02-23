@@ -1,35 +1,22 @@
-import { SERVICE_COOLDOWNS } from '../config';
-import { ShopModel } from '../models';
-import { EconomicaClient, EconomicaService } from '../structures';
+import { FilterQuery } from 'mongoose';
 
-export default class implements EconomicaService {
-	public name = 'update-shop';
+import { Listing, ListingModel } from '../models/index.js';
+import { Service } from '../structures/index.js';
+import { SERVICE_COOLDOWNS } from '../typings/constants.js';
+
+export default class implements Service {
+	public service = 'update-shop';
 	public cooldown = SERVICE_COOLDOWNS.UPDATE_SHOP;
-	public execute = async (client: EconomicaClient): Promise<void> => {
+	public execute = async (): Promise<void> => {
 		const now = new Date();
-		const conditional = {
-			active: true,
-			duration: {
-				$ne: null as number,
-			},
-		};
-
-		const results = await ShopModel.find(conditional);
-
-		if (results?.length) {
-			for (const result of results) {
-				const { duration, createdAt } = result;
-				if (createdAt.getTime() + duration < now.getTime()) {
-					await ShopModel.findOneAndUpdate(
-						{
-							name: result.name,
-						},
-						{
-							active: false,
-						}
-					);
+		const filter: FilterQuery<Listing> = { active: true, duration: { $ne: null as number } };
+		const shops = await ListingModel.find(filter);
+		if (shops?.length) {
+			shops.forEach(async (shop) => {
+				if (shop.createdAt.getTime() + shop.duration < now.getTime()) {
+					await ListingModel.findOneAndUpdate({ name: shop.name }, { active: false });
 				}
-			}
+			});
 		}
 	};
 }

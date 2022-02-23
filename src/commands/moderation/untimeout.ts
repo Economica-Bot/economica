@@ -1,17 +1,16 @@
 import { GuildMember } from 'discord.js';
 
-import { validateTarget } from '../../lib';
-import { MemberModel } from '../../models';
-import { InfractionModel } from '../../models/infractions';
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
+import { validateTarget } from '../../lib/index.js';
+import { InfractionModel, MemberModel } from '../../models/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
-export default class implements EconomicaCommand {
+export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('untimeout')
-		.setDescription('Untimeout a member.')
+		.setDescription('Untimeout a member')
 		.setModule('MODERATION')
-		.setFormat('<member>')
-		.setExamples(['untimeout @JohnDoe'])
+		.setFormat('untimeout <member> [reason]')
+		.setExamples(['untimeout @user', 'untimeout 796906750569611294 forgiveness'])
 		.setClientPermissions(['MODERATE_MEMBERS'])
 		.setAuthority('MODERATOR')
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))
@@ -23,31 +22,19 @@ export default class implements EconomicaCommand {
 		await MemberModel.findOneAndUpdate(
 			{ guild: ctx.guildDocument, userId: target.id },
 			{ guild: ctx.guildDocument, userId: target.id },
-			{ upsert: true, new: true, setDefaultsOnInsert: true }
+			{ upsert: true, new: true, setDefaultsOnInsert: true },
 		);
 		const reason = ctx.interaction.options.getString('reason', false) || 'No reason provided';
-		const timeout = target.isCommunicationDisabled();
-		if (!timeout) return await ctx.embedify('error', 'user', 'That user is not under a timeout.', true);
-		let messagedUser = true;
-
-		await target
-			.send(`Your timeout has been canceled in **${ctx.interaction.guild.name}**`)
-			.catch(() => (messagedUser = false));
-		await target.timeout(null, reason);
-		await InfractionModel.updateMany(
-			{
-				userId: target.id,
-				guildId: ctx.interaction.guild.id,
-				type: 'UNTIMEOUT',
-				active: true,
-			},
-			{
-				active: false,
-			}
-		);
-
-		// prettier-ignore
-		const content = `Timeout canceled for ${target.user.tag}${messagedUser ? '\nUser notified' : '\nCould not notify user'}`;
-		return await ctx.embedify('success', 'user', content, false);
+		if (!target.isCommunicationDisabled()) {
+			await ctx.embedify('error', 'user', 'That user is not under a timeout.', true);
+		} else {
+			await target.timeout(null, reason);
+			await InfractionModel.updateMany(
+				{ userId: target.id, guildId: ctx.interaction.guild.id, type: 'UNTIMEOUT', active: true },
+				{ active: false },
+			);
+			const content = `Timeout canceled for ${target.user.tag}`;
+			ctx.embedify('success', 'user', content, false);
+		}
 	};
 }

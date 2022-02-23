@@ -1,11 +1,12 @@
-import { ClientOptions, ColorResolvable, ExcludeEnum, Intents, InviteGenerationOptions, Permissions } from 'discord.js';
-import { ActivityTypes } from 'discord.js/typings/enums';
-import * as i18n from 'i18n';
-import { ConnectOptions } from 'mongoose';
-import path from 'path';
-import { ISettingsParam } from 'tslog';
+/* eslint-disable prefer-destructuring */
+import { ClientOptions, ExcludeEnum, Intents, InviteGenerationOptions, Permissions } from 'discord.js';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 
-import { IncomeCommand, IntervalCommand, ReplyString } from './typings';
+import type { ActivityTypes } from 'discord.js/typings/enums';
+import type { ISettingsParam } from 'tslog';
+
+dotenv.config();
 
 // Environment Vars
 
@@ -62,7 +63,7 @@ export const inviteOptions: InviteGenerationOptions = {
 	],
 };
 
-export const mongoOptions: ConnectOptions = {
+export const mongoOptions: mongoose.ConnectOptions = {
 	useUnifiedTopology: true,
 	useNewUrlParser: true,
 	useFindAndModify: false,
@@ -75,93 +76,3 @@ export const loggerOptions: ISettingsParam = {
 	displayInstanceName: true,
 	minLevel: DEBUG ? 'silly' : 'info',
 };
-
-export const i18nOptions: i18n.ConfigurationOptions = {
-	defaultLocale: 'en',
-	directory: path.join(__dirname, '../locales'),
-	locales: ['en'],
-	updateFiles: false,
-	objectNotation: true,
-};
-
-i18n.configure(i18nOptions);
-export { i18n };
-
-// Constants
-
-export enum SERVICE_COOLDOWNS {
-	DEV = 1000 * 10,
-	UPDATE_BANS = 1000 * 60 * 5,
-	UPDATE_BOT_LOG = 1000 * 60 * 10,
-	UPDATE_GENERATORS = 1000 * 60 * 5,
-	UPDATE_LOANS = 1000 * 60 * 5,
-	UPDATE_SHOP = 1000 * 60 * 5,
-}
-
-export const EmbedColors: Record<ReplyString, ColorResolvable> = {
-	success: 'GREEN',
-	info: 'BLURPLE',
-	warn: 'YELLOW',
-	error: 'RED',
-};
-
-export const hyperlinks = {
-	help: '[Help Me Understand](https://discord.gg/57rQ7aHTpX)',
-	bug: '[Report An Issue](https://discord.gg/qEXKFth3vY)',
-	suggest: '[Suggest An Improvement](https://discord.gg/Rez4Etbf9X)',
-	insertAll: () => `${hyperlinks.help}\n${hyperlinks.bug}\n${hyperlinks.suggest}`,
-};
-
-export const icons = {
-	success: 'https://cdn.discordapp.com/emojis/843390419261194300.webp?size=96&quality=lossless',
-	info: 'https://cdn.discordapp.com/emojis/843390419429883924.webp?size=96&quality=lossless',
-	warning: 'https://cdn.discordapp.com/emojis/843390419270107136.webp?size=96&quality=lossless',
-	abort: 'https://cdn.discordapp.com/emojis/843390419270107136.webp?size=96&quality=lossless',
-	error: 'https://cdn.discordapp.com/emojis/843390419303661569.webp?size=96&quality=lossless',
-};
-
-export const authors = {
-	success: {
-		name: 'Process Executed Successfully',
-		iconURL: icons.success,
-	},
-	warning: {
-		name: 'Process Executed With Issues',
-		iconURL: icons.warning,
-	},
-	abort: {
-		name: 'Process Aborted',
-		iconURL: icons.abort,
-	},
-	error: {
-		name: 'Process Error',
-		iconURL: icons.error,
-	},
-};
-
-export const BUTTON_INTERACTION_COOLDOWN = 1000 * 15;
-
-// Types
-
-export type defaultIncomes = {
-	work: IncomeCommand;
-	beg: IncomeCommand;
-	crime: IncomeCommand;
-	rob: IncomeCommand;
-};
-
-export type defaultIntervals = {
-	minutely: IntervalCommand;
-	hourly: IntervalCommand;
-	daily: IntervalCommand;
-	weekly: IntervalCommand;
-	fortnightly: IntervalCommand;
-	monthly: IntervalCommand;
-};
-
-// Check ../../models/guilds.ts when updating
-// Make into record
-export type DefaultModuleString = 'ADMIN' | 'ECONOMY' | 'INCOME' | 'MODERATION' | 'SHOP' | 'UTILITY';
-export type SpecialModuleString = 'INSIGHTS' | 'INTERVAL' | 'CORPORATION';
-export type DevModuleString = 'APPLICATION';
-export type ModuleString = DefaultModuleString | SpecialModuleString | DevModuleString;

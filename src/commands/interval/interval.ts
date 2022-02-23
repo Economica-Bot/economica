@@ -1,56 +1,46 @@
-import { Message } from 'discord.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+import { defaultIntervals } from '../../typings/index.js';
 
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from '../../structures';
-
-export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+export default class implements Command {
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('interval')
-		.setDescription('View and configure interval commands.')
+		.setDescription('Manage the interval commands')
 		.setModule('INTERVAL')
-		.addEconomicaSubcommand((subcommand) =>
-			subcommand.setName('view').setDescription('View interval command configurations.')
-		)
-		.addEconomicaSubcommand((subcommand) =>
-			subcommand
-				.setName('edit')
-				.setDescription('Edit interval command configs.')
-				.setAuthority('MANAGER')
-				.addStringOption((option) => option.setName('command').setDescription('Specify the command.').setRequired(true))
-				.addIntegerOption((option) =>
-					option.setName('funds').setDescription('Specify the funds.').setMinValue(1).setRequired(true)
-				)
-		);
+		.setFormat('interval <view | edit> [...arguments]')
+		.setExamples(['interval view', 'interval edit daily 100'])
+		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View interval command configurations'))
+		.addSubcommand((subcommand) => subcommand
+			.setName('edit')
+			.setDescription('Edit interval command configs.')
+			.setAuthority('MANAGER')
+			.addStringOption((option) => option.setName('command').setDescription('Specify the command').setRequired(true))
+			.addIntegerOption((option) => option.setName('funds').setDescription('Specify the funds').setMinValue(1).setRequired(true)));
 
-	execute = async (ctx: Context): Promise<Message | void> => {
-		const intervals = ctx.guildDocument.intervals;
+	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		if (subcommand === 'view') {
-			const embed = ctx.embedify('info', 'guild', 'Interval command information');
-			for (const [k, v] of Object.entries(intervals)) {
-				const description = [];
-				for (const [k1, v1] of Object.entries(v)) {
-					description.push(`\`${k1}: ${v1}\``);
-				}
-
-				embed.addField(k, `${description.join('\n')}`, true);
-			}
-
-			return await ctx.interaction.reply({ embeds: [embed] });
-		} else if (subcommand === 'edit') {
+			const embed = ctx.embedify('info', 'guild', 'Income command information');
+			Object.entries(ctx.guildDocument.intervals).forEach((interval) => {
+				const description = Object.entries(interval[1]).map((prop) => description.push(`\`${prop[0]}: ${prop[1]}\``));
+				embed.addField(interval[0], description.join('\n'));
+			});
+			await ctx.interaction.reply({ embeds: [embed] });
+		} if (subcommand === 'edit') {
 			const funds = ctx.interaction.options.getInteger('funds');
-			const command = ctx.interaction.options.getString('command');
-			const inter = ctx.client.commands.get(command);
-
-			if (!inter) {
-				return await ctx.embedify('error', 'user', 'Could not find that command.', true);
-			} else if (inter.data.name in Object.keys(intervals)) {
-				return await ctx.embedify('error', 'user', `That is not an \`INTERVAL\` command.`, true);
+			const commandQuery = ctx.interaction.options.getString('command');
+			const command = ctx.client.commands.get(commandQuery);
+			if (!command) {
+				await ctx.embedify('error', 'user', 'Could not find that command.', true);
+			} if (commandQuery in Object.keys(ctx.guildDocument.intervals)) {
+				await ctx.embedify('error', 'user', 'That is not an `INTERVAL` command.', true);
+			} else {
+				Object.keys(ctx.guildDocument.intervals).forEach((interval: keyof defaultIntervals) => {
+					if (interval === command.data.name) ctx.guildDocument.intervals[interval].amount = funds;
+				});
+				ctx.guildDocument.markModified('intervals');
+				await ctx.guildDocument.save();
+				await ctx.embedify('success', 'user', `Updated \`${command}\`.`, false);
 			}
-
-			let k: keyof typeof intervals;
-			for (k in intervals) if (k === command) intervals[k].amount = funds;
-			await ctx.guildDocument.updateOne({ intervals });
-			return await ctx.embedify('success', 'user', `Updated \`${command}\`.`, false);
 		}
 	};
 }

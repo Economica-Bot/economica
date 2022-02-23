@@ -1,5 +1,4 @@
-import * as mongoose from 'mongoose';
-import { Corporation } from '.';
+import mongoose from 'mongoose';
 
 import { IndustryString } from './corporations';
 
@@ -86,7 +85,7 @@ export const PropertySchema = new mongoose.Schema<Property>(
 	},
 	{
 		versionKey: false,
-	}
+	},
 );
 
 export const PropertyModel: mongoose.Model<Property> = mongoose.model('Property', PropertySchema);

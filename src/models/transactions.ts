@@ -1,7 +1,6 @@
-import * as mongoose from 'mongoose';
-
-import { Guild, Member } from '.';
-import { TransactionString } from '../typings';
+import mongoose from 'mongoose';
+import { Guild, Member } from './index.js';
+import { TransactionString } from '../typings/index.js';
 
 export interface Transaction extends mongoose.Document {
 	guild: mongoose.PopulatedDoc<Guild>;
@@ -25,7 +24,7 @@ export const TransactionSchema = new mongoose.Schema<Transaction>(
 	{
 		timestamps: { createdAt: true, updatedAt: false },
 		versionKey: false,
-	}
+	},
 );
 
 export const TransactionModel: mongoose.Model<Transaction> = mongoose.model('Transaction', TransactionSchema);

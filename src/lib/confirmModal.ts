@@ -1,6 +1,7 @@
-import { ButtonInteraction, CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
-import { BUTTON_INTERACTION_COOLDOWN } from "../config";
-import { ConfirmModalEmbeds } from "../typings";
+import { ButtonInteraction, CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
+
+import { BUTTON_INTERACTION_COOLDOWN } from '../typings/constants.js';
+import { ConfirmModalEmbeds } from '../typings/index.js';
 
 /**
  * Creates an embed confirm modal with CONFIRM and CANCEL buttons.
@@ -13,57 +14,55 @@ import { ConfirmModalEmbeds } from "../typings";
 export async function confirmModal(interaction: CommandInteraction, { promptEmbed, confirmEmbed, cancelEmbed }: ConfirmModalEmbeds, confirmCallback: (reply: Message<boolean>, confirmEmbed: MessageEmbed) => void, ephemeral?: boolean): Promise<boolean> {
 	let confirmed = false;
 
-	if (!interaction.deferred)
+	if (!interaction.deferred) {
 		await interaction.deferReply({
-			ephemeral
+			ephemeral,
 		});
-	
-	let components = [new MessageActionRow()
+	}
+
+	const components = [new MessageActionRow()
 		.addComponents([
 			new MessageButton()
 				.setCustomId('confirm')
 				.setLabel('Delete All')
-				.setStyle('DANGER')
-			,
+				.setStyle('DANGER'),
 			new MessageButton()
 				.setCustomId('cancel')
 				.setLabel('Cancel')
-				.setStyle('SECONDARY')
+				.setStyle('SECONDARY'),
 		])];
 
 	const reply = (await interaction.editReply({
 		embeds: [promptEmbed],
-		components
+		components,
 	})) as Message;
 
-	const filter = (click: ButtonInteraction): boolean => click.user.id == interaction.user.id;
+	const filter = (click: ButtonInteraction): boolean => click.user.id === interaction.user.id;
 
 	const collector = reply.createMessageComponentCollector<'BUTTON'>({
 		filter,
-		time: BUTTON_INTERACTION_COOLDOWN
+		time: BUTTON_INTERACTION_COOLDOWN,
 	});
 
-	collector.on('collect', async(click) => {
-		if (click.customId == 'confirm') {
+	collector.on('collect', async (click) => {
+		if (click.customId === 'confirm') {
 			await click.update({
 				embeds: [confirmEmbed],
-				components: []
+				components: [],
 			});
 
 			confirmed = true;
 			collector.stop();
-		} else if (click.customId == 'cancel')
-			collector.stop();
+		} else if (click.customId === 'cancel') { collector.stop(); }
 	});
 
-	collector.on('end', async() => {
-		if (confirmed)
-			await confirmCallback(reply, confirmEmbed);
-		else
+	collector.on('end', async () => {
+		if (confirmed) { await confirmCallback(reply, confirmEmbed); } else {
 			await interaction.editReply({
 				embeds: [cancelEmbed],
-				components: []
-			})
+				components: [],
+			});
+		}
 	});
 
 	return confirmed;

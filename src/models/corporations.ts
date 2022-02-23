@@ -1,6 +1,15 @@
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
-import { Application, ApplicationSchema, Employee, EmployeeSchema, Guild, Member, Property, PropertySchema } from '.';
+import {
+	Application,
+	ApplicationSchema,
+	Employee,
+	EmployeeSchema,
+	Guild,
+	Member,
+	Property,
+	PropertySchema,
+} from './index.js';
 
 export type IndustryString =
 	| 'MANUFACTURING'
@@ -42,14 +51,14 @@ export const CorporationSchema = new mongoose.Schema<Corporation>(
 		industry: { type: mongoose.Schema.Types.String, required: true },
 		description: { type: mongoose.Schema.Types.String, required: true },
 		balance: { type: mongoose.Schema.Types.Number, required: true },
-		applications: { type: [ApplicationSchema], default: [] },
-		employees: { type: [EmployeeSchema], default: [] },
-		properties: { type: [PropertySchema], default: [] },
+		applications: { type: Array<typeof ApplicationSchema>(), default: [] },
+		employees: { type: Array<typeof EmployeeSchema>(), default: [] },
+		properties: { type: Array<typeof PropertySchema>(), default: [] },
 	},
 	{
 		timestamps: { createdAt: true, updatedAt: false },
 		versionKey: false,
-	}
+	},
 );
 
 export const CorporationModel: mongoose.Model<Corporation> = mongoose.model('Corporation', CorporationSchema);
