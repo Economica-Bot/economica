@@ -63,7 +63,7 @@ async function checkPermission(ctx: Context): Promise<boolean> {
 	) as EconomicaSlashCommandSubcommandBuilder;
 	const clientPermissions: PermissionString[] = [];
 	const missingClientPermissions: PermissionString[] = [];
-	let missingAuthority: Authority;
+	let missingAuthority: keyof typeof Authorities;
 
 	const authority = subcommand.authority ?? group.authority ?? ctx.data.authority;
 	if (ctx.data.clientPermissions) clientPermissions.push(...ctx.data.clientPermissions);

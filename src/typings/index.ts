@@ -64,24 +64,6 @@ export type Author = 'bot' | 'user' | 'guild' | EmbedAuthorData;
 export type Moderation = 'ban' | 'kick' | 'timeout' | 'unban' | 'untimeout';
 export type BalanceString = 'wallet' | 'treasury';
 export type ListingString = 'CLASSIC' | 'INSTANT' | 'USABLE' | 'UNUSABLE' | 'GENERATOR';
-
-// Check ../../models/guilds.ts when updating
-export type ModuleType = 'DEFAULT' | 'SPECIAL' | 'DEV';
-export type ModuleString = 'ADMIN' | 'ECONOMY' | 'INCOME' | 'MODERATION' | 'SHOP' | 'UTILITY' | 'INSIGHTS' | 'INTERVAL' | 'CORPORATION' | 'MESSAGE' | 'APPLICATION';
-export const Modules: Record<ModuleString, ModuleType> = {
-	ADMIN: 'DEFAULT',
-	ECONOMY: 'DEFAULT',
-	INCOME: 'DEFAULT',
-	MODERATION: 'DEFAULT',
-	SHOP: 'DEFAULT',
-	UTILITY: 'DEFAULT',
-	INSIGHTS: 'SPECIAL',
-	INTERVAL: 'SPECIAL',
-	CORPORATION: 'SPECIAL',
-	MESSAGE: 'SPECIAL',
-	APPLICATION: 'DEV',
-};
-
 export type InfractionString = 'BAN' | 'KICK' | 'TIMEOUT' | 'UNBAN' | 'UNTIMEOUT';
 export type TransactionString =
 	| 'DEPOSIT'
@@ -114,5 +96,21 @@ export type TransactionString =
 	| 'INTERVAL_WEEK'
 	| 'INTERVAL_FORTNIGHT'
 	| 'INTERVAL_MONTH';
+export const OccupationArr = [
+	'Accountant',
+	'Business Analyst',
+	'CEO',
+	'CFO',
+	'COO',
+	'CTO',
+	'Laborer',
+	'Manager',
+	'Marketer',
+	'Secretary',
+	'Talent Acquisitor',
+	'Head of Diversity',
+	'Dog Walker',
+] as const;
+export type OccupationString = typeof OccupationArr[number];
 
 export * from './constants.js';

@@ -1,24 +1,17 @@
-import mongoose from 'mongoose';
+import { Ref, getModelForClass, prop } from '@typegoose/typegoose';
 
-import { ModuleString } from '../typings';
+import { ModuleString } from '../typings/index.js';
+import { Guild, User } from './index.js';
 
-export interface Module extends mongoose.Types.Subdocument {
-	guild: mongoose.Types.ObjectId;
-	user: mongoose.Types.ObjectId;
-	module: ModuleString;
+export class Module {
+	@prop({ ref: () => Guild })
+	public guild: Ref<Guild>;
+
+	@prop({ ref: () => User })
+	public user: Ref<User>;
+
+	@prop({ required: true })
+	public module: ModuleString;
 }
 
-export const ModuleSchema = new mongoose.Schema<Module>(
-	{
-		guild: { type: mongoose.Schema.Types.ObjectId, ref: 'Guild' },
-		user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-		module: { type: mongoose.Schema.Types.String, required: true },
-	},
-	{
-		strict: true,
-		versionKey: false,
-		timestamps: false,
-	},
-);
-
-export const ModuleModel: mongoose.Model<Module> = mongoose.model('Module', ModuleSchema);
+export const ModuleModel = getModelForClass(Module);

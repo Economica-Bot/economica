@@ -1,6 +1,6 @@
 import { ColorResolvable } from 'discord.js';
 
-import { Modules, ReplyString, defaultIncomes, defaultIntervals } from '.';
+import { ReplyString, defaultIncomes, defaultIntervals } from '.';
 
 export const defaultIntervalsObj: defaultIntervals = {
 	minutely: {
@@ -98,3 +98,60 @@ export enum emojis {
 }
 
 export const BUTTON_INTERACTION_COOLDOWN = 1000 * 15;
+
+export enum Properties {
+	TEXTILE_MILL = 'MANUFACTURING',
+	OIL_REFINERY = 'MANUFACTURING',
+	PLASTIC_FACTORY = 'MANUFACTURING',
+	LUMBER_PLANT = 'MANUFACTURING',
+	SUPERMARKET = 'RETAIL',
+	WAREHOUSE_STORE = 'RETAIL',
+	MALL = 'RETAIL',
+	ORCHARD = 'AGRICULTURE',
+	HYDROPONIC_FARM = 'AGRICULTURE',
+	TRADITIONAL_FARM = 'AGRICULTURE',
+	LIVESTOCK = 'AGRICULTURE',
+	BULLDOZER = 'CONSTRUCTION',
+	FRONT_LOADER = 'CONSTRUCTION',
+	DUMP_TRUCK = 'CONSTRUCTION',
+	BACKHOE = 'CONSTRUCTION',
+	TRENCHER = 'CONSTRUCTION',
+	CRANE = 'CONSTRUCTION',
+	PRESCHOOL = 'EDUCATION',
+	KINDERGARTEN = 'EDUCATION',
+	ELEMENTARY_SCHOOL = 'EDUCATION',
+	INTERMEDIATE_SCHOOL = 'EDUCATION',
+	SECONDARY_SCHOOL = 'EDUCATION',
+	COLLEGE = 'EDUCATION',
+	UNIVERSITY = 'EDUCATION',
+	PHONE_ASSEMBLY_LINE = 'TECHNOLOGY',
+	COMPUTER_ASSEMBLY_LINE = 'TECHNOLOGY',
+	TABLET_ASSEMBLY_LINE = 'TECHNOLOGY',
+	COMPACT_CAR = 'TRANSPORATION',
+	BUS = 'TRANSPORATION',
+	STEAM_LOCOMOTIVE = 'TRANSPORATION',
+	DIESEL_LOCOMOTIVE = 'TRANSPORATION',
+	ELECTRIC_LOCOMOTIVE = 'TRANSPORATION',
+	CESSNA = 'TRANSPORATION',
+	JUMBO_JET = 'TRANSPORATION',
+}
+
+export type PropertyString = `${Properties}`;
+export type IndustryString = keyof typeof Properties;
+
+export enum Modules {
+	ADMIN = 'DEFAULT',
+	ECONOMY = 'DEFAULT',
+	INCOME = 'DEFAULT',
+	MODERATION = 'DEFAULT',
+	SHOP = 'DEFAULT',
+	UTILITY = 'DEFAULT',
+	INSIGHTS = 'SPECIAL',
+	INTERVAL = 'SPECIAL',
+	CORPORATION = 'SPECIAL',
+	MESSAGE = 'SPECIAL',
+	APPLICATION = 'DEV',
+}
+
+export type ModuleType = `${Modules}`;
+export type ModuleString = keyof typeof Modules;

@@ -3,6 +3,7 @@ export * from './commands.js';
 export * from './contracts.js';
 export * from './corporations.js';
 export * from './employees.js';
+export * from './experience.js';
 export * from './guilds.js';
 export * from './infractions.js';
 export * from './inventoryItems.js';

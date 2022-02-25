@@ -1,55 +1,25 @@
 import mongoose from 'mongoose';
+import { Ref, getModelForClass, prop } from '@typegoose/typegoose';
 
+import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses';
+import { OccupationString } from '../typings/index.js';
 import { Member } from './index.js';
 
-export type OccupationString =
-	| 'CEO'
-	| 'CTO'
-	| 'CFO'
-	| 'COO'
-	| 'Secretary'
-	| 'Accountant'
-	| 'Marketer'
-	| 'Talent Acquisitor'
-	| 'Business Analyst'
-	| 'Manager'
-	| 'Laborer';
+export class Application extends TimeStamps {
+	@prop({ ref: () => Member })
+	public member: Ref<Member>;
 
-export const OccupationArr: OccupationString[] = [
-	'Accountant',
-	'Business Analyst',
-	'CEO',
-	'CFO',
-	'COO',
-	'CTO',
-	'Laborer',
-	'Manager',
-	'Marketer',
-	'Secretary',
-	'Talent Acquisitor',
-];
+	@prop({ type: mongoose.Schema.Types.String, required: true })
+	public occupation: OccupationString;
 
-export interface Application extends mongoose.Types.Subdocument {
-	member: mongoose.PopulatedDoc<Member>;
-	occupation: OccupationString;
-	content: string;
-	pending: boolean;
-	accepted: boolean;
-	createdAt: Date;
+	@prop({ type: mongoose.Schema.Types.String, required: true })
+	public content: string;
+
+	@prop({ default: true })
+	public pending: boolean;
+
+	@prop({ default: false })
+	public accepted: boolean;
 }
 
-export const ApplicationSchema = new mongoose.Schema<Application>(
-	{
-		member: { type: mongoose.Schema.Types.ObjectId, ref: 'Member' },
-		occupation: { type: mongoose.Schema.Types.String, required: true },
-		content: { type: mongoose.Schema.Types.String, required: true },
-		pending: { type: mongoose.Schema.Types.Boolean, default: true },
-		accepted: { type: mongoose.Schema.Types.Boolean, default: false },
-	},
-	{
-		timestamps: true,
-		versionKey: false,
-	},
-);
-
-export const ApplicationModel: mongoose.Model<Application> = mongoose.model('Application', ApplicationSchema);
+export const ApplicationModel = getModelForClass(Application);
