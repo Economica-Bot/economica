@@ -100,18 +100,6 @@ async function validateModule(ctx: Context): Promise<boolean> {
 	return true;
 }
 
-// async function parseInput(ctx: Context): Promise<boolean> {
-// 	const authority = ctx.interaction.options.getString('authority', false);
-// 	if (authority && !(authority in Authorities)) {
-// 		await ctx.embedify('error', 'user', 'AUTHORITY | Invalid input');
-// 		return false;
-// 	}
-
-// 	const
-
-// 	return true;
-// }
-
 export async function commandCheck(ctx: Context): Promise<boolean> {
 	const isDeveloper = DEVELOPER_IDS.includes(ctx.interaction.user.id);
 	if (!ctx.data.enabled) {
@@ -133,10 +121,6 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 		const valid = await validateModule(ctx);
 		if (!valid) return false;
 	}
-	// else {
-	// 	const valid = await parseInput(ctx);
-	// 	if (!valid) return false;
-	// }
 
 	return true;
 }

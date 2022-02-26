@@ -96,7 +96,7 @@ export type TransactionString =
 	| 'INTERVAL_WEEK'
 	| 'INTERVAL_FORTNIGHT'
 	| 'INTERVAL_MONTH';
-export const OccupationArr = [
+export enum Occupations {
 	'Accountant',
 	'Business Analyst',
 	'CEO',
@@ -110,7 +110,7 @@ export const OccupationArr = [
 	'Talent Acquisitor',
 	'Head of Diversity',
 	'Dog Walker',
-] as const;
-export type OccupationString = typeof OccupationArr[number];
+}
+export type OccupationString = keyof typeof Occupations;
 
 export * from './constants.js';

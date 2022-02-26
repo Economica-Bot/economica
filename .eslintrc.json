@@ -44,13 +44,13 @@
       "@typescript-eslint/parser": [".ts"]
     },
     "import/resolver": {
+      // "project": {},
       "node": {
         "extensions": [".ts"],
-        "paths": ["./src/lib/index.js"]
+        "moduleDirectory": ["./src", "./node_modules"]
       },
       "typescript": {
-        "alwaysTryTypes": true,
-        "project": "./tsconfig.json"
+        "alwaysTryTypes": true
       }
     }
   },
