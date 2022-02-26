@@ -1,4 +1,5 @@
 export * from './applications.js';
+export * from './authority.js';
 export * from './commands.js';
 export * from './contracts.js';
 export * from './corporations.js';

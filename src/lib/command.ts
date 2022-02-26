@@ -81,7 +81,7 @@ async function checkPermission(ctx: Context): Promise<boolean> {
 		return true;
 	} if (authority) {
 		const { auth } = ctx.guildDocument;
-		const roleAuth = auth.filter((r) => r.authority === authority && member.roles.cache.has(r.roleId));
+		const roleAuth = auth.filter((r) => r.authority === authority && (member.roles.cache.has(r.id) || member.id === r.id));
 		if (!roleAuth.length) missingAuthority = authority;
 	} if (missingAuthority) {
 		const description = `Missing authority: \`${missingAuthority}\``;

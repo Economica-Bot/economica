@@ -1,14 +1,15 @@
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
+import { Authority, AuthoritySchema } from './index.js';
 import { CURRENCY_SYMBOL } from '../config';
-import { RoleAuthority, defaultIncomesObj, defaultIntervalsObj, defaultModulesArr, modulesArr } from '../typings';
+import { defaultIncomesObj, defaultIntervalsObj, defaultModulesArr, modulesArr } from '../typings';
 
 export interface Guild extends mongoose.Document {
 	guildId: string;
 	currency: string;
-	transactionLogChannelId: string;
-	infractionLogChannelId: string;
-	botLogChannelId: string;
-	auth: RoleAuthority[];
+	transactionLogId: string;
+	infractionLogId: string;
+	botLogId: string;
+	auth: mongoose.Types.DocumentArray<Authority>;
 	incomes: typeof defaultIncomesObj;
 	intervals: typeof defaultIntervalsObj;
 	modules: typeof modulesArr;
@@ -18,10 +19,10 @@ export const GuildSchema = new mongoose.Schema<Guild>(
 	{
 		guildId: { type: mongoose.Schema.Types.String, required: true },
 		currency: { type: mongoose.Schema.Types.String, default: CURRENCY_SYMBOL },
-		transactionLogChannelId: { type: mongoose.Schema.Types.String, default: null },
-		infractionLogChannelId: { type: mongoose.Schema.Types.String, default: null },
-		botLogChannelId: { type: mongoose.Schema.Types.String, default: null },
-		auth: { type: mongoose.Schema.Types.Array },
+		transactionLogId: { type: mongoose.Schema.Types.String, default: null },
+		infractionLogId: { type: mongoose.Schema.Types.String, default: null },
+		botLogId: { type: mongoose.Schema.Types.String, default: null },
+		auth: { type: [AuthoritySchema] },
 		incomes: { type: Object, default: defaultIncomesObj },
 		intervals: { type: Object, default: defaultIntervalsObj },
 		modules: { type: [String], default: defaultModulesArr },

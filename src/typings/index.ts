@@ -1,7 +1,5 @@
 import { EmbedAuthorData, MessageEmbed } from 'discord.js';
 
-import { Authorities } from './constants.js';
-
 export interface EconomyInfo {
 	wallet: number;
 	treasury: number;
@@ -16,11 +14,6 @@ export interface IncomeCommandProperties {
 	chance: number;
 	minFine: number;
 	maxFine: number;
-}
-
-export interface RoleAuthority {
-	roleId: string;
-	authority: keyof typeof Authorities;
 }
 
 export interface ConfirmModalEmbeds {
