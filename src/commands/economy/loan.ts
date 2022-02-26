@@ -1,7 +1,7 @@
 import ms from 'ms';
 
 import { getEconInfo, transaction, validateObjectId } from '../../lib/index.js';
-import { LoanModel, Member, MemberModel } from '../../models/index.js';
+import { LoanModel, MemberModel } from '../../models/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
@@ -111,26 +111,26 @@ export default class implements Command {
 				{ id, guildId: ctx.interaction.guild.id, borrowerId: ctx.interaction.user.id, pending: true },
 				{ pending: false },
 			);
-			const member = loan.populate('lender').lender as Member;
-			transaction(ctx.client, ctx.guildDocument, ctx.memberDocument, member, 'LOAN_ACCEPT', loan.principal, 0);
+			const { lender } = await loan.populate('lender');
+			transaction(ctx.client, ctx.guildDocument, ctx.memberDocument, lender, 'LOAN_ACCEPT', loan.principal, 0);
 			await ctx.embedify('success', 'user', `Accepted loan \`${id}\``, false);
 		} if (subcommand === 'decline') {
 			const loan = await LoanModel.findOneAndUpdate(
 				{ id, guildId: ctx.interaction.guild.id, borrowerId: ctx.interaction.user.id, pending: true },
 				{ pending: false, active: false },
 			);
-			const member = loan.populate('lender').lender as Member;
-			transaction(ctx.client, ctx.guildDocument, member, ctx.clientDocument, 'LOAN_DECLINE', 0, loan.principal);
+			const { lender } = await loan.populate('lender');
+			transaction(ctx.client, ctx.guildDocument, lender, ctx.clientDocument, 'LOAN_DECLINE', 0, loan.principal);
 			await ctx.embedify('success', 'user', `Accepted loan \`${id}\``, false);
 		} if (subcommand === 'view') {
 			if (id) {
-				const member = document.populate('borrower').borrower as Member;
+				const { borrower } = await document.populate('borrower');
 				await ctx.embedify(
 					'success',
 					'user',
 					`Loan \`${id}\` | <t:${document.createdAt.getMilliseconds()}:f>
 					Expires in <t:${document.expires.getMilliseconds()}:R>
-					Borrower: <@!${member.userId}>
+					Borrower: <@!${borrower.userId}>
 					Pending: \`${document.pending}\` | Active: \`${document.active}\` | Complete: \`${document.complete}\`
 					Principal: ${currency}${document.principal} | Repayment: ${currency}${document.repayment})`,
 					false,
@@ -140,7 +140,7 @@ export default class implements Command {
 				const incomingLoans = await LoanModel.find({ guildId: ctx.guildDocument.guildId, borrowerId: user.id });
 				let description = '';
 				outgoingLoans.forEach(async (loan) => {
-					await loan.populate('borrower').execPopulate();
+					await loan.populate('borrower');
 					description
 						+= `Outgoing Loan \`${loan.id}\`
 						Expires in <t:${loan.expires.getMilliseconds()}:R>
@@ -149,7 +149,7 @@ export default class implements Command {
 						Principal: ${currency}${loan.principal} | Repayment: ${currency}${loan.repayment}\n\n`;
 				});
 				incomingLoans.forEach(async (loan) => {
-					await loan.populate('lender').execPopulate();
+					await loan.populate('lender');
 					description
 						+= `Incoming Loan \`${loan.id}\`
 						Expires in <t:${loan.expires.getMilliseconds()}:R>

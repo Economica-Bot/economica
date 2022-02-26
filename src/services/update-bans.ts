@@ -1,4 +1,4 @@
-import { Guild, InfractionModel, Member } from '../models/index.js';
+import { InfractionModel, Member } from '../models/index.js';
 import { Economica, Service } from '../structures/index.js';
 import { SERVICE_COOLDOWNS } from '../typings/constants.js';
 
@@ -11,8 +11,8 @@ export default class implements Service {
 		bans.forEach(async (ban) => {
 			if (ban.createdAt.getTime() + ban.duration < now.getTime()) {
 				await ban.updateOne({ active: false });
-				const memberDocument = ban.populate('target').parent() as Member;
-				const guildDocument = memberDocument.populate('guild').guild as Guild;
+				const memberDocument = ban.parent() as Member;
+				const { guild: guildDocument } = await memberDocument.populate('guild');
 				const guild = client.guilds.cache.get(guildDocument.guildId);
 				await guild.members.unban(memberDocument.userId, 'Economica: Ban expired.');
 			}

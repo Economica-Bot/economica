@@ -1,15 +1,18 @@
-import { getModelForClass, prop } from '@typegoose/typegoose';
-import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses';
+import mongoose from 'mongoose';
 
-export class Contract extends TimeStamps {
-	@prop({ required: true })
-	public expires: Date;
-
-	@prop({ required: true })
-	public wage: number;
-
-	@prop({ required: true })
-	public cooldown: number;
+export interface Contract extends mongoose.Types.Subdocument {
+	expires: Date;
+	wage: number;
+	cooldown: number;
 }
 
-export const ContractModel = getModelForClass(Contract);
+export const ContractSchema = new mongoose.Schema<Contract>(
+	{
+		expires: { type: mongoose.Schema.Types.Date, required: true },
+		wage: { type: mongoose.Schema.Types.Number, required: true },
+		cooldown: { type: mongoose.Schema.Types.Number, required: true },
+	},
+	{ timestamps: true, versionKey: false },
+);
+
+export const ContractModel: mongoose.Model<Contract> = mongoose.model('Contract', ContractSchema);

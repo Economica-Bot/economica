@@ -14,7 +14,6 @@
   "dependencies": {
     "@adrastopoulos/number-parser": "github:Adrastopoulos/Number-Parser",
     "@discordjs/builders": "^0.10.0",
-    "@typegoose/typegoose": "^9.7.0",
     "discord-api-types": "^0.25.2",
     "discord.js": "^13.6.0",
     "dotenv": "^10.0.0",

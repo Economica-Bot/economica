@@ -24,7 +24,7 @@ export const displayListing = async (ctx: Context, listing: Listing): Promise<vo
 			{ name: 'Active?', value: `\`${listing.active}\``, inline: true },
 			{ name: 'Stackable?', value: `\`${listing.stackable}\``, inline: true },
 			{ name: 'Price', value: `${ctx.guildDocument.currency}${listing.price?.toLocaleString() || 'Free'}`, inline: true },
-			{ name: 'Required Treasury', value: `${ctx.guildDocument.currency}${listing.requiredTreasury.toLocaleString()}+`, inline: true },
+			{ name: 'Required Treasury', value: `${ctx.guildDocument.currency}${listing.treasuryRequired.toLocaleString()}+`, inline: true },
 			{ name: 'Expires', value: `${expires}`, inline: true },
 			{ name: 'Stock Left', value: `${listing.stock.toLocaleString()}`, inline: true },
 			{ name: 'Roles Given', value: listing.rolesGiven.length ? `<@&${listing.rolesGiven.join('>, <@&')}>` : 'None', inline: true },

@@ -1,12 +1,18 @@
-import { getModelForClass, prop } from '@typegoose/typegoose';
+import mongoose from 'mongoose';
 import { Listing } from './index.js';
 
-export class InventoryItem {
-	@prop({ ref: () => Listing })
-	public listing: Listing;
-
-	@prop({ required: true })
-	public amount: number;
+export interface InventoryItem extends mongoose.Types.Subdocument {
+	listing: mongoose.PopulatedDoc<Listing>;
+	amount: number;
+	createdAt: Date;
 }
 
-export const InventoryItemModel = getModelForClass(InventoryItem);
+export const InventoryItemSchema = new mongoose.Schema<InventoryItem>(
+	{
+		listing: { type: mongoose.Schema.Types.ObjectId, ref: 'Listing' },
+		amount: { type: mongoose.Schema.Types.Number, required: true },
+	},
+	{ versionKey: false },
+);
+
+export const InventoryItemModel: mongoose.Model<InventoryItem> = mongoose.model('InventoryItem', InventoryItemSchema);

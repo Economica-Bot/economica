@@ -1,9 +1,15 @@
-import { getModelForClass, prop } from '@typegoose/typegoose';
-import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses';
+import mongoose from 'mongoose';
 
-export class Command extends TimeStamps {
-	@prop()
-	public command: string;
+export interface Command extends mongoose.Types.Subdocument {
+	command: string;
+	createdAt: Date;
 }
 
-export const CommandModel = getModelForClass(Command);
+export const CommandSchema = new mongoose.Schema<Command>(
+	{
+		command: { type: mongoose.Schema.Types.String, required: true },
+	},
+	{ timestamps: true, versionKey: false },
+);
+
+export const CommandModel: mongoose.Model<Command> = mongoose.model('Command', CommandSchema);

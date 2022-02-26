@@ -1,7 +1,6 @@
 /* eslint-disable prefer-destructuring */
 import { ClientOptions, ExcludeEnum, Intents, InviteGenerationOptions, Permissions } from 'discord.js';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 
 import type { ActivityTypes } from 'discord.js/typings/enums';
 import type { ISettingsParam } from 'tslog';
@@ -63,11 +62,11 @@ export const inviteOptions: InviteGenerationOptions = {
 	],
 };
 
-export const mongoOptions: mongoose.ConnectOptions = {
-	useUnifiedTopology: true,
-	useNewUrlParser: true,
-	useFindAndModify: false,
-};
+// export const mongoOptions: mongoose.ConnectOptions = {
+// 	useUnifiedTopology: true,
+// 	useNewUrlParser: true,
+// 	useFindAndModify: false,
+// };
 
 export const loggerOptions: ISettingsParam = {
 	instanceName: 'Economica_Bot',

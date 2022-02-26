@@ -1,8 +1,8 @@
 import { AutocompleteInteraction, CommandInteraction, Interaction } from 'discord.js';
 
 import { commandCheck } from '../lib/command.js';
-import { OccupationArr } from '../models/index.js';
 import { Context, Economica, Event } from '../structures/index.js';
+import { Occupations } from '../typings/index.js';
 
 export default class implements Event {
 	public event = 'interactionCreate' as const;
@@ -32,7 +32,7 @@ export default class implements Event {
 		if (interaction.commandName === 'application') {
 			if (interaction.options.getSubcommand() === 'apply') {
 				const focusedOption = interaction.options.getFocused(true);
-				if (focusedOption.name === 'occupation') choices = OccupationArr;
+				if (focusedOption.name === 'occupation') choices = Object.keys(Occupations);
 				const filtered = choices.filter((choice) => choice.toLowerCase().includes((focusedOption.value as string).toLowerCase()));
 				await interaction.respond(filtered.map((choice) => ({ name: choice, value: choice })));
 			}

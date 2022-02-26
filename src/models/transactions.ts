@@ -1,26 +1,31 @@
-import { Ref, getModelForClass, prop } from '@typegoose/typegoose';
+import mongoose from 'mongoose';
 
-import { TransactionString } from '../typings/index.js';
 import { Guild, Member } from './index.js';
+import { TransactionString } from '../typings';
 
-export class Transaction {
-	@prop({ ref: () => Guild })
-	public guild: Ref<Guild>;
-
-	@prop({ ref: () => Member })
-	public target: Ref<Member>;
-
-	@prop({ ref: () => Member })
-	public agent: Ref<Member>;
-
-	@prop({ required: true })
-	public type: TransactionString;
-
-	@prop({ required: true })
-	public wallet: number;
-
-	@prop({ required: true })
-	public treasury: number;
+export interface Transaction extends mongoose.Document {
+	guild: mongoose.PopulatedDoc<Guild>;
+	target: mongoose.PopulatedDoc<Member>;
+	agent: mongoose.PopulatedDoc<Member>;
+	type: TransactionString;
+	wallet: number;
+	treasury: number;
+	createdAt: Date;
 }
 
-export const TransactionModel = getModelForClass(Transaction);
+export const TransactionSchema = new mongoose.Schema<Transaction>(
+	{
+		guild: { type: mongoose.Schema.Types.ObjectId, ref: 'Guild' },
+		target: { type: mongoose.Schema.Types.ObjectId, ref: 'Member' },
+		agent: { type: mongoose.Schema.Types.ObjectId, ref: 'Member' },
+		type: { type: mongoose.Schema.Types.String, required: true },
+		wallet: { type: mongoose.Schema.Types.Number, required: true },
+		treasury: { type: mongoose.Schema.Types.Number, required: true },
+	},
+	{
+		timestamps: { createdAt: true, updatedAt: false },
+		versionKey: false,
+	},
+);
+
+export const TransactionModel: mongoose.Model<Transaction> = mongoose.model('Transaction', TransactionSchema);

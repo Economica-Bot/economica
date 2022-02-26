@@ -27,7 +27,7 @@ export default class implements Command {
 
 		let total = 0;
 		memberDocument.inventory.forEach(async (invItem) => {
-			const { listing }: { listing: Listing } = await invItem.populate('listing').execPopulate();
+			const { listing }: { listing: Listing } = await invItem.populate('listing');
 			entries.push(`\`${listing.name}\` (${invItem.amount})`);
 			total += invItem.amount;
 		});

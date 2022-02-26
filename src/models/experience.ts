@@ -1,9 +1,11 @@
-import { getModelForClass, prop } from '@typegoose/typegoose';
-import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses';
+import mongoose from 'mongoose';
 
-export class Experience extends TimeStamps {
-	@prop({ required: true })
-	public amount: number;
+export interface Experience extends mongoose.Document {
+	amount: number;
 }
 
-export const ExperienceModel = getModelForClass(Experience);
+export const ExperienceSchema = new mongoose.Schema({
+	number: { type: mongoose.Schema.Types.Number, default: 0 },
+});
+
+export const ExperienceModel: mongoose.Model<Experience> = mongoose.model('Experience', ExperienceSchema);

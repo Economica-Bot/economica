@@ -1,35 +1,32 @@
-import { getModelForClass, prop } from '@typegoose/typegoose';
-import { Snowflake } from 'discord.js';
-import { CURRENCY_SYMBOL } from '../config.js';
+import * as mongoose from 'mongoose';
+import { CURRENCY_SYMBOL } from '../config';
+import { RoleAuthority, defaultIncomesObj, defaultIntervalsObj, defaultModulesArr, modulesArr } from '../typings';
 
-import { RoleAuthority, defaultIncomesObj, defaultIntervalsObj, defaultModulesArr, modulesArr } from '../typings/index.js';
-
-export class Guild {
-	@prop({ required: true })
-	public guildId: Snowflake;
-
-	@prop({ default: CURRENCY_SYMBOL })
-	public currency: string;
-
-	@prop({ required: true })
-	public transactionLogId: Snowflake;
-
-	@prop({ required: true })
-	public infractionLogId: Snowflake;
-
-	@prop({ required: true })
-	public botLogId: Snowflake;
-
-	@prop({ default: [] })
-	public auth: RoleAuthority[];
-
-	@prop({ default: defaultIncomesObj })
-	public incomes: typeof defaultIncomesObj;
-
-	@prop({ default: defaultIntervalsObj })
-	public intervals: typeof defaultIntervalsObj;
-
-	@prop({ default: defaultModulesArr })
-	public modules: typeof modulesArr;
+export interface Guild extends mongoose.Document {
+	guildId: string;
+	currency: string;
+	transactionLogChannelId: string;
+	infractionLogChannelId: string;
+	botLogChannelId: string;
+	auth: RoleAuthority[];
+	incomes: typeof defaultIncomesObj;
+	intervals: typeof defaultIntervalsObj;
+	modules: typeof modulesArr;
 }
-export const GuildModel = getModelForClass(Guild);
+
+export const GuildSchema = new mongoose.Schema<Guild>(
+	{
+		guildId: { type: mongoose.Schema.Types.String, required: true },
+		currency: { type: mongoose.Schema.Types.String, default: CURRENCY_SYMBOL },
+		transactionLogChannelId: { type: mongoose.Schema.Types.String, default: null },
+		infractionLogChannelId: { type: mongoose.Schema.Types.String, default: null },
+		botLogChannelId: { type: mongoose.Schema.Types.String, default: null },
+		auth: { type: mongoose.Schema.Types.Array },
+		incomes: { type: Object, default: defaultIncomesObj },
+		intervals: { type: Object, default: defaultIntervalsObj },
+		modules: { type: [String], default: defaultModulesArr },
+	},
+	{ strict: true, versionKey: false },
+);
+
+export const GuildModel: mongoose.Model<Guild> = mongoose.model('Guild', GuildSchema);

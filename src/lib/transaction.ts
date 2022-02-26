@@ -6,7 +6,7 @@ import { Economica } from '../structures/index.js';
 import { TransactionString } from '../typings/index.js';
 
 export async function displayTransaction(transaction: Transaction): Promise<MessageEmbed> {
-	await transaction.populate('target').populate('agent').populate('guild').execPopulate();
+	await transaction.populate(['guild', 'agent', 'target']);
 	const { target, guild, agent, wallet, treasury } = transaction;
 	const total = wallet + treasury;
 	const description = `Target: <@!${target.userId}> | Agent: <@!${agent.userId}>`;

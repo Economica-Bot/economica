@@ -20,7 +20,6 @@ import {
 	WEBHOOK_URLS,
 	clientOptions,
 	loggerOptions,
-	mongoOptions,
 } from '../config.js';
 import { SERVICE_COOLDOWNS } from '../typings/constants.js';
 import { Command } from './Command.js';
@@ -125,7 +124,7 @@ export class Economica extends Client {
 		// MONGO_URI
 		this.log.debug('Validating MONGO_URI');
 		try {
-			await mongoose.connect(MONGO_URI, mongoOptions);
+			await mongoose.connect(MONGO_URI);
 		} catch {
 			this.log.fatal(new Error('Could not connect to mongo'));
 		} finally {
@@ -179,7 +178,7 @@ export class Economica extends Client {
 
 	private async connectMongo() {
 		this.log.debug('Connecting to Mongo');
-		this.mongoose = await mongoose.connect(MONGO_URI, mongoOptions);
+		this.mongoose = await mongoose.connect(MONGO_URI);
 		this.log.info('Connected to Mongo');
 	}
 
