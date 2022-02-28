@@ -37,7 +37,8 @@
     "max-len": "off",
     "class-methods-use-this": "off",
     "@typescript-eslint/no-shadow": "off",
-    "import/no-cycle": "off"
+    "import/no-cycle": "off",
+    "newline-per-chained-call": "off"
   },
   "settings": {
     "import/parsers": {

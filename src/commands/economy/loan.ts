@@ -1,183 +1,184 @@
+/* eslint-disable no-param-reassign */
+import { ApplicationCommandPermissionType } from 'discord-api-types';
+import {
+	MessageActionRow,
+	MessageButton,
+	MessageEmbed,
+	MessageSelectMenu,
+	Modal,
+	SelectMenuInteraction,
+	TextInputComponent,
+} from 'discord.js';
 import ms from 'ms';
 
-import { getEconInfo, transaction, validateObjectId } from '../../lib/index.js';
-import { LoanModel, MemberModel } from '../../models/index.js';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+import { Loan, LoanModel, MemberModel } from '../../models';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
+import { emojis } from '../../typings';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('loan')
-		.setDescription('Loan money to other users.')
-		.setModule('ECONOMY')
-		.setFormat('<propose | cancel | accept | decline | view> [...arguments]')
-		.setExamples([
-			'loan view @user',
-			'loan view 61199fcedfa37a179c65c37b',
-			'loan propose @user 1000 1200 2d',
-			'loan cancel 61199fcedfa37a179c65c37b',
-			'loan accept 61199fcedfa37a179c65c37b',
-			'loan decline 61199fcedfa37a179c65c37b',
-		])
-		.addSubcommand((subcommand) => subcommand
-			.setName('view')
-			.setDescription('View the loan registry')
-			.addStringOption((option) => option.setName('loanid').setDescription('Specify a loan'))
-			.addUserOption((option) => option.setName('user').setDescription('Specify a user')))
-		.addSubcommand((subcommand) => subcommand
-			.setName('propose')
-			.setDescription('Add a loan to the registry.')
-			.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(true))
-			.addIntegerOption((option) => option.setName('principal').setDescription('Specify the principal').setMinValue(1).setRequired(true))
-			.addIntegerOption((option) => option.setName('repayment').setDescription('Specify the repayment').setMinValue(1).setRequired(true))
-			.addStringOption((option) => option.setName('duration').setDescription('Specify the life of the loan').setRequired(true)))
-		.addSubcommand((subcommand) => subcommand
-			.setName('cancel')
-			.setDescription('Cancel a pending loan in the registry.')
-			.addStringOption((option) => option.setName('loanid').setDescription('Specify a loan').setRequired(true)))
-		.addSubcommand((subcommand) => subcommand
-			.setName('accept')
-			.setDescription('Accept a pending loan in the registry')
-			.addStringOption((option) => option.setName('loanid').setDescription('Specify a loan').setRequired(true)))
-		.addSubcommand((subcommand) => subcommand
-			.setName('decline')
-			.setDescription('Decline a pending loan in the registry')
-			.addStringOption((option) => option.setName('loanid').setDescription('Specify a loan').setRequired(true)))
-		.addSubcommandGroup((subcommandgroup) => subcommandgroup
-			.setName('delete')
-			.setDescription('Delete loan data')
-			.setAuthority('MANAGER')
-			.addSubcommand((subcommand) => subcommand.setName('single').setDescription('Delete a single loan').addStringOption((option) => option.setName('loanid').setDescription('Specify a loan').setRequired(true)))
-			.addSubcommand((subcommand) => subcommand.setName('user').setDescription('Delete all pending loans for a user').addUserOption((option) => option.setName('lender').setDescription('Specify a user')).addUserOption((option) => option.setName('borrower').setDescription('Specify a user')))
-			.addSubcommand((subcommand) => subcommand.setName('all').setDescription('Delete all loans')));
+		.setDescription('Lend money to other users.')
+		.setModule('ECONOMY');
 
 	public execute = async (ctx: Context): Promise<void> => {
-		const subcommandgroup = ctx.interaction.options.getSubcommandGroup(false);
-		const subcommand = ctx.interaction.options.getSubcommand();
-		const principal = ctx.interaction.options.getInteger('principal', false);
-		const repayment = ctx.interaction.options.getInteger('repayment', false);
-		const duration = ctx.interaction.options.getString('duration', false);
-		const user = ctx.interaction.options.getUser('user', false);
-		const lender = ctx.interaction.options.getUser('lender', false);
-		const borrower = ctx.interaction.options.getUser('borrower', false);
-		const { valid, document } = await validateObjectId(ctx, 'Loan');
-		if (!valid) return;
-		const targetDocument = user
-			?? (await MemberModel.findOneAndUpdate(
-				{ guild: ctx.guildDocument, userId: user.id },
-				{ guild: ctx.guildDocument, userId: user.id },
-				{ upsert: true, new: true, setDefaultsOnInsert: true },
-			));
-		const { id } = document;
-		const { currency } = ctx.guildDocument;
-		const { treasury } = await getEconInfo(ctx.memberDocument);
-		if (subcommand === 'propose') {
-			if (user.id === ctx.interaction.user.id) {
-				await ctx.embedify('error', 'user', 'You cannot give yourself a loan.', true);
-			} else if (principal > treasury) {
-				await ctx.embedify('error', 'user', 'Please enter a smaller amount.', true);
-			} else if (principal < 1) {
-				await ctx.embedify('error', 'user', 'Principal cannot be less than 1.', true);
-			} else if (!ms(duration)) {
-				await ctx.embedify('error', 'user', 'Please enter a valid length.', true);
-			} else {
-				const loan = await LoanModel.create({
-					guild: ctx.guildDocument,
-					borrower: targetDocument,
-					lender: ctx.memberDocument,
-					principal,
-					repayment,
-					expires: new Date(new Date().getTime() + ms(duration)),
-					pending: true,
-					active: true,
-					complete: false,
-				});
-				await transaction(ctx.client, ctx.guildDocument, ctx.memberDocument, ctx.clientDocument, 'LOAN_PROPOSE', 0, -principal);
-				const content = `Successfully created a loan.
-				Loan \`${loan.id}\` | <t:${loan.createdAt.getTime()}:f>
-				Expires in <t:${loan.expires.getTime()}:R>
-				Borrower: <@!${loan.populate('member')}>
-				Pending: \`${loan.pending}\` | Active: \`${loan.active}\` | Complete: \`${loan.complete}\`
-				Principal: ${currency}${loan.principal.toLocaleString()} | Repayment: ${currency}${loan.repayment.toLocaleString()}`;
-				await ctx.embedify('success', 'user', content, false);
+		const loans = await LoanModel.find({ guild: ctx.guildDocument._id });
+		const embed = new MessageEmbed()
+			.setAuthor({ name: 'Loan Dashboard', iconURL: ctx.interaction.guild.iconURL() })
+			.setDescription(
+				`**Welcome ${ctx.interaction.member} to your loan dashboard! Here, you can make new loans, view active loans, or manage pending loans.**\n\n**${emojis.SELECT} Select a category below to get started.**`,
+			)
+			.addFields([
+				{ name: `${emojis.CREATE_LOAN} Create`, value: 'Make a new loan', inline: true },
+				{ name: `${emojis.ACTIVE_LOAN} View`, value: 'View active loans', inline: true },
+				{ name: `${emojis.MANAGE_LOAN} Manage`, value: 'Accept or Deny pending loans', inline: true },
+			])
+			.setFooter({ text: ctx.interaction.user.tag, iconURL: ctx.interaction.user.displayAvatarURL() });
+
+		const dropdown = new MessageActionRow()
+			.setComponents([
+				new MessageSelectMenu()
+					.setPlaceholder('None Selected')
+					.setCustomId('loan_select')
+					.setOptions([
+						{ emoji: emojis.CREATE_LOAN, label: 'Create', value: 'create' },
+						{ emoji: emojis.MANAGE_LOAN, label: 'Manage', value: 'manage' },
+					]),
+			]);
+
+		const message = await ctx.interaction.reply({ embeds: [embed], components: [dropdown], fetchReply: true });
+		const collector = message.createMessageComponentCollector({ componentType: 'SELECT_MENU', filter: (i) => i.user.id === ctx.interaction.user.id });
+		collector.on('collect', async (i) => {
+			if (i.values[0] === 'create') {
+				const loan = { guild: ctx.guildDocument, lender: ctx.interaction.user.id, valid: false, pending: true, active: false, complete: false } as Loan;
+				await this.createLoan(ctx, i, loan);
+			} else if (i.values[0] === 'manage') {
+				const outgoingLoans = loans.filter((loan) => loan.lender === ctx.memberDocument);
+				const incomingLoans = loans.filter((loan) => loan.borrower === ctx.memberDocument);
+				const embed = new MessageEmbed()
+					.setAuthor({ name: 'Loan Management Menu', iconURL: ctx.interaction.guild.iconURL() })
+					.addFields([
+						{ name: 'Pending Loans', value: 'Pending loans are loans that have not yet been accepted by the borrower.' },
+						{ name: 'Outgoing', value: outgoingLoans.filter((loan) => loan.pending).map((loan) => loan._id).join('\n') || 'None', inline: true },
+						{ name: 'Incoming ', value: incomingLoans.filter((loan) => loan.pending).map((loan) => loan._id).join('\n') || 'None', inline: true },
+						{ name: 'Active Loans', value: 'Active loans are loans that have been accepted.' },
+						{ name: 'Outgoing', value: outgoingLoans.filter((loan) => loan.active).map((loan) => loan._id).join('\n') || 'None', inline: true },
+						{ name: 'Incoming ', value: incomingLoans.filter((loan) => loan.active).map((loan) => loan._id).join('\n') || 'None', inline: true },
+					]);
+
+				await i.reply({ embeds: [embed] });
 			}
-		} if (subcommand === 'cancel') {
-			await LoanModel.findOneAndUpdate(
-				{ id, guildId: ctx.interaction.guild.id, lenderId: ctx.interaction.user.id, pending: false },
-				{ pending: false, active: false },
-			);
-			await ctx.embedify('error', 'user', `Canceled loan \`${id}\``, false);
-		} if (subcommand === 'accept') {
-			const loan = await LoanModel.findOneAndUpdate(
-				{ id, guildId: ctx.interaction.guild.id, borrowerId: ctx.interaction.user.id, pending: true },
-				{ pending: false },
-			);
-			const { lender } = await loan.populate('lender');
-			transaction(ctx.client, ctx.guildDocument, ctx.memberDocument, lender, 'LOAN_ACCEPT', loan.principal, 0);
-			await ctx.embedify('success', 'user', `Accepted loan \`${id}\``, false);
-		} if (subcommand === 'decline') {
-			const loan = await LoanModel.findOneAndUpdate(
-				{ id, guildId: ctx.interaction.guild.id, borrowerId: ctx.interaction.user.id, pending: true },
-				{ pending: false, active: false },
-			);
-			const { lender } = await loan.populate('lender');
-			transaction(ctx.client, ctx.guildDocument, lender, ctx.clientDocument, 'LOAN_DECLINE', 0, loan.principal);
-			await ctx.embedify('success', 'user', `Accepted loan \`${id}\``, false);
-		} if (subcommand === 'view') {
-			if (id) {
-				const { borrower } = await document.populate('borrower');
-				await ctx.embedify(
-					'success',
-					'user',
-					`Loan \`${id}\` | <t:${document.createdAt.getMilliseconds()}:f>
-					Expires in <t:${document.expires.getMilliseconds()}:R>
-					Borrower: <@!${borrower.userId}>
-					Pending: \`${document.pending}\` | Active: \`${document.active}\` | Complete: \`${document.complete}\`
-					Principal: ${currency}${document.principal} | Repayment: ${currency}${document.repayment})`,
-					false,
-				);
-			} else if (user) {
-				const outgoingLoans = await LoanModel.find({ guildId: ctx.guildDocument.guildId, lenderId: user.id });
-				const incomingLoans = await LoanModel.find({ guildId: ctx.guildDocument.guildId, borrowerId: user.id });
-				let description = '';
-				outgoingLoans.forEach(async (loan) => {
-					await loan.populate('borrower');
-					description
-						+= `Outgoing Loan \`${loan.id}\`
-						Expires in <t:${loan.expires.getMilliseconds()}:R>
-						Borrower: <@!${loan.borrower.userId}>
-						Pending: \`${loan.pending}\` | Active: \`${loan.active}\` | Complete: \`${loan.complete}\`
-						Principal: ${currency}${loan.principal} | Repayment: ${currency}${loan.repayment}\n\n`;
-				});
-				incomingLoans.forEach(async (loan) => {
-					await loan.populate('lender');
-					description
-						+= `Incoming Loan \`${loan.id}\`
-						Expires in <t:${loan.expires.getMilliseconds()}:R>
-						Lender: <@!${loan.lender.userId}>
-						Pending: \`${loan.pending}\` | Active: \`${loan.active}\` | Complete: \`${loan.complete}\`
-						Principal: ${currency}${loan.principal} | Repayment: ${currency}${loan.repayment}\n\n`;
-				});
-				await ctx.embedify('success', 'user', description ?? 'No loans found.', !!description);
-			}
-		} else if (subcommandgroup === 'delete') {
-			if (subcommand === 'id') {
-				await document.deleteOne();
-				await ctx.embedify('success', 'user', `Deleted loan \`${id}\``, true);
-			} else if (subcommand === 'user') {
-				const loans = lender
-					? await LoanModel.deleteMany({
-						guildId: ctx.guildDocument.guildId,
-						lender,
-					})
-					: await LoanModel.deleteMany({
-						guildId: ctx.guildDocument.guildId,
-						borrower,
-					});
-				await ctx.embedify('success', 'user', `Deleted \`${loans.deletedCount}\` loans.`, true);
-			} else if (subcommand === 'all') {
-				const loans = await LoanModel.deleteMany({ guildId: ctx.interaction.guild.id });
-				await ctx.embedify('success', 'user', `Deleted \`${loans.deletedCount}\` loans.`, true);
-			}
-		}
+		});
 	};
+
+	private async validateLoan(ctx: Context, loan: Loan): Promise<string[]> {
+		const errors = [];
+
+		if (!loan.borrower) errors.push('Missing borrower');
+		else if (!(await ctx.interaction.guild.members.fetch(loan.borrower).catch(() => null))) errors.push('Invalid Borrower');
+		if (!loan.description) errors.push('Missing description');
+		if (!loan.principal) errors.push('Missing principal');
+		else if (!+loan.principal) errors.push('Invalid principal');
+		if (!loan.repayment) errors.push('Missing repayment');
+		else if (!+loan.repayment) errors.push('Invalid repayment');
+		if (!loan.duration) errors.push('Missing duration');
+		else if (!ms(loan.duration)) errors.push('Invalid duration');
+
+		return errors;
+	}
+
+	private async createLoan(ctx: Context, interaction: SelectMenuInteraction<'cached'>, loan: Loan) {
+		const createEmbed = new MessageEmbed()
+			.setAuthor({ name: 'Loan Editor', iconURL: ctx.interaction.guild.iconURL() })
+			.setDescription(
+				`**Welcome ${ctx.interaction.member} to the loan editor!**
+				
+				*Note:* \`Lender\` & \`Borrower\` are entered with ID
+				*Loan Validated*: \`${loan.valid}\` 
+
+				**From**: \`${loan.lender}\` | **To**: \`${loan.borrower}\`
+				**Description**
+				> ${loan.description}
+			`,
+			).addFields([
+				{ name: 'Principal', value: loan.principal?.toLocaleString() || 'Unset', inline: true },
+				{ name: 'Repayment', value: loan.repayment?.toLocaleString() || 'Unset', inline: true },
+				{ name: 'Duration', value: loan.duration?.toString() || 'Unset', inline: true },
+			])
+			.setFooter({ text: ctx.interaction.user.tag, iconURL: ctx.interaction.user.displayAvatarURL() });
+
+		const rawModal = new Modal()
+			.setTitle('Loan Interface')
+			.addComponents(...[
+				new MessageActionRow<TextInputComponent>().setComponents(
+					new TextInputComponent().setCustomId('borrower').setLabel('Borrower').setStyle('SHORT').setMinLength(1),
+				),
+				new MessageActionRow<TextInputComponent>().setComponents(
+					new TextInputComponent().setCustomId('description').setLabel('description').setStyle('PARAGRAPH').setMinLength(1),
+				),
+				new MessageActionRow<TextInputComponent>().setComponents(
+					new TextInputComponent().setCustomId('principal').setLabel('Principal').setStyle('SHORT').setMinLength(1),
+				),
+				new MessageActionRow<TextInputComponent>().setComponents(
+					new TextInputComponent().setCustomId('repayment').setLabel('Repayment').setStyle('SHORT').setMinLength(1),
+				),
+				new MessageActionRow<TextInputComponent>().setComponents(
+					new TextInputComponent().setCustomId('duration').setLabel('Duration').setStyle('SHORT').setMinLength(1),
+				),
+			]);
+
+		const row = new MessageActionRow()
+			.setComponents([
+				new MessageButton().setCustomId('edit').setLabel('Edit').setStyle('PRIMARY'),
+				new MessageButton().setCustomId('cancel').setLabel('Cancel').setStyle('DANGER'),
+				new MessageButton().setCustomId('validate').setLabel('Validate').setStyle('SECONDARY'),
+				new MessageButton().setCustomId('publish').setLabel('Publish').setStyle('SUCCESS').setDisabled(!loan.valid),
+			]);
+
+		const msg = interaction.replied
+			? await interaction.editReply({ embeds: [createEmbed], components: [row] })
+			: await interaction.reply({ embeds: [createEmbed], components: [row], fetchReply: true });
+		const collector = msg.createMessageComponentCollector({ filter: (i) => i.user.id === ctx.interaction.user.id });
+		collector.on('collect', async (i) => {
+			if (i.customId === 'edit') {
+				const customId = `modal-${i.id}`;
+				const modal = new Modal({ ...rawModal, customId });
+				await i.showModal(modal);
+				const modalSubmit = await i.awaitModalSubmit({ filter: (filterInteraction) => filterInteraction.customId === customId, time: 1000 * 60 * 2 }).catch(() => null);
+				['borrower', 'description', 'principal', 'repayment', 'duration'].forEach((key) => {
+					if (modalSubmit.fields.getTextInputValue(key)) loan[key] = modalSubmit.fields.getTextInputValue(key);
+				});
+				modalSubmit.reply({ content: '✅ Input Received ☝️', ephemeral: true });
+				collector.stop();
+				this.createLoan(ctx, interaction, loan);
+			} else if (i.customId === 'cancel') {
+				await interaction.editReply({ components: [] });
+				i.reply('❕ Loan Canceled');
+			} else if (i.customId === 'validate') {
+				const errors = await this.validateLoan(ctx, loan);
+				if (errors.length) {
+					i.reply({ content: `Could not validate! Errors:\n${errors.join('\n')}`, ephemeral: true });
+					loan.valid = false;
+					collector.stop();
+					this.createLoan(ctx, interaction, loan);
+				} else {
+					i.reply('✅ Loan Validated');
+					loan.valid = true;
+					collector.stop();
+					this.createLoan(ctx, interaction, loan);
+				}
+			} else if (i.customId === 'publish') {
+				loan.pending = true;
+				loan.lender = await MemberModel.findOne({ guild: ctx.guildDocument, userId: ctx.interaction.user.id });
+				loan.borrower = await MemberModel.findOne({ guild: ctx.guildDocument, userId: loan.borrower });
+				loan.principal = +loan.principal;
+				loan.repayment = +loan.repayment;
+				loan.duration = Number(ms(loan.duration));
+
+				await LoanModel.create(loan);
+				await interaction.editReply({ components: [] });
+				i.reply('✅ Loan Published');
+			}
+		});
+	}
 }

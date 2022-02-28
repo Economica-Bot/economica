@@ -1,5 +1,4 @@
-import { CommandInteraction, GuildMember, Message, MessageEmbed } from 'discord.js';
-import { APIMessage } from 'discord.js/node_modules/discord-api-types';
+import { CommandInteraction, GuildMember, MessageEmbed } from 'discord.js';
 
 import { Guild, GuildModel, Member, MemberModel } from '../models/index.js';
 import { EmbedColors } from '../typings/constants.js';
@@ -49,7 +48,7 @@ export class Context {
 
 	public embedify(type: ReplyString, author: Author, description?: string | null): MessageEmbed;
 	public async embedify(type: ReplyString, author: Author, description: string | null, ephemeral: boolean): Promise<void>;
-	public embedify(type: ReplyString, author: Author, description: string | null, ephemeral?: boolean): MessageEmbed | Promise<void | Message | APIMessage> {
+	public embedify(type: ReplyString, author: Author, description: string | null, ephemeral?: boolean): MessageEmbed | Promise<void> {
 		const embed = new MessageEmbed().setColor(EmbedColors[type]);
 		if (description) embed.setDescription(description);
 		if (author === 'bot') embed.setAuthor({ name: this.interaction.client.user.username, iconURL: this.interaction.client.user.displayAvatarURL() });
@@ -58,9 +57,9 @@ export class Context {
 		else embed.setAuthor(author);
 
 		if (typeof ephemeral !== 'undefined') {
-			if (this.interaction.deferred) return this.interaction.editReply({ embeds: [embed] });
-			if (this.interaction.replied) return this.interaction.followUp({ embeds: [embed], ephemeral });
-			return this.interaction.reply({ embeds: [embed], ephemeral });
+			if (this.interaction.deferred) this.interaction.editReply({ embeds: [embed] });
+			if (this.interaction.replied) this.interaction.followUp({ embeds: [embed], ephemeral });
+			this.interaction.reply({ embeds: [embed], ephemeral });
 		} return embed;
 	}
 }

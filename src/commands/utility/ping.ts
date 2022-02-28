@@ -16,8 +16,6 @@ export default class implements Command {
 		const ws = ctx.client.ws.ping;
 		const content = `\`\`\`ansi\n[1;34mGateway Ping [0m: [0;35m${ws}[0mms\n[1;34mRest Ping    [0m: [0;35m${api}[0mms\`\`\``;
 		const embed = ctx.embedify('success', 'bot', content);
-		console.log(Date.now() - now);
 		await ctx.interaction.editReply({ content: null, embeds: [embed] });
-		console.log(Date.now() - now);
 	};
 }

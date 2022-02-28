@@ -7,6 +7,7 @@ import { Occupations } from '../typings/index.js';
 export default class implements Event {
 	public event = 'interactionCreate' as const;
 	public async execute(client: Economica, interaction: Interaction<'cached'>): Promise<void> {
+		client.log.debug(`Executing interaction ${interaction.type}`);
 		if (interaction.isCommand()) {
 			await this.commandInteraction(client, interaction);
 		} else if (interaction.isAutocomplete()) {

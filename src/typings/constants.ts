@@ -95,7 +95,10 @@ export enum icons {
 
 export enum emojis {
 	ITEM_DISABLED = '<:ITEM_DISABLED:944737714274717746>',
-	LOAN = '<:loan:946934016546857010>',
+	ACTIVE_LOAN = '<:active_loan:947238735668449280>',
+	CREATE_LOAN = '<:create_loan:947238735471333427>',
+	MANAGE_LOAN = '<:manage_loan:947238735450353734>',
+	SELECT = '<:select:947240263003304027>',
 }
 
 export const BUTTON_INTERACTION_COOLDOWN = 1000 * 15;
