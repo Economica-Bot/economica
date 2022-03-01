@@ -210,6 +210,7 @@ export default class implements EconomicaCommand {
 		const subcommand = interaction.options.getSubcommand();
 		const edit_mode = interaction.options.getString('edit-mode');
 
+
 		// There's no item, dumbass
 		if (!
 			await ShopModel.findOne({
@@ -345,20 +346,24 @@ export default class implements EconomicaCommand {
 
 		let generatorPeriod: number;
 		if (subcommand == 'generator') {
-			generatorPeriod = ms(interaction.options.getString('generator_period')) ?? parseInt(interaction.options.getString('generator_period'))
+			if (interaction.options.getString('generator_period')) {
+				generatorPeriod = ms(interaction.options.getString('generator_period')) ?? parseInt(interaction.options.getString('generator_period'))
 
-			if (!generatorPeriod)
-				return ctx.embedify('error', 'user', `\`${interaction.options.getString('generatorPeriod')}\` is not a parseable duration value.\n\nExample: 10000, 10s, 10m, 10h, 10d.`, true)
+				if (!generatorPeriod)
+					return ctx.embedify('error', 'user', `\`${interaction.options.getString('generatorPeriod')}\` is not a parseable duration value.\n\nExample: 10000, 10s, 10m, 10h, 10d.`, true)
 
-			if (generatorPeriod < 10000)
-				return ctx.embedify('error', 'user', `\`generator_period\` can't be less than 10 seconds!`, true)
+				if (generatorPeriod < 10000)
+					return ctx.embedify('error', 'user', `\`generator_period\` can't be less than 10 seconds!`, true)
+			}
+			editedItem['generatorPeriod'] = generatorPeriod
 		}
 
 		if (edit_mode == 'layered') {
 			Object.keys(editedItem).forEach(key => {
-				if (!editedItem[key] || !editedItem[key]?.length)
+				if (!editedItem[key] || (Array.isArray(editedItem[key]) && !editedItem[key]?.length))
 					delete editedItem[key];
 			})
+
 
 			await ShopModel.findOneAndUpdate({
 				guild: ctx.guildDocument,
@@ -409,6 +414,7 @@ export default class implements EconomicaCommand {
 				})
 			}
 		}
+
 
 		const item = await ShopModel.findOne({
 			guild: ctx.guildDocument,
