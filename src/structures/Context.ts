@@ -1,6 +1,5 @@
 import { CommandInteraction, GuildMember, MessageEmbed } from 'discord.js';
 
-import { Guild, GuildModel, Member, MemberModel } from '../models/index.js';
 import { EmbedColors } from '../typings/constants.js';
 import { Author, ReplyString } from '../typings/index.js';
 import { EconomicaSlashCommandBuilder } from './Builders.js';
@@ -10,9 +9,6 @@ export class Context {
 	public client: Economica;
 	public interaction: CommandInteraction<'cached'>;
 	public data: EconomicaSlashCommandBuilder;
-	public guildDocument: Guild;
-	public memberDocument: Member;
-	public clientDocument: Member;
 	public member: GuildMember;
 	public constructor(client: Economica, interaction?: CommandInteraction<'cached'>) {
 		this.client = client;
@@ -27,21 +23,6 @@ export class Context {
 		}
 
 		this.data = command.data as EconomicaSlashCommandBuilder;
-		this.guildDocument = await GuildModel.findOneAndUpdate(
-			{ guildId: this.interaction.guildId },
-			{ guildId: this.interaction.guildId },
-			{ upsert: true, new: true, setDefaultsOnInsert: true },
-		);
-		this.memberDocument = await MemberModel.findOneAndUpdate(
-			{ guild: this.guildDocument, userId: this.interaction.user.id },
-			{ guild: this.guildDocument, userId: this.interaction.user.id },
-			{ upsert: true, new: true, setDefaultsOnInsert: true },
-		);
-		this.clientDocument = await MemberModel.findOneAndUpdate(
-			{ guild: this.guildDocument, userId: this.client.user.id },
-			{ guild: this.guildDocument, userId: this.client.user.id },
-			{ upsert: true, new: true, setDefaultsOnInsert: true },
-		);
 		this.member = this.client.guilds.cache.get(this.interaction.guildId).members.cache.get(this.client.user.id);
 		return this;
 	}

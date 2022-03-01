@@ -44,5 +44,6 @@
 		"skipLibCheck": true,
 		//"baseUrl": "./"
 	},
-	"include": ["src", "tsconfig.eslint.json"]
+	"include": ["src", "tsconfig.eslint.json"],
+	"exlude": ["node_modules"]
 }

@@ -1,8 +1,8 @@
 import { Client, Collection, MessageEmbed, WebhookClient } from 'discord.js';
 import { readdirSync } from 'fs';
-import mongoose from 'mongoose';
 import path from 'path';
 import { Logger } from 'tslog';
+import { Connection } from 'typeorm';
 import { fileURLToPath } from 'url';
 
 import {
@@ -14,26 +14,21 @@ import {
 	DEVELOPMENT,
 	DEVELOPMENT_GUILD_IDS,
 	DISCORD_INVITE_URL,
-	MONGO_URI,
-	PRODUCTION,
 	PUBLIC_GUILD_ID,
 	WEBHOOK_URLS,
 	clientOptions,
 	loggerOptions,
 } from '../config.js';
-import { SERVICE_COOLDOWNS } from '../typings/constants.js';
 import { Command } from './Command.js';
-import { Service } from './Service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export class Economica extends Client {
 	public commands: Collection<string, Command>;
-	public services: Collection<string, Service>;
 	public cooldowns: Collection<string, Date>;
-	public mongoose: mongoose.Mongoose;
 	public webhooks: WebhookClient[];
+	public connection: Connection;
 	public log: Logger;
 
 	public constructor() {
@@ -41,7 +36,6 @@ export class Economica extends Client {
 		this.commands = new Collection<string, Command>();
 		this.cooldowns = new Collection<string, Date>();
 		this.webhooks = new Array<WebhookClient>();
-		this.services = new Collection<string, Service>();
 		this.log = new Logger(loggerOptions);
 	}
 
@@ -49,10 +43,9 @@ export class Economica extends Client {
 		await this.validateSettings();
 		await this.initWebHooks();
 		await this.errorHandler();
-		await this.connectMongo();
+		await this.connectSQL();
 		await this.registerEvents();
 		await this.registerCommands();
-		await this.runServices();
 		await this.login(BOT_TOKEN);
 		this.log.info(`${this.user.username} logged in`);
 	}
@@ -121,16 +114,6 @@ export class Economica extends Client {
 			}
 		});
 
-		// MONGO_URI
-		this.log.debug('Validating MONGO_URI');
-		try {
-			await mongoose.connect(MONGO_URI);
-		} catch {
-			this.log.fatal(new Error('Could not connect to mongo'));
-		} finally {
-			await mongoose.disconnect();
-		}
-
 		testClient.destroy();
 		this.log.info('Settings validated');
 	}
@@ -176,10 +159,16 @@ export class Economica extends Client {
 		if (DEVELOPMENT) process.exit(1);
 	}
 
-	private async connectMongo() {
-		this.log.debug('Connecting to Mongo');
-		this.mongoose = await mongoose.connect(MONGO_URI);
-		this.log.info('Connected to Mongo');
+	private async connectSQL() {
+		this.log.debug('Connecting to DB');
+		this.connection = await new Connection({
+			type: 'sqlite',
+			database: 'database.sqlite',
+			synchronize: true,
+			logging: false,
+			entities: [path.resolve(__dirname, '../entity/*')],
+		}).connect();
+		this.log.debug('Connected to DB');
 	}
 
 	private async registerEvents() {
@@ -211,24 +200,5 @@ export class Economica extends Client {
 			});
 		});
 		this.log.info('Commands registered');
-	}
-
-	private async runServices() {
-		this.log.debug('Loading services');
-		const serviceFiles = readdirSync(path.resolve(__dirname, '../services')).filter((file) => file.endsWith('.ts') || file.endsWith('.js')).sort();
-		serviceFiles.forEach(async (file) => {
-			this.log.debug(`Loading service ${file}`);
-			const { default: Service } = await import(`../services/${file}`);
-			const service = new Service();
-			this.services.set(service.name, service);
-		});
-		this.log.info('Services loaded');
-		this.services.forEach((service) => {
-			const cooldown = PRODUCTION ? service.cooldown : SERVICE_COOLDOWNS.DEV;
-			setInterval(async () => {
-				this.log.info(`Executing service ${service.service}`);
-				await service.execute(this);
-			}, cooldown);
-		});
 	}
 }
