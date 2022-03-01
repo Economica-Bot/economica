@@ -5,6 +5,7 @@ import { Occupations } from '../typings/index.js';
 import { Guild } from '../entity/guild';
 import { Member } from '../entity/member.js';
 import { User } from '../entity/user.js';
+import { Command } from '../entity/command.js';
 
 export default class implements Event {
 	public event = 'interactionCreate' as const;
@@ -29,8 +30,11 @@ export default class implements Event {
 		const memberRepo = client.connection.getRepository(Member);
 		const member = memberRepo.create({ user, guild });
 		await memberRepo.save(member);
+		const commandRepo = client.connection.getRepository(Command);
+		const command = commandRepo.create({ member, command: interaction.commandName, createdAt: Date.now() });
+		await commandRepo.save(command);
 
-		console.log(await memberRepo.find({ where: { user: { id: ctx.interaction.user.id } } }));
+		console.log(await memberRepo.find({ relations: ['users', 'guilds', 'commands'], where: { user, guild } }));
 	}
 
 	private async autocompleteInteraction(_client: Economica, interaction: AutocompleteInteraction): Promise<void> {

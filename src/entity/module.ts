@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, Relation } from 'typeorm';
 
 import { ModuleString } from '../typings';
 import { Guild } from './guild';
@@ -8,12 +8,12 @@ import { User } from './user';
 export class Module {
 	@OneToOne(() => User, (user) => user.id, { primary: true })
 	@JoinColumn({ name: 'userId' })
-		user: User;
+		user: Relation<User>;
 
 	@OneToOne(() => Guild, (guild) => guild.id, { primary: true })
 	@JoinColumn({ name: 'guildId' })
-		guild: Guild;
+		guild: Relation<Guild>;
 
-	@Column()
+	@Column({ primary: true })
 		module: ModuleString;
 }

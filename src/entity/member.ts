@@ -7,7 +7,7 @@ import { User } from './user';
 export class Member {
 	@OneToOne(() => User, (user) => user.id, { primary: true })
 	@JoinColumn({ name: 'userId' })
-		user: User;
+		user: Relation<User>;
 
 	@ManyToOne(() => Guild, (guild) => guild.members, { primary: true })
 	@JoinColumn({ name: 'guildId' })
