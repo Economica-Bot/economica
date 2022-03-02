@@ -7,7 +7,7 @@ export class User {
 		id: string;
 
 	@OneToMany(() => Module, (module) => module.user)
-		modules: Relation<Module>[];
+		modules: Promise<Relation<Module>[]>;
 
 	@Column({ default: 0 })
 		keys: number;

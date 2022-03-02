@@ -69,6 +69,8 @@ export enum Authorities {
 	DEVELOPER = 'developer',
 }
 
+export type AuthorityString = keyof typeof Authorities;
+
 export enum SERVICE_COOLDOWNS {
 	DEV = 1000 * 10,
 	UPDATE_BANS = 1000 * 60 * 5,

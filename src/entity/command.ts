@@ -1,18 +1,18 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, Relation } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
 import { Member } from './member';
 
 @Entity()
 export class Command {
-	@ManyToOne(() => Member, (member) => member.commands, { primary: true })
-	@JoinColumn([
-		{ name: 'userId' },
-		{ name: 'guildId' },
-	])
+	@PrimaryGeneratedColumn()
+		id: number;
+
+	@ManyToOne(() => Member, (member) => member.commands)
+	@JoinColumn()
 		member: Relation<Member>;
 
-	@Column({ primary: true })
+	@Column()
 		command: string;
 
-	@CreateDateColumn({ primary: true })
+	@Column({ type: 'timestamp', primary: true })
 		createdAt: Date;
 }

@@ -162,11 +162,17 @@ export class Economica extends Client {
 	private async connectSQL() {
 		this.log.debug('Connecting to DB');
 		this.connection = await new Connection({
-			type: 'sqlite',
-			database: 'database.sqlite',
+			type: 'mysql',
+			host: 'localhost',
+			port: 3306,
+			username: 'root',
+			password: 'FU$89hac',
+			database: 'bot',
 			synchronize: true,
 			logging: false,
-			entities: [path.resolve(__dirname, '../entity/*')],
+			insecureAuth: true,
+			charset: 'utf8mb4',
+			entities: [path.resolve(__dirname, '../entity/*.ts'), path.resolve(__dirname, '../entity/*.js')],
 		}).connect();
 		this.log.debug('Connected to DB');
 	}

@@ -1,20 +1,26 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, Relation } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, Relation } from 'typeorm';
 import { Command } from './command';
 import { Guild } from './guild';
 import { User } from './user';
 
 @Entity()
 export class Member {
+	@PrimaryColumn()
+		userId: string;
+
+	@PrimaryColumn()
+		guildId: string;
+
 	@OneToOne(() => User, (user) => user.id, { primary: true })
-	@JoinColumn({ name: 'userId' })
+	@JoinColumn()
 		user: Relation<User>;
 
 	@ManyToOne(() => Guild, (guild) => guild.members, { primary: true })
-	@JoinColumn({ name: 'guildId' })
+	@JoinColumn()
 		guild: Relation<Guild>;
 
 	@OneToMany(() => Command, (command) => command.member)
-		commands: Relation<Command>[];
+		commands: Promise<Relation<Command>[]>;
 
 	@Column({ type: 'double', default: 0 })
 		treasury: number;
