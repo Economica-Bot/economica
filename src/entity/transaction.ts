@@ -1,8 +1,7 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
 
-import { TransactionString } from '../typings';
-import { Guild } from './guild';
-import { Member } from './member';
+import { TransactionString } from '../typings/index.js';
+import { Guild, Member } from './index.js';
 
 @Entity()
 export class Transaction {

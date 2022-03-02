@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
-import { Guild } from './guild';
-import { Member } from './member';
+
+import { Guild, Member } from './index.js';
 
 @Entity()
 export class Loan {

@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
-import { InfractionString } from '../typings';
 
-import { Member } from './member';
+import { InfractionString } from '../typings/index.js';
+import { Member } from './index.js';
 
 @Entity()
 export class Infraction {

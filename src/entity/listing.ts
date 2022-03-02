@@ -1,6 +1,7 @@
 import { Snowflake } from 'discord.js';
 import { BaseEntity, Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { ListingString } from '../typings';
+
+import { ListingString } from '../typings/index.js';
 
 @Entity()
 export class Listing extends BaseEntity {

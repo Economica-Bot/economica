@@ -1,8 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, Relation } from 'typeorm';
 
-import { ModuleString } from '../typings';
-import { Guild } from './guild';
-import { User } from './user';
+import { ModuleString } from '../typings/index.js';
+import { Guild, User } from './index.js';
 
 @Entity()
 export class Module {

@@ -28,21 +28,12 @@ export default class implements Event {
 		const guildRepo = client.connection.getRepository(Guild);
 		const guild = guildRepo.create({ id: ctx.interaction.guildId });
 		await guildRepo.save(guild);
-		console.time();
-		const test = await guildRepo.findOne({ relations: ['members', 'members.guild'] });
-		console.timeEnd();
-		console.dir(test);
-		// const memberRepo = client.connection.getRepository(Member);
-		// const member = memberRepo.create({ user, guild });
-		// await memberRepo.save(member);
-		// const commandRepo = client.connection.getRepository(Command);
-		// const command = commandRepo.create({ member, command: interaction.commandName, createdAt: new Date() });
-		// await commandRepo.save(command);
-
-		// console.time();
-		// const test = await guildRepo.findOne();
-		// console.timeEnd();
-		// console.log(test);
+		const memberRepo = client.connection.getRepository(Member);
+		const member = memberRepo.create({ user, guild });
+		await memberRepo.save(member);
+		const commandRepo = client.connection.getRepository(Command);
+		const command = commandRepo.create({ member, command: interaction.commandName, createdAt: new Date() });
+		await commandRepo.save(command);
 	}
 
 	private async autocompleteInteraction(_client: Economica, interaction: AutocompleteInteraction): Promise<void> {

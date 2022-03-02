@@ -1,8 +1,9 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
-import { Member } from './member';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
+
+import { Member } from './index.js';
 
 @Entity()
-export class Command {
+export class Command extends BaseEntity {
 	@PrimaryGeneratedColumn()
 		id: number;
 

@@ -166,7 +166,7 @@ export class Economica extends Client {
 			host: 'localhost',
 			port: 3306,
 			username: 'root',
-			password: 'FU$89hac',
+			password: 'password',
 			database: 'bot',
 			synchronize: true,
 			logging: false,

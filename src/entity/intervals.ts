@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, OneToOne, Relation } from 'typeorm';
-import { defaultIntervalsObj } from '../typings';
-import { Guild } from './guild';
+
+import { defaultIntervalsObj } from '../typings/index.js';
+import { Guild } from './index.js';
 
 @Entity()
 export class Intervals {

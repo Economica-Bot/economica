@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryColumn, Relation } from 'typeorm';
-import { Module } from './module';
+
+import { Module } from './index.js';
 
 @Entity()
 export class User {

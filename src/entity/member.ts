@@ -1,10 +1,9 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, Relation } from 'typeorm';
-import { Command } from './command';
-import { Guild } from './guild';
-import { User } from './user';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, Relation } from 'typeorm';
+
+import { Command, Guild, User } from './index.js';
 
 @Entity()
-export class Member {
+export class Member extends BaseEntity {
 	@PrimaryColumn()
 		userId: string;
 

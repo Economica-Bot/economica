@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, OneToOne, Relation } from 'typeorm';
 
-import { defaultIncomesObj } from '../typings';
-import { Guild } from './guild';
+import { defaultIncomesObj } from '../typings/index.js';
+import { Guild } from './index.js';
 
 @Entity()
 export class Incomes {
