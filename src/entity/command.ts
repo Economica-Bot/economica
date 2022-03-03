@@ -1,11 +1,17 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
+import { Snowflake, SnowflakeUtil } from 'discord.js';
+import { BaseEntity, BeforeInsert, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
 
 import { Member } from './index.js';
 
 @Entity()
 export class Command extends BaseEntity {
-	@PrimaryGeneratedColumn()
-		id: number;
+	@PrimaryColumn()
+		id: Snowflake;
+
+	@BeforeInsert()
+	private beforeInsert() {
+		this.id = SnowflakeUtil.generate();
+	}
 
 	@ManyToOne(() => Member, (member) => member.commands)
 	@JoinColumn()
@@ -14,6 +20,6 @@ export class Command extends BaseEntity {
 	@Column()
 		command: string;
 
-	@Column({ type: 'timestamp', primary: true })
+	@Column('timestamp')
 		createdAt: Date;
 }

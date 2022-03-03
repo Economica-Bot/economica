@@ -1,11 +1,17 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
+import { Snowflake, SnowflakeUtil } from 'discord.js';
+import { BeforeInsert, Column, Entity, JoinColumn, OneToOne, PrimaryColumn, Relation } from 'typeorm';
 
 import { Guild, Member } from './index.js';
 
 @Entity()
 export class Loan {
-	@PrimaryGeneratedColumn()
-		id: number;
+	@PrimaryColumn()
+		id: Snowflake;
+
+	@BeforeInsert()
+	private beforeInsert() {
+		this.id = SnowflakeUtil.generate();
+	}
 
 	@OneToOne(() => Guild, (guild) => guild.id)
 	@JoinColumn()
@@ -40,9 +46,9 @@ export class Loan {
 	@Column()
 		complete: boolean;
 
-	@Column({ type: 'timestamp' })
+	@Column('timestamp')
 		createdAt: Date;
 
-	@Column({ type: 'timestamp' })
+	@Column('timestamp')
 		expiresAt: Date;
 }

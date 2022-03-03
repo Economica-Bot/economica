@@ -21,19 +21,10 @@ export default class implements Event {
 	private async commandInteraction(client: Economica, interaction: CommandInteraction<'cached'>): Promise<void> {
 		const ctx = await new Context(client, interaction).init();
 		await client.commands.get(interaction.commandName).execute(ctx);
-
-		const userRepo = client.connection.getRepository(User);
-		const user = userRepo.create({ id: ctx.interaction.user.id });
-		await userRepo.save(user);
-		const guildRepo = client.connection.getRepository(Guild);
-		const guild = guildRepo.create({ id: ctx.interaction.guildId });
-		await guildRepo.save(guild);
-		const memberRepo = client.connection.getRepository(Member);
-		const member = memberRepo.create({ user, guild });
-		await memberRepo.save(member);
-		const commandRepo = client.connection.getRepository(Command);
-		const command = commandRepo.create({ member, command: interaction.commandName, createdAt: new Date() });
-		await commandRepo.save(command);
+		console.time();
+		const test = await client.connection.getRepository(Command).findOne();
+		console.log(test);
+		console.timeEnd();
 	}
 
 	private async autocompleteInteraction(_client: Economica, interaction: AutocompleteInteraction): Promise<void> {

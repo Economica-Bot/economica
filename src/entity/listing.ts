@@ -1,12 +1,17 @@
-import { Snowflake } from 'discord.js';
-import { BaseEntity, Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Snowflake, SnowflakeUtil } from 'discord.js';
+import { BaseEntity, BeforeInsert, Column, Entity, JoinColumn, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 
 import { ListingString } from '../typings/index.js';
 
 @Entity()
 export class Listing extends BaseEntity {
-	@PrimaryGeneratedColumn()
-		id: number;
+	@PrimaryColumn()
+		id: Snowflake;
+
+	@BeforeInsert()
+	private beforeInsert() {
+		this.id = SnowflakeUtil.generate();
+	}
 
 	@Column()
 		type: ListingString;
@@ -26,7 +31,7 @@ export class Listing extends BaseEntity {
 	@Column()
 		description: string;
 
-	@Column({ type: 'timestamp' })
+	@Column('timestamp')
 		expires: Date;
 
 	@Column()
@@ -54,6 +59,6 @@ export class Listing extends BaseEntity {
 	@Column()
 		generatorAmount: number;
 
-	@Column({ type: 'timestamp' })
+	@Column('timestamp')
 		createdAt: Date;
 }

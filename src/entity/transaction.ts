@@ -1,12 +1,18 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
+import { Snowflake, SnowflakeUtil } from 'discord.js';
+import { BeforeInsert, Column, Entity, JoinColumn, OneToOne, PrimaryColumn, Relation } from 'typeorm';
 
 import { TransactionString } from '../typings/index.js';
 import { Guild, Member } from './index.js';
 
 @Entity()
 export class Transaction {
-	@PrimaryGeneratedColumn()
-		id: number;
+	@PrimaryColumn()
+		id: Snowflake;
+
+	@BeforeInsert()
+	private beforeInsert() {
+		this.id = SnowflakeUtil.generate();
+	}
 
 	@OneToOne(() => Guild, (guild) => guild.id)
 	@JoinColumn()
@@ -29,6 +35,6 @@ export class Transaction {
 	@Column()
 		treasury: number;
 
-	@Column({ type: 'timestamp', primary: true })
+	@Column('timestamp')
 		createdAt: Date;
 }
