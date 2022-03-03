@@ -1,12 +1,12 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
 
 import { Member } from './index.js';
 
 @Entity()
 export class Command extends BaseEntity {
 	@PrimaryColumn({ default: () => SnowflakeUtil.generate() })
-		id: Snowflake;
+		id: Snowflake = SnowflakeUtil.generate();
 
 	@ManyToOne(() => Member, (member) => member.commands)
 	@JoinColumn()
@@ -15,6 +15,6 @@ export class Command extends BaseEntity {
 	@Column()
 		command: string;
 
-	@Column('timestamp')
+	@CreateDateColumn()
 		createdAt: Date;
 }
