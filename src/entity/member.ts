@@ -1,25 +1,20 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, BeforeInsert, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, Relation } from 'typeorm';
 
 import { Command, Guild, User } from './index.js';
 
 @Entity()
 export class Member extends BaseEntity {
-	@PrimaryColumn()
+	@PrimaryColumn({ default: () => SnowflakeUtil.generate() })
 		id: Snowflake;
 
-	@BeforeInsert()
-	private beforeInsert() {
-		this.id = SnowflakeUtil.generate();
-	}
-
-	@OneToOne(() => User, (user) => user.id)
+	@OneToOne(() => User, (user) => user.id, { eager: true })
 	@JoinColumn()
-		user: Promise<Relation<User>>;
+		user: Relation<User>;
 
-	@ManyToOne(() => Guild, (guild) => guild.members)
+	@ManyToOne(() => Guild, (guild) => guild.members, { eager: true })
 	@JoinColumn()
-		guild: Promise<Relation<Guild>>;
+		guild: Relation<Guild>;
 
 	@OneToMany(() => Command, (command) => command.member)
 		commands: Promise<Relation<Command>[]>;

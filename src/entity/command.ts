@@ -1,17 +1,12 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, BeforeInsert, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
 
 import { Member } from './index.js';
 
 @Entity()
 export class Command extends BaseEntity {
-	@PrimaryColumn()
+	@PrimaryColumn({ default: () => SnowflakeUtil.generate() })
 		id: Snowflake;
-
-	@BeforeInsert()
-	private beforeInsert() {
-		this.id = SnowflakeUtil.generate();
-	}
 
 	@ManyToOne(() => Member, (member) => member.commands)
 	@JoinColumn()

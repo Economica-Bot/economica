@@ -1,17 +1,12 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, BeforeInsert, Column, Entity, JoinColumn, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, OneToMany, PrimaryColumn } from 'typeorm';
 
 import { ListingString } from '../typings/index.js';
 
 @Entity()
 export class Listing extends BaseEntity {
-	@PrimaryColumn()
+	@PrimaryColumn({ default: () => SnowflakeUtil.generate() })
 		id: Snowflake;
-
-	@BeforeInsert()
-	private beforeInsert() {
-		this.id = SnowflakeUtil.generate();
-	}
 
 	@Column()
 		type: ListingString;

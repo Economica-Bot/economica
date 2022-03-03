@@ -1,18 +1,13 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn, Relation } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn, Relation } from 'typeorm';
 
 import { InfractionString } from '../typings/index.js';
 import { Member } from './index.js';
 
 @Entity()
 export class Infraction {
-	@PrimaryColumn()
+	@PrimaryColumn({ default: () => SnowflakeUtil.generate() })
 		id: Snowflake;
-
-	@BeforeInsert()
-	private beforeInsert() {
-		this.id = SnowflakeUtil.generate();
-	}
 
 	@ManyToOne(() => Member, (member) => member.commands)
 	@JoinColumn()

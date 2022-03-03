@@ -1,17 +1,12 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BeforeInsert, Column, Entity, JoinColumn, OneToOne, PrimaryColumn, Relation } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn, Relation } from 'typeorm';
 
 import { Guild, Member } from './index.js';
 
 @Entity()
 export class Loan {
-	@PrimaryColumn()
+	@PrimaryColumn({ default: () => SnowflakeUtil.generate() })
 		id: Snowflake;
-
-	@BeforeInsert()
-	private beforeInsert() {
-		this.id = SnowflakeUtil.generate();
-	}
 
 	@OneToOne(() => Guild, (guild) => guild.id)
 	@JoinColumn()
