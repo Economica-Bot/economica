@@ -1,14 +1,18 @@
 import { CommandInteraction, GuildMember, MessageEmbed } from 'discord.js';
 
-import { EmbedColors } from '../typings/constants.js';
-import { Author, ReplyString } from '../typings/index.js';
-import { EconomicaSlashCommandBuilder } from './Builders.js';
-import { Command, Economica } from './index.js';
+import { Guild, Member, User } from '../entities';
+import { Author, EmbedColors, ReplyString } from '../typings';
+import { Command, Economica, EconomicaSlashCommandBuilder } from '.';
 
 export class Context {
 	public client: Economica;
 	public interaction: CommandInteraction<'cached'>;
 	public data: EconomicaSlashCommandBuilder;
+	public userEntity: User;
+	public guildEntity: Guild;
+	public memberEntity: Member;
+	public clientuserEntity: User;
+	public clientMemberEntity: Member;
 	public member: GuildMember;
 	public constructor(client: Economica, interaction?: CommandInteraction<'cached'>) {
 		this.client = client;
@@ -23,6 +27,19 @@ export class Context {
 		}
 
 		this.data = command.data as EconomicaSlashCommandBuilder;
+		User.useConnection(this.client.connection);
+		Member.useConnection(this.client.connection);
+		Guild.useConnection(this.client.connection);
+		this.userEntity = await User.findOne({ id: this.interaction.user.id })
+			?? await User.create({ id: this.interaction.user.id }).save();
+		this.guildEntity = await Guild.findOne({ id: this.interaction.guildId })
+			?? await Guild.create({ id: this.interaction.guildId }).save();
+		this.memberEntity = await Member.findOne({ user: this.userEntity, guild: this.guildEntity })
+			?? await Member.create({ user: this.userEntity, guild: this.guildEntity }).save();
+		this.clientuserEntity = await User.findOne({ id: this.client.user.id })
+			?? await User.create({ id: this.client.user.id }).save();
+		this.clientMemberEntity = await Member.findOne({ user: this.clientuserEntity, guild: this.guildEntity })
+			?? await Member.create({ user: this.clientuserEntity, guild: this.guildEntity }).save();
 		this.member = this.client.guilds.cache.get(this.interaction.guildId).members.cache.get(this.client.user.id);
 		return this;
 	}

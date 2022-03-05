@@ -4,7 +4,7 @@ import {
 	EconomicaSlashCommandOptionsOnlyBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandsOnlyBuilder,
-} from './index.js';
+} from '.';
 
 export class Command {
 	public data:

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DEVELOPMENT_GUILD_IDS, PRODUCTION } from '../config.js';
-import { Economica, EconomicaSlashCommandBuilder, Event } from '../structures/index.js';
-import { Modules } from '../typings/index.js';
+import { DEVELOPMENT_GUILD_IDS, PRODUCTION } from '../config';
+import { Economica, EconomicaSlashCommandBuilder, Event } from '../structures';
+import { Modules } from '../typings';
 
 export default class implements Event {
 	public event = 'ready' as const;

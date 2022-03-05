@@ -1,10 +1,10 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { Column, Entity, OneToOne, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, Entity, OneToOne, PrimaryColumn, Relation } from 'typeorm';
 
-import { Listing } from './index.js';
+import { Listing } from '.';
 
 @Entity()
-export class Item {
+export class Item extends BaseEntity {
 	@PrimaryColumn({ default: () => SnowflakeUtil.generate() })
 		id: Snowflake;
 

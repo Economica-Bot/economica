@@ -1,11 +1,9 @@
 import { AutocompleteInteraction, CommandInteraction, Interaction } from 'discord.js';
 
-import { Command } from '../entity/command.js';
-import { Guild } from '../entity/guild';
-import { Member } from '../entity/member.js';
-import { User } from '../entity/user.js';
-import { Context, Economica, Event } from '../structures/index.js';
-import { Occupations } from '../typings/index.js';
+import { Command } from '../entities';
+import { commandCheck } from '../lib';
+import { Context, Economica, Event } from '../structures';
+import { Occupations } from '../typings';
 
 export default class implements Event {
 	public event = 'interactionCreate' as const;
@@ -20,13 +18,12 @@ export default class implements Event {
 
 	private async commandInteraction(client: Economica, interaction: CommandInteraction<'cached'>): Promise<void> {
 		const ctx = await new Context(client, interaction).init();
-		await client.commands.get(interaction.commandName).execute(ctx);
-		const user = await client.connection.getRepository(User).save({ id: ctx.interaction.user.id });
-		const guild = await client.connection.getRepository(Guild).save({ id: ctx.interaction.guildId });
-		const memberRepository = client.connection.getRepository(Member);
-		const member = await memberRepository.findOne({ user, guild }) ? await memberRepository.findOne({ user, guild }) : await memberRepository.save({ user, guild });
-		const command = await client.connection.getRepository(Command).save({ member, command: interaction.commandName });
-		// await client.connection.getRepository(Command).save(command);
+		const check = await commandCheck(ctx);
+		if (check) {
+			await client.commands.get(interaction.commandName).execute(ctx);
+			Command.useConnection(client.connection);
+			await Command.create({ member: ctx.memberEntity, command: interaction.commandName }).save();
+		}
 	}
 
 	private async autocompleteInteraction(_client: Economica, interaction: AutocompleteInteraction): Promise<void> {

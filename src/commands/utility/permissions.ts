@@ -4,7 +4,7 @@ import {
 	EconomicaSlashCommandBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
-} from '../../structures/index.js';
+} from '../../structures';
 import { icons } from '../../typings/constants.js';
 
 export default class implements Command {

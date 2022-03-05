@@ -1,17 +1,17 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn, Relation } from 'typeorm';
 
-import { InfractionString } from '../typings/index.js';
-import { Member } from './index.js';
+import { InfractionString } from '../typings';
+import { Member } from '.';
 
 @Entity()
-export class Infraction {
+export class Infraction extends BaseEntity {
 	@PrimaryColumn({ default: () => SnowflakeUtil.generate() })
 		id: Snowflake;
 
 	@ManyToOne(() => Member, (member) => member.commands)
 	@JoinColumn()
-		member: Relation<Member>;
+		target: Relation<Member>;
 
 	@OneToOne(() => Member)
 	@JoinColumn()

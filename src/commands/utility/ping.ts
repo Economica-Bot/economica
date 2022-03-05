@@ -1,4 +1,4 @@
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()

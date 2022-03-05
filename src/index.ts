@@ -7,6 +7,6 @@
 // | $$$$$$$$|  $$$$$$$|  $$$$$$/| $$  | $$|  $$$$$$/| $$ | $$ | $$| $$|  $$$$$$$|  $$$$$$$
 // |________/ \_______/ \______/ |__/  |__/ \______/ |__/ |__/ |__/|__/ \_______/ \_______/
 
-import { Economica } from './structures/index.js';
+import { Economica } from './structures';
 
 new Economica().init();

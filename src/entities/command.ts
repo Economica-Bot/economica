@@ -1,7 +1,7 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
 
-import { Member } from './index.js';
+import { Member } from '.';
 
 @Entity()
 export class Command extends BaseEntity {

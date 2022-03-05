@@ -1,11 +1,12 @@
 import { Snowflake } from 'discord.js';
-import { Column, Entity, OneToMany, OneToOne, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, Entity, OneToMany, PrimaryColumn, Relation } from 'typeorm';
 
+import { Authority, Member, Module } from '.';
 import { CURRENCY_SYMBOL } from '../config';
-import { Authority, Incomes, Intervals, Member, Module } from './index.js';
+import { defaultIncomesObj, defaultIntervalsObj } from '../typings';
 
 @Entity()
-export class Guild {
+export class Guild extends BaseEntity {
 	@PrimaryColumn()
 		id: Snowflake;
 
@@ -24,11 +25,11 @@ export class Guild {
 	@OneToMany(() => Authority, (authority) => authority.guild)
 		auth: Promise<Relation<Authority>[]>;
 
-	@OneToOne(() => Incomes, (incomes) => incomes.guild, { eager: true, cascade: true })
-		incomes: Promise<Relation<Incomes>>;
+	@Column({ type: 'json', default: defaultIncomesObj })
+		incomes: typeof defaultIncomesObj;
 
-	@OneToOne(() => Intervals, (intervals) => intervals.guild, { eager: true, cascade: true })
-		intervals: Promise<Relation<Intervals>>;
+	@Column({ type: 'json', default: defaultIntervalsObj })
+		intervals: typeof defaultIntervalsObj;
 
 	@OneToMany(() => Module, (module) => module.guild)
 		modules: Promise<Relation<Module>[]>;

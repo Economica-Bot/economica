@@ -42,7 +42,7 @@
 
 		// Completeness
 		"skipLibCheck": true,
-		//"baseUrl": "./"
+		// "baseUrl": "./"
 	},
 	"include": ["src", "tsconfig.eslint.json"],
 	"exlude": ["node_modules"]

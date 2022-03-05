@@ -18,8 +18,8 @@ import {
 	WEBHOOK_URLS,
 	clientOptions,
 	loggerOptions,
-} from '../config.js';
-import { Command } from './Command.js';
+} from '../config';
+import { Command } from './Command';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -162,24 +162,23 @@ export class Economica extends Client {
 	private async connectSQL() {
 		this.log.debug('Connecting to DB');
 		this.connection = await new Connection({
-			type: 'mysql',
+			type: 'postgres',
 			host: 'localhost',
-			port: 3306,
-			username: 'root',
+			port: 5432,
+			username: 'postgres',
 			password: 'password',
 			database: 'bot',
-			synchronize: true,
-			logging: false,
-			insecureAuth: true,
-			charset: 'utf8mb4',
-			entities: [path.resolve(__dirname, '../entity/*.ts'), path.resolve(__dirname, '../entity/*.js')],
+			entities: ['../entities/*.{js,ts}'],
+			logNotifications: true,
+			applicationName: 'Economica',
 		}).connect();
+		this.connection.synchronize(true);
 		this.log.debug('Connected to DB');
 	}
 
 	private async registerEvents() {
 		this.log.debug('Registering events');
-		const eventFiles = readdirSync(path.resolve(__dirname, '../events')).filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
+		const eventFiles = readdirSync(path.resolve(__dirname, '../events')).filter((file) => file.endsWith('.js'));
 		eventFiles.forEach(async (file) => {
 			const { default: Event } = await import(`../events/${file}`);
 			const event = new Event();

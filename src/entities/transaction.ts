@@ -1,11 +1,11 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryColumn, Relation } from 'typeorm';
 
-import { TransactionString } from '../typings/index.js';
-import { Guild, Member } from './index.js';
+import { TransactionString } from '../typings';
+import { Guild, Member } from '.';
 
 @Entity()
-export class Transaction {
+export class Transaction extends BaseEntity {
 	@PrimaryColumn({ default: () => SnowflakeUtil.generate() })
 		id: Snowflake;
 

@@ -62,12 +62,6 @@ export const inviteOptions: InviteGenerationOptions = {
 	],
 };
 
-// export const mongoOptions: mongoose.ConnectOptions = {
-// 	useUnifiedTopology: true,
-// 	useNewUrlParser: true,
-// 	useFindAndModify: false,
-// };
-
 export const loggerOptions: ISettingsParam = {
 	instanceName: 'Economica_Bot',
 	overwriteConsole: true,

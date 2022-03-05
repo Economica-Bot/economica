@@ -1,6 +1,6 @@
 import { MessageEmbed } from 'discord.js';
 
-import { Economica, Event } from '../structures/index.js';
+import { Economica, Event } from '../structures';
 
 export default class implements Event {
 	public event = 'error' as const;
