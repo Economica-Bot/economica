@@ -1,6 +1,8 @@
+import { parseNumber } from '@adrastopoulos/number-parser';
+
+import { Member, User } from '../../entities';
 import { transaction, validateAmount } from '../../lib';
-import { Member } from '../../entities';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -14,11 +16,15 @@ export default class implements Command {
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const target = ctx.interaction.options.getUser('user');
-		const targetEntity = await Member.findOne({ user: { id: target.id }, guild: { id: ctx.interaction.guild.id } }) ?? await Member.create({ user: { id: target.id }, guild: { id: ctx.interaction.guild.id } }).save();
+		const targetEntity = await Member.findOne({ relations: ['user', 'guild'], where: { user: { id: target.id }, guild: ctx.guildEntity } })
+		?? await (async () => {
+			const user = await User.create({ id: target.id }).save();
+			return Member.create({ user, guild: ctx.guildEntity }).save();
+		})();
 		const { validated, result } = await validateAmount(ctx, 'wallet');
 		if (!validated) return;
-		await transaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.memberEntity, 'GIVE_PAYMENT', -result, 0);
-		await transaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'RECEIVE_PAYMENT', result, 0);
-		await ctx.embedify('success', 'user', `Paid ${target} ${ctx.guildEntity.currency}${result.toLocaleString()}`, false);
+		transaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.memberEntity, 'GIVE_PAYMENT', -result, 0);
+		transaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'RECEIVE_PAYMENT', result, 0);
+		await ctx.embedify('success', 'user', `Paid ${target} ${ctx.guildEntity.currency}${parseNumber(result)}`, false);
 	};
 }

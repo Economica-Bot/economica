@@ -10,20 +10,8 @@ import { PermissionString } from 'discord.js';
 import { Authorities, ModuleString } from '../typings';
 
 export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcommandBuilder {
-	public format: string;
-	public examples: string[];
 	public clientPermissions: PermissionString[];
 	public authority: keyof typeof Authorities;
-
-	public setFormat(format: string): this {
-		this.format = format;
-		return this;
-	}
-
-	public setExamples(examples: string[]): this {
-		this.examples = examples;
-		return this;
-	}
 
 	public setClientPermissions(clientPermissions: PermissionString[]): this {
 		this.clientPermissions = clientPermissions;

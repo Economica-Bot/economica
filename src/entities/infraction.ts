@@ -1,19 +1,23 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
 
-import { InfractionString } from '../typings';
-import { Member } from '.';
+import { InfractionString } from '../typings/index.js';
+import { Guild, Member } from './index.js';
 
 @Entity()
 export class Infraction extends BaseEntity {
-	@PrimaryColumn({ default: () => SnowflakeUtil.generate() })
-		id: Snowflake;
+	@PrimaryColumn()
+		id: Snowflake = SnowflakeUtil.generate();
 
-	@ManyToOne(() => Member, (member) => member.commands)
+	@ManyToOne(() => Guild)
+	@JoinColumn()
+		guild: Relation<Guild>;
+
+	@ManyToOne(() => Member)
 	@JoinColumn()
 		target: Relation<Member>;
 
-	@OneToOne(() => Member)
+	@ManyToOne(() => Member)
 	@JoinColumn()
 		agent: Relation<Member>;
 
@@ -23,15 +27,15 @@ export class Infraction extends BaseEntity {
 	@Column()
 		reason: string;
 
-	@Column()
-		permanent: boolean;
+	@Column({ nullable: true })
+		active: boolean | null;
 
-	@Column()
-		active: boolean;
+	@Column({ nullable: true })
+		duration: number | null;
 
-	@Column()
-		duration: number;
+	@Column({ nullable: true })
+		permanent: boolean | null;
 
-	@Column('timestamp')
+	@CreateDateColumn()
 		createdAt: Date;
 }

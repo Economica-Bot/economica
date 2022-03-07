@@ -2,8 +2,8 @@ import { AutocompleteInteraction, CommandInteraction, Interaction } from 'discor
 
 import { Command } from '../entities';
 import { commandCheck } from '../lib';
-import { Context, Economica, Event } from '../structures';
-import { Occupations } from '../typings';
+import { Context, Economica, Event } from '../structures/index.js';
+import { Occupations } from '../typings/index.js';
 
 export default class implements Event {
 	public event = 'interactionCreate' as const;
@@ -21,7 +21,6 @@ export default class implements Event {
 		const check = await commandCheck(ctx);
 		if (check) {
 			await client.commands.get(interaction.commandName).execute(ctx);
-			Command.useConnection(client.connection);
 			await Command.create({ member: ctx.memberEntity, command: interaction.commandName }).save();
 		}
 	}

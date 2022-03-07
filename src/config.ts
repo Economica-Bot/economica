@@ -9,16 +9,15 @@ dotenv.config();
 
 // Environment Vars
 
-export const BOT_TOKEN = process.env.BOT_TOKEN;
+export const BOT_TOKEN = process.env.ECON_ALPHA_TOKEN;
 export const DEVELOPER_IDS: string[] = JSON.parse(process.env.DEVELOPER_IDS);
 export const DEVELOPMENT_GUILD_IDS: string[] = JSON.parse(process.env.DEVELOPMENT_GUILD_IDS);
 export const PUBLIC_GUILD_ID = process.env.PUBLIC_GUILD_ID;
 export const DISCORD_INVITE_URL = process.env.DISCORD_INVITE_URL;
-export const WEBHOOK_URLS: string[] = JSON.parse(process.env.WEBHOOK_URLS);
+export const WEBHOOK_URIS: string[] = JSON.parse(process.env.WEBHOOK_URIS);
 export const PRODUCTION = process.env.PRODUCTION === 'true';
 export const DEVELOPMENT = !PRODUCTION;
 export const DEBUG = process.env.DEBUG === 'true';
-export const MONGO_URI = process.env.MONGO_URI;
 export const CURRENCY_SYMBOL = process.env.CURRENCY_SYMBOL;
 
 // Exemptions
@@ -29,7 +28,11 @@ export const DEV_MODULE_EXEMPT = process.env.DEV_MODULE_EXEMPT === 'true';
 
 // Optional
 
-export const WEBSITE_URL = process.env.WEBSITE_URL;
+export const WEBSITE_HOME_URL = process.env.WEBSITE_HOME_URL;
+export const WEBSITE_COMMANDS_URL = process.env.WEBSITE_COMMANDS_URL;
+export const WEBSITE_DOCS_URL = process.env.WEBSITE_DOCS_URL;
+export const WEBSITE_VOTE_URL = process.env.WEBSITE_VOTE_URL;
+
 export const ACTIVITY_NAME = process.env.ACTIVITY_NAME;
 export const ACTIVITY_TYPE = process.env.ACTIVITY_TYPE as ExcludeEnum<typeof ActivityTypes, 'CUSTOM'>;
 
@@ -41,7 +44,7 @@ export const clientOptions: ClientOptions = {
 			{
 				name: ACTIVITY_NAME,
 				type: ACTIVITY_TYPE,
-				url: WEBSITE_URL,
+				url: WEBSITE_HOME_URL,
 			},
 		],
 	},
@@ -63,7 +66,7 @@ export const inviteOptions: InviteGenerationOptions = {
 };
 
 export const loggerOptions: ISettingsParam = {
-	instanceName: 'Economica_Bot',
+	instanceName: 'Bot',
 	overwriteConsole: true,
 	dateTimeTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 	displayInstanceName: true,

@@ -4,15 +4,17 @@ import {
 	EconomicaSlashCommandOptionsOnlyBuilder,
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandsOnlyBuilder,
-} from '.';
+} from './index.js';
 
-export class Command {
+export class Command<TopLevelData = false> {
 	public data:
-	| EconomicaSlashCommandBuilder
-	| EconomicaSlashCommandSubcommandBuilder
-	| EconomicaSlashCommandSubcommandsOnlyBuilder
-	| EconomicaSlashCommandOptionsOnlyBuilder
-	| Omit<EconomicaSlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
+	TopLevelData extends true ?
+		EconomicaSlashCommandBuilder :
+		| EconomicaSlashCommandBuilder
+		| EconomicaSlashCommandSubcommandBuilder
+		| EconomicaSlashCommandSubcommandsOnlyBuilder
+		| EconomicaSlashCommandOptionsOnlyBuilder
+		| Omit<EconomicaSlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
 
 	public execute: (ctx: Context) => Promise<void>;
 }

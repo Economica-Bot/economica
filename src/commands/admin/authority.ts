@@ -1,8 +1,8 @@
 import { MessageEmbed } from 'discord.js';
 
 import { Authority } from '../../entities';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
-import { Authorities } from '../../typings';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+import { Authorities } from '../../typings/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -10,11 +10,17 @@ export default class implements Command {
 		.setDescription('Manage the economy authority role hierarchy')
 		.setModule('ADMIN')
 		.setFormat('authority <view | set | reset> [...options]')
+		.setExamples([
+			'authority view',
+			'authority set @Administrator Administrator',
+			'authority set @Adrastopoulos Manager',
+			'authority reset',
+			'authority reset @Moderator',
+		])
 		.addSubcommand((options) => options.setName('view').setDescription('View the economy authority hierarchy'))
 		.addSubcommand((options) => options
 			.setName('set')
 			.setDescription("Set a role's authority level")
-			.setFormat('<role> <user | mod | manager | admin>')
 			.setAuthority('ADMINISTRATOR')
 			.addMentionableOption((option) => option.setName('mentionable').setDescription('Specify a role or user').setRequired(true))
 			.addStringOption((option) => option

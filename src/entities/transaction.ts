@@ -1,35 +1,35 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
 
-import { TransactionString } from '../typings';
-import { Guild, Member } from '.';
+import { TransactionString } from '../typings/index.js';
+import { Guild, Member } from './index.js';
 
 @Entity()
 export class Transaction extends BaseEntity {
-	@PrimaryColumn({ default: () => SnowflakeUtil.generate() })
-		id: Snowflake;
+	@PrimaryColumn()
+		id: Snowflake = SnowflakeUtil.generate();
 
-	@OneToOne(() => Guild, (guild) => guild.id)
+	@ManyToOne(() => Guild)
 	@JoinColumn()
 		guild: Relation<Guild>;
 
-	@OneToOne(() => Member)
+	@ManyToOne(() => Member)
 	@JoinColumn()
 		target: Relation<Member>;
 
-	@OneToOne(() => Member)
+	@ManyToOne(() => Member)
 	@JoinColumn()
 		agent: Relation<Member>;
 
 	@Column()
 		type: TransactionString;
 
-	@Column()
+	@Column({ type: 'float' })
 		wallet: number;
 
-	@Column()
+	@Column({ type: 'float' })
 		treasury: number;
 
-	@Column('timestamp')
+	@CreateDateColumn()
 		createdAt: Date;
 }

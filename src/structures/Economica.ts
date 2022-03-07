@@ -15,17 +15,30 @@ import {
 	DEVELOPMENT_GUILD_IDS,
 	DISCORD_INVITE_URL,
 	PUBLIC_GUILD_ID,
-	WEBHOOK_URLS,
+	WEBHOOK_URIS,
 	clientOptions,
 	loggerOptions,
-} from '../config';
-import { Command } from './Command';
+} from '../config.js';
+import {
+	Authority,
+	Command,
+	Guild,
+	Infraction,
+	Item,
+	Listing,
+	Loan,
+	Member,
+	Module,
+	Transaction,
+	User,
+} from '../entities/index.js';
+import { Command as CommandStruct } from './Command.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export class Economica extends Client {
-	public commands: Collection<string, Command>;
+	public commands: Collection<string, CommandStruct<true>>;
 	public cooldowns: Collection<string, Date>;
 	public webhooks: WebhookClient[];
 	public connection: Connection;
@@ -33,7 +46,7 @@ export class Economica extends Client {
 
 	public constructor() {
 		super(clientOptions);
-		this.commands = new Collection<string, Command>();
+		this.commands = new Collection<string, CommandStruct<true>>();
 		this.cooldowns = new Collection<string, Date>();
 		this.webhooks = new Array<WebhookClient>();
 		this.log = new Logger(loggerOptions);
@@ -104,9 +117,9 @@ export class Economica extends Client {
 			process.exit(1);
 		}
 
-		// WEBHOOK_URLS
-		this.log.debug('Validating WEBHOOK_URLS');
-		WEBHOOK_URLS.forEach(async (url) => {
+		// WEBHOOK_URIS
+		this.log.debug('Validating WEBHOOK_URIS');
+		WEBHOOK_URIS.forEach(async (url) => {
 			const webhookClient = new WebhookClient({ url });
 			if (!webhookClient) {
 				this.log.fatal(new Error(`Could not create Webhook with URL ${url}`));
@@ -120,8 +133,8 @@ export class Economica extends Client {
 
 	private async initWebHooks(): Promise<void> {
 		this.log.debug('Initializing webhooks');
-		WEBHOOK_URLS.forEach((WEBHOOK_URL) => {
-			this.webhooks.push(new WebhookClient({ url: WEBHOOK_URL }));
+		WEBHOOK_URIS.forEach((WEBHOOK_URI) => {
+			this.webhooks.push(new WebhookClient({ url: WEBHOOK_URI }));
 		});
 		this.log.info('Webhooks initialized');
 	}
@@ -168,11 +181,21 @@ export class Economica extends Client {
 			username: 'postgres',
 			password: 'password',
 			database: 'bot',
-			entities: ['../entities/*.{js,ts}'],
-			logNotifications: true,
+			entities: [path.join(__dirname, '../entities/*.{js,ts}')],
 			applicationName: 'Economica',
 		}).connect();
 		this.connection.synchronize(true);
+		Authority.useConnection(this.connection);
+		Command.useConnection(this.connection);
+		Guild.useConnection(this.connection);
+		Infraction.useConnection(this.connection);
+		Item.useConnection(this.connection);
+		Listing.useConnection(this.connection);
+		Loan.useConnection(this.connection);
+		Member.useConnection(this.connection);
+		Module.useConnection(this.connection);
+		Transaction.useConnection(this.connection);
+		User.useConnection(this.connection);
 		this.log.debug('Connected to DB');
 	}
 
@@ -198,8 +221,12 @@ export class Economica extends Client {
 			const files = readdirSync(path.resolve(__dirname, `../commands/${dir}/`)).filter((file) => file.endsWith('.ts') || file.endsWith('.js'));
 			files.forEach(async (file) => {
 				const { default: Command } = await import(`../commands/${dir}/${file}`);
-				const command = new Command();
+				const command = new Command() as CommandStruct<true>;
+
+				// Validation
 				if (!command.data.module) throw new Error(`Command ${command.data.name} missing module!`);
+				if (!command.data.format) throw new Error(`Command ${command.data.name} missing format!`);
+				if (!command.data.examples) throw new Error(`Command ${command.data.name} missing examples!`);
 				this.log.debug(`Registering command ${command.data.name}`);
 				this.commands.set(command.data.name, command);
 			});

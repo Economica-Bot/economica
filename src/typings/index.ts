@@ -106,4 +106,4 @@ export enum Occupations {
 }
 export type OccupationString = keyof typeof Occupations;
 
-export * from './constants';
+export * from './constants.js';

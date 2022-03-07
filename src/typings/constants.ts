@@ -1,6 +1,6 @@
 import { ColorResolvable } from 'discord.js';
 
-import { ReplyString, defaultIncomes, defaultIntervals } from '.';
+import { ReplyString, defaultIncomes, defaultIntervals } from './index.js';
 
 export const defaultIntervalsObj: defaultIntervals = {
 	minutely: {
@@ -87,20 +87,25 @@ export const EmbedColors: Record<ReplyString, ColorResolvable> = {
 	error: 'RED',
 };
 
-export enum icons {
-	SUCCESS = 'https://cdn.discordapp.com/emojis/843390419261194300.webp?size=96&quality=lossless',
-	INFO = 'https://cdn.discordapp.com/emojis/843390419429883924.webp?size=96&quality=lossless',
-	WARNING = 'https://cdn.discordapp.com/emojis/843390419270107136.webp?size=96&quality=lossless',
-	ABORT = 'https://cdn.discordapp.com/emojis/843390419270107136.webp?size=96&quality=lossless',
-	ERROR = 'https://cdn.discordapp.com/emojis/843390419303661569.webp?size=96&quality=lossless',
-}
-
 export enum emojis {
+	ECONOMICA_LOGO_0 = '<:economicalogo0:843375936589922305>',
+	ECONOMICA_LOGO_1 = '<:economicalogo1:843376438782722068>',
+	ECONOMICA_LOGO_2 = '<:economicalogo2:843376482603892746>1',
 	ITEM_DISABLED = '<:ITEM_DISABLED:944737714274717746>',
 	ACTIVE_LOAN = '<:active_loan:947238735668449280>',
 	CREATE_LOAN = '<:create_loan:947238735471333427>',
 	MANAGE_LOAN = '<:manage_loan:947238735450353734>',
 	SELECT = '<:select:947240263003304027>',
+	DESCRIPTION = '<:description:950268990763204648>',
+	FORMAT = '<:format:950251489966837880>',
+	RESEARCH = '<:research:950251348782350377>',
+	DASHBOARD = '<:dashboard:950251162869841930>',
+	COMMAND = '<:command:950269811039039540>',
+	SUCCESS = '<:appendix_success:843390419261194300>',
+	INFO = '<:appendix_info:843390419429883924>',
+	WARNING = '<:appendix_warning:843390419270107136>',
+	ERROR = '<:appendix_info:843390419429883924>',
+	HELP = '<:help:950426939796111390>',
 }
 
 export const BUTTON_INTERACTION_COOLDOWN = 1000 * 15;

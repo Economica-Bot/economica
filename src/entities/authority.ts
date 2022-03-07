@@ -1,8 +1,8 @@
 import { Snowflake } from 'discord.js';
 import { BaseEntity, Column, Entity, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
 
-import { AuthorityString } from '../typings';
-import { Guild } from '.';
+import { AuthorityString } from '../typings/index.js';
+import { Guild } from './index.js';
 
 @Entity()
 export class Authority extends BaseEntity {

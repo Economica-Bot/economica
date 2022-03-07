@@ -1,37 +1,31 @@
 /* eslint-disable no-param-reassign */
+import { parseNumber } from '@adrastopoulos/number-parser';
 import { MessageEmbed, TextChannel } from 'discord.js';
 
 import { Guild, Member, Transaction } from '../entities';
-import { Economica } from '../structures';
-import { TransactionString } from '../typings';
+import { Economica } from '../structures/index.js';
+import { TransactionString } from '../typings/index.js';
 
+/**
+ * Display a transaction
+ * @param transaction - The transaction to display
+ * @returns {MessageEmbed}
+ */
 export async function displayTransaction(transaction: Transaction): Promise<MessageEmbed> {
-	const { target, guild, agent, wallet, treasury } = transaction;
+	const { id, guild, type, target, agent, wallet, treasury, createdAt } = transaction;
 	const total = wallet + treasury;
 	const description = `Target: <@!${target.user.id}> | Agent: <@!${agent.user.id}>`;
 	return new MessageEmbed()
 		.setColor('GOLD')
-		.setAuthor({ name: `Transaction | ${transaction.type}` })
+		.setAuthor({ name: `Transaction | ${type}` })
 		.setDescription(description)
 		.addFields([
-			{
-				name: '__**Wallet**__',
-				value: `${guild.currency}${wallet.toLocaleString()}`,
-				inline: true,
-			},
-			{
-				name: '__**Treasury**__',
-				value: `${guild.currency}${treasury.toLocaleString()}`,
-				inline: true,
-			},
-			{
-				name: '__**Total**__',
-				value: `${guild.currency}${total.toLocaleString()}`,
-				inline: true,
-			},
+			{ name: '__**Wallet**__', value: `${guild.currency}${parseNumber(wallet)}`, inline: true },
+			{ name: '__**Treasury**__', value: `${guild.currency}${parseNumber(treasury)}`, inline: true },
+			{ name: '__**Total**__', value: `${guild.currency}${parseNumber(total)}`, inline: true },
 		])
-		.setFooter({ text: `ID: ${transaction.id.toString()}` })
-		.setTimestamp();
+		.setFooter({ text: `ID: ${id}` })
+		.setTimestamp(createdAt);
 }
 
 /**
@@ -54,9 +48,7 @@ export async function transaction(
 	wallet: number,
 	treasury: number,
 ): Promise<void> {
-	target.wallet += wallet;
-	target.treasury += treasury;
-	await target.save();
+	await client.connection.manager.update(Member, { id: target.id }, { wallet: target.wallet + wallet, treasury: target.treasury + treasury });
 	const transactionEntity = await Transaction.create({ guild, target, agent, type, wallet, treasury }).save();
 	const { transactionLogId } = guild;
 	if (transactionLogId) {

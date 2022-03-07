@@ -1,9 +1,9 @@
-import { parseString } from '@adrastopoulos/number-parser';
+import { parseNumber, parseString } from '@adrastopoulos/number-parser';
 import { GuildMember } from 'discord.js';
 
 import { transaction } from '../../lib';
-import { Member } from '../../entities';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
+import { Member, User } from '../../entities';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -23,7 +23,11 @@ export default class implements Command {
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const target = ctx.interaction.options.getMember('user') as GuildMember;
-		const targetEntity = await Member.findOne({ user: { id: target.id }, guild: { id: ctx.interaction.guild.id } }) ?? await Member.create({ user: { id: target.id }, guild: { id: ctx.interaction.guild.id } }).save();
+		const targetEntity = await Member.findOne({ relations: ['user', 'guild'], where: { user: { id: target.id }, guild: ctx.guildEntity } })
+		?? await (async () => {
+			const user = await User.create({ id: target.id }).save();
+			return Member.create({ user, guild: ctx.guildEntity }).save();
+		})();
 		const amount = parseString(ctx.interaction.options.getString('amount'));
 		const balance = ctx.interaction.options.getString('balance');
 		const { wallet: w, treasury: t } = targetEntity;
@@ -31,7 +35,7 @@ export default class implements Command {
 		const wallet = balance === 'wallet' ? difference : 0;
 		const treasury = balance === 'treasury' ? difference : 0;
 		if (!amount) return ctx.embedify('error', 'user', 'Please enter a valid amount.', true);
-		await transaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'SET_MONEY', wallet, treasury);
-		return ctx.embedify('success', 'user', `Set ${target}'s \`${balance}\` to ${ctx.guildEntity.currency}${amount.toLocaleString()}.`, false);
+		transaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'SET_MONEY', wallet, treasury);
+		return ctx.embedify('success', 'user', `Set ${target}'s \`${balance}\` to ${ctx.guildEntity.currency}${parseNumber(amount)}.`, false);
 	};
 }

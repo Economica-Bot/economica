@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import * as Discord from 'discord.js';
 
-import { BUTTON_INTERACTION_COOLDOWN } from '../typings';
+import { BUTTON_INTERACTION_COOLDOWN } from '../typings/index.js';
 
 /**
  * Initiates a pagination embed display.

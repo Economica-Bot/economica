@@ -2,8 +2,8 @@ import { parseNumber, parseString } from '@adrastopoulos/number-parser';
 import { GuildMember } from 'discord.js';
 
 import { transaction } from '../../lib';
-import { Member } from '../../entities';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
+import { Member, User } from '../../entities';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -28,14 +28,18 @@ export default class implements Command {
 		const amount = ctx.interaction.options.getString('amount');
 		const balance = ctx.interaction.options.getString('balance');
 		const parsedAmount = parseString(amount);
-		const wallet = balance === 'wallet' ? parsedAmount : 0;
-		const treasury = balance === 'treasury' ? parsedAmount : 0;
-		const target = ctx.interaction.options.getMember('target') as GuildMember;
-		const targetEntity = await Member.findOne({ user: { id: target.id }, guild: { id: ctx.interaction.guild.id } }) ?? await Member.create({ user: { id: target.id }, guild: { id: ctx.interaction.guild.id } }).save();
 		if (!parsedAmount) {
 			await ctx.embedify('error', 'user', `Invalid amount: \`${amount}\``, true);
 		} else {
-			await transaction(ctx.client, ctx.guildEntity, targetEntity, ctx.clientMemberEntity, 'ADD_MONEY', wallet, treasury);
+			const wallet = balance === 'wallet' ? parsedAmount : 0;
+			const treasury = balance === 'treasury' ? parsedAmount : 0;
+			const target = ctx.interaction.options.getMember('target') as GuildMember;
+			const targetEntity = await Member.findOne({ user: { id: target.id }, guild: ctx.guildEntity })
+			?? await (async () => {
+				const user = await User.create({ id: target.id }).save();
+				return Member.create({ user, guild: ctx.guildEntity }).save();
+			})();
+			transaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'ADD_MONEY', wallet, treasury);
 			await ctx.embedify('success', 'user', `Added ${ctx.guildEntity.currency}${parseNumber(parsedAmount)} to <@!${target.id}>'s \`${balance}\`.`, false);
 		}
 	};

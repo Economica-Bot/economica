@@ -1,13 +1,13 @@
 import { Guild, GuildMember, PermissionString, TextChannel } from 'discord.js';
 import ms from 'ms';
 
-import { DEVELOPER_IDS, DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEV_PERMISSION_EXEMPT } from '../config';
+import { DEVELOPER_IDS, DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEV_PERMISSION_EXEMPT } from '../config.js';
 import {
 	Context,
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
-} from '../structures';
-import { Authorities, icons } from '../typings';
+} from '../structures/index.js';
+import { Authorities } from '../typings/index.js';
 
 async function checkCooldown(ctx: Context): Promise<boolean> {
 	const { incomes, intervals } = ctx.guildEntity;
@@ -83,7 +83,7 @@ async function checkPermission(ctx: Context): Promise<boolean> {
 		if (!roleAuth.length) missingAuthority = authority;
 	} if (missingAuthority) {
 		const description = `Missing authority: \`${missingAuthority}\``;
-		await ctx.embedify('error', { name: 'Insufficient Permissions', iconURL: icons.WARNING }, description, true);
+		await ctx.embedify('error', 'user', `Insufficient Permissions: \`${description}\``, true);
 		return false;
 	}
 
@@ -91,8 +91,7 @@ async function checkPermission(ctx: Context): Promise<boolean> {
 }
 
 async function validateModule(ctx: Context): Promise<boolean> {
-	const modules = await ctx.guildEntity.modules;
-	if (!modules.find((module) => module.module === ctx.data.module)) {
+	if (ctx.guildEntity.modules.find((module) => module === ctx.data.module)) {
 		await ctx.embedify('warn', 'user', `The \`${ctx.data.module}\` module is not enabled in this server.`, true);
 		return false;
 	}

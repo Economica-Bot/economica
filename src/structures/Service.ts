@@ -1,4 +1,4 @@
-import { Economica } from '.';
+import { Economica } from './index.js';
 
 export class Service {
 	public service: string;

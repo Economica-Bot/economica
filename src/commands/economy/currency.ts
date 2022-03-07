@@ -1,5 +1,5 @@
 import { CURRENCY_SYMBOL } from '../../config.js';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()

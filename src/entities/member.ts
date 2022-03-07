@@ -1,27 +1,24 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
 
-import { Command, Guild, User } from '.';
+import { Guild, User } from './index.js';
 
 @Entity()
 export class Member extends BaseEntity {
-	@PrimaryColumn({ default: () => SnowflakeUtil.generate() })
-		id: Snowflake;
+	@PrimaryColumn()
+		id: Snowflake = SnowflakeUtil.generate();
 
-	@OneToOne(() => User, (user) => user.id)
+	@ManyToOne(() => User, (user) => user.id, { eager: true })
 	@JoinColumn()
 		user: Relation<User>;
 
-	@ManyToOne(() => Guild, (guild) => guild.members)
+	@ManyToOne(() => Guild)
 	@JoinColumn()
 		guild: Relation<Guild>;
 
-	@OneToMany(() => Command, (command) => command.member)
-		commands: Promise<Relation<Command>[]>;
-
-	@Column({ type: 'decimal', default: 0 })
+	@Column({ type: 'float', default: 0 })
 		treasury: number;
 
-	@Column({ type: 'decimal', default: 0 })
+	@Column({ type: 'float', default: 0 })
 		wallet: number;
 }

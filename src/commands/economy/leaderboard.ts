@@ -3,7 +3,7 @@ import { MessageEmbed } from 'discord.js';
 
 import { paginate } from '../../lib';
 import { Member } from '../../entities';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -18,16 +18,17 @@ export default class implements Command {
 		const page = ctx.interaction.options.getInteger('page', false) ?? 1;
 		const members = await Member
 			.createQueryBuilder('member')
-			.select('SUM(user.wallet + user.treasury)')
 			.where('member.guild = :id', { id: ctx.interaction.guildId })
+			.leftJoinAndSelect('member.user', 'user')
+			.orderBy('"treasury" + "wallet"', 'DESC')
 			.getMany();
 		const entryCount = 10;
 		const pageCount = Math.ceil(members.length / entryCount);
 		const leaderBoardEntries: string[] = [];
-		let rank = 1;
+		let rank = 0;
 		members.forEach((member) => {
 			const balance = parseNumber(member.wallet + member.treasury);
-			leaderBoardEntries.push(`\`${rank += 1}\` • <@${member.user.id}> | ${ctx.guildEntity}${balance}\n`);
+			leaderBoardEntries.push(`\`${rank += 1}\` • <@${member.user.id}> | ${ctx.guildEntity.currency}${balance}\n`);
 		});
 		const embeds: MessageEmbed[] = [];
 		let k = 0;

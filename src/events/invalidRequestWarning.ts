@@ -1,6 +1,6 @@
 import { MessageEmbed } from 'discord.js';
 
-import { Economica, Event } from '../structures';
+import { Economica, Event } from '../structures/index.js';
 
 export default class implements Event {
 	public event = 'invalidRequestWarning' as const;

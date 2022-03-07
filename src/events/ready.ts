@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DEVELOPMENT_GUILD_IDS, PRODUCTION } from '../config';
-import { Economica, EconomicaSlashCommandBuilder, Event } from '../structures';
-import { Modules } from '../typings';
+import { DEVELOPMENT_GUILD_IDS, PRODUCTION } from '../config.js';
+import { Economica, Event } from '../structures/index.js';
+import { Modules } from '../typings/index.js';
 
 export default class implements Event {
 	public event = 'ready' as const;
@@ -9,10 +9,9 @@ export default class implements Event {
 		const commandData: any[] = [];
 		const defaultCommandData: any[] = [];
 		client.commands.forEach((command) => {
-			const data = command.data as EconomicaSlashCommandBuilder;
-			commandData.push(data.toJSON());
-			if (Modules[data.module] === 'DEFAULT') {
-				defaultCommandData.push(data.toJSON());
+			commandData.push(command.data.toJSON());
+			if (Modules[command.data.module] === 'DEFAULT') {
+				defaultCommandData.push(command.data.toJSON());
 			}
 		});
 
