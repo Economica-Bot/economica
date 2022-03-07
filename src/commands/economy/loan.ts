@@ -24,18 +24,13 @@ export default class implements Command {
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const loans = await Loan.find({ guild: ctx.guildEntity });
-		const embed = new MessageEmbed()
+		const embed = ctx.embedify('info', 'user', `**Welcome ${ctx.interaction.member} to your loan dashboard! Here, you can make new loans, view active loans, or manage pending loans.**\n\n**${emojis.SELECT} Select a category below to get started.**`)
 			.setAuthor({ name: 'Loan Dashboard', iconURL: ctx.interaction.guild.iconURL() })
-			.setDescription(
-				`**Welcome ${ctx.interaction.member} to your loan dashboard! Here, you can make new loans, view active loans, or manage pending loans.**\n\n**${emojis.SELECT} Select a category below to get started.**`,
-			)
 			.addFields([
 				{ name: `${emojis.CREATE_LOAN} Create`, value: 'Make a new loan', inline: true },
 				{ name: `${emojis.ACTIVE_LOAN} View`, value: 'View active loans', inline: true },
 				{ name: `${emojis.MANAGE_LOAN} Manage`, value: 'Accept or Deny pending loans', inline: true },
-			])
-			.setFooter({ text: ctx.interaction.user.tag, iconURL: ctx.interaction.user.displayAvatarURL() });
-
+			]);
 		const dropdown = new MessageActionRow()
 			.setComponents([
 				new MessageSelectMenu()
@@ -46,7 +41,6 @@ export default class implements Command {
 						{ emoji: emojis.MANAGE_LOAN, label: 'Manage', value: 'manage' },
 					]),
 			]);
-
 		const message = await ctx.interaction.reply({ embeds: [embed], components: [dropdown], fetchReply: true });
 		const collector = message.createMessageComponentCollector({ componentType: 'SELECT_MENU', filter: (i) => i.user.id === ctx.interaction.user.id });
 		collector.on('collect', async (i) => {
@@ -56,7 +50,7 @@ export default class implements Command {
 			} else if (i.values[0] === 'manage') {
 				const outgoingLoans = loans.filter((loan) => loan.lender === ctx.memberEntity);
 				const incomingLoans = loans.filter((loan) => loan.borrower === ctx.memberEntity);
-				const embed = new MessageEmbed()
+				const embed = ctx.embedify('info', 'user')
 					.setAuthor({ name: 'Loan Management Menu', iconURL: ctx.interaction.guild.iconURL() })
 					.addFields([
 						{ name: 'Pending Loans', value: 'Pending loans are loans that have not yet been accepted by the borrower.' },
@@ -89,7 +83,7 @@ export default class implements Command {
 	}
 
 	private async createLoan(ctx: Context, interaction: SelectMenuInteraction<'cached'>, loan: Loan) {
-		const createEmbed = new MessageEmbed()
+		const createEmbed = ctx.embedify('info', 'user')
 			.setAuthor({ name: 'Loan Editor', iconURL: ctx.interaction.guild.iconURL() })
 			.setDescription(
 				`**Welcome ${ctx.interaction.member} to the loan editor!**
@@ -104,8 +98,7 @@ export default class implements Command {
 				{ name: 'Principal', value: loan.principal?.toLocaleString() || 'Unset', inline: true },
 				{ name: 'Repayment', value: loan.repayment?.toLocaleString() || 'Unset', inline: true },
 				{ name: 'Duration', value: loan.duration?.toString() || 'Unset', inline: true },
-			])
-			.setFooter({ text: ctx.interaction.user.tag, iconURL: ctx.interaction.user.displayAvatarURL() });
+			]);
 
 		const rawModal = new Modal()
 			.setTitle('Loan Interface')

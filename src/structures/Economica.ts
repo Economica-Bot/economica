@@ -180,7 +180,6 @@ export class Economica extends Client {
 			port: 5432,
 			username: 'postgres',
 			password: 'password',
-			database: 'bot',
 			entities: [path.join(__dirname, '../entities/*.{js,ts}')],
 			applicationName: 'Economica',
 		}).connect();

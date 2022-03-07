@@ -1,4 +1,4 @@
-import { EmbedAuthorData, MessageEmbed } from 'discord.js';
+import { EmbedFooterData, MessageEmbed } from 'discord.js';
 
 export interface EconomyInfo {
 	wallet: number;
@@ -53,7 +53,7 @@ export type defaultIntervals = {
 };
 
 export type ReplyString = 'success' | 'info' | 'warn' | 'error';
-export type Author = 'bot' | 'user' | 'guild' | EmbedAuthorData;
+export type Footer = 'bot' | 'user' | 'guild' | EmbedFooterData;
 export type Moderation = 'ban' | 'kick' | 'timeout' | 'unban' | 'untimeout';
 export type BalanceString = 'wallet' | 'treasury';
 export type ListingString = 'CLASSIC' | 'INSTANT' | 'USABLE' | 'UNUSABLE' | 'GENERATOR';

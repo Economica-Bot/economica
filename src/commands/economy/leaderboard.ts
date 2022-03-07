@@ -39,7 +39,8 @@ export default class implements Command {
 			}
 
 			const embed = ctx
-				.embedify('info', { name: `${ctx.interaction.guild}'s Leaderboard`, iconURL: ctx.interaction.guild.iconURL() }, description)
+				.embedify('info', null, description)
+				.setAuthor({ name: `${ctx.interaction.guild}'s Leaderboard`, iconURL: ctx.interaction.guild.iconURL() })
 				.setFooter({ text: `page ${i + 1} of ${pageCount}` });
 			embeds.push(embed);
 		}

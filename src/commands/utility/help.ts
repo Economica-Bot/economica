@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageEmbed, MessageSelectMenu, MessageSelectOptionData, Util } from 'discord.js';
+import { CommandInteraction, Message, MessageActionRow, MessageEmbed, MessageSelectMenu, MessageSelectOptionData, Util } from 'discord.js';
 import { WEBSITE_COMMANDS_URL, WEBSITE_DOCS_URL, WEBSITE_HOME_URL, WEBSITE_VOTE_URL } from '../../config.js';
 
 import {
@@ -25,23 +25,9 @@ export default class implements Command {
 		if (!query) {
 			const helpEmbed = new MessageEmbed()
 				.setAuthor({ name: 'Economica Help Dashboard', iconURL: ctx.client.user.displayAvatarURL() })
-				.setDescription(`${emojis.HELP} **Welcome to the ${ctx.member} Help Dashboard!**\nHere, you can get information about any command or module. Use the select menu below to specify a module.\n\n${emojis.ECONOMICA_LOGO_0} **The Best New Discord Economy Bot**\nTo become more familiar with Economica, please refer to the [documentation](${WEBSITE_DOCS_URL}). There you can set up various permissions-related settings and get detailed information about all command modules.\n\n🔗 **Useful Links**:\n**[Home Page](${WEBSITE_HOME_URL}) | [Command Docs](${WEBSITE_COMMANDS_URL}) | [Vote For Us](${WEBSITE_VOTE_URL})**`).setFooter({ text: ctx.client.user.tag, iconURL: ctx.client.user.displayAvatarURL() });
-			const labels = ctx.guildEntity.modules.map((module) => ({ label: module, value: module } as MessageSelectOptionData));
-			const dropdown = new MessageActionRow()
-				.setComponents([
-					new MessageSelectMenu()
-						.setCustomId('help_select')
-						.setOptions([{ label: 'Home', value: 'home', default: true }, ...labels]),
-				]);
-			const msg = await ctx.interaction.reply({ embeds: [helpEmbed], components: [dropdown], ephemeral: true, fetchReply: true });
-			const interaction = await msg.awaitMessageComponent({ componentType: 'SELECT_MENU' });
-			dropdown.components[0].setDisabled(true);
-			await ctx.interaction.editReply({ components: [dropdown] });
-			const description = ctx.client.commands.filter(({ data }) => data.module === interaction.values[0]).map((command) => `**${command.data.name}**\n> *${command.data.description}*`).join('\n\n');
-			const moduleEmbed = new MessageEmbed()
-				.setAuthor({ name: interaction.values[0] })
-				.setDescription(description);
-			interaction.reply({ embeds: [moduleEmbed], ephemeral: true });
+				.setDescription(`${emojis.HELP} **Welcome to the ${ctx.member} Help Dashboard!**\nHere, you can get information about any command or module. Use the select menu below to specify a module.\n\n${emojis.ECONOMICA_LOGO_0} **The Best New Discord Economy Bot**\nTo become more familiar with Economica, please refer to the [documentation](${WEBSITE_DOCS_URL}). There you can set up various permissions-related settings and get detailed information about all command modules.\n\n🔗 **Useful Links**:\n**[Home Page](${WEBSITE_HOME_URL}) | [Command Docs](${WEBSITE_COMMANDS_URL}) | [Vote For Us](${WEBSITE_VOTE_URL})**`);
+			const msg = await ctx.interaction.reply({ embeds: [helpEmbed], ephemeral: true, fetchReply: true });
+			await this.displayHelp(ctx, ctx.interaction, msg);
 			return;
 		}
 
@@ -68,4 +54,24 @@ export default class implements Command {
 		});
 		await ctx.interaction.reply({ embeds: [commandEmbed], ephemeral: true });
 	};
+
+	private async displayHelp(ctx: Context, i: CommandInteraction, message: Message<true>) {
+		const labels = ctx.guildEntity.modules.map((module) => ({ label: module, value: module } as MessageSelectOptionData));
+		const dropdown = new MessageActionRow()
+			.setComponents([
+				new MessageSelectMenu()
+					.setCustomId('help_select')
+					.setPlaceholder('None Selected')
+					.setOptions(labels),
+			]);
+		await i.editReply({ components: [dropdown] });
+		const interaction = await message.awaitMessageComponent({ componentType: 'SELECT_MENU' });
+		dropdown.components[0].setDisabled(true);
+		const description = ctx.client.commands.filter(({ data }) => data.module === interaction.values[0]).map((command) => `**${command.data.name}**\n> ${command.data.description}`).join('\n');
+		const moduleEmbed = new MessageEmbed()
+			.setAuthor({ name: `${interaction.values[0]} Module` })
+			.setDescription(description);
+		const msg = await interaction.update({ embeds: [moduleEmbed], fetchReply: true });
+		this.displayHelp(ctx, i, msg);
+	}
 }

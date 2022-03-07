@@ -19,7 +19,8 @@ export default class implements Command {
 			return Member.create({ user, guild: ctx.guildEntity }).save();
 		})();
 		const embed = ctx
-			.embedify('info', { name: target.username, iconURL: target.displayAvatarURL() })
+			.embedify('info', 'user')
+			.setAuthor({ name: `${target}'s Balance`, iconURL: target.displayAvatarURL() })
 			.addFields(
 				{ name: 'Wallet', value: `${ctx.guildEntity.currency}${parseNumber(targetEntity.wallet)}`, inline: true },
 				{ name: 'Treasury', value: `${ctx.guildEntity.currency}${parseNumber(targetEntity.treasury)}`, inline: true },
