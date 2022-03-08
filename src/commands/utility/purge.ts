@@ -17,12 +17,17 @@ export default class implements Command {
 			.setDescription('Specify a channel')
 			.addChannelType(ChannelType.GuildText)
 			.setRequired(false))
-		.addNumberOption((option) => option.setName('amount').setDescription('Specify an amount.').setMinValue(1).setMaxValue(100)
+		.addNumberOption((option) => option
+			.setName('amount')
+			.setDescription('Specify an amount.')
+			.setMinValue(1)
+			.setMaxValue(100)
 			.setRequired(false));
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const channel = (ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel) as GuildTextBasedChannel;
 		const amount = ctx.interaction.options.getNumber('amount') ?? 100;
-		return channel.bulkDelete(amount, true).then(async (count) => ctx.embedify('success', 'user', `Deleted \`${count.size}\` messages.`, true));
+		const count = await channel.bulkDelete(amount, true);
+		await ctx.embedify('success', 'user', `Deleted \`${count.size}\` messages.`, true);
 	};
 }

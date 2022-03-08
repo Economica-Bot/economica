@@ -2,7 +2,6 @@
 import {
 	MessageActionRow,
 	MessageButton,
-	MessageEmbed,
 	MessageSelectMenu,
 	Modal,
 	SelectMenuInteraction,
