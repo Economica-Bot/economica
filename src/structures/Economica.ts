@@ -15,6 +15,7 @@ import {
 	DEVELOPMENT_GUILD_IDS,
 	DISCORD_INVITE_URL,
 	PUBLIC_GUILD_ID,
+	VALIDATE_SETTINGS,
 	WEBHOOK_URIS,
 	clientOptions,
 	loggerOptions,
@@ -53,14 +54,14 @@ export class Economica extends Client {
 	}
 
 	public async init() {
-		await this.validateSettings();
+		if (VALIDATE_SETTINGS) await this.validateSettings();
 		await this.initWebHooks();
 		await this.errorHandler();
 		await this.connectSQL();
 		await this.registerEvents();
 		await this.registerCommands();
 		await this.login(BOT_TOKEN);
-		this.log.info(`${this.user.username} logged in`);
+		this.log.info(`${this.user.tag} logged in`);
 	}
 
 	private async validateSettings(): Promise<void> {

@@ -150,7 +150,7 @@ export default class implements Command {
 				.setHeight(450)
 				.setBackgroundColor('#2f3136');
 			const url = await chart.getShortUrl();
-			const embed = ctx.embedify('info', { name: 'Balance Statistics', iconURL: user?.displayAvatarURL() ?? ctx.interaction.guild.iconURL() }, null).setImage(url);
+			const embed = ctx.embedify('info', { text: 'Balance Statistics', iconURL: user?.displayAvatarURL() ?? ctx.interaction.guild.iconURL() }, null).setImage(url);
 			await ctx.interaction.reply({ embeds: [embed] });
 		}
 	};

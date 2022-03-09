@@ -20,7 +20,7 @@ export default class implements Command {
 		const commandInput = ctx.interaction.options.getString('command');
 		const command = ctx.client.commands.get(commandInput);
 		if (!command) return ctx.embedify('error', 'user', 'Could not find that command.', true);
-		const embed = ctx.embedify('info', { name: `Permissions for ${command.data.name}`, iconURL: ctx.interaction.guild.emojis.resolve(emojis.COMMAND).url });
+		const embed = ctx.embedify('info', { text: `Permissions for ${command.data.name}`, iconURL: ctx.interaction.guild.emojis.resolve(emojis.COMMAND).url });
 		embed.addField('Base', `Client Permissions: \`${command.data.clientPermissions ?? '`None`'}\` Authority Level: \`${command.data.authority ?? '`None`'}\``);
 		command.data.options.forEach((option) => {
 			if (option instanceof EconomicaSlashCommandSubcommandBuilder) {

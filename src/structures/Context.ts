@@ -46,8 +46,8 @@ export class Context {
 	public embedify(type: ReplyString, footer: Footer, description: string | null, ephemeral?: boolean): MessageEmbed | Promise<void> {
 		const embed = new MessageEmbed().setColor(EmbedColors[type]);
 		if (description) embed.setDescription(description);
-		if (footer === 'bot') embed.setFooter({ text: this.interaction.client.user.username, iconURL: this.interaction.client.user.displayAvatarURL() });
-		else if (footer === 'user') embed.setFooter({ text: this.interaction.user.username, iconURL: this.interaction.user.displayAvatarURL() });
+		if (footer === 'bot') embed.setFooter({ text: this.interaction.client.user.tag, iconURL: this.interaction.client.user.displayAvatarURL() });
+		else if (footer === 'user') embed.setFooter({ text: this.interaction.user.tag, iconURL: this.interaction.user.displayAvatarURL() });
 		else if (footer === 'guild') embed.setFooter({ text: this.interaction.guild.name, iconURL: this.interaction.guild.iconURL() });
 		else embed.setFooter(footer);
 

@@ -106,6 +106,11 @@ export enum emojis {
 	WARNING = '<:appendix_warning:843390419270107136>',
 	ERROR = '<:appendix_info:843390419429883924>',
 	HELP = '<:help:950426939796111390>',
+	ANALYTICS = '<:analytics:950870757616005150>',
+	TEAM_MEMBER = '<:teammember:950871612289343558>',
+	COMMUNITY = '<:community:950871622934491196>',
+	ROBOT = '<:robot:950871596426461284>',
+	MEMORY = '<:memory:950902208042532904>',
 }
 
 export const BUTTON_INTERACTION_COOLDOWN = 1000 * 15;
