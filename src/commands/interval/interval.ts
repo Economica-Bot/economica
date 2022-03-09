@@ -1,5 +1,4 @@
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
-import { defaultIntervals } from '../../typings/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -14,7 +13,8 @@ export default class implements Command {
 			.setDescription('Edit interval command configs.')
 			.setAuthority('MANAGER')
 			.addStringOption((option) => option.setName('command').setDescription('Specify the command').setRequired(true))
-			.addIntegerOption((option) => option.setName('funds').setDescription('Specify the funds').setMinValue(1).setRequired(true)));
+			.addIntegerOption((option) => option.setName('amount').setDescription('Specify the amount').setMinValue(1).setRequired(false))
+			.addBooleanOption((option) => option.setName('enabled').setDescription('Whether the command should be enabled').setRequired(false)));
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
@@ -22,23 +22,23 @@ export default class implements Command {
 			const embed = ctx.embedify('info', 'guild', 'Income command information');
 			Object.entries(ctx.guildEntity.intervals).forEach((interval) => {
 				const description = Object.entries(interval[1]).map((prop) => `\`${prop[0]}: ${prop[1]}\``);
-				embed.addField(interval[0], description.join('\n'));
+				embed.addField(interval[0], description.join('\n'), true);
 			});
 			await ctx.interaction.reply({ embeds: [embed] });
 		} if (subcommand === 'edit') {
-			const funds = ctx.interaction.options.getInteger('funds');
 			const commandQuery = ctx.interaction.options.getString('command');
 			const command = ctx.client.commands.get(commandQuery);
+			const amount = ctx.interaction.options.getInteger('amount', false);
+			const enabled = ctx.interaction.options.getBoolean('enabled', false);
 			if (!command) {
 				await ctx.embedify('error', 'user', 'Could not find that command.', true);
 			} if (commandQuery in Object.keys(ctx.guildEntity.intervals)) {
 				await ctx.embedify('error', 'user', 'That is not an `INTERVAL` command.', true);
 			} else {
-				Object.keys(ctx.guildEntity.intervals).forEach((interval: keyof defaultIntervals) => {
-					if (interval === command.data.name) ctx.guildEntity.intervals[interval].amount = funds;
-				});
+				if (amount) ctx.guildEntity.intervals[command.data.name].amount = amount;
+				if (typeof enabled !== 'undefined') ctx.guildEntity.intervals[command.data.name].enabled = enabled;
 				await ctx.guildEntity.save();
-				await ctx.embedify('success', 'user', `Updated \`${command}\`.`, false);
+				await ctx.embedify('success', 'user', `Updated \`${command.data.name}\`.`, false);
 			}
 		}
 	};

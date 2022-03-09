@@ -17,7 +17,11 @@ export async function interval(
 	ctx: Context,
 	type: keyof typeof intervals,
 ): Promise<void> {
-	const { amount } = ctx.guildEntity.intervals[type];
-	await transaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, intervals[type], amount, 0);
-	return ctx.embedify('success', 'user', `You earned ${ctx.guildEntity.currency}${parseNumber(amount)}!`, false);
+	if (!ctx.guildEntity.intervals[type].enabled) {
+		await ctx.embedify('warn', 'user', 'This interval command is disabled.', true);
+	} else {
+		const { amount } = ctx.guildEntity.intervals[type];
+		transaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, intervals[type], amount, 0);
+		await ctx.embedify('success', 'user', `You earned ${ctx.guildEntity.currency}${parseNumber(amount)}!`, false);
+	}
 }
