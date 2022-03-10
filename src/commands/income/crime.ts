@@ -1,6 +1,6 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 
-import { transaction } from '../../lib/index.js';
+import { recordTransaction } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
@@ -16,11 +16,11 @@ export default class implements Command {
 		const amount = Math.ceil(Math.random() * (max - min) + min);
 		const fine = Math.ceil(Math.random() * (maxfine - minfine) + minfine);
 		if (Math.random() * 100 > chance) {
-			await transaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'CRIME_FINE', 0, -fine);
 			await ctx.embedify('warn', 'user', `You were caught and fined ${ctx.guildEntity.currency}${fine.toLocaleString()}.`, false);
+			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'CRIME_FINE', 0, -fine);
 		} else {
-			await transaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'CRIME_SUCCESS', amount, 0);
 			await ctx.embedify('success', 'user', `You successfully committed a crime and earned ${ctx.guildEntity.currency}${parseNumber(amount)}.`, false);
+			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'CRIME_SUCCESS', amount, 0);
 		}
 	};
 }

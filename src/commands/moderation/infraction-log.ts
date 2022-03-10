@@ -13,6 +13,7 @@ export default class implements Command {
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View the infraction log channel'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('set')
+			.setClientPermissions(['SEND_MESSAGES', 'EMBED_LINKS'])
 			.setDescription('Set the infraction log channel')
 			.setAuthority('ADMINISTRATOR')
 			.addChannelOption((option) => option
@@ -33,7 +34,7 @@ export default class implements Command {
 			}
 		} else if (subcommand === 'set') {
 			const channel = ctx.interaction.options.getChannel('channel') as TextChannel;
-			if (!channel.permissionsFor(ctx.member).has('SEND_MESSAGES') || !channel.permissionsFor(ctx.member).has('EMBED_LINKS')) {
+			if (!channel.permissionsFor(ctx.interaction.guild.me).has('SEND_MESSAGES') || !channel.permissionsFor(ctx.interaction.guild.me).has('EMBED_LINKS')) {
 				await ctx.embedify('error', 'user', 'I need `SEND_MESSAGES` and `EMBED_LINKS` in that channel.', true);
 			} else {
 				ctx.guildEntity.infractionLogId = channel.id;

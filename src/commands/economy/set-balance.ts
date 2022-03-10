@@ -1,7 +1,7 @@
 import { parseNumber, parseString } from '@adrastopoulos/number-parser';
 import { GuildMember } from 'discord.js';
 
-import { transaction } from '../../lib';
+import { recordTransaction } from '../../lib';
 import { Member, User } from '../../entities';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
@@ -34,8 +34,11 @@ export default class implements Command {
 		const difference = balance === 'wallet' ? amount - w : amount - t;
 		const wallet = balance === 'wallet' ? difference : 0;
 		const treasury = balance === 'treasury' ? difference : 0;
-		if (!amount) return ctx.embedify('error', 'user', 'Please enter a valid amount.', true);
-		transaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'SET_MONEY', wallet, treasury);
-		return ctx.embedify('success', 'user', `Set ${target}'s \`${balance}\` to ${ctx.guildEntity.currency}${parseNumber(amount)}.`, false);
+		if (!amount) {
+			await ctx.embedify('error', 'user', 'Please enter a valid amount.', true);
+			return;
+		}
+		await ctx.embedify('success', 'user', `Set ${target}'s \`${balance}\` to ${ctx.guildEntity.currency}${parseNumber(amount)}.`, false);
+		await recordTransaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'SET_MONEY', wallet, treasury);
 	};
 }

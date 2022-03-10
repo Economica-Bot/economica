@@ -1,106 +1,75 @@
 import { GuildMember, PermissionString, TextChannel } from 'discord.js';
 import ms from 'ms';
 
-import { DEVELOPER_IDS, DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEV_PERMISSION_EXEMPT } from '../config.js';
-import {
-	Context,
-	EconomicaSlashCommandSubcommandBuilder,
-	EconomicaSlashCommandSubcommandGroupBuilder,
-} from '../structures/index.js';
+import { DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEV_PERMISSION_EXEMPT, DEVELOPER_IDS } from '../config.js';
+import { Context } from '../structures/index.js';
 import { Authorities } from '../typings/index.js';
 
 async function checkPermission(ctx: Context): Promise<boolean> {
 	const member = ctx.interaction.member as GuildMember;
 	const channel = ctx.interaction.channel as TextChannel;
-	const group = ctx.data.getSubcommandGroup(
-		ctx.interaction.options.getSubcommandGroup(false),
-	) as EconomicaSlashCommandSubcommandGroupBuilder;
-	const subcommand = ctx.data.getSubcommand(
-		ctx.interaction.options.getSubcommand(false),
-	) as EconomicaSlashCommandSubcommandBuilder;
+	const group = ctx.data.getSubcommandGroup(ctx.interaction.options.getSubcommandGroup(false))[0];
+	const subcommand = ctx.data.getSubcommand(ctx.interaction.options.getSubcommand(false))[0];
 	const clientPermissions: PermissionString[] = [];
 	const missingClientPermissions: PermissionString[] = [];
-
 	if (ctx.data.clientPermissions) clientPermissions.push(...ctx.data.clientPermissions);
 	if (group?.clientPermissions) clientPermissions.push(...group.clientPermissions);
 	if (subcommand?.clientPermissions) clientPermissions.push(...subcommand.clientPermissions);
-
 	clientPermissions.forEach((permission) => {
 		if (!ctx.interaction.guild.me.permissionsIn(channel).has(permission)) missingClientPermissions.push(permission);
 	});
-
 	if (missingClientPermissions.length) {
 		await ctx.embedify('warn', 'bot', `Missing Bot Permissions: \`${missingClientPermissions}\``, true);
 		return false;
 	}
-
 	if (ctx.interaction.guild.ownerId === member.id || member.permissions.has('ADMINISTRATOR')) {
 		return true;
 	}
-
 	return true;
 }
 
 async function checkCooldown(ctx: Context): Promise<boolean> {
 	const { incomes, intervals } = ctx.guildEntity;
 	const key = `${ctx.interaction.guildId}-${ctx.interaction.user.id}-${ctx.interaction.commandName}`;
-	if (ctx.interaction.commandName in { ...incomes, ...intervals }) {
-		const date = ctx.client.cooldowns.get(key);
-		let cooldown: number;
-
-		if (!date) {
-			ctx.client.cooldowns.set(key, new Date());
-			return true;
-		}
-
-		if (ctx.interaction.commandName in incomes) {
-			Object.keys(incomes).forEach((k: keyof typeof incomes) => {
-				if (k === ctx.interaction.commandName) {
-					cooldown = incomes[k].cooldown;
-				}
-			});
-		} else if (ctx.interaction.commandName in intervals) {
-			Object.keys(intervals).forEach((k: keyof typeof intervals) => {
-				if (k === ctx.interaction.commandName) {
-					cooldown = intervals[k].cooldown;
-				}
-			});
-		}
-
-		if (date.getTime() + cooldown > Date.now()) {
-			const embed = ctx
-				.embedify('warn', 'user', `You may run this command in \`${ms(date.getTime() + cooldown - Date.now())}\``)
-				.setFooter({ text: `Cooldown: ${ms(cooldown)}` });
-			ctx.interaction.reply({ embeds: [embed], ephemeral: true });
-			return false;
-		}
+	if (!(ctx.interaction.commandName in { ...incomes, ...intervals })) return true;
+	const date = ctx.client.cooldowns.get(key);
+	let cooldown: number;
+	if (!date) {
 		ctx.client.cooldowns.set(key, new Date());
 		return true;
 	}
+	if (ctx.interaction.commandName in { ...intervals, ...incomes }) {
+		Object.keys({ ...intervals, ...incomes }).forEach((k) => {
+			if (k === ctx.interaction.commandName) cooldown = { ...intervals, ...incomes }[k].cooldown;
+		});
+	}
+	if (date.getTime() + cooldown > Date.now()) {
+		const embed = ctx
+			.embedify('warn', 'user', `You may run this command in \`${ms(date.getTime() + cooldown - Date.now())}\``)
+			.setFooter({ text: `Cooldown: ${ms(cooldown)}` });
+		ctx.interaction.reply({ embeds: [embed], ephemeral: true });
+		return false;
+	}
+	ctx.client.cooldowns.set(key, new Date());
 	return true;
 }
 
 async function checkAuthority(ctx: Context): Promise<boolean> {
 	const member = ctx.interaction.member as GuildMember;
-	const group = ctx.data.getSubcommandGroup(
-		ctx.interaction.options.getSubcommandGroup(false),
-	) as EconomicaSlashCommandSubcommandGroupBuilder;
-	const subcommand = ctx.data.getSubcommand(
-		ctx.interaction.options.getSubcommand(false),
-	) as EconomicaSlashCommandSubcommandBuilder;
+	const group = ctx.data.getSubcommandGroup(ctx.interaction.options.getSubcommandGroup(false))[0];
+	const subcommand = ctx.data.getSubcommand(ctx.interaction.options.getSubcommand(false))[0];
 	let missingAuthority: keyof typeof Authorities;
-
 	const authority = subcommand.authority ?? group.authority ?? ctx.data.authority;
 	if (authority) {
 		const auth = await ctx.guildEntity.auth;
 		const roleAuth = auth.filter((r) => r.authority === authority && (member.roles.cache.has(r.id) || member.id === r.id));
 		if (!roleAuth.length) missingAuthority = authority;
-	} if (missingAuthority) {
+	}
+	if (missingAuthority) {
 		const description = `Missing authority: \`${missingAuthority}\``;
 		await ctx.embedify('error', 'user', `Insufficient Permissions: \`${description}\``, true);
 		return false;
 	}
-
 	return true;
 }
 

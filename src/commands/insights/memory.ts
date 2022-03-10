@@ -1,7 +1,7 @@
 import { Util } from 'discord.js';
 
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
-import { emojis } from '../../typings';
+import { Emojis } from '../../typings';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -20,7 +20,7 @@ export default class implements Command {
 		+ '**arrayBuffers**: Memory allocated for `ArrayBuffer`s and `SharedArrayBuffer`s.';
 		const embed = ctx
 			.embedify('info', 'bot', description)
-			.setAuthor({ name: 'Bot Memory Levels', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(emojis.MEMORY).id).url });
+			.setAuthor({ name: 'Bot Memory Levels', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.MEMORY).id).url });
 		Object.entries(process.memoryUsage()).forEach((key, value) => embed.addField(key[0], `\`${Math.round((value / 1024 / 1024) * 100) / 100}Mb\``, true));
 		await ctx.interaction.reply({ embeds: [embed] });
 	};

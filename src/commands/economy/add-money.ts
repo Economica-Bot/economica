@@ -1,7 +1,7 @@
 import { parseNumber, parseString } from '@adrastopoulos/number-parser';
 import { GuildMember } from 'discord.js';
 
-import { transaction } from '../../lib';
+import { recordTransaction } from '../../lib';
 import { Member, User } from '../../entities';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
@@ -39,8 +39,8 @@ export default class implements Command {
 				const user = await User.create({ id: target.id }).save();
 				return Member.create({ user, guild: ctx.guildEntity }).save();
 			})();
-			transaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'ADD_MONEY', wallet, treasury);
 			await ctx.embedify('success', 'user', `Added ${ctx.guildEntity.currency}${parseNumber(parsedAmount)} to <@!${target.id}>'s \`${balance}\`.`, false);
+			await recordTransaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'ADD_MONEY', wallet, treasury);
 		}
 	};
 }

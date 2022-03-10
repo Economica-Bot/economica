@@ -1,7 +1,7 @@
 import { GuildMember } from 'discord.js';
 import ms from 'ms';
 
-import { infraction, validateTarget } from '../../lib/index.js';
+import { recordInfraction, validateTarget } from '../../lib/index.js';
 import { Member, User } from '../../entities/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
@@ -39,7 +39,7 @@ export default class implements Command {
 		}
 		const reason = (ctx.interaction.options.getString('reason') as string) ?? 'No reason provided';
 		await target.timeout(milliseconds, reason);
-		infraction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'TIMEOUT', reason, true, milliseconds, false);
 		await ctx.embedify('success', 'user', `Placed \`${target.user.tag}\` under a timeout for ${ms(milliseconds)}.`, false);
+		await recordInfraction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'TIMEOUT', reason, true, milliseconds, false);
 	};
 }

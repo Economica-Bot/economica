@@ -1,6 +1,6 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 
-import { transaction } from '../../lib/index.js';
+import { recordTransaction } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
@@ -15,7 +15,7 @@ export default class implements Command {
 		const { currency } = ctx.guildEntity;
 		const { min, max } = ctx.guildEntity.incomes.work;
 		const amount = Math.ceil(Math.random() * (max - min) + min);
-		await transaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'WORK', amount, 0);
 		await ctx.embedify('success', 'user', `You worked and earned ${currency}${parseNumber(amount)}`, false);
+		await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'WORK', amount, 0);
 	};
 }

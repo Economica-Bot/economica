@@ -61,6 +61,7 @@ export class Economica extends Client {
 		await this.connectSQL();
 		await this.registerEvents();
 		await this.registerCommands();
+		await this.registerJobs();
 		await this.login(BOT_TOKEN);
 		this.log.info(`${this.user.tag} logged in`);
 	}
@@ -208,7 +209,7 @@ export class Economica extends Client {
 
 	private async registerEvents() {
 		this.log.debug('Registering events');
-		const eventFiles = readdirSync(path.resolve(__dirname, '../events')).filter((file) => file.endsWith('.js'));
+		const eventFiles = readdirSync(path.resolve(dirname, '../events')).filter((file) => file.endsWith('.js'));
 		eventFiles.forEach(async (file) => {
 			const { default: Event } = await import(`../events/${file}`);
 			const event = new Event();
@@ -221,11 +222,26 @@ export class Economica extends Client {
 		this.log.info('Events loaded');
 	}
 
+	private async registerJobs() {
+		this.log.debug('Registering jobs');
+		const jobFiles = readdirSync(path.resolve(dirname, '../jobs')).filter((file) => file.endsWith('.js'));
+		jobFiles.forEach(async (file) => {
+			const { default: Job } = await import(`../jobs/${file}`);
+			const job = new Job();
+			this.log.debug(`Loading job ${job.name}`);
+			setInterval(async () => {
+				this.log.info(`Executing ${job.name}`);
+				await job.execute(this);
+			}, job.cooldown);
+		});
+		this.log.info('Logs registered');
+	}
+
 	public async registerCommands() {
 		this.log.debug('Registering commands');
-		const dirs = readdirSync(path.resolve(__dirname, '../commands'));
+		const dirs = readdirSync(path.resolve(dirname, '../commands'));
 		dirs.forEach((dir) => {
-			const files = readdirSync(path.resolve(__dirname, `../commands/${dir}/`)).filter((file) => file.endsWith('.ts') || file.endsWith('.js'));
+			const files = readdirSync(path.resolve(dirname, `../commands/${dir}/`)).filter((file) => file.endsWith('.ts') || file.endsWith('.js'));
 			files.forEach(async (file) => {
 				const { default: CommandClass } = await import(`../commands/${dir}/${file}`);
 				const command = new CommandClass() as CommandStruct<true>;

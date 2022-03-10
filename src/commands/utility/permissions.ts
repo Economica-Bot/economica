@@ -7,7 +7,7 @@ import {
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from '../../structures/index.js';
-import { emojis } from '../../typings/constants.js';
+import { Emojis } from '../../typings/constants.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -24,7 +24,7 @@ export default class implements Command {
 		if (!command) return ctx.embedify('error', 'user', 'Could not find that command.', true);
 		const embed = ctx
 			.embedify('info', 'user')
-			.setAuthor({ name: `Permissions for ${command.data.name}`, iconURL: ctx.interaction.guild.emojis.resolve(Util.parseEmoji(emojis.COMMAND).id).url })
+			.setAuthor({ name: `Permissions for ${command.data.name}`, iconURL: ctx.interaction.guild.emojis.resolve(Util.parseEmoji(Emojis.COMMAND).id).url })
 			.addField('Base', `Client Permissions: \`${command.data.clientPermissions ?? '`None`'}\` Authority Level: \`${command.data.authority ?? '`None`'}\``);
 		command.data.options.forEach((option) => {
 			if (option instanceof EconomicaSlashCommandSubcommandBuilder) {

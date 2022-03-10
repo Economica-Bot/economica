@@ -87,6 +87,6 @@ export async function paginate(
 	});
 
 	collector.on('end', async () => {
-		await msg.edit({ components: [] });
+		await msg.edit({ components: [] }).catch();
 	});
 }

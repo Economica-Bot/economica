@@ -1,7 +1,7 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 
 import { Member, User } from '../../entities';
-import { transaction, validateAmount } from '../../lib';
+import { recordTransaction, validateAmount } from '../../lib';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
@@ -23,8 +23,8 @@ export default class implements Command {
 		})();
 		const { validated, result } = await validateAmount(ctx, 'wallet');
 		if (!validated) return;
-		transaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.memberEntity, 'GIVE_PAYMENT', -result, 0);
-		transaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'RECEIVE_PAYMENT', result, 0);
 		await ctx.embedify('success', 'user', `Paid ${target} ${ctx.guildEntity.currency}${parseNumber(result)}`, false);
+		await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.memberEntity, 'GIVE_PAYMENT', -result, 0);
+		await recordTransaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'RECEIVE_PAYMENT', result, 0);
 	};
 }

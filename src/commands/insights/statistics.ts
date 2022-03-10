@@ -3,7 +3,7 @@ import ms from 'ms';
 
 import { Command as CommandEntity } from '../../entities';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
-import { emojis } from '../../typings';
+import { Emojis } from '../../typings';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -26,11 +26,11 @@ export default class implements Command {
 			+ `*Channels*: \`${ctx.interaction.guild.channels.cache.size}\``;
 		const embed = ctx
 			.embedify('info', 'user', description)
-			.setAuthor({ name: 'Statistics Dashboard', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(emojis.ANALYTICS).id).url })
+			.setAuthor({ name: 'Statistics Dashboard', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.ANALYTICS).id).url })
 			.addFields([
-				{ name: `${emojis.ROBOT} Bot Statistics`, value: botStats, inline: true },
-				{ name: `${emojis.TEAM_MEMBER} Member Statistics`, value: memberStats, inline: true },
-				{ name: `${emojis.COMMUNITY} Server Statistics`, value: serverStats, inline: true },
+				{ name: `${Emojis.ROBOT} Bot Statistics`, value: botStats, inline: true },
+				{ name: `${Emojis.TEAM_MEMBER} Member Statistics`, value: memberStats, inline: true },
+				{ name: `${Emojis.COMMUNITY} Server Statistics`, value: serverStats, inline: true },
 			]);
 		await ctx.interaction.reply({ embeds: [embed] });
 	};
