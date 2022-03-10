@@ -17,16 +17,10 @@
   },
   "plugins": ["@typescript-eslint", "import"],
   "rules": {
-    "import/no-unresolved": "error",
-		"import/prefer-default-export": "off",
-    "no-console": "off",
-    "indent": "off",
-    "@typescript-eslint/indent": [2, "tab"],
+    "import/no-cycle": "off",
+    "import/prefer-default-export": "off",
     "no-tabs": ["error", { "allowIndentationTabs": true }],
-    "linebreak-style": ["error", "windows"],
-		"no-underscore-dangle": "off",
-		"@typescript-eslint/naming-convention": "off",
-		"sort-imports": ["error", { "ignoreDeclarationSort": true }],
+    "@typescript-eslint/indent": [2, "tab"],
     "@typescript-eslint/lines-between-class-members": [
       "error",
       "always",
@@ -36,8 +30,6 @@
     "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
     "max-len": "off",
     "class-methods-use-this": "off",
-    "@typescript-eslint/no-shadow": "off",
-    "import/no-cycle": "off",
     "newline-per-chained-call": "off"
   },
   "settings": {

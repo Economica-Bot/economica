@@ -57,10 +57,10 @@ export default class implements Command {
 				await ctx.interaction.reply({ embeds: [embed] });
 			} else if (subcommand === 'user') {
 				const transactions = await Transaction.find({ relations: ['target', 'target.user'], where: { guild: ctx.guildEntity, target: { user: { id: user.id } } } });
-				await ctx.embedify('info', 'user', `*${user.tag}'s Transactions:**\n\`${transactions.map((transaction) => transaction.id).join('`, `')}\``, false);
+				await ctx.embedify('info', 'user', `*${user.tag}'s Transactions:**\n\`${transactions.map((v) => v.id).join('`, `')}\``, false);
 			} else if (subcommand === 'all') {
 				const transactions = await Transaction.find({ guild: ctx.guildEntity });
-				await ctx.embedify('info', 'user', `**All Transactions:**\n\`${transactions.map((transaction) => transaction.id).join('`, `')}\``, false);
+				await ctx.embedify('info', 'user', `**All Transactions:**\n\`${transactions.map((v) => v.id).join('`, `')}\``, false);
 			}
 		} if (subcommandgroup === 'delete') {
 			if (subcommand === 'single') {

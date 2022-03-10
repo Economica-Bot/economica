@@ -36,8 +36,8 @@ import {
 } from '../entities/index.js';
 import { Command as CommandStruct } from './Command.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 export class Economica extends Client {
 	public commands: Collection<string, CommandStruct<true>>;
@@ -182,7 +182,7 @@ export class Economica extends Client {
 			port: 5432,
 			username: 'postgres',
 			password: 'password',
-			entities: [path.join(__dirname, '../entities/*.{js,ts}')],
+			entities: [path.join(dirname, '../entities/*.{js,ts}')],
 			applicationName: 'Economica',
 		}).connect();
 		if (DB_OPTION === 1) {
@@ -227,8 +227,8 @@ export class Economica extends Client {
 		dirs.forEach((dir) => {
 			const files = readdirSync(path.resolve(__dirname, `../commands/${dir}/`)).filter((file) => file.endsWith('.ts') || file.endsWith('.js'));
 			files.forEach(async (file) => {
-				const { default: Command } = await import(`../commands/${dir}/${file}`);
-				const command = new Command() as CommandStruct<true>;
+				const { default: CommandClass } = await import(`../commands/${dir}/${file}`);
+				const command = new CommandClass() as CommandStruct<true>;
 
 				// Validation
 				if (!command.data.module) throw new Error(`Command ${command.data.name} missing module!`);

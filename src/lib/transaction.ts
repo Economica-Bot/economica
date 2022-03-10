@@ -39,7 +39,7 @@ export async function displayTransaction(transaction: Transaction): Promise<Mess
  * @param {number} treasury - The value to be added to the user's treasury.
  * @returns {Promise<number>} total.
  */
-export async function transaction(
+export async function recordTransaction(
 	client: Economica,
 	guild: Guild,
 	target: Member,

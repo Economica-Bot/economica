@@ -8,7 +8,7 @@ import {
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from '../../structures/index.js';
-import { emojis } from '../../typings/constants.js';
+import { Emojis } from '../../typings/constants.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -25,21 +25,21 @@ export default class implements Command {
 		if (!query) {
 			const helpEmbed = new MessageEmbed()
 				.setAuthor({ name: 'Economica Help Dashboard', iconURL: ctx.client.user.displayAvatarURL() })
-				.setDescription(`${emojis.HELP} **Welcome to the ${ctx.member} Help Dashboard!**\nHere, you can get information about any command or module. Use the select menu below to specify a module.\n\n${emojis.ECONOMICA_LOGO_0} **The Best New Discord Economy Bot**\nTo become more familiar with Economica, please refer to the [documentation](${WEBSITE_DOCS_URL}). There you can set up various permissions-related settings and get detailed information about all command modules.\n\n🔗 **Useful Links**:\n**[Home Page](${WEBSITE_HOME_URL}) | [Command Docs](${WEBSITE_COMMANDS_URL}) | [Vote For Us](${WEBSITE_VOTE_URL})**`);
+				.setDescription(`${Emojis.HELP} **Welcome to the ${ctx.interaction.guild.me} Help Dashboard!**\nHere, you can get information about any command or module. Use the select menu below to specify a module.\n\n${Emojis.ECONOMICA_LOGO_0} **The Best New Discord Economy Bot**\nTo become more familiar with Economica, please refer to the [documentation](${WEBSITE_DOCS_URL}). There you can set up various permissions-related settings and get detailed information about all command modules.\n\n🔗 **Useful Links**:\n**[Home Page](${WEBSITE_HOME_URL}) | [Command Docs](${WEBSITE_COMMANDS_URL}) | [Vote For Us](${WEBSITE_VOTE_URL})**`);
 			const msg = await ctx.interaction.reply({ embeds: [helpEmbed], ephemeral: true, fetchReply: true });
 			await this.displayHelp(ctx, ctx.interaction, msg);
 			return;
 		}
 
-		const command = ctx.client.commands.find((command) => ctx.guildEntity.modules.includes(command.data.module) && command.data.name.toLowerCase() === query.toLowerCase());
+		const command = ctx.client.commands.find((v) => ctx.guildEntity.modules.includes(v.data.module) && v.data.name.toLowerCase() === query.toLowerCase());
 		if (!command) {
 			await ctx.embedify('error', 'user', `Could not find command \`${query}\``, true);
 			return;
 		}
 
 		const commandEmbed = new MessageEmbed()
-			.setAuthor({ name: `${command.data.name} | ${command.data.description}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(emojis.COMMAND).id).url })
-			.setDescription(`${emojis.FORMAT} **Format**: \`${command.data.format}\`\n${emojis.RESEARCH} **Examples**: \`\`\`${command.data.examples.join('\n')}\`\`\``)
+			.setAuthor({ name: `${command.data.name} | ${command.data.description}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.COMMAND).id).url })
+			.setDescription(`${Emojis.FORMAT} **Format**: \`${command.data.format}\`\n${Emojis.RESEARCH} **Examples**: \`\`\`${command.data.examples.join('\n')}\`\`\``)
 			.setFooter({ text: ctx.interaction.user.tag, iconURL: ctx.interaction.user.displayAvatarURL() })
 			.setTimestamp();
 		command.data.options.forEach((option) => {

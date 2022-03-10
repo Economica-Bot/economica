@@ -1,4 +1,4 @@
-import { ClientEvents, EmbedFooterData, MessageEmbed } from 'discord.js';
+import { EmbedFooterData, MessageEmbed } from 'discord.js';
 
 export interface EconomyInfo {
 	wallet: number;
@@ -31,7 +31,7 @@ export interface IncomeCommand {
 	cooldown: number;
 }
 
-export type defaultIncomes = {
+export type DefaultIncomes = {
 	work: IncomeCommand;
 	beg: IncomeCommand;
 	crime: IncomeCommand;
@@ -44,7 +44,7 @@ export interface IntervalCommand {
 	enabled: boolean;
 }
 
-export type defaultIntervals = {
+export type DefaultIntervals = {
 	minutely: IntervalCommand;
 	hourly: IntervalCommand;
 	daily: IntervalCommand;

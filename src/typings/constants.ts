@@ -1,8 +1,8 @@
 import { ColorResolvable } from 'discord.js';
 
-import { ReplyString, defaultIncomes, defaultIntervals } from './index.js';
+import { ReplyString, DefaultIncomes, DefaultIntervals } from './index.js';
 
-export const defaultIntervalsObj: defaultIntervals = {
+export const defaultIntervalsObj: DefaultIntervals = {
 	minutely: {
 		amount: 50,
 		cooldown: 1000 * 60,
@@ -35,7 +35,7 @@ export const defaultIntervalsObj: defaultIntervals = {
 	},
 };
 
-export const defaultIncomesObj: defaultIncomes = {
+export const defaultIncomesObj: DefaultIncomes = {
 	work: {
 		min: 100,
 		max: 500,
@@ -73,15 +73,6 @@ export enum Authorities {
 
 export type AuthorityString = keyof typeof Authorities;
 
-export enum SERVICE_COOLDOWNS {
-	DEV = 1000 * 10,
-	UPDATE_BANS = 1000 * 60 * 5,
-	UPDATE_BOT_LOG = 1000 * 60 * 10,
-	UPDATE_GENERATORS = 1000 * 60 * 5,
-	UPDATE_LOANS = 1000 * 60 * 5,
-	UPDATE_SHOP = 1000 * 60 * 5,
-}
-
 export const EmbedColors: Record<ReplyString, ColorResolvable> = {
 	success: 'GREEN',
 	info: 'BLURPLE',
@@ -89,7 +80,7 @@ export const EmbedColors: Record<ReplyString, ColorResolvable> = {
 	error: 'RED',
 };
 
-export enum emojis {
+export enum Emojis {
 	ECONOMICA_LOGO_0 = '<:economicalogo0:843375936589922305>',
 	ECONOMICA_LOGO_1 = '<:economicalogo1:843376438782722068>',
 	ECONOMICA_LOGO_2 = '<:economicalogo2:843376482603892746>1',

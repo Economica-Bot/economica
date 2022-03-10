@@ -11,7 +11,7 @@ import ms from 'ms';
 
 import { Loan } from '../../entities';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
-import { emojis } from '../../typings';
+import { Emojis } from '../../typings';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -23,12 +23,12 @@ export default class implements Command {
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const loans = await Loan.find({ guild: ctx.guildEntity });
-		const embed = ctx.embedify('info', 'user', `**Welcome ${ctx.interaction.member} to your loan dashboard! Here, you can make new loans, view active loans, or manage pending loans.**\n\n**${emojis.SELECT} Select a category below to get started.**`)
+		const embed = ctx.embedify('info', 'user', `**Welcome ${ctx.interaction.member} to your loan dashboard! Here, you can make new loans, view active loans, or manage pending loans.**\n\n**${Emojis.SELECT} Select a category below to get started.**`)
 			.setAuthor({ name: 'Loan Dashboard', iconURL: ctx.interaction.guild.iconURL() })
 			.addFields([
-				{ name: `${emojis.CREATE_LOAN} Create`, value: 'Make a new loan', inline: true },
-				{ name: `${emojis.ACTIVE_LOAN} View`, value: 'View active loans', inline: true },
-				{ name: `${emojis.MANAGE_LOAN} Manage`, value: 'Accept or Deny pending loans', inline: true },
+				{ name: `${Emojis.CREATE_LOAN} Create`, value: 'Make a new loan', inline: true },
+				{ name: `${Emojis.ACTIVE_LOAN} View`, value: 'View active loans', inline: true },
+				{ name: `${Emojis.MANAGE_LOAN} Manage`, value: 'Accept or Deny pending loans', inline: true },
 			]);
 		const dropdown = new MessageActionRow()
 			.setComponents([
@@ -36,8 +36,8 @@ export default class implements Command {
 					.setPlaceholder('None Selected')
 					.setCustomId('loan_select')
 					.setOptions([
-						{ emoji: emojis.CREATE_LOAN, label: 'Create', value: 'create' },
-						{ emoji: emojis.MANAGE_LOAN, label: 'Manage', value: 'manage' },
+						{ emoji: Emojis.CREATE_LOAN, label: 'Create', value: 'create' },
+						{ emoji: Emojis.MANAGE_LOAN, label: 'Manage', value: 'manage' },
 					]),
 			]);
 		const message = await ctx.interaction.reply({ embeds: [embed], components: [dropdown], fetchReply: true });
@@ -49,7 +49,7 @@ export default class implements Command {
 			} else if (i.values[0] === 'manage') {
 				const outgoingLoans = loans.filter((loan) => loan.lender === ctx.memberEntity);
 				const incomingLoans = loans.filter((loan) => loan.borrower === ctx.memberEntity);
-				const embed = ctx.embedify('info', 'user')
+				const loanEmbed = ctx.embedify('info', 'user')
 					.setAuthor({ name: 'Loan Management Menu', iconURL: ctx.interaction.guild.iconURL() })
 					.addFields([
 						{ name: 'Pending Loans', value: 'Pending loans are loans that have not yet been accepted by the borrower.' },
@@ -60,7 +60,7 @@ export default class implements Command {
 						{ name: 'Incoming ', value: incomingLoans.filter((loan) => loan.active).map((loan) => loan.id).join('\n') || 'None', inline: true },
 					]);
 
-				await i.reply({ embeds: [embed] });
+				await i.reply({ embeds: [loanEmbed] });
 			}
 		});
 	};

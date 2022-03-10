@@ -39,7 +39,7 @@ export async function displayInfraction(infraction: Infraction): Promise<Message
  * @param {number} duration - The length of the punishment.
  * @param {boolean} permanent - Whether the punishment is permanent.
  */
-export async function infraction(
+export async function recordInfraction(
 	client: Economica,
 	guild: Guild,
 	target: Member,

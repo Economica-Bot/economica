@@ -1,10 +1,10 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 
 import { Context } from '../structures/index.js';
-import { TransactionString, defaultIntervals } from '../typings/index.js';
-import { transaction } from './index.js';
+import { TransactionString, DefaultIntervals } from '../typings/index.js';
+import { recordTransaction } from './index.js';
 
-const intervals: Record<keyof defaultIntervals, TransactionString> = {
+const intervals: Record<keyof DefaultIntervals, TransactionString> = {
 	daily: 'INTERVAL_MINUTE',
 	fortnightly: 'INTERVAL_FORTNIGHT',
 	hourly: 'INTERVAL_HOUR',
@@ -21,7 +21,7 @@ export async function interval(
 		await ctx.embedify('warn', 'user', 'This interval command is disabled.', true);
 	} else {
 		const { amount } = ctx.guildEntity.intervals[type];
-		transaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, intervals[type], amount, 0);
+		recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, intervals[type], amount, 0);
 		await ctx.embedify('success', 'user', `You earned ${ctx.guildEntity.currency}${parseNumber(amount)}!`, false);
 	}
 }

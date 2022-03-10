@@ -1,4 +1,4 @@
-import { CommandInteraction, GuildMember, MessageEmbed } from 'discord.js';
+import { CommandInteraction, MessageEmbed } from 'discord.js';
 
 import { Guild, Member, User } from '../entities';
 import { EmbedColors, Footer, ReplyString } from '../typings/index.js';
