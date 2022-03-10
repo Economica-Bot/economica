@@ -20,7 +20,7 @@ export default class implements Command {
 		})();
 		const embed = ctx
 			.embedify('info', 'user')
-			.setAuthor({ name: `${target}'s Balance`, iconURL: target.displayAvatarURL() })
+			.setAuthor({ name: `${target.username}'s Balance`, iconURL: target.displayAvatarURL() })
 			.addFields(
 				{ name: 'Wallet', value: `${ctx.guildEntity.currency}${parseNumber(targetEntity.wallet)}`, inline: true },
 				{ name: 'Treasury', value: `${ctx.guildEntity.currency}${parseNumber(targetEntity.treasury)}`, inline: true },
