@@ -15,7 +15,8 @@ export const DEVELOPMENT_GUILD_IDS: string[] = JSON.parse(process.env.DEVELOPMEN
 export const PUBLIC_GUILD_ID = process.env.PUBLIC_GUILD_ID;
 export const DISCORD_INVITE_URL = process.env.DISCORD_INVITE_URL;
 export const WEBHOOK_URIS: string[] = JSON.parse(process.env.WEBHOOK_URIS);
-export const DEPLOY_COMMANDS = process.env.DEPLOY_COMMANDS;
+export const DEPLOY_COMMANDS = Number(process.env.DEPLOY_COMMANDS);
+export const DB_OPTION = Number(process.env.DB_OPTION);
 export const VALIDATE_SETTINGS = process.env.VALIDATE_SETTINGS === 'true';
 export const PRODUCTION = process.env.PRODUCTION === 'true';
 export const DEVELOPMENT = !PRODUCTION;

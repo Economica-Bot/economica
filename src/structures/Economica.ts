@@ -9,6 +9,7 @@ import {
 	ACTIVITY_NAME,
 	ACTIVITY_TYPE,
 	BOT_TOKEN,
+	DB_OPTION,
 	DEBUG,
 	DEVELOPER_IDS,
 	DEVELOPMENT,
@@ -184,7 +185,13 @@ export class Economica extends Client {
 			entities: [path.join(__dirname, '../entities/*.{js,ts}')],
 			applicationName: 'Economica',
 		}).connect();
-		this.connection.synchronize(true);
+		if (DB_OPTION === 1) {
+			await this.connection.synchronize();
+			this.log.debug('Database synchronized');
+		} else if (DB_OPTION === 2) {
+			await this.connection.synchronize(true);
+			this.log.debug('Database dropped and synchronized');
+		}
 		Authority.useConnection(this.connection);
 		Command.useConnection(this.connection);
 		Guild.useConnection(this.connection);
@@ -196,7 +203,7 @@ export class Economica extends Client {
 		Module.useConnection(this.connection);
 		Transaction.useConnection(this.connection);
 		User.useConnection(this.connection);
-		this.log.debug('Connected to DB');
+		this.log.info('Connected to DB');
 	}
 
 	private async registerEvents() {

@@ -6,26 +6,32 @@ export const defaultIntervalsObj: defaultIntervals = {
 	minutely: {
 		amount: 50,
 		cooldown: 1000 * 60,
+		enabled: true,
 	},
 	hourly: {
 		amount: 500,
 		cooldown: 1000 * 60 * 60,
+		enabled: true,
 	},
 	daily: {
 		amount: 5_000,
 		cooldown: 1000 * 60 * 60 * 24,
+		enabled: true,
 	},
 	weekly: {
 		amount: 50_000,
 		cooldown: 1000 * 60 * 60 * 24 * 7,
+		enabled: true,
 	},
 	fortnightly: {
 		amount: 125_000,
 		cooldown: 1000 * 60 * 60 * 24 * 7 * 2,
+		enabled: true,
 	},
 	monthly: {
 		amount: 300_000,
 		cooldown: 1000 * 60 * 60 * 24 * 7 * 4,
+		enabled: true,
 	},
 };
 

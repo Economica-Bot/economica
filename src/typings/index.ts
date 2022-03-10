@@ -41,6 +41,7 @@ export type defaultIncomes = {
 export interface IntervalCommand {
 	amount: number;
 	cooldown: number;
+	enabled: boolean;
 }
 
 export type defaultIntervals = {
