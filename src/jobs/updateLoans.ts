@@ -1,6 +1,6 @@
-import { Loan, Member, Guild } from '../entities/index.js';
+import { Loan } from '../entities/index.js';
 import { recordTransaction } from '../lib/transaction.js';
-import { Context, Economica, Job } from '../structures/index.js';
+import { Economica, Job } from '../structures/index.js';
 
 export default class implements Job {
 	public name = 'update-loans';

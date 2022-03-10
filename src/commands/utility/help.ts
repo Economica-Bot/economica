@@ -67,7 +67,9 @@ export default class implements Command {
 		await i.editReply({ components: [dropdown] });
 		const interaction = await message.awaitMessageComponent({ componentType: 'SELECT_MENU' });
 		dropdown.components[0].setDisabled(true);
-		const description = ctx.client.commands.filter(({ data }) => data.module === interaction.values[0]).map((command) => `**${command.data.name}**\n> ${command.data.description}`).join('\n');
+		const description = ctx.client.commands
+			.filter(({ data }) => data.module === interaction.values[0])
+			.map((command) => `**${command.data.name}**\n> ${command.data.description}`).join('\n');
 		const moduleEmbed = new MessageEmbed()
 			.setAuthor({ name: `${interaction.values[0]} Module` })
 			.setDescription(description);
