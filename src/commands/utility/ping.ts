@@ -14,7 +14,13 @@ export default class implements Command {
 		await ctx.interaction.reply('Pinging...');
 		const api = Date.now() - now;
 		const ws = ctx.client.ws.ping;
-		const content = `\`\`\`ansi\n[1;34mGateway Ping [0m: [0;35m${ws}[0mms\n[1;34mRest Ping    [0m: [0;35m${api}[0mms\`\`\``;
+		const { shardId } = ctx.interaction.guild;
+		const shard = ctx.client.ws.shards.get(shardId).ping;
+		const content = '```ansi\n'
+			+ `[1;34mGateway Ping [0m: [0;35m${ws}[0mms\n`
+			+ `[1;34mRest Ping    [0m: [0;35m${api}[0mms\n`
+			+ `[1;34mShard Ping   [0m: [0;35m${shard}[0mms\n`
+			+ '```';
 		const embed = ctx.embedify('success', 'bot', content);
 		await ctx.interaction.editReply({ content: null, embeds: [embed] });
 	};

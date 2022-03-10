@@ -1,4 +1,4 @@
-import { Guild, GuildMember, PermissionString, TextChannel } from 'discord.js';
+import { GuildMember, PermissionString, TextChannel } from 'discord.js';
 import ms from 'ms';
 
 import { DEVELOPER_IDS, DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEV_PERMISSION_EXEMPT } from '../config.js';
@@ -8,6 +8,38 @@ import {
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from '../structures/index.js';
 import { Authorities } from '../typings/index.js';
+
+async function checkPermission(ctx: Context): Promise<boolean> {
+	const member = ctx.interaction.member as GuildMember;
+	const channel = ctx.interaction.channel as TextChannel;
+	const group = ctx.data.getSubcommandGroup(
+		ctx.interaction.options.getSubcommandGroup(false),
+	) as EconomicaSlashCommandSubcommandGroupBuilder;
+	const subcommand = ctx.data.getSubcommand(
+		ctx.interaction.options.getSubcommand(false),
+	) as EconomicaSlashCommandSubcommandBuilder;
+	const clientPermissions: PermissionString[] = [];
+	const missingClientPermissions: PermissionString[] = [];
+
+	if (ctx.data.clientPermissions) clientPermissions.push(...ctx.data.clientPermissions);
+	if (group?.clientPermissions) clientPermissions.push(...group.clientPermissions);
+	if (subcommand?.clientPermissions) clientPermissions.push(...subcommand.clientPermissions);
+
+	clientPermissions.forEach((permission) => {
+		if (!ctx.interaction.guild.me.permissionsIn(channel).has(permission)) missingClientPermissions.push(permission);
+	});
+
+	if (missingClientPermissions.length) {
+		await ctx.embedify('warn', 'bot', `Missing Bot Permissions: \`${missingClientPermissions}\``, true);
+		return false;
+	}
+
+	if (ctx.interaction.guild.ownerId === member.id || member.permissions.has('ADMINISTRATOR')) {
+		return true;
+	}
+
+	return true;
+}
 
 async function checkCooldown(ctx: Context): Promise<boolean> {
 	const { incomes, intervals } = ctx.guildEntity;
@@ -48,36 +80,18 @@ async function checkCooldown(ctx: Context): Promise<boolean> {
 	return true;
 }
 
-async function checkPermission(ctx: Context): Promise<boolean> {
+async function checkAuthority(ctx: Context): Promise<boolean> {
 	const member = ctx.interaction.member as GuildMember;
-	const guild = ctx.interaction.guild as Guild;
-	const clientMember = (await guild.members.fetch(ctx.interaction.client.user.id)) as GuildMember;
-	const channel = ctx.interaction.channel as TextChannel;
 	const group = ctx.data.getSubcommandGroup(
 		ctx.interaction.options.getSubcommandGroup(false),
 	) as EconomicaSlashCommandSubcommandGroupBuilder;
 	const subcommand = ctx.data.getSubcommand(
 		ctx.interaction.options.getSubcommand(false),
 	) as EconomicaSlashCommandSubcommandBuilder;
-	const clientPermissions: PermissionString[] = [];
-	const missingClientPermissions: PermissionString[] = [];
 	let missingAuthority: keyof typeof Authorities;
 
 	const authority = subcommand.authority ?? group.authority ?? ctx.data.authority;
-	if (ctx.data.clientPermissions) clientPermissions.push(...ctx.data.clientPermissions);
-	if (group?.clientPermissions) clientPermissions.push(...group.clientPermissions);
-	if (subcommand?.clientPermissions) clientPermissions.push(...subcommand.clientPermissions);
-
-	clientPermissions.forEach((permission) => {
-		if (!clientMember.permissionsIn(channel).has(permission)) missingClientPermissions.push(permission);
-	});
-
-	if (missingClientPermissions.length) {
-		await ctx.embedify('warn', 'bot', `Missing Bot Permissions: \`${missingClientPermissions}\``, true);
-		return false;
-	} if (ctx.interaction.guild.ownerId === member.id || member.permissions.has('ADMINISTRATOR')) {
-		return true;
-	} if (authority) {
+	if (authority) {
 		const auth = await ctx.guildEntity.auth;
 		const roleAuth = auth.filter((r) => r.authority === authority && (member.roles.cache.has(r.id) || member.id === r.id));
 		if (!roleAuth.length) missingAuthority = authority;
@@ -106,14 +120,16 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 	} if (ctx.data.authority === 'DEVELOPER' && !isDeveloper) {
 		await ctx.embedify('warn', 'user', 'This command is dev only.', true);
 		return false;
-	} if (!ctx.data.global && !ctx.interaction.guild) {
+	} if (!ctx.data.global && !ctx.interaction.inGuild()) {
 		await ctx.embedify('warn', 'user', 'This command may only be used within servers.', true);
+		return false;
+	} if (!(await checkPermission(ctx))) {
 		return false;
 	} if (!isDeveloper || !DEV_COOLDOWN_EXEMPT) {
 		const valid = await checkCooldown(ctx);
 		if (!valid) return false;
 	} else if (!isDeveloper || !DEV_PERMISSION_EXEMPT) {
-		const valid = await checkPermission(ctx);
+		const valid = await checkAuthority(ctx);
 		if (!valid) return false;
 	} else if (!isDeveloper || !DEV_MODULE_EXEMPT) {
 		const valid = await validateModule(ctx);

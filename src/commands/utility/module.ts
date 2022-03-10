@@ -1,13 +1,13 @@
 import { Module } from '../../entities/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
-import { modulesArr } from '../../typings/constants.js';
+import { ModuleString, Modules } from '../../typings/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('module')
 		.setDescription('Manage server modules')
 		.setModule('UTILITY')
-		.setFormat('module <view | add | remove> [moduleName]')
+		.setFormat('module <view | add | remove> [module]')
 		.setExamples(['module view', 'module add Interval', 'module remove Interval'])
 		.setAuthority('ADMINISTRATOR')
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View the enabled modules on this server'))
@@ -23,14 +23,16 @@ export default class implements Command {
 	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const moduleQuery = ctx.interaction.options.getString('module', false);
-		const moduleName = modulesArr.find((mod) => mod.toLowerCase() === moduleQuery?.toLowerCase());
+		const moduleName = Modules[moduleQuery];
 		if (!moduleName && moduleQuery) {
 			await ctx.embedify('error', 'user', `Invalid module: \`${moduleQuery}\``, true);
 		} else if (subcommand === 'view') {
-			const disModules = modulesArr.filter((mod) => !ctx.guildEntity.modules.find((m) => m === mod)).join('`, `');
+			const modulesArr = Object.keys(Modules) as ModuleString[];
+			const enabledModulesArr = modulesArr.filter((module) => ctx.guildEntity.modules.includes(module));
+			const disabledModulesArr = modulesArr.filter((module) => !ctx.guildEntity.modules.includes(module));
 			const embed = ctx.embedify('info', 'guild', "View the server's modules").addFields([
-				{ name: 'Enabled Modules', value: `\`${ctx.guildEntity.modules.join('`, `')}\``, inline: true },
-				{ name: 'Disabled Modules', value: `\`${disModules.length ? disModules : '`None`'}\``, inline: true },
+				{ name: 'Enabled Modules', value: `\`${enabledModulesArr.join('`, `')}\``, inline: true },
+				{ name: 'Disabled Modules', value: `\`${disabledModulesArr.join('`, `')}\``, inline: true },
 			]);
 			await ctx.interaction.reply({ embeds: [embed] });
 		} else if (subcommand === 'add') {

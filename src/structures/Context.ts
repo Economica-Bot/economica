@@ -13,7 +13,6 @@ export class Context {
 	public memberEntity: Member;
 	public clientUserEntity: User;
 	public clientMemberEntity: Member;
-	public member: GuildMember;
 	public constructor(client: Economica, interaction?: CommandInteraction<'cached'>) {
 		this.client = client;
 		this.interaction = interaction;
@@ -22,8 +21,9 @@ export class Context {
 	public async init(): Promise<this> {
 		const command = this.client.commands.get(this.interaction.commandName);
 		if (!command) {
-			this.interaction.reply({ content: 'There was an error while executing this command.', ephemeral: true });
-			throw new Error('There was an error while executing this command');
+			const content = 'There was an error while executing this command';
+			this.interaction.reply({ content, ephemeral: true });
+			throw new Error(content);
 		}
 
 		this.data = command.data;
@@ -37,7 +37,6 @@ export class Context {
 			?? await User.create({ id: this.client.user.id }).save();
 		this.clientMemberEntity = await Member.findOne({ user: this.clientUserEntity, guild: this.guildEntity })
 			?? await Member.create({ user: this.clientUserEntity, guild: this.guildEntity }).save();
-		this.member = this.client.guilds.cache.get(this.interaction.guildId).members.cache.get(this.client.user.id);
 		return this;
 	}
 

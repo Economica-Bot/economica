@@ -1,4 +1,4 @@
-import { EmbedFooterData, MessageEmbed } from 'discord.js';
+import { ClientEvents, EmbedFooterData, MessageEmbed } from 'discord.js';
 
 export interface EconomyInfo {
 	wallet: number;

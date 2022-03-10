@@ -2,7 +2,7 @@ import { Snowflake } from 'discord.js';
 import { BaseEntity, Column, Entity, OneToMany, PrimaryColumn, Relation } from 'typeorm';
 
 import { CURRENCY_SYMBOL } from '../config.js';
-import { defaultIncomesObj, defaultIntervalsObj, defaultModulesArr, modulesArr } from '../typings/index.js';
+import { ModuleString, Modules, defaultIncomesObj, defaultIntervalsObj } from '../typings/index.js';
 import { Authority } from './index.js';
 
 @Entity()
@@ -29,5 +29,5 @@ export class Guild extends BaseEntity {
 		intervals: typeof defaultIntervalsObj;
 
 	@Column({ type: 'text', array: true })
-		modules: typeof modulesArr = defaultModulesArr;
+		modules: ModuleString[] = (Object.keys(Modules) as ModuleString[]).filter((module) => Modules[module] === 'DEFAULT');
 }

@@ -57,10 +57,6 @@ export const defaultIncomesObj: defaultIncomes = {
 	},
 };
 
-export const defaultModulesArr: (keyof typeof Modules)[] = ['ADMIN', 'ECONOMY', 'INCOME', 'MODERATION', 'SHOP', 'UTILITY'];
-export const specialModulesArr: (keyof typeof Modules)[] = ['INSIGHTS', 'INTERVAL', 'CORPORATION', 'MESSAGE'];
-export const modulesArr: (keyof typeof Modules)[] = [...defaultModulesArr, ...specialModulesArr];
-
 export enum Authorities {
 	USER = 'user',
 	MODERATOR = 'moderator',
@@ -111,6 +107,15 @@ export enum emojis {
 	COMMUNITY = '<:community:950871622934491196>',
 	ROBOT = '<:robot:950871596426461284>',
 	MEMORY = '<:memory:950902208042532904>',
+	INTERVAL = '⏱️',
+	ADMIN = '<:admin:950999584858066964>',
+	UTILITY = '<:utilities:950999584824492042>',
+	INCOME = '<:salary:950999584769978468>',
+	SHOP = '<:store:950999584698679367>',
+	ECONOMY = '<:economy:950998596877176902>',
+	MODERATION = '🛡️',
+	INSIGHTS = '<:insights:950998596147359764>',
+	CORPORATION = '<:corporation:950998596109619240>',
 }
 
 export const BUTTON_INTERACTION_COOLDOWN = 1000 * 15;
@@ -155,19 +160,29 @@ export enum Properties {
 export type PropertyString = `${Properties}`;
 export type IndustryString = keyof typeof Properties;
 
-export enum Modules {
-	ADMIN = 'DEFAULT',
-	ECONOMY = 'DEFAULT',
-	INCOME = 'DEFAULT',
-	MODERATION = 'DEFAULT',
-	SHOP = 'DEFAULT',
-	UTILITY = 'DEFAULT',
-	INSIGHTS = 'SPECIAL',
-	INTERVAL = 'SPECIAL',
-	CORPORATION = 'SPECIAL',
-	MESSAGE = 'SPECIAL',
-	APPLICATION = 'DEV',
-}
-
-export type ModuleType = `${Modules}`;
-export type ModuleString = keyof typeof Modules;
+export type ModuleTypeString =
+	| 'DEFAULT'
+	| 'SPECIAL';
+export type DefaultModuleString =
+	| 'ADMIN'
+	| 'ECONOMY'
+	| 'INCOME'
+	| 'MODERATION'
+	| 'SHOP'
+	| 'UTILITY';
+export type SpecialModuleString =
+	| 'INSIGHTS'
+	| 'INTERVAL'
+	| 'CORPORATION';
+export type ModuleString = DefaultModuleString | SpecialModuleString;
+export const Modules: Record<ModuleString, ModuleTypeString> = {
+	ADMIN: 'DEFAULT',
+	ECONOMY: 'DEFAULT',
+	INCOME: 'DEFAULT',
+	MODERATION: 'DEFAULT',
+	SHOP: 'DEFAULT',
+	UTILITY: 'DEFAULT',
+	INSIGHTS: 'SPECIAL',
+	INTERVAL: 'SPECIAL',
+	CORPORATION: 'SPECIAL',
+};
