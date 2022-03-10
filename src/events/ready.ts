@@ -6,11 +6,11 @@ import { Modules } from '../typings/index.js';
 export default class implements Event {
 	public event = 'ready' as const;
 	public async execute(client: Economica) {
-		if (DEPLOY_COMMANDS === '0') {
+		if (DEPLOY_COMMANDS === 0) {
 			client.log.info('Commands Idle');
-		} else if (DEPLOY_COMMANDS === '1') {
+		} else if (DEPLOY_COMMANDS === 1) {
 			await this.updateCommands(client);
-		} else if (DEPLOY_COMMANDS === '2') {
+		} else if (DEPLOY_COMMANDS === 2) {
 			await this.resetCommands(client);
 			await this.updateCommands(client);
 		}
