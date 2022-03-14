@@ -17,6 +17,7 @@
   },
   "plugins": ["@typescript-eslint", "import"],
   "rules": {
+    "linebreak-style": ["error", "unix"],  // changes the file to LF
     "import/no-cycle": "off",
     "import/prefer-default-export": "off",
     "no-tabs": ["error", { "allowIndentationTabs": true }],

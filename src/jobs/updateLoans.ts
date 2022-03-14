@@ -6,7 +6,6 @@ export default class implements Job {
 	public name = 'update-loans';
 	public cooldown = 1000 * 60 * 5;
 	public execute = async (client: Economica): Promise<void> => {
-		const now = new Date();
 		const loans = await Loan.find({ pending: false, active: true, complete: false });
 
 		// Complete loan transaction.
