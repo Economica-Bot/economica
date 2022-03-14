@@ -1,292 +1,152 @@
-import { CommandInteraction, GuildMemberRoleManager, MessageEmbed } from "discord.js";
-import { Types } from "mongoose";
-import ms from "ms";
-import { asyncSome, cut, getEconInfo, itemInfo, itemRegExp, transaction } from "../../lib";
-import { confirmModal } from "../../lib/confirmModal";
-import { MemberModel, Shop, ShopModel } from "../../models";
-import { Context, EconomicaCommand, EconomicaSlashCommandBuilder } from "../../structures";
+import { parseNumber } from '@adrastopoulos/number-parser';
 
-export default class implements EconomicaCommand {
-	data = new EconomicaSlashCommandBuilder()
+import { Item, Listing, Member } from '../../entities/index.js';
+import { recordTransaction } from '../../lib/transaction.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+
+export default class implements Command {
+	public data = new EconomicaSlashCommandBuilder()
 		.setName('item')
-		.setDescription('Interact with shop items')
+		.setDescription('Interact with inventory items')
 		.setModule('SHOP')
-		.setDefaultPermission(true)
-		// buy
-		.addEconomicaSubcommand(s => s
-			.setName('buy')
-			.setDescription('Buy an item.')
-			.addStringOption((option) => option.setName('name').setDescription('Specify the name.').setRequired(true))
-		)
-		// sell
-		.addEconomicaSubcommand(s => s
+		.setFormat('item <sell | use | give>')
+		.addSubcommand((subcommand) => subcommand
 			.setName('sell')
-			.setDescription('Sell an item.')
-			.addStringOption((option) => option.setName('item').setDescription('Specify an item.').setRequired(true))
-		)
-		// use
-		.addEconomicaSubcommand(s => s
+			.setDescription('Sell an item')
+			.addStringOption((option) => option
+				.setName('item').setDescription('Specify an item').setRequired(true)))
+		.addSubcommand((subcommand) => subcommand
 			.setName('use')
-			.setDescription('Use a usable inventory item.')
-			.addStringOption((options) =>
-				options
-					.setName('name')
-					.setDescription('The name of the item to use.')
-					.setRequired(true)
-			)
-		)
-		// give
-		.addEconomicaSubcommand(s => s
+			.setDescription('Use an item')
+			.addStringOption((option) => option
+				.setName('item').setDescription('Specify an item').setRequired(true)))
+		.addSubcommand((subcommand) => subcommand
 			.setName('give')
-			.setDescription('Give a user a new instance of an existing item.')
+			.setDescription('Give an item away')
 			.setAuthority('MANAGER')
-			.addUserOption((options) =>
-				options
-					.setName('user')
-					.setDescription('The user to give the item(s) to.')
-					.setRequired(true)
-			)
-			.addStringOption((options) =>
-				options
-					.setName('name')
-					.setDescription('The name of the item to give.')
-					.setRequired(true)
-			)
-			.addIntegerOption((options) =>
-				options
-					.setName('amount')
-					.setDescription('The amount of this item to give to the user.')
-			)
-		)
-	execute = async (ctx: Context) => {
-		const itemCommand = ctx.interaction.options.getSubcommandGroup(false) ?? ctx.interaction.options.getSubcommand();
+			.addStringOption((option) => option
+				.setName('item').setDescription('Specify an item').setRequired(true))
+			.addUserOption((option) => option
+				.setName('member')
+				.setDescription('Specify a member which will receive the items')
+				.setRequired(true))
+			.addIntegerOption((option) => option
+				.setName('amount')
+				.setDescription('Specify the amount')
+				.setMinValue(1)));
 
-		if (itemCommand == 'buy') {
-			const query = ctx.interaction.options.getString('name');
-			const shop = await ShopModel.findOne({ guild: ctx.guildDocument, name: itemRegExp(query) });
+	public execute = async (ctx: Context) => {
+		const subcommand = ctx.interaction.options.getSubcommand();
+		const query = ctx.interaction.options.getString('name', false);
+		const listing = await Listing.findOne({ guild: ctx.guildEntity, name: query });
+		const item = await Item.findOne({ listing, owner: ctx.memberEntity });
+		if (subcommand === 'buy') {
+			if (!listing) {
+				await ctx.embedify('error', 'user', `Could not find a listing called \`${query}\``, true);
+				return;
+			}
+			if (!listing.active) {
+				await ctx.embedify('error', 'user', `The listing \`${listing.name}\` is not active`, true);
+				return;
+			}
 
-			if (!shop.active)
-				return await ctx.embedify('error', 'user', `The item \`${shop.name}\` is not active. Contact your Economy Manager for more info.`, true)
-
-			if (!shop)
-				return await ctx.embedify('error', 'user', `Could not find an item with name \`${query}\` (case-insensitive)`, true)
-
-			const hasItem = await asyncSome(ctx.memberDocument.inventory, (async (invItem) => {
-				ctx.memberDocument = await ctx.memberDocument.populate({
-					path: `inventory.shop`,
-					model: 'Shop'
-				}).execPopulate()
-
-				const inventoryItem = ctx.memberDocument.inventory.find(i => {
-					return `${i.shop._id}` == `${shop._id}`
-				})
-
-				if (inventoryItem) {
-					return true
-				}
-				else return false
-			}));
-
-			const { currency } = ctx.guildDocument;
-			const { wallet, treasury } = await getEconInfo(ctx.memberDocument);
-			const missingRoles = new Array<String>();
-			const missingItems = new Array<String>();
-
-			shop.requiredRoles?.forEach(async (roleId) => {
-				if (!(ctx.interaction.member.roles as GuildMemberRoleManager).cache.has(roleId)) {
-					missingRoles.push(roleId);
-				}
+			const missingRoles = new Array<string>();
+			const missingItems = new Array<string>();
+			listing.rolesRequired.forEach((role) => {
+				if (!ctx.interaction.member.roles.cache.has(role)) missingRoles.push(role);
 			});
-
-			shop
-				.populate('requiredItems')
-				.execPopulate()
-				.then((shop) => {
-					shop.requiredItems.forEach(async (shop: Shop) => {
-						if (!ctx.memberDocument.inventory.some((entry) => entry.shop._id === shop._id)) {
-							missingItems.push(shop.name);
-						}
-					});
-				});
-
-			if (!shop) {
-				return await ctx.embedify('error', 'user', 'Could not find an item with that name.', true);
-			} else if (shop.price > wallet) {
-				return await ctx.embedify('warn', 'user', 'You cannot afford this item.', true);
-			} else if (shop.treasuryRequired > treasury) {
-				// prettier-ignore
-				return await ctx.embedify('warn', 'user', `You need ${currency}${shop.treasuryRequired.toLocaleString()} in your treasury.`, true);
-			} else if (missingItems.length) {
-				return await ctx.embedify('warn', 'user', `You are missing \`${missingItems.join('`, `')}\`.`, true);
-			} else if (missingRoles.length) {
-				return await ctx.embedify('warn', 'user', `You are missing <@&${missingRoles.join('>, <@&')}>.`, true);
-			} else if (hasItem && !shop.stackable) {
-				return await ctx.embedify('warn', 'user', 'This item is not stackable.', true);
-			}
-
-			await ctx.embedify(
-				'success',
-				'user',
-				`Purchased \`${shop.name}\` for ${currency}${shop.price.toLocaleString()}`,
-				false
-			);
-
-			if (shop.usability == 'Instant') {
-				shop.rolesRemoved.forEach(async (roleId) => {
-					(ctx.interaction.member.roles as GuildMemberRoleManager).remove(roleId, `Purchased ${shop.name}`);
-				});
-
-				shop.rolesGiven.forEach((roleId) => {
-					(ctx.interaction.member.roles as GuildMemberRoleManager).add(roleId, `Purchased ${shop.name}`);
-				});
-			}
-
-			await transaction(ctx.client, ctx.guildDocument, ctx.memberDocument, ctx.clientDocument, 'BUY', -shop.price, 0);
-
-			if (hasItem) {
-				// prettier-ignore
-				ctx.memberDocument.inventory.find((v) => {
-					if (`${v.shop._id}` === `${shop._id}`)
-						return v
-				}).amount += 1;
-				ctx.memberDocument.markModified('inventory');
-			} else {
-				ctx.memberDocument.inventory.push({ shop, amount: 1 });
-			}
-
-			await ctx.memberDocument.save();
-			shop.stock -= 1;
-			shop.save();
-		}
-		else if (itemCommand == 'sell') {
-			const query = ctx.interaction.options.getString('item');
-			const shop = await ShopModel.findOne({ name: new RegExp(`^${query}`, 'i') });
-			const hasItem = await asyncSome(ctx.memberDocument.inventory, (async (invItem) => {
-				ctx.memberDocument = await ctx.memberDocument.populate({
-					path: `inventory.shop`,
-					model: 'Shop'
-				}).execPopulate()
-
-				const inventoryItem = ctx.memberDocument.inventory.find(i => {
-					return `${i.shop._id}` == `${shop._id}`
-				})
-
-				if (inventoryItem) {
-					return true
-				}
-				else return false
-			}));
-
-			const { currency } = ctx.guildDocument;
-
-			if (!shop) {
-				return await ctx.embedify('error', 'user', `No item with name \`${cut(query)}\` found (case-insensitive).`, true);
-			} else if (!hasItem) {
-				return await ctx.embedify('error', 'user', `No item with name \`${cut(query)}\` found in inventory (case-insensitive).`, true);
-			}
-
-			await transaction(ctx.client, ctx.guildDocument, ctx.memberDocument, ctx.clientDocument, 'SELL', (shop.price * ctx.guildDocument.sellRefund), 0);
-
-			ctx.memberDocument.inventory.map((entry) => {
-				if (entry.amount === 1) {
-					return ctx.memberDocument.inventory.pull(entry);
-				} else {
-					entry.amount -= 1;
-					return entry;
-				}
+			(await listing.itemsRequired).forEach(async (sublisting) => {
+				const hasSublisting = await Item.find({ listing: sublisting, owner: ctx.memberEntity });
+				if (!hasSublisting) missingItems.push(sublisting.name);
 			});
-
-			ctx.memberDocument.save();
-			shop.stock += 1;
-			shop.save();
-
-			return await ctx.embedify(
-				'success',
-				'user',
-				`Sold \`${shop.name}\` for ${currency}${(shop.price * ctx.guildDocument.sellRefund).toLocaleString()}`,
-				false
-			)
-		}
-		else if (itemCommand == 'use') {
-			const { interaction, memberDocument } = ctx;
-			const query = interaction.options.getString('name');
-
-			const item = await ShopModel.findOne({
-				guild: ctx.guildDocument,
-				name: itemRegExp(query)
-			})
-
-			if (!item)
-				return await ctx.embedify('error', 'user', `No item with name \`${cut(query)}\` exists.`, true)
-
-			const { inventory } = memberDocument;
-
-			const inventoryItem = inventory.find(invItem => `${invItem.shop}` == `${item._id}`)
-
-			if (!inventoryItem)
-				return await ctx.embedify('error', 'user', `No item with name \`${cut(query)}\` (case-insensitive) found in inventory.`, true)
-
-			if (item.usability == 'Usable') {
-				const embed = ctx.embedify('success', 'user', `Used \`${item.name}\` x1`)
-
-				if (item.rolesGiven.length) {
-					item.rolesGiven.forEach((roleId) => {
-						(ctx.interaction.member.roles as GuildMemberRoleManager).add(roleId, `Purchased ${item.name}`);
-					});
-
-					embed.addField('Roles Given', `<@&${item.rolesGiven.join('>, <@&')}>`)
-				}
-				if (item.rolesRemoved.length) {
-					item.rolesRemoved.forEach((roleId) => {
-						(ctx.interaction.member.roles as GuildMemberRoleManager).remove(roleId, `Purchased ${item.name}`);
-					})
-
-					embed.addField('Roles Removed', `<@&${item.rolesRemoved.join('>, <@&')}>`)
-				}
-
-				// If item has amount, decrease; if not, delete.
-				ctx.memberDocument.inventory.map(item => {
-					if (item == inventoryItem)
-						item.amount > 1 ? item.amount -= 1 : item.remove()
-				})
-
-				ctx.memberDocument.markModified('inventory')
-				await ctx.memberDocument.save()
-
-				return await interaction.reply({
-					embeds: [embed]
-				})
-			} else if (item.usability == 'Unusable')
-				return await ctx.embedify('error', 'user', 'This item is unusable.', true)
-		}
-		else if (itemCommand == 'give') {
-			const { interaction } = ctx;
-
-			const user = interaction.options.getUser('user');
-			const item = await ShopModel.findOne({ guild: ctx.guildDocument, name: itemRegExp(interaction.options.getString('name')) });
-			const amount = interaction.options.getInteger('amount') || 1;
-
-			if (!item)
-				return await ctx.embedify('error', 'user', `No item with name \`${item.name}\` found (case-insensitive)`, true);
-
-			if (amount <= 0)
-				return await ctx.embedify('error', 'user', '`amount` must be a positive integer greater than 0.', true);
-			await ctx.embedify('success', 'user', `Gave ${amount} x \`${item.name}\` to ${user.username}`, false);
-
-			const invItem = ctx.memberDocument.inventory.find(i => `${i.shop?._id}` == `${item._id}`);
-
-			if (invItem) {
-				invItem.amount += amount;
-				ctx.memberDocument.markModified('inventory');
-			} else {
-				ctx.memberDocument.inventory.push({ shop: item, amount });
-				ctx.memberDocument.markModified('inventory');
+			if (listing.price > ctx.memberEntity.wallet) {
+				await ctx.embedify('warn', 'user', 'You cannot afford this item.', true);
+				return;
+			} if (listing.treasuryRequired > ctx.memberEntity.treasury) {
+				await ctx.embedify('warn', 'user', `You need ${ctx.guildEntity.currency}${parseNumber(listing.treasuryRequired)} in your treasury.`, true);
+				return;
+			} if (missingItems.length) {
+				await ctx.embedify('warn', 'user', `You are missing \`${missingItems.join('`, `')}\`.`, true);
+				return;
+			} if (missingRoles.length) {
+				await ctx.embedify('warn', 'user', `You are missing <@&${missingRoles.join('>, <@&')}>.`, true);
+				return;
+			} if (item && !listing.stackable) {
+				await ctx.embedify('warn', 'user', 'This item is not stackable.', true);
+				return;
 			}
 
-			await ctx.memberDocument.save();
-			return;
+			await ctx.embedify('success', 'user', `Purchased \`${listing.name}\` for ${ctx.guildEntity.currency}${parseNumber(listing.price)}`, false);
+			if (listing.type === 'INSTANT') {
+				listing.rolesRemoved.forEach(async (role) => ctx.interaction.member.roles.remove(role, `Purchased ${listing.name}`));
+				listing.rolesGiven.forEach((roleId) => ctx.interaction.member.roles.add(roleId, `Purchased ${listing.name}`));
+			}
+
+			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'BUY', -listing.price, 0);
+			if (item) await Item.update(item, { amount: item.amount + 1 });
+			else await Item.create({ owner: ctx.memberEntity, listing, amount: 1 }).save();
+			listing.stock -= 1;
+			await listing.save();
+		} else if (subcommand === 'sell') {
+			if (!listing) {
+				await ctx.embedify('error', 'user', `Could not find a listing called \`${query}\``, true);
+				return;
+			}
+			if (!listing.active) {
+				await ctx.embedify('error', 'user', `The listing \`${listing.name}\` is not active`, true);
+				return;
+			}
+
+			await ctx.embedify('success', 'user', `Sold \`${listing.name}\` for ${ctx.guildEntity.currency}${parseNumber(listing.price)}`, false);
+			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'SELL', listing.price, 0);
+			item.amount -= 1;
+			await item.save();
+			if (item.amount === 0) await item.remove();
+			listing.stock += 1;
+			listing.save();
+		} else if (subcommand === 'use') {
+			if (!item) {
+				await ctx.embedify('error', 'user', `No item with name \`${query}\` exists.`, true);
+				return;
+			}
+			if (item.listing.type !== 'USABLE') {
+				await ctx.embedify('error', 'user', 'This item is unusable.', true);
+				return;
+			}
+
+			const embed = ctx.embedify('success', 'user', `Used \`${item.listing.name}\` x1`);
+			item.listing.rolesGiven.forEach((role) => { ctx.interaction.member.roles.add(role, `Purchased ${item.listing.name}`); });
+			embed.addField('Roles Given', `<@&${item.listing.rolesGiven.join('>, <@&')}>`);
+			item.listing.rolesRemoved.forEach((role) => { ctx.interaction.member.roles.remove(role, `Purchased ${item.listing.name}`); });
+			embed.addField('Roles Removed', `<@&${item.listing.rolesRemoved.join('>, <@&')}>`);
+
+			await ctx.interaction.reply({ embeds: [embed] });
+
+			item.amount -= 1;
+			await item.save();
+			if (item.amount === 0) await item.remove();
+		} else if (subcommand === 'give') {
+			const member = ctx.interaction.options.getMember('member');
+			const memberEntity = await Member.findOne({ relations: ['user'], where: { user: { id: member.user.id }, guild: ctx.guildEntity } });
+			const userItem = await Item.findOne({ listing, owner: memberEntity });
+			if (userItem && !item.listing.stackable) {
+				await ctx.embedify('warn', 'user', 'That user already has that non-stackable item', true);
+				return;
+			}
+
+			const amount = ctx.interaction.options.getInteger('amount') || 1;
+			if (amount > item.amount) {
+				await ctx.embedify('warn', 'user', `You do not have ${amount} \`${item.listing.name}\`s`, true);
+				return;
+			}
+
+			if (userItem) await Item.update(userItem, { amount: userItem.amount + amount });
+			else await Item.create({ owner: memberEntity, listing, amount }).save();
+			item.amount -= 1;
+			await item.save();
+			if (item.amount === 0) await item.remove();
+
+			await ctx.embedify('success', 'user', `Gave ${amount} x \`${item.listing.name}\` to ${member.user}`, false);
 		}
-		else
-			throw new Error(`Unknown itemCommand ${itemCommand}`)
-	}
+	};
 }
