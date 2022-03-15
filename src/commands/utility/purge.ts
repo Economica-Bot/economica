@@ -27,7 +27,7 @@ export default class implements Command {
 	public execute = async (ctx: Context): Promise<void> => {
 		const channel = (ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel) as GuildTextBasedChannel;
 		const amount = ctx.interaction.options.getNumber('amount') ?? 100;
-		const count = await channel.bulkDelete(amount, true);
-		await ctx.embedify('success', 'user', `Deleted \`${count.size}\` messages.`, true);
+		const count = await channel.bulkDelete(amount);
+		await ctx.embedify('success', 'user', `Deleted \`${count.size}\` messages.`).send(true);
 	};
 }

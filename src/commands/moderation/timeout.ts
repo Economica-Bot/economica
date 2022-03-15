@@ -34,12 +34,12 @@ export default class implements Command {
 		const duration = ctx.interaction.options.getString('duration') as string;
 		const milliseconds = ms(duration);
 		if (milliseconds > 1000 * 60 * 60 * 24 * 28) {
-			await ctx.embedify('error', 'user', 'Timeout cannot exceed 28 days.', true);
+			await ctx.embedify('error', 'user', 'Timeout cannot exceed 28 days.').send(true);
 			return;
 		}
 		const reason = (ctx.interaction.options.getString('reason') as string) ?? 'No reason provided';
 		await target.timeout(milliseconds, reason);
-		await ctx.embedify('success', 'user', `Placed \`${target.user.tag}\` under a timeout for ${ms(milliseconds)}.`, false);
+		await ctx.embedify('success', 'user', `Placed \`${target.user.tag}\` under a timeout for ${ms(milliseconds)}.`).send();
 		await recordInfraction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'TIMEOUT', reason, true, milliseconds, false);
 	};
 }

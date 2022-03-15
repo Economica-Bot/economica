@@ -26,7 +26,7 @@ export default class implements Command {
 			})();
 		const reason = (ctx.interaction.options.getString('reason') as string) ?? 'No reason provided';
 		await target.kick(reason);
-		await ctx.embedify('success', 'user', `Kicked \`${target.user.tag}\``, true);
+		await ctx.embedify('success', 'user', `Kicked \`${target.user.tag}\``).send(true);
 		await recordInfraction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'KICK', reason);
 	};
 }

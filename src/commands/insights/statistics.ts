@@ -14,7 +14,7 @@ export default class implements Command {
 		.setExamples(['statistics']);
 
 	public execute = async (ctx: Context) => {
-		const description = `Welcome to ${ctx.client.user}'s Statistics Dashboard!`;
+		const description = `**Welcome to ${ctx.client.user}'s Statistics Dashboard!**`;
 		const botStats = `*Websocket Ping*: \`${ctx.client.ws.ping}ms\`\n`
 			+ `*Bot Uptime*: \`${ms(ctx.client.uptime)}\`\n`
 			+ `*Commands Ran*: \`${(await CommandEntity.find({ relations: ['member', 'member.guild'], where: { member: { guild: ctx.guildEntity } } })).length}\``;

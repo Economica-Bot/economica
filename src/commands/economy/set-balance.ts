@@ -24,10 +24,10 @@ export default class implements Command {
 	public execute = async (ctx: Context): Promise<void> => {
 		const target = ctx.interaction.options.getMember('user') as GuildMember;
 		const targetEntity = await Member.findOne({ relations: ['user', 'guild'], where: { user: { id: target.id }, guild: ctx.guildEntity } })
-		?? await (async () => {
-			const user = await User.create({ id: target.id }).save();
-			return Member.create({ user, guild: ctx.guildEntity }).save();
-		})();
+			?? await (async () => {
+				const user = await User.create({ id: target.id }).save();
+				return Member.create({ user, guild: ctx.guildEntity }).save();
+			})();
 		const amount = parseString(ctx.interaction.options.getString('amount'));
 		const balance = ctx.interaction.options.getString('balance');
 		const { wallet: w, treasury: t } = targetEntity;
@@ -35,10 +35,10 @@ export default class implements Command {
 		const wallet = balance === 'wallet' ? difference : 0;
 		const treasury = balance === 'treasury' ? difference : 0;
 		if (!amount) {
-			await ctx.embedify('error', 'user', 'Please enter a valid amount.', true);
+			await ctx.embedify('error', 'user', 'Please enter a valid amount.').send(true);
 			return;
 		}
-		await ctx.embedify('success', 'user', `Set ${target}'s \`${balance}\` to ${ctx.guildEntity.currency}${parseNumber(amount)}.`, false);
+		await ctx.embedify('success', 'user', `Set ${target}'s \`${balance}\` to ${ctx.guildEntity.currency}${parseNumber(amount)}.`).send();
 		await recordTransaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'SET_MONEY', wallet, treasury);
 	};
 }

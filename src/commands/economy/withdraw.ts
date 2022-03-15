@@ -14,7 +14,7 @@ export default class implements Command {
 	public execute = async (ctx: Context): Promise<void> => {
 		const { validated, result } = await validateAmount(ctx, 'treasury');
 		if (!validated) return;
-		await ctx.embedify('success', 'user', `Withdrew ${ctx.guildEntity.currency}${parseNumber(result)}`, false);
+		await ctx.embedify('success', 'user', `Withdrew ${ctx.guildEntity.currency}${parseNumber(result)}`).send();
 		await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.memberEntity, 'WITHDRAW', result, -result);
 	};
 }

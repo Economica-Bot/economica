@@ -31,14 +31,14 @@ export default class implements Command {
 			const amount = ctx.interaction.options.getInteger('amount', false);
 			const enabled = ctx.interaction.options.getBoolean('enabled', false);
 			if (!command) {
-				await ctx.embedify('error', 'user', 'Could not find that command.', true);
+				await ctx.embedify('error', 'user', 'Could not find that command.').send(true);
 			} if (commandQuery in Object.keys(ctx.guildEntity.intervals)) {
-				await ctx.embedify('error', 'user', 'That is not an `INTERVAL` command.', true);
+				await ctx.embedify('error', 'user', 'That is not an `INTERVAL` command.').send(true);
 			} else {
 				if (amount) ctx.guildEntity.intervals[command.data.name].amount = amount;
 				if (typeof enabled !== 'undefined') ctx.guildEntity.intervals[command.data.name].enabled = enabled;
 				await ctx.guildEntity.save();
-				await ctx.embedify('success', 'user', `Updated \`${command.data.name}\`.`, false);
+				await ctx.embedify('success', 'user', `Updated \`${command.data.name}\`.`).send();
 			}
 		}
 	};

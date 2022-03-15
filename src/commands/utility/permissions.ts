@@ -21,7 +21,7 @@ export default class implements Command {
 	public execute = async (ctx: Context): Promise<void> => {
 		const commandInput = ctx.interaction.options.getString('command');
 		const command = ctx.client.commands.get(commandInput);
-		if (!command) return ctx.embedify('error', 'user', 'Could not find that command.', true);
+		if (!command) return ctx.embedify('error', 'user', 'Could not find that command.').send(true);
 		const embed = ctx
 			.embedify('info', 'user')
 			.setAuthor({ name: `Permissions for ${command.data.name}`, iconURL: ctx.interaction.guild.emojis.resolve(Util.parseEmoji(Emojis.COMMAND).id).url })

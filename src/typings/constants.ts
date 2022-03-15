@@ -113,6 +113,15 @@ export enum Emojis {
 	MODERATION = '🛡️',
 	INSIGHTS = '<:insights:950998596147359764>',
 	CORPORATION = '<:corporation:950998596109619240>',
+	STOCK = '<:stock:953112763591438336>',
+	STACK = '<:stack:953113375716548638>',
+	TREASURY = '🏦',
+	WALLET = '<:wallet:953114661295886437>',
+	SETTINGS = '<:settings:953115211584381008>',
+	SEARCH = '<:search:953117655970242620>',
+	CANCEL = '✖',
+	PUBLISH = '✔',
+	GENERATOR = '<:generator:953122979544444928>',
 }
 
 export const BUTTON_INTERACTION_COOLDOWN = 1000 * 15;

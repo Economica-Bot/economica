@@ -1,8 +1,23 @@
+/* eslint-disable max-classes-per-file */
 import { CommandInteraction, MessageEmbed } from 'discord.js';
 
 import { Guild, Member, User } from '../entities';
 import { EmbedColors, Footer, ReplyString } from '../typings/index.js';
 import { Economica, EconomicaSlashCommandBuilder } from './index.js';
+
+class ContextEmbed extends MessageEmbed {
+	public ctx: Context;
+	constructor(ctx: Context) {
+		super();
+		this.ctx = ctx;
+	}
+
+	public async send(ephemeral = false) {
+		if (this.ctx.interaction.deferred) this.ctx.interaction.editReply({ embeds: [this] });
+		if (this.ctx.interaction.replied) this.ctx.interaction.followUp({ embeds: [this], ephemeral });
+		this.ctx.interaction.reply({ embeds: [this], ephemeral });
+	}
+}
 
 export class Context {
 	public client: Economica;
@@ -40,20 +55,13 @@ export class Context {
 		return this;
 	}
 
-	public embedify(type: ReplyString, footer: Footer, description?: string | null): MessageEmbed;
-	public async embedify(type: ReplyString, footer: Footer, description: string | null, ephemeral: boolean): Promise<void>;
-	public embedify(type: ReplyString, footer: Footer, description: string | null, ephemeral?: boolean): MessageEmbed | Promise<void> {
-		const embed = new MessageEmbed().setColor(EmbedColors[type]);
+	public embedify(type: ReplyString, footer: Footer, description?: string | null): ContextEmbed {
+		const embed = new ContextEmbed(this).setColor(EmbedColors[type]);
 		if (description) embed.setDescription(description);
 		if (footer === 'bot') embed.setFooter({ text: this.interaction.client.user.tag, iconURL: this.interaction.client.user.displayAvatarURL() });
 		else if (footer === 'user') embed.setFooter({ text: this.interaction.user.tag, iconURL: this.interaction.user.displayAvatarURL() });
 		else if (footer === 'guild') embed.setFooter({ text: this.interaction.guild.name, iconURL: this.interaction.guild.iconURL() });
 		else embed.setFooter(footer);
-
-		if (typeof ephemeral !== 'undefined') {
-			if (this.interaction.deferred) this.interaction.editReply({ embeds: [embed] });
-			if (this.interaction.replied) this.interaction.followUp({ embeds: [embed], ephemeral });
-			this.interaction.reply({ embeds: [embed], ephemeral });
-		} return embed;
+		return embed;
 	}
 }

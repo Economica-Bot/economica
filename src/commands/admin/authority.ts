@@ -76,15 +76,15 @@ export default class implements Command {
 			const authority = ctx.interaction.options.getString('authority') as keyof typeof Authorities;
 			const { id } = ctx.interaction.options.getMentionable('mentionable');
 			await Authority.update({ id }, { authority });
-			await ctx.embedify('success', 'bot', `Authority set to \`${authority}\`.`, false);
+			await ctx.embedify('success', 'bot', `Authority set to \`${authority}\`.`).send();
 		} else if (subcommand === 'reset') {
 			const { id } = ctx.interaction.options.getMentionable('mentionable', false);
 			if (id) {
 				await Authority.delete({ id });
-				await ctx.embedify('success', 'bot', 'Authority reset.', false);
+				await ctx.embedify('success', 'bot', 'Authority reset.').send();
 			} else {
 				await Authority.delete({ guild: ctx.guildEntity });
-				await ctx.embedify('success', 'bot', 'Authority settings have been reset.', false);
+				await ctx.embedify('success', 'bot', 'Authority settings have been reset.').send();
 			}
 		}
 	};

@@ -15,7 +15,6 @@ export default class implements Event {
 			await this.updateCommands(client);
 		}
 
-		client.log.info('Commands registered');
 		client.log.info(`${client.user.tag} Ready`);
 	}
 

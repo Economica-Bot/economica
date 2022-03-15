@@ -24,23 +24,23 @@ export default class implements Command {
 		const { chance, minfine, maxfine } = ctx.guildEntity.incomes.rob;
 		const fine = Math.ceil(Math.random() * (maxfine - minfine) + minfine);
 		if (target.id === ctx.client.user.id) {
-			await ctx.embedify('warn', 'user', 'You cannot rob me!', true);
+			await ctx.embedify('warn', 'user', 'You cannot rob me!').send(true);
 			return;
 		}
 		if (ctx.interaction.user.id === target.id) {
-			await ctx.embedify('warn', 'user', 'You cannot rob yourself', true);
+			await ctx.embedify('warn', 'user', 'You cannot rob yourself').send(true);
 			return;
 		}
 		if (targetEntity.wallet <= 0) {
-			await ctx.embedify('warn', 'user', `<@!${target.id}> has no money to rob!`, true);
+			await ctx.embedify('warn', 'user', `<@!${target.id}> has no money to rob!`).send(true);
 			return;
 		}
 		if (Math.random() * 100 > chance) {
 			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'ROB_FINE', 0, -fine);
-			await ctx.embedify('warn', 'user', `You were caught and fined ${ctx.guildEntity.currency}${fine.toLocaleString()}`, false);
+			await ctx.embedify('warn', 'user', `You were caught and fined ${ctx.guildEntity.currency}${fine.toLocaleString()}`).send();
 			return;
 		}
-		await ctx.embedify('success', 'user', `You stole ${ctx.guildEntity.currency}${parseNumber(amount)} from ${target}.`, false);
+		await ctx.embedify('success', 'user', `You stole ${ctx.guildEntity.currency}${parseNumber(amount)} from ${target}.`).send();
 		await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, targetEntity, 'ROB_SUCCESS', amount, 0);
 		await recordTransaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'ROB_VICTIM', -amount, 0);
 	};

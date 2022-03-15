@@ -47,9 +47,9 @@ export default class implements Command {
 			const commandQuery = ctx.interaction.options.getString('command');
 			const command = ctx.client.commands.get(commandQuery);
 			if (!command) {
-				await ctx.embedify('error', 'user', 'Could not find that command.', true);
+				await ctx.embedify('error', 'user', 'Could not find that command.').send(true);
 			} if (commandQuery in Object.keys(ctx.guildEntity.incomes)) {
-				await ctx.embedify('error', 'user', 'That is not an `INCOME` command.', true);
+				await ctx.embedify('error', 'user', 'That is not an `INCOME` command.').send(true);
 			} else {
 				Object.keys(ctx.guildEntity.incomes).forEach((cmd) => {
 					if (cmd === commandQuery) {
@@ -63,7 +63,7 @@ export default class implements Command {
 				});
 
 				await ctx.guildEntity.save();
-				await ctx.embedify('success', 'user', `Updated \`${commandQuery}\`.`, false);
+				await ctx.embedify('success', 'user', `Updated \`${commandQuery}\`.`).send();
 			}
 		}
 	};

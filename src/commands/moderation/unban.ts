@@ -15,7 +15,7 @@ export default class implements Command {
 		.addStringOption((option) => option.setName('string').setDescription('Specify a reason'));
 
 	public execute = async (ctx: Context): Promise<void> => {
-		if (!(await validateTarget(ctx, false))) return;
+		if (!(await validateTarget(ctx))) return;
 		const target = ctx.interaction.options.getUser('target');
 		const targetEntity = await Member.findOne({ user: { id: target.id }, guild: ctx.guildEntity })
 			?? await (async () => {
@@ -25,14 +25,14 @@ export default class implements Command {
 		const reason = ctx.interaction.options.getString('reason', false) || 'No reason provided';
 		const ban = (await ctx.interaction.guild.bans.fetch()).get(target.id);
 		if (!ban) {
-			await ctx.embedify('error', 'user', 'Could not find banned user.', true);
+			await ctx.embedify('error', 'user', 'Could not find banned user.').send(true);
 		} else {
 			await ctx.interaction.guild.members.unban(target, reason);
 			await Infraction.update(
 				{ target: targetEntity, guild: ctx.guildEntity, type: 'BAN', active: true },
 				{ active: false },
 			);
-			await ctx.embedify('success', 'user', `Unbanned \`${target.tag}\``, true);
+			await ctx.embedify('success', 'user', `Unbanned \`${target.tag}\``).send(true);
 		}
 	};
 }

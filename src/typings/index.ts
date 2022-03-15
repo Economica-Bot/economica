@@ -57,7 +57,7 @@ export type ReplyString = 'success' | 'info' | 'warn' | 'error';
 export type Footer = 'bot' | 'user' | 'guild' | EmbedFooterData;
 export type Moderation = 'ban' | 'kick' | 'timeout' | 'unban' | 'untimeout';
 export type BalanceString = 'wallet' | 'treasury';
-export type ListingString = 'CLASSIC' | 'INSTANT' | 'USABLE' | 'UNUSABLE' | 'GENERATOR';
+export type ListingString = 'CLASSIC' | 'INSTANT' | 'USABLE' | 'GENERATOR';
 export type InfractionString = 'BAN' | 'KICK' | 'TIMEOUT' | 'UNBAN' | 'UNTIMEOUT';
 export type TransactionString =
 	| 'DEPOSIT'

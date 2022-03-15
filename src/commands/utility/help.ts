@@ -33,7 +33,7 @@ export default class implements Command {
 
 		const command = ctx.client.commands.find((v) => ctx.guildEntity.modules.includes(v.data.module) && v.data.name.toLowerCase() === query.toLowerCase());
 		if (!command) {
-			await ctx.embedify('error', 'user', `Could not find command \`${query}\``, true);
+			await ctx.embedify('error', 'user', `Could not find command \`${query}\``).send(true);
 			return;
 		}
 

@@ -13,6 +13,6 @@ export default class implements Command {
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const invite = ctx.client.generateInvite(inviteOptions);
-		return ctx.embedify('info', 'bot', `**Invite ${ctx.client.user} to your server!**\n[Click Me!](${invite} 'Invite Economica')`, false);
+		return ctx.embedify('info', 'bot', `**Invite ${ctx.client.user} to your server!**\n[Click Me!](${invite} 'Invite Economica')`).send();
 	};
 }

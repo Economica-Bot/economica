@@ -6,7 +6,9 @@ export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('collect')
 		.setDescription('Collect all money from generators.')
-		.setModule('SHOP');
+		.setModule('SHOP')
+		.setFormat('collect')
+		.setExamples(['collect']);
 
 	public execute = async (ctx: Context) => {
 		const items = await Item.find({ relations: ['listing'], where: { owner: ctx.memberEntity } });
@@ -19,10 +21,10 @@ export default class implements Command {
 		});
 
 		if (amount) {
-			await ctx.embedify('success', 'user', `Collected ${ctx.guildEntity.currency}${amount}`, false);
+			await ctx.embedify('success', 'user', `Collected ${ctx.guildEntity.currency}${amount}`).send();
 			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.memberEntity, 'GENERATOR', 0, amount);
 		} else {
-			await ctx.embedify('warn', 'user', 'You have no money ready to collect', true);
+			await ctx.embedify('warn', 'user', 'You have no money ready to collect').send(true);
 		}
 	};
 }

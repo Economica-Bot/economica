@@ -47,7 +47,7 @@ export default class implements Command {
 		const id = ctx.interaction.options.getString('infraction_id', false);
 		const infraction = await Infraction.findOne({ relations: ['guild', 'target', 'agent'], where: { id, guild: ctx.guildEntity } });
 		if (id && !infraction) {
-			await ctx.embedify('error', 'user', `Could not find infraction with id \`${id}\``, true);
+			await ctx.embedify('error', 'user', `Could not find infraction with id \`${id}\``).send(true);
 			return;
 		}
 
@@ -57,26 +57,26 @@ export default class implements Command {
 				await ctx.interaction.reply({ embeds: [embed] });
 			} else if (subcommand === 'user') {
 				const infractions = await Infraction.find({ relations: ['target', 'target.user'], where: { guild: ctx.guildEntity, target: { user: { id: user.id } } } });
-				await ctx.embedify('info', 'user', `**${user.tag}'s Infractions:**\n\`${infractions.map((v) => v.id).join('`, `')}\``, false);
+				await ctx.embedify('info', 'user', `**${user.tag}'s Infractions:**\n\`${infractions.map((v) => v.id).join('`, `')}\``).send();
 			} else if (subcommand === 'all') {
 				const infractions = await Infraction.find({ guild: ctx.guildEntity });
-				await ctx.embedify('info', 'user', `**All Infractions:**\n\`${infractions.map((v) => v.id).join('`, `')}\``, false);
+				await ctx.embedify('info', 'user', `**All Infractions:**\n\`${infractions.map((v) => v.id).join('`, `')}\``).send();
 			}
 		} if (subcommandgroup === 'delete') {
 			if (subcommand === 'single') {
 				await infraction.remove();
-				await ctx.embedify('success', 'guild', `Deleted infraction \`${id}\``, true);
+				await ctx.embedify('success', 'guild', `Deleted infraction \`${id}\``).send(true);
 			} else if (subcommand === 'user') {
 				const infractions = await Infraction.find({ relations: ['guild', 'target', 'target.user'], where: { guild: ctx.guildEntity, target: { user: { id: user.id } } } });
 				await Infraction.remove(infractions);
-				await ctx.embedify('success', 'guild', `Deleted \`${infractions.length}\` infractions.`, true);
+				await ctx.embedify('success', 'guild', `Deleted \`${infractions.length}\` infractions.`).send(true);
 			} else if (subcommand === 'all') {
 				const infractions = await Infraction
 					.createQueryBuilder('infraction')
 					.where('guild = :id', { id: ctx.interaction.guildId })
 					.delete()
 					.execute();
-				await ctx.embedify('success', 'guild', `Deleted \`${infractions.affected}\` infractions.`, true);
+				await ctx.embedify('success', 'guild', `Deleted \`${infractions.affected}\` infractions.`).send(true);
 			}
 		}
 	};

@@ -25,7 +25,7 @@ export default class implements Command {
 		const moduleQuery = ctx.interaction.options.getString('module', false);
 		const moduleName = Modules[moduleQuery];
 		if (!moduleName && moduleQuery) {
-			await ctx.embedify('error', 'user', `Invalid module: \`${moduleQuery}\``, true);
+			await ctx.embedify('error', 'user', `Invalid module: \`${moduleQuery}\``).send(true);
 		} else if (subcommand === 'view') {
 			const modulesArr = Object.keys(Modules) as ModuleString[];
 			const enabledModulesArr = modulesArr.filter((module) => ctx.guildEntity.modules.includes(module));
@@ -37,28 +37,28 @@ export default class implements Command {
 			await ctx.interaction.reply({ embeds: [embed] });
 		} else if (subcommand === 'add') {
 			if (ctx.userEntity.keys < 1) {
-				await ctx.embedify('warn', 'user', 'You do not have any keys.', true);
+				await ctx.embedify('warn', 'user', 'You do not have any keys.').send(true);
 			} else if (ctx.guildEntity.modules.find((m) => m === moduleName)) {
-				await ctx.embedify('warn', 'user', `This server already has the \`${moduleName}\` module enabled.`, true);
+				await ctx.embedify('warn', 'user', `This server already has the \`${moduleName}\` module enabled.`).send(true);
 			} else {
 				await Module.create({ user: ctx.userEntity, guild: ctx.guildEntity, module: moduleName }).save();
 				ctx.userEntity.keys -= 1;
 				await ctx.userEntity.save();
 				ctx.guildEntity.modules.push(moduleName);
 				await ctx.guildEntity.save();
-				await ctx.embedify('success', 'user', `Added the \`${moduleName}\` module.`, true);
+				await ctx.embedify('success', 'user', `Added the \`${moduleName}\` module.`).send(true);
 			}
 		} else if (subcommand === 'remove') {
 			const module = await Module.findOne({ guild: ctx.guildEntity, module: moduleName });
 			if (!module) {
-				await ctx.embedify('warn', 'user', 'You have not enabled this module in this server.', true);
+				await ctx.embedify('warn', 'user', 'You have not enabled this module in this server.').send(true);
 			} else {
 				await module.remove();
 				ctx.userEntity.keys += 1;
 				await ctx.userEntity.save();
 				ctx.guildEntity.modules.map((mod) => mod !== module.module);
 				await ctx.guildEntity.save();
-				await ctx.embedify('success', 'user', `Removed the \`${moduleName}\` module.`, true);
+				await ctx.embedify('success', 'user', `Removed the \`${moduleName}\` module.`).send(true);
 			}
 		}
 	};

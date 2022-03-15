@@ -29,17 +29,17 @@ export default class implements Command {
 		const balance = ctx.interaction.options.getString('balance');
 		const parsedAmount = parseString(amount);
 		if (!parsedAmount) {
-			await ctx.embedify('error', 'user', `Invalid amount: \`${amount}\``, true);
+			await ctx.embedify('error', 'user', `Invalid amount: \`${amount}\``).send(true);
 		} else {
 			const wallet = balance === 'wallet' ? parsedAmount : 0;
 			const treasury = balance === 'treasury' ? parsedAmount : 0;
 			const target = ctx.interaction.options.getMember('target') as GuildMember;
 			const targetEntity = await Member.findOne({ user: { id: target.id }, guild: ctx.guildEntity })
-			?? await (async () => {
-				const user = await User.create({ id: target.id }).save();
-				return Member.create({ user, guild: ctx.guildEntity }).save();
-			})();
-			await ctx.embedify('success', 'user', `Added ${ctx.guildEntity.currency}${parseNumber(parsedAmount)} to <@!${target.id}>'s \`${balance}\`.`, false);
+				?? await (async () => {
+					const user = await User.create({ id: target.id }).save();
+					return Member.create({ user, guild: ctx.guildEntity }).save();
+				})();
+			await ctx.embedify('success', 'user', `Added ${ctx.guildEntity.currency}${parseNumber(parsedAmount)} to <@!${target.id}>'s \`${balance}\`.`).send();
 			await recordTransaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'ADD_MONEY', wallet, treasury);
 		}
 	};

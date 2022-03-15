@@ -17,13 +17,13 @@ export default class implements Command {
 	public execute = async (ctx: Context): Promise<void> => {
 		const target = ctx.interaction.options.getUser('user');
 		const targetEntity = await Member.findOne({ relations: ['user', 'guild'], where: { user: { id: target.id }, guild: ctx.guildEntity } })
-		?? await (async () => {
-			const user = await User.create({ id: target.id }).save();
-			return Member.create({ user, guild: ctx.guildEntity }).save();
-		})();
+			?? await (async () => {
+				const user = await User.create({ id: target.id }).save();
+				return Member.create({ user, guild: ctx.guildEntity }).save();
+			})();
 		const { validated, result } = await validateAmount(ctx, 'wallet');
 		if (!validated) return;
-		await ctx.embedify('success', 'user', `Paid ${target} ${ctx.guildEntity.currency}${parseNumber(result)}`, false);
+		await ctx.embedify('success', 'user', `Paid ${target} ${ctx.guildEntity.currency}${parseNumber(result)}`).send();
 		await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.memberEntity, 'GIVE_PAYMENT', -result, 0);
 		await recordTransaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'RECEIVE_PAYMENT', result, 0);
 	};

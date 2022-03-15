@@ -30,6 +30,6 @@ export default class implements Command {
 			{ target: targetEntity, guild: ctx.guildEntity, type: 'TIMEOUT', active: true },
 			{ active: false },
 		);
-		await ctx.embedify('success', 'user', `Timeout canceled for ${target}.`, false);
+		await ctx.embedify('success', 'user', `Timeout canceled for ${target}.`).send();
 	};
 }

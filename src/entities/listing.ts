@@ -51,10 +51,10 @@ export class Listing extends BaseEntity {
 		itemsRequired: Promise<Listing[]>;
 
 	@Column()
-		generatorPeriod: number;
+		generatorPeriod: number | null;
 
 	@Column()
-		generatorAmount: number;
+		generatorAmount: number | null;
 
 	@CreateDateColumn()
 		createdAt: Date;

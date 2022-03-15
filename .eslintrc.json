@@ -31,7 +31,8 @@
     "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
     "max-len": "off",
     "class-methods-use-this": "off",
-    "newline-per-chained-call": "off"
+    "newline-per-chained-call": "off",
+    "radix": "off"
   },
   "settings": {
     "import/parsers": {

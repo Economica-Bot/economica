@@ -28,23 +28,23 @@ export default class implements Command {
 		if (subcommand === 'view') {
 			const channelId = ctx.guildEntity.transactionLogId;
 			if (channelId) {
-				await ctx.embedify('info', 'user', `The current transaction log is <#${channelId}>.`, false);
+				await ctx.embedify('info', 'user', `The current transaction log is <#${channelId}>.`).send();
 			} else {
-				await ctx.embedify('warn', 'user', 'There is no transaction log.', false);
+				await ctx.embedify('warn', 'user', 'There is no transaction log.').send();
 			}
 		} if (subcommand === 'set') {
 			const channel = ctx.interaction.options.getChannel('channel') as TextChannel;
 			if (!channel.permissionsFor(ctx.interaction.guild.me).has('SEND_MESSAGES') || !channel.permissionsFor(ctx.interaction.guild.me).has('EMBED_LINKS')) {
-				await ctx.embedify('error', 'user', 'I need `SEND_MESSAGES` and `EMBED_LINKS` in that channel.', true);
+				await ctx.embedify('error', 'user', 'I need `SEND_MESSAGES` and `EMBED_LINKS` in that channel.').send(true);
 			} else {
 				ctx.guildEntity.transactionLogId = channel.id;
 				await ctx.guildEntity.save();
-				await ctx.embedify('success', 'user', `Transaction log set to ${channel}.`, false);
+				await ctx.embedify('success', 'user', `Transaction log set to ${channel}.`).send();
 			}
 		} if (subcommand === 'reset') {
 			ctx.guildEntity.transactionLogId = null;
 			await ctx.guildEntity.save();
-			await ctx.embedify('success', 'user', 'Transaction log reset.', false);
+			await ctx.embedify('success', 'user', 'Transaction log reset.').send();
 		}
 	};
 }

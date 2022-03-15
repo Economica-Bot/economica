@@ -39,7 +39,7 @@ export default class implements Command {
 		const reason = ctx.interaction.options.getString('reason') ?? 'No reason provided';
 		const days = ctx.interaction.options.getNumber('days') ?? 0;
 		await target.ban({ days, reason });
-		await ctx.embedify('success', 'user', `Banned \`${target.user.tag}\` | Length: ${formattedDuration}`, true);
+		await ctx.embedify('success', 'user', `Banned \`${target.user.tag}\` | Length: ${formattedDuration}`).send(true);
 		await recordInfraction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'BAN', reason, true, milliseconds, permanent);
 	};
 }

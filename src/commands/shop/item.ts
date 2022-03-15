@@ -10,6 +10,7 @@ export default class implements Command {
 		.setDescription('Interact with inventory items')
 		.setModule('SHOP')
 		.setFormat('item <sell | use | give>')
+		.setExamples(['item'])
 		.addSubcommand((subcommand) => subcommand
 			.setName('sell')
 			.setDescription('Sell an item')
@@ -27,8 +28,8 @@ export default class implements Command {
 			.addStringOption((option) => option
 				.setName('item').setDescription('Specify an item').setRequired(true))
 			.addUserOption((option) => option
-				.setName('member')
-				.setDescription('Specify a member which will receive the items')
+				.setName('user')
+				.setDescription('Specify a user')
 				.setRequired(true))
 			.addIntegerOption((option) => option
 				.setName('amount')
@@ -42,11 +43,11 @@ export default class implements Command {
 		const item = await Item.findOne({ listing, owner: ctx.memberEntity });
 		if (subcommand === 'buy') {
 			if (!listing) {
-				await ctx.embedify('error', 'user', `Could not find a listing called \`${query}\``, true);
+				await ctx.embedify('error', 'user', `Could not find a listing called \`${query}\``).send(true);
 				return;
 			}
 			if (!listing.active) {
-				await ctx.embedify('error', 'user', `The listing \`${listing.name}\` is not active`, true);
+				await ctx.embedify('error', 'user', `The listing \`${listing.name}\` is not active`).send(true);
 				return;
 			}
 
@@ -60,23 +61,23 @@ export default class implements Command {
 				if (!hasSublisting) missingItems.push(sublisting.name);
 			});
 			if (listing.price > ctx.memberEntity.wallet) {
-				await ctx.embedify('warn', 'user', 'You cannot afford this item.', true);
+				await ctx.embedify('warn', 'user', 'You cannot afford this item.').send(true);
 				return;
 			} if (listing.treasuryRequired > ctx.memberEntity.treasury) {
-				await ctx.embedify('warn', 'user', `You need ${ctx.guildEntity.currency}${parseNumber(listing.treasuryRequired)} in your treasury.`, true);
+				await ctx.embedify('warn', 'user', `You need ${ctx.guildEntity.currency}${parseNumber(listing.treasuryRequired)} in your treasury.`).send(true);
 				return;
 			} if (missingItems.length) {
-				await ctx.embedify('warn', 'user', `You are missing \`${missingItems.join('`, `')}\`.`, true);
+				await ctx.embedify('warn', 'user', `You are missing \`${missingItems.join('`, `')}\`.`).send(true);
 				return;
 			} if (missingRoles.length) {
-				await ctx.embedify('warn', 'user', `You are missing <@&${missingRoles.join('>, <@&')}>.`, true);
+				await ctx.embedify('warn', 'user', `You are missing <@&${missingRoles.join('>, <@&')}>.`).send(true);
 				return;
 			} if (item && !listing.stackable) {
-				await ctx.embedify('warn', 'user', 'This item is not stackable.', true);
+				await ctx.embedify('warn', 'user', 'This item is not stackable.').send(true);
 				return;
 			}
 
-			await ctx.embedify('success', 'user', `Purchased \`${listing.name}\` for ${ctx.guildEntity.currency}${parseNumber(listing.price)}`, false);
+			await ctx.embedify('success', 'user', `Purchased \`${listing.name}\` for ${ctx.guildEntity.currency}${parseNumber(listing.price)}`).send();
 			if (listing.type === 'INSTANT') {
 				listing.rolesRemoved.forEach(async (role) => ctx.interaction.member.roles.remove(role, `Purchased ${listing.name}`));
 				listing.rolesGiven.forEach((roleId) => ctx.interaction.member.roles.add(roleId, `Purchased ${listing.name}`));
@@ -89,15 +90,15 @@ export default class implements Command {
 			await listing.save();
 		} else if (subcommand === 'sell') {
 			if (!listing) {
-				await ctx.embedify('error', 'user', `Could not find a listing called \`${query}\``, true);
+				await ctx.embedify('error', 'user', `Could not find a listing called \`${query}\``).send(true);
 				return;
 			}
 			if (!listing.active) {
-				await ctx.embedify('error', 'user', `The listing \`${listing.name}\` is not active`, true);
+				await ctx.embedify('error', 'user', `The listing \`${listing.name}\` is not active`).send(true);
 				return;
 			}
 
-			await ctx.embedify('success', 'user', `Sold \`${listing.name}\` for ${ctx.guildEntity.currency}${parseNumber(listing.price)}`, false);
+			await ctx.embedify('success', 'user', `Sold \`${listing.name}\` for ${ctx.guildEntity.currency}${parseNumber(listing.price)}`).send();
 			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'SELL', listing.price, 0);
 			item.amount -= 1;
 			await item.save();
@@ -106,11 +107,11 @@ export default class implements Command {
 			listing.save();
 		} else if (subcommand === 'use') {
 			if (!item) {
-				await ctx.embedify('error', 'user', `No item with name \`${query}\` exists.`, true);
+				await ctx.embedify('error', 'user', `No item with name \`${query}\` exists.`).send(true);
 				return;
 			}
 			if (item.listing.type !== 'USABLE') {
-				await ctx.embedify('error', 'user', 'This item is unusable.', true);
+				await ctx.embedify('error', 'user', 'This item is unusable.').send(true);
 				return;
 			}
 
@@ -130,13 +131,13 @@ export default class implements Command {
 			const memberEntity = await Member.findOne({ relations: ['user'], where: { user: { id: member.user.id }, guild: ctx.guildEntity } });
 			const userItem = await Item.findOne({ listing, owner: memberEntity });
 			if (userItem && !item.listing.stackable) {
-				await ctx.embedify('warn', 'user', 'That user already has that non-stackable item', true);
+				await ctx.embedify('warn', 'user', 'That user already has that non-stackable item').send(true);
 				return;
 			}
 
 			const amount = ctx.interaction.options.getInteger('amount') || 1;
 			if (amount > item.amount) {
-				await ctx.embedify('warn', 'user', `You do not have ${amount} \`${item.listing.name}\`s`, true);
+				await ctx.embedify('warn', 'user', `You do not have ${amount} \`${item.listing.name}\`s`).send(true);
 				return;
 			}
 
@@ -146,7 +147,7 @@ export default class implements Command {
 			await item.save();
 			if (item.amount === 0) await item.remove();
 
-			await ctx.embedify('success', 'user', `Gave ${amount} x \`${item.listing.name}\` to ${member.user}`, false);
+			await ctx.embedify('success', 'user', `Gave ${amount} x \`${item.listing.name}\` to ${member.user}`).send();
 		}
 	};
 }

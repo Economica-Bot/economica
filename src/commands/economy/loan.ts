@@ -17,13 +17,14 @@ export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('loan')
 		.setDescription('Lend money to other users.')
+		.setModule('ECONOMY')
 		.setFormat('loan')
-		.setExamples(['loan'])
-		.setModule('ECONOMY');
+		.setExamples(['loan']);
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const loans = await Loan.find({ guild: ctx.guildEntity });
-		const embed = ctx.embedify('info', 'user', `**Welcome ${ctx.interaction.member} to your loan dashboard! Here, you can make new loans, view active loans, or manage pending loans.**\n\n**${Emojis.SELECT} Select a category below to get started.**`)
+		const description = `**Welcome ${ctx.interaction.member} to your loan dashboard! Here, you can make new loans, view active loans, or manage pending loans.**\n\n**${Emojis.SELECT} Select a category below to get started.**`;
+		const embed = ctx.embedify('info', 'user', description)
 			.setAuthor({ name: 'Loan Dashboard', iconURL: ctx.interaction.guild.iconURL() })
 			.addFields([
 				{ name: `${Emojis.CREATE_LOAN} Create`, value: 'Make a new loan', inline: true },

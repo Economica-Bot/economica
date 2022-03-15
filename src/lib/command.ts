@@ -19,7 +19,7 @@ async function checkPermission(ctx: Context): Promise<boolean> {
 		if (!ctx.interaction.guild.me.permissionsIn(channel).has(permission)) missingClientPermissions.push(permission);
 	});
 	if (missingClientPermissions.length) {
-		await ctx.embedify('warn', 'bot', `Missing Bot Permissions: \`${missingClientPermissions}\``, true);
+		await ctx.embedify('warn', 'bot', `Missing Bot Permissions: \`${missingClientPermissions}\``).send(true);
 		return false;
 	}
 	if (ctx.interaction.guild.ownerId === member.id || member.permissions.has('ADMINISTRATOR')) {
@@ -67,7 +67,7 @@ async function checkAuthority(ctx: Context): Promise<boolean> {
 	}
 	if (missingAuthority) {
 		const description = `Missing authority: \`${missingAuthority}\``;
-		await ctx.embedify('error', 'user', `Insufficient Permissions: \`${description}\``, true);
+		await ctx.embedify('error', 'user', `Insufficient Permissions: \`${description}\``).send(true);
 		return false;
 	}
 	return true;
@@ -75,7 +75,7 @@ async function checkAuthority(ctx: Context): Promise<boolean> {
 
 async function validateModule(ctx: Context): Promise<boolean> {
 	if (ctx.guildEntity.modules.find((module) => module === ctx.data.module)) {
-		await ctx.embedify('warn', 'user', `The \`${ctx.data.module}\` module is not enabled in this server.`, true);
+		await ctx.embedify('warn', 'user', `The \`${ctx.data.module}\` module is not enabled in this server.`).send(true);
 		return false;
 	}
 	return true;
@@ -84,13 +84,13 @@ async function validateModule(ctx: Context): Promise<boolean> {
 export async function commandCheck(ctx: Context): Promise<boolean> {
 	const isDeveloper = DEVELOPER_IDS.includes(ctx.interaction.user.id);
 	if (!ctx.data.enabled) {
-		await ctx.embedify('warn', 'user', 'This command is disabled.', true);
+		await ctx.embedify('warn', 'user', 'This command is disabled.').send(true);
 		return false;
 	} if (ctx.data.authority === 'DEVELOPER' && !isDeveloper) {
-		await ctx.embedify('warn', 'user', 'This command is dev only.', true);
+		await ctx.embedify('warn', 'user', 'This command is dev only.').send(true);
 		return false;
 	} if (!ctx.data.global && !ctx.interaction.inGuild()) {
-		await ctx.embedify('warn', 'user', 'This command may only be used within servers.', true);
+		await ctx.embedify('warn', 'user', 'This command may only be used within servers.').send(true);
 		return false;
 	} if (!(await checkPermission(ctx))) {
 		return false;

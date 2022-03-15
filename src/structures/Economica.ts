@@ -234,7 +234,7 @@ export class Economica extends Client {
 				await job.execute(this);
 			}, job.cooldown);
 		});
-		this.log.info('Logs registered');
+		this.log.info('Jobs registered');
 	}
 
 	public async registerCommands() {

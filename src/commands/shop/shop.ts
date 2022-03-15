@@ -1,13 +1,13 @@
 import { MessageEmbed } from 'discord.js';
 
-import { Listing } from '../../entities/index.js';
-import { paginate } from '../../lib/paginate.js';
+import { Item, Listing } from '../../entities/index.js';
+import { paginate, recordTransaction } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
-		.setName('')
-		.setDescription('Create and purchase listings')
+		.setName('shop')
+		.setDescription('View and purchase shop listings')
 		.setModule('SHOP')
 		.setFormat('shop <view | buy> [item]')
 		.setExamples([
@@ -16,7 +16,7 @@ export default class implements Command {
 			'shop buy Plane',
 		])
 		.addSubcommand((subcommand) => subcommand
-			.setName('View')
+			.setName('view')
 			.setDescription('View shop listings')
 			.addStringOption((option) => option
 				.setName('listing').setDescription('Specify a listing')))
@@ -29,17 +29,17 @@ export default class implements Command {
 	public execute = async (ctx: Context) => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const query = ctx.interaction.options.getString('listing');
-		const listings = await Listing.find({ guild: ctx.guildEntity });
+		const listings = await Listing.find({ where: { guild: ctx.guildEntity } });
 		const listing = listings.find((l) => l.name === query);
 		if (query && !listing) {
-			await ctx.embedify('error', 'user', `Could not find listing named \`${query}\``, true);
+			await ctx.embedify('error', 'user', `Could not find listing named \`${query}\``).send(true);
 			return;
 		}
 
 		if (subcommand === 'view') {
 			if (listing) {
 				const description = listing.toString();
-				await ctx.embedify('info', 'user', description, false);
+				await ctx.embedify('info', 'user', description).send();
 				return;
 			}
 
@@ -57,6 +57,42 @@ export default class implements Command {
 			}
 
 			await paginate(ctx.interaction, embeds);
+			return;
+		}
+
+		if (subcommand === 'buy') {
+			const errors: string[] = [];
+			if (!listing.active) errors.push('This listing is no longer active');
+			if (listing.price > ctx.memberEntity.wallet) errors.push(`You cannot afford this item. Current wallet balance: ${ctx.guildEntity.currency}${ctx.memberEntity.wallet}`);
+			if (listing.treasuryRequired > ctx.memberEntity.treasury) errors.push(`Insufficient treasury balance. You need at least ${ctx.guildEntity.currency}${listing.treasuryRequired}`);
+			listing.rolesRequired.forEach(async (role) => {
+				if (!ctx.interaction.member.roles.cache.has(role)) errors.push(`You are missing the <@!${role}> role`);
+			});
+			(await listing.itemsRequired).forEach(async (item) => {
+				if (!(await Item.findOne({ owner: ctx.memberEntity, listing: item }))) errors.push(`You need a \`${item.name}\` to purchase this listing`);
+			});
+			const item = await Item.findOne({ owner: ctx.memberEntity, listing });
+			if (item && !listing.stackable) errors.push('This item is not stackable');
+			if (errors.length) {
+				await ctx.embedify('warn', 'user', errors.join('\n')).send(true);
+				return;
+			}
+
+			await ctx.embedify('success', 'user', `Purchased \`${listing.name}\``).send();
+			if (listing.type === 'INSTANT') {
+				listing.rolesRemoved.forEach(async (role) => ctx.interaction.member.roles.remove(role));
+				listing.rolesGiven.forEach(async (role) => ctx.interaction.member.roles.add(role));
+			}
+
+			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'BUY', -listing.price, 0);
+			if (item) {
+				item.amount += 1;
+				await item.save();
+			} else {
+				const newItem = await Item.create({ listing, owner: ctx.memberEntity, amount: 1 });
+				if (newItem.listing.type === 'GENERATOR') newItem.lastGeneratedAt = new Date();
+				await newItem.save();
+			}
 		}
 	};
 }

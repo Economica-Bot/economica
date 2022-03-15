@@ -15,7 +15,7 @@ export default class implements Command {
 		const { currency } = ctx.guildEntity;
 		const { min, max } = ctx.guildEntity.incomes.work;
 		const amount = Math.ceil(Math.random() * (max - min) + min);
-		await ctx.embedify('success', 'user', `You worked and earned ${currency}${parseNumber(amount)}`, false);
+		await ctx.embedify('success', 'user', `You worked and earned ${currency}${parseNumber(amount)}`).send();
 		await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'WORK', amount, 0);
 	};
 }
