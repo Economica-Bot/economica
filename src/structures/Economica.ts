@@ -20,6 +20,7 @@ import {
 	WEBHOOK_URIS,
 	clientOptions,
 	loggerOptions,
+	DB_PASSWORD,
 } from '../config.js';
 import {
 	Authority,
@@ -182,7 +183,7 @@ export class Economica extends Client {
 			host: 'localhost',
 			port: 5432,
 			username: 'postgres',
-			password: 'password',
+			password: DB_PASSWORD,
 			entities: [path.join(dirname, '../entities/*.{js,ts}')],
 			applicationName: 'Economica',
 		}).connect();
@@ -247,9 +248,9 @@ export class Economica extends Client {
 				const command = new CommandClass() as CommandStruct<true>;
 
 				// Validation
-				if (!command.data.module) throw new Error(`Command ${command.data.name} missing module!`);
+				/* if (!command.data.module) throw new Error(`Command ${command.data.name} missing module!`);
 				if (!command.data.format) throw new Error(`Command ${command.data.name} missing format!`);
-				if (!command.data.examples) throw new Error(`Command ${command.data.name} missing examples!`);
+				if (!command.data.examples) throw new Error(`Command ${command.data.name} missing examples!`); */
 				this.log.debug(`Registering command ${command.data.name}`);
 				this.commands.set(command.data.name, command);
 			});
