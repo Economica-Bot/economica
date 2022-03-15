@@ -20,6 +20,7 @@ import {
 	WEBHOOK_URIS,
 	clientOptions,
 	loggerOptions,
+	DB_PASSWORD,
 } from '../config.js';
 import {
 	Authority,
@@ -182,7 +183,7 @@ export class Economica extends Client {
 			host: 'localhost',
 			port: 5432,
 			username: 'postgres',
-			password: 'password',
+			password: DB_PASSWORD,
 			entities: [path.join(dirname, '../entities/*.{js,ts}')],
 			applicationName: 'Economica',
 		}).connect();
