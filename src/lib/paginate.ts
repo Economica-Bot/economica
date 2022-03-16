@@ -13,80 +13,37 @@ export async function paginate(
 	interaction: Discord.CommandInteraction,
 	embeds: Discord.MessageEmbed[],
 	index = 0,
+	components?: Discord.MessageComponent[],
 ) {
 	if (!interaction.deferred) {
 		await interaction.deferReply();
 	}
 
-	let row = new Discord.MessageActionRow()
-		.addComponents(
-			new Discord.MessageButton()
-				.setCustomId('previous_page')
-				.setLabel('Previous')
-				.setStyle('SECONDARY')
-				.setDisabled(index === 0),
-		)
-		.addComponents(
-			new Discord.MessageButton()
-				.setCustomId('next_page')
-				.setLabel('Next')
-				.setStyle('PRIMARY')
-				.setDisabled(index === embeds.length - 1),
-		);
+	setTimeout(() => interaction.editReply({
+		components: [],
+	}), BUTTON_INTERACTION_COOLDOWN);
+
+	const row = new Discord.MessageActionRow()
+		.setComponents([
+			new Discord.MessageButton().setCustomId('previous_page').setLabel('Previous').setStyle('SECONDARY').setDisabled(index === 0),
+			new Discord.MessageButton().setCustomId('next_page').setLabel('Next').setStyle('PRIMARY').setDisabled(index === embeds.length - 1),
+			...components,
+		]);
 
 	const msg = (await interaction.editReply({
 		embeds: [embeds[index]],
 		components: [row],
 	})) as Discord.Message;
 
-	const filter = (i: Discord.ButtonInteraction): boolean => i.user.id === interaction.user.id;
-
-	const collector = msg.createMessageComponentCollector<'BUTTON'>({
-		filter,
-		time: BUTTON_INTERACTION_COOLDOWN,
+	const i = await msg.awaitMessageComponent({
+		componentType: 'BUTTON',
 	});
 
-	collector.on('collect', async (i) => {
-		if (index < embeds.length - 1 && index >= 0 && i.customId === 'next_page') {
-			index += 1;
-			row = new Discord.MessageActionRow()
-				.addComponents(
-					new Discord.MessageButton()
-						.setCustomId('previous_page')
-						.setLabel('Previous')
-						.setStyle('SECONDARY')
-						.setDisabled(index === 0),
-				)
-				.addComponents(
-					new Discord.MessageButton()
-						.setCustomId('next_page')
-						.setLabel('Next')
-						.setStyle('PRIMARY')
-						.setDisabled(index === embeds.length - 1),
-				);
-		} else if (index > 0 && index < embeds.length && i.customId === 'previous_page') {
-			index += 1;
-			row = new Discord.MessageActionRow()
-				.addComponents(
-					new Discord.MessageButton()
-						.setCustomId('previous_page')
-						.setLabel('Previous')
-						.setStyle('SECONDARY')
-						.setDisabled(index === 0),
-				)
-				.addComponents(
-					new Discord.MessageButton()
-						.setCustomId('next_page')
-						.setLabel('Next')
-						.setStyle('PRIMARY')
-						.setDisabled(index === embeds.length - 1),
-				);
-		}
+	if (index < embeds.length - 1 && index >= 0 && i.customId === 'next_page') {
+		index += 1;
+	} else if (index > 0 && index < embeds.length && i.customId === 'previous_page') {
+		index -= 1;
+	}
 
-		await i.update({ embeds: [embeds[index]], components: [row] });
-	});
-
-	collector.on('end', async () => {
-		await msg.edit({ components: [] }).catch();
-	});
+	await paginate(interaction, embeds, index, components);
 }
