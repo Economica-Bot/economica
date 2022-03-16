@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { GuildApplicationCommandPermissionData, MessageEmbed } from 'discord.js';
 
 import { Authority } from '../../entities';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
@@ -17,11 +17,12 @@ export default class implements Command {
 			'authority reset',
 			'authority reset @Moderator',
 		])
+		.setAuthority('ADMINISTRATOR')
+		.setDefaultPermission(false)
 		.addSubcommand((options) => options.setName('view').setDescription('View the economy authority hierarchy'))
 		.addSubcommand((options) => options
 			.setName('set')
 			.setDescription("Set a role or user's authority level")
-			.setAuthority('ADMINISTRATOR')
 			.addMentionableOption((option) => option.setName('mentionable').setDescription('Specify a role or user').setRequired(true))
 			.addStringOption((option) => option
 				.setName('authority')
@@ -36,7 +37,6 @@ export default class implements Command {
 		.addSubcommand((options) => options
 			.setName('reset')
 			.setDescription('Reset authority levels')
-			.setAuthority('ADMINISTRATOR')
 			.addMentionableOption((option) => option.setName('mentionable').setDescription('Specify a role or user')));
 
 	public execute = async (ctx: Context): Promise<void> => {
@@ -58,22 +58,24 @@ export default class implements Command {
 				.addField('__Economy Admin__', 'Lead your economy team!')
 				.addField('Description', 'Economy Admins can do anything with regards to the economy (reset economy, manage economy ranks and permissions, etc...)\n', true)
 				.addField('Items', admin || 'No Authorized Users or Roles\n*Note: Any member with the `ADMINISTRATOR` permission is automatically considered an Economy Admin.\n', true);
-			await ctx.interaction.reply({ embeds: [embed] });
+			await ctx.interaction.reply({ embeds: [embed], ephemeral: true });
 		} else if (subcommand === 'set') {
 			const authorityLevel = ctx.interaction.options.getString('authority') as keyof typeof Authorities;
 			const { id } = ctx.interaction.options.getMentionable('mentionable');
 			const type = ctx.client.users.cache.get(id) ? 'USER' : 'ROLE';
 			if (await Authority.findOne({ id })) await Authority.update({ id }, { authority: authorityLevel });
 			else await Authority.create({ id, guild: ctx.guildEntity, type, authority: authorityLevel }).save();
-			await ctx.embedify('success', 'bot', `Authority set to \`${authorityLevel}\`.`).send();
+			await ctx.embedify('success', 'bot', `Authority set to \`${authorityLevel}\`.`).send(true);
+			const fullPermissions = ctx.client.application.commands.cache.map((command) => ({ id: command.id, permissions: [{ id, type, permission: true }] } as GuildApplicationCommandPermissionData));
+			ctx.client.application.commands.permissions.set({ guild: ctx.interaction.guildId, fullPermissions });
 		} else if (subcommand === 'reset') {
 			const { id } = ctx.interaction.options.getMentionable('mentionable', false);
 			if (id) {
 				await Authority.delete({ id });
-				await ctx.embedify('success', 'bot', 'Authority reset.').send();
+				await ctx.embedify('success', 'bot', 'Authority reset.').send(true);
 			} else {
 				await Authority.delete({ guild: ctx.guildEntity });
-				await ctx.embedify('success', 'bot', 'Authority settings have been reset.').send();
+				await ctx.embedify('success', 'bot', 'Authority settings have been reset.').send(true);
 			}
 		}
 	};

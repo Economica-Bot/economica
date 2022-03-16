@@ -14,6 +14,7 @@ export default class implements Command {
 		.setExamples(['ban @user', 'ban @user 3h', 'ban @user spamming', 'ban @user 3h spamming'])
 		.setClientPermissions(['BAN_MEMBERS'])
 		.setAuthority('MODERATOR')
+		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target').setRequired(true))
 		.addStringOption((option) => option.setName('duration').setDescription('Specify a duration').setRequired(false))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason').setRequired(false))

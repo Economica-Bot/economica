@@ -9,7 +9,9 @@ export default class implements Command {
 		.setDescription('Work to earn a sum')
 		.setModule('INCOME')
 		.setFormat('work')
-		.setExamples(['work']);
+		.setExamples(['work'])
+		.setAuthority('USER')
+		.setDefaultPermission(false);
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const { currency } = ctx.guildEntity;

@@ -9,7 +9,9 @@ export default class implements Command {
 		.setDescription('Commit a felony to swindle a sum')
 		.setModule('INCOME')
 		.setFormat('crime')
-		.setExamples(['crime']);
+		.setExamples(['crime'])
+		.setAuthority('USER')
+		.setDefaultPermission(false);
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const { min, max, chance, minfine, maxfine } = ctx.guildEntity.incomes.crime;

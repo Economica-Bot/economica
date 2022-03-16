@@ -9,7 +9,9 @@ export default class implements Command {
 		.setDescription('View various bot memory statistics')
 		.setModule('INSIGHTS')
 		.setFormat('memory')
-		.setExamples(['memory']);
+		.setExamples(['memory'])
+		.setAuthority('USER')
+		.setDefaultPermission(false);
 
 	public execute = async (ctx: Context) => {
 		const description = '**View bots usage of memory in various measures.**\n\n'

@@ -8,13 +8,14 @@ export default class implements Command {
 		.setModule('ECONOMY')
 		.setFormat('currency <view | set | reset> [currency]')
 		.setExamples(['currency view', 'currency set 💵', 'currency reset'])
+		.setAuthority('MANAGER')
+		.setDefaultPermission(false)
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View the currency symbol'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('set')
 			.setDescription('Set the currency symbol')
-			.setAuthority('MANAGER')
 			.addStringOption((option) => option.setName('currency').setDescription('Specify a symbol').setRequired(true)))
-		.addSubcommand((subcommand) => subcommand.setName('reset').setDescription('Reset the currency symbol').setAuthority('MANAGER'));
+		.addSubcommand((subcommand) => subcommand.setName('reset').setDescription('Reset the currency symbol'));
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();

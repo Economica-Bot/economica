@@ -10,6 +10,8 @@ export default class implements Command {
 		.setModule('INSIGHTS')
 		.setFormat('graph balance [user]')
 		.setExamples(['graph balance', 'graph balance @user'])
+		.setAuthority('USER')
+		.setDefaultPermission(false)
 		.addSubcommand((subcommand) => subcommand
 			.setName('balance')
 			.setDescription('View graph for user balance')

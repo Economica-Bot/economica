@@ -9,7 +9,9 @@ export default class implements Command {
 		.setDescription('Grovel in hopes of earning a meager sum')
 		.setModule('INCOME')
 		.setFormat('beg')
-		.setExamples(['beg']);
+		.setExamples(['beg'])
+		.setAuthority('USER')
+		.setDefaultPermission(false);
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const { min, max, chance } = ctx.guildEntity.incomes.beg;

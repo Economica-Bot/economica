@@ -13,6 +13,7 @@ export default class implements Command {
 		.setExamples(['kick @user', 'kick @user harrassment'])
 		.setClientPermissions(['KICK_MEMBERS'])
 		.setAuthority('MODERATOR')
+		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason.').setRequired(false));
 

@@ -13,6 +13,7 @@ export default class implements Command {
 		.setFormat('add-money <user> <amount> <target>')
 		.setExamples(['add-money @user 300 wallet', 'add-money @user 100 treasury'])
 		.setAuthority('MANAGER')
+		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('target').setDescription('Specify a user').setRequired(true))
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true))
 		.addStringOption((option) => option

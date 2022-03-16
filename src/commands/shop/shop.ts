@@ -15,6 +15,8 @@ export default class implements Command {
 			'shop view Plane',
 			'shop buy Plane',
 		])
+		.setAuthority('USER')
+		.setDefaultPermission(false)
 		.addSubcommand((subcommand) => subcommand
 			.setName('view')
 			.setDescription('View shop listings')

@@ -56,13 +56,10 @@ async function checkCooldown(ctx: Context): Promise<boolean> {
 
 async function checkAuthority(ctx: Context): Promise<boolean> {
 	const member = ctx.interaction.member as GuildMember;
-	const group = ctx.data.getSubcommandGroup(ctx.interaction.options.getSubcommandGroup(false))[0];
-	const subcommand = ctx.data.getSubcommand(ctx.interaction.options.getSubcommand(false))[0];
 	let missingAuthority: keyof typeof Authorities;
-	const authority = subcommand?.authority ?? group?.authority ?? ctx.data.authority;
-	if (authority) {
-		const auth = ctx.guildEntity.auth.some((a) => a.authority === authority && (member.roles.cache.has(a.id) || member.id === a.id));
-		if (!auth) missingAuthority = authority;
+	if (ctx.data.authority) {
+		const auth = ctx.guildEntity.auth.some((a) => a.authority === ctx.data.authority && (member.roles.cache.has(a.id) || member.id === a.id));
+		if (!auth) missingAuthority = ctx.data.authority;
 		if (missingAuthority === 'ADMINISTRATOR' && ctx.interaction.member.permissions.has('ADMINISTRATOR')) missingAuthority = null;
 		if (missingAuthority === 'MANAGER' && ctx.interaction.member.permissions.has('MANAGE_GUILD')) missingAuthority = null;
 		if (missingAuthority === 'MODERATOR' && ctx.interaction.member.permissions.has('MODERATE_MEMBERS')) missingAuthority = null;
@@ -94,6 +91,8 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 	} if (!ctx.data.global && !ctx.interaction.inGuild()) {
 		await ctx.embedify('warn', 'user', 'This command may only be used within servers.').send(true);
 		return false;
+	} if (!ctx.interaction.inGuild()) {
+		return true;
 	} if (!(await checkPermission(ctx))) {
 		return false;
 	} if (!isDeveloper || !DEV_COOLDOWN_EXEMPT) {

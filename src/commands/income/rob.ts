@@ -11,6 +11,8 @@ export default class implements Command {
 		.setModule('INCOME')
 		.setFormat('rob <user>')
 		.setExamples(['rob @QiNG-agar'])
+		.setAuthority('USER')
+		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(true));
 
 	public execute = async (ctx: Context): Promise<void> => {

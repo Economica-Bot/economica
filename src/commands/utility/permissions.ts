@@ -28,11 +28,11 @@ export default class implements Command {
 			.addField('Base', `Client Permissions: \`${command.data.clientPermissions ?? '`None`'}\` Authority Level: \`${command.data.authority ?? '`None`'}\``);
 		command.data.options.forEach((option) => {
 			if (option instanceof EconomicaSlashCommandSubcommandBuilder) {
-				embed.addField(`${command.data.name} ${option.name}`, `Client Permissions: \`${option.clientPermissions ?? '`None`'}\`\nAuthority Level: \`${option.authority ?? '`None`'}\``, true);
+				embed.addField(`${command.data.name} ${option.name}`, `Client Permissions: \`${option.clientPermissions ?? '`None`'}\``, true);
 			} else if (option instanceof EconomicaSlashCommandSubcommandGroupBuilder) {
-				embed.addField(`${command.data.name} ${option.name}`, `Client Permissions: \`${option.clientPermissions ?? '`None`'}\`\nAuthority Level: \`${option.authority ?? '`None`'}\``);
+				embed.addField(`${command.data.name} ${option.name}`, `Client Permissions: \`${option.clientPermissions ?? '`None`'}\``);
 				option.options.forEach((opt: EconomicaSlashCommandSubcommandBuilder) => {
-					embed.addField(`${command.data.name} ${option.name} ${opt.name}`, `Client Permissions: \`${opt.clientPermissions ?? '`None`'}\` Authority Level: \`${opt.authority ?? '`None`'}\``, true);
+					embed.addField(`${command.data.name} ${option.name} ${opt.name}`, `Client Permissions: \`${opt.clientPermissions ?? '`None`'}\``, true);
 				});
 			}
 		});

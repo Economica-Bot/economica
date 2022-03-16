@@ -11,7 +11,9 @@ export default class implements Command {
 		.setDescription('View server and bot statistics')
 		.setModule('INSIGHTS')
 		.setFormat('statistics')
-		.setExamples(['statistics']);
+		.setExamples(['statistics'])
+		.setAuthority('USER')
+		.setDefaultPermission(false);
 
 	public execute = async (ctx: Context) => {
 		const description = `**Welcome to ${ctx.client.user}'s Statistics Dashboard!**`;

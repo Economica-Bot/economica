@@ -14,6 +14,8 @@ export default class implements Command {
 			'transaction delete user @user',
 			'transaction delete all',
 		])
+		.setAuthority('MANAGER')
+		.setDefaultPermission(false)
 		.addSubcommandGroup((subcommandgroup) => subcommandgroup
 			.setName('view')
 			.setDescription('View transaction data')
@@ -29,7 +31,6 @@ export default class implements Command {
 		.addSubcommandGroup((subcommandgroup) => subcommandgroup
 			.setName('delete')
 			.setDescription('Delete transaction data')
-			.setAuthority('MANAGER')
 			.addSubcommand((subcommand) => subcommand
 				.setName('single')
 				.setDescription('Delete a single transaction')

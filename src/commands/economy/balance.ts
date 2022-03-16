@@ -9,6 +9,8 @@ export default class implements Command {
 		.setModule('ECONOMY')
 		.setFormat('balance [user]')
 		.setExamples(['balance', 'balance @user'])
+		.setAuthority('USER')
+		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(false));
 
 	public execute = async (ctx: Context): Promise<void> => {

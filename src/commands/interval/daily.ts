@@ -8,7 +8,8 @@ export default class implements Command {
 		.setModule('INTERVAL')
 		.setFormat('daily')
 		.setExamples(['daily'])
-		.setGlobal(false);
+		.setAuthority('USER')
+		.setDefaultPermission(false);
 
 	public execute = async (ctx: Context): Promise<void> => interval(ctx, 'daily');
 }

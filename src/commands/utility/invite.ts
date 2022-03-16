@@ -8,8 +8,8 @@ export default class implements Command {
 		.setModule('UTILITY')
 		.setFormat('invite')
 		.setExamples(['invite'])
-		.setAuthority('DEVELOPER')
-		.setGlobal(true);
+		.setGlobal(true)
+		.setEnabled(false);
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const invite = ctx.client.generateInvite(inviteOptions);

@@ -8,7 +8,7 @@ import {
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from '../../structures/index.js';
-import { Emojis } from '../../typings/constants.js';
+import { Emojis, Modules } from '../../typings/constants.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -25,13 +25,13 @@ export default class implements Command {
 		if (!query) {
 			const helpEmbed = new MessageEmbed()
 				.setAuthor({ name: 'Economica Help Dashboard', iconURL: ctx.client.user.displayAvatarURL() })
-				.setDescription(`${Emojis.HELP} **Welcome to the ${ctx.interaction.guild.me} Help Dashboard!**\nHere, you can get information about any command or module. Use the select menu below to specify a module.\n\n${Emojis.ECONOMICA_LOGO_0} **The Best New Discord Economy Bot**\nTo become more familiar with Economica, please refer to the [documentation](${WEBSITE_DOCS_URL}). There you can set up various permissions-related settings and get detailed information about all command modules.\n\n🔗 **Useful Links**:\n**[Home Page](${WEBSITE_HOME_URL}) | [Command Docs](${WEBSITE_COMMANDS_URL}) | [Vote For Us](${WEBSITE_VOTE_URL})**`);
+				.setDescription(`${Emojis.HELP} **Welcome to the ${ctx.interaction.user} Help Dashboard!**\nHere, you can get information about any command or module. Use the select menu below to specify a module.\n\n${Emojis.ECONOMICA_LOGO_0} **The Best New Discord Economy Bot**\nTo become more familiar with Economica, please refer to the [documentation](${WEBSITE_DOCS_URL}). There you can set up various permissions-related settings and get detailed information about all command modules.\n\n🔗 **Useful Links**:\n**[Home Page](${WEBSITE_HOME_URL}) | [Command Docs](${WEBSITE_COMMANDS_URL}) | [Vote For Us](${WEBSITE_VOTE_URL})**`);
 			const msg = await ctx.interaction.reply({ embeds: [helpEmbed], ephemeral: true, fetchReply: true });
 			await this.displayHelp(ctx, ctx.interaction, msg);
 			return;
 		}
 
-		const command = ctx.client.commands.find((v) => ctx.guildEntity.modules.includes(v.data.module) && v.data.name.toLowerCase() === query.toLowerCase());
+		const command = ctx.client.commands.find((v) => v.data.name.toLowerCase() === query.toLowerCase());
 		if (!command) {
 			await ctx.embedify('error', 'user', `Could not find command \`${query}\``).send(true);
 			return;
@@ -56,7 +56,7 @@ export default class implements Command {
 	};
 
 	private async displayHelp(ctx: Context, i: CommandInteraction, message: Message<true>) {
-		const labels = ctx.guildEntity.modules.map((module) => ({ label: module, value: module } as MessageSelectOptionData));
+		const labels = Object.keys(Modules).map((module) => ({ label: module, value: module } as MessageSelectOptionData));
 		const dropdown = new MessageActionRow()
 			.setComponents([
 				new MessageSelectMenu()

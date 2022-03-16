@@ -14,12 +14,13 @@ export default class implements Command {
 			'income edit crime maxfine: 20%',
 			'income edit beg cooldown: 5m',
 		])
+		.setAuthority('MANAGER')
+		.setDefaultPermission(false)
 		.addSubcommand((subcommand) => subcommand
 			.setName('view').setDescription('View income command configurations'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('edit')
 			.setDescription('Edit income command configs')
-			.setAuthority('MANAGER')
 			.addStringOption((option) => option.setName('command').setDescription('Specify the comman.').setRequired(true))
 			.addIntegerOption((option) => option.setName('minimum').setDescription('Specify the minimum value').setMinValue(0))
 			.addIntegerOption((option) => option.setName('maximum').setDescription('Specify the maximum value').setMinValue(1))

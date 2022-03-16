@@ -12,6 +12,7 @@ export default class implements Command {
 		.setExamples(['purge', 'purge #general', 'purge #general 50'])
 		.setClientPermissions(['MANAGE_MESSAGES'])
 		.setAuthority('MODERATOR')
+		.setDefaultPermission(false)
 		.addChannelOption((option) => option
 			.setName('channel')
 			.setDescription('Specify a channel')

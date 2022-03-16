@@ -24,7 +24,6 @@ export default class implements Command {
 		.addSubcommand((subcommand) => subcommand
 			.setName('give')
 			.setDescription('Give an item away')
-			.setAuthority('MANAGER')
 			.addStringOption((option) => option
 				.setName('item').setDescription('Specify an item').setRequired(true))
 			.addUserOption((option) => option

@@ -8,7 +8,8 @@ export default class implements Command {
 		.setModule('INTERVAL')
 		.setFormat('fortnightly')
 		.setExamples(['fortnightly'])
-		.setGlobal(false);
+		.setAuthority('USER')
+		.setDefaultPermission(false);
 
 	public execute = async (ctx: Context): Promise<void> => interval(ctx, 'fortnightly');
 }

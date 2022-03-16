@@ -11,6 +11,7 @@ export default class implements Command {
 		.setExamples(['unban @user', 'unban 796906750569611294 forgiveness'])
 		.setClientPermissions(['BAN_MEMBERS'])
 		.setAuthority('MODERATOR')
+		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target').setRequired(true))
 		.addStringOption((option) => option.setName('string').setDescription('Specify a reason'));
 

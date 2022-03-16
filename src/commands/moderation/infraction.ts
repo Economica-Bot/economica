@@ -14,6 +14,8 @@ export default class implements Command {
 			'infraction delete user @user',
 			'infraction delete all',
 		])
+		.setAuthority('MANAGER')
+		.setDefaultPermission(false)
 		.addSubcommandGroup((subcommandgroup) => subcommandgroup
 			.setName('view')
 			.setDescription('View infraction data')
@@ -29,7 +31,6 @@ export default class implements Command {
 		.addSubcommandGroup((subcommandgroup) => subcommandgroup
 			.setName('delete')
 			.setDescription('Delete infraction data')
-			.setAuthority('MANAGER')
 			.addSubcommand((subcommand) => subcommand
 				.setName('single')
 				.setDescription('Delete a single infraction')

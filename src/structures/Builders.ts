@@ -11,31 +11,19 @@ import { Authorities, ModuleString } from '../typings';
 
 export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcommandBuilder {
 	public clientPermissions: PermissionString[];
-	public authority: keyof typeof Authorities;
 
 	public setClientPermissions(clientPermissions: PermissionString[]): this {
 		this.clientPermissions = clientPermissions;
-		return this;
-	}
-
-	public setAuthority(authority: keyof typeof Authorities): this {
-		this.authority = authority;
 		return this;
 	}
 }
 
 export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSubcommandGroupBuilder {
 	public clientPermissions: PermissionString[];
-	public authority: keyof typeof Authorities;
 	public declare options: EconomicaSlashCommandSubcommandBuilder[];
 
 	public setClientPermissions(clientPermissions: PermissionString[]): this {
 		this.clientPermissions = clientPermissions;
-		return this;
-	}
-
-	public setAuthority(authority: keyof typeof Authorities): this {
-		this.authority = authority;
 		return this;
 	}
 

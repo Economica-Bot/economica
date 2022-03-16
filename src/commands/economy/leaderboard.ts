@@ -12,6 +12,8 @@ export default class implements Command {
 		.setModule('ECONOMY')
 		.setFormat('leaderboard [page]')
 		.setExamples(['leaderboard', 'leaderboard 3'])
+		.setAuthority('USER')
+		.setDefaultPermission(false)
 		.addIntegerOption((option) => option.setName('page').setDescription('Specify a page').setMinValue(1).setRequired(false));
 
 	public execute = async (ctx: Context): Promise<void> => {

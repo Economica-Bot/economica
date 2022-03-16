@@ -10,18 +10,19 @@ export default class implements Command {
 		.setModule('ECONOMY')
 		.setFormat('transaction-log <view | set | reset> [channel]')
 		.setExamples(['transaction-log view', 'transaction-log set #transaction-logs', 'transaction-log reset'])
+		.setAuthority('MANAGER')
+		.setDefaultPermission(false)
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View the transaction log channel'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('set')
 			.setClientPermissions(['SEND_MESSAGES', 'EMBED_LINKS'])
 			.setDescription('Set the transaction log channel')
-			.setAuthority('MANAGER')
 			.addChannelOption((option) => option
 				.setName('channel')
 				.setDescription('Specify a channel')
 				.addChannelType(ChannelType.GuildText)
 				.setRequired(true)))
-		.addSubcommand((subcommand) => subcommand.setName('reset').setDescription('Reset the transaction log channel').setAuthority('MANAGER'));
+		.addSubcommand((subcommand) => subcommand.setName('reset').setDescription('Reset the transaction log channel'));
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();

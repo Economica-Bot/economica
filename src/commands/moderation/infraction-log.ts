@@ -10,18 +10,19 @@ export default class implements Command {
 		.setModule('MODERATION')
 		.setFormat('infraction-log <view | set | reset> [channel]')
 		.setExamples(['infraction-log view', 'infraction-log set #infraction-logs', 'infraction-log reset'])
+		.setAuthority('ADMINISTRATOR')
+		.setDefaultPermission(false)
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View the infraction log channel'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('set')
 			.setClientPermissions(['SEND_MESSAGES', 'EMBED_LINKS'])
 			.setDescription('Set the infraction log channel')
-			.setAuthority('ADMINISTRATOR')
 			.addChannelOption((option) => option
 				.setName('channel')
 				.setDescription('Specify a channel')
 				.addChannelType(ChannelType.GuildText)
 				.setRequired(true)))
-		.addSubcommand((subcommand) => subcommand.setName('reset').setDescription('Reset the infraction log channel').setAuthority('ADMINISTRATOR'));
+		.addSubcommand((subcommand) => subcommand.setName('reset').setDescription('Reset the infraction log channel'));
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();

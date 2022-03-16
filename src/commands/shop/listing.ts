@@ -12,6 +12,8 @@ export default class implements Command {
 		.setModule('SHOP')
 		.setFormat('listing')
 		.setExamples(['listing'])
+		.setAuthority('USER')
+		.setDefaultPermission(false)
 		.addSubcommand((subcommand) => subcommand
 			.setName('create')
 			.setDescription('Create a new item')

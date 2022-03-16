@@ -42,6 +42,8 @@ export class Context {
 		}
 
 		this.data = command.data;
+		if (!this.interaction.inCachedGuild()) return this;
+
 		this.userEntity = await User.findOne({ id: this.interaction.user.id })
 			?? await User.create({ id: this.interaction.user.id }).save();
 		this.guildEntity = await Guild.findOne({ id: this.interaction.guildId })

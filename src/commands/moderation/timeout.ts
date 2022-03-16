@@ -19,6 +19,7 @@ export default class implements Command {
 		])
 		.setClientPermissions(['MODERATE_MEMBERS'])
 		.setAuthority('MODERATOR')
+		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target').setRequired(true))
 		.addStringOption((option) => option.setName('duration').setDescription('Specify a duration').setRequired(true))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason').setRequired(false));

@@ -7,11 +7,12 @@ export default class implements Command {
 		.setModule('INTERVAL')
 		.setFormat('interval <view | edit> [...arguments]')
 		.setExamples(['interval view', 'interval edit daily 100'])
+		.setAuthority('MANAGER')
+		.setDefaultPermission(false)
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View interval command configurations'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('edit')
 			.setDescription('Edit interval command configs.')
-			.setAuthority('MANAGER')
 			.addStringOption((option) => option.setName('command').setDescription('Specify the command').setRequired(true))
 			.addIntegerOption((option) => option.setName('amount').setDescription('Specify the amount').setMinValue(1).setRequired(false))
 			.addBooleanOption((option) => option.setName('enabled').setDescription('Whether the command should be enabled').setRequired(false)));

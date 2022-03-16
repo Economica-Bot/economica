@@ -19,7 +19,9 @@ export default class implements Command {
 		.setDescription('Lend money to other users.')
 		.setModule('ECONOMY')
 		.setFormat('loan')
-		.setExamples(['loan']);
+		.setExamples(['loan'])
+		.setAuthority('USER')
+		.setDefaultPermission(false);
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const loans = await Loan.find({ guild: ctx.guildEntity });
