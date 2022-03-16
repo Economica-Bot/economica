@@ -1,6 +1,6 @@
 import { Module } from '../../entities/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
-import { ModuleString, Modules } from '../../typings/index.js';
+import { Modules, ModuleString } from '../../typings/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -23,7 +23,7 @@ export default class implements Command {
 	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const moduleName = ctx.interaction.options.getString('module', false) as ModuleString;
-		if (!(moduleName in Modules)) {
+		if (moduleName && !(moduleName in Modules)) {
 			await ctx.embedify('error', 'user', `Invalid module: \`${moduleName}\``).send(true);
 		} else if (subcommand === 'view') {
 			const modulesArr = Object.keys(Modules) as ModuleString[];
@@ -46,20 +46,24 @@ export default class implements Command {
 				ctx.guildEntity.modules.push(moduleName);
 				await ctx.guildEntity.save();
 				await ctx.embedify('success', 'user', `Added the \`${moduleName}\` module.`).send(true);
-				const moduleCommands = ctx.client.commands.filter((command) => command.data.module === moduleName).map((command) => command.data.toJSON() as any);
-				ctx.interaction.guild.commands.set(moduleCommands);
+				ctx.client.commands
+					.filter((command) => command.data.module === moduleName)
+					.forEach(async (command) => ctx.interaction.guild.commands.create(command.data.toJSON() as any));
 			}
 		} else if (subcommand === 'remove') {
 			const module = await Module.findOne({ guild: ctx.guildEntity, module: moduleName });
 			if (!module) {
 				await ctx.embedify('warn', 'user', 'You have not enabled this module in this server.').send(true);
 			} else {
-				await module.remove();
+				ctx.guildEntity.modules = ctx.guildEntity.modules.filter((mod) => mod !== module.module);
+				await ctx.guildEntity.save();
 				ctx.userEntity.keys += 1;
 				await ctx.userEntity.save();
-				ctx.guildEntity.modules.map((mod) => mod !== module.module);
-				await ctx.guildEntity.save();
+				await module.remove();
 				await ctx.embedify('success', 'user', `Removed the \`${moduleName}\` module.`).send(true);
+				ctx.client.commands
+					.filter((command) => command.data.module === moduleName)
+					.forEach(async (command) => ctx.interaction.guild.commands.delete((await ctx.interaction.guild.commands.fetch()).find((cmd) => cmd.name === command.data.name)));
 			}
 		}
 	};

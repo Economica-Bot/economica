@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DEPLOY_COMMANDS, DEVELOPMENT_GUILD_IDS, PRODUCTION } from '../config.js';
+import { DEPLOY_ALL_MODULES, DEPLOY_COMMANDS, DEVELOPMENT_GUILD_IDS, PRODUCTION } from '../config.js';
 import { Economica, Event } from '../structures/index.js';
 import { Modules } from '../typings/index.js';
 
@@ -30,7 +30,9 @@ export default class implements Event {
 
 		DEVELOPMENT_GUILD_IDS.forEach(async (id) => {
 			const guild = await client.guilds.fetch(id);
-			await guild.commands.set(commandData);
+			if (DEPLOY_ALL_MODULES) {
+				await guild.commands.set(commandData);
+			} else await guild.commands.set(defaultCommandData);
 			client.log.debug(`Registered commands in dev guild ${guild.name}`);
 		});
 
