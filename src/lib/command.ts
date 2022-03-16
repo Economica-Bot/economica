@@ -59,22 +59,24 @@ async function checkAuthority(ctx: Context): Promise<boolean> {
 	const group = ctx.data.getSubcommandGroup(ctx.interaction.options.getSubcommandGroup(false))[0];
 	const subcommand = ctx.data.getSubcommand(ctx.interaction.options.getSubcommand(false))[0];
 	let missingAuthority: keyof typeof Authorities;
-	const authority = subcommand.authority ?? group.authority ?? ctx.data.authority;
+	const authority = subcommand?.authority ?? group?.authority ?? ctx.data.authority;
 	if (authority) {
-		const auth = await ctx.guildEntity.auth;
-		const roleAuth = auth.filter((r) => r.authority === authority && (member.roles.cache.has(r.id) || member.id === r.id));
-		if (!roleAuth.length) missingAuthority = authority;
+		const auth = ctx.guildEntity.auth.some((a) => a.authority === authority && (member.roles.cache.has(a.id) || member.id === a.id));
+		if (!auth) missingAuthority = authority;
+		if (missingAuthority === 'ADMINISTRATOR' && ctx.interaction.member.permissions.has('ADMINISTRATOR')) missingAuthority = null;
+		if (missingAuthority === 'MANAGER' && ctx.interaction.member.permissions.has('MANAGE_GUILD')) missingAuthority = null;
+		if (missingAuthority === 'MODERATOR' && ctx.interaction.member.permissions.has('MODERATE_MEMBERS')) missingAuthority = null;
 	}
 	if (missingAuthority) {
-		const description = `Missing authority: \`${missingAuthority}\``;
-		await ctx.embedify('error', 'user', `Insufficient Permissions: \`${description}\``).send(true);
+		const description = `Insufficient Permissions - missing authority: \`${missingAuthority}\``;
+		await ctx.embedify('error', 'user', description).send(true);
 		return false;
 	}
 	return true;
 }
 
 async function validateModule(ctx: Context): Promise<boolean> {
-	if (ctx.guildEntity.modules.find((module) => module === ctx.data.module)) {
+	if (!ctx.guildEntity.modules.some((module) => module === ctx.data.module)) {
 		await ctx.embedify('warn', 'user', `The \`${ctx.data.module}\` module is not enabled in this server.`).send(true);
 		return false;
 	}
@@ -97,10 +99,10 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 	} if (!isDeveloper || !DEV_COOLDOWN_EXEMPT) {
 		const valid = await checkCooldown(ctx);
 		if (!valid) return false;
-	} else if (!isDeveloper || !DEV_PERMISSION_EXEMPT) {
+	} if (!isDeveloper || !DEV_PERMISSION_EXEMPT) {
 		const valid = await checkAuthority(ctx);
 		if (!valid) return false;
-	} else if (!isDeveloper || !DEV_MODULE_EXEMPT) {
+	} if (!isDeveloper || !DEV_MODULE_EXEMPT) {
 		const valid = await validateModule(ctx);
 		if (!valid) return false;
 	}

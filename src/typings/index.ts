@@ -107,4 +107,6 @@ export enum Occupations {
 }
 export type OccupationString = keyof typeof Occupations;
 
+export type AuthorityType = 'USER' | 'ROLE';
+
 export * from './constants.js';

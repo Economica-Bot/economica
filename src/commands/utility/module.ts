@@ -22,10 +22,9 @@ export default class implements Command {
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
-		const moduleQuery = ctx.interaction.options.getString('module', false);
-		const moduleName = Modules[moduleQuery];
-		if (!moduleName && moduleQuery) {
-			await ctx.embedify('error', 'user', `Invalid module: \`${moduleQuery}\``).send(true);
+		const moduleName = ctx.interaction.options.getString('module', false) as ModuleString;
+		if (!(moduleName in Modules)) {
+			await ctx.embedify('error', 'user', `Invalid module: \`${moduleName}\``).send(true);
 		} else if (subcommand === 'view') {
 			const modulesArr = Object.keys(Modules) as ModuleString[];
 			const enabledModulesArr = modulesArr.filter((module) => ctx.guildEntity.modules.includes(module));
@@ -47,6 +46,8 @@ export default class implements Command {
 				ctx.guildEntity.modules.push(moduleName);
 				await ctx.guildEntity.save();
 				await ctx.embedify('success', 'user', `Added the \`${moduleName}\` module.`).send(true);
+				const moduleCommands = ctx.client.commands.filter((command) => command.data.module === moduleName).map((command) => command.data.toJSON() as any);
+				ctx.interaction.guild.commands.set(moduleCommands);
 			}
 		} else if (subcommand === 'remove') {
 			const module = await Module.findOne({ guild: ctx.guildEntity, module: moduleName });

@@ -13,8 +13,8 @@
   "license": "ISC",
   "dependencies": {
     "@adrastopoulos/number-parser": "github:Adrastopoulos/Number-Parser",
-    "@discordjs/builders": "^0.10.0",
-    "discord-api-types": "^0.25.2",
+    "@discordjs/builders": "^0.12.0",
+    "discord-api-types": "^0.26.0",
     "discord.js": "github:monbrey/discord.js#modals",
     "dotenv": "^10.0.0",
     "fs": "^0.0.1-security",
