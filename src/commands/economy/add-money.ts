@@ -1,8 +1,8 @@
 import { parseNumber, parseString } from '@adrastopoulos/number-parser';
 import { GuildMember } from 'discord.js';
 
-import { recordTransaction } from '../../lib';
-import { Member, User } from '../../entities';
+import { recordTransaction } from '../../lib/index.js';
+import { Member, User } from '../../entities/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {

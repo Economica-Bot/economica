@@ -27,6 +27,8 @@ export default class implements Command {
 		.setModule('UTILITY')
 		.setFormat('help [command]')
 		.setExamples(['help', 'help permissions'])
+		.setAuthority('USER')
+		.setDefaultPermission(false)
 		.setGlobal(true)
 		.addStringOption((option) => option.setName('query').setDescription('Specify a command.').setRequired(false));
 

@@ -16,6 +16,8 @@ export default class implements Command {
 		.setModule('UTILITY')
 		.setFormat('permissions <command>')
 		.setExamples(['permissions infraction'])
+		.setAuthority('USER')
+		.setDefaultPermission(false)
 		.setGlobal(true)
 		.addStringOption((option) => option.setName('command').setDescription('Specify a command').setRequired(true));
 

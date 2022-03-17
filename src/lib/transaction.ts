@@ -2,7 +2,7 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 import { EmbedBuilder, PermissionFlagsBits, TextChannel, Util } from 'discord.js';
 
-import { Guild, Member, Transaction } from '../entities';
+import { Guild, Member, Transaction } from '../entities/index.js';
 import { Economica } from '../structures/index.js';
 import { TransactionString } from '../typings/index.js';
 

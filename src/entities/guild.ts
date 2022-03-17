@@ -1,9 +1,8 @@
 import { Snowflake } from 'discord.js';
-import { BaseEntity, Column, Entity, OneToMany, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 
 import { CURRENCY_SYMBOL } from '../config.js';
 import { ModuleString, Modules, defaultIncomesObj, defaultIntervalsObj } from '../typings/index.js';
-import { Authority } from './index.js';
 
 @Entity()
 export class Guild extends BaseEntity {
@@ -18,9 +17,6 @@ export class Guild extends BaseEntity {
 
 	@Column({ default: null })
 		infractionLogId: string | null;
-
-	@OneToMany(() => Authority, (authority) => authority.guild, { eager: true })
-		auth: Relation<Authority>[];
 
 	@Column({ type: 'json', default: defaultIncomesObj })
 		incomes: typeof defaultIncomesObj;

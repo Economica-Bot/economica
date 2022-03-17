@@ -12,9 +12,9 @@ import {
 } from 'discord.js';
 import ms from 'ms';
 
-import { Loan } from '../../entities';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
-import { Emojis } from '../../typings';
+import { Loan } from '../../entities/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+import { Emojis } from '../../typings/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()

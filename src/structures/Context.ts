@@ -1,11 +1,11 @@
 /* eslint-disable max-classes-per-file */
 import { ChatInputCommandInteraction, EmbedBuilder, Util } from 'discord.js';
 
-import { Guild, Member, User } from '../entities';
+import { Guild, Member, User } from '../entities/index.js';
 import { EmbedColors, Footer, ReplyString } from '../typings/index.js';
 import { Economica, EconomicaSlashCommandBuilder } from './index.js';
 
-class ContextEmbed extends EmbedBuilder {
+export class ContextEmbed extends EmbedBuilder {
 	public ctx: Context;
 	constructor(ctx: Context) {
 		super();
@@ -14,8 +14,8 @@ class ContextEmbed extends EmbedBuilder {
 
 	public async send(ephemeral = false) {
 		if (this.ctx.interaction.deferred) this.ctx.interaction.editReply({ embeds: [this] });
-		if (this.ctx.interaction.replied) this.ctx.interaction.followUp({ embeds: [this], ephemeral });
-		this.ctx.interaction.reply({ embeds: [this], ephemeral });
+		else if (this.ctx.interaction.replied) this.ctx.interaction.followUp({ embeds: [this], ephemeral });
+		else this.ctx.interaction.reply({ embeds: [this], ephemeral });
 	}
 }
 

@@ -8,7 +8,8 @@
     "prebuild": "npm run clean",
     "build": "tsc",
     "lint": "eslint src --ext .ts",
-    "dev": "node --enable-source-maps --es-module-specifier-resolution=node --experimental-modules dist/index.js"
+    "dev": "node --enable-source-maps --es-module-specifier-resolution=node --experimental-modules dist/index.js",
+    "ts-node": "node --loader ts-node/esm src/index.ts"
   },
   "license": "ISC",
   "dependencies": {
@@ -39,6 +40,7 @@
     "eslint-import-resolver-typescript": "^2.5.0",
     "eslint-plugin-import": "^2.25.4",
     "rimraf": "^3.0.2",
+    "ts-node": "^10.7.0",
     "typescript": "^4.5.5"
   }
 }

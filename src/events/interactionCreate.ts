@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, Interaction } from 'discord.js';
 
-import { Command } from '../entities';
-import { commandCheck } from '../lib';
+import { Command } from '../entities/index.js';
+import { commandCheck } from '../lib/index.js';
 import { Context, Economica, Event } from '../structures/index.js';
 
 export default class implements Event {

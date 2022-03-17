@@ -1,10 +1,9 @@
 /* eslint-disable no-param-reassign */
-import { Message, ActionRowBuilder, ButtonBuilder, EmbedBuilder, ButtonStyle, ComponentType } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 import { Listing } from '../../entities/index.js';
-import { embedifyListing } from '../../lib/index.js';
+import { displayListing } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
-import { BUTTON_INTERACTION_COOLDOWN, Emojis } from '../../typings/constants.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -13,13 +12,15 @@ export default class implements Command {
 		.setModule('SHOP')
 		.setFormat('shop')
 		.setExamples(['shop'])
+		.setAuthority('USER')
+		.setDefaultPermission(false)
 		.addStringOption((o) => o
-			.setName('item')
-			.setDescription('The name of the item to view. Omit to view entire shop.'));
+			.setName('query')
+			.setDescription('Specify a listing'));
 
 	public execute = async (ctx: Context) => {
-		const query = ctx.interaction.options.getString('item');
-		const listings = await Listing.find({ where: { guild: ctx.guildEntity } });
+		const query = ctx.interaction.options.getString('query', false);
+		const listings = await Listing.find({ guild: ctx.guildEntity });
 		const listing = listings.find((l) => l.name === query);
 		if (query && !listing) {
 			await ctx.embedify('error', 'user', `Could not find listing named \`${query}\``).send(true);
@@ -27,22 +28,10 @@ export default class implements Command {
 		}
 
 		if (listing) {
-			const description = listing.toString();
-			await ctx.embedify('info', 'user', description).send();
+			const embed = await displayListing(ctx, listing);
+			await ctx.interaction.reply({ embeds: [embed] });
 			return;
 		}
-
-		const components = [
-			new ButtonBuilder()
-				.setCustomId('create-item')
-				.setLabel('Create Item')
-				.setStyle(ButtonStyle.Primary)
-				.setEmoji({ id: Emojis.ADD }),
-			new ButtonBuilder()
-				.setCustomId('delete-all-items')
-				.setLabel('Delete All')
-				.setStyle(ButtonStyle.Primary),
-		];
 
 		const maxEntries = 10;
 		const pageCount = listings.length / maxEntries || 1;
@@ -102,49 +91,4 @@ export default class implements Command {
 			}
 		} */
 	};
-
-	private async displayShop(
-		ctx: Context,
-		embeds: EmbedBuilder[],
-		index = 0,
-		components?: ButtonBuilder[],
-	) {
-		const { interaction } = ctx;
-
-		if (!interaction.deferred) {
-			await interaction.deferReply();
-		}
-
-		setTimeout(() => interaction.editReply({
-			components: [],
-		}), BUTTON_INTERACTION_COOLDOWN);
-
-		const row = new ActionRowBuilder<ButtonBuilder>()
-			.setComponents(
-				new ButtonBuilder().setCustomId('previous_page').setLabel('Previous').setStyle(ButtonStyle.Secondary).setDisabled(index === 0),
-				new ButtonBuilder().setCustomId('next_page').setLabel('Next').setStyle(ButtonStyle.Primary).setDisabled(index === embeds.length - 1),
-				...components,
-			);
-
-		const msg = (await interaction.editReply({
-			embeds: [embeds[index]],
-			components: [row],
-		})) as Message;
-
-		const i = await msg.awaitMessageComponent({
-			componentType: ComponentType.Button,
-		});
-
-		if (index < embeds.length - 1 && index >= 0 && i.customId === 'next_page') {
-			index += 1;
-		} else if (index > 0 && index < embeds.length && i.customId === 'previous_page') {
-			index -= 1;
-		} else if (i.customId === 'create-item') {
-			embeds = [
-				await embedifyListing(ctx, null),
-			];
-
-			await this.displayShop(ctx, embeds, index, components);
-		}
-	}
 }

@@ -1,9 +1,8 @@
 import { GuildMember, PermissionFlagsBits, PermissionsString, TextChannel } from 'discord.js';
 import ms from 'ms';
 
-import { DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEV_PERMISSION_EXEMPT, DEVELOPER_IDS } from '../config.js';
+import { DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEVELOPER_IDS } from '../config.js';
 import { Context } from '../structures/index.js';
-import { Authorities } from '../typings/index.js';
 
 async function checkPermission(ctx: Context): Promise<boolean> {
 	const member = ctx.interaction.member as GuildMember;
@@ -54,24 +53,6 @@ async function checkCooldown(ctx: Context): Promise<boolean> {
 	return true;
 }
 
-async function checkAuthority(ctx: Context): Promise<boolean> {
-	const member = ctx.interaction.member as GuildMember;
-	let missingAuthority: Authorities;
-	if (ctx.data.authority) {
-		const auth = ctx.guildEntity.auth.some((a) => a.authority === ctx.data.authority && (member.roles.cache.has(a.id) || member.id === a.id));
-		if (!auth) missingAuthority = ctx.data.authority;
-		if (missingAuthority === 3 && ctx.interaction.member.permissions.has(PermissionFlagsBits.Administrator)) missingAuthority = null;
-		if (missingAuthority === 2 && ctx.interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) missingAuthority = null;
-		if (missingAuthority === 1 && ctx.interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers)) missingAuthority = null;
-	}
-	if (missingAuthority) {
-		const description = `Insufficient Permissions - missing authority: \`${missingAuthority}\``;
-		await ctx.embedify('error', 'user', description).send(true);
-		return false;
-	}
-	return true;
-}
-
 async function validateModule(ctx: Context): Promise<boolean> {
 	if (!ctx.guildEntity.modules.some((module) => module === ctx.data.module)) {
 		await ctx.embedify('warn', 'user', `The \`${ctx.data.module}\` module is not enabled in this server.`).send(true);
@@ -97,9 +78,6 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 		return false;
 	} if (!isDeveloper || !DEV_COOLDOWN_EXEMPT) {
 		const valid = await checkCooldown(ctx);
-		if (!valid) return false;
-	} if (!isDeveloper || !DEV_PERMISSION_EXEMPT) {
-		const valid = await checkAuthority(ctx);
 		if (!valid) return false;
 	} if (!isDeveloper || !DEV_MODULE_EXEMPT) {
 		const valid = await validateModule(ctx);

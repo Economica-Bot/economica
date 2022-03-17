@@ -1,9 +1,9 @@
 import { Util } from 'discord.js';
 import ms from 'ms';
 
-import { Command as CommandEntity } from '../../entities';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
-import { Emojis } from '../../typings';
+import { Command as CommandEntity } from '../../entities/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+import { Emojis } from '../../typings/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()

@@ -1,5 +1,5 @@
-import { Transaction } from '../../entities';
-import { displayTransaction } from '../../lib';
+import { Transaction } from '../../entities/index.js';
+import { displayTransaction } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {

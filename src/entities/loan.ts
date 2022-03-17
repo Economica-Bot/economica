@@ -6,44 +6,44 @@ import { Guild, Member } from './index.js';
 @Entity()
 export class Loan extends BaseEntity {
 	@PrimaryColumn()
-	id: Snowflake = SnowflakeUtil.generate().toString();
+		id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@OneToOne(() => Guild, (guild) => guild.id)
 	@JoinColumn()
-	guild: Relation<Guild>;
+		guild: Relation<Guild>;
 
 	@OneToOne(() => Member)
 	@JoinColumn()
-	lender: Relation<Member>;
+		lender: Relation<Member>;
 
 	@OneToOne(() => Member)
 	@JoinColumn()
-	borrower: Relation<Member>;
+		borrower: Relation<Member>;
 
 	@Column()
-	description: string;
+		description: string;
 
 	@Column()
-	principal: number;
+		principal: number;
 
 	@Column()
-	repayment: number;
+		repayment: number;
 
 	@Column()
-	duration: number;
+		duration: number;
 
 	@Column()
-	valid: boolean;
+		valid: boolean;
 
 	@Column()
-	pending: boolean;
+		pending: boolean;
 
 	@Column()
-	active: boolean;
+		active: boolean;
 
 	@Column()
-	complete: boolean;
+		complete: boolean;
 
 	@CreateDateColumn()
-	createdAt: Date;
+		createdAt: Date;
 }

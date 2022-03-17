@@ -1,5 +1,6 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
-import { Member, User } from '../../entities';
+
+import { Member, User } from '../../entities/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {

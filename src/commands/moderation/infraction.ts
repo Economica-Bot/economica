@@ -1,5 +1,5 @@
-import { Infraction } from '../../entities';
-import { displayInfraction } from '../../lib';
+import { Infraction } from '../../entities/index.js';
+import { displayInfraction } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {

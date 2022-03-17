@@ -7,7 +7,7 @@ import {
 	SlashCommandSubcommandsOnlyBuilder,
 } from '@discordjs/builders';
 import { PermissionsString } from 'discord.js';
-import { Authorities, ModuleString } from '../typings';
+import { Authorities, ModuleString } from '../typings/index.js';
 
 export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcommandBuilder {
 	public clientPermissions: PermissionsString[];

@@ -1,7 +1,7 @@
 import { EmbedBuilder, PermissionFlagsBits, TextChannel, Util } from 'discord.js';
 import ms from 'ms';
 
-import { Guild, Infraction, Member } from '../entities';
+import { Guild, Infraction, Member } from '../entities/index.js';
 import { Economica } from '../structures/index.js';
 import { InfractionString } from '../typings/index.js';
 

@@ -8,6 +8,8 @@ export default class implements Command {
 		.setModule('UTILITY')
 		.setFormat('invite')
 		.setExamples(['invite'])
+		.setAuthority('USER')
+		.setDefaultPermission(false)
 		.setGlobal(true)
 		.setEnabled(false);
 

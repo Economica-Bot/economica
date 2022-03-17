@@ -23,7 +23,6 @@ import {
 	WEBHOOK_URIS,
 } from '../config.js';
 import {
-	Authority,
 	Command,
 	Guild,
 	Infraction,
@@ -186,7 +185,6 @@ export class Economica extends Client {
 			await this.connection.synchronize(true);
 			this.log.debug('Database dropped and synchronized');
 		}
-		Authority.useConnection(this.connection);
 		Command.useConnection(this.connection);
 		Guild.useConnection(this.connection);
 		Infraction.useConnection(this.connection);
@@ -202,7 +200,7 @@ export class Economica extends Client {
 
 	private async registerEvents() {
 		this.log.debug('Registering events');
-		const eventFiles = readdirSync(path.resolve(dirname, '../events')).filter((file) => file.endsWith('.js'));
+		const eventFiles = readdirSync(path.resolve(dirname, '../events')).filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
 		eventFiles.forEach(async (file) => {
 			const { default: Event } = await import(`../events/${file}`);
 			const event = new Event();
@@ -217,7 +215,7 @@ export class Economica extends Client {
 
 	private async registerJobs() {
 		this.log.debug('Registering jobs');
-		const jobFiles = readdirSync(path.resolve(dirname, '../jobs')).filter((file) => file.endsWith('.js'));
+		const jobFiles = readdirSync(path.resolve(dirname, '../jobs')).filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
 		jobFiles.forEach(async (file) => {
 			const { default: Job } = await import(`../jobs/${file}`);
 			const job = new Job();
@@ -234,7 +232,7 @@ export class Economica extends Client {
 		this.log.debug('Registering commands');
 		const dirs = readdirSync(path.resolve(dirname, '../commands'));
 		dirs.forEach((dir) => {
-			const files = readdirSync(path.resolve(dirname, `../commands/${dir}/`)).filter((file) => file.endsWith('.ts') || file.endsWith('.js'));
+			const files = readdirSync(path.resolve(dirname, `../commands/${dir}/`)).filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
 			files.forEach(async (file) => {
 				const { default: CommandClass } = await import(`../commands/${dir}/${file}`);
 				const command = new CommandClass() as CommandStruct<true>;
@@ -243,6 +241,7 @@ export class Economica extends Client {
 				if (!command.data.module) throw new Error(`Command ${command.data.name} missing module!`);
 				if (!command.data.format) throw new Error(`Command ${command.data.name} missing format!`);
 				if (!command.data.examples) throw new Error(`Command ${command.data.name} missing examples!`);
+				if (typeof command.data.authority === 'undefined') throw new Error(`Command ${command.data.name} missing authority!`);
 				this.log.debug(`Registering command ${command.data.name}`);
 				this.commands.set(command.data.name, command);
 			});
