@@ -37,8 +37,8 @@ export default class implements Command {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		if (subcommand === 'create') {
 			const description = `**Create the item, ${ctx.interaction.member}, of your wildest dreams! Customize your fantastic generator, rare collectible, or classic old item.**\n\n${Emojis.SELECT} Click a button below to customize your item.`;
-			const name = ctx.interaction.options.getString('name');
-			const price = ctx.interaction.options.getInteger('price');
+			// const name = ctx.interaction.options.getString('name');
+			// const price = ctx.interaction.options.getInteger('price');
 			const type = ctx.interaction.options.getString('type') as ListingString;
 			const embed = ctx
 				.embedify('info', 'user', description)
@@ -73,8 +73,8 @@ export default class implements Command {
 				));
 
 			const message = await ctx.interaction.reply({ embeds: [embed], components: rows, fetchReply: true });
-			const listing = Listing.create({ guild: ctx.guildEntity, type, name });
-			await this.createListing(ctx, message, listing);
+			// const listing = Listing.create({ guild: ctx.guildEntity, type, name });
+			await this.createListing(/* ctx, */message /* , listing */);
 		} else if (subcommand === 'manage') {
 			const query = ctx.interaction.options.getString('listing_id');
 			const listing = await Listing.findOne({ id: query });
@@ -88,7 +88,7 @@ export default class implements Command {
 		}
 	};
 
-	private async createListing(ctx: Context, message: Message<true>, listing: Listing) {
+	private async createListing(/* ctx: Context, */ message: Message<true> /* , listing: Listing */) {
 		const button = await message.awaitMessageComponent({ componentType: ComponentType.Button });
 		if (button.customId === 'description') button.reply({ content: 'How many times the listing can be sold', ephemeral: true });
 		if (button.customId === 'duration') button.reply({ content: 'This listing\'s shelf life', ephemeral: true });

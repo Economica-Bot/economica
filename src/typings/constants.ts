@@ -121,6 +121,7 @@ export enum Emojis {
 	SEARCH = '<:search:953117655970242620>',
 	CANCEL = '✖',
 	PUBLISH = '✔',
+	ADD = '➕', // ➕
 	GENERATOR = '<:generator:953122979544444928>',
 }
 
