@@ -56,13 +56,13 @@ async function checkCooldown(ctx: Context): Promise<boolean> {
 
 async function checkAuthority(ctx: Context): Promise<boolean> {
 	const member = ctx.interaction.member as GuildMember;
-	let missingAuthority: keyof typeof Authorities;
+	let missingAuthority: Authorities;
 	if (ctx.data.authority) {
 		const auth = ctx.guildEntity.auth.some((a) => a.authority === ctx.data.authority && (member.roles.cache.has(a.id) || member.id === a.id));
 		if (!auth) missingAuthority = ctx.data.authority;
-		if (missingAuthority === 'ADMINISTRATOR' && ctx.interaction.member.permissions.has(PermissionFlagsBits.Administrator)) missingAuthority = null;
-		if (missingAuthority === 'MANAGER' && ctx.interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) missingAuthority = null;
-		if (missingAuthority === 'MODERATOR' && ctx.interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers)) missingAuthority = null;
+		if (missingAuthority === 3 && ctx.interaction.member.permissions.has(PermissionFlagsBits.Administrator)) missingAuthority = null;
+		if (missingAuthority === 2 && ctx.interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) missingAuthority = null;
+		if (missingAuthority === 1 && ctx.interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers)) missingAuthority = null;
 	}
 	if (missingAuthority) {
 		const description = `Insufficient Permissions - missing authority: \`${missingAuthority}\``;
@@ -85,7 +85,7 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 	if (!ctx.data.enabled) {
 		await ctx.embedify('warn', 'user', 'This command is disabled.').send(true);
 		return false;
-	} if (ctx.data.authority === 'DEVELOPER' && !isDeveloper) {
+	} if (ctx.data.authority === 3 && !isDeveloper) {
 		await ctx.embedify('warn', 'user', 'This command is dev only.').send(true);
 		return false;
 	} if (!ctx.data.global && !ctx.interaction.inGuild()) {

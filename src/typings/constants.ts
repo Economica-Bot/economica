@@ -64,11 +64,11 @@ export const defaultIncomesObj: DefaultIncomes = {
 };
 
 export enum Authorities {
-	USER = 'user',
-	MODERATOR = 'moderator',
-	MANAGER = 'manager',
-	ADMINISTRATOR = 'administrator',
-	DEVELOPER = 'developer',
+	USER,
+	MODERATOR,
+	MANAGER,
+	ADMINISTRATOR,
+	DEVELOPER,
 }
 
 export type AuthorityString = keyof typeof Authorities;

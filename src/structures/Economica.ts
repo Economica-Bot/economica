@@ -1,4 +1,4 @@
-import { Client, Collection, EmbedBuilder, WebhookClient } from 'discord.js';
+import { Client, Collection, EmbedBuilder, Util, WebhookClient } from 'discord.js';
 import { readdirSync } from 'fs';
 import path from 'path';
 import { Logger } from 'tslog';
@@ -158,7 +158,7 @@ export class Economica extends Client {
 
 		const description = `\`\`\`ts${err.stack}\`\`\``;
 		const embed = new EmbedBuilder()
-			.setColor('Blurple')
+			.setColor(Util.resolveColor('Blurple'))
 			.setAuthor({ name: 'Unhandled Rejection' })
 			.setDescription(description)
 			.setTimestamp();
@@ -168,7 +168,7 @@ export class Economica extends Client {
 	private async uncaughtException(err: Error, origin: string) {
 		this.log.fatal(err);
 		const embed = new EmbedBuilder()
-			.setColor('Red')
+			.setColor(Util.resolveColor('Red'))
 			.setAuthor({ name: 'CRITICAL | Uncaught Exception' })
 			.setDescription(`Caught exception: ${err}\nException origin: ${origin}`)
 			.setTimestamp();

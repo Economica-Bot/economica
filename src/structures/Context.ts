@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, Util } from 'discord.js';
 
 import { Guild, Member, User } from '../entities';
 import { EmbedColors, Footer, ReplyString } from '../typings/index.js';
@@ -58,7 +58,7 @@ export class Context {
 	}
 
 	public embedify(type: ReplyString, footer: Footer, description?: string | null): ContextEmbed {
-		const embed = new ContextEmbed(this).setColor(EmbedColors[type]);
+		const embed = new ContextEmbed(this).setColor(Util.resolveColor(EmbedColors[type]));
 		if (description) embed.setDescription(description);
 		if (footer === 'bot') embed.setFooter({ text: this.interaction.client.user.tag, iconURL: this.interaction.client.user.displayAvatarURL() });
 		else if (footer === 'user') embed.setFooter({ text: this.interaction.user.tag, iconURL: this.interaction.user.displayAvatarURL() });

@@ -1,4 +1,4 @@
-import { EmbedBuilder, PermissionFlagsBits, TextChannel } from 'discord.js';
+import { EmbedBuilder, PermissionFlagsBits, TextChannel, Util } from 'discord.js';
 import ms from 'ms';
 
 import { Guild, Infraction, Member } from '../entities';
@@ -14,7 +14,7 @@ export async function displayInfraction(infraction: Infraction): Promise<EmbedBu
 	const { id, type, target, agent, reason, duration, active, permanent, createdAt } = infraction;
 	const description = `Target: <@!${target.user.id}> | Agent: <@!${agent.user.id}>`;
 	return new EmbedBuilder()
-		.setColor('Red')
+		.setColor(Util.resolveColor('Red'))
 		.setAuthor({ name: `Infraction | ${type}` })
 		.setDescription(description)
 		.addFields(

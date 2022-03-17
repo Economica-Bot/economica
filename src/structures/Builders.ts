@@ -41,7 +41,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	public clientPermissions: PermissionsString[];
 	public global = false;
 	public enabled = true;
-	public authority: keyof typeof Authorities;
+	public authority: Authorities;
 
 	public setGlobal(global: boolean): this {
 		this.global = global;
@@ -69,7 +69,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	}
 
 	public setAuthority(level: keyof typeof Authorities): this {
-		this.authority = level;
+		this.authority = Authorities[level];
 		return this;
 	}
 
