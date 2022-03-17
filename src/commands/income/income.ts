@@ -34,8 +34,8 @@ export default class implements Command {
 		if (subcommand === 'view') {
 			const embed = ctx.embedify('info', 'guild', 'Income command information');
 			Object.entries(ctx.guildEntity.incomes).forEach((income) => {
-				const description = Object.entries(income[1]).map((prop) => `\`${prop[0]}: ${prop[1]}\``);
-				embed.addFields({ name: income[0], value: description.join('\n') });
+				const description = Object.entries(income[1]).map((prop) => `${prop[0]}: ${prop[1]}`);
+				embed.addFields({ name: income[0], value: `\`\`\`${description.join('\n')}\`\`\``, inline: true });
 			});
 			await ctx.interaction.reply({ embeds: [embed] });
 		} if (subcommand === 'edit') {
