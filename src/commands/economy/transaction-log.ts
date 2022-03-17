@@ -15,7 +15,7 @@ export default class implements Command {
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View the transaction log channel'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('set')
-			.setClientPermissions(['SEND_MESSAGES', 'EMBED_LINKS'])
+			.setClientPermissions(['SendMessages', 'EmbedLinks'])
 			.setDescription('Set the transaction log channel')
 			.addChannelOption((option) => option
 				.setName('channel')
@@ -35,7 +35,7 @@ export default class implements Command {
 			}
 		} if (subcommand === 'set') {
 			const channel = ctx.interaction.options.getChannel('channel') as TextChannel;
-			if (!channel.permissionsFor(ctx.interaction.guild.me).has('SEND_MESSAGES') || !channel.permissionsFor(ctx.interaction.guild.me).has('EMBED_LINKS')) {
+			if (!channel.permissionsFor(ctx.interaction.guild.me).has('SendMessages') || !channel.permissionsFor(ctx.interaction.guild.me).has('EmbedLinks')) {
 				await ctx.embedify('error', 'user', 'I need `SEND_MESSAGES` and `EMBED_LINKS` in that channel.').send(true);
 			} else {
 				ctx.guildEntity.transactionLogId = channel.id;

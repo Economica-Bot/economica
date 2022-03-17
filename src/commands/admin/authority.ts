@@ -1,4 +1,4 @@
-import { GuildApplicationCommandPermissionData, MessageEmbed } from 'discord.js';
+import { EmbedBuilder, GuildApplicationCommandPermissionData, ApplicationCommandPermissionType } from 'discord.js';
 
 import { Authority } from '../../entities';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
@@ -18,7 +18,7 @@ export default class implements Command {
 			'authority reset @Moderator',
 		])
 		.setAuthority('ADMINISTRATOR')
-		.setDefaultPermission(false)
+		.setDefaultPermission(true)
 		.addSubcommand((options) => options.setName('view').setDescription('View the economy authority hierarchy'))
 		.addSubcommand((options) => options
 			.setName('set')
@@ -45,24 +45,26 @@ export default class implements Command {
 			const mod = ctx.guildEntity.auth.filter((auth) => auth.authority === 'MODERATOR').map((authority) => authority.toString()).join('\n');
 			const manager = ctx.guildEntity.auth.filter((auth) => auth.authority === 'MANAGER').map((authority) => authority.toString()).join('\n');
 			const admin = ctx.guildEntity.auth.filter((auth) => auth.authority === 'ADMINISTRATOR').map((authority) => authority.toString()).join('\n');
-			const embed = new MessageEmbed()
-				.setColor('BLURPLE')
+			const embed = new EmbedBuilder()
+				.setColor('Blurple')
 				.setAuthor({ name: `${ctx.interaction.guild.name} Authority Hierarchy`, iconURL: ctx.interaction.guild.iconURL() })
 				.setDescription("Running a server economy on your own is no easy task. Build and customize your economy team with Economica's authority utility!")
-				.addField('__Economy Mod__', 'Keep your economy safe and cheater-free!')
-				.addField('Description', 'Economy mods can manage the economy blacklists (economy blacklist, loans blacklist, etc...)\n', true)
-				.addField('Items', mod || 'No Authorized Users or Roles\n', true)
-				.addField('__Economy Manager__', 'Update your economy with fresh new content!')
-				.addField('Description', 'Economy managers can manage the economy as a whole (shop, users, inventories, etc...). They also have all the permissions of Economy Mods.\n', true)
-				.addField('Items', manager || 'No Authorized Users or Roles\n*Note: Any member with the `MANAGE_GUILD` permission is automatically considered an economy manager.', true)
-				.addField('__Economy Admin__', 'Lead your economy team!')
-				.addField('Description', 'Economy Admins can do anything with regards to the economy (reset economy, manage economy ranks and permissions, etc...)\n', true)
-				.addField('Items', admin || 'No Authorized Users or Roles\n*Note: Any member with the `ADMINISTRATOR` permission is automatically considered an Economy Admin.\n', true);
+				.addFields(
+					{ name: '__Economy Mod__', value: 'Keep your economy safe and cheater-free!' },
+					{ name: 'Description', value: 'Economy mods can manage the economy blacklists (economy blacklist, loans blacklist, etc...)\n', inline: true },
+					{ name: 'Items', value: mod || 'No Authorized Users or Roles\n', inline: true },
+					{ name: '__Economy Manager__ value: ', value: 'Update your economy with fresh new content!' },
+					{ name: 'Description', value: 'Economy managers can manage the economy as a whole (shop, users, inventories, etc...). They also have all the permissions of Economy Mods.\n', inline: true },
+					{ name: 'Items', value: manager || 'No Authorized Users or Roles\n*Note: Any member with the `MANAGE_GUILD` permission is automatically considered an economy manager.', inline: true },
+					{ name: '__Economy Admin__ value: ', value: 'Lead your economy team!' },
+					{ name: 'Description', value: 'Economy Admins can do anything with regards to the economy (reset economy, manage economy ranks and permissions, etc...)\n', inline: true },
+					{ name: 'Items', value: admin || 'No Authorized Users or Roles\n*Note: Any member with the `ADMINISTRATOR` permission is automatically considered an Economy Admin.\n', inline: true },
+				);
 			await ctx.interaction.reply({ embeds: [embed], ephemeral: true });
 		} else if (subcommand === 'set') {
 			const authorityLevel = ctx.interaction.options.getString('authority') as keyof typeof Authorities;
 			const { id } = ctx.interaction.options.getMentionable('mentionable');
-			const type = ctx.client.users.cache.get(id) ? 'USER' : 'ROLE';
+			const type = ctx.client.application.commands.cache.get(id) ? ApplicationCommandPermissionType.User : ApplicationCommandPermissionType.Role;
 			if (await Authority.findOne({ id })) await Authority.update({ id }, { authority: authorityLevel });
 			else await Authority.create({ id, guild: ctx.guildEntity, type, authority: authorityLevel }).save();
 			await ctx.embedify('success', 'bot', `Authority set to \`${authorityLevel}\`.`).send(true);

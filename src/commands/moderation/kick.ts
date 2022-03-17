@@ -11,7 +11,7 @@ export default class implements Command {
 		.setModule('MODERATION')
 		.setFormat('kick <target> [reason]')
 		.setExamples(['kick @user', 'kick @user harrassment'])
-		.setClientPermissions(['KICK_MEMBERS'])
+		.setClientPermissions(['KickMembers'])
 		.setAuthority('MODERATOR')
 		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))

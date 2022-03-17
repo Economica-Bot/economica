@@ -7,7 +7,7 @@ import { Guild, Member } from './index.js';
 @Entity()
 export class Infraction extends BaseEntity {
 	@PrimaryColumn()
-		id: Snowflake = SnowflakeUtil.generate();
+		id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => Guild)
 	@JoinColumn()

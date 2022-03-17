@@ -74,10 +74,10 @@ export enum Authorities {
 export type AuthorityString = keyof typeof Authorities;
 
 export const EmbedColors: Record<ReplyString, ColorResolvable> = {
-	success: 'GREEN',
-	info: 'BLURPLE',
-	warn: 'YELLOW',
-	error: 'RED',
+	success: 'Green',
+	info: 'Blurple',
+	warn: 'Yellow',
+	error: 'Red',
 };
 
 export enum Emojis {

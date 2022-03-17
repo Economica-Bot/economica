@@ -6,7 +6,7 @@ import { Listing, Member } from './index.js';
 @Entity()
 export class Item extends BaseEntity {
 	@PrimaryColumn()
-		id: Snowflake = SnowflakeUtil.generate();
+		id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => Listing, (listing) => listing.id)
 		listing: Relation<Listing>;

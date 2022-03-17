@@ -1,4 +1,4 @@
-import { Client, Collection, MessageEmbed, WebhookClient } from 'discord.js';
+import { Client, Collection, EmbedBuilder, WebhookClient } from 'discord.js';
 import { readdirSync } from 'fs';
 import path from 'path';
 import { Logger } from 'tslog';
@@ -9,18 +9,18 @@ import {
 	ACTIVITY_NAME,
 	ACTIVITY_TYPE,
 	BOT_TOKEN,
+	clientOptions,
+	databaseOptions,
 	DB_OPTION,
 	DEBUG,
 	DEVELOPER_IDS,
 	DEVELOPMENT,
 	DEVELOPMENT_GUILD_IDS,
 	DISCORD_INVITE_URL,
+	loggerOptions,
 	PUBLIC_GUILD_ID,
 	VALIDATE_SETTINGS,
 	WEBHOOK_URIS,
-	clientOptions,
-	loggerOptions,
-	DB_PASSWORD,
 } from '../config.js';
 import {
 	Authority,
@@ -157,8 +157,8 @@ export class Economica extends Client {
 		}
 
 		const description = `\`\`\`ts${err.stack}\`\`\``;
-		const embed = new MessageEmbed()
-			.setColor('DARK_ORANGE')
+		const embed = new EmbedBuilder()
+			.setColor('Blurple')
 			.setAuthor({ name: 'Unhandled Rejection' })
 			.setDescription(description)
 			.setTimestamp();
@@ -167,8 +167,8 @@ export class Economica extends Client {
 
 	private async uncaughtException(err: Error, origin: string) {
 		this.log.fatal(err);
-		const embed = new MessageEmbed()
-			.setColor('RED')
+		const embed = new EmbedBuilder()
+			.setColor('Red')
 			.setAuthor({ name: 'CRITICAL | Uncaught Exception' })
 			.setDescription(`Caught exception: ${err}\nException origin: ${origin}`)
 			.setTimestamp();
@@ -178,15 +178,7 @@ export class Economica extends Client {
 
 	private async connectSQL() {
 		this.log.debug('Connecting to DB');
-		this.connection = await new Connection({
-			type: 'postgres',
-			host: 'localhost',
-			port: 5432,
-			username: 'postgres',
-			password: DB_PASSWORD,
-			entities: [path.join(dirname, '../entities/*.{js,ts}')],
-			applicationName: 'Economica',
-		}).connect();
+		this.connection = await new Connection(databaseOptions).connect();
 		if (DB_OPTION === 1) {
 			await this.connection.synchronize();
 			this.log.debug('Database synchronized');

@@ -11,7 +11,7 @@ export default class implements Command {
 		.setModule('MODERATION')
 		.setFormat('untimeout <member> [reason]')
 		.setExamples(['untimeout @user', 'untimeout 796906750569611294 forgiveness'])
-		.setClientPermissions(['MODERATE_MEMBERS'])
+		.setClientPermissions(['ModerateMembers'])
 		.setAuthority('MODERATOR')
 		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))

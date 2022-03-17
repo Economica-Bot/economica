@@ -1,4 +1,4 @@
-import { MessageEmbed, TextChannel } from 'discord.js';
+import { EmbedBuilder, PermissionFlagsBits, TextChannel } from 'discord.js';
 import ms from 'ms';
 
 import { Guild, Infraction, Member } from '../entities';
@@ -8,21 +8,21 @@ import { InfractionString } from '../typings/index.js';
 /**
  * Display an infraction
  * @param infraction - The infraction to display
- * @returns {MessageEmbed}
+ * @returns {EmbedBuilder}
  */
-export async function displayInfraction(infraction: Infraction): Promise<MessageEmbed> {
+export async function displayInfraction(infraction: Infraction): Promise<EmbedBuilder> {
 	const { id, type, target, agent, reason, duration, active, permanent, createdAt } = infraction;
 	const description = `Target: <@!${target.user.id}> | Agent: <@!${agent.user.id}>`;
-	return new MessageEmbed()
-		.setColor('RED')
+	return new EmbedBuilder()
+		.setColor('Red')
 		.setAuthor({ name: `Infraction | ${type}` })
 		.setDescription(description)
-		.addFields([
+		.addFields(
 			{ name: '__**Reason**__', value: reason },
 			{ name: '**Permanent**', value: `\`${permanent ?? 'N/A'}\``, inline: true },
 			{ name: '**Active**', value: `\`${active ?? 'N/A'}\``, inline: true },
 			{ name: '**Duration**', value: `\`${ms(duration ?? 0)}\``, inline: true },
-		])
+		)
 		.setFooter({ text: `ID: ${id}` })
 		.setTimestamp(createdAt);
 }
@@ -55,7 +55,7 @@ export async function recordInfraction(
 	if (infractionLogId) {
 		const channel = client.channels.cache.get(infractionLogId) as TextChannel;
 		const member = channel.guild.members.cache.get(client.user.id);
-		if (!channel.permissionsFor(member).has('SEND_MESSAGES') || !channel.permissionsFor(member).has('EMBED_LINKS')) return;
+		if (!channel.permissionsFor(member).has(PermissionFlagsBits.SendMessages) || !channel.permissionsFor(member).has(PermissionFlagsBits.EmbedLinks)) return;
 		const embed = await displayInfraction(infractionEntity);
 		await channel.send({ embeds: [embed] });
 	}

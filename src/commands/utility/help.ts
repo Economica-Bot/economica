@@ -1,6 +1,16 @@
-import { CommandInteraction, Message, MessageActionRow, MessageEmbed, MessageSelectMenu, MessageSelectOptionData, Util } from 'discord.js';
-import { WEBSITE_COMMANDS_URL, WEBSITE_DOCS_URL, WEBSITE_HOME_URL, WEBSITE_VOTE_URL } from '../../config.js';
+import {
+	ActionRowBuilder,
+	CommandInteraction,
+	ComponentType,
+	EmbedBuilder,
+	Message,
+	MessageActionRowComponentBuilder,
+	SelectMenuBuilder,
+	SelectMenuOptionBuilder,
+	Util,
+} from 'discord.js';
 
+import { WEBSITE_COMMANDS_URL, WEBSITE_DOCS_URL, WEBSITE_HOME_URL, WEBSITE_VOTE_URL } from '../../config.js';
 import {
 	Command,
 	Context,
@@ -23,7 +33,7 @@ export default class implements Command {
 	public execute = async (ctx: Context): Promise<void> => {
 		const query = ctx.interaction.options.getString('query');
 		if (!query) {
-			const helpEmbed = new MessageEmbed()
+			const helpEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Economica Help Dashboard', iconURL: ctx.client.user.displayAvatarURL() })
 				.setDescription(`${Emojis.HELP} **Welcome to the ${ctx.interaction.user} Help Dashboard!**\nHere, you can get information about any command or module. Use the select menu below to specify a module.\n\n${Emojis.ECONOMICA_LOGO_0} **The Best New Discord Economy Bot**\nTo become more familiar with Economica, please refer to the [documentation](${WEBSITE_DOCS_URL}). There you can set up various permissions-related settings and get detailed information about all command modules.\n\n🔗 **Useful Links**:\n**[Home Page](${WEBSITE_HOME_URL}) | [Command Docs](${WEBSITE_COMMANDS_URL}) | [Vote For Us](${WEBSITE_VOTE_URL})**`);
 			const msg = await ctx.interaction.reply({ embeds: [helpEmbed], ephemeral: true, fetchReply: true });
@@ -37,18 +47,18 @@ export default class implements Command {
 			return;
 		}
 
-		const commandEmbed = new MessageEmbed()
+		const commandEmbed = new EmbedBuilder()
 			.setAuthor({ name: `${command.data.name} | ${command.data.description}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.COMMAND).id).url })
 			.setDescription(`${Emojis.FORMAT} **Format**: \`${command.data.format}\`\n${Emojis.RESEARCH} **Examples**: \`\`\`${command.data.examples.join('\n')}\`\`\``)
 			.setFooter({ text: ctx.interaction.user.tag, iconURL: ctx.interaction.user.displayAvatarURL() })
 			.setTimestamp();
 		command.data.options.forEach((option) => {
 			if (option instanceof EconomicaSlashCommandSubcommandBuilder) {
-				commandEmbed.addField(`${command.data.name} ${option.name}`, option.description);
+				commandEmbed.addFields({ name: `${command.data.name} ${option.name}`, value: option.description });
 			} else if (option instanceof EconomicaSlashCommandSubcommandGroupBuilder) {
-				commandEmbed.addField(`${command.data.name} ${option.name}`, option.description);
+				commandEmbed.addFields({ name: `${command.data.name} ${option.name}`, value: option.description });
 				option.options.forEach((opt: EconomicaSlashCommandSubcommandBuilder) => {
-					commandEmbed.addField(`${command.data.name} ${option.name} ${opt.name}`, opt.description, true);
+					commandEmbed.addFields({ name: `${command.data.name} ${option.name} ${opt.name}`, value: opt.description, inline: true });
 				});
 			}
 		});
@@ -56,24 +66,23 @@ export default class implements Command {
 	};
 
 	private async displayHelp(ctx: Context, i: CommandInteraction, message: Message<true>) {
-		const labels = Object.keys(Modules).map((module) => ({ label: module, value: module } as MessageSelectOptionData));
-		const dropdown = new MessageActionRow()
-			.setComponents([
-				new MessageSelectMenu()
+		const labels = Object.keys(Modules).map((module) => new SelectMenuOptionBuilder().setLabel(module).setValue(module));
+		const dropdown = new ActionRowBuilder<MessageActionRowComponentBuilder>()
+			.setComponents(
+				new SelectMenuBuilder()
 					.setCustomId('help_select')
 					.setPlaceholder('None Selected')
-					.setOptions(labels),
-			]);
+					.setOptions(...labels),
+			);
 		await i.editReply({ components: [dropdown] });
-		const interaction = await message.awaitMessageComponent({ componentType: 'SELECT_MENU' });
-		dropdown.components[0].setDisabled(true);
+		const interaction = await message.awaitMessageComponent({ componentType: ComponentType.SelectMenu });
 		const description = ctx.client.commands
 			.filter(({ data }) => data.module === interaction.values[0])
 			.map((command) => `**${command.data.name}**\n> ${command.data.description}`).join('\n');
-		const moduleEmbed = new MessageEmbed()
+		const moduleEmbed = new EmbedBuilder()
 			.setAuthor({ name: `${interaction.values[0]} Module` })
 			.setDescription(description);
-		const msg = await interaction.update({ embeds: [moduleEmbed], fetchReply: true });
+		const msg = await interaction.update({ embeds: [moduleEmbed.toJSON()], fetchReply: true });
 		this.displayHelp(ctx, i, msg);
 	}
 }

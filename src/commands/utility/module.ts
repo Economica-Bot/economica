@@ -30,10 +30,10 @@ export default class implements Command {
 			const modulesArr = Object.keys(Modules) as ModuleString[];
 			const enabledModulesArr = modulesArr.filter((module) => ctx.guildEntity.modules.includes(module));
 			const disabledModulesArr = modulesArr.filter((module) => !ctx.guildEntity.modules.includes(module));
-			const embed = ctx.embedify('info', 'guild', "View the server's modules").addFields([
+			const embed = ctx.embedify('info', 'guild', "View the server's modules").addFields(
 				{ name: 'Enabled Modules', value: `\`${enabledModulesArr.join('`, `')}\``, inline: true },
 				{ name: 'Disabled Modules', value: `\`${disabledModulesArr.join('`, `')}\``, inline: true },
-			]);
+			);
 			await ctx.interaction.reply({ embeds: [embed] });
 		} else if (subcommand === 'add') {
 			if (ctx.userEntity.keys < 1) {

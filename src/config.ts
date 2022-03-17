@@ -1,8 +1,17 @@
 /* eslint-disable prefer-destructuring */
-import { ClientOptions, ExcludeEnum, Intents, InviteGenerationOptions, Permissions } from 'discord.js';
+import {
+	ActivityType,
+	ClientOptions,
+	GatewayIntentBits,
+	InviteGenerationOptions,
+	OAuth2Scopes,
+	PermissionFlagsBits,
+} from 'discord.js';
 import dotenv from 'dotenv';
+import path from 'path';
+import { ConnectionOptions } from 'typeorm';
+import { fileURLToPath } from 'url';
 
-import type { ActivityTypes } from 'discord.js/typings/enums';
 import type { ISettingsParam } from 'tslog';
 
 dotenv.config();
@@ -39,7 +48,7 @@ export const WEBSITE_DOCS_URL = process.env.WEBSITE_DOCS_URL;
 export const WEBSITE_VOTE_URL = process.env.WEBSITE_VOTE_URL;
 
 export const ACTIVITY_NAME = process.env.ACTIVITY_NAME;
-export const ACTIVITY_TYPE = process.env.ACTIVITY_TYPE as ExcludeEnum<typeof ActivityTypes, 'CUSTOM'>;
+export const ACTIVITY_TYPE = +process.env.ACTIVITY_TYPE as Exclude<ActivityType, ActivityType.Custom>;
 
 // Configurations
 
@@ -54,24 +63,35 @@ export const clientOptions: ClientOptions = {
 		],
 	},
 	intents: [
-		Intents.FLAGS.GUILDS,
-		Intents.FLAGS.GUILD_MEMBERS,
-		Intents.FLAGS.GUILD_MESSAGES,
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.GuildMessages,
 	],
 };
 
 export const inviteOptions: InviteGenerationOptions = {
-	scopes: ['bot', 'applications.commands'],
+	scopes: [OAuth2Scopes.Bot, OAuth2Scopes.ApplicationsCommands],
 	permissions: [
-		Permissions.FLAGS.VIEW_CHANNEL,
-		Permissions.FLAGS.SEND_MESSAGES,
-		Permissions.FLAGS.EMBED_LINKS,
-		Permissions.FLAGS.BAN_MEMBERS,
-		Permissions.FLAGS.KICK_MEMBERS,
-		Permissions.FLAGS.MODERATE_MEMBERS,
-		Permissions.FLAGS.MANAGE_MESSAGES,
-		Permissions.FLAGS.USE_EXTERNAL_EMOJIS,
+		PermissionFlagsBits.ViewChannel,
+		PermissionFlagsBits.SendMessages,
+		PermissionFlagsBits.EmbedLinks,
+		PermissionFlagsBits.BanMembers,
+		PermissionFlagsBits.BanMembers,
+		PermissionFlagsBits.ModerateMembers,
+		PermissionFlagsBits.ManageMessages,
+		PermissionFlagsBits.UseExternalEmojis,
 	],
+};
+
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+export const databaseOptions: ConnectionOptions = {
+	type: 'postgres',
+	host: 'localhost',
+	port: 5432,
+	username: 'postgres',
+	password: DB_PASSWORD,
+	entities: [path.resolve(dirname, './entities/*.{js,ts}')],
+	applicationName: 'Economica',
 };
 
 export const loggerOptions: ISettingsParam = {

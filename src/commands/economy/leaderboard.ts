@@ -1,5 +1,5 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 import { paginate } from '../../lib';
 import { Member } from '../../entities';
@@ -32,7 +32,7 @@ export default class implements Command {
 			const balance = parseNumber(member.wallet + member.treasury);
 			leaderBoardEntries.push(`\`${rank += 1}\` • <@${member.user.id}> | ${ctx.guildEntity.currency}${balance}\n`);
 		});
-		const embeds: MessageEmbed[] = [];
+		const embeds: EmbedBuilder[] = [];
 		let k = 0;
 		for (let i = 0; i < pageCount; i++) {
 			let description = '';

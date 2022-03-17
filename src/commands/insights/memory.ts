@@ -23,7 +23,7 @@ export default class implements Command {
 		const embed = ctx
 			.embedify('info', 'bot', description)
 			.setAuthor({ name: 'Bot Memory Levels', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.MEMORY).id).url });
-		Object.entries(process.memoryUsage()).forEach((key, value) => embed.addField(key[0], `\`${Math.round((value / 1024 / 1024) * 100) / 100}Mb\``, true));
+		Object.entries(process.memoryUsage()).forEach((key, value) => embed.addFields({ name: key[0], value: `\`${Math.round((value / 1024 / 1024) * 100) / 100}Mb\``, inline: true }));
 		await ctx.interaction.reply({ embeds: [embed] });
 	};
 }

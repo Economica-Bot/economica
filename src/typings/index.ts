@@ -1,4 +1,4 @@
-import { EmbedFooterData, MessageEmbed } from 'discord.js';
+import { EmbedFooterData, EmbedBuilder } from 'discord.js';
 
 export interface EconomyInfo {
 	wallet: number;
@@ -17,9 +17,9 @@ export interface IncomeCommandProperties {
 }
 
 export interface ConfirmModalEmbeds {
-	promptEmbed: MessageEmbed;
-	confirmEmbed: MessageEmbed;
-	cancelEmbed: MessageEmbed;
+	promptEmbed: EmbedBuilder;
+	confirmEmbed: EmbedBuilder;
+	cancelEmbed: EmbedBuilder;
 }
 
 export interface IncomeCommand {

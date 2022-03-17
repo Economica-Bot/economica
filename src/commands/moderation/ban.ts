@@ -12,7 +12,7 @@ export default class implements Command {
 		.setModule('MODERATION')
 		.setFormat('ban <member> [duration] [reason] [days]')
 		.setExamples(['ban @user', 'ban @user 3h', 'ban @user spamming', 'ban @user 3h spamming'])
-		.setClientPermissions(['BAN_MEMBERS'])
+		.setClientPermissions(['BanMembers'])
 		.setAuthority('MODERATOR')
 		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target').setRequired(true))
@@ -38,8 +38,8 @@ export default class implements Command {
 		const milliseconds = ms(duration);
 		const formattedDuration = milliseconds ? `**${ms(milliseconds)}**` : '**Permanent**';
 		const reason = ctx.interaction.options.getString('reason') ?? 'No reason provided';
-		const days = ctx.interaction.options.getNumber('days') ?? 0;
-		await target.ban({ days, reason });
+		const deleteMessageDays = ctx.interaction.options.getNumber('days') ?? 0;
+		await target.ban({ deleteMessageDays, reason });
 		await ctx.embedify('success', 'user', `Banned \`${target.user.tag}\` | Length: ${formattedDuration}`).send(true);
 		await recordInfraction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'BAN', reason, true, milliseconds, permanent);
 	};

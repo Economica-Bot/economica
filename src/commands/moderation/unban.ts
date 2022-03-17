@@ -9,7 +9,7 @@ export default class implements Command {
 		.setModule('MODERATION')
 		.setFormat('<user> [reason]')
 		.setExamples(['unban @user', 'unban 796906750569611294 forgiveness'])
-		.setClientPermissions(['BAN_MEMBERS'])
+		.setClientPermissions(['BanMembers'])
 		.setAuthority('MODERATOR')
 		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target').setRequired(true))

@@ -11,6 +11,8 @@ export default class implements Command {
 		.setModule('SHOP')
 		.setFormat('item <sell | use | give>')
 		.setExamples(['item'])
+		.setAuthority('USER')
+		.setDefaultPermission(false)
 		.addSubcommand((subcommand) => subcommand
 			.setName('sell')
 			.setDescription('Sell an item')
@@ -116,9 +118,9 @@ export default class implements Command {
 
 			const embed = ctx.embedify('success', 'user', `Used \`${item.listing.name}\` x1`);
 			item.listing.rolesGiven.forEach((role) => { ctx.interaction.member.roles.add(role, `Purchased ${item.listing.name}`); });
-			embed.addField('Roles Given', `<@&${item.listing.rolesGiven.join('>, <@&')}>`);
+			embed.addFields({ name: 'Roles Given', value: `<@&${item.listing.rolesGiven.join('>, <@&')}>` });
 			item.listing.rolesRemoved.forEach((role) => { ctx.interaction.member.roles.remove(role, `Purchased ${item.listing.name}`); });
-			embed.addField('Roles Removed', `<@&${item.listing.rolesRemoved.join('>, <@&')}>`);
+			embed.addFields({ name: 'Roles Removed', value: `<@&${item.listing.rolesRemoved.join('>, <@&')}>` });
 
 			await ctx.interaction.reply({ embeds: [embed] });
 

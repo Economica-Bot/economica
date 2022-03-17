@@ -7,29 +7,29 @@ import { Guild, Member } from './index.js';
 @Entity()
 export class Transaction extends BaseEntity {
 	@PrimaryColumn()
-		id: Snowflake = SnowflakeUtil.generate();
+	id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => Guild)
 	@JoinColumn()
-		guild: Relation<Guild>;
+	guild: Relation<Guild>;
 
 	@ManyToOne(() => Member)
 	@JoinColumn()
-		target: Relation<Member>;
+	target: Relation<Member>;
 
 	@ManyToOne(() => Member)
 	@JoinColumn()
-		agent: Relation<Member>;
+	agent: Relation<Member>;
 
 	@Column()
-		type: TransactionString;
+	type: TransactionString;
 
 	@Column({ type: 'float' })
-		wallet: number;
+	wallet: number;
 
 	@Column({ type: 'float' })
-		treasury: number;
+	treasury: number;
 
 	@CreateDateColumn()
-		createdAt: Date;
+	createdAt: Date;
 }

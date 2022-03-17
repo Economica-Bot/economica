@@ -1,4 +1,4 @@
-import { GuildMember, PermissionString, TextChannel } from 'discord.js';
+import { GuildMember, PermissionFlagsBits, PermissionsString, TextChannel } from 'discord.js';
 import ms from 'ms';
 
 import { DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEV_PERMISSION_EXEMPT, DEVELOPER_IDS } from '../config.js';
@@ -10,8 +10,8 @@ async function checkPermission(ctx: Context): Promise<boolean> {
 	const channel = ctx.interaction.channel as TextChannel;
 	const group = ctx.data.getSubcommandGroup(ctx.interaction.options.getSubcommandGroup(false))[0];
 	const subcommand = ctx.data.getSubcommand(ctx.interaction.options.getSubcommand(false))[0];
-	const clientPermissions: PermissionString[] = [];
-	const missingClientPermissions: PermissionString[] = [];
+	const clientPermissions: PermissionsString[] = [];
+	const missingClientPermissions: PermissionsString[] = [];
 	if (ctx.data.clientPermissions) clientPermissions.push(...ctx.data.clientPermissions);
 	if (group?.clientPermissions) clientPermissions.push(...group.clientPermissions);
 	if (subcommand?.clientPermissions) clientPermissions.push(...subcommand.clientPermissions);
@@ -22,7 +22,7 @@ async function checkPermission(ctx: Context): Promise<boolean> {
 		await ctx.embedify('warn', 'bot', `Missing Bot Permissions: \`${missingClientPermissions}\``).send(true);
 		return false;
 	}
-	if (ctx.interaction.guild.ownerId === member.id || member.permissions.has('ADMINISTRATOR')) {
+	if (ctx.interaction.guild.ownerId === member.id || member.permissions.has(PermissionFlagsBits.Administrator)) {
 		return true;
 	}
 	return true;
@@ -60,9 +60,9 @@ async function checkAuthority(ctx: Context): Promise<boolean> {
 	if (ctx.data.authority) {
 		const auth = ctx.guildEntity.auth.some((a) => a.authority === ctx.data.authority && (member.roles.cache.has(a.id) || member.id === a.id));
 		if (!auth) missingAuthority = ctx.data.authority;
-		if (missingAuthority === 'ADMINISTRATOR' && ctx.interaction.member.permissions.has('ADMINISTRATOR')) missingAuthority = null;
-		if (missingAuthority === 'MANAGER' && ctx.interaction.member.permissions.has('MANAGE_GUILD')) missingAuthority = null;
-		if (missingAuthority === 'MODERATOR' && ctx.interaction.member.permissions.has('MODERATE_MEMBERS')) missingAuthority = null;
+		if (missingAuthority === 'ADMINISTRATOR' && ctx.interaction.member.permissions.has(PermissionFlagsBits.Administrator)) missingAuthority = null;
+		if (missingAuthority === 'MANAGER' && ctx.interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) missingAuthority = null;
+		if (missingAuthority === 'MODERATOR' && ctx.interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers)) missingAuthority = null;
 	}
 	if (missingAuthority) {
 		const description = `Insufficient Permissions - missing authority: \`${missingAuthority}\``;

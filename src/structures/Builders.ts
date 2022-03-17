@@ -6,23 +6,23 @@ import {
 	SlashCommandSubcommandGroupBuilder,
 	SlashCommandSubcommandsOnlyBuilder,
 } from '@discordjs/builders';
-import { PermissionString } from 'discord.js';
+import { PermissionsString } from 'discord.js';
 import { Authorities, ModuleString } from '../typings';
 
 export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcommandBuilder {
-	public clientPermissions: PermissionString[];
+	public clientPermissions: PermissionsString[];
 
-	public setClientPermissions(clientPermissions: PermissionString[]): this {
+	public setClientPermissions(clientPermissions: PermissionsString[]): this {
 		this.clientPermissions = clientPermissions;
 		return this;
 	}
 }
 
 export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSubcommandGroupBuilder {
-	public clientPermissions: PermissionString[];
+	public clientPermissions: PermissionsString[];
 	public declare options: EconomicaSlashCommandSubcommandBuilder[];
 
-	public setClientPermissions(clientPermissions: PermissionString[]): this {
+	public setClientPermissions(clientPermissions: PermissionsString[]): this {
 		this.clientPermissions = clientPermissions;
 		return this;
 	}
@@ -38,7 +38,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	public module: ModuleString;
 	public format: string;
 	public examples: string[];
-	public clientPermissions: PermissionString[];
+	public clientPermissions: PermissionsString[];
 	public global = false;
 	public enabled = true;
 	public authority: keyof typeof Authorities;
@@ -63,7 +63,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	public setClientPermissions(clientPermissions: PermissionString[]): this {
+	public setClientPermissions(clientPermissions: PermissionsString[]): this {
 		this.clientPermissions = clientPermissions;
 		return this;
 	}

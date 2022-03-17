@@ -7,16 +7,16 @@ import { Guild, User } from './index.js';
 @Entity()
 export class Module extends BaseEntity {
 	@PrimaryColumn()
-		id: Snowflake = SnowflakeUtil.generate();
+	id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => User, (user) => user.id)
 	@JoinColumn()
-		user: Relation<User>;
+	user: Relation<User>;
 
 	@ManyToOne(() => Guild, (guild) => guild.id)
 	@JoinColumn()
-		guild: Relation<Guild>;
+	guild: Relation<Guild>;
 
 	@Column()
-		module: ModuleString;
+	module: ModuleString;
 }

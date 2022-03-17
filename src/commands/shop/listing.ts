@@ -1,4 +1,4 @@
-import { Message, MessageActionRow, MessageButton } from 'discord.js';
+import { Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 
 import { Listing } from '../../entities/listing.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
@@ -43,34 +43,34 @@ export default class implements Command {
 			const embed = ctx
 				.embedify('info', 'user', description)
 				.setAuthor({ name: 'Item Creation', iconURL: ctx.interaction.guild.iconURL() });
-			const rows: MessageActionRow[] = [];
-			rows.push(new MessageActionRow()
-				.setComponents([
-					new MessageButton().setCustomId('stock').setLabel('Stock').setStyle('PRIMARY').setEmoji(Emojis.STOCK),
-					new MessageButton().setCustomId('duration').setLabel('Duration').setStyle('PRIMARY').setEmoji(Emojis.INTERVAL),
-					new MessageButton().setCustomId('stackable').setLabel('Stackable').setStyle('PRIMARY').setEmoji(Emojis.STACK),
-				]));
-			rows.push(new MessageActionRow()
-				.setComponents([
-					new MessageButton().setCustomId('required_treasury').setLabel('Required Treasury').setStyle('PRIMARY').setEmoji(Emojis.TREASURY),
-					new MessageButton().setCustomId('required_items').setLabel('Required Items').setStyle('PRIMARY').setEmoji(Emojis.SEARCH),
-					new MessageButton().setCustomId('required_roles').setLabel('Required Roles').setStyle('PRIMARY').setEmoji(Emojis.SETTINGS),
-					new MessageButton().setCustomId('roles_given').setLabel('Roles Given').setStyle('PRIMARY').setEmoji(Emojis.SETTINGS),
-					new MessageButton().setCustomId('roles_removed').setLabel('Roles Removed').setStyle('PRIMARY').setEmoji(Emojis.SETTINGS),
-				]));
+			const rows: ActionRowBuilder<ButtonBuilder>[] = [];
+			rows.push(new ActionRowBuilder<ButtonBuilder>()
+				.setComponents(
+					new ButtonBuilder().setCustomId('stock').setLabel('Stock').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.STOCK }),
+					new ButtonBuilder().setCustomId('duration').setLabel('Duration').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.INTERVAL }),
+					new ButtonBuilder().setCustomId('stackable').setLabel('Stackable').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.STACK }),
+				));
+			rows.push(new ActionRowBuilder<ButtonBuilder>()
+				.setComponents(
+					new ButtonBuilder().setCustomId('required_treasury').setLabel('Required Treasury').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.TREASURY }),
+					new ButtonBuilder().setCustomId('required_items').setLabel('Required Items').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SEARCH }),
+					new ButtonBuilder().setCustomId('required_roles').setLabel('Required Roles').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SETTINGS }),
+					new ButtonBuilder().setCustomId('roles_given').setLabel('Roles Given').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SETTINGS }),
+					new ButtonBuilder().setCustomId('roles_removed').setLabel('Roles Removed').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SETTINGS }),
+				));
 			if (type === 'GENERATOR') {
-				rows.push(new MessageActionRow()
-					.setComponents([
-						new MessageButton().setCustomId('generator_amount').setLabel('Generator Amount').setStyle('PRIMARY').setEmoji(Emojis.GENERATOR),
-						new MessageButton().setCustomId('generator_period').setLabel('Generator Period').setStyle('PRIMARY').setEmoji(Emojis.INTERVAL),
-					]));
+				rows.push(new ActionRowBuilder<ButtonBuilder>()
+					.setComponents(
+						new ButtonBuilder().setCustomId('generator_amount').setLabel('Generator Amount').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.GENERATOR }),
+						new ButtonBuilder().setCustomId('generator_period').setLabel('Generator Period').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.INTERVAL }),
+					));
 			}
-			rows.push(new MessageActionRow()
-				.setComponents([
-					new MessageButton().setCustomId('cancel').setLabel('Cancel').setStyle('DANGER').setEmoji(Emojis.CANCEL),
-					new MessageButton().setCustomId('validate').setLabel('Validate').setStyle('SECONDARY').setEmoji(Emojis.INFO),
-					new MessageButton().setCustomId('publish').setLabel('Publish').setStyle('SUCCESS').setEmoji(Emojis.PUBLISH),
-				]));
+			rows.push(new ActionRowBuilder<ButtonBuilder>()
+				.setComponents(
+					new ButtonBuilder().setCustomId('cancel').setLabel('Cancel').setStyle(ButtonStyle.Danger).setEmoji({ id: Emojis.CANCEL }),
+					new ButtonBuilder().setCustomId('validate').setLabel('Validate').setStyle(ButtonStyle.Secondary).setEmoji({ id: Emojis.INFO }),
+					new ButtonBuilder().setCustomId('publish').setLabel('Publish').setStyle(ButtonStyle.Success).setEmoji({ id: Emojis.PUBLISH }),
+				));
 
 			const message = await ctx.interaction.reply({ embeds: [embed], components: rows, fetchReply: true });
 			const listing = Listing.create({ guild: ctx.guildEntity, type, name });
@@ -89,7 +89,7 @@ export default class implements Command {
 	};
 
 	private async createListing(ctx: Context, message: Message<true>, listing: Listing) {
-		const button = await message.awaitMessageComponent({ componentType: 'BUTTON' });
+		const button = await message.awaitMessageComponent({ componentType: ComponentType.Button });
 		if (button.customId === 'description') button.reply({ content: 'How many times the listing can be sold', ephemeral: true });
 		if (button.customId === 'duration') button.reply({ content: 'This listing\'s shelf life', ephemeral: true });
 		if (button.customId === 'stackable') button.reply({ content: 'Whether the listing can be purchased multiple times', ephemeral: true });

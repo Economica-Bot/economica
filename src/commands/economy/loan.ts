@@ -1,11 +1,14 @@
 /* eslint-disable no-param-reassign */
 import {
-	MessageActionRow,
-	MessageButton,
-	MessageSelectMenu,
-	Modal,
+	ActionRowBuilder,
+	ButtonStyle,
+	ButtonBuilder,
+	SelectMenuBuilder,
+	ComponentType,
+	ModalBuilder,
 	SelectMenuInteraction,
-	TextInputComponent,
+	TextInputBuilder,
+	TextInputStyle,
 } from 'discord.js';
 import ms from 'ms';
 
@@ -28,23 +31,23 @@ export default class implements Command {
 		const description = `**Welcome ${ctx.interaction.member} to your loan dashboard! Here, you can make new loans, view active loans, or manage pending loans.**\n\n**${Emojis.SELECT} Select a category below to get started.**`;
 		const embed = ctx.embedify('info', 'user', description)
 			.setAuthor({ name: 'Loan Dashboard', iconURL: ctx.interaction.guild.iconURL() })
-			.addFields([
+			.addFields(
 				{ name: `${Emojis.CREATE_LOAN} Create`, value: 'Make a new loan', inline: true },
 				{ name: `${Emojis.ACTIVE_LOAN} View`, value: 'View active loans', inline: true },
 				{ name: `${Emojis.MANAGE_LOAN} Manage`, value: 'Accept or Deny pending loans', inline: true },
-			]);
-		const dropdown = new MessageActionRow()
-			.setComponents([
-				new MessageSelectMenu()
+			);
+		const dropdown = new ActionRowBuilder<SelectMenuBuilder>()
+			.setComponents(
+				new SelectMenuBuilder()
 					.setPlaceholder('None Selected')
 					.setCustomId('loan_select')
-					.setOptions([
-						{ emoji: Emojis.CREATE_LOAN, label: 'Create', value: 'create' },
-						{ emoji: Emojis.MANAGE_LOAN, label: 'Manage', value: 'manage' },
-					]),
-			]);
+					.setOptions(
+						{ emoji: { id: Emojis.CREATE_LOAN }, label: 'Create', value: 'create' },
+						{ emoji: { id: Emojis.MANAGE_LOAN }, label: 'Manage', value: 'manage' },
+					),
+			);
 		const message = await ctx.interaction.reply({ embeds: [embed], components: [dropdown], fetchReply: true });
-		const collector = message.createMessageComponentCollector({ componentType: 'SELECT_MENU', filter: (i) => i.user.id === ctx.interaction.user.id });
+		const collector = message.createMessageComponentCollector({ componentType: ComponentType.SelectMenu, filter: (i) => i.user.id === ctx.interaction.user.id });
 		collector.on('collect', async (i) => {
 			if (i.values[0] === 'create') {
 				const loan = Loan.create({ guild: ctx.guildEntity, lender: ctx.memberEntity, valid: false, pending: true, active: false, complete: false });
@@ -54,14 +57,14 @@ export default class implements Command {
 				const incomingLoans = loans.filter((loan) => loan.borrower === ctx.memberEntity);
 				const loanEmbed = ctx.embedify('info', 'user')
 					.setAuthor({ name: 'Loan Management Menu', iconURL: ctx.interaction.guild.iconURL() })
-					.addFields([
+					.addFields(
 						{ name: 'Pending Loans', value: 'Pending loans are loans that have not yet been accepted by the borrower.' },
 						{ name: 'Outgoing', value: outgoingLoans.filter((loan) => loan.pending).map((loan) => loan.id).join('\n') || 'None', inline: true },
 						{ name: 'Incoming ', value: incomingLoans.filter((loan) => loan.pending).map((loan) => loan.id).join('\n') || 'None', inline: true },
 						{ name: 'Active Loans', value: 'Active loans are loans that have been accepted.' },
 						{ name: 'Outgoing', value: outgoingLoans.filter((loan) => loan.active).map((loan) => loan.id).join('\n') || 'None', inline: true },
 						{ name: 'Incoming ', value: incomingLoans.filter((loan) => loan.active).map((loan) => loan.id).join('\n') || 'None', inline: true },
-					]);
+					);
 
 				await i.reply({ embeds: [loanEmbed] });
 			}
@@ -96,39 +99,19 @@ export default class implements Command {
 				**Description**
 				> ${loan.description}
 			`,
-			).addFields([
+			).addFields(
 				{ name: 'Principal', value: loan.principal?.toLocaleString() || 'Unset', inline: true },
 				{ name: 'Repayment', value: loan.repayment?.toLocaleString() || 'Unset', inline: true },
 				{ name: 'Duration', value: loan.duration?.toString() || 'Unset', inline: true },
-			]);
+			);
 
-		const rawModal = new Modal()
-			.setTitle('Loan Interface')
-			.addComponents(...[
-				new MessageActionRow<TextInputComponent>().setComponents(
-					new TextInputComponent().setCustomId('borrower').setLabel('Borrower').setStyle('SHORT').setMinLength(1),
-				),
-				new MessageActionRow<TextInputComponent>().setComponents(
-					new TextInputComponent().setCustomId('description').setLabel('description').setStyle('PARAGRAPH').setMinLength(1),
-				),
-				new MessageActionRow<TextInputComponent>().setComponents(
-					new TextInputComponent().setCustomId('principal').setLabel('Principal').setStyle('SHORT').setMinLength(1),
-				),
-				new MessageActionRow<TextInputComponent>().setComponents(
-					new TextInputComponent().setCustomId('repayment').setLabel('Repayment').setStyle('SHORT').setMinLength(1),
-				),
-				new MessageActionRow<TextInputComponent>().setComponents(
-					new TextInputComponent().setCustomId('duration').setLabel('Duration').setStyle('SHORT').setMinLength(1),
-				),
-			]);
-
-		const row = new MessageActionRow()
-			.setComponents([
-				new MessageButton().setCustomId('edit').setLabel('Edit').setStyle('PRIMARY'),
-				new MessageButton().setCustomId('cancel').setLabel('Cancel').setStyle('DANGER'),
-				new MessageButton().setCustomId('validate').setLabel('Validate').setStyle('SECONDARY'),
-				new MessageButton().setCustomId('publish').setLabel('Publish').setStyle('SUCCESS').setDisabled(!loan.valid),
-			]);
+		const row = new ActionRowBuilder<ButtonBuilder>()
+			.setComponents(
+				new ButtonBuilder().setCustomId('edit').setLabel('Edit').setStyle(ButtonStyle.Primary),
+				new ButtonBuilder().setCustomId('cancel').setLabel('Cancel').setStyle(ButtonStyle.Danger),
+				new ButtonBuilder().setCustomId('validate').setLabel('Validate').setStyle(ButtonStyle.Danger),
+				new ButtonBuilder().setCustomId('publish').setLabel('Publish').setStyle(ButtonStyle.Success).setDisabled(!loan.valid),
+			);
 
 		const msg = interaction.replied
 			? await interaction.editReply({ embeds: [createEmbed], components: [row] })
@@ -137,9 +120,25 @@ export default class implements Command {
 		collector.on('collect', async (i) => {
 			if (i.customId === 'edit') {
 				const customId = `modal-${i.id}`;
-				const modal = new Modal({ ...rawModal, customId });
+				const modal = new ModalBuilder().setCustomId(customId).setTitle('Loan Interface').setComponents(
+					new ActionRowBuilder<TextInputBuilder>().setComponents(
+						new TextInputBuilder().setCustomId('borrower').setLabel('Borrower').setStyle(TextInputStyle.Short).setMinLength(1),
+					),
+					new ActionRowBuilder<TextInputBuilder>().setComponents(
+						new TextInputBuilder().setCustomId('description').setLabel('description').setStyle(TextInputStyle.Paragraph).setMinLength(1),
+					),
+					new ActionRowBuilder<TextInputBuilder>().setComponents(
+						new TextInputBuilder().setCustomId('principal').setLabel('Principal').setStyle(TextInputStyle.Short).setMinLength(1),
+					),
+					new ActionRowBuilder<TextInputBuilder>().setComponents(
+						new TextInputBuilder().setCustomId('repayment').setLabel('Repayment').setStyle(TextInputStyle.Short).setMinLength(1),
+					),
+					new ActionRowBuilder<TextInputBuilder>().setComponents(
+						new TextInputBuilder().setCustomId('duration').setLabel('Duration').setStyle(TextInputStyle.Short).setMinLength(1),
+					),
+				);
 				await i.showModal(modal);
-				const modalSubmit = await i.awaitModalSubmit({ filter: (filterInteraction) => filterInteraction.customId === customId, time: 1000 * 60 * 2 }).catch(() => null);
+				const modalSubmit = await i.message.awaitMessageComponent({ filter: (filterInteraction) => filterInteraction.customId === customId, time: 1000 * 60 * 2 }).catch(() => null);
 				['borrower', 'description', 'principal', 'repayment', 'duration'].forEach((key) => {
 					if (modalSubmit.fields.getTextInputValue(key)) loan[key] = modalSubmit.fields.getTextInputValue(key);
 				});

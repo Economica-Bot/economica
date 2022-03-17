@@ -1,7 +1,7 @@
-import { Snowflake } from 'discord.js';
+import { ApplicationCommandPermissionType, Snowflake } from 'discord.js';
 import { BaseEntity, Column, Entity, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
 
-import { AuthorityString, AuthorityType } from '../typings/index.js';
+import { AuthorityString } from '../typings/index.js';
 import { Guild } from './index.js';
 
 @Entity()
@@ -13,13 +13,13 @@ export class Authority extends BaseEntity {
 		guild: Relation<Guild>;
 
 	@Column()
-		type: AuthorityType;
+		type: ApplicationCommandPermissionType;
 
 	@Column()
 		authority: AuthorityString;
 
 	override toString(): string {
-		return this.type === 'ROLE'
+		return this.type === 1
 			? `<@&${this.id}>`
 			: `<@${this.id}>`;
 	}

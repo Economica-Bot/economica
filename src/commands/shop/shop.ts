@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 import { Item, Listing } from '../../entities/index.js';
 import { paginate, recordTransaction } from '../../lib/index.js';
@@ -47,12 +47,12 @@ export default class implements Command {
 
 			const maxEntries = 10;
 			const pageCount = listings.length / maxEntries || 1;
-			const embeds: MessageEmbed[] = [];
+			const embeds: EmbedBuilder[] = [];
 			let k = 0;
 			for (let i = 0; i < pageCount; i++) {
 				const embed = ctx.embedify('info', 'guild', `Welcome to ${ctx.client.user}'s shop!`);
 				for (let j = 0; j < maxEntries; j++, k++) {
-					if (listings[k]) embed.addField(listings[k].name, `${ctx.guildEntity.currency}${listing.price}\n*${listing.description}*`, true);
+					if (listings[k]) embed.addFields({ name: listings[k].name, value: `${ctx.guildEntity.currency}${listing.price}\n*${listing.description}*`, inline: true });
 				}
 
 				embeds.push(embed);

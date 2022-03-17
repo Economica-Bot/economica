@@ -15,7 +15,7 @@
     "@adrastopoulos/number-parser": "github:Adrastopoulos/Number-Parser",
     "@discordjs/builders": "^0.12.0",
     "discord-api-types": "^0.26.0",
-    "discord.js": "github:monbrey/discord.js#modals",
+    "discord.js": "^14.0.0-dev.1647259751.2297c2b",
     "dotenv": "^10.0.0",
     "fs": "^0.0.1-security",
     "json-format": "^1.0.1",

@@ -5,8 +5,8 @@ import { Member } from './index.js';
 
 @Entity()
 export class Command extends BaseEntity {
-	@PrimaryColumn()
-		id: Snowflake = SnowflakeUtil.generate();
+	@PrimaryColumn({ type: 'bigint' })
+		id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => Member)
 	@JoinColumn()

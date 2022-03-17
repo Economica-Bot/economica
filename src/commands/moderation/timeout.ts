@@ -17,7 +17,7 @@ export default class implements Command {
 			'timeout @user spamming',
 			'timeout @user 3h spamming',
 		])
-		.setClientPermissions(['MODERATE_MEMBERS'])
+		.setClientPermissions(['ModerateMembers'])
 		.setAuthority('MODERATOR')
 		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target').setRequired(true))

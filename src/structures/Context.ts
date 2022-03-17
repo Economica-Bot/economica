@@ -1,11 +1,11 @@
 /* eslint-disable max-classes-per-file */
-import { CommandInteraction, MessageEmbed } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
 import { Guild, Member, User } from '../entities';
 import { EmbedColors, Footer, ReplyString } from '../typings/index.js';
 import { Economica, EconomicaSlashCommandBuilder } from './index.js';
 
-class ContextEmbed extends MessageEmbed {
+class ContextEmbed extends EmbedBuilder {
 	public ctx: Context;
 	constructor(ctx: Context) {
 		super();
@@ -21,14 +21,14 @@ class ContextEmbed extends MessageEmbed {
 
 export class Context {
 	public client: Economica;
-	public interaction: CommandInteraction<'cached'>;
+	public interaction: ChatInputCommandInteraction<'cached'>;
 	public data: EconomicaSlashCommandBuilder;
 	public userEntity: User;
 	public guildEntity: Guild;
 	public memberEntity: Member;
 	public clientUserEntity: User;
 	public clientMemberEntity: Member;
-	public constructor(client: Economica, interaction?: CommandInteraction<'cached'>) {
+	public constructor(client: Economica, interaction?: ChatInputCommandInteraction<'cached'>) {
 		this.client = client;
 		this.interaction = interaction;
 	}
