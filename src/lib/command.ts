@@ -66,7 +66,7 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 	if (!ctx.data.enabled) {
 		await ctx.embedify('warn', 'user', 'This command is disabled.').send(true);
 		return false;
-	} if (ctx.data.authority === 3 && !isDeveloper) {
+	} if (ctx.data.authority === 4 && !isDeveloper) {
 		await ctx.embedify('warn', 'user', 'This command is dev only.').send(true);
 		return false;
 	} if (!ctx.data.global && !ctx.interaction.inGuild()) {

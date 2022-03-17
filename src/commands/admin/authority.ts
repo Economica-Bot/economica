@@ -1,4 +1,4 @@
-import { ApplicationCommandPermissionType, EmbedBuilder, GuildApplicationCommandPermissionData, Util } from 'discord.js';
+import { ApplicationCommandPermissionData, ApplicationCommandPermissionType, Collection, GuildApplicationCommandPermissionData } from 'discord.js';
 
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 import { Authorities } from '../../typings/index.js';
@@ -36,56 +36,57 @@ export default class implements Command {
 		.addSubcommand((options) => options
 			.setName('reset')
 			.setDescription('Reset authority levels')
-			.addMentionableOption((option) => option.setName('mentionable').setDescription('Specify a role or user')));
+			.addMentionableOption((option) => option.setName('mentionable').setDescription('Specify a role or user').setRequired(true)));
 
 	public execute = async (ctx: Context): Promise<void> => {
-		const permissions = await ctx.client.application.commands.permissions.fetch({ guild: ctx.interaction.guildId });
-		const commands = await ctx.client.application.commands.fetch();
+		await ctx.interaction.deferReply({ ephemeral: true });
+		const applicationPermissions = await ctx.client.application.commands.permissions.fetch({ guild: ctx.interaction.guildId });
+		const applicationCommands = await ctx.client.application.commands.fetch();
 		const subcommand = ctx.interaction.options.getSubcommand();
+		const id = ctx.interaction.options.getMentionable('mentionable', false)?.id;
 		if (subcommand === 'view') {
-			const user = permissions.filter((permission) => ctx.client.commands.get(commands.get(permission[1].id).name).data.authority === 0);
-			// const user = ctx.guildEntity.auth.filter((auth) => auth.authority === 0).map((authority) => authority.toString()).join('\n');
-			// const mod = ctx.guildEntity.auth.filter((auth) => auth.authority === 1).map((authority) => authority.toString()).join('\n');
-			// const manager = ctx.guildEntity.auth.filter((auth) => auth.authority === 2).map((authority) => authority.toString()).join('\n');
-			// const admin = ctx.guildEntity.auth.filter((auth) => auth.authority === 3).map((authority) => authority.toString()).join('\n');
-			const embed = new EmbedBuilder()
-				.setColor(Util.resolveColor('Blurple'))
+			const authorities = new Collection<string, Authorities>();
+			applicationPermissions
+				.forEach((value, key) => {
+					const { authority } = ctx.client.commands.get(applicationCommands.get(key).name).data;
+					value.forEach((permission) => {
+						const formattedPermission = permission.type === 2 ? `<@${permission.id}>` : `<@&${permission.id}>`;
+						if (!permission.permission || (authorities.has(formattedPermission) && authorities.get(formattedPermission) > authority)) return;
+						authorities.set(formattedPermission, authority);
+					});
+				});
+			ctx
+				.embedify('info', 'bot', "Running a server economy on your own is no easy task. Build and customize your economy team with Economica's authority utility!")
 				.setAuthor({ name: `${ctx.interaction.guild.name} Authority Hierarchy`, iconURL: ctx.interaction.guild.iconURL() })
-				.setDescription("Running a server economy on your own is no easy task. Build and customize your economy team with Economica's authority utility!")
 				.addFields(
-					{ name: '__User__', value: 'The basic economy member' },
-					{ name: 'Description', value: 'Economy users can use basic level commands\n', inline: true },
-					{ name: 'Items', value: 'user' || 'No Authorized Users or Roles\n', inline: true },
-					{ name: '__Moderator__', value: 'Keep your economy safe and cheater-free!' },
-					{ name: 'Description', value: 'Economy mods can manage the economy blacklists (economy blacklist, loans blacklist, etc...)\n', inline: true },
-					{ name: 'Items', value: 'mod' || 'No Authorized Users or Roles\n', inline: true },
-					{ name: '__Manager__', value: 'Update your economy with fresh new content!' },
-					{ name: 'Description', value: 'Economy managers can manage the economy as a whole (shop, users, inventories, etc...). They also have all the permissions of Economy Mods.\n', inline: true },
-					{ name: 'Items', value: 'manager' || 'No Authorized Users or Roles\n*Note: Any member with the `MANAGE_GUILD` permission is automatically considered an economy manager.', inline: true },
-					{ name: '__Administrator__', value: 'Lead your economy team!' },
-					{ name: 'Description', value: 'Economy Admins can do anything with regards to the economy (reset economy, manage economy ranks and permissions, etc...)\n', inline: true },
-					{ name: 'Items', value: 'admin' || 'No Authorized Users or Roles\n*Note: Any member with the `ADMINISTRATOR` permission is automatically considered an Economy Admin.\n', inline: true },
-				);
-			await ctx.interaction.reply({ embeds: [embed], ephemeral: true });
+					{ name: 'User', value: 'The basic economy member, can use basic level commands.' },
+					{ name: 'Items', value: Array.from(authorities.filter((auth) => auth === 0).keys()).join(', ') || 'No Authorized Users or Roles\n', inline: true },
+					{ name: 'Moderator', value: 'Keep your economy safe and cheater-free! Mods can manage the economy blacklists and have basic moderation capabilities.' },
+					{ name: 'Items', value: Array.from(authorities.filter((auth) => auth === 1).keys()).join(', ') || 'No Authorized Users or Roles\n', inline: true },
+					{ name: 'Manager', value: 'Update your economy with fresh new content! Managers can manage the economy as a whole. They also have all the permissions of moderators.' },
+					{ name: 'Items', value: Array.from(authorities.filter((auth) => auth === 2).keys()).join(', ') || 'No Authorized Users or Roles\n*Note: Any member with the `MANAGE_GUILD` permission is automatically considered an economy manager.', inline: true },
+					{ name: 'Administrator', value: 'Lead your economy team! Admins can do anything in regards to the economy.' },
+					{ name: 'Items', value: Array.from(authorities.filter((auth) => auth === 3).keys()).join(', ') || 'No Authorized Users or Roles\n*Note: Any member with the `ADMINISTRATOR` permission is automatically considered an Economy Admin.\n', inline: true },
+				).send(true);
 		} else if (subcommand === 'set') {
-			await ctx.interaction.deferReply();
+			const type = ctx.client.users.cache.get(id) ? ApplicationCommandPermissionType.User : ApplicationCommandPermissionType.Role;
 			const authority = ctx.interaction.options.getString('authority');
 			const authorityLevel = Authorities[authority];
-			const { id } = ctx.interaction.options.getMentionable('mentionable');
-			const type = ctx.client.application.commands.cache.get(id) ? ApplicationCommandPermissionType.User : ApplicationCommandPermissionType.Role;
-			const fullPermissions = commands
-				.filter((command) => ctx.client.commands.get(command.name).data.authority <= authorityLevel)
-				.map((command) => ({ id: command.id, permissions: [{ id, type, permission: true }] } as GuildApplicationCommandPermissionData));
-			await ctx.client.application.commands.permissions.set({ guild: ctx.interaction.guildId, fullPermissions: ctx.client.application.commands.cache.map((command) => ({ id: command.id, permissions: [{ id, type, permission: false }] } as GuildApplicationCommandPermissionData)) });
+			const fullPermissions: GuildApplicationCommandPermissionData[] = [];
+			applicationCommands.forEach((applicationCommand) => {
+				const permissions: ApplicationCommandPermissionData[] = applicationPermissions.get(applicationCommand.id) || [];
+				const permissionData: ApplicationCommandPermissionData = { id, type, permission: ctx.client.commands.get(applicationCommand.name).data.authority <= authorityLevel };
+				if (permissions.some((perm) => perm.id === id)) permissions[permissions.findIndex((perm) => perm.id === id)] = permissionData;
+				else permissions.push(permissionData);
+				fullPermissions.push({ id: applicationCommand.id, permissions });
+			});
 			await ctx.client.application.commands.permissions.set({ guild: ctx.interaction.guildId, fullPermissions });
 			await ctx.embedify('success', 'bot', `Authority set to \`${authority}\`.`).send(true);
 		} else if (subcommand === 'reset') {
-			const { id } = ctx.interaction.options.getMentionable('mentionable', false);
-			if (id) {
-				await ctx.embedify('success', 'bot', 'Authority reset.').send(true);
-			} else {
-				await ctx.embedify('success', 'bot', 'Authority settings have been reset.').send(true);
-			}
+			const fullPermissions: GuildApplicationCommandPermissionData[] = [];
+			applicationPermissions.forEach((permission, command) => fullPermissions.push({ id: command, permissions: permission.filter((perm) => perm.id !== id) }));
+			await ctx.client.application.commands.permissions.set({ guild: ctx.interaction.guildId, fullPermissions });
+			await ctx.embedify('success', 'bot', 'Authority reset.').send(true);
 		}
 	};
 }
