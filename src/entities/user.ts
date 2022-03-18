@@ -6,11 +6,11 @@ import { Module } from './index.js';
 @Entity({ name: 'discuser' })
 export class User extends BaseEntity {
 	@PrimaryColumn()
-		id: Snowflake;
+	public id: Snowflake;
 
 	@OneToMany(() => Module, (module) => module.user)
-		modules: Promise<Relation<Module>[]>;
+	public modules: Promise<Relation<Module>[]>;
 
 	@Column({ default: 0 })
-		keys: number;
+	public keys: number;
 }

@@ -1,29 +1,30 @@
 import { Snowflake } from 'discord.js';
-import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
+import Module from 'module';
+import { BaseEntity, Column, Entity, OneToMany, PrimaryColumn, Relation } from 'typeorm';
 
 import { CURRENCY_SYMBOL } from '../config.js';
-import { ModuleString, Modules, defaultIncomesObj, defaultIntervalsObj } from '../typings/index.js';
+import { defaultIncomesObj, defaultIntervalsObj } from '../typings/index.js';
 
 @Entity()
 export class Guild extends BaseEntity {
 	@PrimaryColumn()
-		id: Snowflake;
+	public id: Snowflake;
 
 	@Column({ default: CURRENCY_SYMBOL })
-		currency: string;
+	public currency: string;
 
 	@Column({ default: null })
-		transactionLogId: string | null;
+	public transactionLogId: string | null;
 
 	@Column({ default: null })
-		infractionLogId: string | null;
+	public infractionLogId: string | null;
 
 	@Column({ type: 'json', default: defaultIncomesObj })
-		incomes: typeof defaultIncomesObj;
+	public incomes: typeof defaultIncomesObj;
 
 	@Column({ type: 'json', default: defaultIntervalsObj })
-		intervals: typeof defaultIntervalsObj;
+	public intervals: typeof defaultIntervalsObj;
 
-	@Column({ type: 'text', array: true })
-		modules: ModuleString[] = (Object.keys(Modules) as ModuleString[]).filter((module) => Modules[module] === 'DEFAULT');
+	@OneToMany(() => Module, (module) => module.id)
+	public modules: Relation<Module>;
 }

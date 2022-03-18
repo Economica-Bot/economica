@@ -7,58 +7,58 @@ import { Guild } from './index.js';
 @Entity()
 export class Listing extends BaseEntity {
 	@PrimaryColumn()
-		id: Snowflake = SnowflakeUtil.generate().toString();
+	public id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => Guild)
 	@JoinColumn()
-		guild: Relation<Guild>;
+	public guild: Relation<Guild>;
 
 	@Column()
-		type: ListingString;
+	public type: ListingString;
 
 	@Column()
-		name: string;
+	public name: string;
 
 	@Column()
-		price: number;
+	public price: number;
 
 	@Column()
-		treasuryRequired: number;
+	public treasuryRequired: number;
 
 	@Column()
-		active: boolean;
+	public active: boolean;
 
 	@Column()
-		description: string;
+	public description: string;
 
 	@Column()
-		stackable: boolean;
+	public stackable: boolean;
 
 	@Column()
-		stock: number;
+	public stock: number;
 
 	@Column('simple-array')
-		rolesRequired: Snowflake[];
+	public rolesRequired: Snowflake[];
 
 	@Column('simple-array')
-		rolesGiven: Snowflake[];
+	public rolesGiven: Snowflake[];
 
 	@Column('simple-array')
-		rolesRemoved: Snowflake[];
+	public rolesRemoved: Snowflake[];
 
 	@OneToMany(() => Listing, (listing) => listing.itemsRequired)
 	@JoinColumn()
-		itemsRequired: Promise<Listing[]>;
+	public itemsRequired: Promise<Listing[]>;
 
 	@Column()
-		generatorPeriod: number | null;
+	public generatorPeriod: number | null;
 
 	@Column()
-		generatorAmount: number | null;
+	public generatorAmount: number | null;
 
 	@CreateDateColumn()
-		createdAt: Date;
+	public createdAt: Date;
 
 	@Column('timestamp')
-		expiresAt: Date;
+	public expiresAt: Date;
 }

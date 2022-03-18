@@ -6,15 +6,15 @@ import { Member } from './index.js';
 @Entity()
 export class Command extends BaseEntity {
 	@PrimaryColumn({ type: 'bigint' })
-		id: Snowflake = SnowflakeUtil.generate().toString();
+	public id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => Member)
 	@JoinColumn()
-		member: Relation<Member>;
+	public member: Relation<Member>;
 
 	@Column()
-		command: string;
+	public command: string;
 
 	@CreateDateColumn()
-		createdAt: Date;
+	public createdAt: Date;
 }

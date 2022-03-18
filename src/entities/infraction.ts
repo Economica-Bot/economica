@@ -7,35 +7,35 @@ import { Guild, Member } from './index.js';
 @Entity()
 export class Infraction extends BaseEntity {
 	@PrimaryColumn()
-		id: Snowflake = SnowflakeUtil.generate().toString();
+	public id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => Guild)
 	@JoinColumn()
-		guild: Relation<Guild>;
+	public guild: Relation<Guild>;
 
 	@ManyToOne(() => Member)
 	@JoinColumn()
-		target: Relation<Member>;
+	public target: Relation<Member>;
 
 	@ManyToOne(() => Member)
 	@JoinColumn()
-		agent: Relation<Member>;
+	public agent: Relation<Member>;
 
 	@Column()
-		type: InfractionString;
+	public type: InfractionString;
 
 	@Column()
-		reason: string;
+	public reason: string;
 
 	@Column({ nullable: true })
-		active: boolean | null;
+	public active: boolean | null;
 
 	@Column({ nullable: true })
-		duration: number | null;
+	public duration: number | null;
 
 	@Column({ nullable: true })
-		permanent: boolean | null;
+	public permanent: boolean | null;
 
 	@CreateDateColumn()
-		createdAt: Date;
+	public createdAt: Date;
 }

@@ -6,19 +6,19 @@ import { Guild, User } from './index.js';
 @Entity()
 export class Member extends BaseEntity {
 	@PrimaryColumn()
-		id: Snowflake = SnowflakeUtil.generate().toString();
+	public id: Snowflake = SnowflakeUtil.generate().toString();
 
-	@ManyToOne(() => User, (user) => user.id, { eager: true })
+	@ManyToOne(() => User)
 	@JoinColumn()
-		user: Relation<User>;
+	public user: Relation<User>;
 
 	@ManyToOne(() => Guild)
 	@JoinColumn()
-		guild: Relation<Guild>;
+	public guild: Relation<Guild>;
 
 	@Column({ type: 'float', default: 0 })
-		treasury: number;
+	public treasury: number;
 
 	@Column({ type: 'float', default: 0 })
-		wallet: number;
+	public wallet: number;
 }
