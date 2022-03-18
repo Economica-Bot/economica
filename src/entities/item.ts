@@ -6,17 +6,17 @@ import { Listing, Member } from './index.js';
 @Entity()
 export class Item extends BaseEntity {
 	@PrimaryColumn()
-		id: Snowflake = SnowflakeUtil.generate().toString();
+	public id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => Listing, (listing) => listing.id)
-		listing: Relation<Listing>;
+	public listing: Relation<Listing>;
 
 	@ManyToOne(() => Member, (member) => member.id)
-		owner: Relation<Member>;
+	public owner: Relation<Member>;
 
 	@Column()
-		amount: number;
+	public amount: number;
 
 	@Column({ default: null })
-		lastGeneratedAt: Date;
+	public lastGeneratedAt: Date;
 }
