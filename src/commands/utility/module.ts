@@ -46,10 +46,12 @@ export default class implements Command {
 				await ctx.userEntity.save();
 				ctx.guildEntity.modules.push(moduleName);
 				await ctx.guildEntity.save();
-				await ctx.embedify('success', 'user', `Added the \`${moduleName}\` module.`).send(true);
 				ctx.client.commands
 					.filter((command) => command.data.module === moduleName)
-					.forEach(async (command) => ctx.interaction.guild.commands.create(command.data.toJSON() as any));
+					.forEach(async (command) => {
+						await ctx.interaction.guild.commands.create(command.data.toJSON() as any);
+					});
+				await ctx.embedify('success', 'user', `Added the \`${moduleName}\` module.`).send(true);
 			}
 		} else if (subcommand === 'remove') {
 			const module = await Module.findOne({ guild: ctx.guildEntity, module: moduleName });
@@ -61,10 +63,14 @@ export default class implements Command {
 				ctx.userEntity.keys += 1;
 				await ctx.userEntity.save();
 				await module.remove();
-				await ctx.embedify('success', 'user', `Removed the \`${moduleName}\` module.`).send(true);
+				const applicationCommands = await ctx.interaction.guild.commands.fetch();
 				ctx.client.commands
 					.filter((command) => command.data.module === moduleName)
-					.forEach(async (command) => ctx.interaction.guild.commands.delete((await ctx.interaction.guild.commands.fetch()).find((cmd) => cmd.name === command.data.name)));
+					.forEach(async (command) => {
+						const cmd = applicationCommands.find((applicationCommand) => applicationCommand.name === command.data.name);
+						await ctx.interaction.guild.commands.delete(cmd);
+					});
+				await ctx.embedify('success', 'user', `Removed the \`${moduleName}\` module.`).send(true);
 			}
 		}
 	};
