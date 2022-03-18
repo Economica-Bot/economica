@@ -5,6 +5,7 @@ import {
 	GatewayIntentBits,
 	InviteGenerationOptions,
 	OAuth2Scopes,
+	Partials,
 	PermissionFlagsBits,
 } from 'discord.js';
 import dotenv from 'dotenv';
@@ -66,6 +67,10 @@ export const clientOptions: ClientOptions = {
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMembers,
 		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.DirectMessages,
+	],
+	partials: [
+		Partials.Channel,
 	],
 };
 
