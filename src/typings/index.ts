@@ -1,4 +1,5 @@
-import { EmbedFooterData, EmbedBuilder } from 'discord.js';
+import { EmbedFooterData, EmbedBuilder, Snowflake } from 'discord.js';
+import { ModuleString, ModuleTypeString } from './constants.js';
 
 export interface EconomyInfo {
 	wallet: number;
@@ -51,6 +52,21 @@ export type DefaultIntervals = {
 	weekly: IntervalCommand;
 	fortnightly: IntervalCommand;
 	monthly: IntervalCommand;
+};
+
+export interface Module {
+	module: ModuleString;
+	type: ModuleTypeString;
+	user: Snowflake;
+}
+
+export type DefaultModules = {
+	admin: Module;
+	economy: Module;
+	income: Module;
+	moderation: Module;
+	shop: Module;
+	utility: Module;
 };
 
 export type ReplyString = 'success' | 'info' | 'warn' | 'error';
