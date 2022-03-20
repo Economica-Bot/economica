@@ -54,7 +54,7 @@ async function checkCooldown(ctx: Context): Promise<boolean> {
 }
 
 async function validateModule(ctx: Context): Promise<boolean> {
-	if (!ctx.guildEntity.modules.some((module) => module === ctx.data.module)) {
+	if (!ctx.guildEntity.modules.some((module) => module.module === ctx.data.module)) {
 		await ctx.embedify('warn', 'user', `The \`${ctx.data.module}\` module is not enabled in this server.`).send(true);
 		return false;
 	}

@@ -1,9 +1,8 @@
 import { Snowflake } from 'discord.js';
-import Module from 'module';
-import { BaseEntity, Column, Entity, OneToMany, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 
 import { CURRENCY_SYMBOL } from '../config.js';
-import { defaultIncomesObj, defaultIntervalsObj } from '../typings/index.js';
+import { defaultIncomesObj, defaultIntervalsObj, defaultModulesObj, Module } from '../typings/index.js';
 
 @Entity()
 export class Guild extends BaseEntity {
@@ -19,12 +18,12 @@ export class Guild extends BaseEntity {
 	@Column({ default: null })
 	public infractionLogId: string | null;
 
-	@Column({ type: 'json', default: defaultIncomesObj })
+	@Column({ type: 'jsonb', default: defaultIncomesObj })
 	public incomes: typeof defaultIncomesObj;
 
-	@Column({ type: 'json', default: defaultIntervalsObj })
+	@Column({ type: 'jsonb', default: defaultIntervalsObj })
 	public intervals: typeof defaultIntervalsObj;
 
-	@OneToMany(() => Module, (module) => module.id)
-	public modules: Relation<Module>;
+	@Column({ type: 'jsonb', default: Object.values(defaultModulesObj) })
+	public modules: Module[];
 }

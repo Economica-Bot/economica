@@ -1,4 +1,3 @@
-import { Module } from '../../entities/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 import { Modules, ModuleString } from '../../typings/index.js';
 
@@ -27,24 +26,25 @@ export default class implements Command {
 		if (moduleName && !(moduleName in Modules)) {
 			await ctx.embedify('error', 'user', `Invalid module: \`${moduleName}\``).send(true);
 		} else if (subcommand === 'view') {
-			const modulesArr = Object.keys(Modules) as ModuleString[];
-			const enabledModulesArr = modulesArr.filter((module) => ctx.guildEntity.modules.includes(module));
-			const disabledModulesArr = modulesArr.filter((module) => !ctx.guildEntity.modules.includes(module));
-			const embed = ctx.embedify('info', 'guild', "View the server's modules").addFields(
-				{ name: 'Enabled Modules', value: `\`${enabledModulesArr.join('`, `')}\``, inline: true },
-				{ name: 'Disabled Modules', value: `\`${disabledModulesArr.join('`, `')}\``, inline: true },
-			);
+			const description = `**View ${ctx.interaction.guild}'s Modules!**\nModule command authorities must be set manually after they are added to the server.`;
+			const embed = ctx
+				.embedify('info', 'guild', description)
+				.setAuthor({ iconURL: ctx.interaction.guild.iconURL(), name: 'Modules' })
+				.addFields(
+					{ name: 'Default Modules', inline: true, value: ctx.guildEntity.modules.filter((module) => module.type === 'DEFAULT').map((module) => `\`${module.module}\``).join('\n') },
+					{ name: 'Enabled Modules', inline: true, value: ctx.guildEntity.modules.filter((module) => module.type === 'SPECIAL').map((module) => `\`${module.module}\``).join('\n') },
+					{ name: 'Disabled Modules', inline: true, value: Object.keys(Modules).filter((module) => !ctx.guildEntity.modules.some((m) => m.module === module)).map((module) => `\`${module}\``).join('\n') },
+				);
 			await ctx.interaction.reply({ embeds: [embed] });
 		} else if (subcommand === 'add') {
 			if (ctx.userEntity.keys < 1) {
 				await ctx.embedify('warn', 'user', 'You do not have any keys.').send(true);
-			} else if (ctx.guildEntity.modules.find((m) => m === moduleName)) {
+			} else if (ctx.guildEntity.modules.some((module) => module.module === moduleName)) {
 				await ctx.embedify('warn', 'user', `This server already has the \`${moduleName}\` module enabled.`).send(true);
 			} else {
-				await Module.create({ user: ctx.userEntity, guild: ctx.guildEntity, module: moduleName }).save();
 				ctx.userEntity.keys -= 1;
 				await ctx.userEntity.save();
-				ctx.guildEntity.modules.push(moduleName);
+				ctx.guildEntity.modules.push({ module: moduleName, type: 'SPECIAL', user: ctx.userEntity.id });
 				await ctx.guildEntity.save();
 				ctx.client.commands
 					.filter((command) => command.data.module === moduleName)
@@ -54,21 +54,19 @@ export default class implements Command {
 				await ctx.embedify('success', 'user', `Added the \`${moduleName}\` module.`).send(true);
 			}
 		} else if (subcommand === 'remove') {
-			const module = await Module.findOne({ guild: ctx.guildEntity, module: moduleName });
-			if (!module) {
+			if (!ctx.guildEntity.modules.some((module) => module.module === moduleName && module.user === ctx.userEntity.id)) {
 				await ctx.embedify('warn', 'user', 'You have not enabled this module in this server.').send(true);
 			} else {
-				ctx.guildEntity.modules = ctx.guildEntity.modules.filter((mod) => mod !== module.module);
-				await ctx.guildEntity.save();
 				ctx.userEntity.keys += 1;
 				await ctx.userEntity.save();
-				await module.remove();
+				ctx.guildEntity.modules = ctx.guildEntity.modules.filter((module) => module.module !== moduleName);
+				await ctx.guildEntity.save();
 				const applicationCommands = await ctx.interaction.guild.commands.fetch();
 				ctx.client.commands
 					.filter((command) => command.data.module === moduleName)
 					.forEach(async (command) => {
 						const cmd = applicationCommands.find((applicationCommand) => applicationCommand.name === command.data.name);
-						await ctx.interaction.guild.commands.delete(cmd);
+						if (cmd) await ctx.interaction.guild.commands.delete(cmd);
 					});
 				await ctx.embedify('success', 'user', `Removed the \`${moduleName}\` module.`).send(true);
 			}

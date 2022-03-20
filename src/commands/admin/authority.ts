@@ -41,7 +41,9 @@ export default class implements Command {
 	public execute = async (ctx: Context): Promise<void> => {
 		await ctx.interaction.deferReply({ ephemeral: true });
 		const applicationPermissions = await ctx.client.application.commands.permissions.fetch({ guild: ctx.interaction.guildId });
-		const applicationCommands = await ctx.client.application.commands.fetch();
+		const guildApplicationCommands = await ctx.interaction.guild.commands.fetch();
+		const globalApplicationCommands = await ctx.client.application.commands.fetch();
+		const applicationCommands = new Collection([...guildApplicationCommands, ...globalApplicationCommands]);
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const id = ctx.interaction.options.getMentionable('mentionable', false)?.id;
 		if (subcommand === 'view') {
