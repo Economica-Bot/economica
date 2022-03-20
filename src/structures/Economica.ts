@@ -30,7 +30,6 @@ import {
 	Listing,
 	Loan,
 	Member,
-	Module,
 	Transaction,
 	User,
 } from '../entities/index.js';
@@ -192,7 +191,6 @@ export class Economica extends Client {
 		Listing.useConnection(this.connection);
 		Loan.useConnection(this.connection);
 		Member.useConnection(this.connection);
-		Module.useConnection(this.connection);
 		Transaction.useConnection(this.connection);
 		User.useConnection(this.connection);
 		this.log.info('Connected to DB');
