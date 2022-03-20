@@ -9,6 +9,7 @@ import {
 	SelectMenuInteraction,
 	TextInputBuilder,
 	TextInputStyle,
+	Util,
 } from 'discord.js';
 import ms from 'ms';
 
@@ -42,8 +43,8 @@ export default class implements Command {
 					.setPlaceholder('None Selected')
 					.setCustomId('loan_select')
 					.setOptions(
-						{ emoji: { id: Emojis.CREATE_LOAN }, label: 'Create', value: 'create' },
-						{ emoji: { id: Emojis.MANAGE_LOAN }, label: 'Manage', value: 'manage' },
+						{ emoji: { id: Util.resolvePartialEmoji(Emojis.CREATE_LOAN).id }, label: 'Create', value: 'create' },
+						{ emoji: { id: Util.resolvePartialEmoji(Emojis.MANAGE_LOAN).id }, label: 'Manage', value: 'manage' },
 					),
 			);
 		const message = await ctx.interaction.reply({ embeds: [embed], components: [dropdown], fetchReply: true });
