@@ -46,7 +46,7 @@ export default class implements Command {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const user = ctx.interaction.options.getUser('user', false);
 		const id = ctx.interaction.options.getString('infraction_id', false);
-		const infraction = await Infraction.findOne({ relations: ['guild', 'target', 'agent'], where: { id, guild: ctx.guildEntity } });
+		const infraction = await Infraction.findOne({ relations: ['guild', 'target', 'agent', 'target.user', 'agent.user'], where: { id, guild: ctx.guildEntity } });
 		if (id && !infraction) {
 			await ctx.embedify('error', 'user', `Could not find infraction with id \`${id}\``).send(true);
 			return;
