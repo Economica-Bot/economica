@@ -9,7 +9,7 @@
     "build": "tsc",
     "lint": "eslint src --ext .ts",
     "dev": "node --enable-source-maps --es-module-specifier-resolution=node --experimental-modules dist/index.js",
-    "ts-node": "node --loader ts-node/esm src/index.ts"
+    "ts-node": "node --loader ts-node/esm"
   },
   "license": "ISC",
   "dependencies": {
