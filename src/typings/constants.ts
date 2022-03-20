@@ -1,8 +1,8 @@
 import { ColorResolvable } from 'discord.js';
 
-import { ReplyString, DefaultIncomes, DefaultIntervals, DefaultModules } from './index.js';
+import { ReplyString, Incomes, Intervals, Modules } from './index.js';
 
-export const defaultIntervalsObj: DefaultIntervals = {
+export const defaultIntervalsObj: Intervals = {
 	minutely: {
 		amount: 50,
 		cooldown: 1000 * 60,
@@ -35,7 +35,7 @@ export const defaultIntervalsObj: DefaultIntervals = {
 	},
 };
 
-export const defaultIncomesObj: DefaultIncomes = {
+export const defaultIncomesObj: Incomes = {
 	work: {
 		min: 100,
 		max: 500,
@@ -63,35 +63,45 @@ export const defaultIncomesObj: DefaultIncomes = {
 	},
 };
 
-export const defaultModulesObj: DefaultModules = {
-	admin: {
-		module: 'ADMIN',
+export const defaultModulesObj: Modules = {
+	ADMIN: {
 		type: 'DEFAULT',
+		enabled: true,
 		user: null,
 	},
-	economy: {
-		module: 'ECONOMY',
+	ECONOMY: {
 		type: 'DEFAULT',
+		enabled: true,
 		user: null,
 	},
-	income: {
-		module: 'INCOME',
+	INCOME: {
 		type: 'DEFAULT',
+		enabled: true,
 		user: null,
 	},
-	moderation: {
-		module: 'MODERATION',
-		type: 'DEFAULT',
+	INSIGHTS: {
+		type: 'SPECIAL',
+		enabled: false,
 		user: null,
 	},
-	shop: {
-		module: 'SHOP',
-		type: 'DEFAULT',
+	INTERVAL: {
+		type: 'SPECIAL',
+		enabled: false,
 		user: null,
 	},
-	utility: {
-		module: 'UTILITY',
+	MODERATION: {
 		type: 'DEFAULT',
+		enabled: true,
+		user: null,
+	},
+	SHOP: {
+		type: 'DEFAULT',
+		enabled: true,
+		user: null,
+	},
+	UTILITY: {
+		type: 'DEFAULT',
+		enabled: true,
 		user: null,
 	},
 };
@@ -214,13 +224,3 @@ export type SpecialModuleString =
 	| 'INSIGHTS'
 	| 'INTERVAL';
 export type ModuleString = DefaultModuleString | SpecialModuleString;
-export const Modules: Record<ModuleString, ModuleTypeString> = {
-	ADMIN: 'DEFAULT',
-	ECONOMY: 'DEFAULT',
-	INCOME: 'DEFAULT',
-	MODERATION: 'DEFAULT',
-	SHOP: 'DEFAULT',
-	UTILITY: 'DEFAULT',
-	INSIGHTS: 'SPECIAL',
-	INTERVAL: 'SPECIAL',
-};

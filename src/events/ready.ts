@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DEPLOY_ALL_MODULES, DEPLOY_COMMANDS, DEVELOPMENT_GUILD_IDS, PRODUCTION } from '../config.js';
 import { Economica, Event } from '../structures/index.js';
-import { Modules } from '../typings/index.js';
+import { defaultModulesObj } from '../typings/constants.js';
 
 export default class implements Event {
 	public event = 'ready' as const;
@@ -23,7 +23,7 @@ export default class implements Event {
 		const defaultCommandData: any[] = [];
 		client.commands.forEach((command) => {
 			commandData.push(command.data.toJSON());
-			if (Modules[command.data.module] === 'DEFAULT') {
+			if (defaultModulesObj[command.data.module].type === 'DEFAULT') {
 				defaultCommandData.push(command.data.toJSON());
 			}
 		});

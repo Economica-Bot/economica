@@ -1,5 +1,5 @@
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
-import { Modules, ModuleString } from '../../typings/index.js';
+import { ModuleString } from '../../typings/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -23,7 +23,7 @@ export default class implements Command {
 	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const moduleName = ctx.interaction.options.getString('module', false) as ModuleString;
-		if (moduleName && !(moduleName in Modules)) {
+		if (moduleName && !(moduleName in ctx.guildEntity.modules)) {
 			await ctx.embedify('error', 'user', `Invalid module: \`${moduleName}\``).send(true);
 		} else if (subcommand === 'view') {
 			const description = `**View ${ctx.interaction.guild}'s Modules!**\nModule command authorities must be set manually after they are added to the server.`;
@@ -31,20 +31,21 @@ export default class implements Command {
 				.embedify('info', 'guild', description)
 				.setAuthor({ iconURL: ctx.interaction.guild.iconURL(), name: 'Modules' })
 				.addFields(
-					{ name: 'Default Modules', inline: true, value: ctx.guildEntity.modules.filter((module) => module.type === 'DEFAULT').map((module) => `\`${module.module}\``).join('\n') },
-					{ name: 'Enabled Modules', inline: true, value: ctx.guildEntity.modules.filter((module) => module.type === 'SPECIAL').map((module) => `\`${module.module}\``).join('\n') },
-					{ name: 'Disabled Modules', inline: true, value: Object.keys(Modules).filter((module) => !ctx.guildEntity.modules.some((m) => m.module === module)).map((module) => `\`${module}\``).join('\n') },
+					{ name: 'Default Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([_, module]) => module.type === 'DEFAULT').map(([module, _]) => `\`${module}\``).join('\n') },
+					{ name: 'Enabled Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([_, module]) => module.enabled).map(([module, _]) => `\`${module}\``).join('\n') },
+					{ name: 'Disabled Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([_, module]) => !module.enabled).map(([module, _]) => `\`${module}\``).join('\n') },
 				);
 			await ctx.interaction.reply({ embeds: [embed] });
 		} else if (subcommand === 'add') {
 			if (ctx.userEntity.keys < 1) {
 				await ctx.embedify('warn', 'user', 'You do not have any keys.').send(true);
-			} else if (ctx.guildEntity.modules.some((module) => module.module === moduleName)) {
+			} else if (ctx.guildEntity.modules[moduleName].enabled) {
 				await ctx.embedify('warn', 'user', `This server already has the \`${moduleName}\` module enabled.`).send(true);
 			} else {
 				ctx.userEntity.keys -= 1;
 				await ctx.userEntity.save();
-				ctx.guildEntity.modules.push({ module: moduleName, type: 'SPECIAL', user: ctx.userEntity.id });
+				ctx.guildEntity.modules[moduleName].enabled = true;
+				ctx.guildEntity.modules[moduleName].user = ctx.userEntity.id;
 				await ctx.guildEntity.save();
 				ctx.client.commands
 					.filter((command) => command.data.module === moduleName)
@@ -54,12 +55,13 @@ export default class implements Command {
 				await ctx.embedify('success', 'user', `Added the \`${moduleName}\` module.`).send(true);
 			}
 		} else if (subcommand === 'remove') {
-			if (!ctx.guildEntity.modules.some((module) => module.module === moduleName && module.user === ctx.userEntity.id)) {
+			if (ctx.guildEntity.modules[moduleName].user !== ctx.userEntity.id) {
 				await ctx.embedify('warn', 'user', 'You have not enabled this module in this server.').send(true);
 			} else {
 				ctx.userEntity.keys += 1;
 				await ctx.userEntity.save();
-				ctx.guildEntity.modules = ctx.guildEntity.modules.filter((module) => module.module !== moduleName);
+				ctx.guildEntity.modules[moduleName].enabled = false;
+				ctx.guildEntity.modules[moduleName].user = null;
 				await ctx.guildEntity.save();
 				const applicationCommands = await ctx.interaction.guild.commands.fetch();
 				ctx.client.commands

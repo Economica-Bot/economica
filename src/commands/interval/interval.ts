@@ -37,7 +37,7 @@ export default class implements Command {
 				await ctx.embedify('error', 'user', 'That is not an `INTERVAL` command.').send(true);
 			} else {
 				if (amount) ctx.guildEntity.intervals[command.data.name].amount = amount;
-				if (typeof enabled !== 'undefined') ctx.guildEntity.intervals[command.data.name].enabled = enabled;
+				if (enabled !== null) ctx.guildEntity.intervals[command.data.name].enabled = enabled;
 				await ctx.guildEntity.save();
 				await ctx.embedify('success', 'user', `Updated \`${command.data.name}\`.`).send();
 			}

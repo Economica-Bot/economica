@@ -18,7 +18,7 @@ import {
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from '../../structures/index.js';
-import { INTERACTION_COMPONENT_COOLDOWN, Emojis, Modules } from '../../typings/constants.js';
+import { INTERACTION_COMPONENT_COOLDOWN, Emojis } from '../../typings/constants.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -68,7 +68,7 @@ export default class implements Command {
 	};
 
 	private async displayHelp(ctx: Context, i: CommandInteraction, message: Message<true>) {
-		const labels = Object.keys(Modules).map((module) => new SelectMenuOptionBuilder().setLabel(module).setValue(module));
+		const labels = Object.keys(ctx.guildEntity.modules).map((module) => new SelectMenuOptionBuilder().setLabel(module).setValue(module));
 		const dropdown = new ActionRowBuilder<MessageActionRowComponentBuilder>()
 			.setComponents(
 				new SelectMenuBuilder()

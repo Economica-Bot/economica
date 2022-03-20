@@ -3,6 +3,7 @@ import ms from 'ms';
 
 import { DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEVELOPER_IDS } from '../config.js';
 import { Context } from '../structures/index.js';
+import { Authorities } from '../typings/constants.js';
 
 async function checkPermission(ctx: Context): Promise<boolean> {
 	const member = ctx.interaction.member as GuildMember;
@@ -54,7 +55,7 @@ async function checkCooldown(ctx: Context): Promise<boolean> {
 }
 
 async function validateModule(ctx: Context): Promise<boolean> {
-	if (!ctx.guildEntity.modules.some((module) => module.module === ctx.data.module)) {
+	if (!ctx.guildEntity.modules[ctx.data.module].enabled) {
 		await ctx.embedify('warn', 'user', `The \`${ctx.data.module}\` module is not enabled in this server.`).send(true);
 		return false;
 	}
@@ -66,7 +67,7 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 	if (!ctx.data.enabled) {
 		await ctx.embedify('warn', 'user', 'This command is disabled.').send(true);
 		return false;
-	} if (ctx.data.authority === 4 && !isDeveloper) {
+	} if (Authorities[ctx.data.authority] === 'DEVELOPER' && !isDeveloper) {
 		await ctx.embedify('warn', 'user', 'This command is dev only.').send(true);
 		return false;
 	} if (!ctx.data.global && !ctx.interaction.inGuild()) {

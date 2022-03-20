@@ -32,7 +32,7 @@ export interface IncomeCommand {
 	cooldown: number;
 }
 
-export type DefaultIncomes = {
+export type Incomes = {
 	work: IncomeCommand;
 	beg: IncomeCommand;
 	crime: IncomeCommand;
@@ -45,7 +45,7 @@ export interface IntervalCommand {
 	enabled: boolean;
 }
 
-export type DefaultIntervals = {
+export type Intervals = {
 	minutely: IntervalCommand;
 	hourly: IntervalCommand;
 	daily: IntervalCommand;
@@ -55,19 +55,12 @@ export type DefaultIntervals = {
 };
 
 export interface Module {
-	module: ModuleString;
 	type: ModuleTypeString;
+	enabled: boolean;
 	user: Snowflake;
 }
 
-export type DefaultModules = {
-	admin: Module;
-	economy: Module;
-	income: Module;
-	moderation: Module;
-	shop: Module;
-	utility: Module;
-};
+export type Modules = Record<ModuleString, Module>;
 
 export type ReplyString = 'success' | 'info' | 'warn' | 'error';
 export type Footer = 'bot' | 'user' | 'guild' | EmbedFooterData;
