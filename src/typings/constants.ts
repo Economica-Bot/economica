@@ -212,8 +212,7 @@ export type DefaultModuleString =
 	| 'UTILITY';
 export type SpecialModuleString =
 	| 'INSIGHTS'
-	| 'INTERVAL'
-	| 'CORPORATION';
+	| 'INTERVAL';
 export type ModuleString = DefaultModuleString | SpecialModuleString;
 export const Modules: Record<ModuleString, ModuleTypeString> = {
 	ADMIN: 'DEFAULT',
@@ -224,5 +223,4 @@ export const Modules: Record<ModuleString, ModuleTypeString> = {
 	UTILITY: 'DEFAULT',
 	INSIGHTS: 'SPECIAL',
 	INTERVAL: 'SPECIAL',
-	CORPORATION: 'SPECIAL',
 };
