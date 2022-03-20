@@ -46,7 +46,7 @@ export default class implements Command {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const user = ctx.interaction.options.getUser('user', false);
 		const id = ctx.interaction.options.getString('transaction_id', false);
-		const transaction = await Transaction.findOne({ relations: ['guild', 'target', 'agent'], where: { id, guild: ctx.guildEntity } });
+		const transaction = await Transaction.findOne({ relations: ['guild', 'target', 'agent', 'target.user', 'agent.user'], where: { id, guild: ctx.guildEntity } });
 		if (id && !transaction) {
 			await ctx.embedify('error', 'user', `Could not find transaction with id \`${id}\``).send(true);
 			return;
