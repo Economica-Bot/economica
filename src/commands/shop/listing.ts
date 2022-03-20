@@ -2,7 +2,7 @@ import { Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } 
 
 import { Listing } from '../../entities/listing.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
-import { Emojis } from '../../typings/constants.js';
+import { INTERACTION_COMPONENT_COOLDOWN, Emojis } from '../../typings/constants.js';
 import { ListingString } from '../../typings/index.js';
 
 export default class implements Command {
@@ -89,7 +89,7 @@ export default class implements Command {
 	};
 
 	private async createListing(/* ctx: Context, */ message: Message<true> /* , listing: Listing */) {
-		const button = await message.awaitMessageComponent({ componentType: ComponentType.Button });
+		const button = await message.awaitMessageComponent({ componentType: ComponentType.Button, time: INTERACTION_COMPONENT_COOLDOWN });
 		if (button.customId === 'description') button.reply({ content: 'How many times the listing can be sold', ephemeral: true });
 		if (button.customId === 'duration') button.reply({ content: 'This listing\'s shelf life', ephemeral: true });
 		if (button.customId === 'stackable') button.reply({ content: 'Whether the listing can be purchased multiple times', ephemeral: true });

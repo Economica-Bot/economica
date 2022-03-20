@@ -18,7 +18,7 @@ import {
 	EconomicaSlashCommandSubcommandBuilder,
 	EconomicaSlashCommandSubcommandGroupBuilder,
 } from '../../structures/index.js';
-import { Emojis, Modules } from '../../typings/constants.js';
+import { INTERACTION_COMPONENT_COOLDOWN, Emojis, Modules } from '../../typings/constants.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -77,7 +77,7 @@ export default class implements Command {
 					.setOptions(...labels),
 			);
 		await i.editReply({ components: [dropdown] });
-		const interaction = await message.awaitMessageComponent({ componentType: ComponentType.SelectMenu });
+		const interaction = await message.awaitMessageComponent({ componentType: ComponentType.SelectMenu, time: INTERACTION_COMPONENT_COOLDOWN });
 		const description = ctx.client.commands
 			.filter(({ data }) => data.module === interaction.values[0])
 			.map((command) => `**${command.data.name}**\n> ${command.data.description}`).join('\n');

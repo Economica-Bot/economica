@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, EmbedBuilder, Message, MessageActionRowComponentBuilder } from 'discord.js';
-import { BUTTON_INTERACTION_COOLDOWN } from '../typings/index.js';
+import { INTERACTION_COMPONENT_COOLDOWN } from '../typings/index.js';
 
 /**
  * Initiates a pagination embed display.
@@ -20,7 +20,7 @@ export async function paginate(
 
 	setTimeout(() => interaction.editReply({
 		components: [],
-	}), BUTTON_INTERACTION_COOLDOWN);
+	}), INTERACTION_COMPONENT_COOLDOWN);
 
 	const row = new ActionRowBuilder<MessageActionRowComponentBuilder>()
 		.setComponents(
@@ -29,10 +29,7 @@ export async function paginate(
 		);
 
 	const msg = await interaction.editReply({ embeds: [embeds[index]], components: [row] }) as Message<true>;
-	const i = await msg.awaitMessageComponent({
-		componentType: ComponentType.Button,
-	});
-
+	const i = await msg.awaitMessageComponent({ componentType: ComponentType.Button, time: INTERACTION_COMPONENT_COOLDOWN });
 	if (index < embeds.length - 1 && index >= 0 && i.customId === 'next_page') {
 		index += 1;
 	} else if (index > 0 && index < embeds.length && i.customId === 'previous_page') {

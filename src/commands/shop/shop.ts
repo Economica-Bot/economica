@@ -50,7 +50,7 @@ export default class implements Command {
 
 		const collector = msg.createMessageComponentCollector({
 			filter,
-			time: BUTTON_INTERACTION_COOLDOWN,
+			time: INTERACTION_COMPONENT_COOLDOWN,
 		});
 
 		collector.on('collect', async () => {

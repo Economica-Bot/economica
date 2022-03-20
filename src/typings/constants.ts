@@ -158,7 +158,7 @@ export enum Emojis {
 	GENERATOR = '<:generator:953122979544444928>',
 }
 
-export const BUTTON_INTERACTION_COOLDOWN = 1000 * 15;
+export const INTERACTION_COMPONENT_COOLDOWN = 1000 * 45;
 
 export enum Properties {
 	TEXTILE_MILL = 'MANUFACTURING',
