@@ -1,6 +1,6 @@
 import { ColorResolvable } from 'discord.js';
 
-import { ReplyString, DefaultIncomes, DefaultIntervals } from './index.js';
+import { ReplyString, DefaultIncomes, DefaultIntervals, DefaultModules } from './index.js';
 
 export const defaultIntervalsObj: DefaultIntervals = {
 	minutely: {
@@ -63,6 +63,39 @@ export const defaultIncomesObj: DefaultIncomes = {
 	},
 };
 
+export const defaultModulesObj: DefaultModules = {
+	admin: {
+		module: 'ADMIN',
+		type: 'DEFAULT',
+		user: null,
+	},
+	economy: {
+		module: 'ECONOMY',
+		type: 'DEFAULT',
+		user: null,
+	},
+	income: {
+		module: 'INCOME',
+		type: 'DEFAULT',
+		user: null,
+	},
+	moderation: {
+		module: 'MODERATION',
+		type: 'DEFAULT',
+		user: null,
+	},
+	shop: {
+		module: 'SHOP',
+		type: 'DEFAULT',
+		user: null,
+	},
+	utility: {
+		module: 'UTILITY',
+		type: 'DEFAULT',
+		user: null,
+	},
+};
+
 export enum Authorities {
 	USER,
 	MODERATOR,
@@ -97,7 +130,7 @@ export enum Emojis {
 	SUCCESS = '<:appendix_success:843390419261194300>',
 	INFO = '<:appendix_info:843390419429883924>',
 	WARNING = '<:appendix_warning:843390419270107136>',
-	ERROR = '<:appendix_info:843390419429883924>',
+	ERROR = '<:appendix_error:843390419303661569>',
 	HELP = '<:help:950426939796111390>',
 	ANALYTICS = '<:analytics:950870757616005150>',
 	TEAM_MEMBER = '<:teammember:950871612289343558>',
