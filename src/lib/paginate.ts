@@ -29,7 +29,7 @@ export async function paginate(
 		);
 
 	const msg = await interaction.editReply({ embeds: [embeds[index]], components: [row] }) as Message<true>;
-	const i = await msg.awaitMessageComponent({ componentType: ComponentType.Button, time: INTERACTION_COMPONENT_COOLDOWN });
+	const i = await msg.awaitMessageComponent({ componentType: ComponentType.Button, time: INTERACTION_COMPONENT_COOLDOWN }).catch(() => null);
 	if (index < embeds.length - 1 && index >= 0 && i.customId === 'next_page') {
 		index += 1;
 	} else if (index > 0 && index < embeds.length && i.customId === 'previous_page') {

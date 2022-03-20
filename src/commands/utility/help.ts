@@ -77,7 +77,7 @@ export default class implements Command {
 					.setOptions(...labels),
 			);
 		await i.editReply({ components: [dropdown] });
-		const interaction = await message.awaitMessageComponent({ componentType: ComponentType.SelectMenu, time: INTERACTION_COMPONENT_COOLDOWN });
+		const interaction = await message.awaitMessageComponent({ componentType: ComponentType.SelectMenu, time: INTERACTION_COMPONENT_COOLDOWN }).catch(() => null);
 		const description = ctx.client.commands
 			.filter(({ data }) => data.module === interaction.values[0])
 			.map((command) => `**${command.data.name}**\n> ${command.data.description}`).join('\n');

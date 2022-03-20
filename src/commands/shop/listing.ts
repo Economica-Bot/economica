@@ -89,7 +89,7 @@ export default class implements Command {
 	};
 
 	private async createListing(/* ctx: Context, */ message: Message<true> /* , listing: Listing */) {
-		const button = await message.awaitMessageComponent({ componentType: ComponentType.Button, time: INTERACTION_COMPONENT_COOLDOWN });
+		const button = await message.awaitMessageComponent({ componentType: ComponentType.Button, time: INTERACTION_COMPONENT_COOLDOWN }).catch(() => null);
 		if (button.customId === 'description') button.reply({ content: 'How many times the listing can be sold', ephemeral: true });
 		if (button.customId === 'duration') button.reply({ content: 'This listing\'s shelf life', ephemeral: true });
 		if (button.customId === 'stackable') button.reply({ content: 'Whether the listing can be purchased multiple times', ephemeral: true });
