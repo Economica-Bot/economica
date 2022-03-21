@@ -1,5 +1,4 @@
-import { ChannelType } from 'discord-api-types';
-import { GuildTextBasedChannel } from 'discord.js';
+import { ChannelType, TextChannel } from 'discord.js';
 
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
@@ -16,7 +15,7 @@ export default class implements Command {
 		.addChannelOption((option) => option
 			.setName('channel')
 			.setDescription('Specify a channel')
-			.addChannelType(ChannelType.GuildText)
+			.addChannelTypes(ChannelType.GuildText)
 			.setRequired(false))
 		.addNumberOption((option) => option
 			.setName('amount')
@@ -26,7 +25,7 @@ export default class implements Command {
 			.setRequired(false));
 
 	public execute = async (ctx: Context): Promise<void> => {
-		const channel = (ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel) as GuildTextBasedChannel;
+		const channel = (ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel) as TextChannel;
 		const amount = ctx.interaction.options.getNumber('amount') ?? 100;
 		const count = await channel.bulkDelete(amount);
 		await ctx.embedify('success', 'user', `Deleted \`${count.size}\` messages.`).send(true);

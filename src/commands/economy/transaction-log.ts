@@ -1,5 +1,4 @@
-import { ChannelType } from 'discord-api-types';
-import { TextChannel } from 'discord.js';
+import { ChannelType, TextChannel } from 'discord.js';
 
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
@@ -20,7 +19,7 @@ export default class implements Command {
 			.addChannelOption((option) => option
 				.setName('channel')
 				.setDescription('Specify a channel')
-				.addChannelType(ChannelType.GuildText)
+				.addChannelTypes(ChannelType.GuildText)
 				.setRequired(true)))
 		.addSubcommand((subcommand) => subcommand.setName('reset').setDescription('Reset the transaction log channel'));
 
