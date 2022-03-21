@@ -26,6 +26,11 @@ export default class implements Command {
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const channel = (ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel) as TextChannel;
+		if (!channel.permissionsFor(ctx.interaction.guild.me).has('ManageMessages')) {
+			await ctx.embedify('error', 'bot', 'I need `MANAGE_MESSAGES` in that channel.').send(true);
+			return;
+		}
+
 		const amount = ctx.interaction.options.getNumber('amount') ?? 100;
 		const count = await channel.bulkDelete(amount);
 		await ctx.embedify('success', 'user', `Deleted \`${count.size}\` messages.`).send(true);
