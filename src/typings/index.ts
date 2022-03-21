@@ -1,5 +1,4 @@
 import { EmbedFooterData, EmbedBuilder, Snowflake } from 'discord.js';
-import { ModuleString, ModuleTypeString } from './constants.js';
 
 export interface EconomyInfo {
 	wallet: number;
@@ -7,7 +6,6 @@ export interface EconomyInfo {
 	total: number;
 	rank: number;
 }
-
 export interface IncomeCommandProperties {
 	command: string;
 	min: number;
@@ -16,13 +14,11 @@ export interface IncomeCommandProperties {
 	minFine: number;
 	maxFine: number;
 }
-
 export interface ConfirmModalEmbeds {
 	promptEmbed: EmbedBuilder;
 	confirmEmbed: EmbedBuilder;
 	cancelEmbed: EmbedBuilder;
 }
-
 export interface IncomeCommand {
 	min?: number;
 	max?: number;
@@ -31,20 +27,17 @@ export interface IncomeCommand {
 	maxfine?: number;
 	cooldown: number;
 }
-
 export type Incomes = {
 	work: IncomeCommand;
 	beg: IncomeCommand;
 	crime: IncomeCommand;
 	rob: IncomeCommand;
 };
-
 export interface IntervalCommand {
 	amount: number;
 	cooldown: number;
 	enabled: boolean;
 }
-
 export type Intervals = {
 	minutely: IntervalCommand;
 	hourly: IntervalCommand;
@@ -53,15 +46,11 @@ export type Intervals = {
 	fortnightly: IntervalCommand;
 	monthly: IntervalCommand;
 };
-
 export interface Module {
 	type: ModuleTypeString;
 	enabled: boolean;
 	user: Snowflake;
 }
-
-export type Modules = Record<ModuleString, Module>;
-
 export type ReplyString = 'success' | 'info' | 'warn' | 'error';
 export type Footer = 'bot' | 'user' | 'guild' | EmbedFooterData;
 export type Moderation = 'ban' | 'kick' | 'timeout' | 'unban' | 'untimeout';
@@ -117,7 +106,20 @@ export enum Occupations {
 	'Dog Walker',
 }
 export type OccupationString = keyof typeof Occupations;
-
 export type AuthorityType = 'USER' | 'ROLE';
-
+export type ModuleTypeString =
+	| 'DEFAULT'
+	| 'SPECIAL';
+export type DefaultModuleString =
+	| 'ADMIN'
+	| 'ECONOMY'
+	| 'INCOME'
+	| 'MODERATION'
+	| 'SHOP'
+	| 'UTILITY';
+export type SpecialModuleString =
+	| 'INSIGHTS'
+	| 'INTERVAL'
+	| 'CASINO';
+export type ModuleString = DefaultModuleString | SpecialModuleString;
 export * from './constants.js';
