@@ -69,6 +69,11 @@ export const defaultModulesObj: Modules = {
 		enabled: true,
 		user: null,
 	},
+	CASINO: {
+		type: 'SPECIAL',
+		enabled: false,
+		user: null,
+	},
 	ECONOMY: {
 		type: 'DEFAULT',
 		enabled: true,
@@ -222,5 +227,6 @@ export type DefaultModuleString =
 	| 'UTILITY';
 export type SpecialModuleString =
 	| 'INSIGHTS'
-	| 'INTERVAL';
+	| 'INTERVAL'
+	| 'CASINO';
 export type ModuleString = DefaultModuleString | SpecialModuleString;
