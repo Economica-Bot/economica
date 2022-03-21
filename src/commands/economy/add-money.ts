@@ -16,14 +16,10 @@ export default class implements Command {
 		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('target').setDescription('Specify a user').setRequired(true))
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true))
-		.addStringOption((option) => option
-			.setName('balance')
-			.setDescription('Specify the balance')
-			.addChoices([
-				['Wallet', 'wallet'],
-				['Treasury', 'treasury'],
-			])
-			.setRequired(true));
+		.addStringOption((option) => option.setName('balance').setDescription('Specify the balance').setRequired(true).addChoices(
+			{ name: 'Wallet', value: 'wallet' },
+			{ name: 'Treasury', value: 'treasury' },
+		));
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const amount = ctx.interaction.options.getString('amount');

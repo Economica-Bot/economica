@@ -31,9 +31,9 @@ export default class implements Command {
 				.embedify('info', 'guild', description)
 				.setAuthor({ iconURL: ctx.interaction.guild.iconURL(), name: 'Modules' })
 				.addFields(
-					{ name: 'Default Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([_, module]) => module.type === 'DEFAULT').map(([module, _]) => `\`${module}\``).join('\n') },
-					{ name: 'Enabled Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([_, module]) => module.enabled).map(([module, _]) => `\`${module}\``).join('\n') },
-					{ name: 'Disabled Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([_, module]) => !module.enabled).map(([module, _]) => `\`${module}\``).join('\n') },
+					{ name: 'Default Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([,module]) => module.type === 'DEFAULT').map(([module]) => `\`${module}\``).join('\n') },
+					{ name: 'Enabled Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([,module]) => module.enabled).map(([module]) => `\`${module}\``).join('\n') },
+					{ name: 'Disabled Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([,module]) => !module.enabled).map(([module]) => `\`${module}\``).join('\n') },
 				);
 			await ctx.interaction.reply({ embeds: [embed] });
 		} else if (subcommand === 'add') {
@@ -50,7 +50,7 @@ export default class implements Command {
 				ctx.client.commands
 					.filter((command) => command.data.module === moduleName)
 					.forEach(async (command) => {
-						await ctx.interaction.guild.commands.create(command.data.toJSON() as any);
+						await ctx.interaction.guild.commands.create(command.data.toJSON());
 					});
 				await ctx.embedify('success', 'user', `Added the \`${moduleName}\` module.`).send(true);
 			}

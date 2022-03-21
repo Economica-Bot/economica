@@ -19,19 +19,16 @@ export default class implements Command {
 			.setDescription('Create a new item')
 			.addStringOption((option) => option.setName('name').setDescription('Specify the name').setRequired(true))
 			.addIntegerOption((option) => option.setName('price').setDescription('Specify the price').setMinValue(0).setRequired(true))
-			.addStringOption((option) => option.setName('type').setDescription('Specify the type').setRequired(true).addChoices([
-				['Classic', 'CLASSIC'],
-				['Instant', 'INSTANT'],
-				['Usable', 'USABLE'],
-				['Generator', 'GENERATOR'],
-			])))
+			.addStringOption((option) => option.setName('type').setDescription('Specify the type').setRequired(true).addChoices(
+				{ name: 'Classic', value: 'CLASSIC' },
+				{ name: 'Instant', value: 'INSTANT' },
+				{ name: 'Usable', value: 'USABLE' },
+				{ name: 'Generator', value: 'GENERATOR' },
+			)))
 		.addSubcommand((subcommand) => subcommand
 			.setName('manage')
 			.setDescription('Manage a shop listing')
-			.addStringOption((option) => option
-				.setName('listing_id')
-				.setDescription('Specify a listing')
-				.setRequired(true)));
+			.addStringOption((option) => option.setName('listing_id').setDescription('Specify a listing').setRequired(true)));
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();

@@ -16,11 +16,10 @@ export default class implements Command {
 		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(true))
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true))
-		.addStringOption((option) => option
-			.setName('balance')
-			.setDescription('Specify the target balance')
-			.addChoices([['wallet', 'wallet'], ['treasury', 'treasury']])
-			.setRequired(true));
+		.addStringOption((option) => option.setName('balance').setDescription('Specify the target balance').setRequired(true).addChoices(
+			{ name: 'wallet', value: 'wallet' },
+			{ name: 'treasury', value: 'treasury' },
+		));
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const target = ctx.interaction.options.getMember('user') as GuildMember;

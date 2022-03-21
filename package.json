@@ -14,8 +14,8 @@
   "license": "ISC",
   "dependencies": {
     "@adrastopoulos/number-parser": "github:Adrastopoulos/Number-Parser",
-    "@discordjs/builders": "^0.12.0",
-    "discord-api-types": "^0.26.0",
+    "@discordjs/builders": "^0.13.0-dev.1647259738.2297c2b",
+    "discord-api-types": "^0.27.3",
     "discord.js": "^14.0.0-dev.1647259751.2297c2b",
     "dotenv": "^10.0.0",
     "fs": "^0.0.1-security",

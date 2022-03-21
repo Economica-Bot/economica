@@ -23,16 +23,12 @@ export default class implements Command {
 			.setName('set')
 			.setDescription("Set a role or user's authority level")
 			.addMentionableOption((option) => option.setName('mentionable').setDescription('Specify a role or user').setRequired(true))
-			.addStringOption((option) => option
-				.setName('authority')
-				.setDescription('Specify the authority')
-				.addChoices([
-					['User', 'USER'],
-					['Moderator', 'MODERATOR'],
-					['Manager', 'MANAGER'],
-					['Administrator', 'ADMINISTRATOR'],
-				])
-				.setRequired(true)))
+			.addStringOption((option) => option.setName('authority').setDescription('Specify the authority').setRequired(true).addChoices(
+				{ name: 'User', value: 'USER' },
+				{ name: 'Moderator', value: 'MODERATOR' },
+				{ name: 'Manager', value: 'MANAGER' },
+				{ name: 'Administrator', value: 'ADMINISTRATOR' },
+			)))
 		.addSubcommand((options) => options
 			.setName('reset')
 			.setDescription('Reset authority levels')
