@@ -1,4 +1,3 @@
-import { Snowflake, SnowflakeUtil } from 'discord.js';
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
 
 import { Guild, User } from './index.js';
@@ -6,14 +5,17 @@ import { Guild, User } from './index.js';
 @Entity()
 export class Member extends BaseEntity {
 	@PrimaryColumn()
-	public id: Snowflake = SnowflakeUtil.generate().toString();
+	public userId: string;
 
-	@ManyToOne(() => User)
-	@JoinColumn()
+	@PrimaryColumn()
+	public guildId: string;
+
+	@ManyToOne(() => User, (user) => user.id)
+	@JoinColumn({ name: 'userId' })
 	public user: Relation<User>;
 
-	@ManyToOne(() => Guild)
-	@JoinColumn()
+	@ManyToOne(() => Guild, (guild) => guild.id)
+	@JoinColumn({ name: 'guildId' })
 	public guild: Relation<Guild>;
 
 	@Column({ type: 'float', default: 0 })

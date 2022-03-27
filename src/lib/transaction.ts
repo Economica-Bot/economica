@@ -48,7 +48,9 @@ export async function recordTransaction(
 	wallet: number,
 	treasury: number,
 ): Promise<void> {
-	await client.connection.manager.update(Member, { id: target.id }, { wallet: target.wallet + wallet, treasury: target.treasury + treasury });
+	target.wallet += wallet;
+	target.treasury += treasury;
+	await target.save();
 	const transactionEntity = await Transaction.create({ guild, target, agent, type, wallet, treasury }).save();
 	const { transactionLogId } = guild;
 	if (transactionLogId) {

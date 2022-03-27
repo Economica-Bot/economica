@@ -5,10 +5,10 @@ import { Member } from './index.js';
 
 @Entity()
 export class Command extends BaseEntity {
-	@PrimaryColumn({ type: 'bigint' })
+	@PrimaryColumn()
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
-	@ManyToOne(() => Member)
+	@ManyToOne(() => Member, { eager: true })
 	@JoinColumn()
 	public member: Relation<Member>;
 

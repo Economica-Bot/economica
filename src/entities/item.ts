@@ -11,7 +11,7 @@ export class Item extends BaseEntity {
 	@ManyToOne(() => Listing, (listing) => listing.id)
 	public listing: Relation<Listing>;
 
-	@ManyToOne(() => Member, (member) => member.id)
+	@ManyToOne(() => Member)
 	public owner: Relation<Member>;
 
 	@Column()
