@@ -1,7 +1,7 @@
 import { GuildMember } from 'discord.js';
 
-import { validateTarget } from '../../lib/index.js';
 import { Infraction, Member, User } from '../../entities/index.js';
+import { validateTarget } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
@@ -20,7 +20,7 @@ export default class implements Command {
 	public execute = async (ctx: Context): Promise<void> => {
 		if (!(await validateTarget(ctx))) return;
 		const target = ctx.interaction.options.getMember('target') as GuildMember;
-		const targetEntity = await Member.findOne({ user: { id: target.id }, guild: ctx.guildEntity })
+		const targetEntity = await Member.findOne({ where: { userId: target.id, guildId: ctx.guildEntity.id } })
 			?? await (async () => {
 				const user = await User.create({ id: target.id }).save();
 				return Member.create({ user, guild: ctx.guildEntity }).save();
@@ -28,7 +28,7 @@ export default class implements Command {
 		const reason = ctx.interaction.options.getString('reason', false) || 'No reason provided';
 		await target.timeout(null, reason);
 		await Infraction.update(
-			{ target: targetEntity, guild: ctx.guildEntity, type: 'TIMEOUT', active: true },
+			{ target: { userId: targetEntity.userId, guildId: targetEntity.guildId }, type: 'TIMEOUT', active: true },
 			{ active: false },
 		);
 		await ctx.embedify('success', 'user', `Timeout canceled for ${target}.`).send();

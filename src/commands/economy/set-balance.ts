@@ -1,8 +1,8 @@
 import { parseNumber, parseString } from '@adrastopoulos/number-parser';
 import { GuildMember } from 'discord.js';
 
-import { recordTransaction } from '../../lib/index.js';
 import { Member, User } from '../../entities/index.js';
+import { recordTransaction } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
@@ -23,7 +23,7 @@ export default class implements Command {
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const target = ctx.interaction.options.getMember('user') as GuildMember;
-		const targetEntity = await Member.findOne({ relations: ['user', 'guild'], where: { user: { id: target.id }, guild: ctx.guildEntity } })
+		const targetEntity = await Member.findOne({ relations: ['user', 'guild'], where: { user: { id: target.id }, guild: { id: ctx.guildEntity.id } } })
 			?? await (async () => {
 				const user = await User.create({ id: target.id }).save();
 				return Member.create({ user, guild: ctx.guildEntity }).save();

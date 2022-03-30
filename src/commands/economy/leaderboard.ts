@@ -1,8 +1,8 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 import { EmbedBuilder } from 'discord.js';
 
-import { paginate } from '../../lib/index.js';
 import { Member } from '../../entities/index.js';
+import { paginate } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {

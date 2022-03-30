@@ -20,7 +20,7 @@ export default class implements Command {
 
 	public execute = async (ctx: Context) => {
 		const query = ctx.interaction.options.getString('query', false);
-		const listings = await Listing.find({ guild: ctx.guildEntity });
+		const listings = await Listing.find({ where: { guild: { id: ctx.guildEntity.id } } });
 		const listing = listings.find((l) => l.name === query);
 		if (query && !listing) {
 			await ctx.embedify('error', 'user', `Could not find listing named \`${query}\``).send(true);

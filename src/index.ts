@@ -9,4 +9,4 @@
 
 import { Economica } from './structures/index.js';
 
-new Economica().init();
+export const bot = await new Economica().init();

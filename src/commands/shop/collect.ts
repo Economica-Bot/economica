@@ -13,13 +13,15 @@ export default class implements Command {
 		.setDefaultPermission(false);
 
 	public execute = async (ctx: Context) => {
-		const items = await Item.find({ relations: ['listing'], where: { owner: ctx.memberEntity } });
+		const items = await Item.find({ relations: ['listing'], where: { owner: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId } } });
 		let amount = 0;
 		items.forEach(async (item) => {
 			if (item.listing.type !== 'GENERATOR') return;
 			if (!(Date.now() - item.lastGeneratedAt.getTime() >= item.listing.generatorPeriod)) return;
 			amount += item.listing.generatorAmount;
-			await Item.update(Item, { lastGeneratedAt: new Date() });
+			// eslint-disable-next-line no-param-reassign
+			item.lastGeneratedAt = new Date();
+			await item.save();
 		});
 
 		if (amount) {

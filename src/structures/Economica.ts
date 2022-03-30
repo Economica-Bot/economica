@@ -2,9 +2,9 @@ import { Client, Collection, EmbedBuilder, Util, WebhookClient } from 'discord.j
 import { readdirSync } from 'fs';
 import path from 'path';
 import { Logger } from 'tslog';
-import { Connection } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { fileURLToPath } from 'url';
-
+import 'reflect-metadata';
 import {
 	ACTIVITY_NAME,
 	ACTIVITY_TYPE,
@@ -18,36 +18,26 @@ import {
 	DEVELOPMENT_GUILD_IDS,
 	DISCORD_INVITE_URL,
 	loggerOptions,
+	PORT,
 	PUBLIC_GUILD_ID,
 	VALIDATE_SETTINGS,
 	WEBHOOK_URIS,
 } from '../config.js';
-import {
-	Command,
-	Guild,
-	Infraction,
-	Item,
-	Listing,
-	Loan,
-	Member,
-	Transaction,
-	User,
-} from '../entities/index.js';
-import { Command as CommandStruct } from './Command.js';
+import { Command } from './Command.js';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export class Economica extends Client {
-	public commands: Collection<string, CommandStruct<true>>;
+	public commands: Collection<string, Command<true>>;
 	public cooldowns: Collection<string, Date>;
 	public webhooks: WebhookClient[];
-	public connection: Connection;
+	public AppDataSource: DataSource;
 	public log: Logger;
 
 	public constructor() {
 		super(clientOptions);
-		this.commands = new Collection<string, CommandStruct<true>>();
+		this.commands = new Collection<string, Command<true>>();
 		this.cooldowns = new Collection<string, Date>();
 		this.webhooks = new Array<WebhookClient>();
 		this.log = new Logger(loggerOptions);
@@ -57,12 +47,14 @@ export class Economica extends Client {
 		if (VALIDATE_SETTINGS) await this.validateSettings();
 		await this.initWebHooks();
 		await this.errorHandler();
-		await this.connectSQL();
+		await this.connectDB();
 		await this.registerEvents();
 		await this.registerCommands();
 		await this.registerJobs();
+		this.registerAPI();
 		await this.login(BOT_TOKEN);
 		this.log.info(`${this.user.tag} logged in`);
+		return this;
 	}
 
 	private async validateSettings(): Promise<void> {
@@ -174,25 +166,16 @@ export class Economica extends Client {
 		if (DEVELOPMENT) process.exit(1);
 	}
 
-	private async connectSQL() {
+	private async connectDB() {
 		this.log.debug('Connecting to DB');
-		this.connection = await new Connection(databaseOptions).connect();
+		this.AppDataSource = await new DataSource(databaseOptions).initialize();
 		if (DB_OPTION === 1) {
-			await this.connection.synchronize();
+			await this.AppDataSource.synchronize();
 			this.log.debug('Database synchronized');
 		} else if (DB_OPTION === 2) {
-			await this.connection.synchronize(true);
+			await this.AppDataSource.synchronize(true);
 			this.log.debug('Database dropped and synchronized');
 		}
-		Command.useConnection(this.connection);
-		Guild.useConnection(this.connection);
-		Infraction.useConnection(this.connection);
-		Item.useConnection(this.connection);
-		Listing.useConnection(this.connection);
-		Loan.useConnection(this.connection);
-		Member.useConnection(this.connection);
-		Transaction.useConnection(this.connection);
-		User.useConnection(this.connection);
 		this.log.info('Connected to DB');
 	}
 
@@ -233,7 +216,7 @@ export class Economica extends Client {
 			const files = readdirSync(path.resolve(dirname, `../commands/${dir}/`)).filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
 			files.forEach(async (file) => {
 				const { default: CommandClass } = await import(`../commands/${dir}/${file}`);
-				const command = new CommandClass() as CommandStruct<true>;
+				const command = new CommandClass() as Command<true>;
 
 				// Validation
 				if (!command.data.module) throw new Error(`Command ${command.data.name} missing module!`);
@@ -245,5 +228,11 @@ export class Economica extends Client {
 			});
 		});
 		this.log.info('Commands registered');
+	}
+
+	private async registerAPI() {
+		this.log.debug('Registering API...');
+		import('../api/index.js');
+		this.log.info(`API listening on port ${PORT}`);
 	}
 }

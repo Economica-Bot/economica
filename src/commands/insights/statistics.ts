@@ -19,9 +19,9 @@ export default class implements Command {
 		const description = `**Welcome to ${ctx.client.user}'s Statistics Dashboard!**`;
 		const botStats = `*Websocket Ping*: \`${ctx.client.ws.ping}ms\`\n`
 			+ `*Bot Uptime*: \`${ms(ctx.client.uptime)}\`\n`
-			+ `*Commands Ran*: \`${(await CommandEntity.find({ relations: ['member', 'member.guild'], where: { member: { guild: ctx.guildEntity } } })).length}\``;
+			+ `*Commands Ran*: \`${(await CommandEntity.find({ relations: ['member', 'member.guild'], where: { member: { guildId: ctx.guildEntity.id } } })).length}\``;
 		const memberStats = `*Roles*: \`${ctx.interaction.member.roles.cache.size}\`\n`
-			+ `*Commands Used*: \`${(await CommandEntity.find({ member: ctx.memberEntity })).length}\`\n`
+			+ `*Commands Used*: \`${(await CommandEntity.find({ where: { member: { userId: ctx.memberEntity.userId, guildId: ctx.guildEntity.id } } })).length}\`\n`
 			+ `*Joined Server*: \`${ctx.interaction.member.joinedAt.toLocaleString()}\``;
 		const serverStats = `*Roles*: \`${ctx.interaction.guild.roles.cache.size}\`\n`
 			+ `*Members*: \`${ctx.interaction.guild.memberCount}\`\n`

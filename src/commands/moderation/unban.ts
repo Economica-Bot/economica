@@ -18,7 +18,7 @@ export default class implements Command {
 	public execute = async (ctx: Context): Promise<void> => {
 		if (!(await validateTarget(ctx))) return;
 		const target = ctx.interaction.options.getUser('target');
-		const targetEntity = await Member.findOne({ user: { id: target.id }, guild: ctx.guildEntity })
+		const targetEntity = await Member.findOne({ where: { userId: target.id, guildId: ctx.guildEntity.id } })
 			?? await (async () => {
 				const user = await User.create({ id: target.id }).save();
 				return Member.create({ user, guild: ctx.guildEntity }).save();
@@ -30,7 +30,7 @@ export default class implements Command {
 		} else {
 			await ctx.interaction.guild.members.unban(target, reason);
 			await Infraction.update(
-				{ target: targetEntity, guild: ctx.guildEntity, type: 'BAN', active: true },
+				{ target: { userId: targetEntity.userId, guildId: targetEntity.guildId }, type: 'BAN', active: true },
 				{ active: false },
 			);
 			await ctx.embedify('success', 'user', `Unbanned \`${target.tag}\``).send(true);

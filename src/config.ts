@@ -8,18 +8,20 @@ import {
 	Partials,
 	PermissionFlagsBits,
 } from 'discord.js';
-import dotenv from 'dotenv';
+import 'dotenv/config';
 import path from 'path';
-import { ConnectionOptions } from 'typeorm';
-import { fileURLToPath } from 'url';
-
 import type { ISettingsParam } from 'tslog';
-
-dotenv.config();
+import { DataSourceOptions } from 'typeorm';
+import { fileURLToPath } from 'url';
 
 // Environment Vars
 
 export const BOT_TOKEN = process.env.BOT_TOKEN;
+export const PORT = +process.env.PORT;
+export const CLIENT_ID = process.env.CLIENT_ID;
+export const CLIENT_SECRET = process.env.CLIENT_SECRET;
+export const CALLBACK_URL = process.env.CALLBACK_URL;
+export const SECRET = process.env.SECRET;
 export const DEVELOPER_IDS: string[] = JSON.parse(process.env.DEVELOPER_IDS);
 export const DEVELOPMENT_GUILD_IDS: string[] = JSON.parse(process.env.DEVELOPMENT_GUILD_IDS);
 export const PUBLIC_GUILD_ID = process.env.PUBLIC_GUILD_ID;
@@ -88,15 +90,17 @@ export const inviteOptions: InviteGenerationOptions = {
 	],
 };
 
-const dirname = path.dirname(fileURLToPath(import.meta.url));
-export const databaseOptions: ConnectionOptions = {
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
+
+export const databaseOptions: DataSourceOptions = {
 	type: 'postgres',
 	host: 'localhost',
 	port: 5432,
 	username: 'postgres',
 	password: DB_PASSWORD,
-	entities: [path.resolve(dirname, './entities/*.{js,ts}')],
-	applicationName: 'Economica',
+	entities: [path.resolve(dirname, './entities/*.{ts,js}')],
+	database: 'postgres',
 };
 
 export const loggerOptions: ISettingsParam = {

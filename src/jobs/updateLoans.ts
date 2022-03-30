@@ -6,7 +6,7 @@ export default class implements Job {
 	public name = 'update-loans';
 	public cooldown = 1000 * 60 * 5;
 	public execute = async (client: Economica): Promise<void> => {
-		const loans = await Loan.find({ pending: false, active: true, complete: false });
+		const loans = await Loan.find({ where: { pending: false, active: true, complete: false } });
 
 		// Complete loan transaction.
 		loans.forEach(async (loan) => {

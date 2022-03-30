@@ -27,12 +27,12 @@ export default class implements Command {
 		if (ctx.interaction.options.getSubcommand() === 'balance') {
 			const transactions = user
 				? await Transaction.find({
-					guild: ctx.guildEntity,
-					target: ctx.memberEntity,
+					where: {
+						guild: { id: ctx.guildEntity.id },
+						target: { userId: user.id },
+					},
 				})
-				: await Transaction.find({
-					guild: ctx.guildEntity,
-				});
+				: await Transaction.find({ where: { guild: { id: ctx.guildEntity.id } } });
 
 			transactions.forEach((transaction) => {
 				wallets.push(transaction.wallet);

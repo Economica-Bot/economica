@@ -1,5 +1,5 @@
-import { Transaction } from '../../entities/index.js';
 import { displayTransaction } from '../../lib/index.js';
+import { Transaction } from '../../entities/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
@@ -46,7 +46,7 @@ export default class implements Command {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const user = ctx.interaction.options.getUser('user', false);
 		const id = ctx.interaction.options.getString('transaction_id', false);
-		const transaction = await Transaction.findOne({ relations: ['guild', 'target', 'agent', 'target.user', 'agent.user'], where: { id, guild: ctx.guildEntity } });
+		const transaction = await Transaction.findOne({ relations: ['guild', 'target', 'agent', 'target.user', 'agent.user'], where: { id, guild: { id: ctx.guildEntity.id } } });
 		if (id && !transaction) {
 			await ctx.embedify('error', 'user', `Could not find transaction with id \`${id}\``).send(true);
 			return;
@@ -57,10 +57,10 @@ export default class implements Command {
 				const embed = await displayTransaction(transaction);
 				await ctx.interaction.reply({ embeds: [embed] });
 			} else if (subcommand === 'user') {
-				const transactions = await Transaction.find({ relations: ['target', 'target.user'], where: { guild: ctx.guildEntity, target: { user: { id: user.id } } } });
+				const transactions = await Transaction.find({ relations: ['target', 'target.user'], where: { guild: { id: ctx.guildEntity.id }, target: { user: { id: user.id } } } });
 				await ctx.embedify('info', 'user', `*${user.tag}'s Transactions:**\n\`${transactions.map((v) => v.id).join('`, `')}\``).send();
 			} else if (subcommand === 'all') {
-				const transactions = await Transaction.find({ guild: ctx.guildEntity });
+				const transactions = await Transaction.find({ where: { guild: { id: ctx.guildEntity.id } } });
 				await ctx.embedify('info', 'user', `**All Transactions:**\n\`${transactions.map((v) => v.id).join('`, `')}\``).send();
 			}
 		} if (subcommandgroup === 'delete') {
@@ -68,7 +68,7 @@ export default class implements Command {
 				await transaction.remove();
 				await ctx.embedify('success', 'guild', `Deleted transaction \`${id}\``).send(true);
 			} else if (subcommand === 'user') {
-				const transactions = await Transaction.find({ relations: ['guild', 'target', 'target.user'], where: { guild: ctx.guildEntity, target: { user: { id: user.id } } } });
+				const transactions = await Transaction.find({ relations: ['guild', 'target', 'target.user'], where: { guild: { id: ctx.guildEntity.id }, target: { user: { id: user.id } } } });
 				await Transaction.remove(transactions);
 				await ctx.embedify('success', 'guild', `Deleted \`${transactions.length}\` transactions.`).send(true);
 			} else if (subcommand === 'all') {

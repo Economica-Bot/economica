@@ -44,15 +44,15 @@ export class Context {
 		this.data = command.data;
 		if (!this.interaction.inCachedGuild()) return this;
 
-		this.userEntity = await User.findOne({ id: this.interaction.user.id })
+		this.userEntity = await User.findOne({ where: { id: this.interaction.user.id } })
 			?? await User.create({ id: this.interaction.user.id }).save();
-		this.guildEntity = await Guild.findOne({ id: this.interaction.guildId })
+		this.guildEntity = await Guild.findOne({ where: { id: this.interaction.guildId } })
 			?? await Guild.create({ id: this.interaction.guildId }).save();
-		this.memberEntity = await Member.findOne({ user: this.userEntity, guild: this.guildEntity })
+		this.memberEntity = await Member.findOne({ where: { user: { id: this.userEntity.id }, guild: { id: this.guildEntity.id } } })
 			?? await Member.create({ user: this.userEntity, guild: this.guildEntity }).save();
-		this.clientUserEntity = await User.findOne({ id: this.client.user.id })
+		this.clientUserEntity = await User.findOne({ where: { id: this.client.user.id } })
 			?? await User.create({ id: this.client.user.id }).save();
-		this.clientMemberEntity = await Member.findOne({ user: this.clientUserEntity, guild: this.guildEntity })
+		this.clientMemberEntity = await Member.findOne({ where: { user: { id: this.clientUserEntity.id }, guild: { id: this.guildEntity.id } } })
 			?? await Member.create({ user: this.clientUserEntity, guild: this.guildEntity }).save();
 		return this;
 	}

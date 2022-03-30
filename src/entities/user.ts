@@ -1,9 +1,9 @@
 import { Snowflake } from 'discord.js';
-import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
+import { BaseEntity, Column, Entity } from 'typeorm';
 
 @Entity({ name: 'discuser' })
 export class User extends BaseEntity {
-	@PrimaryColumn()
+	@Column({ primary: true })
 	public id: Snowflake;
 
 	@Column({ default: 0 })

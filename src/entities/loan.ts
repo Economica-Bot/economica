@@ -1,11 +1,11 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, OneToOne, Relation } from 'typeorm';
 
 import { Guild, Member } from './index.js';
 
 @Entity()
 export class Loan extends BaseEntity {
-	@PrimaryColumn()
+	@Column({ primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@OneToOne(() => Guild, (guild) => guild.id)

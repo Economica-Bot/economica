@@ -28,7 +28,7 @@ export default class implements Command {
 		.setDefaultPermission(false);
 
 	public execute = async (ctx: Context): Promise<void> => {
-		const loans = await Loan.find({ guild: ctx.guildEntity });
+		const loans = await Loan.find({ where: { guild: { id: ctx.guildEntity.id } } });
 		const description = `**Welcome ${ctx.interaction.member} to your loan dashboard! Here, you can make new loans, view active loans, or manage pending loans.**\n\n**${Emojis.SELECT} Select a category below to get started.**`;
 		const embed = ctx.embedify('info', 'user', description)
 			.setAuthor({ name: 'Loan Dashboard', iconURL: ctx.interaction.guild.iconURL() })

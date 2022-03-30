@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign */
-
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, EmbedBuilder, Message, MessageActionRowComponentBuilder } from 'discord.js';
 import { INTERACTION_COMPONENT_COOLDOWN } from '../typings/index.js';
 

@@ -1,8 +1,8 @@
 import { GuildMember } from 'discord.js';
 import ms from 'ms';
 
-import { recordInfraction, validateTarget } from '../../lib/index.js';
 import { Member, User } from '../../entities/index.js';
+import { recordInfraction, validateTarget } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
@@ -28,7 +28,7 @@ export default class implements Command {
 	public execute = async (ctx: Context): Promise<void> => {
 		if (!(await validateTarget(ctx))) return;
 		const target = ctx.interaction.options.getMember('target') as GuildMember;
-		const targetEntity = await Member.findOne({ user: { id: target.id }, guild: ctx.guildEntity })
+		const targetEntity = await Member.findOne({ where: { userId: target.id, guildId: ctx.guildEntity.id } })
 			?? await (async () => {
 				const user = await User.create({ id: target.id }).save();
 				return Member.create({ user, guild: ctx.guildEntity }).save();

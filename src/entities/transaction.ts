@@ -1,12 +1,12 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, Relation } from 'typeorm';
 
 import { TransactionString } from '../typings/index.js';
 import { Guild, Member } from './index.js';
 
 @Entity()
 export class Transaction extends BaseEntity {
-	@PrimaryColumn()
+	@Column({ primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => Guild)

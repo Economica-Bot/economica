@@ -1,4 +1,5 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
+
 import { recordTransaction, validateAmount } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 

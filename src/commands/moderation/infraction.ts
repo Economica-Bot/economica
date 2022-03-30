@@ -1,5 +1,5 @@
-import { Infraction } from '../../entities/index.js';
 import { displayInfraction } from '../../lib/index.js';
+import { Infraction } from '../../entities/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
@@ -46,7 +46,7 @@ export default class implements Command {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const user = ctx.interaction.options.getUser('user', false);
 		const id = ctx.interaction.options.getString('infraction_id', false);
-		const infraction = await Infraction.findOne({ relations: ['guild', 'target', 'agent', 'target.user', 'agent.user'], where: { id, guild: ctx.guildEntity } });
+		const infraction = await Infraction.findOne({ relations: ['guild', 'target', 'agent', 'target.user', 'agent.user'], where: { id, guild: { id: ctx.guildEntity.id } } });
 		if (id && !infraction) {
 			await ctx.embedify('error', 'user', `Could not find infraction with id \`${id}\``).send(true);
 			return;
@@ -57,10 +57,10 @@ export default class implements Command {
 				const embed = await displayInfraction(infraction);
 				await ctx.interaction.reply({ embeds: [embed] });
 			} else if (subcommand === 'user') {
-				const infractions = await Infraction.find({ relations: ['target', 'target.user'], where: { guild: ctx.guildEntity, target: { user: { id: user.id } } } });
+				const infractions = await Infraction.find({ relations: ['target', 'target.user'], where: { guild: { id: ctx.guildEntity.id }, target: { user: { id: user.id } } } });
 				await ctx.embedify('info', 'user', `**${user.tag}'s Infractions:**\n\`${infractions.map((v) => v.id).join('`, `')}\``).send();
 			} else if (subcommand === 'all') {
-				const infractions = await Infraction.find({ guild: ctx.guildEntity });
+				const infractions = await Infraction.find({ where: { guild: { id: ctx.guildEntity.id } } });
 				await ctx.embedify('info', 'user', `**All Infractions:**\n\`${infractions.map((v) => v.id).join('`, `')}\``).send();
 			}
 		} if (subcommandgroup === 'delete') {
@@ -68,7 +68,7 @@ export default class implements Command {
 				await infraction.remove();
 				await ctx.embedify('success', 'guild', `Deleted infraction \`${id}\``).send(true);
 			} else if (subcommand === 'user') {
-				const infractions = await Infraction.find({ relations: ['guild', 'target', 'target.user'], where: { guild: ctx.guildEntity, target: { user: { id: user.id } } } });
+				const infractions = await Infraction.find({ relations: ['guild', 'target', 'target.user'], where: { guild: { id: ctx.guildEntity.id }, target: { user: { id: user.id } } } });
 				await Infraction.remove(infractions);
 				await ctx.embedify('success', 'guild', `Deleted \`${infractions.length}\` infractions.`).send(true);
 			} else if (subcommand === 'all') {

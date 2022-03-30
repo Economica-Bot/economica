@@ -1,13 +1,13 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, Relation } from 'typeorm';
 
 import { Guild, User } from './index.js';
 
 @Entity()
 export class Member extends BaseEntity {
-	@PrimaryColumn()
+	@Column({ primary: true })
 	public userId: string;
 
-	@PrimaryColumn()
+	@Column({ primary: true })
 	public guildId: string;
 
 	@ManyToOne(() => User, (user) => user.id)

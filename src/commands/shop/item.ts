@@ -40,8 +40,8 @@ export default class implements Command {
 	public execute = async (ctx: Context) => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		const query = ctx.interaction.options.getString('name', false);
-		const listing = await Listing.findOne({ guild: ctx.guildEntity, name: query });
-		const item = await Item.findOne({ listing, owner: ctx.memberEntity });
+		const listing = await Listing.findOne({ where: { guild: { id: ctx.guildEntity.id }, name: query } });
+		const item = await Item.findOne({ where: { id: listing.id, owner: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId } } });
 		if (subcommand === 'buy') {
 			if (!listing) {
 				await ctx.embedify('error', 'user', `Could not find a listing called \`${query}\``).send(true);
@@ -58,7 +58,7 @@ export default class implements Command {
 				if (!ctx.interaction.member.roles.cache.has(role)) missingRoles.push(role);
 			});
 			(await listing.itemsRequired).forEach(async (sublisting) => {
-				const hasSublisting = await Item.find({ listing: sublisting, owner: ctx.memberEntity });
+				const hasSublisting = await Item.find({ where: { id: sublisting.id, owner: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId } } });
 				if (!hasSublisting) missingItems.push(sublisting.name);
 			});
 			if (listing.price > ctx.memberEntity.wallet) {
@@ -85,8 +85,10 @@ export default class implements Command {
 			}
 
 			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'BUY', -listing.price, 0);
-			if (item) await Item.update(item, { amount: item.amount + 1 });
-			else await Item.create({ owner: ctx.memberEntity, listing, amount: 1 }).save();
+			if (item) {
+				item.amount += 1;
+				await item.save();
+			} else await Item.create({ owner: ctx.memberEntity, listing, amount: 1 }).save();
 			listing.stock -= 1;
 			await listing.save();
 		} else if (subcommand === 'sell') {
@@ -129,8 +131,8 @@ export default class implements Command {
 			if (item.amount === 0) await item.remove();
 		} else if (subcommand === 'give') {
 			const member = ctx.interaction.options.getMember('member');
-			const memberEntity = await Member.findOne({ relations: ['user'], where: { user: { id: member.user.id }, guild: ctx.guildEntity } });
-			const userItem = await Item.findOne({ listing, owner: memberEntity });
+			const memberEntity = await Member.findOne({ relations: ['user'], where: { user: { id: member.user.id }, guild: { id: ctx.guildEntity.id } } });
+			const userItem = await Item.findOne({ where: { id: listing.id, owner: { userId: memberEntity.userId, guildId: memberEntity.guildId } } });
 			if (userItem && !item.listing.stackable) {
 				await ctx.embedify('warn', 'user', 'That user already has that non-stackable item').send(true);
 				return;
@@ -142,8 +144,10 @@ export default class implements Command {
 				return;
 			}
 
-			if (userItem) await Item.update(userItem, { amount: userItem.amount + amount });
-			else await Item.create({ owner: memberEntity, listing, amount }).save();
+			if (userItem) {
+				userItem.amount += amount;
+				await userItem.save();
+			} else await Item.create({ owner: memberEntity, listing, amount }).save();
 			item.amount -= 1;
 			await item.save();
 			if (item.amount === 0) await item.remove();

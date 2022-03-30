@@ -1,11 +1,11 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, Column, Entity, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
+import { BaseEntity, Column, Entity, ManyToOne, Relation } from 'typeorm';
 
 import { Listing, Member } from './index.js';
 
 @Entity()
 export class Item extends BaseEntity {
-	@PrimaryColumn()
+	@Column({ primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => Listing, (listing) => listing.id)

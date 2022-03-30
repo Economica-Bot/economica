@@ -1,6 +1,6 @@
 import { Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 
-import { Listing } from '../../entities/listing.js';
+import { Listing } from '../../entities/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 import { INTERACTION_COMPONENT_COOLDOWN, Emojis } from '../../typings/constants.js';
 import { ListingString } from '../../typings/index.js';
@@ -74,7 +74,7 @@ export default class implements Command {
 			await this.createListing(/* ctx, */message /* , listing */);
 		} else if (subcommand === 'manage') {
 			const query = ctx.interaction.options.getString('listing_id');
-			const listing = await Listing.findOne({ id: query });
+			const listing = await Listing.findOne({ where: { id: query } });
 			if (!listing) {
 				await ctx.embedify('error', 'user', `Could not find listing named \`${query}\``).send(true);
 				return;

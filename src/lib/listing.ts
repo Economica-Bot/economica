@@ -1,7 +1,7 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 import ms from 'ms';
-
 import { Listing } from '../entities/index.js';
+
 import { Context, ContextEmbed } from '../structures/index.js';
 
 /**
