@@ -39,7 +39,7 @@ export default class implements Command {
 		}
 		if (Math.random() * 100 > chance) {
 			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'ROB_FINE', 0, -fine);
-			await ctx.embedify('warn', 'user', `You were caught and fined ${ctx.guildEntity.currency}${fine.toLocaleString()}`).send();
+			await ctx.embedify('warn', 'user', `You were caught and fined ${ctx.guildEntity.currency}${parseNumber(fine)}`).send();
 			return;
 		}
 		await ctx.embedify('success', 'user', `You stole ${ctx.guildEntity.currency}${parseNumber(amount)} from ${target}.`).send();
