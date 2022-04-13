@@ -12,7 +12,7 @@ import { InfractionString } from '../typings/index.js';
  */
 export async function displayInfraction(infraction: Infraction): Promise<EmbedBuilder> {
 	const { id, type, target, agent, reason, duration, active, permanent, createdAt } = infraction;
-	const description = `Target: <@!${target.user.id}> | Agent: <@!${agent.user.id}>`;
+	const description = `Target: <@!${target.userId}> | Agent: <@!${agent.userId}>`;
 	return new EmbedBuilder()
 		.setColor(Util.resolveColor('Red'))
 		.setAuthor({ name: `Infraction | ${type}` })

@@ -14,7 +14,7 @@ import { TransactionString } from '../typings/index.js';
 export async function displayTransaction(transaction: Transaction): Promise<EmbedBuilder> {
 	const { id, guild, type, target, agent, wallet, treasury, createdAt } = transaction;
 	const total = wallet + treasury;
-	const description = `Target: <@!${target.user.id}> | Agent: <@!${agent.user.id}>`;
+	const description = `Target: <@!${target.userId}> | Agent: <@!${agent.userId}>`;
 	return new EmbedBuilder()
 		.setColor(Util.resolveColor('Gold'))
 		.setAuthor({ name: `Transaction | ${type}` })

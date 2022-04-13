@@ -73,6 +73,7 @@ export const clientOptions: ClientOptions = {
 	],
 	partials: [
 		Partials.Channel,
+		Partials.GuildMember,
 	],
 };
 

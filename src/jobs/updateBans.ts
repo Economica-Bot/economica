@@ -10,7 +10,7 @@ export default class implements Job {
 		bans.forEach(async (ban) => {
 			if (ban.createdAt.getTime() + ban.duration < now.getTime()) {
 				const guild = client.guilds.cache.get(ban.guild.id);
-				await guild.members.unban(ban.target.user.id, 'Economica | Ban expired.');
+				await guild.members.unban(ban.target.userId, 'Economica | Ban expired.');
 			}
 		});
 
