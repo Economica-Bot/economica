@@ -32,7 +32,7 @@ export default class implements Command {
 		}
 
 		const amount = ctx.interaction.options.getNumber('amount') ?? 100;
-		const count = await channel.bulkDelete(amount);
+		const count = await channel.bulkDelete(amount, true);
 		await ctx.embedify('success', 'user', `Deleted \`${count.size}\` messages.`).send(true);
 	};
 }

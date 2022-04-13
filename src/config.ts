@@ -81,7 +81,6 @@ export const inviteOptions: InviteGenerationOptions = {
 		PermissionFlagsBits.SendMessages,
 		PermissionFlagsBits.EmbedLinks,
 		PermissionFlagsBits.BanMembers,
-		PermissionFlagsBits.BanMembers,
 		PermissionFlagsBits.ModerateMembers,
 		PermissionFlagsBits.ManageMessages,
 		PermissionFlagsBits.UseExternalEmojis,
