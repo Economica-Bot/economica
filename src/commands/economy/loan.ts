@@ -33,9 +33,9 @@ export default class implements Command {
 		const embed = ctx.embedify('info', 'user', description)
 			.setAuthor({ name: 'Loan Dashboard', iconURL: ctx.interaction.guild.iconURL() })
 			.addFields(
-				{ name: `${Emojis.CREATE_LOAN} Create`, value: 'Make a new loan', inline: true },
-				{ name: `${Emojis.ACTIVE_LOAN} View`, value: 'View active loans', inline: true },
-				{ name: `${Emojis.MANAGE_LOAN} Manage`, value: 'Accept or Deny pending loans', inline: true },
+				{ name: `${Emojis.LOAN} Create`, value: 'Make a new loan', inline: true },
+				{ name: `${Emojis.ESCROW} View`, value: 'View active loans', inline: true },
+				{ name: `${Emojis.FUNDS} Manage`, value: 'Accept or Deny pending loans', inline: true },
 			);
 		const dropdown = new ActionRowBuilder<SelectMenuBuilder>()
 			.setComponents(
@@ -43,8 +43,8 @@ export default class implements Command {
 					.setPlaceholder('None Selected')
 					.setCustomId('loan_select')
 					.setOptions(
-						{ emoji: { id: Util.resolvePartialEmoji(Emojis.CREATE_LOAN).id }, label: 'Create', value: 'create' },
-						{ emoji: { id: Util.resolvePartialEmoji(Emojis.MANAGE_LOAN).id }, label: 'Manage', value: 'manage' },
+						{ emoji: { id: Util.resolvePartialEmoji(Emojis.LOAN).id }, label: 'Create', value: 'create' },
+						{ emoji: { id: Util.resolvePartialEmoji(Emojis.FUNDS).id }, label: 'Manage', value: 'manage' },
 					),
 			);
 		const message = await ctx.interaction.reply({ embeds: [embed], components: [dropdown], fetchReply: true });

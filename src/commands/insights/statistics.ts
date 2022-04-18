@@ -30,8 +30,8 @@ export default class implements Command {
 			.embedify('info', 'user', description)
 			.setAuthor({ name: 'Statistics Dashboard', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.ANALYTICS).id).url })
 			.addFields(
-				{ name: `${Emojis.ROBOT} Bot Statistics`, value: botStats, inline: true },
-				{ name: `${Emojis.TEAM_MEMBER} Member Statistics`, value: memberStats, inline: true },
+				{ name: `${Emojis.BOT} Bot Statistics`, value: botStats, inline: true },
+				{ name: `${Emojis.ADMIN} Member Statistics`, value: memberStats, inline: true },
 				{ name: `${Emojis.COMMUNITY} Server Statistics`, value: serverStats, inline: true },
 			);
 		await ctx.interaction.reply({ embeds: [embed] });

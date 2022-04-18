@@ -89,7 +89,8 @@ export type TransactionString =
 	| 'INTERVAL_FORTNIGHT'
 	| 'INTERVAL_MONTH'
 	| 'DICE_ROLL'
-	| 'ROULETTE';
+	| 'ROULETTE'
+	| 'BLACKJACK';
 export enum Occupations {
 	'Accountant',
 	'Business Analyst',

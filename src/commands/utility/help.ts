@@ -27,7 +27,7 @@ export default class implements Command {
 		if (!query) {
 			const helpEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Economica Help Dashboard', iconURL: ctx.client.user.displayAvatarURL() })
-				.setDescription(`${Emojis.HELP} **Welcome to the ${ctx.interaction.client.user} Help Dashboard!**\nHere, you can get information about any command or module. Use the select menu below to specify a module.\n\n${Emojis.ECONOMICA_LOGO_0} **The Best New Discord Economy Bot**\nTo become more familiar with Economica, please refer to the [documentation](${WEBSITE_DOCS_URL}). There you can set up various permissions-related settings and get detailed information about all command modules.\n\n🔗 **Useful Links**:\n**[Home Page](${WEBSITE_HOME_URL}) | [Command Docs](${WEBSITE_COMMANDS_URL}) | [Vote For Us](${WEBSITE_VOTE_URL})**`);
+				.setDescription(`${Emojis.HELP} **Welcome to the ${ctx.interaction.client.user} Help Dashboard!**\nHere, you can get information about any command or module. Use the select menu below to specify a module.\n\n${Emojis.ECONOMICA} **The Best New Discord Economy Bot**\nTo become more familiar with Economica, please refer to the [documentation](${WEBSITE_DOCS_URL}). There you can set up various permissions-related settings and get detailed information about all command modules.\n\n🔗 **Useful Links**:\n**[Home Page](${WEBSITE_HOME_URL}) | [Command Docs](${WEBSITE_COMMANDS_URL}) | [Vote For Us](${WEBSITE_VOTE_URL})**`);
 			const labels = Object.keys(ctx.guildEntity.modules).map((module) => new SelectMenuOptionBuilder().setLabel(module).setValue(module));
 			const dropdown = new ActionRowBuilder<SelectMenuBuilder>()
 				.setComponents(
@@ -61,7 +61,7 @@ export default class implements Command {
 
 		const commandEmbed = new EmbedBuilder()
 			.setAuthor({ name: `${command.data.name} | ${command.data.description}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.COMMAND).id).url })
-			.setDescription(`${Emojis.FORMAT} **Format**: \`${command.data.format}\`\n${Emojis.RESEARCH} **Examples**: \`\`\`${command.data.examples.join('\n')}\`\`\``)
+			.setDescription(`${Emojis.COMMAND} **Format**: \`${command.data.format}\`\n${Emojis.DESCRIPTION} **Examples**: \`\`\`${command.data.examples.join('\n')}\`\`\``)
 			.setFooter({ text: ctx.interaction.user.tag, iconURL: ctx.interaction.user.displayAvatarURL() })
 			.setTimestamp();
 		command.data.options.forEach((option) => {
