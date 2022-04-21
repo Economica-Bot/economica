@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { User } from '../../../entities/index.js';
+import { User } from '../../../../entities/index.js';
 
 const router = express.Router();
 

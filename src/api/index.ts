@@ -17,7 +17,7 @@ export function createApp(): Express {
 	// Enable CORS
 	app.use(
 		cors({
-			origin: ['http://localhost:8000'],
+			origin: ['http://localhost:3001'],
 			credentials: true,
 		}),
 	);

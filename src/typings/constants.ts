@@ -324,5 +324,3 @@ export const RouletteBets: Record<RouletteBetsNamesType, RouletteBet> = {
 		description: 'A special bet that covers the numbers 1, 5, 9, 12, 13, 16, 19, 23, 27, 30, 32, and 34',
 	},
 };
-
-export const DISCORD_API_URL = 'https://discord.com/api/v9';

@@ -49,7 +49,7 @@ export type Intervals = {
 export interface Module {
 	type: ModuleTypeString;
 	enabled: boolean;
-	user: Snowflake;
+	user: Snowflake | null;
 }
 export type ReplyString = 'success' | 'info' | 'warn' | 'error';
 export type Footer = 'bot' | 'user' | 'guild' | EmbedFooterData;

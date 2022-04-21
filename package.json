@@ -4,17 +4,19 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "lint": "eslint src --ext .ts",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
     "build": "tsc",
-    "lint": "eslint src --ext .ts",
     "dev": "node --enable-source-maps --es-module-specifier-resolution=node --experimental-modules dist/index.js",
+    "start": "npm run build && npm run dev",
     "ts-node": "node --loader ts-node/esm"
   },
   "license": "ISC",
   "dependencies": {
     "@adrastopoulos/number-parser": "github:Adrastopoulos/Number-Parser",
     "@discordjs/builders": "^0.13.0-dev.1647259738.2297c2b",
+    "@discordjs/rest": "^0.4.0-dev.1648515278-ac4bc3a",
     "axios": "^0.26.1",
     "body-parser": "^1.19.2",
     "connect-pg-simple": "^7.0.0",

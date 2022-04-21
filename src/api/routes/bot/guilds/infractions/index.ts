@@ -1,11 +1,11 @@
 import express from 'express';
 
-import { Infraction } from '../../../../entities/index.js';
+import { Infraction } from '../../../../../entities/index.js';
 
 const router = express.Router();
 
 router.get('/', async (_req, res) => {
-	const infractions = await Infraction.find({ where: { guild: { id: res.locals.guild.id } } });
+	const infractions = await Infraction.find({ relations: ['agent', 'target', 'agent.user', 'target.user'], where: { guild: { id: res.locals.guild.id } } });
 	res.status(200).send(infractions);
 });
 
