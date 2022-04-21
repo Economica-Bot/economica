@@ -17,6 +17,11 @@ export async function paginate(
 		await interaction.deferReply();
 	}
 
+	if (index > embeds.length - 1 || index < 0) {
+		await interaction.editReply({ content: `Page number out of bounds!\nTotal pages: ${embeds.length}` });
+		return;
+	}
+
 	setTimeout(() => interaction.editReply({
 		components: [],
 	}), INTERACTION_COMPONENT_COOLDOWN);
