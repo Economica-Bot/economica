@@ -1,3 +1,4 @@
+import { syncPermissions } from '../../lib/permissions.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 import { ModuleString } from '../../typings/index.js';
 
@@ -47,11 +48,12 @@ export default class implements Command {
 				ctx.guildEntity.modules[moduleName].enabled = true;
 				ctx.guildEntity.modules[moduleName].user = ctx.userEntity.id;
 				await ctx.guildEntity.save();
-				ctx.client.commands
+				await Promise.all(ctx.client.commands
 					.filter((command) => command.data.module === moduleName)
-					.forEach(async (command) => {
+					.map(async (command) => {
 						await ctx.interaction.guild.commands.create(command.data.toJSON());
-					});
+					}));
+				await syncPermissions(ctx.client, ctx.interaction.guild);
 				await ctx.embedify('success', 'user', `Added the \`${moduleName}\` module.`).send(true);
 			}
 		} else if (subcommand === 'remove') {
