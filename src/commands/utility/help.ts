@@ -60,7 +60,7 @@ export default class implements Command {
 		}
 
 		const commandEmbed = new EmbedBuilder()
-			.setAuthor({ name: `${command.data.name} | ${command.data.description}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.COMMAND).id)?.url })
+			.setAuthor({ name: `${command.data.name} | ${command.data.description}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.CODE).id)?.url })
 			.setDescription(`${Emojis.COMMAND} **Format**: \`${command.data.format}\`\n${Emojis.DESCRIPTION} **Examples**: \`\`\`${command.data.examples.join('\n')}\`\`\``)
 			.setFooter({ text: ctx.interaction.user.tag, iconURL: ctx.interaction.user.displayAvatarURL() })
 			.setTimestamp();
