@@ -32,7 +32,7 @@ export default class implements Command {
 		const description = `**Welcome, ${ctx.interaction.user}, to the Roulette Table!**\n\n🤔 **How to play?**\nPlaying roulette is more simple then you think!\nSimply follow the prompts that are given to you and gamble your way to unimaginable wealth!\n\n⏫ **Start a Game!**\nSelect an option below to begin a game of Roulette. May the force be with you.`;
 		const embed = ctx
 			.embedify('info', 'user', description)
-			.setAuthor({ name: 'Play Roulette!', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.ROULETTE).id).url })
+			.setAuthor({ name: 'Play Roulette!', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.ROULETTE).id)?.url })
 			.setThumbnail(img);
 		const msg = await ctx.interaction.reply({ embeds: [embed], components: [row], fetchReply: true });
 		const interaction = await msg.awaitMessageComponent({ filter: (i) => i.user.id === ctx.interaction.user.id, componentType: ComponentType.SelectMenu });
