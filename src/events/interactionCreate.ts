@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Interaction } from 'discord.js';
+import { ChatInputCommandInteraction, Interaction, InteractionType } from 'discord.js';
 
 import { Command } from '../entities/index.js';
 import { commandCheck } from '../lib/index.js';
@@ -7,7 +7,7 @@ import { Context, Economica, Event } from '../structures/index.js';
 export default class implements Event {
 	public event = 'interactionCreate' as const;
 	public async execute(client: Economica, interaction: Interaction<'cached'>): Promise<void> {
-		client.log.debug(`Executing interaction ${interaction.type}`);
+		client.log.debug(`Executing interaction ${InteractionType[interaction.type]}`);
 		if (interaction.isChatInputCommand()) {
 			await this.commandInteraction(client, interaction);
 		}
