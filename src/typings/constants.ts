@@ -127,49 +127,48 @@ export const EmbedColors: Record<ReplyString, ColorResolvable> = {
 	error: 'Red',
 };
 export enum Emojis {
-	ECONOMICA_LOGO_0 = '<:economicalogo0:843375936589922305>',
-	ECONOMICA_LOGO_1 = '<:economicalogo1:843376438782722068>',
-	ECONOMICA_LOGO_2 = '<:economicalogo2:843376482603892746>1',
-	ITEM_DISABLED = '<:ITEM_DISABLED:944737714274717746>',
-	ACTIVE_LOAN = '<:active_loan:947238735668449280>',
-	CREATE_LOAN = '<:create_loan:947238735471333427>',
-	MANAGE_LOAN = '<:manage_loan:947238735450353734>',
-	SELECT = '<:select:947240263003304027>',
-	DESCRIPTION = '<:description:950268990763204648>',
-	FORMAT = '<:format:950251489966837880>',
-	RESEARCH = '<:research:950251348782350377>',
-	DASHBOARD = '<:dashboard:950251162869841930>',
-	COMMAND = '<:command:950269811039039540>',
-	SUCCESS = '<:appendix_success:843390419261194300>',
-	INFO = '<:appendix_info:843390419429883924>',
-	WARNING = '<:appendix_warning:843390419270107136>',
-	ERROR = '<:appendix_error:843390419303661569>',
-	HELP = '<:help:950426939796111390>',
-	ANALYTICS = '<:analytics:950870757616005150>',
-	TEAM_MEMBER = '<:teammember:950871612289343558>',
-	COMMUNITY = '<:community:950871622934491196>',
-	ROBOT = '<:robot:950871596426461284>',
-	MEMORY = '<:memory:950902208042532904>',
-	INTERVAL = '⏱️',
-	ADMIN = '<:admin:950999584858066964>',
-	UTILITY = '<:utilities:950999584824492042>',
-	INCOME = '<:salary:950999584769978468>',
-	SHOP = '<:store:950999584698679367>',
-	ECONOMY = '<:economy:950998596877176902>',
-	MODERATION = '🛡️',
-	INSIGHTS = '<:insights:950998596147359764>',
-	CORPORATION = '<:corporation:950998596109619240>',
-	STOCK = '<:stock:953112763591438336>',
-	STACK = '<:stack:953113375716548638>',
+	ADMIN = '<:admin:963849715600990318>',
+	ANALYTICS = '<:analytics:963849715621961768>',
+	ANALYZE = '<:analyze:963849715672317962>',
+	BOT = '<:bot:963849715626160208>',
+	CHART = '<:chart:963849715617787964>',
+	CHECK = '<:check:963849715689082950>',
+	CHEQUE = '<:cheque:963849715676479549>',
+	CODE = '<:code:963849715718430791>',
+	COMMAND = '<:command:963849715751989258>',
+	COMMUNE = '<:commune:963849715743612948>',
+	COMMUNITY = '<:community:963849715856846848>',
+	CORPORATION = '<:corporation:963849715819106394>',
+	CROSS = '<:cross:963849715437424732>',
+	DASHBOARD = '<:dashboard:963849715936550962>',
+	DESCRIPTION = '<:description:963849715873615892>',
+	DISABLE = '<:disable:963849715412246600>',
+	E_ALPHA = '<:e_alpha:963849777261465620>',
+	E_OG = '<:e_og:963849777974509648>',
+	ECONOMICA = '<:economica:963849777928355880>',
+	ENABLE = '<:enable:963849715873615922>',
+	ESCROW = '<:escrow:963875587598974986>',
+	FUNDS = '<:funds:963849716033028096>',
+	GENERATOR = '<:generator:963849715932356688>',
+	HELP = '<:help:963849715940728842>',
+	INFO = '<:info:963849715970105354>',
+	INSUFFICIENT = '<:insufficient:963849715882000494>',
+	INTERVAL = '🕒',
+	LOAN = '<:loan:963849715932344340>',
+	MANAGE = '<:manage:963849716221763634>',
+	MEMORY = '<:memory:963849715978485890>',
+	PLUS = '<:plus:963849715923968120>',
+	ROULETTE = '<:roulette:963849716100124752>',
+	SEARCH = '<:search:963849716020420709>',
+	SELECT = '<:select:963849716230127636>',
+	SETTING = '<:settings:963849715949125712>',
+	SHOP = '<:shop:963849715965919252>',
+	SPEC = '<:spec:963849715923959880>',
+	STACK = '<:stack:963849716012048465>',
+	STOCK = '<:stock:963849715680702496>',
 	TREASURY = '🏦',
-	WALLET = '<:wallet:953114661295886437>',
-	SETTINGS = '<:settings:953115211584381008>',
-	SEARCH = '<:search:953117655970242620>',
-	CANCEL = '✖',
-	PUBLISH = '✔',
-	ADD = '➕', // ➕
-	GENERATOR = '<:generator:953122979544444928>',
-	ROULETTE = '<:roulette:955308143540314123>',
+	WALLET = '<:wallet:963849716003639397>',
+	WARNING = '<:warning:963849716083343431>',
 }
 export const INTERACTION_COMPONENT_COOLDOWN = 1000 * 45;
 export enum Properties {
@@ -215,48 +214,48 @@ export interface RouletteBet {
 	formatted: RouletteBetsFormattedType;
 	description: RouletteBetsDescriptionsType;
 }
-type RouletteBetsNamesType =
-| 'single'
-| 'split'
-| 'street'
-| 'corner'
-| 'double_street'
-| 'trio'
-| 'first_four'
-| 'half'
-| 'color'
-| 'even_or_odd'
-| 'dozen'
-| 'snake'
-| 'column';
-type RouletteBetsFormattedType =
-| 'Single'
-| 'Split'
-| 'Street'
-| 'Corner'
-| 'Double Street'
-| 'Trio'
-| 'First Four'
-| 'Half'
-| 'Color'
-| 'Even or Odd'
-| 'Dozen'
-| 'Column'
-| 'Snake';
-type RouletteBetsDescriptionsType =
-| 'Bet on a single number'
-| 'Bet on two distinct vertically/horizontally adjacent numbers'
-| 'Bet on three distinct consecutive numbers in a horizontal line'
-| 'Bet on four numbers that meet at one corner'
-| 'Bet on six consecutive numbers that form two horizontal lines'
-| 'A three-number bet that involves at least one zero'
-| 'Bet on 0-1-2-3'
-| 'A bet that the number will be in the chosen range'
-| 'A bet that the number will be the chosen color'
-| 'A bet that the number will be of the chosen type'
-| 'A bet that the number will be in the chosen dozen'
-| 'A bet that the number will be in the chosen vertical column'
-| 'A special bet that covers the numbers 1, 5, 9, 12, 13, 16, 19, 23, 27, 30, 32, and 34';
+export type RouletteBetsNamesType =
+	| 'single'
+	| 'split'
+	| 'street'
+	| 'corner'
+	| 'double_street'
+	| 'trio'
+	| 'first_four'
+	| 'half'
+	| 'color'
+	| 'even_or_odd'
+	| 'dozen'
+	| 'snake'
+	| 'column';
+export type RouletteBetsFormattedType =
+	| 'Single'
+	| 'Split'
+	| 'Street'
+	| 'Corner'
+	| 'Double Street'
+	| 'Trio'
+	| 'First Four'
+	| 'Half'
+	| 'Color'
+	| 'Even or Odd'
+	| 'Dozen'
+	| 'Column'
+	| 'Snake';
+export type RouletteBetsDescriptionsType =
+	| 'Bet on a single number'
+	| 'Bet on two distinct vertically/horizontally adjacent numbers'
+	| 'Bet on three distinct consecutive numbers in a horizontal line'
+	| 'Bet on four numbers that meet at one corner'
+	| 'Bet on six consecutive numbers that form two horizontal lines'
+	| 'A three-number bet that involves at least one zero'
+	| 'Bet on 0-1-2-3'
+	| 'A bet that the number will be in the chosen range'
+	| 'A bet that the number will be the chosen color'
+	| 'A bet that the number will be of the chosen type'
+	| 'A bet that the number will be in the chosen dozen'
+	| 'A bet that the number will be in the chosen vertical column'
+	| 'A special bet that covers the numbers 1, 5, 9, 12, 13, 16, 19, 23, 27, 30, 32, and 34';
 export const RouletteBets: Record<RouletteBetsNamesType, RouletteBet> = {
 	single: {
 		type: 'Inside',

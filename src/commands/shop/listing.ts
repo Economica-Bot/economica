@@ -51,9 +51,9 @@ export default class implements Command {
 				.setComponents(
 					new ButtonBuilder().setCustomId('required_treasury').setLabel('Required Treasury').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.TREASURY }),
 					new ButtonBuilder().setCustomId('required_items').setLabel('Required Items').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SEARCH }),
-					new ButtonBuilder().setCustomId('required_roles').setLabel('Required Roles').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SETTINGS }),
-					new ButtonBuilder().setCustomId('roles_given').setLabel('Roles Given').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SETTINGS }),
-					new ButtonBuilder().setCustomId('roles_removed').setLabel('Roles Removed').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SETTINGS }),
+					new ButtonBuilder().setCustomId('required_roles').setLabel('Required Roles').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SETTING }),
+					new ButtonBuilder().setCustomId('roles_given').setLabel('Roles Given').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SETTING }),
+					new ButtonBuilder().setCustomId('roles_removed').setLabel('Roles Removed').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SETTING }),
 				));
 			if (type === 'GENERATOR') {
 				rows.push(new ActionRowBuilder<ButtonBuilder>()
@@ -64,9 +64,9 @@ export default class implements Command {
 			}
 			rows.push(new ActionRowBuilder<ButtonBuilder>()
 				.setComponents(
-					new ButtonBuilder().setCustomId('cancel').setLabel('Cancel').setStyle(ButtonStyle.Danger).setEmoji({ id: Emojis.CANCEL }),
+					new ButtonBuilder().setCustomId('cancel').setLabel('Cancel').setStyle(ButtonStyle.Danger).setEmoji({ id: Emojis.CROSS }),
 					new ButtonBuilder().setCustomId('validate').setLabel('Validate').setStyle(ButtonStyle.Secondary).setEmoji({ id: Emojis.INFO }),
-					new ButtonBuilder().setCustomId('publish').setLabel('Publish').setStyle(ButtonStyle.Success).setEmoji({ id: Emojis.PUBLISH }),
+					new ButtonBuilder().setCustomId('publish').setLabel('Publish').setStyle(ButtonStyle.Success).setEmoji({ id: Emojis.CHECK }),
 				));
 
 			const message = await ctx.interaction.reply({ embeds: [embed], components: rows, fetchReply: true });
