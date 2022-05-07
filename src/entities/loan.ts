@@ -1,5 +1,5 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, OneToOne, Relation } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, Relation } from 'typeorm';
 
 import { Guild, Member } from './index.js';
 
@@ -8,20 +8,20 @@ export class Loan extends BaseEntity {
 	@Column({ primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
-	@OneToOne(() => Guild, (guild) => guild.id, { eager: true })
+	@ManyToOne(() => Guild, (guild) => guild.id, { eager: true })
 	@JoinColumn()
 	public guild: Relation<Guild>;
 
-	@OneToOne(() => Member, { eager: true })
+	@ManyToOne(() => Member, { eager: true })
 	@JoinColumn()
 	public lender: Relation<Member>;
 
-	@OneToOne(() => Member, { eager: true })
+	@ManyToOne(() => Member, { eager: true })
 	@JoinColumn()
 	public borrower: Relation<Member>;
 
 	@Column()
-	public description: string;
+	public message: string;
 
 	@Column()
 	public principal: number;

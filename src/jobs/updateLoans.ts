@@ -11,7 +11,6 @@ export default class implements Job {
 		// Complete loan transaction.
 		loans.forEach(async (loan) => {
 			const { guild, borrower, lender, repayment } = loan;
-			await recordTransaction(client, guild, borrower, lender, 'LOAN_GIVE_REPAYMENT', 0, -repayment);
 			await recordTransaction(client, guild, borrower, lender, 'LOAN_RECEIVE_REPAYMENT', 0, repayment);
 		});
 		await Loan.update(
