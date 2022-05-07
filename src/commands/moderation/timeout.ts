@@ -1,4 +1,4 @@
-import { GuildMember } from 'discord.js';
+import { GuildMember, PermissionFlagsBits } from 'discord.js';
 import ms from 'ms';
 
 import { Member, User } from '../../entities/index.js';
@@ -18,8 +18,7 @@ export default class implements Command {
 			'timeout @user 3h spamming',
 		])
 		.setClientPermissions(['ModerateMembers'])
-		.setAuthority('MODERATOR')
-		.setDefaultPermission(false)
+		.setPermissions(PermissionFlagsBits.ModerateMembers.toString())
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target').setRequired(true))
 		.addStringOption((option) => option.setName('duration').setDescription('Specify a duration').setRequired(true))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason').setRequired(false));

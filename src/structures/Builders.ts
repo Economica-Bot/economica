@@ -6,8 +6,10 @@ import {
 	SlashCommandSubcommandGroupBuilder,
 	SlashCommandSubcommandsOnlyBuilder,
 } from '@discordjs/builders';
+import { Permissions } from 'discord-api-types/v10';
 import { PermissionsString } from 'discord.js';
-import { Authorities, ModuleString } from '../typings/index.js';
+
+import { ModuleString } from '../typings/index.js';
 
 export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcommandBuilder {
 	public clientPermissions: PermissionsString[];
@@ -15,6 +17,10 @@ export class EconomicaSlashCommandSubcommandBuilder extends SlashCommandSubcomma
 	public setClientPermissions(clientPermissions: PermissionsString[]): this {
 		this.clientPermissions = clientPermissions;
 		return this;
+	}
+
+	public override toJSON() {
+		return { ...super.toJSON(), clientPermissions: this.clientPermissions };
 	}
 }
 
@@ -32,6 +38,10 @@ export class EconomicaSlashCommandSubcommandGroupBuilder extends SlashCommandSub
 		this.options.push(result);
 		return this;
 	}
+
+	public override toJSON() {
+		return { ...super.toJSON(), clientPermissions: this.clientPermissions };
+	}
 }
 
 export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
@@ -41,7 +51,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	public clientPermissions: PermissionsString[];
 	public global = false;
 	public enabled = true;
-	public authority: Authorities;
+	public default_member_permissions: Permissions;
 
 	public setGlobal(global: boolean): this {
 		this.global = global;
@@ -68,8 +78,8 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	public setAuthority(level: keyof typeof Authorities): this {
-		this.authority = Authorities[level];
+	public setPermissions(level: Permissions): this {
+		this.default_member_permissions = level;
 		return this;
 	}
 
@@ -107,6 +117,10 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		if (builder instanceof EconomicaSlashCommandSubcommandGroupBuilder) return [builder.options.find((subcommandbuilder) => subcommandbuilder.name === query) as EconomicaSlashCommandSubcommandBuilder];
 		if (builder instanceof EconomicaSlashCommandSubcommandBuilder) return [builder];
 		return undefined;
+	}
+
+	public override toJSON() {
+		return { ...super.toJSON(), module: this.module, format: this.format, examples: this.examples, clientPermissions: this.clientPermissions, global: this.global, enabled: this.enabled, default_member_permissions: this.default_member_permissions };
 	}
 }
 

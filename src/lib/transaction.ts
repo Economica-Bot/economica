@@ -19,11 +19,11 @@ export async function displayTransaction(transaction: Transaction): Promise<Embe
 		.setColor(Util.resolveColor('Gold'))
 		.setAuthor({ name: `Transaction | ${type}` })
 		.setDescription(description)
-		.addFields(
+		.addFields([
 			{ name: '__**Wallet**__', value: `${guild.currency}${parseNumber(wallet)}`, inline: true },
 			{ name: '__**Treasury**__', value: `${guild.currency}${parseNumber(treasury)}`, inline: true },
 			{ name: '__**Total**__', value: `${guild.currency}${parseNumber(total)}`, inline: true },
-		)
+		])
 		.setFooter({ text: `ID: ${id}` })
 		.setTimestamp(createdAt);
 }

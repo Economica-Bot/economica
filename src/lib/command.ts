@@ -3,7 +3,6 @@ import ms from 'ms';
 
 import { DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEVELOPER_IDS } from '../config.js';
 import { Context } from '../structures/index.js';
-import { Authorities } from '../typings/constants.js';
 
 async function checkPermission(ctx: Context): Promise<boolean> {
 	const member = ctx.interaction.member as GuildMember;
@@ -66,9 +65,6 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 	const isDeveloper = DEVELOPER_IDS.includes(ctx.interaction.user.id);
 	if (!ctx.data.enabled) {
 		await ctx.embedify('warn', 'user', 'This command is disabled.').send(true);
-		return false;
-	} if (Authorities[ctx.data.authority] === 'DEVELOPER' && !isDeveloper) {
-		await ctx.embedify('warn', 'user', 'This command is dev only.').send(true);
 		return false;
 	} if (!ctx.data.global && !ctx.interaction.inGuild()) {
 		await ctx.embedify('warn', 'user', 'This command may only be used within servers.').send(true);

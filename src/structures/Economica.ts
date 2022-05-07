@@ -222,7 +222,6 @@ export class Economica extends Client {
 				if (!command.data.module) throw new Error(`Command ${command.data.name} missing module!`);
 				if (!command.data.format) throw new Error(`Command ${command.data.name} missing format!`);
 				if (!command.data.examples) throw new Error(`Command ${command.data.name} missing examples!`);
-				if (typeof command.data.authority === 'undefined') throw new Error(`Command ${command.data.name} missing authority!`);
 				this.log.debug(`Registering command ${command.data.name}`);
 				this.commands.set(command.data.name, command);
 			});

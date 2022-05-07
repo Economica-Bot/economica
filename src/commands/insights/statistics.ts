@@ -11,9 +11,7 @@ export default class implements Command {
 		.setDescription('View server and bot statistics')
 		.setModule('INSIGHTS')
 		.setFormat('statistics')
-		.setExamples(['statistics'])
-		.setAuthority('USER')
-		.setDefaultPermission(false);
+		.setExamples(['statistics']);
 
 	public execute = async (ctx: Context) => {
 		const description = `**Welcome to ${ctx.client.user}'s Statistics Dashboard!**`;
@@ -29,11 +27,11 @@ export default class implements Command {
 		const embed = ctx
 			.embedify('info', 'user', description)
 			.setAuthor({ name: 'Statistics Dashboard', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.ANALYTICS).id)?.url })
-			.addFields(
+			.addFields([
 				{ name: `${Emojis.BOT} Bot Statistics`, value: botStats, inline: true },
 				{ name: `${Emojis.ADMIN} Member Statistics`, value: memberStats, inline: true },
 				{ name: `${Emojis.COMMUNITY} Server Statistics`, value: serverStats, inline: true },
-			);
+			]);
 		await ctx.interaction.reply({ embeds: [embed] });
 	};
 }

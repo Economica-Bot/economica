@@ -7,9 +7,7 @@ export default class implements Command {
 		.setDescription('Earn funds on a weekly basis.')
 		.setModule('INTERVAL')
 		.setFormat('weekly')
-		.setExamples(['weekly'])
-		.setAuthority('USER')
-		.setDefaultPermission(false);
+		.setExamples(['weekly']);
 
 	public execute = async (ctx: Context): Promise<void> => interval(ctx, 'weekly');
 }

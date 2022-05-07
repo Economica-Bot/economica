@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from 'discord.js';
 import ms from 'ms';
 
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
@@ -14,8 +15,7 @@ export default class implements Command {
 			'income edit crime maxfine: 20%',
 			'income edit beg cooldown: 5m',
 		])
-		.setAuthority('MANAGER')
-		.setDefaultPermission(false)
+		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
 		.addSubcommand((subcommand) => subcommand
 			.setName('view').setDescription('View income command configurations'))
 		.addSubcommand((subcommand) => subcommand
@@ -35,7 +35,7 @@ export default class implements Command {
 			const embed = ctx.embedify('info', 'guild', 'Income command information');
 			Object.entries(ctx.guildEntity.incomes).forEach((income) => {
 				const description = Object.entries(income[1]).map((prop) => `${prop[0]}: ${prop[1]}`);
-				embed.addFields({ name: income[0], value: `\`\`\`${description.join('\n')}\`\`\``, inline: true });
+				embed.addFields([{ name: income[0], value: `\`\`\`${description.join('\n')}\`\`\``, inline: true }]);
 			});
 			await ctx.interaction.reply({ embeds: [embed] });
 		} if (subcommand === 'edit') {

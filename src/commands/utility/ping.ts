@@ -7,8 +7,6 @@ export default class implements Command {
 		.setFormat('ping')
 		.setExamples(['ping'])
 		.setModule('UTILITY')
-		.setAuthority('USER')
-		.setDefaultPermission(false)
 		.setGlobal(true);
 
 	public execute = async (ctx: Context): Promise<void> => {

@@ -12,8 +12,6 @@ export default class implements Command {
 			'dice 100 3',
 			'dice 4000 5',
 		])
-		.setAuthority('USER')
-		.setDefaultPermission(false)
 		.addStringOption((option) => option.setName('amount').setDescription('Specify a bet').setRequired(true))
 		.addIntegerOption((option) => option.setName('number').setDescription('Choose a number on the die').setMinValue(1).setMaxValue(6).setRequired(true));
 
@@ -23,7 +21,7 @@ export default class implements Command {
 		if (!validated) return;
 		const diceRoll = Math.floor(Math.random() * 6 + 1);
 		const proceeds = diceRoll === number ? result * 4 : result * -1;
-		await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'DICE_ROLL', proceeds, 0);
+		recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'DICE_ROLL', proceeds, 0);
 		if (proceeds > 0) {
 			await ctx.embedify('success', 'user', `**The die landed on... \`${diceRoll}\`**\n\n🎉**Huzzah!**\nYou won ${ctx.guildEntity.currency}${parseNumber(result * 4)}`).send();
 			return;

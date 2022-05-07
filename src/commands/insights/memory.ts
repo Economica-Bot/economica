@@ -9,9 +9,7 @@ export default class implements Command {
 		.setDescription('View various bot memory statistics')
 		.setModule('INSIGHTS')
 		.setFormat('memory')
-		.setExamples(['memory'])
-		.setAuthority('USER')
-		.setDefaultPermission(false);
+		.setExamples(['memory']);
 
 	public execute = async (ctx: Context) => {
 		const description = '**View bots usage of memory in various measures.**\n\n'
@@ -23,7 +21,7 @@ export default class implements Command {
 		const embed = ctx
 			.embedify('info', 'bot', description)
 			.setAuthor({ name: 'Bot Memory Levels', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.MEMORY).id)?.url });
-		Object.entries(process.memoryUsage()).forEach((key, value) => embed.addFields({ name: key[0], value: `\`${Math.round((value / 1024 / 1024) * 100) / 100}Mb\``, inline: true }));
+		Object.entries(process.memoryUsage()).forEach((key, value) => embed.addFields([{ name: key[0], value: `\`${Math.round((value / 1024 / 1024) * 100) / 100}Mb\``, inline: true }]));
 		await ctx.interaction.reply({ embeds: [embed] });
 	};
 }

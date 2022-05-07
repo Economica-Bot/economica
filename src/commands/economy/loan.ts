@@ -1,19 +1,17 @@
 /* eslint-disable no-param-reassign */
 import {
 	ActionRowBuilder,
-	ButtonStyle,
 	ButtonBuilder,
-	SelectMenuBuilder,
+	ButtonInteraction,
+	ButtonStyle,
 	ComponentType,
-	ModalBuilder,
-	SelectMenuInteraction,
-	TextInputBuilder,
-	TextInputStyle,
+	GuildMember,
 	Util,
 } from 'discord.js';
 import ms from 'ms';
 
-import { Loan } from '../../entities/index.js';
+import { Loan, Member, User } from '../../entities/index.js';
+import { recordTransaction } from '../../lib/transaction.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 import { Emojis } from '../../typings/index.js';
 
@@ -23,154 +21,229 @@ export default class implements Command {
 		.setDescription('Lend money to other users.')
 		.setModule('ECONOMY')
 		.setFormat('loan')
-		.setExamples(['loan'])
-		.setAuthority('USER')
-		.setDefaultPermission(false);
+		.setExamples(['loan']);
 
 	public execute = async (ctx: Context): Promise<void> => {
-		const loans = await Loan.find({ where: { guild: { id: ctx.guildEntity.id } } });
 		const description = `**Welcome ${ctx.interaction.member} to your loan dashboard! Here, you can make new loans, view active loans, or manage pending loans.**\n\n**${Emojis.SELECT} Select a category below to get started.**`;
 		const embed = ctx.embedify('info', 'user', description)
 			.setAuthor({ name: 'Loan Dashboard', iconURL: ctx.interaction.guild.iconURL() })
-			.addFields(
+			.addFields([
 				{ name: `${Emojis.LOAN} Create`, value: 'Make a new loan', inline: true },
 				{ name: `${Emojis.ESCROW} View`, value: 'View active loans', inline: true },
 				{ name: `${Emojis.FUNDS} Manage`, value: 'Accept or Deny pending loans', inline: true },
-			);
-		const dropdown = new ActionRowBuilder<SelectMenuBuilder>()
-			.setComponents(
-				new SelectMenuBuilder()
-					.setPlaceholder('None Selected')
-					.setCustomId('loan_select')
-					.setOptions(
-						{ emoji: { id: Util.resolvePartialEmoji(Emojis.LOAN).id }, label: 'Create', value: 'create' },
-						{ emoji: { id: Util.resolvePartialEmoji(Emojis.FUNDS).id }, label: 'Manage', value: 'manage' },
-					),
-			);
-		const message = await ctx.interaction.reply({ embeds: [embed], components: [dropdown], fetchReply: true });
-		const collector = message.createMessageComponentCollector({ componentType: ComponentType.SelectMenu, filter: (i) => i.user.id === ctx.interaction.user.id });
-		collector.on('collect', async (i) => {
-			if (i.values[0] === 'create') {
-				const loan = Loan.create({ guild: ctx.guildEntity, lender: ctx.memberEntity, valid: false, pending: true, active: false, complete: false });
-				await this.createLoan(ctx, i, loan);
-			} else if (i.values[0] === 'manage') {
-				const outgoingLoans = loans.filter((loan) => loan.lender === ctx.memberEntity);
-				const incomingLoans = loans.filter((loan) => loan.borrower === ctx.memberEntity);
-				const loanEmbed = ctx.embedify('info', 'user')
-					.setAuthor({ name: 'Loan Management Menu', iconURL: ctx.interaction.guild.iconURL() })
-					.addFields(
-						{ name: 'Pending Loans', value: 'Pending loans are loans that have not yet been accepted by the borrower.' },
-						{ name: 'Outgoing', value: outgoingLoans.filter((loan) => loan.pending).map((loan) => loan.id).join('\n') || 'None', inline: true },
-						{ name: 'Incoming ', value: incomingLoans.filter((loan) => loan.pending).map((loan) => loan.id).join('\n') || 'None', inline: true },
-						{ name: 'Active Loans', value: 'Active loans are loans that have been accepted.' },
-						{ name: 'Outgoing', value: outgoingLoans.filter((loan) => loan.active).map((loan) => loan.id).join('\n') || 'None', inline: true },
-						{ name: 'Incoming ', value: incomingLoans.filter((loan) => loan.active).map((loan) => loan.id).join('\n') || 'None', inline: true },
-					);
-
-				await i.reply({ embeds: [loanEmbed] });
-			}
-		});
+			]);
+		const row = new ActionRowBuilder<ButtonBuilder>()
+			.setComponents([
+				new ButtonBuilder()
+					.setEmoji(Util.resolvePartialEmoji(Emojis.LOAN))
+					.setCustomId('create')
+					.setLabel('Create')
+					.setStyle(ButtonStyle.Primary),
+				new ButtonBuilder()
+					.setEmoji(Util.resolvePartialEmoji(Emojis.FUNDS))
+					.setCustomId('manage')
+					.setLabel('Manage')
+					.setStyle(ButtonStyle.Secondary),
+			]);
+		const message = await ctx.interaction.reply({ embeds: [embed], components: [row], fetchReply: true });
+		const interaction = await message.awaitMessageComponent<ComponentType.Button>({ filter: (i) => i.user.id === ctx.interaction.user.id });
+		await interaction.update({ components: [] });
+		if (interaction.customId === 'create') {
+			const loan = Loan.create({ guild: ctx.guildEntity, lender: ctx.memberEntity, description: 'No description', pending: true, active: false });
+			await this.initializeLoan(ctx, interaction, loan);
+		} else if (interaction.customId === 'manage') {
+			await this.manageLoans(ctx, interaction);
+		}
 	};
 
-	private async validateLoan(ctx: Context, loan: Loan): Promise<string[]> {
-		const errors = [];
-
-		if (!loan.borrower) errors.push('Missing borrower');
-		else if (!(await ctx.interaction.guild.members.fetch(loan.borrower.user.id).catch(() => null))) errors.push('Invalid Borrower');
-		if (!loan.description) errors.push('Missing description');
-		if (!loan.principal) errors.push('Missing principal');
-		else if (!+loan.principal) errors.push('Invalid principal');
-		if (!loan.repayment) errors.push('Missing repayment');
-		else if (!+loan.repayment) errors.push('Invalid repayment');
-		if (!loan.duration) errors.push('Missing expiration');
-		else if (!ms(loan.duration)) errors.push('Invalid expiration');
-
-		return errors;
-	}
-
-	private async createLoan(ctx: Context, interaction: SelectMenuInteraction<'cached'>, loan: Loan) {
+	private async displayLoan(ctx: Context, interaction: ButtonInteraction<'cached'>, loan: Loan) {
 		const createEmbed = ctx.embedify('info', 'user')
-			.setAuthor({ name: 'Loan Editor', iconURL: ctx.interaction.guild.iconURL() })
-			.setDescription(
-				`**Welcome ${ctx.interaction.member} to the loan editor!**
-				
-				*Note:* \`Lender\` & \`Borrower\` are entered with ID
-				*Loan Validated*: \`${loan.valid}\` 
-				**From**: \`${loan.lender}\` | **To**: \`${loan.borrower}\`
-				**Description**
-				> ${loan.description}
-			`,
-			).addFields(
+			.setAuthor({ name: 'Loan Viewer', iconURL: ctx.interaction.guild.iconURL() })
+			.addFields([
+				{ name: 'Lender', value: `<@!${loan.lender.userId}>`, inline: true },
+				{ name: 'Borrower', value: `<@!${loan.borrower?.userId}>`, inline: true },
+				{ name: 'Description', value: `**${loan.description}**` },
 				{ name: 'Principal', value: loan.principal?.toLocaleString() || 'Unset', inline: true },
 				{ name: 'Repayment', value: loan.repayment?.toLocaleString() || 'Unset', inline: true },
-				{ name: 'Duration', value: loan.duration?.toString() || 'Unset', inline: true },
-			);
+				{ name: 'Duration', value: ms(loan.duration || 0) || 'Unset', inline: true },
+			]);
+		await interaction.followUp({ embeds: [createEmbed], fetchReply: true });
+	}
 
+	private async collectBorrower(interaction: ButtonInteraction<'cached'>): Promise<GuildMember | undefined> {
+		await interaction.followUp('Mention a borrower, or `cancel` to cancel:');
+		const message = (await interaction.channel.awaitMessages({ filter: (msg) => msg.author.id === interaction.user.id, maxProcessed: 1 })).first();
+		if (message.content === 'cancel') {
+			await interaction.followUp('Loan Canceled');
+			return undefined;
+		}
+
+		const mention = message.mentions.members.first();
+		if (!mention) {
+			await interaction.followUp('Did not mention borrower');
+			return this.collectBorrower(interaction);
+		}
+
+		if (mention.id === interaction.user.id) {
+			await interaction.followUp('You cannot loan to yourself.');
+			return this.collectBorrower(interaction);
+		}
+
+		if (mention.id === interaction.client.user.id) {
+			await interaction.followUp('You cannot loan to me.');
+			return this.collectBorrower(interaction);
+		}
+
+		return mention;
+	}
+
+	private async collectDescription(interaction: ButtonInteraction<'cached'>) {
+		await interaction.followUp('Type a description or message, or `cancel` to cancel:');
+		const message = (await interaction.channel.awaitMessages({ filter: (msg) => msg.author.id === interaction.user.id, maxProcessed: 1 })).first();
+		if (message.content === 'cancel') {
+			await interaction.followUp('Loan Canceled');
+			return undefined;
+		}
+
+		return message.content;
+	}
+
+	private async collectPrincipal(interaction: ButtonInteraction<'cached'>) {
+		await interaction.followUp('Enter a principal, or `cancel` to cancel:');
+		const message = (await interaction.channel.awaitMessages({ filter: (msg) => msg.author.id === interaction.user.id, maxProcessed: 1 })).first();
+		if (message.content === 'cancel') {
+			await interaction.followUp('Loan Canceled');
+			return undefined;
+		}
+
+		if (!+message.content) {
+			await interaction.followUp('Invalid principal');
+			return this.collectPrincipal(interaction);
+		}
+
+		return +message.content;
+	}
+
+	private async collectRepayment(interaction: ButtonInteraction<'cached'>) {
+		await interaction.followUp('Enter a repayment, or `cancel` to cancel:');
+		const message = (await interaction.channel.awaitMessages({ filter: (msg) => msg.author.id === interaction.user.id, maxProcessed: 1 })).first();
+		if (message.content === 'cancel') {
+			await interaction.followUp('Loan Canceled');
+			return undefined;
+		}
+
+		if (!+message.content) {
+			await interaction.followUp('Invalid repayment');
+			return this.collectRepayment(interaction);
+		}
+
+		return +message.content;
+	}
+
+	private async collectDuration(interaction: ButtonInteraction<'cached'>) {
+		await interaction.followUp('Enter a duration, or `cancel` to cancel:');
+		const message = (await interaction.channel.awaitMessages({ filter: (msg) => msg.author.id === interaction.user.id, maxProcessed: 1 })).first();
+		if (message.content === 'cancel') {
+			await interaction.followUp('Loan Canceled');
+			return undefined;
+		}
+
+		if (!ms(message.content)) {
+			await interaction.followUp('Invalid duration');
+			return this.collectDuration(interaction);
+		}
+
+		return ms(message.content);
+	}
+
+	private async confirmLoan(ctx: Context, interaction: ButtonInteraction<'cached'>, loan: Loan) {
+		const confirmEmbed = ctx.embedify('info', 'user', '**Confirm that this loan is correct.**');
+		const confirmRow = new ActionRowBuilder<ButtonBuilder>()
+			.setComponents([
+				new ButtonBuilder()
+					.setCustomId('cancel')
+					.setStyle(ButtonStyle.Danger)
+					.setLabel('Cancel'),
+				new ButtonBuilder()
+					.setCustomId('edit')
+					.setStyle(ButtonStyle.Primary)
+					.setLabel('Edit'),
+				new ButtonBuilder()
+					.setCustomId('publish')
+					.setStyle(ButtonStyle.Success)
+					.setLabel('Publish'),
+			]);
+		const message = await interaction.followUp({ embeds: [confirmEmbed], components: [confirmRow], fetchReply: true });
+		const i = await message.awaitMessageComponent<ComponentType.Button>({ filter: (int) => int.user.id === ctx.interaction.user.id });
+		if (i.customId === 'cancel') {
+			await i.update({ content: 'Loan Canceled', embeds: [], components: [] });
+		} else if (i.customId === 'edit') {
+			await i.update({ content: 'Loan Editing', embeds: [], components: [] });
+			this.initializeLoan(ctx, interaction, loan);
+		} else if (i.customId === 'publish') {
+			await loan.save();
+			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'LOAN_PROPOSE', loan.principal, 0);
+			await i.update({ content: 'Loan Proposed', embeds: [], components: [] });
+		}
+	}
+
+	private async initializeLoan(ctx: Context, interaction: ButtonInteraction<'cached'>, loan: Loan) {
+		await this.displayLoan(ctx, interaction, loan);
+		const borrower = await this.collectBorrower(interaction);
+		if (!borrower) return;
+		await User.upsert({ id: borrower.id }, ['id']);
+		await Member.upsert({ userId: borrower.id, guildId: borrower.guild.id }, ['userId', 'guildId']);
+		loan.borrower = await Member.findOneBy({ userId: borrower.id, guildId: borrower.guild.id });
+		await this.displayLoan(ctx, interaction, loan);
+		const description = await this.collectDescription(interaction);
+		if (!description) return;
+		loan.description = description;
+		await this.displayLoan(ctx, interaction, loan);
+		const principal = await this.collectPrincipal(interaction);
+		if (!principal) return;
+		loan.principal = principal;
+		await this.displayLoan(ctx, interaction, loan);
+		const repayment = await this.collectRepayment(interaction);
+		if (!repayment) return;
+		loan.repayment = repayment;
+		await this.displayLoan(ctx, interaction, loan);
+		const duration = await this.collectDuration(interaction);
+		if (!duration) return;
+		loan.duration = duration;
+		await this.displayLoan(ctx, interaction, loan);
+		await this.confirmLoan(ctx, interaction, loan);
+	}
+
+	private async manageLoans(ctx: Context, interaction: ButtonInteraction<'cached'>) {
+		const loans = await Loan.findBy({ guild: { id: ctx.guildEntity.id } });
+		const outgoingLoans = loans.filter((loan) => loan.lender.userId === ctx.memberEntity.userId);
+		const incomingLoans = loans.filter((loan) => loan.borrower.userId === ctx.memberEntity.userId);
+		const loanEmbed = ctx.embedify('info', 'user')
+			.setAuthor({ name: 'Loan Management Menu', iconURL: ctx.interaction.guild.iconURL() })
+			.addFields([
+				{ name: 'Pending Loans', value: 'Pending loans are loans that have not yet been accepted by the borrower.' },
+				{ name: 'Outgoing', value: outgoingLoans.filter((loan) => loan.pending).map((loan) => `\`${loan.id}\``).join('\n') || 'None', inline: true },
+				{ name: 'Incoming ', value: incomingLoans.filter((loan) => loan.pending).map((loan) => `\`${loan.id}\``).join('\n') || 'None', inline: true },
+				{ name: 'Active Loans', value: 'Active loans are loans that have been accepted.' },
+				{ name: 'Outgoing', value: outgoingLoans.filter((loan) => loan.active).map((loan) => `\`${loan.id}\``).join('\n') || 'None', inline: true },
+				{ name: 'Incoming ', value: incomingLoans.filter((loan) => loan.active).map((loan) => `\`${loan.id}\``).join('\n') || 'None', inline: true },
+			]);
 		const row = new ActionRowBuilder<ButtonBuilder>()
-			.setComponents(
-				new ButtonBuilder().setCustomId('edit').setLabel('Edit').setStyle(ButtonStyle.Primary),
-				new ButtonBuilder().setCustomId('cancel').setLabel('Cancel').setStyle(ButtonStyle.Danger),
-				new ButtonBuilder().setCustomId('validate').setLabel('Validate').setStyle(ButtonStyle.Danger),
-				new ButtonBuilder().setCustomId('publish').setLabel('Publish').setStyle(ButtonStyle.Success).setDisabled(!loan.valid),
-			);
+			.setComponents([
+				new ButtonBuilder()
+					.setCustomId('view')
+					.setLabel('View')
+					.setStyle(ButtonStyle.Primary),
+			]);
 
-		const msg = interaction.replied
-			? await interaction.editReply({ embeds: [createEmbed], components: [row] })
-			: await interaction.reply({ embeds: [createEmbed], components: [row], fetchReply: true });
-		const collector = msg.createMessageComponentCollector({ filter: (i) => i.user.id === ctx.interaction.user.id });
-		collector.on('collect', async (i) => {
-			if (i.customId === 'edit') {
-				const customId = `modal-${i.id}`;
-				const modal = new ModalBuilder().setCustomId(customId).setTitle('Loan Interface').setComponents(
-					new ActionRowBuilder<TextInputBuilder>().setComponents(
-						new TextInputBuilder().setCustomId('borrower').setLabel('Borrower').setStyle(TextInputStyle.Short).setMinLength(1),
-					),
-					new ActionRowBuilder<TextInputBuilder>().setComponents(
-						new TextInputBuilder().setCustomId('description').setLabel('description').setStyle(TextInputStyle.Paragraph).setMinLength(1),
-					),
-					new ActionRowBuilder<TextInputBuilder>().setComponents(
-						new TextInputBuilder().setCustomId('principal').setLabel('Principal').setStyle(TextInputStyle.Short).setMinLength(1),
-					),
-					new ActionRowBuilder<TextInputBuilder>().setComponents(
-						new TextInputBuilder().setCustomId('repayment').setLabel('Repayment').setStyle(TextInputStyle.Short).setMinLength(1),
-					),
-					new ActionRowBuilder<TextInputBuilder>().setComponents(
-						new TextInputBuilder().setCustomId('duration').setLabel('Duration').setStyle(TextInputStyle.Short).setMinLength(1),
-					),
-				);
-				await i.showModal(modal);
-				const modalSubmit = await i.message.awaitMessageComponent({ filter: (filterInteraction) => filterInteraction.customId === customId, time: 1000 * 60 * 2 }).catch(() => null);
-				['borrower', 'description', 'principal', 'repayment', 'duration'].forEach((key) => {
-					if (modalSubmit.fields.getTextInputValue(key)) loan[key] = modalSubmit.fields.getTextInputValue(key);
-				});
-				modalSubmit.reply({ content: '✅ Input Received ☝️', ephemeral: true });
-				collector.stop();
-				this.createLoan(ctx, interaction, loan);
-			} else if (i.customId === 'cancel') {
-				await interaction.editReply({ components: [] });
-				i.reply('❕ Loan Canceled');
-			} else if (i.customId === 'validate') {
-				const errors = await this.validateLoan(ctx, loan);
-				if (errors.length) {
-					i.reply({ content: `Could not validate! Errors:\n${errors.join('\n')}`, ephemeral: true });
-					loan.valid = false;
-					collector.stop();
-					this.createLoan(ctx, interaction, loan);
-				} else {
-					i.reply('✅ Loan Validated');
-					loan.valid = true;
-					collector.stop();
-					this.createLoan(ctx, interaction, loan);
-				}
-			} else if (i.customId === 'publish') {
-				loan.pending = true;
-				loan.principal = +loan.principal;
-				loan.repayment = +loan.repayment;
-				loan.duration = Number(ms(loan.duration));
-				await Loan.save(loan);
-				await interaction.editReply({ components: [] });
-				i.reply('✅ Loan Published');
-			}
-		});
+		const message = await interaction.followUp({ embeds: [loanEmbed], components: [row] });
+		const int = await message.awaitMessageComponent<ComponentType.Button>({ filter: (i) => i.user.id === interaction.user.id });
+		if (int.customId === 'view') {
+			await int.reply({ content: 'Enter a loan ID', fetchReply: true });
+			const msg = (await interaction.channel.awaitMessages({ filter: (m) => m.author.id === interaction.user.id, maxProcessed: 1 })).first();
+			const loan = await Loan.findOneBy({ guild: { id: interaction.guildId }, id: msg.content });
+			if (!loan) int.followUp(`Could not find loan with that id \`${message.content}\``);
+			else this.displayLoan(ctx, int, loan);
+		}
 	}
 }

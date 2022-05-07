@@ -1,5 +1,7 @@
-import { validateTarget } from '../../lib/index.js';
+import { PermissionFlagsBits } from 'discord.js';
+
 import { Infraction, Member, User } from '../../entities/index.js';
+import { validateTarget } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
@@ -10,8 +12,7 @@ export default class implements Command {
 		.setFormat('<user> [reason]')
 		.setExamples(['unban @user', 'unban 796906750569611294 forgiveness'])
 		.setClientPermissions(['BanMembers'])
-		.setAuthority('MODERATOR')
-		.setDefaultPermission(false)
+		.setPermissions(PermissionFlagsBits.BanMembers.toString())
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target').setRequired(true))
 		.addStringOption((option) => option.setName('string').setDescription('Specify a reason'));
 

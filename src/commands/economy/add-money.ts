@@ -1,5 +1,5 @@
 import { parseNumber, parseString } from '@adrastopoulos/number-parser';
-import { GuildMember } from 'discord.js';
+import { GuildMember, PermissionFlagsBits } from 'discord.js';
 
 import { Member, User } from '../../entities/index.js';
 import { recordTransaction } from '../../lib/index.js';
@@ -12,8 +12,7 @@ export default class implements Command {
 		.setModule('ECONOMY')
 		.setFormat('add-money <user> <amount> <target>')
 		.setExamples(['add-money @user 300 wallet', 'add-money @user 100 treasury'])
-		.setAuthority('MANAGER')
-		.setDefaultPermission(false)
+		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
 		.addUserOption((option) => option.setName('target').setDescription('Specify a user').setRequired(true))
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true))
 		.addStringOption((option) => option.setName('balance').setDescription('Specify the balance').setRequired(true).addChoices(

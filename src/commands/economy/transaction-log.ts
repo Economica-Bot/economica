@@ -1,4 +1,4 @@
-import { ChannelType, TextChannel } from 'discord.js';
+import { ChannelType, PermissionFlagsBits, TextChannel } from 'discord.js';
 
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
@@ -9,8 +9,7 @@ export default class implements Command {
 		.setModule('ECONOMY')
 		.setFormat('transaction-log <view | set | reset> [channel]')
 		.setExamples(['transaction-log view', 'transaction-log set #transaction-logs', 'transaction-log reset'])
-		.setAuthority('MANAGER')
-		.setDefaultPermission(false)
+		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View the transaction log channel'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('set')

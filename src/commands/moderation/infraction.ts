@@ -1,5 +1,7 @@
-import { displayInfraction } from '../../lib/index.js';
+import { PermissionFlagsBits } from 'discord.js';
+
 import { Infraction } from '../../entities/index.js';
+import { displayInfraction } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
@@ -14,8 +16,7 @@ export default class implements Command {
 			'infraction delete user @user',
 			'infraction delete all',
 		])
-		.setAuthority('MANAGER')
-		.setDefaultPermission(false)
+		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
 		.addSubcommandGroup((subcommandgroup) => subcommandgroup
 			.setName('view')
 			.setDescription('View infraction data')

@@ -27,10 +27,10 @@ export async function paginate(
 	}), INTERACTION_COMPONENT_COOLDOWN);
 
 	const row = new ActionRowBuilder<MessageActionRowComponentBuilder>()
-		.setComponents(
+		.setComponents([
 			new ButtonBuilder().setCustomId('previous_page').setLabel('Previous').setStyle(ButtonStyle.Secondary).setDisabled(index === 0),
 			new ButtonBuilder().setCustomId('next_page').setLabel('Next').setStyle(ButtonStyle.Primary).setDisabled(index === embeds.length - 1),
-		);
+		]);
 
 	const msg = await interaction.editReply({ embeds: [embeds[index]], components: [row] }) as Message<true>;
 	const i = await msg.awaitMessageComponent({ componentType: ComponentType.Button, time: INTERACTION_COMPONENT_COOLDOWN }).catch(() => null);

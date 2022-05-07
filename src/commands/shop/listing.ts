@@ -12,8 +12,6 @@ export default class implements Command {
 		.setModule('SHOP')
 		.setFormat('listing')
 		.setExamples(['listing'])
-		.setAuthority('USER')
-		.setDefaultPermission(false)
 		.addSubcommand((subcommand) => subcommand
 			.setName('create')
 			.setDescription('Create a new item')
@@ -42,32 +40,32 @@ export default class implements Command {
 				.setAuthor({ name: 'Item Creation', iconURL: ctx.interaction.guild.iconURL() });
 			const rows: ActionRowBuilder<ButtonBuilder>[] = [];
 			rows.push(new ActionRowBuilder<ButtonBuilder>()
-				.setComponents(
+				.setComponents([
 					new ButtonBuilder().setCustomId('stock').setLabel('Stock').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.STOCK }),
 					new ButtonBuilder().setCustomId('duration').setLabel('Duration').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.INTERVAL }),
 					new ButtonBuilder().setCustomId('stackable').setLabel('Stackable').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.STACK }),
-				));
+				]));
 			rows.push(new ActionRowBuilder<ButtonBuilder>()
-				.setComponents(
+				.setComponents([
 					new ButtonBuilder().setCustomId('required_treasury').setLabel('Required Treasury').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.TREASURY }),
 					new ButtonBuilder().setCustomId('required_items').setLabel('Required Items').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SEARCH }),
 					new ButtonBuilder().setCustomId('required_roles').setLabel('Required Roles').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SETTING }),
 					new ButtonBuilder().setCustomId('roles_given').setLabel('Roles Given').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SETTING }),
 					new ButtonBuilder().setCustomId('roles_removed').setLabel('Roles Removed').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.SETTING }),
-				));
+				]));
 			if (type === 'GENERATOR') {
 				rows.push(new ActionRowBuilder<ButtonBuilder>()
-					.setComponents(
+					.setComponents([
 						new ButtonBuilder().setCustomId('generator_amount').setLabel('Generator Amount').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.GENERATOR }),
 						new ButtonBuilder().setCustomId('generator_period').setLabel('Generator Period').setStyle(ButtonStyle.Primary).setEmoji({ id: Emojis.INTERVAL }),
-					));
+					]));
 			}
 			rows.push(new ActionRowBuilder<ButtonBuilder>()
-				.setComponents(
+				.setComponents([
 					new ButtonBuilder().setCustomId('cancel').setLabel('Cancel').setStyle(ButtonStyle.Danger).setEmoji({ id: Emojis.CROSS }),
 					new ButtonBuilder().setCustomId('validate').setLabel('Validate').setStyle(ButtonStyle.Secondary).setEmoji({ id: Emojis.INFO }),
 					new ButtonBuilder().setCustomId('publish').setLabel('Publish').setStyle(ButtonStyle.Success).setEmoji({ id: Emojis.CHECK }),
-				));
+				]));
 
 			const message = await ctx.interaction.reply({ embeds: [embed], components: rows, fetchReply: true });
 			// const listing = Listing.create({ guild: ctx.guildEntity, type, name });

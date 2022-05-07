@@ -12,7 +12,7 @@ import { Context, ContextEmbed } from '../structures/index.js';
 export const displayListing = async (ctx: Context, listing: Listing): Promise<ContextEmbed> => {
 	const embed = ctx.embedify('info', 'user', `${listing.description}`)
 		.setTitle(`${listing.name} ${listing.active ? '' : '<:ITEM_DISABLED:944737714274717746>'}`)
-		.setFields(
+		.setFields([
 			{ name: 'Type', value: `\`${listing.type}\``, inline: false },
 			{ name: 'Active?', value: `\`${listing.active}\``, inline: true },
 			{ name: 'Stackable?', value: `\`${listing.stackable}\``, inline: true },
@@ -24,12 +24,12 @@ export const displayListing = async (ctx: Context, listing: Listing): Promise<Co
 			{ name: 'Roles Removed', value: listing.rolesRemoved.length ? `<@&${listing.rolesRemoved.join('>, <@&')}>` : 'None', inline: true },
 			{ name: 'Required Roles', value: (await listing.itemsRequired).length ? `<@&${listing.rolesRequired.join('>, <@&')}>` : 'None', inline: true },
 			{ name: 'Required Items', value: (await listing.itemsRequired).length ? `\`${(await listing.itemsRequired).map((item) => item.name).join('`, `')}\`` : 'None', inline: true },
-		);
+		]);
 
 	if (listing.type === 'GENERATOR') {
-		embed.addFields(
+		embed.addFields([
 			{ name: 'Generator', value: `Generates ${ctx.guildEntity.currency}${listing.generatorAmount} every ${ms(listing.generatorPeriod)}` },
-		);
+		]);
 	}
 
 	return embed;

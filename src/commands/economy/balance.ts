@@ -10,8 +10,6 @@ export default class implements Command {
 		.setModule('ECONOMY')
 		.setFormat('balance [user]')
 		.setExamples(['balance', 'balance @user'])
-		.setAuthority('USER')
-		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(false));
 
 	public execute = async (ctx: Context): Promise<void> => {
@@ -24,11 +22,11 @@ export default class implements Command {
 		const embed = ctx
 			.embedify('info', 'user')
 			.setAuthor({ name: `${target.username}'s Balance`, iconURL: target.displayAvatarURL() })
-			.addFields(
+			.addFields([
 				{ name: 'Wallet', value: `${ctx.guildEntity.currency}${parseNumber(targetEntity.wallet)}`, inline: true },
 				{ name: 'Treasury', value: `${ctx.guildEntity.currency}${parseNumber(targetEntity.treasury)}`, inline: true },
 				{ name: 'Total', value: `${ctx.guildEntity.currency}${parseNumber(targetEntity.wallet + targetEntity.treasury)}`, inline: true },
-			);
+			]);
 		await ctx.interaction.reply({ embeds: [embed] });
 	};
 }

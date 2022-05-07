@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ApplicationCommandDataResolvable } from 'discord.js';
+
 import { DEPLOY_ALL_MODULES, DEPLOY_COMMANDS, DEVELOPMENT_GUILD_IDS, PRODUCTION } from '../config.js';
 import { Economica, Event } from '../structures/index.js';
 import { defaultModulesObj } from '../typings/constants.js';
@@ -19,8 +21,8 @@ export default class implements Event {
 	}
 
 	private async updateCommands(client: Economica) {
-		const commandData: any[] = [];
-		const defaultCommandData: any[] = [];
+		const commandData: ApplicationCommandDataResolvable[] = [];
+		const defaultCommandData: ApplicationCommandDataResolvable[] = [];
 		client.commands.forEach((command) => {
 			commandData.push(command.data.toJSON());
 			if (defaultModulesObj[command.data.module].type === 'DEFAULT') {

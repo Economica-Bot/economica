@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from 'discord.js';
 import { displayTransaction } from '../../lib/index.js';
 import { Transaction } from '../../entities/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
@@ -14,8 +15,7 @@ export default class implements Command {
 			'transaction delete user @user',
 			'transaction delete all',
 		])
-		.setAuthority('MANAGER')
-		.setDefaultPermission(false)
+		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
 		.addSubcommandGroup((subcommandgroup) => subcommandgroup
 			.setName('view')
 			.setDescription('View transaction data')

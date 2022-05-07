@@ -9,8 +9,8 @@
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitOverride": true,
 		"noImplicitReturns": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
+		// "noUnusedLocals": true,
+		// "noUnusedParameters": true,
 		// "strict": true,
 		// TypeScript 4.4
 		// "useUnknownInCatchVariables": true,

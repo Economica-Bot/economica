@@ -11,8 +11,6 @@ export default class implements Command {
 		.setModule('ECONOMY')
 		.setFormat('pay <user> <amount>')
 		.setExamples(['pay @user 100', 'pay @user all'])
-		.setAuthority('USER')
-		.setDefaultPermission(false)
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(true))
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true));
 

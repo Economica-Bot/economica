@@ -8,15 +8,15 @@ export class Loan extends BaseEntity {
 	@Column({ primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
-	@OneToOne(() => Guild, (guild) => guild.id)
+	@OneToOne(() => Guild, (guild) => guild.id, { eager: true })
 	@JoinColumn()
 	public guild: Relation<Guild>;
 
-	@OneToOne(() => Member)
+	@OneToOne(() => Member, { eager: true })
 	@JoinColumn()
 	public lender: Relation<Member>;
 
-	@OneToOne(() => Member)
+	@OneToOne(() => Member, { eager: true })
 	@JoinColumn()
 	public borrower: Relation<Member>;
 
@@ -33,16 +33,13 @@ export class Loan extends BaseEntity {
 	public duration: number;
 
 	@Column()
-	public valid: boolean;
-
-	@Column()
 	public pending: boolean;
 
 	@Column()
 	public active: boolean;
 
-	@Column()
-	public complete: boolean;
+	@Column({ default: null })
+	public completedAt: Date;
 
 	@CreateDateColumn()
 	public createdAt: Date;

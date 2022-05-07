@@ -10,8 +10,6 @@ export default class implements Command {
 		.setModule('ECONOMY')
 		.setFormat('withdraw <amount>')
 		.setExamples(['withdraw 1.5k', 'withdraw all'])
-		.setAuthority('USER')
-		.setDefaultPermission(false)
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true));
 
 	public execute = async (ctx: Context): Promise<void> => {

@@ -12,8 +12,6 @@ export default class implements Command {
 		.setModule('SHOP')
 		.setFormat('shop')
 		.setExamples(['shop'])
-		.setAuthority('USER')
-		.setDefaultPermission(false)
 		.addStringOption((o) => o
 			.setName('query')
 			.setDescription('Specify a listing'));
@@ -40,7 +38,7 @@ export default class implements Command {
 		for (let i = 0; i < pageCount; i++) {
 			const embed = ctx.embedify('info', 'guild', `Welcome to ${ctx.client.user}'s shop!`);
 			for (let j = 0; j < maxEntries; j++, k++) {
-				if (listings[k]) embed.addFields({ name: listings[k].name, value: `${ctx.guildEntity.currency}${listing.price}\n*${listing.description}*`, inline: true });
+				if (listings[k]) embed.addFields([{ name: listings[k].name, value: `${ctx.guildEntity.currency}${listing.price}\n*${listing.description}*`, inline: true }]);
 			}
 
 			embeds.push(embed);

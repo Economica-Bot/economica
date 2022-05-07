@@ -107,7 +107,6 @@ export enum Occupations {
 	'Dog Walker',
 }
 export type OccupationString = keyof typeof Occupations;
-export type AuthorityType = 'USER' | 'ROLE';
 export type ModuleTypeString =
 	| 'DEFAULT'
 	| 'SPECIAL';

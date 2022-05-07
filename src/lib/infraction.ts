@@ -17,12 +17,12 @@ export async function displayInfraction(infraction: Infraction): Promise<EmbedBu
 		.setColor(Util.resolveColor('Red'))
 		.setAuthor({ name: `Infraction | ${type}` })
 		.setDescription(description)
-		.addFields(
+		.addFields([
 			{ name: '__**Reason**__', value: reason },
 			{ name: '**Permanent**', value: `\`${permanent ?? 'N/A'}\``, inline: true },
 			{ name: '**Active**', value: `\`${active ?? 'N/A'}\``, inline: true },
 			{ name: '**Duration**', value: `\`${ms(duration ?? 0)}\``, inline: true },
-		)
+		])
 		.setFooter({ text: `ID: ${id}` })
 		.setTimestamp(createdAt);
 }

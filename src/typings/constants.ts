@@ -111,15 +111,6 @@ export const defaultModulesObj: Record<ModuleString, Module> = {
 	},
 };
 
-export enum Authorities {
-	USER,
-	MODERATOR,
-	MANAGER,
-	ADMINISTRATOR,
-	DEVELOPER,
-}
-
-export type AuthorityString = keyof typeof Authorities;
 export const EmbedColors: Record<ReplyString, ColorResolvable> = {
 	success: 'Green',
 	info: 'Blurple',

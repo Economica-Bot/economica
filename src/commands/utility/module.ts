@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from 'discord.js';
 import { syncPermissions } from '../../lib/permissions.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 import { ModuleString } from '../../typings/index.js';
@@ -9,8 +10,7 @@ export default class implements Command {
 		.setModule('UTILITY')
 		.setFormat('module <view | add | remove> [module]')
 		.setExamples(['module view', 'module add Interval', 'module remove Interval'])
-		.setAuthority('ADMINISTRATOR')
-		.setDefaultPermission(false)
+		.setPermissions(PermissionFlagsBits.Administrator.toString())
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View the enabled modules on this server'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('add')
@@ -27,15 +27,15 @@ export default class implements Command {
 		if (moduleName && !(moduleName in ctx.guildEntity.modules)) {
 			await ctx.embedify('error', 'user', `Invalid module: \`${moduleName}\``).send(true);
 		} else if (subcommand === 'view') {
-			const description = `**View ${ctx.interaction.guild}'s Modules!**\nModule command authorities must be set manually after they are added to the server.`;
+			const description = `**View ${ctx.interaction.guild}'s Modules!**`;
 			const embed = ctx
 				.embedify('info', 'guild', description)
 				.setAuthor({ iconURL: ctx.interaction.guild.iconURL(), name: 'Modules' })
-				.addFields(
+				.addFields([
 					{ name: 'Default Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([,module]) => module.type === 'DEFAULT').map(([module]) => `\`${module}\``).join('\n') },
 					{ name: 'Enabled Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([,module]) => module.enabled).map(([module]) => `\`${module}\``).join('\n') },
 					{ name: 'Disabled Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([,module]) => !module.enabled).map(([module]) => `\`${module}\``).join('\n') },
-				);
+				]);
 			await ctx.interaction.reply({ embeds: [embed] });
 		} else if (subcommand === 'add') {
 			if (ctx.userEntity.keys < 1) {

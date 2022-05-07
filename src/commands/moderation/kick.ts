@@ -1,4 +1,4 @@
-import { GuildMember } from 'discord.js';
+import { GuildMember, PermissionFlagsBits } from 'discord.js';
 import { Member, User } from '../../entities/index.js';
 
 import { recordInfraction, validateTarget } from '../../lib/index.js';
@@ -12,8 +12,7 @@ export default class implements Command {
 		.setFormat('kick <target> [reason]')
 		.setExamples(['kick @user', 'kick @user harrassment'])
 		.setClientPermissions(['KickMembers'])
-		.setAuthority('MODERATOR')
-		.setDefaultPermission(false)
+		.setPermissions(PermissionFlagsBits.KickMembers.toString())
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason.').setRequired(false));
 

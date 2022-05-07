@@ -6,7 +6,7 @@ export default class implements Job {
 	public name = 'update-loans';
 	public cooldown = 1000 * 60 * 5;
 	public execute = async (client: Economica): Promise<void> => {
-		const loans = await Loan.find({ where: { pending: false, active: true, complete: false } });
+		const loans = await Loan.find({ where: { pending: false, active: true } });
 
 		// Complete loan transaction.
 		loans.forEach(async (loan) => {
@@ -15,8 +15,8 @@ export default class implements Job {
 			await recordTransaction(client, guild, borrower, lender, 'LOAN_RECEIVE_REPAYMENT', 0, repayment);
 		});
 		await Loan.update(
-			{ pending: false, active: true, complete: false },
-			{ active: false, complete: true },
+			{ pending: false, active: true },
+			{ active: false, completedAt: new Date() },
 		);
 	};
 }

@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from 'discord.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
@@ -7,8 +8,7 @@ export default class implements Command {
 		.setModule('INTERVAL')
 		.setFormat('interval <view | edit> [...arguments]')
 		.setExamples(['interval view', 'interval edit daily 100'])
-		.setAuthority('MANAGER')
-		.setDefaultPermission(false)
+		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View interval command configurations'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('edit')
@@ -23,7 +23,7 @@ export default class implements Command {
 			const embed = ctx.embedify('info', 'guild', 'Income command information');
 			Object.entries(ctx.guildEntity.intervals).forEach((interval) => {
 				const description = Object.entries(interval[1]).map((prop) => `\`${prop[0]}: ${prop[1]}\``);
-				embed.addFields({ name: interval[0], value: description.join('\n'), inline: true });
+				embed.addFields([{ name: interval[0], value: description.join('\n'), inline: true }]);
 			});
 			await ctx.interaction.reply({ embeds: [embed] });
 		} if (subcommand === 'edit') {

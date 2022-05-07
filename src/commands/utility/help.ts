@@ -17,8 +17,6 @@ export default class implements Command {
 		.setModule('UTILITY')
 		.setFormat('help [command]')
 		.setExamples(['help', 'help permissions'])
-		.setAuthority('USER')
-		.setDefaultPermission(false)
 		.setGlobal(true)
 		.addStringOption((option) => option.setName('query').setDescription('Specify a command.').setRequired(false));
 
@@ -28,14 +26,14 @@ export default class implements Command {
 			const helpEmbed = new EmbedBuilder()
 				.setAuthor({ name: 'Economica Help Dashboard', iconURL: ctx.client.user.displayAvatarURL() })
 				.setDescription(`${Emojis.HELP} **Welcome to the ${ctx.interaction.client.user} Help Dashboard!**\nHere, you can get information about any command or module. Use the select menu below to specify a module.\n\n${Emojis.ECONOMICA} **The Best New Discord Economy Bot**\nTo become more familiar with Economica, please refer to the [documentation](${WEBSITE_DOCS_URL}). There you can set up various permissions-related settings and get detailed information about all command modules.\n\n🔗 **Useful Links**:\n**[Home Page](${WEBSITE_HOME_URL}) | [Command Docs](${WEBSITE_COMMANDS_URL}) | [Vote For Us](${WEBSITE_VOTE_URL})**`);
-			const labels = Object.keys(ctx.guildEntity.modules).map((module) => new SelectMenuOptionBuilder().setLabel(module).setValue(module));
+			const labels = Object.keys(ctx.guildEntity.modules).map((module) => new SelectMenuOptionBuilder().setLabel(module).setValue(module).toJSON());
 			const dropdown = new ActionRowBuilder<SelectMenuBuilder>()
-				.setComponents(
+				.setComponents([
 					new SelectMenuBuilder()
 						.setCustomId('help_select')
 						.setPlaceholder('None Selected')
-						.setOptions(...labels),
-				);
+						.setOptions(labels),
+				]);
 			const msg = await ctx.interaction.reply({ embeds: [helpEmbed], ephemeral: true, components: [dropdown], fetchReply: true });
 			const collector = msg.createMessageComponentCollector({ time: INTERACTION_COMPONENT_COOLDOWN, componentType: ComponentType.SelectMenu });
 			collector.on('collect', async (interaction) => {
@@ -66,11 +64,11 @@ export default class implements Command {
 			.setTimestamp();
 		command.data.options.forEach((option) => {
 			if (option instanceof EconomicaSlashCommandSubcommandBuilder) {
-				commandEmbed.addFields({ name: `${command.data.name} ${option.name}`, value: option.description });
+				commandEmbed.addFields([{ name: `${command.data.name} ${option.name}`, value: option.description }]);
 			} else if (option instanceof EconomicaSlashCommandSubcommandGroupBuilder) {
-				commandEmbed.addFields({ name: `${command.data.name} ${option.name}`, value: option.description });
+				commandEmbed.addFields([{ name: `${command.data.name} ${option.name}`, value: option.description }]);
 				option.options.forEach((opt: EconomicaSlashCommandSubcommandBuilder) => {
-					commandEmbed.addFields({ name: `${command.data.name} ${option.name} ${opt.name}`, value: opt.description, inline: true });
+					commandEmbed.addFields([{ name: `${command.data.name} ${option.name} ${opt.name}`, value: opt.description, inline: true }]);
 				});
 			}
 		});

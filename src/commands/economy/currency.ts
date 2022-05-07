@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from 'discord.js';
 import { CURRENCY_SYMBOL } from '../../config.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
@@ -8,8 +9,7 @@ export default class implements Command {
 		.setModule('ECONOMY')
 		.setFormat('currency <view | set | reset> [currency]')
 		.setExamples(['currency view', 'currency set 💵', 'currency reset'])
-		.setAuthority('MANAGER')
-		.setDefaultPermission(false)
+		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View the currency symbol'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('set')
@@ -20,16 +20,16 @@ export default class implements Command {
 	public execute = async (ctx: Context): Promise<void> => {
 		const subcommand = ctx.interaction.options.getSubcommand();
 		if (subcommand === 'view') {
-			await ctx.embedify('success', 'guild', `Currency symbol: ${ctx.guildEntity.currency}`).send();
+			await ctx.embedify('success', { text: `\`${ctx.guildEntity.currency}\`` }, `Currency symbol: ${ctx.guildEntity.currency}`).send();
 		} else if (subcommand === 'set') {
 			const newCurrency = ctx.interaction.options.getString('currency');
 			ctx.guildEntity.currency = newCurrency;
+			await ctx.embedify('success', { text: `\`${ctx.guildEntity.currency}\`` }, `Currency symbol set to ${newCurrency}`).send();
 			await ctx.guildEntity.save();
-			await ctx.embedify('success', 'guild', `Currency symbol set to ${newCurrency}`).send();
 		} else if (subcommand === 'reset') {
 			ctx.guildEntity.currency = CURRENCY_SYMBOL;
+			await ctx.embedify('success', { text: `\`${ctx.guildEntity.currency}\`` }, `Currency symbol reset to default (${CURRENCY_SYMBOL})`).send();
 			await ctx.guildEntity.save();
-			await ctx.embedify('success', 'guild', `Currency symbol reset to default (${CURRENCY_SYMBOL})`).send();
 		}
 	};
 }

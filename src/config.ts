@@ -68,12 +68,14 @@ export const clientOptions: ClientOptions = {
 	intents: [
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.DirectMessages,
 	],
 	partials: [
 		Partials.Channel,
 		Partials.GuildMember,
+		Partials.Message,
 	],
 };
 

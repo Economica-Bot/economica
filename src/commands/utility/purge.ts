@@ -1,4 +1,4 @@
-import { ChannelType, TextChannel } from 'discord.js';
+import { ChannelType, PermissionFlagsBits, TextChannel } from 'discord.js';
 
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
@@ -10,8 +10,7 @@ export default class implements Command {
 		.setFormat('purge [channel] [amount]')
 		.setExamples(['purge', 'purge #general', 'purge #general 50'])
 		.setClientPermissions(['ManageMessages'])
-		.setAuthority('MODERATOR')
-		.setDefaultPermission(false)
+		.setPermissions(PermissionFlagsBits.ManageMessages.toString())
 		.addChannelOption((option) => option
 			.setName('channel')
 			.setDescription('Specify a channel')

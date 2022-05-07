@@ -8,9 +8,7 @@ export default class implements Command {
 		.setDescription('Collect all money from generators.')
 		.setModule('SHOP')
 		.setFormat('collect')
-		.setExamples(['collect'])
-		.setAuthority('USER')
-		.setDefaultPermission(false);
+		.setExamples(['collect']);
 
 	public execute = async (ctx: Context) => {
 		const items = await Item.find({ relations: ['listing'], where: { owner: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId } } });
