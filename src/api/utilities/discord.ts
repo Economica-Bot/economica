@@ -1,11 +1,11 @@
-import { Profile, Strategy } from 'passport-discord';
 import passport from 'passport';
+import { Profile, Strategy } from 'passport-discord';
 import { VerifyCallback } from 'passport-oauth2';
 
 import { Token } from '../../entities/index.js';
 import { CALLBACK_URL, CLIENT_ID, CLIENT_SECRET } from '../../config.js';
 
-passport.serializeUser((user: any, done) => done(null, user.id));
+passport.serializeUser((user: Token, done) => done(null, user.id));
 
 passport.deserializeUser(async (id: string, done) => {
 	const user = await Token.findOne({ where: { id } });

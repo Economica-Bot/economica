@@ -1,11 +1,15 @@
 import express from 'express';
 
-import botRoutes from './bot/index.js';
-import wsRoutes from './ws/index.js';
+import authRoutes from './auth/index.js';
+import commandRoutes from './commands/index.js';
+import guildRoutes from './guilds/index.js';
+import userRoutes from './users/index.js';
 
 const router = express.Router();
 
-router.use('/bot', botRoutes);
-router.use('/ws', wsRoutes);
+router.use('/auth', authRoutes);
+router.use('/commands', commandRoutes);
+router.use('/guilds', guildRoutes);
+router.use('/users', userRoutes);
 
 export default router;
