@@ -54,7 +54,8 @@ export default class implements Command {
 					return;
 				}
 
-				const loanEmbed = ctx.embedify('info', 'user', `**Created At**: \`${loan.createdAt.toLocaleString()}\`\n**Completed At**: \`${loan.completedAt?.toLocaleString()}\``)
+				const loanEmbed = ctx
+					.embedify('info', 'user', `**Created At**: \`${loan.createdAt.toLocaleString()}\`\n**Completed At**: \`${loan.completedAt?.toLocaleString()}\``)
 					.setAuthor({ name: `Loan ${loan.id}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.LOAN).id)?.url })
 					.addFields([
 						{ name: '🤵‍♂️ Lender', value: `<@!${loan.lender.userId}>`, inline: true },
@@ -101,12 +102,13 @@ export default class implements Command {
 			const message = ctx.interaction.options.getString('message', false) ?? 'No Message';
 
 			// Validate parameters
-			if (borrower.id === ctx.client.user.id) await ctx.embedify('error', 'bot', 'You cannot loan to me').send();
-			else if (borrower.user.bot) await ctx.embedify('error', 'user', 'You cannot loan to a bot').send();
-			else if (borrower.id === ctx.interaction.user.id) await ctx.embedify('error', 'user', 'You cannot loan to yourself').send();
-			else if (!parseString(principal)) await ctx.embedify('error', 'user', `Could not parse principal \`${principal}\``).send();
-			else if (!parseString(repayment)) await ctx.embedify('error', 'user', `Could not parse repayment \`${repayment}\``).send();
-			else if (!ms(duration)) await ctx.embedify('error', 'user', `Could not parse duration \`${duration}\``).send();
+			if (borrower.id === ctx.client.user.id) await ctx.embedify('error', 'bot', 'You cannot loan to me.').send();
+			else if (borrower.user.bot) await ctx.embedify('error', 'user', 'You cannot loan to a bot.').send();
+			else if (borrower.id === ctx.interaction.user.id) await ctx.embedify('error', 'user', 'You cannot loan to yourself.').send();
+			else if (!parseString(principal)) await ctx.embedify('error', 'user', `Could not parse principal \`${principal}\`.`).send();
+			else if (parseString(principal) > ctx.memberEntity.wallet) await ctx.embedify('error', 'user', `You cannot afford that loan principal. Your current wallet balance is ${ctx.guildEntity.currency}${ctx.memberEntity.wallet}.`).send();
+			else if (!parseString(repayment)) await ctx.embedify('error', 'user', `Could not parse repayment \`${repayment}\`.`).send();
+			else if (!ms(duration)) await ctx.embedify('error', 'user', `Could not parse duration \`${duration}\`.`).send();
 			if (ctx.interaction.replied) return;
 
 			// Create borrower if not exist
@@ -114,7 +116,7 @@ export default class implements Command {
 			await Member.upsert({ userId: borrower.id, guildId: borrower.guild.id }, ['userId', 'guildId']);
 			const borrowerEntity = await Member.findOneBy({ userId: borrower.id, guildId: borrower.guild.id });
 
-			await Loan.create({
+			const loan = await Loan.create({
 				guild: ctx.guildEntity,
 				lender: ctx.memberEntity,
 				borrower: borrowerEntity,
@@ -126,6 +128,7 @@ export default class implements Command {
 				active: false,
 			}).save();
 
+			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'LOAN_PROPOSE', -loan.principal, 0);
 			await ctx.embedify('success', 'user', `${Emojis.LOAN} **Loan Created Successfully**`).send();
 		} else if (subcommand === 'cancel') {
 			const loanId = ctx.interaction.options.getString('loan_id', false);
