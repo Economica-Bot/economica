@@ -39,7 +39,7 @@ router.get('/@me/guilds', async (req, res) => {
 
 router.get('/:userId', async (req, res) => {
 	const { userId } = req.params;
-	const user = await bot.users.fetch(userId);
+	const user = await bot.users.fetch(userId).catch(() => null);
 	if (!user) {
 		res.sendStatus(404);
 		return;

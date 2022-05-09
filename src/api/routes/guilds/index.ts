@@ -22,7 +22,7 @@ router.use('/:guildId', async (req, res, next) => {
 });
 
 router.get('/:guildId', async (_req, res) => {
-	res.status(200).send(res.locals.guild);
+	res.send(res.locals.guild);
 });
 
 router.get('/:guildId/currency', async (req, res) => {

@@ -4,7 +4,7 @@ import { bot } from '../../../index.js';
 const router = express.Router();
 
 router.get('/', (req, res) => {
-	const { name } = req.body;
+	const name = req.query.name as string;
 	if (!name) {
 		res.status(200).send(bot.commands);
 		return;
