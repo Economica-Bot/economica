@@ -1,5 +1,5 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, Relation } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, ManyToOne, Relation } from 'typeorm';
 
 import { ListingString } from '../typings/index.js';
 import { Guild } from './index.js';
@@ -37,6 +37,13 @@ export class Listing extends BaseEntity {
 	@Column()
 	public stock: number;
 
+	@Column()
+	public duration: number;
+
+	@ManyToMany(() => Listing, (listing) => listing.itemsRequired)
+	@JoinColumn()
+	public itemsRequired: Listing[];
+
 	@Column('simple-array')
 	public rolesRequired: Snowflake[];
 
@@ -46,19 +53,12 @@ export class Listing extends BaseEntity {
 	@Column('simple-array')
 	public rolesRemoved: Snowflake[];
 
-	@OneToMany(() => Listing, (listing) => listing.itemsRequired)
-	@JoinColumn()
-	public itemsRequired: Promise<Listing[]>;
+	@Column({ nullable: true })
+	public generatorPeriod: number;
 
-	@Column()
-	public generatorPeriod: number | null;
-
-	@Column()
-	public generatorAmount: number | null;
+	@Column({ nullable: true })
+	public generatorAmount: number;
 
 	@CreateDateColumn()
 	public createdAt: Date;
-
-	@Column('timestamp')
-	public expiresAt: Date;
 }
