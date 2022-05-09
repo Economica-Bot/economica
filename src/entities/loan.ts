@@ -8,7 +8,7 @@ export class Loan extends BaseEntity {
 	@Column({ primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
-	@ManyToOne(() => Guild, (guild) => guild.id, { eager: true })
+	@ManyToOne(() => Guild, { eager: true })
 	@JoinColumn()
 	public guild: Relation<Guild>;
 
