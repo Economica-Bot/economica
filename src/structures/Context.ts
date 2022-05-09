@@ -13,9 +13,9 @@ export class ContextEmbed extends EmbedBuilder {
 	}
 
 	public async send(ephemeral = false) {
-		if (this.ctx.interaction.deferred) this.ctx.interaction.editReply({ embeds: [this] });
-		else if (this.ctx.interaction.replied) this.ctx.interaction.followUp({ embeds: [this], ephemeral });
-		else this.ctx.interaction.reply({ embeds: [this], ephemeral });
+		if (this.ctx.interaction.deferred) await this.ctx.interaction.editReply({ embeds: [this] });
+		else if (this.ctx.interaction.replied) await this.ctx.interaction.followUp({ embeds: [this], ephemeral });
+		else await this.ctx.interaction.reply({ embeds: [this], ephemeral });
 	}
 }
 
