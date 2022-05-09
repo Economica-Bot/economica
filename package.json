@@ -8,9 +8,8 @@
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
     "build": "tsc",
-    "dev": "node --enable-source-maps --es-module-specifier-resolution=node --experimental-modules dist/index.js",
-    "start": "npm run build && npm run dev",
-    "ts-node": "node --loader ts-node/esm"
+    "postbuild": "node --enable-source-maps --es-module-specifier-resolution=node --experimental-modules dist/index.js",
+    "dev": "node --loader ts-node/esm"
   },
   "license": "ISC",
   "dependencies": {
