@@ -1,4 +1,5 @@
-import { APIEmbedField, Util } from 'discord.js';
+import { Util } from 'discord.js';
+
 import { Item } from '../../entities';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
 import { Emojis, ListingDescriptions } from '../../typings';

@@ -34,10 +34,10 @@ export class Listing extends BaseEntity {
 	@Column()
 	public stackable: boolean;
 
-	@Column()
+	@Column({ type: 'float4' })
 	public stock: number;
 
-	@Column()
+	@Column({ type: 'float4' })
 	public duration: number;
 
 	@ManyToMany(() => Listing, (listing) => listing.itemsRequired)
