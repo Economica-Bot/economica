@@ -1,6 +1,6 @@
-import { Listing } from '../../entities';
-import { displayListing, displayListings } from '../../lib';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
+import { Listing } from '../../entities/index.js';
+import { displayListing, displayListings } from '../../lib/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -11,7 +11,7 @@ export default class implements Command {
 		.setExamples(['shop'])
 		.addStringOption((option) => option
 			.setName('query')
-			.setDescription('Search for a specific item'));
+			.setDescription('Search for a specific item by name or id'));
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const query = ctx.interaction.options.getString('query', false);
@@ -21,7 +21,7 @@ export default class implements Command {
 			return;
 		}
 
-		const listing = await Listing.findOne({ where: { guild: { id: ctx.guildEntity.id }, name: query } });
+		const listing = await Listing.findOne({ where: [{ guild: { id: ctx.guildEntity.id }, name: query }, { guild: { id: ctx.guildEntity.id }, id: query }] });
 		if (!listing) {
 			await ctx.embedify('error', 'user', `Could not find a listing that matched the query \`${query}\`.`).send();
 			return;

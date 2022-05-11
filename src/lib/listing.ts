@@ -3,26 +3,30 @@ import { Util } from 'discord.js';
 import { Listing } from '../entities/index.js';
 import { Context } from '../structures/index.js';
 import { Emojis } from '../typings/constants.js';
-import { ListingDescriptions, ListingEmojis } from '../typings/index.js';
+import { ListingDescriptions } from '../typings/index.js';
+
+const getFormattedCreateTimestamp = (listing: Listing): string => `<t:${Math.trunc(listing.createdAt.getTime() / 1000)}:f>`;
+const getFormattedExpiresTimestamp = (listing: Listing): string => `${
+	listing.duration === Infinity ? '`Never`' : `<t:${
+		Math.trunc((listing.createdAt.getTime() + listing.duration) / 1000)
+	}:R>`
+}`;
 
 export const displayListing = async (ctx: Context, listing: Listing): Promise<void> => {
 	const listingEmbed = ctx
-		.embedify('info', 'user', `**Created At**: \`${listing.createdAt.toLocaleString()}\`\n**Expires**: \`${new Date(listing.createdAt.getTime() + listing.duration).toLocaleString()}\``)
-		.setAuthor({ name: listing.name, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.SHOP).id)?.url })
+		.embedify('info', 'user', `**Id**: \`${listing.id}\` | **Created:** ${getFormattedCreateTimestamp(listing)} | **Expires:** ${getFormattedExpiresTimestamp(listing)}`)
+		.setAuthor({ name: `${listing.name} — ${listing.description}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.SHOP).id)?.url })
 		.addFields([
-			{ name: 'Type', value: `${ListingEmojis[listing.type]} \`${listing.type}\` - **${ListingDescriptions[listing.type]}**` },
-			{ name: 'Price', value: `${ctx.guildEntity.currency}${listing.price}`, inline: true },
-			{ name: 'Required Treasury', value: `${ctx.guildEntity.currency}${listing.treasuryRequired}`, inline: true },
-			{ name: '‎', value: '‎', inline: true },
-			{ name: `${Emojis.DESCRIPTION} Description`, value: `**${listing.description}**` },
+			{ name: `${Emojis[listing.type]} ${listing.type} Item`, value: `${ListingDescriptions[listing.type]}` },
+			{ name: `${Emojis.PRICE} Price`, value: `${ctx.guildEntity.currency}${listing.price}`, inline: true },
+			{ name: `${Emojis.TREASURY} Required Treasury`, value: `${ctx.guildEntity.currency}${listing.treasuryRequired}`, inline: true },
+			{ name: `${Emojis.INSUFFICIENT} Items required`, value: listing.itemsRequired?.map((item) => `\`${item.id}\``).join('\n') ?? '`None`', inline: true },
 			{ name: `${Emojis.STACK} Stackable`, value: `\`${listing.stackable}\``, inline: true },
 			{ name: `${Emojis.ANALYTICS} Active`, value: `\`${listing.stackable}\``, inline: true },
 			{ name: `${Emojis.STOCK} In Stock`, value: `\`${listing.stock > 0}\``, inline: true },
-			{ name: `${Emojis.INSUFFICIENT} Items required`, value: listing.itemsRequired?.map((item) => `\`${item.id}\``).join('\n') ?? 'None' },
-			{ name: `${Emojis.ROLE} Roles`, value: '**Shop listings may require roles to purchase, remove roles upon purchasing, or grant roles when purchased. This is useful for tracking which items you have at a glance.**' },
-			{ name: `${Emojis.KEY} Required`, value: listing.rolesRequired.length ? listing.rolesRequired.map((role) => `<@&${role}>`).join('\n') : 'None', inline: true },
-			{ name: `${Emojis.REMOVE} Removed`, value: listing.rolesRemoved.length ? listing.rolesRemoved.map((role) => `<@&${role}>`).join('\n') : 'None', inline: true },
-			{ name: `${Emojis.GIVE} Given`, value: listing.rolesGiven.length ? listing.rolesGiven.map((role) => `<@&${role}>`).join('\n') : 'None', inline: true },
+			{ name: `${Emojis.KEY} Roles Required`, value: listing.rolesRequired.length ? listing.rolesRequired.map((role) => `<@&${role}>`).join('\n') : '`None`', inline: true },
+			{ name: `${Emojis.REMOVE} Roles Removed`, value: listing.rolesRemoved.length ? listing.rolesRemoved.map((role) => `<@&${role}>`).join('\n') : '`None`', inline: true },
+			{ name: `${Emojis.GIVE} Roles Given`, value: listing.rolesGiven.length ? listing.rolesGiven.map((role) => `<@&${role}>`).join('\n') : '`None`', inline: true },
 		]);
 
 	if (listing.type === 'GENERATOR') {
@@ -36,10 +40,11 @@ export const displayListing = async (ctx: Context, listing: Listing): Promise<vo
 };
 
 export const displayListings = async (ctx: Context, listings: Listing[]) => {
-	const listingsEmbed = ctx.embedify('info', 'user', `There are \`${listings.length}\` listings in the shop.`);
+	const description = `${Emojis.SHOP} **There are \`${listings.length}\` active listings.**\n\n${Emojis.INFO} **Use \`/buy <item>\` to buy an item, and \`/shop <item>\` for more information on a specific item.**`;
+	const listingsEmbed = ctx.embedify('info', 'user', description);
 	listings.forEach((listing) => {
 		listingsEmbed.addFields([
-			{ name: `${listing.name} - ${ctx.guildEntity.currency}${listing.price}`, value: `*${listing.description}*\n\`${listing.id}\`` },
+			{ name: `${listing.name} - ${ctx.guildEntity.currency}${listing.price}`, value: `>>> ${listing.description}\n**Id:** \`${listing.id}\`` },
 		]);
 	});
 

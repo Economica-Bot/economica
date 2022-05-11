@@ -1,5 +1,4 @@
 import { EmbedFooterData, EmbedBuilder, Snowflake } from 'discord.js';
-import { Emojis } from './constants.js';
 
 export interface EconomyInfo {
 	wallet: number;
@@ -62,12 +61,6 @@ export const ListingDescriptions: Record<ListingString, string> = {
 	INSTANT: 'Instant items are special items that are used instantly when purchased. They may grant a role or do something else.',
 	USABLE: 'Usable items may be used after purchasing to achieve some task or another.',
 	GENERATOR: 'Generator items generate money that can be collected with `/collect` based on a duration specific to that particular generator.',
-};
-export const ListingEmojis: Record<ListingString, `${Emojis}`> = {
-	CLASSIC: '🪨',
-	INSTANT: '🔥',
-	USABLE: '<:manage:963849716221763634>',
-	GENERATOR: '<:generator:963849715932356688>',
 };
 export type InfractionString = 'BAN' | 'KICK' | 'TIMEOUT' | 'UNBAN' | 'UNTIMEOUT';
 export type TransactionString =

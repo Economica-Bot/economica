@@ -1,10 +1,10 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, Column, Entity, ManyToOne, Relation } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, Relation } from 'typeorm';
 
 import { Listing, Member } from './index.js';
 
 @Entity()
-export class Item extends BaseEntity {
+export class Market extends BaseEntity {
 	@Column({ primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
@@ -17,6 +17,9 @@ export class Item extends BaseEntity {
 	@Column()
 	public amount: number;
 
-	@Column({ default: null })
-	public lastGeneratedAt: Date;
+	@Column()
+	public price: number;
+
+	@CreateDateColumn()
+	public createdAt: Date;
 }

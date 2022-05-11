@@ -4,6 +4,7 @@ export * from './infraction.js';
 export * from './item.js';
 export * from './listing.js';
 export * from './loan.js';
+export * from './market.js';
 export * from './member.js';
 export * from './session.js';
 export * from './token.js';

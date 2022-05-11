@@ -2,7 +2,7 @@ import { parseString } from '@adrastopoulos/number-parser';
 import { PermissionFlagsBits } from 'discord.js';
 import ms from 'ms';
 
-import { Listing } from '../../entities/listing.js';
+import { Listing } from '../../entities/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 import { Emojis, ListingString } from '../../typings/index.js';
 

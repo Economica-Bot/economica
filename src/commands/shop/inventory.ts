@@ -1,8 +1,8 @@
-import { Util } from 'discord.js';
+import { APIEmbedField, Util } from 'discord.js';
 
-import { Item } from '../../entities';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures';
-import { Emojis, ListingDescriptions } from '../../typings';
+import { Item } from '../../entities/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+import { Emojis } from '../../typings/index.js';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -14,23 +14,10 @@ export default class implements Command {
 
 	public execute = async (ctx: Context) => {
 		const items = await Item.find({ relations: ['listing'], where: { owner: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId } } });
-
-		const classicItems = items.filter((item) => item.listing.type === 'CLASSIC');
-		const usableItems = items.filter((item) => item.listing.type === 'USABLE');
-		const generators = items.filter((item) => item.listing.type === 'GENERATOR');
-
 		const inventoryEmbed = ctx
 			.embedify('info', 'user', 'If an item is of type `USABLE`, you may use it at any time with the `/use` command.')
-			.setAuthor({ name: 'Inventory', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.INFO).id)?.url })
-			.setFields([
-				{ name: 'Classic Items', value: ListingDescriptions.CLASSIC, inline: true },
-				{ name: 'Usable Items', value: ListingDescriptions.USABLE, inline: true },
-				{ name: 'Generator Items', value: ListingDescriptions.GENERATOR, inline: true },
-				{ name: `Quantity: ${classicItems.length}`, value: classicItems.length ? classicItems.map((item) => item.listing.name).join(', ') : 'None', inline: true },
-				{ name: `Quantity: ${usableItems.length}`, value: usableItems.length ? usableItems.map((item) => item.listing.name).join(', ') : 'None', inline: true },
-				{ name: `Quantity: ${generators.length}`, value: generators.length ? generators.map((item) => item.listing.name).join(', ') : 'None', inline: true },
-			]);
-
+			.setAuthor({ name: 'Inventory', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.STACK).id)?.url })
+			.setFields(items.map((item) => ({ name: `${item.listing.name} (*${item.listing.type}*) - \`${item.amount}\``, value: `>>> ${item.listing.description}\n**Id:**: \`${item.id}\`` } as APIEmbedField)));
 		await ctx.interaction.reply({ embeds: [inventoryEmbed] });
 	};
 }

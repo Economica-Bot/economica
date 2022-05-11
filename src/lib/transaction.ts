@@ -24,7 +24,7 @@ export async function displayTransaction(transaction: Transaction): Promise<Embe
 			{ name: '__**Treasury**__', value: `${guild.currency}${parseNumber(treasury)}`, inline: true },
 			{ name: '__**Total**__', value: `${guild.currency}${parseNumber(total)}`, inline: true },
 		])
-		.setFooter({ text: `ID: ${id}` })
+		.setFooter({ text: `Id: ${id}` })
 		.setTimestamp(createdAt);
 }
 
