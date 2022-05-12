@@ -1,4 +1,6 @@
+import { parseNumber } from '@adrastopoulos/number-parser';
 import { Util } from 'discord.js';
+import ms from 'ms';
 
 import { Listing } from '../entities/index.js';
 import { Context } from '../structures/index.js';
@@ -17,7 +19,6 @@ export const displayListing = async (ctx: Context, listing: Listing): Promise<vo
 		.embedify('info', 'user', `**Id**: \`${listing.id}\` | **Created:** ${getFormattedCreateTimestamp(listing)} | **Expires:** ${getFormattedExpiresTimestamp(listing)}`)
 		.setAuthor({ name: `${listing.name} — ${listing.description}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.SHOP).id)?.url })
 		.addFields([
-			{ name: `${Emojis[listing.type]} ${listing.type} Item`, value: `${ListingDescriptions[listing.type]}` },
 			{ name: `${Emojis.PRICE} Price`, value: `${ctx.guildEntity.currency}${listing.price}`, inline: true },
 			{ name: `${Emojis.TREASURY} Required Treasury`, value: `${ctx.guildEntity.currency}${listing.treasuryRequired}`, inline: true },
 			{ name: `${Emojis.INSUFFICIENT} Items required`, value: listing.itemsRequired?.map((item) => `\`${item.id}\``).join('\n') ?? '`None`', inline: true },
@@ -27,12 +28,13 @@ export const displayListing = async (ctx: Context, listing: Listing): Promise<vo
 			{ name: `${Emojis.KEY} Roles Required`, value: listing.rolesRequired.length ? listing.rolesRequired.map((role) => `<@&${role}>`).join('\n') : '`None`', inline: true },
 			{ name: `${Emojis.REMOVE} Roles Removed`, value: listing.rolesRemoved.length ? listing.rolesRemoved.map((role) => `<@&${role}>`).join('\n') : '`None`', inline: true },
 			{ name: `${Emojis.GIVE} Roles Given`, value: listing.rolesGiven.length ? listing.rolesGiven.map((role) => `<@&${role}>`).join('\n') : '`None`', inline: true },
+			{ name: `${Emojis[listing.type]} \`${listing.type}\` Item`, value: `${ListingDescriptions[listing.type]}` },
 		]);
 
 	if (listing.type === 'GENERATOR') {
 		listingEmbed.addFields([
-			{ name: 'Generator Period', value: listing.generatorPeriod.toLocaleString(), inline: true },
-			{ name: 'Generator Amount', value: listing.generatorAmount.toLocaleString(), inline: true },
+			{ name: 'Generator Period', value: `\`${ms(listing.generatorPeriod)}\``, inline: true },
+			{ name: 'Generator Amount', value: `${ctx.guildEntity.currency}${parseNumber(listing.generatorAmount)}`, inline: true },
 		]);
 	}
 

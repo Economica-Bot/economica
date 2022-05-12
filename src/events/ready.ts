@@ -51,9 +51,7 @@ export default class implements Event {
 			client.log.debug(`Reset commands in dev guild ${guild.name}`);
 		});
 
-		if (PRODUCTION) {
-			await client.application.commands.set([]);
-			client.log.debug('Reset global commands');
-		}
+		await client.application.commands.set([]);
+		client.log.debug('Reset global commands');
 	}
 }
