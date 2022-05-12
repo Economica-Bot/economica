@@ -1,8 +1,7 @@
 import { parseString } from '@adrastopoulos/number-parser';
-import { APIEmbedField } from 'discord.js';
 
 import { Item, Market } from '../../entities/index.js';
-import { recordTransaction } from '../../lib/transaction.js';
+import { recordTransaction, displayMarket, displayMarkets } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 import { Emojis } from '../../typings/index.js';
 
@@ -46,29 +45,26 @@ export default class implements Command {
 		if (subcommand === 'view') {
 			const id = ctx.interaction.options.getString('market_id');
 			if (!id) {
-				const markets = await Market.find({ relations: ['listing', 'listing.guild'], where: { listing: { guild: { id: ctx.interaction.guildId } } } });
-				const marketEmbed = ctx
-					.embedify('info', 'user', `There are \`${markets.length}\` markets.`)
-					.addFields(markets.map((market) => ({ name: market.listing.name, value: market.listing.description } as APIEmbedField)));
-				await ctx.interaction.reply({ embeds: [marketEmbed] });
+				const markets = await Market.find({ relations: ['owner', 'listing', 'listing.guild'], where: { listing: { guild: { id: ctx.interaction.guildId } } } });
+				await displayMarkets(ctx, markets);
 				return;
 			}
 
-			const market = await Market.findOne({ relations: ['listing', 'listing.guild'], where: { listing: { guild: { id: ctx.interaction.guildId } }, id } });
+			const market = await Market.findOne({ relations: ['owner', 'listing', 'listing.guild'], where: { listing: { guild: { id: ctx.interaction.guildId } }, id } });
 			if (!market) {
 				await ctx.embedify('error', 'user', `Could not find a market with id \`${id}\``).send();
 				return;
 			}
 
-			await ctx.embedify('info', 'user', `${market.listing.name}`).send();
+			await displayMarket(ctx, market);
 		} else if (subcommand === 'buy') {
 			const id = ctx.interaction.options.getString('market_id');
 
-			const market = await Market.findOne({ relations: ['listing', 'listing.guild'], where: { listing: { guild: { id: ctx.interaction.guildId } }, id } });
+			const market = await Market.findOne({ relations: ['owner', 'listing', 'listing.guild'], where: { listing: { guild: { id: ctx.interaction.guildId } }, id } });
 			const item = await Item.findOneBy({ owner: { guildId: ctx.interaction.guildId, userId: ctx.interaction.user.id }, listing: { id: market?.listing?.id } });
 
 			if (!market) await ctx.embedify('error', 'user', `Could not find market with id \`${id}\`.`).send();
-			else if (market.owner === ctx.memberEntity) await ctx.embedify('error', 'user', 'You cannot buy your own market.').send();
+			else if (market.owner.guildId === ctx.memberEntity.guildId && market.owner.userId === ctx.memberEntity.userId) await ctx.embedify('error', 'user', 'You cannot buy your own market.').send();
 			else if (item && !market.listing.stackable) await ctx.embedify('error', 'user', 'You cannot have more than one of this item.').send();
 			else if (market.price > ctx.memberEntity.wallet) await ctx.embedify('error', 'user', 'You cannot afford to purchase this market.').send();
 			if (ctx.interaction.replied) return;
@@ -76,7 +72,14 @@ export default class implements Command {
 			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, market.owner, 'BUY', -market.price, 0);
 			await recordTransaction(ctx.client, ctx.guildEntity, market.owner, ctx.memberEntity, 'SELL', 0, market.price);
 
-			await ctx.embedify('success', 'user', '**Market Purchased Successfully**').send();
+			await market.remove();
+			if (item) {
+				item.amount += market.amount;
+			} else {
+				await Item.create({ listing: market.listing, owner: ctx.memberEntity, amount: market.amount }).save();
+			}
+
+			await ctx.embedify('success', 'user', `${Emojis.CHECK} **Market Purchased Successfully**`).send();
 		} else if (subcommand === 'sell') {
 			const id = ctx.interaction.options.getString('item_id');
 			const price = ctx.interaction.options.getString('price');

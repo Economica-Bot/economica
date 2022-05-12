@@ -32,15 +32,16 @@ export default class implements Command {
 		});
 
 		if (!listing) await ctx.embedify('error', 'user', `Could not find listing with id \`${id}\`.`).send();
-		else if (!listing.active) await ctx.embedify('warn', 'user', 'This listing is not active.').send();
-		else if (listing.stock < 1) await ctx.embedify('warn', 'user', 'This listing is out of stock.').send();
-		else if (!listing.stackable && amount > 1) await ctx.embedify('warn', 'user', 'You cannot buy more than 1x of this item.').send();
-		else if (!listing.stackable && existingItem) await ctx.embedify('warn', 'user', 'You already own this item.').send();
-		else if (amount > listing.stock) await ctx.embedify('warn', 'user', `You cannot buy that amount. Current stock: \`${listing.stock}\`.`).send();
+		else if (!listing.active) await ctx.embedify('warn', 'user', 'This listing is **not active**.').send();
+		else if (listing.stock < 1) await ctx.embedify('warn', 'user', 'This listing is **out of stock**.').send();
+		else if (!listing.stackable && amount > 1) await ctx.embedify('warn', 'user', 'You cannot buy more than `1x` of this item.').send();
+		else if (listing.type === 'INSTANT' && amount > 1) await ctx.embedify('warn', 'user', 'You cannot buy more than `1` usable item at a time.').send();
+		else if (!listing.stackable && existingItem) await ctx.embedify('warn', 'user', 'You **already own** this item.').send();
+		else if (amount > listing.stock) await ctx.embedify('warn', 'user', `You cannot buy that amount. **Current stock:** \`${listing.stock}\`.`).send();
 		else if (missingItems.length) await ctx.embedify('warn', 'user', `You must own ${missingItems.map((item) => `\`${item.name}\``).join(', ')} to purchase this listing.`).send();
 		else if (missingRoles.length) await ctx.embedify('warn', 'user', `You must have the roles ${missingRoles.map((role) => `<@${role}>`).join(', ')} to buy this item.`).send();
-		else if (listing.treasuryRequired > ctx.memberEntity.treasury) await ctx.embedify('warn', 'user', `You must have a treasury balance of ${ctx.guildEntity.currency}${listing.treasuryRequired} to purchase this listing.`).send();
-		else if (listing.price > ctx.memberEntity.wallet) await ctx.embedify('warn', 'user', 'You cannot afford this item.').send();
+		else if (listing.treasuryRequired > ctx.memberEntity.treasury) await ctx.embedify('warn', 'user', `You must have a **treasury balance** of ${ctx.guildEntity.currency}${listing.treasuryRequired} to purchase this listing.`).send();
+		else if (listing.price > ctx.memberEntity.wallet) await ctx.embedify('warn', 'user', 'You **cannot afford** this item.').send();
 		if (ctx.interaction.replied) return;
 
 		// Purchase complete
@@ -51,11 +52,16 @@ export default class implements Command {
 			existingItem.amount += amount;
 			await existingItem.save();
 		} else {
-			await Item.create({
+			const item = await Item.create({
 				listing,
 				owner: ctx.memberEntity,
 				amount,
 			}).save();
+			if (item.listing.type === 'INSTANT') {
+				item.listing.rolesGiven.forEach((role) => ctx.interaction.member.roles.add(role, `Purchased ${item.listing.name}`));
+				item.listing.rolesRemoved.forEach((role) => ctx.interaction.member.roles.remove(role, `Purchased ${item.listing.name}`));
+				await item.remove();
+			}
 		}
 
 		await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'BUY', -listing.price, 0);
