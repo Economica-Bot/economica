@@ -29,7 +29,7 @@ export default class implements Command {
 
 		const embed = ctx
 			.embedify('info', 'user')
-			.setAuthor({ name: `Permissions for ${command.data.name}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.COMMAND).id)?.url })
+			.setAuthor({ name: `Permissions for ${command.data.name}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.PERSON_ADD).id)?.url })
 			.addFields([{ name: 'Base', value: `Client Permissions: \`${command.data.clientPermissions ?? '`None`'}\` Default Member Permissions: \`${command.data.default_member_permissions ?? '`None`'}\`` }]);
 		command.data.options.forEach((option) => {
 			if (option instanceof EconomicaSlashCommandSubcommandBuilder) {

@@ -65,6 +65,6 @@ export default class implements Command {
 		}
 
 		await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'BUY', -listing.price, 0);
-		await ctx.embedify('success', 'user', `${Emojis.SHOP} **Listing Purchased Successfully**`).send();
+		await ctx.embedify('success', 'user', `${Emojis.CHECK} **Listing Purchased Successfully**`).send();
 	};
 }

@@ -134,7 +134,7 @@ export default class implements Command {
 				generatorPeriod: generatorPeriod ? ms(generatorPeriod) : null,
 			}).save();
 
-			await ctx.embedify('success', 'user', `${Emojis.SHOP} **Listing Created Successfully**`).send();
+			await ctx.embedify('success', 'user', `${Emojis.CHECK} **Listing Created Successfully**`).send();
 		}
 	};
 }

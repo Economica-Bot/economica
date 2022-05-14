@@ -56,14 +56,14 @@ export default class implements Command {
 
 				const loanEmbed = ctx
 					.embedify('info', 'user', `**Created At**: \`${loan.createdAt.toLocaleString()}\`\n**Completed At**: \`${loan.completedAt?.toLocaleString()}\``)
-					.setAuthor({ name: `Loan ${loan.id}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.LOAN).id)?.url })
+					.setAuthor({ name: `Loan ${loan.id}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.MONEY_BAG).id)?.url })
 					.addFields([
 						{ name: '🤵‍♂️ Lender', value: `<@!${loan.lender.userId}>`, inline: true },
-						{ name: `${Emojis.ESCROW} Borrower`, value: `<@!${loan.borrower?.userId}>`, inline: true },
-						{ name: `${Emojis.DESCRIPTION} Message`, value: `*${loan.message}*` },
-						{ name: `${Emojis.CHEQUE} Principal`, value: `${ctx.guildEntity.currency}${parseNumber(loan.principal)}`, inline: true },
-						{ name: `${Emojis.WALLET} Repayment`, value: `${ctx.guildEntity.currency}${parseNumber(loan.repayment)}`, inline: true },
-						{ name: `${Emojis.INTERVAL} Duration`, value: `\`${ms(loan.duration, { long: true })}\``, inline: true },
+						{ name: `${Emojis.PERSON_ADD} Borrower`, value: `<@!${loan.borrower?.userId}>`, inline: true },
+						{ name: `${Emojis.DEED} Message`, value: `*${loan.message}*` },
+						{ name: `${Emojis.ECON_DOLLAR} Principal`, value: `${ctx.guildEntity.currency}${parseNumber(loan.principal)}`, inline: true },
+						{ name: `${Emojis.CREDIT} Repayment`, value: `${ctx.guildEntity.currency}${parseNumber(loan.repayment)}`, inline: true },
+						{ name: `${Emojis.TIME} Duration`, value: `\`${ms(loan.duration, { long: true })}\``, inline: true },
 					]);
 
 				await ctx.interaction.reply({ embeds: [loanEmbed] });
@@ -78,13 +78,13 @@ export default class implements Command {
 				const outgoingCompleteLoans = outgoingLoans.filter((loan) => loan.completedAt);
 				const incomingCompleteLoans = incomingLoans.filter((loan) => loan.completedAt);
 				const loansEmbed = ctx.embedify('info', 'user')
-					.setAuthor({ name: 'Loan Management Menu', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.LOAN).id)?.url })
+					.setAuthor({ name: 'Loan Management Menu', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.DEED).id)?.url })
 					.setDescription('Loans may be viewed in detail by using the command `loan view <id>`.')
 					.addFields([
-						{ name: `${Emojis.SPEC} Pending Loans`, value: 'Pending loans are loans that have not yet been accepted by the borrower. Loan proposals may be canceled by the lender with the command `loan cancel <id>`.' },
+						{ name: `${Emojis.MONEY_BAG} Pending Loans`, value: 'Pending loans are loans that have not yet been accepted by the borrower. Loan proposals may be canceled by the lender with the command `loan cancel <id>`.' },
 						{ name: '➡️ Outgoing', value: outgoingPendingLoans.map((loan) => `\`${loan.id}\``).join('\n') || 'None', inline: true },
 						{ name: '⬅️ Incoming ', value: incomingPendingLoans.map((loan) => `\`${loan.id}\``).join('\n') || 'None', inline: true },
-						{ name: `${Emojis.CHEQUE} Active Loans`, value: 'Active loans are loans that have been accepted by the borrower and are currently in effect. **Note**: Loans are updated every 5 minutes.' },
+						{ name: `${Emojis.CREDIT} Active Loans`, value: 'Active loans are loans that have been accepted by the borrower and are currently in effect. **Note**: Loans are updated every 5 minutes.' },
 						{ name: '➡️ Outgoing', value: outgoingActiveLoans.map((loan) => `\`${loan.id}\``).join('\n') || 'None', inline: true },
 						{ name: '⬅️ Incoming ', value: incomingActiveLoans.map((loan) => `\`${loan.id}\``).join('\n') || 'None', inline: true },
 						{ name: `${Emojis.CHECK} Complete Loans`, value: 'Complete loans are loans that have been repayed and fully processed.' },
@@ -129,7 +129,7 @@ export default class implements Command {
 			}).save();
 
 			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'LOAN_PROPOSE', -loan.principal, 0);
-			await ctx.embedify('success', 'user', `${Emojis.LOAN} **Loan Created Successfully**`).send();
+			await ctx.embedify('success', 'user', `${Emojis.DEED} **Loan Created Successfully**`).send();
 		} else if (subcommand === 'cancel') {
 			const loanId = ctx.interaction.options.getString('loan_id', false);
 			const loan = await Loan.findOneBy({ id: loanId, lender: { userId: ctx.interaction.user.id }, guild: { id: ctx.interaction.guildId } });
@@ -141,7 +141,7 @@ export default class implements Command {
 			loan.pending = false;
 			await loan.save();
 			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'LOAN_CANCEL', loan.principal, 0);
-			await ctx.embedify('success', 'user', `${Emojis.CHECK} **Loan Canceled**`).send();
+			await ctx.embedify('success', 'user', `${Emojis.CROSS} **Loan Canceled**`).send();
 		} else if (subcommand === 'accept') {
 			const loanId = ctx.interaction.options.getString('loan_id', false);
 			const loan = await Loan.findOneBy({ id: loanId, borrower: { userId: ctx.interaction.user.id }, guild: { id: ctx.interaction.guildId } });

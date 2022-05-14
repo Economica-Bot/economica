@@ -26,11 +26,11 @@ export default class implements Command {
 			+ `Channels: \`${ctx.interaction.guild.channels.cache.size}\``;
 		const embed = ctx
 			.embedify('info', 'user', description)
-			.setAuthor({ name: 'Statistics Dashboard', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.ANALYTICS).id)?.url })
+			.setAuthor({ name: 'Statistics Dashboard', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.TREND).id)?.url })
 			.addFields([
-				{ name: `${Emojis.BOT} \`Bot Statistics\``, value: botStats, inline: true },
-				{ name: `${Emojis.ADMIN} \`Member Statistics\``, value: memberStats, inline: true },
-				{ name: `${Emojis.COMMUNITY} \`Server Statistics\``, value: serverStats, inline: true },
+				{ name: `${Emojis.CPU} \`Bot Statistics\``, value: botStats, inline: true },
+				{ name: `${Emojis.PERSON_ADD} \`Member Statistics\``, value: memberStats, inline: true },
+				{ name: `${Emojis.NETWORK} \`Server Statistics\``, value: serverStats, inline: true },
 			]);
 		await ctx.interaction.reply({ embeds: [embed] });
 	};

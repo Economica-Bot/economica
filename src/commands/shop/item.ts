@@ -1,4 +1,4 @@
-import { Item, Listing, Member, User } from '../../entities/index.js';
+import { Item, Member, User } from '../../entities/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 import { Emojis } from '../../typings/constants.js';
 

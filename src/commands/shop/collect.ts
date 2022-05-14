@@ -26,7 +26,7 @@ export default class implements Command {
 		});
 
 		if (amount) {
-			await ctx.embedify('success', 'user', `${Emojis.GENERATOR} Collected ${ctx.guildEntity.currency}${parseNumber(amount)}`).send();
+			await ctx.embedify('success', 'user', `${Emojis.CHECK} Collected ${ctx.guildEntity.currency}${parseNumber(amount)}`).send();
 			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.memberEntity, 'GENERATOR', 0, amount);
 		} else {
 			await ctx

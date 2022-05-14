@@ -1,7 +1,7 @@
 import { parseString } from '@adrastopoulos/number-parser';
 
 import { Item, Market } from '../../entities/index.js';
-import { recordTransaction, displayMarket, displayMarkets } from '../../lib/index.js';
+import { displayMarket, displayMarkets, recordTransaction } from '../../lib/index.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 import { Emojis } from '../../typings/index.js';
 
@@ -104,7 +104,7 @@ export default class implements Command {
 				amount,
 			}).save();
 
-			await ctx.embedify('success', 'user', `${Emojis.SHOP} **Market Created Successfully**`).send();
+			await ctx.embedify('success', 'user', `${Emojis.CHECK} **Market Created Successfully**`).send();
 		} else if (subcommand === 'remove') {
 			const id = ctx.interaction.options.getString('market_id');
 			const market = await Market.findOne({ relations: ['listing'], where: { owner: { guildId: ctx.guildEntity.id, userId: ctx.userEntity.id }, id } });

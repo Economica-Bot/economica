@@ -9,11 +9,11 @@ const percentDifference = (num1: number, num2: number): string => (((num1 - num2
 export const displayMarket = async (ctx: Context, market: Market): Promise<void> => {
 	await ctx
 		.embedify('info', 'user', `\`${market.amount}\` x **${market.listing.name}**\n**Sold By**: <@${market.owner.userId}>\n**Market Id:**: \`${market.id}\`\n**Listing Id**: \`${market.listing.id}\``)
-		.setAuthor({ name: 'Market Item', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.GIVE).id)?.url })
+		.setAuthor({ name: 'Market Item', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.BOX).id)?.url })
 		.addFields([
-			{ name: `${Emojis.PRICE} Price`, value: `${ctx.guildEntity.currency}${market.price}`, inline: true },
-			{ name: `${Emojis.CLASSIC} Original Price`, value: `${ctx.guildEntity.currency}${market.listing.price}`, inline: true },
-			{ name: `${Emojis.ANALYTICS} % Difference`, value: `\`${percentDifference(market.price, market.listing.price)}\` Percent`, inline: true },
+			{ name: `${Emojis.MONEY_STACK} Price`, value: `${ctx.guildEntity.currency}${market.price}`, inline: true },
+			{ name: `${Emojis.FOREIGN_COIN} Original Price`, value: `${ctx.guildEntity.currency}${market.listing.price}`, inline: true },
+			{ name: `${Emojis.LEVELS_4} % Difference`, value: `\`${percentDifference(market.price, market.listing.price)}\` Percent`, inline: true },
 		])
 		.send();
 };
