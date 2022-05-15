@@ -13,7 +13,7 @@ export default class implements Command {
 		.setFormat('ban <member> [duration] [reason] [days]')
 		.setExamples(['ban @user', 'ban @user 3h', 'ban @user spamming', 'ban @user 3h spamming'])
 		.setClientPermissions(['BanMembers'])
-		.setPermissions(PermissionFlagsBits.BanMembers.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers.toString())
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target').setRequired(true))
 		.addStringOption((option) => option.setName('duration').setDescription('Specify a duration').setRequired(false))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason').setRequired(false))

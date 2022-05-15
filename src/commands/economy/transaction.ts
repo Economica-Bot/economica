@@ -15,7 +15,7 @@ export default class implements Command {
 			'transaction delete user @user',
 			'transaction delete all',
 		])
-		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild.toString())
 		.addSubcommandGroup((subcommandgroup) => subcommandgroup
 			.setName('view')
 			.setDescription('View transaction data')

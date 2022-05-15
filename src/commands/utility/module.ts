@@ -10,7 +10,7 @@ export default class implements Command {
 		.setModule('UTILITY')
 		.setFormat('module <view | add | remove> [module]')
 		.setExamples(['module view', 'module add Interval', 'module remove Interval'])
-		.setPermissions(PermissionFlagsBits.Administrator.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator.toString())
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View the enabled modules on this server'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('add')

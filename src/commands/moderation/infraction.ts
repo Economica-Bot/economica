@@ -16,7 +16,7 @@ export default class implements Command {
 			'infraction delete user @user',
 			'infraction delete all',
 		])
-		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild.toString())
 		.addSubcommandGroup((subcommandgroup) => subcommandgroup
 			.setName('view')
 			.setDescription('View infraction data')

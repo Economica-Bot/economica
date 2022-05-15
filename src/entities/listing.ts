@@ -42,7 +42,7 @@ export class Listing extends BaseEntity {
 
 	@ManyToMany(() => Listing, (listing) => listing.itemsRequired)
 	@JoinColumn()
-	public itemsRequired: Listing[];
+	public itemsRequired: Relation<Listing>[];
 
 	@Column('simple-array')
 	public rolesRequired: Snowflake[];

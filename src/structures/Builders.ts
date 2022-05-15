@@ -51,7 +51,6 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	public clientPermissions: PermissionsString[];
 	public global = false;
 	public enabled = true;
-	public default_member_permissions: Permissions;
 
 	public setGlobal(global: boolean): this {
 		this.global = global;
@@ -75,11 +74,6 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 
 	public setClientPermissions(clientPermissions: PermissionsString[]): this {
 		this.clientPermissions = clientPermissions;
-		return this;
-	}
-
-	public setPermissions(level: Permissions): this {
-		this.default_member_permissions = level;
 		return this;
 	}
 

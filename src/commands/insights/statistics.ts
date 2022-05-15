@@ -22,7 +22,7 @@ export default class implements Command {
 			+ `Commands Used: \`${(await CommandEntity.find({ where: { member: { userId: ctx.memberEntity.userId, guildId: ctx.guildEntity.id } } })).length}\`\n`
 			+ `Joined: <t:${Math.round(ctx.interaction.member.joinedAt.getTime() / 1000)}:f>`;
 		const serverStats = `Roles: \`${ctx.interaction.guild.roles.cache.size}\`\n`
-			+ `Members: \`${ctx.interaction.guild.memberCount}\`\n`
+			+ `Members: \`${ctx.interaction.guild.members.cache.size}\`\n`
 			+ `Channels: \`${ctx.interaction.guild.channels.cache.size}\``;
 		const embed = ctx
 			.embedify('info', 'user', description)

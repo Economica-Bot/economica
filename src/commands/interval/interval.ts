@@ -8,7 +8,7 @@ export default class implements Command {
 		.setModule('INTERVAL')
 		.setFormat('interval <view | edit> [...arguments]')
 		.setExamples(['interval view', 'interval edit daily 100'])
-		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild.toString())
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View interval command configurations'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('edit')

@@ -1,3 +1,4 @@
+import { User } from '../../entities/user.js';
 import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 
 export default class implements Command {

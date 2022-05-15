@@ -12,7 +12,7 @@ export default class implements Command {
 		.setFormat('kick <target> [reason]')
 		.setExamples(['kick @user', 'kick @user harrassment'])
 		.setClientPermissions(['KickMembers'])
-		.setPermissions(PermissionFlagsBits.KickMembers.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.KickMembers.toString())
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason.').setRequired(false));
 

@@ -18,7 +18,7 @@ export default class implements Command {
 			'timeout @user 3h spamming',
 		])
 		.setClientPermissions(['ModerateMembers'])
-		.setPermissions(PermissionFlagsBits.ModerateMembers.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers.toString())
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target').setRequired(true))
 		.addStringOption((option) => option.setName('duration').setDescription('Specify a duration').setRequired(true))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason').setRequired(false));

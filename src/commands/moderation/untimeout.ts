@@ -12,7 +12,7 @@ export default class implements Command {
 		.setFormat('untimeout <member> [reason]')
 		.setExamples(['untimeout @user', 'untimeout 796906750569611294 forgiveness'])
 		.setClientPermissions(['ModerateMembers'])
-		.setPermissions(PermissionFlagsBits.ModerateMembers.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers.toString())
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))
 		.addStringOption((option) => option.setName('string').setDescription('Specify a reason.'));
 

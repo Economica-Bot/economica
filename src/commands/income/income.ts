@@ -15,7 +15,7 @@ export default class implements Command {
 			'income edit crime maxfine: 20%',
 			'income edit beg cooldown: 5m',
 		])
-		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild.toString())
 		.addSubcommand((subcommand) => subcommand
 			.setName('view').setDescription('View income command configurations'))
 		.addSubcommand((subcommand) => subcommand

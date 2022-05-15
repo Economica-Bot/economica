@@ -12,7 +12,7 @@ export default class implements Command {
 		.setFormat('<user> [reason]')
 		.setExamples(['unban @user', 'unban 796906750569611294 forgiveness'])
 		.setClientPermissions(['BanMembers'])
-		.setPermissions(PermissionFlagsBits.BanMembers.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers.toString())
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target').setRequired(true))
 		.addStringOption((option) => option.setName('string').setDescription('Specify a reason'));
 

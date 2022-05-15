@@ -9,7 +9,7 @@ export default class implements Command {
 		.setModule('MODERATION')
 		.setFormat('infraction-log <view | set | reset> [channel]')
 		.setExamples(['infraction-log view', 'infraction-log set #infraction-logs', 'infraction-log reset'])
-		.setPermissions(PermissionFlagsBits.Administrator.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator.toString())
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View the infraction log channel'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('set')
@@ -33,7 +33,7 @@ export default class implements Command {
 			}
 		} else if (subcommand === 'set') {
 			const channel = ctx.interaction.options.getChannel('channel') as TextChannel;
-			if (!channel.permissionsFor(ctx.interaction.guild.me).has('SendMessages') || !channel.permissionsFor(ctx.interaction.guild.me).has('EmbedLinks')) {
+			if (!channel.permissionsFor(ctx.interaction.guild.members.me).has('SendMessages') || !channel.permissionsFor(ctx.interaction.guild.members.me).has('EmbedLinks')) {
 				await ctx.embedify('error', 'user', 'I need `SEND_MESSAGES` and `EMBED_LINKS` permissions in that channel.').send(true);
 			} else {
 				ctx.guildEntity.infractionLogId = channel.id;

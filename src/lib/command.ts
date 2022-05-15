@@ -15,7 +15,7 @@ async function checkPermission(ctx: Context): Promise<boolean> {
 	if (group?.clientPermissions) clientPermissions.push(...group.clientPermissions);
 	if (subcommand?.clientPermissions) clientPermissions.push(...subcommand.clientPermissions);
 	clientPermissions.forEach((permission) => {
-		if (!ctx.interaction.guild.me.permissionsIn(channel).has(permission)) missingClientPermissions.push(permission);
+		if (!ctx.interaction.guild.members.me.permissionsIn(channel).has(permission)) missingClientPermissions.push(permission);
 	});
 	if (missingClientPermissions.length) {
 		await ctx.embedify('warn', 'bot', `Missing Bot Permissions: \`${missingClientPermissions}\``).send(true);

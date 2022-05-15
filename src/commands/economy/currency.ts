@@ -9,7 +9,7 @@ export default class implements Command {
 		.setModule('ECONOMY')
 		.setFormat('currency <view | set | reset> [currency]')
 		.setExamples(['currency view', 'currency set 💵', 'currency reset'])
-		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild.toString())
 		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View the currency symbol'))
 		.addSubcommand((subcommand) => subcommand
 			.setName('set')

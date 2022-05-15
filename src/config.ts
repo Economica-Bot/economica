@@ -1,4 +1,7 @@
 /* eslint-disable prefer-destructuring */
+import 'dotenv/config';
+import 'reflect-metadata';
+
 import {
 	ActivityType,
 	ClientOptions,
@@ -8,10 +11,10 @@ import {
 	Partials,
 	PermissionFlagsBits,
 } from 'discord.js';
-import 'dotenv/config';
-import path from 'path';
-import type { ISettingsParam } from 'tslog';
 import { DataSourceOptions } from 'typeorm';
+
+import type { ISettingsParam } from 'tslog';
+import path from 'path';
 import { fileURLToPath } from 'url';
 
 // Environment Vars
@@ -101,8 +104,9 @@ export const databaseOptions: DataSourceOptions = {
 	port: 5432,
 	username: 'postgres',
 	password: DB_PASSWORD,
-	entities: [path.resolve(dirname, './entities/*.{ts,js}')],
+	entities: [path.resolve(dirname, '/entities/**/*.{ts,js}')],
 	database: 'postgres',
+	logging: ['error', 'warn'],
 };
 
 export const loggerOptions: ISettingsParam = {

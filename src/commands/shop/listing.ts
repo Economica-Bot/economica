@@ -13,7 +13,7 @@ export default class implements Command {
 		.setModule('SHOP')
 		.setFormat('listing')
 		.setExamples(['listing'])
-		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild.toString())
 		.addSubcommand((subcommand) => subcommand
 			.setName('create')
 			.setDescription('Create a new item')

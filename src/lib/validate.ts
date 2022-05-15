@@ -25,7 +25,7 @@ export async function validateAmount(
 
 export async function validateTarget(ctx: Context, memberRequired = true): Promise<boolean> {
 	const type = ctx.interaction.commandName as Moderation;
-	const member = (await ctx.interaction.guild.members.fetch(ctx.client.user.id)) as GuildMember;
+	const member = ctx.interaction.guild.members.me;
 	const target = ctx.interaction.options.getMember('target') as GuildMember;
 	const targetUser = ctx.interaction.options.getUser('target');
 	if (!target && (!targetUser || memberRequired)) {

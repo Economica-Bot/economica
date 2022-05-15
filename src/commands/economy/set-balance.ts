@@ -12,7 +12,7 @@ export default class implements Command {
 		.setModule('ECONOMY')
 		.setFormat('set-balance <user> <amount> <target>')
 		.setExamples(['set-balance @user 300 wallet', 'set-balance @user 100 treasury'])
-		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild.toString())
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(true))
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true))
 		.addStringOption((option) => option.setName('balance').setDescription('Specify the target balance').setRequired(true).addChoices(

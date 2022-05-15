@@ -10,7 +10,7 @@ export default class implements Command {
 		.setFormat('purge [channel] [amount]')
 		.setExamples(['purge', 'purge #general', 'purge #general 50'])
 		.setClientPermissions(['ManageMessages'])
-		.setPermissions(PermissionFlagsBits.ManageMessages.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages.toString())
 		.addChannelOption((option) => option
 			.setName('channel')
 			.setDescription('Specify a channel')
@@ -25,7 +25,7 @@ export default class implements Command {
 
 	public execute = async (ctx: Context): Promise<void> => {
 		const channel = (ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel) as TextChannel;
-		if (!channel.permissionsFor(ctx.interaction.guild.me).has('ManageMessages')) {
+		if (!channel.permissionsFor(ctx.interaction.guild.members.me).has('ManageMessages')) {
 			await ctx.embedify('error', 'bot', 'I need `MANAGE_MESSAGES` in that channel.').send(true);
 			return;
 		}
