@@ -171,7 +171,6 @@ export class Economica extends Client {
 		if (DB_OPTION === 1) {
 			await this.AppDataSource.synchronize();
 			this.log.debug('Database synchronized');
-			this.log.debug(this.AppDataSource.entityMetadatas);
 		} else if (DB_OPTION === 2) {
 			await this.AppDataSource.synchronize(true);
 			this.log.debug('Database dropped and synchronized');

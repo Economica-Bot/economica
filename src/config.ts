@@ -104,9 +104,9 @@ export const databaseOptions: DataSourceOptions = {
 	port: 5432,
 	username: 'postgres',
 	password: DB_PASSWORD,
-	entities: [path.resolve(dirname, '/entities/**/*.{ts,js}')],
+	entities: [path.resolve(dirname, './entities/*.{ts,js}')],
 	database: 'postgres',
-	logging: ['error', 'warn'],
+	logging: ['info', 'log', 'warn', 'error'],
 };
 
 export const loggerOptions: ISettingsParam = {
