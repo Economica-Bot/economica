@@ -6,7 +6,6 @@ import {
 	SlashCommandSubcommandGroupBuilder,
 	SlashCommandSubcommandsOnlyBuilder,
 } from '@discordjs/builders';
-import { Permissions } from 'discord-api-types/v10';
 import { PermissionsString } from 'discord.js';
 
 import { ModuleString } from '../typings/index.js';
