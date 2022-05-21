@@ -2,13 +2,9 @@ import { parseNumber, parseString } from '@adrastopoulos/number-parser';
 import { Util } from 'discord.js';
 import ms from 'ms';
 
-import { Loan } from '../../entities/loan.js';
-import { Member } from '../../entities/member.js';
-import { User } from '../../entities/user.js';
-import { recordTransaction } from '../../lib/transaction.js';
-import { EconomicaSlashCommandBuilder } from '../../structures/Builders.js';
-import { Command } from '../../structures/Command.js';
-import { Context } from '../../structures/Context.js';
+import { Loan, Member, User } from '../../entities/index.js';
+import { recordTransaction } from '../../lib/index.js';
+import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
 import { Emojis } from '../../typings/constants.js';
 
 export default class implements Command {
@@ -78,7 +74,8 @@ export default class implements Command {
 				const outgoingCompleteLoans = outgoingLoans.filter((loan) => loan.completedAt);
 				const incomingCompleteLoans = incomingLoans.filter((loan) => loan.completedAt);
 				const loansEmbed = ctx.embedify('info', 'user')
-					.setAuthor({ name: 'Loan Management Menu', iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.DEED).id)?.url })
+					.setAuthor({ name: 'Loan Management Menu' })
+					.setThumbnail(ctx.client.emojis.resolve(Util.parseEmoji(Emojis.DEED).id)?.url)
 					.setDescription('Loans may be viewed in detail by using the command `loan view <id>`.')
 					.addFields([
 						{ name: `${Emojis.MONEY_BAG} Pending Loans`, value: 'Pending loans are loans that have not yet been accepted by the borrower. Loan proposals may be canceled by the lender with the command `loan cancel <id>`.' },
