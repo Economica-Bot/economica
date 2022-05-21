@@ -232,6 +232,8 @@ export enum Emojis {
 	UNLOCK = '<a:unlock:975152087384068096>',
 	URANIUM = '<:uranium:975152152198660248>',
 	WOOD = '<:wood:974924909383917568>',
+	NEXT = '<:next:975487429517672520>',
+	PREVIOUS = '<:previous:975487443656642620>',
 }
 export const INTERACTION_COMPONENT_COOLDOWN = 1000 * 45;
 export enum Properties {
@@ -386,3 +388,4 @@ export const RouletteBets: Record<RouletteBetsNamesType, RouletteBet> = {
 		description: 'A special bet that covers the numbers 1, 5, 9, 12, 13, 16, 19, 23, 27, 30, 32, and 34',
 	},
 };
+export const PAGINATION_LIMIT = 5;

@@ -11,12 +11,11 @@ import {
 	Partials,
 	PermissionFlagsBits,
 } from 'discord.js';
-import { DataSourceOptions } from 'typeorm';
-
-import type { ISettingsParam } from 'tslog';
 import path from 'path';
+import { DataSourceOptions } from 'typeorm';
 import { fileURLToPath } from 'url';
 
+import type { ISettingsParam } from 'tslog';
 // Environment Vars
 
 export const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -104,7 +103,7 @@ export const databaseOptions: DataSourceOptions = {
 	port: 5432,
 	username: 'postgres',
 	password: DB_PASSWORD,
-	entities: [path.resolve(dirname, './entities/*.{ts,js}')],
+	entities: [path.join(dirname, '/entities/*.js')],
 	database: 'postgres',
 	logging: ['info', 'log', 'warn', 'error'],
 };
