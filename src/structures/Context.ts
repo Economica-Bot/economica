@@ -113,25 +113,26 @@ export class Context {
 
 	public async paginator<T extends ValidInteraction>({ pages, interaction, index = 0 }: {
 		pages: InteractionReplyOptions[],
-		interaction?: T,
+		interaction: T,
 		index?: number
 	}) {
 		const component = new ActionRowBuilder<ButtonBuilder>()
 			.setComponents([
 				new ButtonBuilder()
 					.setCustomId('previous')
-					.setLabel('Previous Page')
+					.setEmoji({ id: Util.parseEmoji(Emojis.PREVIOUS).id })
 					.setStyle(ButtonStyle.Secondary)
 					.setDisabled(index === 0),
 				new ButtonBuilder()
 					.setCustomId('next')
-					.setLabel('Next Page')
+					.setEmoji({ id: Util.parseEmoji(Emojis.NEXT).id })
 					.setStyle(ButtonStyle.Primary)
 					.setDisabled(index + 1 === pages.length),
 			]);
 
 		const reply = _.cloneDeep(pages[index]);
-		reply.components.push(component);
+		if (reply.components) reply.components.push(component);
+		else Object.assign(reply, { components: [component] });
 		let message: Message<true>;
 		if (interaction.isChatInputCommand()) message = await interaction.reply({ ...reply, fetchReply: true });
 		else message = await interaction.update({ ...reply, fetchReply: true } as any);

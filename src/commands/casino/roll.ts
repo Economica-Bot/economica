@@ -23,10 +23,10 @@ export default class implements Command {
 		const proceeds = diceRoll === number ? result * 4 : result * -1;
 		recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'DICE_ROLL', proceeds, 0);
 		if (proceeds > 0) {
-			await ctx.embedify('success', 'user', `**The die landed on... \`${diceRoll}\`**\n\n🎉**Huzzah!**\nYou won ${ctx.guildEntity.currency}${parseNumber(result * 4)}`).send();
+			await ctx.embedify('success', 'user', `**The die landed on... \`${diceRoll}\`**\n\n🎉 **Huzzah!**\nYou won ${ctx.guildEntity.currency}${parseNumber(result * 4)}`).send();
 			return;
 		}
 
-		await ctx.embedify('error', 'user', `**The die landed on... \`${diceRoll}\`!**\n\n❌**Better Luck Next Time!**\nYou lost ${ctx.guildEntity.currency}${parseNumber(result)}`).send();
+		await ctx.embedify('error', 'user', `**The die landed on... \`${diceRoll}\`!**\n\n❌ **Better Luck Next Time!**\nYou lost ${ctx.guildEntity.currency}${parseNumber(result)}`).send();
 	};
 }

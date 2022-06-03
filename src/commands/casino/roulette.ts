@@ -53,10 +53,10 @@ export default class implements Command {
 		const proceeds = type.values.includes(ballResult) ? result * type.multiplier : result * -1;
 		recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'ROULETTE', proceeds, 0);
 		if (proceeds > 0) {
-			await ctx.embedify('success', 'user', `**The roulette ball landed on... \`${ballResult}\`**\n\n🎉**Huzzah!**\nYou won ${ctx.guildEntity.currency}${parseNumber(proceeds)}`).send();
+			await ctx.embedify('success', 'user', `**The roulette ball landed on... \`${ballResult}\`**\n\n🎉 **Huzzah!**\nYou won ${ctx.guildEntity.currency}${parseNumber(proceeds)}`).send();
 			return;
 		}
 
-		await ctx.embedify('error', 'user', `**The roulette ball landed on... \`${ballResult}\`!**\n\n❌**Better Luck Next Time!**\nYou lost ${ctx.guildEntity.currency}${parseNumber(result)}`).send();
+		await ctx.embedify('error', 'user', `**The roulette ball landed on... \`${ballResult}\`!**\n\n❌ **Better Luck Next Time!**\nYou lost ${ctx.guildEntity.currency}${parseNumber(result)}`).send();
 	};
 }

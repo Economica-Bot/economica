@@ -32,7 +32,9 @@
     "class-methods-use-this": "off",
     "newline-per-chained-call": "off",
     "radix": "off",
-    "no-param-reassign": "off"
+    "no-param-reassign": "off",
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": "off"
   },
   "settings": {
     "import/parsers": {

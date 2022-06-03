@@ -1,5 +1,5 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, InteractionReplyOptions } from 'discord.js';
 
 import { Member } from '../../entities/index.js';
 import { paginate } from '../../lib/index.js';
@@ -30,7 +30,7 @@ export default class implements Command {
 			const balance = parseNumber(member.wallet + member.treasury);
 			leaderBoardEntries.push(`\`${rank += 1}\` • <@${member.user.id}> | ${ctx.guildEntity.currency}${balance}\n`);
 		});
-		const embeds: EmbedBuilder[] = [];
+		const pages: InteractionReplyOptions[] = [];
 		let k = 0;
 		for (let i = 0; i < pageCount; i++) {
 			let description = '';
@@ -42,9 +42,9 @@ export default class implements Command {
 				.embedify('info', null, description)
 				.setAuthor({ name: `${ctx.interaction.guild}'s Leaderboard`, iconURL: ctx.interaction.guild.iconURL() })
 				.setFooter({ text: `page ${i + 1} of ${pageCount}` });
-			embeds.push(embed);
+			pages.push({ embeds: [embed] });
 		}
 
-		await paginate(ctx.interaction, embeds, page - 1);
+		await ctx.paginator({ pages, interaction: ctx.interaction, index: page - 1 });
 	};
 }

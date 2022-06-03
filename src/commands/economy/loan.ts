@@ -220,7 +220,6 @@ export default class implements Command {
 		if (interaction.replied) await interaction.editReply({ embeds: [embed], components: [] });
 		else await interaction.update({ embeds: [embed], components: [] });
 		const res = await interaction.channel.awaitMessages({ max: 1 });
-		console.log(!parseString(res.first().content), parseString(res.first().content) < ctx.memberEntity.wallet);
 		if (!validate(res.first() as Message<true>)) {
 			await interaction.followUp({ embeds: [ctx.embedify('error', 'user', `Invalid \`${property}\``)], ephemeral: true });
 			return this.collectProp(ctx, interaction, base, property, prompt, validate, parse);
