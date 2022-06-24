@@ -1,9 +1,6 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
-import { EmbedBuilder, InteractionReplyOptions } from 'discord.js';
-
-import { Member } from '../../entities/index.js';
-import { paginate } from '../../lib/index.js';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+import { Member } from '../../entities';
+import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -11,40 +8,48 @@ export default class implements Command {
 		.setDescription('View top balances')
 		.setModule('ECONOMY')
 		.setFormat('leaderboard [page]')
-		.setExamples(['leaderboard', 'leaderboard 3'])
-		.addIntegerOption((option) => option.setName('page').setDescription('Specify a page').setMinValue(1).setRequired(false));
+		.setExamples(['leaderboard', 'leaderboard 3']);
 
-	public execute = async (ctx: Context): Promise<void> => {
-		const page = ctx.interaction.options.getInteger('page', false) ?? 1;
-		const members = await Member
-			.createQueryBuilder('member')
-			.where('member.guild = :id', { id: ctx.interaction.guildId })
-			.leftJoinAndSelect('member.user', 'user')
-			.orderBy('"treasury" + "wallet"', 'DESC')
-			.getMany();
-		const entryCount = 10;
-		const pageCount = Math.ceil(members.length / entryCount);
-		const leaderBoardEntries: string[] = [];
-		let rank = 0;
-		members.forEach((member) => {
-			const balance = parseNumber(member.wallet + member.treasury);
-			leaderBoardEntries.push(`\`${rank += 1}\` • <@${member.user.id}> | ${ctx.guildEntity.currency}${balance}\n`);
-		});
-		const pages: InteractionReplyOptions[] = [];
-		let k = 0;
-		for (let i = 0; i < pageCount; i++) {
-			let description = '';
-			for (let j = 0; j < entryCount; j++, k++) {
-				if (leaderBoardEntries[k]) description += leaderBoardEntries[k];
-			}
-
-			const embed = ctx
-				.embedify('info', null, description)
-				.setAuthor({ name: `${ctx.interaction.guild}'s Leaderboard`, iconURL: ctx.interaction.guild.iconURL() })
-				.setFooter({ text: `page ${i + 1} of ${pageCount}` });
-			pages.push({ embeds: [embed] });
-		}
-
-		await ctx.paginator({ pages, interaction: ctx.interaction, index: page - 1 });
-	};
+	public execute = new ExecutionBuilder()
+		.setName('Leaderboard')
+		.setValue('leaderboard')
+		.setDescription('View the server leaderboard')
+		.setOptions([
+			new ExecutionBuilder()
+				.setName('Wallet')
+				.setValue('wallet')
+				.setDescription('View the leaderboard by wallet')
+				.setPagination(
+					async (ctx) => Member.find({ relations: ['guild'], order: { wallet: 'DESC' }, where: { guildId: ctx.interaction.guildId } }),
+					(member) => new ExecutionBuilder()
+						.setName(`Total: ${member.guild.currency} ${parseNumber(member.wallet)}`)
+						.setValue(member.userId)
+						.setDescription(`<@${member.userId}>`),
+				),
+			new ExecutionBuilder()
+				.setName('Treasury')
+				.setValue('treasury')
+				.setDescription('View the leaderboard by treasury')
+				.setPagination(
+					async (ctx) => Member.find({ relations: ['guild'], order: { treasury: 'DESC' }, where: { guildId: ctx.interaction.guildId } }),
+					(member) => new ExecutionBuilder()
+						.setName(`${member.guild.currency} ${parseNumber(member.treasury)}`)
+						.setValue(member.userId)
+						.setDescription(`<@${member.userId}>`),
+				),
+			new ExecutionBuilder()
+				.setName('Total')
+				.setValue('total')
+				.setDescription('View the leaderboard by total wealth')
+				.setPagination(
+					async (ctx) => {
+						const members = await Member.find({ relations: ['guild'], order: { wallet: 'DESC', treasury: 'DESC' }, where: { guildId: ctx.interaction.guildId } });
+						return members;
+					},
+					(member) => new ExecutionBuilder()
+						.setName(`Total: ${member.guild.currency} ${parseNumber(member.wallet + member.treasury)}`)
+						.setValue(member.userId)
+						.setDescription(`<@${member.userId}>`),
+				),
+		]);
 }

@@ -1,5 +1,4 @@
 import { parseNumber, parseString } from '@adrastopoulos/number-parser';
-import { GuildMember } from 'discord.js';
 
 import { Context } from '../structures/index.js';
 import { Moderation } from '../typings/index.js';
@@ -26,7 +25,7 @@ export async function validateAmount(
 export async function validateTarget(ctx: Context, memberRequired = true): Promise<boolean> {
 	const type = ctx.interaction.commandName as Moderation;
 	const member = ctx.interaction.guild.members.me;
-	const target = ctx.interaction.options.getMember('target') as GuildMember;
+	const target = ctx.interaction.options.getMember('target');
 	const targetUser = ctx.interaction.options.getUser('target');
 	if (!target && (!targetUser || memberRequired)) {
 		await ctx.embedify('error', 'user', 'Target not found.').send(true);

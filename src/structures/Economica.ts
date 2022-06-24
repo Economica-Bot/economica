@@ -1,4 +1,4 @@
-import { Client, Collection, EmbedBuilder, Util, WebhookClient } from 'discord.js';
+import { Client, Collection, EmbedBuilder, resolveColor, WebhookClient } from 'discord.js';
 import { readdirSync } from 'fs';
 import path from 'path';
 import { Logger } from 'tslog';
@@ -28,7 +28,7 @@ const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export class Economica extends Client {
-	public commands: Collection<string, Command<true>>;
+	public commands: Collection<string, Command>;
 	public cooldowns: Collection<string, Date>;
 	public webhooks: WebhookClient[];
 	public AppDataSource: DataSource;
@@ -36,7 +36,7 @@ export class Economica extends Client {
 
 	public constructor() {
 		super(clientOptions);
-		this.commands = new Collection<string, Command<true>>();
+		this.commands = new Collection<string, Command>();
 		this.cooldowns = new Collection<string, Date>();
 		this.webhooks = new Array<WebhookClient>();
 		this.log = new Logger(loggerOptions);
@@ -147,7 +147,7 @@ export class Economica extends Client {
 
 		const description = `\`\`\`ts${err.stack}\`\`\``;
 		const embed = new EmbedBuilder()
-			.setColor(Util.resolveColor('Blurple'))
+			.setColor(resolveColor('Blurple'))
 			.setAuthor({ name: 'Unhandled Rejection' })
 			.setDescription(description)
 			.setTimestamp();
@@ -157,7 +157,7 @@ export class Economica extends Client {
 	private async uncaughtException(err: Error, origin: string) {
 		this.log.fatal(err);
 		const embed = new EmbedBuilder()
-			.setColor(Util.resolveColor('Red'))
+			.setColor(resolveColor('Red'))
 			.setAuthor({ name: 'CRITICAL | Uncaught Exception' })
 			.setDescription(`Caught exception: ${err}\nException origin: ${origin}`)
 			.setTimestamp();
@@ -215,7 +215,7 @@ export class Economica extends Client {
 			const files = readdirSync(path.resolve(dirname, `../commands/${dir}/`)).filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
 			files.forEach(async (file) => {
 				const { default: CommandClass } = await import(`../commands/${dir}/${file}`);
-				const command = new CommandClass() as Command<true>;
+				const command = new CommandClass() as Command;
 
 				// Validation
 				if (!command.data.module) throw new Error(`Command ${command.data.name} missing module!`);

@@ -8,7 +8,7 @@ export class Item extends BaseEntity {
 	@Column({ primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
-	@ManyToOne(() => Listing)
+	@ManyToOne(() => Listing, { onDelete: 'CASCADE' })
 	public listing: Relation<Listing>;
 
 	@ManyToOne(() => Member)

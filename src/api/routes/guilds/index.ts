@@ -52,7 +52,7 @@ router.get('/:guildId/channels', async (req, res) => {
 	const { guildId: id } = req.params;
 	const guild = await bot.guilds.fetch(id);
 	const channels = await guild.channels.fetch();
-	const textChannels = channels.filter((channel) => channel.isText());
+	const textChannels = channels.filter((channel) => channel.isTextBased());
 	res.send(textChannels.toJSON());
 });
 

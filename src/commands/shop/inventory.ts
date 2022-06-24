@@ -1,8 +1,7 @@
-import { APIEmbedField, Util } from 'discord.js';
-
-import { Item } from '../../entities/index.js';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
-import { Emojis } from '../../typings/index.js';
+import { Item, Member, User } from '../../entities';
+import { collectProp, displayListing } from '../../lib';
+import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Emojis } from '../../typings';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -10,18 +9,77 @@ export default class implements Command {
 		.setDescription('View purchased items.')
 		.setModule('SHOP')
 		.setFormat('inventory')
-		.setExamples(['inventory'])
-		.addUserOption((option) => option
-			.setName('user')
-			.setDescription('Specify a user'));
+		.setExamples(['inventory']);
 
-	public execute = async (ctx: Context) => {
-		const member = ctx.interaction.options.getMember('user') ?? ctx.interaction.member;
-		const items = await Item.find({ relations: ['listing'], where: { owner: { userId: member.id, guildId: member.guild.id } } });
-		const inventoryEmbed = ctx
-			.embedify('info', 'user', 'If an item is of type `USABLE`, you may use it at any time with the `/item use` command. You may sell items on the market with `/market sell <id>`, or give them away with `/item give <id>`.')
-			.setAuthor({ name: `Inventory of ${member.user.tag}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.STACK).id)?.url })
-			.setFields(items.map((item) => ({ name: `${item.listing.name} (*${item.listing.type}*) - \`${item.amount}\``, value: `>>> ${item.listing.description}\n**Id:** \`${item.id}\`` } as APIEmbedField)));
-		await ctx.interaction.reply({ embeds: [inventoryEmbed] });
-	};
+	public execute = new ExecutionBuilder()
+		.setName('Viewing Inventory')
+		.setValue('inventory')
+		.setDescription('View items that you own')
+		.setPagination(
+			async (ctx) => Item.find({ relations: ['listing', 'listing.itemsRequired'], where: { owner: { userId: ctx.interaction.user.id, guildId: ctx.interaction.guildId } } }),
+			(item, ctx) => new ExecutionBuilder()
+				.setName(item.listing.name)
+				.setValue(item.listing.id)
+				.setDescription(item.listing.description)
+				.setEmbed(displayListing(ctx, item.listing))
+				.setOptions([
+					new ExecutionBuilder()
+						.setName('Give Item')
+						.setValue('item_give')
+						.setDescription('Give this item to another user')
+						.setExecution(async (ctx, interaction) => {
+							const embed = ctx.embedify('info', 'user', 'Specify a user');
+							const target = await collectProp(ctx, interaction, embed, 'target', (msg) => !!msg.mentions.members.first(), (msg) => msg.mentions.members.first());
+							const targetEntity = await Member.findOne({ where: { user: { id: target.id }, guild: { id: ctx.guildEntity.id } } })
+								?? await (async () => {
+									const user = await User.create({ id: target.id }).save();
+									return Member.create({ user, guild: ctx.guildEntity }).save();
+								})();
+							const targetItem = await Item.findOne({ where: { id: item.listing.id, owner: { userId: targetEntity.userId, guildId: targetEntity.guildId } } });
+							if (targetEntity.userId === ctx.memberEntity.userId) {
+								const embed = ctx.embedify('warn', 'user', 'You cannot give items to yourself.');
+								await interaction.editReply({ embeds: [embed] });
+								return;
+							}
+
+							if (targetItem && !item.listing.stackable) {
+								const embed = ctx.embedify('warn', 'user', 'That user already has that non-stackable item.');
+								await interaction.editReply({ embeds: [embed] });
+								return;
+							}
+
+							if (targetItem) {
+								targetItem.amount += 1;
+								await targetItem.save();
+							} else {
+								await Item.create({ owner: targetEntity, listing: item.listing, amount: 1 }).save();
+							}
+
+							item.amount -= 1;
+							if (item.amount === 0) await item.remove();
+							else item.save();
+
+							const successEmbed = ctx.embedify('success', 'user', `${Emojis.CHECK} Gave \`1\` x **${item.listing.name}** to <@${target.id}>.`);
+							await interaction.editReply({ embeds: [successEmbed] });
+						}),
+					new ExecutionBuilder()
+						.setName('Use Item')
+						.setValue('item_use')
+						.setDescription('Use this item')
+						.setEnabled(item.listing.type === 'USABLE')
+						.setExecution(async (ctx, interaction) => {
+							item.listing.rolesGranted.forEach((role) => { ctx.interaction.member.roles.add(role, `Used ${item.listing.name}`); });
+							item.listing.rolesRemoved.forEach((role) => { ctx.interaction.member.roles.remove(role, `Used ${item.listing.name}`); });
+							item.amount -= 1;
+							if (item.amount === 0) await item.remove();
+							else await item.save();
+
+							const embed = ctx
+								.embedify('success', 'user', `Used \`1\` x **${item.listing.name}**.`)
+								.addFields([{ name: 'Roles Removed', value: `<@&${item.listing.rolesRemoved.join('>, <@&')}>` }])
+								.addFields([{ name: 'Roles Given', value: `<@&${item.listing.rolesGranted.join('>, <@&')}>` }]);
+							await interaction.update({ embeds: [embed], components: [] });
+						}),
+				]),
+		);
 }

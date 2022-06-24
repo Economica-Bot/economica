@@ -1,5 +1,5 @@
-import { interval } from '../../lib/index.js';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+import { interval } from '../../lib';
+import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -9,5 +9,8 @@ export default class implements Command {
 		.setFormat('monthly')
 		.setExamples(['monthly']);
 
-	public execute = async (ctx: Context): Promise<void> => interval(ctx, 'monthly');
+	public execute = new ExecutionBuilder()
+		.setExecution(async (ctx) => {
+			interval(ctx, 'monthly');
+		});
 }

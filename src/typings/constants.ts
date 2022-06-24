@@ -1,6 +1,6 @@
 import { ColorResolvable } from 'discord.js';
 
-import { ReplyString, Incomes, Intervals, Module, ModuleString } from './index.js';
+import { ReplyString, Incomes, Intervals, Module, ModuleString, ListingString } from './index.js';
 
 export const defaultIntervalsObj: Intervals = {
 	minutely: {
@@ -139,6 +139,7 @@ export enum Emojis {
 	COG = '<:cog:974903646531764284>',
 	COGS = '<:cogs:974903647358046228>',
 	COIN = '<a:coin:975152086708781066>',
+	COLLECTABLE = '<:collectable:974924859895336971>',
 	COMMON_CHEST = '<a:common_chest:975152086721396816>',
 	CONFIRM = '<:confirm:974903647840391220>',
 	CONTROLS = '<:controls:974903648972841011>',
@@ -159,6 +160,7 @@ export enum Emojis {
 	FUTURE_CUBE = '<:future_cube:974903664093315072>',
 	GAMBLING_DIE = '<:gambling_die:974903666945437726>',
 	GEM = '<a:gem:975152086935277648>',
+	GENERATOR = '<:generator:990007141320523827>',
 	GLOBAL = '<:global:974903665020239893>',
 	GLOBAL_NOT = '<:global_not:974903666001707048>',
 	GLOBE = '<:globe:974903667679428651>',
@@ -179,7 +181,6 @@ export enum Emojis {
 	INSTRUMENT_TRUMPET = '<:instrument_trumpet:974924861447221268>',
 	INSTRUMENT_VIOLIN = '<:instrument_violin:974924866430050314>',
 	KEY = '<a:key:975152086436163615>',
-	LEATHER_BOOK = '<:leather_book:974924859895336971>',
 	LEGENDARY_CHEST = '<a:legendary_chest:975152086822035546>',
 	LEVELS_4 = '<:levels_4:974924865280815186>',
 	MAGIC_ORE = '<a:magic_ore:975152087014973450>',
@@ -190,6 +191,7 @@ export enum Emojis {
 	MONEY_BRIEFCASE = '<:money_briefcase:974924871698100255>',
 	MONEY_STACK = '<:money_stack:974924872918638602>',
 	NETWORK = '<:network:974924870632734731>',
+	NEXT = '<:next:975487429517672520>',
 	NOTIFICATION = '<:notification:974924874093051924>',
 	OIL = '<:oil:974924875120672810>',
 	PAPER_TOWEL = '<:paper_towel:974924876508975135>',
@@ -199,6 +201,7 @@ export enum Emojis {
 	POTION_AMBER = '<:potion_amber:974924880472584192>',
 	POTION_BLUE = '<:potion_blue:974924882708164608>',
 	POTION_GREEN = '<:potion_green:974924883454742579>',
+	PREVIOUS = '<:previous:975487443656642620>',
 	RAM = '<:ram:974924881324032010>',
 	RARE_CHEST = '<a:rare_chest:975152086817865819>',
 	RED_DOWN_ARROW = '<:red_down_arrow:974924884486524959>',
@@ -217,13 +220,12 @@ export enum Emojis {
 	STAR_LEVEL_ONE = '<:star_level_one:974924897111384125>',
 	STAR_LEVEL_THREE = '<:star_level_three:974924900143890442>',
 	STAR_LEVEL_TWO = '<:star_level_two:974924897950261259>',
+	STONE = '<:stone:989719975654752266>',
 	SUNGLASSES = '<:sunglasses:974924898923339797>',
 	TEXTING = '<a:texting:975152086893346866>',
 	TILES = '<:tiles:974924901494452234>',
 	TIME = '<:time:974924903570604092>',
-	TOOL_AXE = '<:tool_axe:974924904426250281>',
-	TOOL_HAMMER = '<:tool_hammer:974924902438162452>',
-	TOOL_SHOVEL = '<:tool_shovel:974924905378377759>',
+	PICKAXE = '<:pickaxe:989967644037885994>',
 	TREND = '<a:trend:975152087660896286>',
 	TRIANGLE_DOWN = '<:triangle_down:974924906414346250>',
 	TRIANGLE_UP = '<:triangle_up:974924907400036374>',
@@ -232,8 +234,6 @@ export enum Emojis {
 	UNLOCK = '<a:unlock:975152087384068096>',
 	URANIUM = '<:uranium:975152152198660248>',
 	WOOD = '<:wood:974924909383917568>',
-	NEXT = '<:next:975487429517672520>',
-	PREVIOUS = '<:previous:975487443656642620>',
 }
 export const INTERACTION_COMPONENT_COOLDOWN = 1000 * 45;
 export enum Properties {

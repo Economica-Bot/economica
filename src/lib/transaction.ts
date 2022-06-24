@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { parseNumber } from '@adrastopoulos/number-parser';
-import { EmbedBuilder, PermissionFlagsBits, TextChannel, Util } from 'discord.js';
+import { EmbedBuilder, PermissionFlagsBits, resolveColor, TextChannel } from 'discord.js';
 
 import { Guild, Member, Transaction } from '../entities/index.js';
 import { Economica } from '../structures/index.js';
@@ -11,12 +11,12 @@ import { TransactionString } from '../typings/index.js';
  * @param transaction - The transaction to display
  * @returns {EmbedBuilder}
  */
-export async function displayTransaction(transaction: Transaction): Promise<EmbedBuilder> {
+export function displayTransaction(transaction: Transaction): EmbedBuilder {
 	const { id, guild, type, target, agent, wallet, treasury, createdAt } = transaction;
 	const total = wallet + treasury;
 	const description = `Target: <@!${target.userId}> | Agent: <@!${agent.userId}>`;
 	return new EmbedBuilder()
-		.setColor(Util.resolveColor('Gold'))
+		.setColor(resolveColor('Gold'))
 		.setAuthor({ name: `Transaction | ${type}` })
 		.setDescription(description)
 		.addFields([

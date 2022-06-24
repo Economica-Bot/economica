@@ -10,14 +10,15 @@ import {
 	InteractionReplyOptions,
 	Message,
 	MessageComponentInteraction,
+	parseEmoji,
+	resolveColor,
 	SelectMenuBuilder,
 	SelectMenuInteraction,
-	Util,
 } from 'discord.js';
 import _ from 'lodash';
 
 import { Guild, Member, User } from '../entities/index.js';
-import { EmbedColors, Footer, PAGINATION_LIMIT, ReplyString, Emojis } from '../typings/index.js';
+import { EmbedColors, Emojis, Footer, PAGINATION_LIMIT, ReplyString } from '../typings/index.js';
 import { Economica, EconomicaSlashCommandBuilder } from './index.js';
 
 export class ContextEmbed extends EmbedBuilder {
@@ -37,7 +38,7 @@ export class ContextEmbed extends EmbedBuilder {
 export class Context {
 	public client: Economica;
 	public interaction: ChatInputCommandInteraction<'cached'>;
-	public data: EconomicaSlashCommandBuilder;
+	public data: Partial<EconomicaSlashCommandBuilder>;
 	public userEntity: User;
 	public guildEntity: Guild;
 	public memberEntity: Member;
@@ -73,7 +74,7 @@ export class Context {
 	}
 
 	public embedify(type: ReplyString, footer: Footer, description?: string | null): ContextEmbed {
-		const embed = new ContextEmbed(this).setColor(Util.resolveColor(EmbedColors[type]));
+		const embed = new ContextEmbed(this).setColor(resolveColor(EmbedColors[type]));
 		if (description) embed.setDescription(description);
 		if (footer === 'bot') embed.setFooter({ text: this.interaction.client.user.tag, iconURL: this.interaction.client.user.displayAvatarURL() });
 		else if (footer === 'user') embed.setFooter({ text: this.interaction.user.tag, iconURL: this.interaction.user.displayAvatarURL() });
@@ -100,7 +101,7 @@ export class Context {
 			const selectMenu = new SelectMenuBuilder().setCustomId('select');
 			const dataSubset = data.slice(i * PAGINATION_LIMIT, i * PAGINATION_LIMIT + PAGINATION_LIMIT);
 			embed.addFields(dataSubset.map((d, j) => ({ name: `${numbers[j + 1]} ${d.emoji || ''} ${d.name}`, value: d.description })));
-			selectMenu.addOptions(dataSubset.map((d, j) => ({ emoji: { id: Util.parseEmoji(numbers[j + 1]).id }, label: `${d.clean}`, value: d.value })));
+			selectMenu.addOptions(dataSubset.map((d, j) => ({ emoji: { id: parseEmoji(numbers[j + 1]).id }, label: `${d.clean}`, value: d.value })));
 			const row = new ActionRowBuilder<SelectMenuBuilder>().setComponents([selectMenu]);
 			const page: InteractionReplyOptions = { embeds: [embed], components: selectMenu.options.length ? [row] : [] };
 			pages.push(page);
@@ -120,12 +121,12 @@ export class Context {
 			.setComponents([
 				new ButtonBuilder()
 					.setCustomId('previous')
-					.setEmoji({ id: Util.parseEmoji(Emojis.PREVIOUS).id })
+					.setEmoji({ id: parseEmoji(Emojis.PREVIOUS).id })
 					.setStyle(ButtonStyle.Secondary)
 					.setDisabled(index === 0),
 				new ButtonBuilder()
 					.setCustomId('next')
-					.setEmoji({ id: Util.parseEmoji(Emojis.NEXT).id })
+					.setEmoji({ id: parseEmoji(Emojis.NEXT).id })
 					.setStyle(ButtonStyle.Primary)
 					.setDisabled(index + 1 === pages.length),
 			]);
@@ -135,7 +136,7 @@ export class Context {
 		else Object.assign(reply, { components: [component] });
 		let message: Message<true>;
 		if (interaction.isChatInputCommand()) message = await interaction.reply({ ...reply, fetchReply: true });
-		else message = await interaction.update({ ...reply, fetchReply: true } as any);
+		else message = await interaction.update({ ...reply, fetchReply: true } as any) as Message<true>;
 		const res = await message.awaitMessageComponent();
 		if (res.isSelectMenu()) return res as any;
 		return this.paginator({ pages, interaction: res, index: res.customId === 'next' ? index + 1 : index - 1 });

@@ -1,5 +1,15 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, ManyToOne, Relation } from 'typeorm';
+import {
+	BaseEntity,
+	Column,
+	CreateDateColumn,
+	Entity,
+	JoinColumn,
+	JoinTable,
+	ManyToMany,
+	ManyToOne,
+	Relation,
+} from 'typeorm';
 
 import { ListingString } from '../typings/index.js';
 import { Guild } from './index.js';
@@ -40,15 +50,15 @@ export class Listing extends BaseEntity {
 	@Column({ type: 'float4' })
 	public duration: number;
 
-	@ManyToMany(() => Listing, (listing) => listing.itemsRequired)
-	@JoinColumn()
+	@ManyToMany(() => Listing, (listing) => listing.itemsRequired, { eager: false })
+	@JoinTable()
 	public itemsRequired: Relation<Listing>[];
 
 	@Column('simple-array')
 	public rolesRequired: Snowflake[];
 
 	@Column('simple-array')
-	public rolesGiven: Snowflake[];
+	public rolesGranted: Snowflake[];
 
 	@Column('simple-array')
 	public rolesRemoved: Snowflake[];

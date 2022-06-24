@@ -22,7 +22,7 @@
     "connect-pg-simple": "^7.0.0",
     "cors": "^2.8.5",
     "discord-api-types": "^0.32.1",
-    "discord.js": "^14.0.0-dev.1652918983-adf461b",
+    "discord.js": "^14.0.0-dev.1655381041-4df491c",
     "dotenv": "^10.0.0",
     "express": "^4.17.3",
     "express-session": "^1.17.2",
