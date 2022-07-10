@@ -5,7 +5,7 @@ import { Listing, Member } from './index.js';
 
 @Entity()
 export class Market extends BaseEntity {
-	@Column({ primary: true })
+	@Column({ type: 'character varying', primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => Listing)
@@ -14,12 +14,12 @@ export class Market extends BaseEntity {
 	@ManyToOne(() => Member)
 	public owner: Relation<Member>;
 
-	@Column()
+	@Column({ type: 'integer' })
 	public amount: number;
 
-	@Column()
+	@Column({ type: 'integer' })
 	public price: number;
 
-	@CreateDateColumn()
+	@CreateDateColumn({ type: 'character varying' })
 	public createdAt: Date;
 }

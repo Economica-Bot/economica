@@ -5,8 +5,6 @@ import { WEBSITE_COMMANDS_URL, WEBSITE_DOCS_URL, WEBSITE_HOME_URL, WEBSITE_VOTE_
 import {
 	Command,
 	EconomicaSlashCommandBuilder,
-	EconomicaSlashCommandSubcommandBuilder,
-	EconomicaSlashCommandSubcommandGroupBuilder,
 	ExecutionBuilder,
 } from '../../structures';
 import { Emojis } from '../../typings';
@@ -42,16 +40,6 @@ export default class implements Command {
 								.setDescription(`${Emojis.FOCUS} **Format**: \`${command.data.format}\`\n${Emojis.TEXTING} **Examples**: \`\`\`${command.data.examples.join('\n')}\`\`\``)
 								.setFooter({ text: ctx.interaction.user.tag, iconURL: ctx.interaction.user.displayAvatarURL() })
 								.setTimestamp();
-							command.data.options.forEach((option) => {
-								if (option instanceof EconomicaSlashCommandSubcommandBuilder) {
-									commandEmbed.addFields([{ name: `${command.data.name} ${option.name}`, value: option.description }]);
-								} else if (option instanceof EconomicaSlashCommandSubcommandGroupBuilder) {
-									commandEmbed.addFields([{ name: `${command.data.name} ${option.name}`, value: option.description }]);
-									option.options.forEach((opt: EconomicaSlashCommandSubcommandBuilder) => {
-										commandEmbed.addFields([{ name: `${command.data.name} ${option.name} ${opt.name}`, value: opt.description, inline: true }]);
-									});
-								}
-							});
 
 							await interaction.update({ embeds: [commandEmbed], components: [] });
 						}),

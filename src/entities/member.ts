@@ -4,10 +4,10 @@ import { Guild, User } from './index.js';
 
 @Entity()
 export class Member extends BaseEntity {
-	@Column({ primary: true })
+	@Column({ type: 'character varying', primary: true })
 	public userId: string;
 
-	@Column({ primary: true })
+	@Column({ type: 'character varying', primary: true })
 	public guildId: string;
 
 	@ManyToOne(() => User, (user) => user.id)

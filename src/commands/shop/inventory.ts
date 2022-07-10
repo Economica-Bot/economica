@@ -29,12 +29,19 @@ export default class implements Command {
 						.setDescription('Give this item to another user')
 						.setExecution(async (ctx, interaction) => {
 							const embed = ctx.embedify('info', 'user', 'Specify a user');
-							const target = await collectProp(ctx, interaction, embed, 'target', (msg) => !!msg.mentions.members.first(), (msg) => msg.mentions.members.first());
-							const targetEntity = await Member.findOne({ where: { user: { id: target.id }, guild: { id: ctx.guildEntity.id } } })
-								?? await (async () => {
-									const user = await User.create({ id: target.id }).save();
-									return Member.create({ user, guild: ctx.guildEntity }).save();
-								})();
+							const target = await collectProp(
+								ctx,
+								interaction,
+								embed,
+								'target',
+								[{ function: (input) => ctx.client.users.cache.has(input), error: 'Could not find that user' },
+									{ function: (input) => input !== interaction.user.id, error: 'You cannot give yourself items' },
+									{ function: (input) => !ctx.client.users.cache.get(input).bot, error: 'You cannot give items to a bot' }],
+								(input) => ctx.client.users.cache.get(input),
+							);
+							await User.upsert({ id: target.id }, ['id']);
+							await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
+							const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
 							const targetItem = await Item.findOne({ where: { id: item.listing.id, owner: { userId: targetEntity.userId, guildId: targetEntity.guildId } } });
 							if (targetEntity.userId === ctx.memberEntity.userId) {
 								const embed = ctx.embedify('warn', 'user', 'You cannot give items to yourself.');

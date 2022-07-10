@@ -16,11 +16,9 @@ export default class implements Command {
 	public execute = new ExecutionBuilder()
 		.setExecution(async (ctx) => {
 			const target = ctx.interaction.options.getUser('user');
-			const targetEntity = await Member.findOne({ where: { user: { id: target.id }, guild: { id: ctx.guildEntity.id } } })
-				?? await (async () => {
-					const user = await User.create({ id: target.id }).save();
-					return Member.create({ user, guild: ctx.guildEntity }).save();
-				})();
+			await User.upsert({ id: target.id }, ['id']);
+			await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
+			const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
 			const amount = Math.ceil(Math.random() * targetEntity.wallet);
 			const { chance, minfine, maxfine } = ctx.guildEntity.incomes.rob;
 			const fine = Math.ceil(Math.random() * (maxfine - minfine) + minfine);

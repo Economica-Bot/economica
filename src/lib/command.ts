@@ -7,13 +7,9 @@ import { Context } from '../structures/index.js';
 async function checkPermission(ctx: Context): Promise<boolean> {
 	const member = ctx.interaction.member as GuildMember;
 	const channel = ctx.interaction.channel as TextChannel;
-	const group = ctx.data.getSubcommandGroup(ctx.interaction.options.getSubcommandGroup(false))[0];
-	const subcommand = ctx.data.getSubcommand(ctx.interaction.options.getSubcommand(false))[0];
 	const clientPermissions: PermissionsString[] = [];
 	const missingClientPermissions: PermissionsString[] = [];
 	if (ctx.data.clientPermissions) clientPermissions.push(...ctx.data.clientPermissions);
-	if (group?.clientPermissions) clientPermissions.push(...group.clientPermissions);
-	if (subcommand?.clientPermissions) clientPermissions.push(...subcommand.clientPermissions);
 	clientPermissions.forEach((permission) => {
 		if (!ctx.interaction.guild.members.me.permissionsIn(channel).has(permission)) missingClientPermissions.push(permission);
 	});

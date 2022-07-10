@@ -1,5 +1,5 @@
 import { parseNumber, parseString } from '@adrastopoulos/number-parser';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, parseEmoji } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, parseEmoji, SnowflakeUtil, MessageMentions } from 'discord.js';
 import ms from 'ms';
 import { IsNull, Not } from 'typeorm';
 
@@ -126,11 +126,52 @@ export default class implements Command {
 						.setAuthor({ name: 'Loan Creation Menu' })
 						.setThumbnail(ctx.client.emojis.resolve(parseEmoji(Emojis.DEED).id).url);
 
-					const borrower = await collectProp(ctx, interaction, embed, 'borrower', (msg) => !!msg.mentions.users.first() && msg.mentions.users.first().id !== interaction.user.id && !msg.mentions.users.first().bot, (msg) => msg.mentions.users.first());
-					const principal = await collectProp(ctx, interaction, embed, 'principal', (msg) => !!parseString(msg.content) && parseString(msg.content) <= ctx.memberEntity.wallet, (msg) => parseString(msg.content));
-					const repayment = await collectProp(ctx, interaction, embed, 'repayment', (msg) => !!parseString(msg.content), (msg) => parseString(msg.content));
-					const duration = await collectProp(ctx, interaction, embed, 'duration', (msg) => !!ms(msg.content), (msg) => ms(msg.content));
-					const message = await collectProp(ctx, interaction, embed, 'message', (msg) => !!msg.content, (msg) => msg.content);
+					const borrower = await collectProp(
+						ctx,
+						interaction,
+						embed,
+						'borrower',
+						[{ function: (input) => !!input.match(/\d{17,19}/)[0], error: 'Input is not a user snowflake' },
+							{ function: async (input) => !!(await ctx.client.users.fetch(input)), error: 'Could not find that user' },
+							{ function: (input) => input !== interaction.user.id, error: 'You cannot loan towards yourself!' },
+							{ function: (input) => !ctx.client.users.cache.get(input).bot, error: 'You cannot loan towards a bot!' }],
+						(input) => ctx.client.users.cache.get(input),
+					);
+					const principal = await collectProp(
+						ctx,
+						interaction,
+						embed,
+						'principal',
+						[{ function: (input) => !!parseString(input), error: 'Input could not be parsed' },
+							{ function: (input) => parseString(input) <= ctx.memberEntity.wallet, error: 'Principal is more than your wallet!' },
+							{ function: (input) => parseString(input) > 0, error: 'Principal must be more than 0.' }],
+						(input) => parseString(input),
+					);
+					const repayment = await collectProp(
+						ctx,
+						interaction,
+						embed,
+						'repayment',
+						[{ function: (input) => !!parseString(input), error: 'Input could not be parsed' },
+							{ function: (input) => parseString(input) > 0, error: 'Repayment must be more than 0' }],
+						(input) => parseString(input),
+					);
+					const duration = await collectProp(
+						ctx,
+						interaction,
+						embed,
+						'duration',
+						[{ function: (input) => !!ms(input), error: 'Input could not be parsed' }],
+						(input) => ms(input),
+					);
+					const message = await collectProp(
+						ctx,
+						interaction,
+						embed,
+						'message',
+						[{ function: (input) => !!input, error: 'Input could not be parsed' }],
+						(input) => input,
+					);
 
 					// Create borrower if not exist
 					await User.upsert({ id: borrower.id }, ['id']);

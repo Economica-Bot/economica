@@ -33,11 +33,9 @@ export default class implements Command {
 			const wallet = balance === 'wallet' ? parsedAmount : 0;
 			const treasury = balance === 'treasury' ? parsedAmount : 0;
 			const target = ctx.interaction.options.getMember('target');
-			const targetEntity = await Member.findOne({ where: { user: { id: target.id }, guild: { id: ctx.guildEntity.id } } })
-					?? await (async () => {
-						const user = await User.create({ id: target.id }).save();
-						return Member.create({ user, guild: ctx.guildEntity }).save();
-					})();
+			await User.upsert({ id: target.id }, ['id']);
+			await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
+			const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
 			await ctx.embedify('success', 'user', `Added ${ctx.guildEntity.currency}${parseNumber(parsedAmount)} to <@!${target.id}>'s \`${balance}\`.`).send();
 			await recordTransaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'ADD_MONEY', wallet, treasury);
 		});

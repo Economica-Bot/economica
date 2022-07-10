@@ -28,11 +28,9 @@ export default class implements Command {
 		.setExecution(async (ctx) => {
 			if (!(await validateTarget(ctx))) return;
 			const target = ctx.interaction.options.getMember('target');
-			const targetEntity = await Member.findOne({ where: { userId: target.id, guildId: ctx.guildEntity.id } })
-					?? await (async () => {
-						const user = await User.create({ id: target.id }).save();
-						return Member.create({ user, guild: ctx.guildEntity }).save();
-					})();
+			await User.upsert({ id: target.id }, ['id']);
+			await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
+			const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
 			const duration = ctx.interaction.options.getString('duration') ?? 'Permanent';
 			const permanent = duration === 'Permanent';
 			const milliseconds = ms(duration);

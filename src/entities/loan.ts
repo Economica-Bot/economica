@@ -5,7 +5,7 @@ import { Guild, Member } from './index.js';
 
 @Entity()
 export class Loan extends BaseEntity {
-	@Column({ primary: true })
+	@Column({ type: 'character varying', primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => Guild, { eager: true })
@@ -20,27 +20,27 @@ export class Loan extends BaseEntity {
 	@JoinColumn()
 	public borrower: Relation<Member>;
 
-	@Column()
+	@Column({ type: 'character varying' })
 	public message: string;
 
-	@Column()
+	@Column({ type: 'integer' })
 	public principal: number;
 
-	@Column()
+	@Column({ type: 'integer' })
 	public repayment: number;
 
-	@Column()
+	@Column({ type: 'integer' })
 	public duration: number;
 
-	@Column()
+	@Column({ type: 'boolean' })
 	public pending: boolean;
 
-	@Column()
+	@Column({ type: 'boolean' })
 	public active: boolean;
 
-	@Column({ default: null })
+	@Column({ type: 'time without time zone', default: null })
 	public completedAt: Date;
 
-	@CreateDateColumn()
+	@CreateDateColumn({ type: 'time without time zone' })
 	public createdAt: Date;
 }

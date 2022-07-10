@@ -6,7 +6,7 @@ import { Guild, Member } from './index.js';
 
 @Entity()
 export class Infraction extends BaseEntity {
-	@Column({ primary: true })
+	@Column({ type: 'character varying', primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => Guild)
@@ -21,21 +21,21 @@ export class Infraction extends BaseEntity {
 	@JoinColumn()
 	public agent: Relation<Member>;
 
-	@Column()
+	@Column({ type: 'character varying' })
 	public type: InfractionString;
 
-	@Column()
+	@Column({ type: 'character varying' })
 	public reason: string;
 
-	@Column({ nullable: true })
+	@Column({ type: 'boolean', nullable: true })
 	public active: boolean | null;
 
-	@Column({ nullable: true })
+	@Column({ type: 'integer', nullable: true })
 	public duration: number | null;
 
-	@Column({ nullable: true })
+	@Column({ type: 'boolean', nullable: true })
 	public permanent: boolean | null;
 
-	@CreateDateColumn()
+	@CreateDateColumn({ type: 'timestamp without time zone' })
 	public createdAt: Date;
 }

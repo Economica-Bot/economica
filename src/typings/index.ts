@@ -128,5 +128,4 @@ export type SpecialModuleString =
 	| 'INTERVAL'
 	| 'CASINO';
 export type ModuleString = DefaultModuleString | SpecialModuleString;
-export type Promisable<T> = T | Promise<T>;
 export * from './constants.js';

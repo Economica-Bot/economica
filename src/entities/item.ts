@@ -5,7 +5,7 @@ import { Listing, Member } from './index.js';
 
 @Entity()
 export class Item extends BaseEntity {
-	@Column({ primary: true })
+	@Column({ type: 'character varying', primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
 	@ManyToOne(() => Listing, { onDelete: 'CASCADE' })
@@ -14,9 +14,9 @@ export class Item extends BaseEntity {
 	@ManyToOne(() => Member)
 	public owner: Relation<Member>;
 
-	@Column()
+	@Column({ type: 'integer' })
 	public amount: number;
 
-	@Column({ default: null })
+	@Column({ type: 'time without time zone', default: null })
 	public lastGeneratedAt: Date;
 }

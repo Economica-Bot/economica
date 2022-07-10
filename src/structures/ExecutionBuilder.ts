@@ -1,6 +1,6 @@
-import { EmbedBuilder, MessageComponentInteraction, PermissionsString } from 'discord.js';
+/* eslint-disable max-classes-per-file */
+import { Awaitable, EmbedBuilder, MessageComponentInteraction, PermissionsString } from 'discord.js';
 
-import { Promisable } from '../typings';
 import { Context } from './Context';
 
 export class ExecutionBuilder {
@@ -14,8 +14,10 @@ export class ExecutionBuilder {
 	public execution: (ctx: Context, interaction?: MessageComponentInteraction<'cached'>) => Promise<void | ExecutionBuilder>;
 	public options: ExecutionBuilder[] = [];
 
-	public elements: (ctx: Context) => Promisable<any[]>;
+	public elements: (ctx: Context) => Awaitable<any[]>;
 	public func: (t: any, ctx: Context) => ExecutionBuilder;
+
+	public variables: Record<string, unknown> = {};
 
 	public setCtx(ctx: Context) {
 		this.ctx = ctx;
@@ -62,9 +64,13 @@ export class ExecutionBuilder {
 		return this;
 	}
 
-	public setPagination<T>(elements: (ctx: Context) => Promisable<T[]>, func: (t: T, ctx: Context) => ExecutionBuilder) {
+	public setPagination<T>(elements: (ctx: Context) => Awaitable<T[]>, func: (t: T, ctx: Context) => ExecutionBuilder) {
 		this.elements = elements;
 		this.func = func;
+		return this;
+	}
+
+	public collectVar() {
 		return this;
 	}
 }

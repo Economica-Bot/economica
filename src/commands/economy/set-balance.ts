@@ -23,11 +23,9 @@ export default class implements Command {
 	public execute = new ExecutionBuilder()
 		.setExecution(async (ctx) => {
 			const target = ctx.interaction.options.getMember('user');
-			const targetEntity = await Member.findOne({ relations: ['user', 'guild'], where: { user: { id: target.id }, guild: { id: ctx.guildEntity.id } } })
-				?? await (async () => {
-					const user = await User.create({ id: target.id }).save();
-					return Member.create({ user, guild: ctx.guildEntity }).save();
-				})();
+			await User.upsert({ id: target.id }, ['id']);
+			await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
+			const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
 			const amount = parseString(ctx.interaction.options.getString('amount'));
 			const balance = ctx.interaction.options.getString('balance');
 			const { wallet: w, treasury: t } = targetEntity;

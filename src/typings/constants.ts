@@ -235,6 +235,13 @@ export enum Emojis {
 	URANIUM = '<:uranium:975152152198660248>',
 	WOOD = '<:wood:974924909383917568>',
 }
+export const Icons: Record<number, `${Emojis}`> = {
+	0: '<:icon_1:974903674868498482>',
+	1: '<:icon_2:974903675891879997>',
+	2: '<:icon_3:974903677087281222>',
+	3: '<:icon_4:974903678920196157>',
+	4: '<:icon_5:974903678018404372>',
+};
 export const INTERACTION_COMPONENT_COOLDOWN = 1000 * 45;
 export enum Properties {
 	TEXTILE_MILL = 'MANUFACTURING',

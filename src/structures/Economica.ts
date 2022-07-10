@@ -43,20 +43,25 @@ export class Economica extends Client {
 	}
 
 	public async init() {
-		if (VALIDATE_SETTINGS) await this.validateSettings();
+		await this.validateSettings();
 		await this.initWebHooks();
 		await this.errorHandler();
 		await this.connectDB();
 		await this.registerEvents();
 		await this.registerCommands();
 		await this.registerJobs();
-		this.registerAPI();
+		await this.registerAPI();
 		await this.login(BOT_TOKEN);
-		this.log.info(`${this.user.tag} logged in`);
+		this.log.info(`${this.user.tag} Initialized`);
 		return this;
 	}
 
 	private async validateSettings(): Promise<void> {
+		if (!VALIDATE_SETTINGS) {
+			this.log.info('Skipping validation...');
+			return;
+		}
+
 		// BOT_TOKEN
 		this.log.debug('Validating BOT_TOKEN');
 		const token = BOT_TOKEN;

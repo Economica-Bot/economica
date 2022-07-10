@@ -2,12 +2,12 @@ import { BaseEntity, Column, Entity } from 'typeorm';
 
 @Entity()
 export class Token extends BaseEntity {
-	@Column({ primary: true })
+	@Column({ type: 'character varying', primary: true })
 	public id: string;
 
-	@Column()
+	@Column({ type: 'character varying' })
 	public accessToken: string;
 
-	@Column()
+	@Column({ type: 'character varying' })
 	public refreshToken: string;
 }

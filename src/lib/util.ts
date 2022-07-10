@@ -1,20 +1,84 @@
-import { EmbedBuilder, Message, MessageComponentInteraction } from 'discord.js';
+import {
+	ActionRowBuilder,
+	Awaitable,
+	ButtonBuilder,
+	ButtonStyle,
+	ComponentType,
+	EmbedBuilder,
+	MessageComponentInteraction,
+	ModalBuilder,
+	ModalMessageModalSubmitInteraction,
+	TextInputBuilder,
+	TextInputStyle,
+} from 'discord.js';
 
 import { Context, ContextEmbed } from '../structures';
-import { Promisable } from '../typings';
 
-export async function collectProp<T>(ctx: Context, interaction: MessageComponentInteraction<'cached'>, base: ContextEmbed, property: string, validate: (msg: Message<true>) => Promisable<boolean>, parse: (msg: Message<true>) => Promisable<T>, skippable = false): Promise<T> {
+export async function collectProp<T>(ctx: Context, interaction: MessageComponentInteraction<'cached'>, base: ContextEmbed, property: string, validators: { function: (input: string) => Awaitable<boolean>, error: string }[], parse: (input: string) => Awaitable<T>, skippable = false): Promise<T> {
 	const embed = new EmbedBuilder(base.data);
 	embed.setDescription(`Specify the \`${property}\` property.`);
-	if (skippable) embed.setFooter({ text: 'Enter "skip" to skip' });
-	if (interaction.replied) await interaction.editReply({ embeds: [embed], components: [] });
-	else await interaction.update({ embeds: [embed], components: [] });
-	const res = await interaction.channel.awaitMessages({ max: 1, filter: (msg) => msg.author.id === interaction.user.id });
-	if (skippable && res.first().content.toLowerCase() === 'skip') return null;
-	if (!(await validate(res.first() as Message<true>))) {
-		await interaction.followUp({ embeds: [ctx.embedify('error', 'user', `Invalid \`${property}\`.`)], ephemeral: true });
-		return collectProp(ctx, interaction, base, property, validate, parse, skippable);
+	const components = [
+		new ActionRowBuilder<ButtonBuilder>()
+			.setComponents(
+				new ButtonBuilder()
+					.setCustomId('input')
+					.setLabel('Input')
+					.setStyle(ButtonStyle.Primary),
+				new ButtonBuilder()
+					.setCustomId('skip')
+					.setLabel('Skip')
+					.setStyle(ButtonStyle.Secondary)
+					.setDisabled(!skippable),
+				new ButtonBuilder()
+					.setCustomId('cancel')
+					.setLabel('Cancel')
+					.setStyle(ButtonStyle.Danger),
+			),
+	];
+
+	const message = interaction.replied ? await interaction.editReply({ embeds: [embed], components }) : await interaction.update({ embeds: [embed], components, fetchReply: true });
+	const res = await message.awaitMessageComponent({ componentType: ComponentType.Button, filter: (int) => int.user.id === interaction.user.id });
+
+	if (res.customId === 'input') {
+		const modal = new ModalBuilder()
+			.setCustomId('modal')
+			.setTitle(`Specifying a ${property}`)
+			.setComponents([
+				new ActionRowBuilder<TextInputBuilder>()
+					.setComponents([
+						new TextInputBuilder()
+							.setCustomId('modal_input')
+							.setLabel(`Specify a new ${property} (type: ${typeof property})`)
+							.setRequired(true)
+							.setStyle(TextInputStyle.Short),
+					]),
+			]);
+
+		await res.showModal(modal);
+		const modalSubmit = await res.awaitModalSubmit({ time: 0 }) as ModalMessageModalSubmitInteraction;
+		const input = modalSubmit.fields.getTextInputValue('modal_input');
+
+		const errors = [];
+		// eslint-disable-next-line no-restricted-syntax
+		for await (const validator of validators) {
+			const res = await validator.function(input);
+			if (!res) {
+				errors.push(validator.error);
+				break;
+			}
+		}
+
+		if (errors.length) {
+			await modalSubmit.reply({ content: `Invalid input.\nErrors: ${errors.map((error) => `\`${error}\``).join('\n')}`, ephemeral: true });
+			return collectProp(ctx, interaction, base, property, validators, parse, skippable);
+		}
+
+		await modalSubmit.reply({ content: 'Input success.', ephemeral: true });
+		return parse(input);
+	} if (res.customId === 'skip' || res.customId === 'cancel') {
+		await res.update(res.customId);
+		return null;
 	}
 
-	return parse(res.first() as Message<true>);
+	return null;
 }

@@ -61,20 +61,20 @@ export const editListing = async (ctx: Context, interaction: MessageComponentInt
 		.setAuthor({ name: 'Shop Item Creation Menu' })
 		.setThumbnail(ctx.client.emojis.resolve(parseEmoji(Emojis.CHEST).id).url);
 
-	listing.name = await collectProp(ctx, interaction, embed, 'name', (msg) => !!msg.content, (msg) => msg.content, skipAll) ?? listing.name;
-	listing.price = await collectProp(ctx, interaction, embed, 'price', (msg) => !!parseString(msg.content), (msg) => parseString(msg.content), skipAll) ?? listing.price;
-	listing.type = await collectProp(ctx, interaction, embed, 'type', (msg) => ['collectable', 'instant', 'usable', 'generator'].includes(msg.content.toLowerCase()), (msg) => msg.content.toUpperCase(), skipAll) as ListingString ?? listing.type;
-	listing.treasuryRequired = await collectProp(ctx, interaction, embed, 'required treasury', (msg) => !!parseString(msg.content), (msg) => parseString(msg.content), true) ?? listing.treasuryRequired ?? 0;
-	listing.description = await collectProp(ctx, interaction, embed, 'description', (msg) => !!msg.content, (msg) => msg.content, true) ?? listing.description ?? 'No description';
-	listing.duration = await collectProp(ctx, interaction, embed, 'duration', (msg) => !!ms(msg.content), (msg) => ms(msg.content), true) ?? listing.duration ?? Infinity;
-	listing.stock = await collectProp(ctx, interaction, embed, 'stock', (msg) => !!parseString(msg.content), (msg) => parseString(msg.content), true) ?? listing.stock ?? Infinity;
-	listing.stackable = await collectProp(ctx, interaction, embed, 'stackable', (msg) => ['false', 'true'].includes(msg.content.toLowerCase()), (msg) => msg.content === 'true', true) ?? listing.stackable ?? false;
-	listing.itemsRequired = await collectProp(ctx, interaction, embed, 'required items', async (msg) => !!(await Listing.findBy({ guild: { id: ctx.interaction.guildId }, name: ILike(msg.content) })).length, async (msg) => Listing.findBy({ guild: { id: ctx.interaction.guildId }, name: ILike(msg.content) }), true) ?? listing.itemsRequired ?? [];
-	listing.rolesRequired = await collectProp(ctx, interaction, embed, 'required roles', (msg) => !!msg.mentions.roles.size, (msg) => Array.from(msg.mentions.roles.values()).map((role) => role.id), true) ?? listing.rolesRequired ?? [];
-	listing.rolesGranted = await collectProp(ctx, interaction, embed, 'granted roles', (msg) => !!msg.mentions.roles.size, (msg) => Array.from(msg.mentions.roles.values()).map((role) => role.id), true) ?? listing.rolesGranted ?? [];
-	listing.rolesRemoved = await collectProp(ctx, interaction, embed, 'removed roles', (msg) => !!msg.mentions.roles.size, (msg) => Array.from(msg.mentions.roles.values()).map((role) => role.id), true) ?? listing.rolesGranted ?? [];
+	listing.name = await collectProp(ctx, interaction, embed, 'name', [{ function: (input) => !!input, error: 'Could not parse input' }], (input) => input, skipAll) ?? listing.name;
+	listing.price = await collectProp(ctx, interaction, embed, 'price', [{ function: (input) => !!parseString(input), error: 'Input must be numerical' }], (input) => parseString(input), skipAll) ?? listing.price;
+	listing.type = await collectProp(ctx, interaction, embed, 'type', [{ function: (input) => !!input, error: 'Could not parse input' }, { function: (input) => ['collectable', 'instant', 'usable', 'generator'].includes(input.toLowerCase()), error: 'Input must be one of `collectable`, `instant`, `usable`, `generator` (case insensitive).' }], (input) => input.toUpperCase(), skipAll) as ListingString ?? listing.type;
+	listing.treasuryRequired = await collectProp(ctx, interaction, embed, 'required treasury', [{ function: (input) => !!parseString(input), error: 'Input must be numerical' }], (input) => parseString(input), true) ?? listing.treasuryRequired ?? 0;
+	listing.description = await collectProp(ctx, interaction, embed, 'description', [{ function: (input) => !!input, error: 'Could not parse input' }], (input) => input, true) ?? listing.description ?? 'No description';
+	listing.duration = await collectProp(ctx, interaction, embed, 'duration', [{ function: (input) => !!ms(input), error: 'Input must be a valid duration' }], (input) => ms(input), true) ?? listing.duration ?? Infinity;
+	listing.stock = await collectProp(ctx, interaction, embed, 'stock', [{ function: (input) => !!parseString(input), error: 'Input must be numerical' }], (input) => parseString(input), true) ?? listing.stock ?? Infinity;
+	listing.stackable = await collectProp(ctx, interaction, embed, 'stackable', [{ function: (input) => ['false', 'true'].includes(input.toLowerCase()), error: 'Input must be one of `false` or `true`' }], (input) => input === 'true', true) ?? listing.stackable ?? false;
+	listing.itemsRequired = await collectProp(ctx, interaction, embed, 'required items', [{ function: async (input) => !!(await Listing.findBy({ guild: { id: ctx.interaction.guildId }, name: ILike(input) })).length, error: 'Could not find that item in the market' }], async (input) => Listing.findBy({ guild: { id: ctx.interaction.guildId }, name: ILike(input) }), true) ?? listing.itemsRequired ?? [];
+	listing.rolesRequired = await collectProp(ctx, interaction, embed, 'required roles', [{ function: (input) => ctx.interaction.guild.roles.cache.has(input), error: 'Could not find that role' }], (input) => [input]);
+	listing.rolesGranted = await collectProp(ctx, interaction, embed, 'granted roles', [{ function: (input) => ctx.interaction.guild.roles.cache.has(input), error: 'Could not find that role' }], (input) => [input]);
+	listing.rolesRemoved = await collectProp(ctx, interaction, embed, 'removed roles', [{ function: (input) => ctx.interaction.guild.roles.cache.has(input), error: 'Could not find that role' }], (input) => [input]);
 	if (listing.type === 'GENERATOR') {
-		listing.generatorAmount = await collectProp(ctx, interaction, embed, 'generator amount', (msg) => !!parseString(msg.content), (msg) => parseString(msg.content)) ?? listing.generatorAmount;
-		listing.generatorPeriod = await collectProp(ctx, interaction, embed, 'generator period', (msg) => !!ms(msg.content), (msg) => ms(msg.content)) ?? listing.generatorPeriod;
+		listing.generatorAmount = await collectProp(ctx, interaction, embed, 'generator amount', [{ function: (input) => !!parseString(input), error: 'Input must be numerical' }], (input) => parseString(input)) ?? listing.generatorAmount;
+		listing.generatorPeriod = await collectProp(ctx, interaction, embed, 'generator period', [{ function: (input) => !!ms(input), error: 'Input must be valid duration' }], (input) => ms(input)) ?? listing.generatorPeriod;
 	}
 };

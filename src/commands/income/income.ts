@@ -40,6 +40,7 @@ export default class implements Command {
 				.setName('Edit')
 				.setValue('edit')
 				.setDescription('Edit income command configurations')
+				.setPermissions(['ManageGuild'])
 				.setPagination(
 					async (ctx) => Object.keys(ctx.guildEntity.incomes),
 					(cmd, ctx) => new ExecutionBuilder()
@@ -56,14 +57,12 @@ export default class implements Command {
 									.setAuthor({ name: `Income Command Configuration | ${cmd}:${property}` })
 									.setThumbnail(ctx.client.emojis.resolve(parseEmoji(Emojis.MONEY_BRIEFCASE).id).url);
 
-								const prop = await collectProp(ctx, interaction, embed, property.toString(), (msg) => !!parseString(msg.content), (msg) => parseString(msg.content));
+								const prop = await collectProp(ctx, interaction, embed, property.toString(), [{ function: (input) => !!parseString(input), error: 'Could not parse input' }], (input) => parseString(input));
+								if (prop === null) return;
 								ctx.guildEntity.incomes[cmd][property] = prop;
 								await ctx.guildEntity.save();
-
-								return new ExecutionBuilder()
-									.setName('Success')
-									.setValue('success')
-									.setDescription(`Successfully updated the \`${property}\` property on command \`${cmd}\`.`);
+								const successEmbed = ctx.embedify('success', 'user', `${Emojis.CHECK} **Successfully updated the \`${property}\` property to \`${prop}\` on command \`${cmd}\`.**`);
+								await interaction.editReply({ embeds: [successEmbed], components: [] });
 							}))),
 				),
 		]);

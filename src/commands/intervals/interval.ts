@@ -51,7 +51,7 @@ export default class implements Command {
 									.setAuthor({ name: 'Interval Command Configuration' })
 									.setThumbnail(ctx.client.emojis.resolve(parseEmoji(Emojis.TIME).id).url);
 
-								const prop = await collectProp(ctx, interaction, embed, property.toString(), (msg) => !!parseString(msg.content), (msg) => parseString(msg.content));
+								const prop = await collectProp(ctx, interaction, embed, property.toString(), [{ function: (input) => !!parseString(input), error: 'Could not parse input' }], (input) => parseString(input));
 								ctx.guildEntity.intervals[cmd][property] = prop;
 								await ctx.guildEntity.save();
 

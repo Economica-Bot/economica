@@ -16,7 +16,7 @@ import { Command } from '../entities/index.js';
 import { commandCheck } from '../lib/index.js';
 import { ExecutionBuilder } from '../structures/ExecutionBuilder.js';
 import { Context, Economica, Event } from '../structures/index.js';
-import { Emojis, PAGINATION_LIMIT } from '../typings/constants.js';
+import { Emojis, Icons, PAGINATION_LIMIT } from '../typings/constants.js';
 
 export default class implements Event {
 	public event = 'interactionCreate' as const;
@@ -37,14 +37,6 @@ export default class implements Event {
 			await Command.create({ member: ctx.memberEntity, command: interaction.commandName }).save();
 		}
 	}
-
-	private icons: Record<number, `${Emojis}`> = {
-		0: '<:icon_1:974903674868498482>',
-		1: '<:icon_2:974903675891879997>',
-		2: '<:icon_3:974903677087281222>',
-		3: '<:icon_4:974903678920196157>',
-		4: '<:icon_5:974903678018404372>',
-	};
 
 	private async execution(ctx: Context, ex: ExecutionBuilder, index = 0, interaction?: MessageComponentInteraction<'cached'>): Promise<void> {
 		if (ex.execution) {
@@ -76,8 +68,8 @@ export default class implements Event {
 		const row2 = new ActionRowBuilder<ButtonBuilder>();
 
 		for (let i = 0; i < fields.length; i++) {
-			fields[i].name = `${this.icons[i]} ${fields[i].name}`;
-			row1.components[0].options[i].data.emoji = { id: parseEmoji(this.icons[i]).id };
+			fields[i].name = `${Icons[i]} ${fields[i].name}`;
+			row1.components[0].options[i].data.emoji = { id: parseEmoji(Icons[i]).id };
 		}
 
 		if (index > 0) {

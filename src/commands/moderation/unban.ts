@@ -20,11 +20,9 @@ export default class implements Command {
 		.setExecution(async (ctx) => {
 			if (!(await validateTarget(ctx, false))) return;
 			const target = ctx.interaction.options.getUser('target');
-			const targetEntity = await Member.findOne({ where: { userId: target.id, guildId: ctx.guildEntity.id } })
-				?? await (async () => {
-					const user = await User.create({ id: target.id }).save();
-					return Member.create({ user, guild: ctx.guildEntity }).save();
-				})();
+			await User.upsert({ id: target.id }, ['id']);
+			await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
+			const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
 			const reason = ctx.interaction.options.getString('reason', false) || 'No reason provided';
 			const ban = (await ctx.interaction.guild.bans.fetch()).get(target.id);
 			if (!ban) {
