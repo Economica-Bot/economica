@@ -26,7 +26,7 @@ export default class implements Command {
 	public execute = new ExecutionBuilder()
 		.setExecution(async (ctx) => {
 			const channel = (ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel);
-			if (!channel.permissionsFor(ctx.interaction.guild.members.me).has('ManageMessages')) {
+			if (!channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.ManageMessages)) {
 				await ctx.embedify('error', 'bot', 'I need `MANAGE_MESSAGES` in that channel.').send(true);
 				return;
 			}

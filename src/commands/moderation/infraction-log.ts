@@ -35,7 +35,7 @@ export default class implements Command {
 					const channel = msgs.first().mentions.channels.first() as TextChannel;
 					if (!channel) {
 						await interaction.followUp({ content: 'Could not find mention', ephemeral: true });
-					} else if (!channel.permissionsFor(ctx.interaction.guild.members.me).has('SendMessages') || !channel.permissionsFor(ctx.interaction.guild.members.me).has('EmbedLinks')) {
+					} else if (!channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.SendMessages) || !channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.EmbedLinks)) {
 						const embed = ctx.embedify('error', 'user', 'I need `SEND_MESSAGES` and `EMBED_LINKS` permissions in that channel.');
 						await interaction.followUp({ embeds: [embed], components: [] });
 					} else {
