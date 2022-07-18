@@ -157,11 +157,11 @@ export default class implements Command {
 					parse: (ctx, input) => input,
 				})
 				.setExecution(async (ctx, interaction) => {
-					const borrower = this.execute.getVariable('borrower', this.execute);
-					const principal = this.execute.getVariable('principal', this.execute);
-					const repayment = this.execute.getVariable('repayment', this.execute);
-					const message = this.execute.getVariable('message', this.execute);
-					const duration = this.execute.getVariable('duration', this.execute);
+					const borrower = this.execute.getVariable('borrower');
+					const principal = this.execute.getVariable('principal');
+					const repayment = this.execute.getVariable('repayment');
+					const message = this.execute.getVariable('message');
+					const duration = this.execute.getVariable('duration');
 
 					// Create borrower if not exist
 					await User.upsert({ id: borrower.id }, ['id']);

@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, TextChannel } from 'discord.js';
+import { ChannelType, PermissionFlagsBits } from 'discord.js';
 
 import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 
@@ -30,20 +30,26 @@ export default class implements Command {
 				.setName('Set')
 				.setValue('set')
 				.setDescription('Set the transaction log')
+				.collectVar({
+					property: 'channel',
+					prompt: 'Specify a channel by ID',
+					validators: [
+						{ function: (ctx, input) => !!input.match(/\d{17,19}/)?.[0], error: 'Input is not a channel snowflake!' },
+						{ function: (ctx, input) => !!ctx.interaction.guild.channels.cache.get(input), error: 'Could not find that channel.' },
+						{ function: (ctx, input) => ctx.interaction.guild.channels.cache.get(input).type === ChannelType.GuildText, error: 'That is not a text channel.' },
+					],
+					parse: (ctx, input) => ctx.interaction.guild.channels.cache.get(input),
+				})
 				.setExecution(async (ctx, interaction) => {
-					await interaction.reply({ content: 'Mention a channel', ephemeral: true });
-					const msgs = await interaction.channel.awaitMessages({ max: 1, filter: (msg) => msg.author.id === ctx.interaction.user.id });
-					const channel = msgs.first().mentions.channels.first() as TextChannel;
-					if (!channel) {
-						await interaction.followUp({ content: 'Could not find mention', ephemeral: true });
-					} else if (!channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.SendMessages) || !channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.EmbedLinks)) {
+					const channel = this.execute.getVariable('channel');
+					if (!channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.SendMessages) || !channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.EmbedLinks)) {
 						const embed = ctx.embedify('error', 'user', 'I need `SEND_MESSAGES` and `EMBED_LINKS` permissions in that channel.');
-						await interaction.followUp({ embeds: [embed], components: [] });
+						await interaction.editReply({ embeds: [embed], components: [] });
 					} else {
 						ctx.guildEntity.transactionLogId = channel.id;
 						await ctx.guildEntity.save();
 						const embed = ctx.embedify('success', 'user', `Transaction log set to ${channel}.`);
-						await interaction.followUp({ embeds: [embed], components: [] });
+						await interaction.editReply({ embeds: [embed], components: [] });
 					}
 				}),
 			new ExecutionBuilder()

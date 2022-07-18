@@ -57,7 +57,7 @@ export async function recordTransaction(
 		const channel = client.channels.cache.get(transactionLogId) as TextChannel;
 		const member = channel.guild.members.cache.get(client.user.id);
 		if (!channel.permissionsFor(member).has(PermissionFlagsBits.SendMessages) || !channel.permissionsFor(member).has(PermissionFlagsBits.EmbedLinks)) return;
-		const embed = await displayTransaction(transactionEntity);
+		const embed = displayTransaction(transactionEntity);
 		await channel.send({ embeds: [embed] });
 	}
 }

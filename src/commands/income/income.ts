@@ -56,7 +56,7 @@ export default class implements Command {
 								parse: (ctx, input) => parseString(input),
 							})
 							.setExecution(async (ctx, interaction) => {
-								ctx.guildEntity.incomes[cmd][property] = this.execute.getVariable(property, this.execute);
+								ctx.guildEntity.incomes[cmd][property] = this.execute.getVariable(property);
 								await ctx.guildEntity.save();
 								const successEmbed = ctx.embedify('success', 'user', `${Emojis.CHECK} **Successfully updated the \`${property}\` property to \`${ctx.guildEntity.incomes[cmd][property]}\` on command \`${cmd}\`.**`);
 								await interaction.editReply({ embeds: [successEmbed], components: [] });

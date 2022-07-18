@@ -51,7 +51,7 @@ export default class implements Command {
 								parse: (ctx, input) => parseString(input),
 							})
 							.setExecution(async (ctx) => {
-								const res = this.execute.getVariable(property, this.execute);
+								const res = this.execute.getVariable(property);
 								ctx.guildEntity.intervals[cmd][property] = res;
 								await ctx.guildEntity.save();
 								return new ExecutionBuilder()

@@ -76,7 +76,7 @@ export class ExecutionBuilder {
 		return this;
 	}
 
-	public getVariable(input: string, ex: ExecutionBuilder) {
+	public getVariable(input: string, ex: ExecutionBuilder = this) {
 		if (ex.variables[input]) return ex.variables[input];
 		// eslint-disable-next-line no-restricted-syntax
 		for (const option of ex.options) {

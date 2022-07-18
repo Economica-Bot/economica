@@ -60,7 +60,7 @@ export default class implements Command {
 					parse: (ctx, input) => ctx.client.users.cache.get(input),
 				})
 				.setPagination(
-					(ctx) => Infraction.find({ relations: ['target', 'agent'], where: { guild: { id: ctx.interaction.guildId }, target: { userId: this.execute.getVariable('user', this.execute).id } } }),
+					(ctx) => Infraction.find({ relations: ['target', 'agent'], where: { guild: { id: ctx.interaction.guildId }, target: { userId: this.execute.getVariable('user').id } } }),
 					(infraction) => new ExecutionBuilder()
 						.setName(infraction.type)
 						.setValue(infraction.id)
