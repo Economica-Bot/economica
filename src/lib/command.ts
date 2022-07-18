@@ -2,6 +2,7 @@ import { GuildMember, PermissionFlagsBits, PermissionsString, TextChannel } from
 import ms from 'ms';
 
 import { DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEVELOPER_IDS } from '../config';
+import { Command } from '../entities';
 import { Context } from '../structures';
 
 async function checkPermission(ctx: Context): Promise<boolean> {
@@ -25,27 +26,23 @@ async function checkPermission(ctx: Context): Promise<boolean> {
 
 async function checkCooldown(ctx: Context): Promise<boolean> {
 	const { incomes, intervals } = ctx.guildEntity;
-	const key = `${ctx.interaction.guildId}-${ctx.interaction.user.id}-${ctx.interaction.commandName}`;
 	if (!(ctx.interaction.commandName in { ...incomes, ...intervals })) return true;
-	const date = ctx.client.cooldowns.get(key);
+	const command = await Command.findOne({ order: { createdAt: 'DESC' }, where: { member: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId }, command: ctx.interaction.commandName } });
+	const createdAt = command?.createdAt;
+	if (!createdAt) return true;
 	let cooldown: number;
-	if (!date) {
-		ctx.client.cooldowns.set(key, new Date());
-		return true;
-	}
 	if (ctx.interaction.commandName in { ...intervals, ...incomes }) {
 		Object.keys({ ...intervals, ...incomes }).forEach((k) => {
 			if (k === ctx.interaction.commandName) cooldown = { ...intervals, ...incomes }[k].cooldown;
 		});
 	}
-	if (date.getTime() + cooldown > Date.now()) {
+	if (createdAt.getTime() + cooldown > Date.now()) {
 		const embed = ctx
-			.embedify('warn', 'user', `You may run this command in \`${ms(date.getTime() + cooldown - Date.now())}\``)
+			.embedify('warn', 'user', `You may run this command in \`${ms(createdAt.getTime() + cooldown - Date.now())}\``)
 			.setFooter({ text: `Cooldown: ${ms(cooldown)}` });
 		ctx.interaction.reply({ embeds: [embed], ephemeral: true });
 		return false;
 	}
-	ctx.client.cooldowns.set(key, new Date());
 	return true;
 }
 

@@ -26,7 +26,6 @@ import {
 
 export class Economica extends Client {
 	public commands: Collection<string, Command>;
-	public cooldowns: Collection<string, Date>;
 	public webhooks: WebhookClient[];
 	public AppDataSource: DataSource;
 	public log: Logger;
@@ -34,7 +33,6 @@ export class Economica extends Client {
 	public constructor() {
 		super(clientOptions);
 		this.commands = new Collection<string, Command>();
-		this.cooldowns = new Collection<string, Date>();
 		this.webhooks = new Array<WebhookClient>();
 		this.log = new Logger(loggerOptions);
 	}
