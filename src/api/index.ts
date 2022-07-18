@@ -4,9 +4,9 @@ import session from 'express-session';
 import passport from 'passport';
 import PGStore from 'connect-pg-simple';
 
-import './utilities/discord.js';
-import routes from './routes/index.js';
-import { PORT, SECRET } from '../config.js';
+import './utilities/discord';
+import routes from './routes';
+import { PORT, SECRET } from '../config';
 
 export function createApp(): Express {
 	const app = express();

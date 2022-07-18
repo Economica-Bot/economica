@@ -1,7 +1,6 @@
 import { parseString } from '@adrastopoulos/number-parser';
-import { parseEmoji, PermissionFlagsBits } from 'discord.js';
+import { PermissionFlagsBits } from 'discord.js';
 
-import { collectProp } from '../../lib';
 import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 import { Emojis, IncomeCommand } from '../../typings';
 
@@ -28,14 +27,13 @@ export default class implements Command {
 				.setName('View')
 				.setValue('view')
 				.setDescription('View income command information')
-				.setExecution(async (ctx, interaction) => {
-					const embed = ctx.embedify('info', 'guild', 'Income command information');
-					Object.entries(ctx.guildEntity.incomes).forEach((income) => {
-						const description = Object.entries(income[1]).map((prop) => `${prop[0]}: ${prop[1]}`);
-						embed.addFields([{ name: income[0], value: `\`\`\`${description.join('\n')}\`\`\``, inline: true }]);
-					});
-					await interaction.update({ embeds: [embed], components: [] });
-				}),
+				.setPagination(
+					(ctx) => Object.keys(ctx.guildEntity.incomes),
+					(cmd, ctx) => new ExecutionBuilder()
+						.setName(cmd)
+						.setValue(cmd)
+						.setDescription(`\`\`\`${Object.entries(ctx.guildEntity.incomes[cmd]).map((prop) => `${prop[0]}: ${prop[1]}`).join('\n')}\`\`\``),
+				),
 			new ExecutionBuilder()
 				.setName('Edit')
 				.setValue('edit')
@@ -51,17 +49,16 @@ export default class implements Command {
 							.setName(property)
 							.setValue(property)
 							.setDescription(`The \`${property}\` property of \`${cmd}\``)
+							.collectVar({
+								property,
+								prompt: `Enter a new ${property}`,
+								validators: [{ function: (ctx, input) => !!parseString(input), error: 'Could not parse input!' }],
+								parse: (ctx, input) => parseString(input),
+							})
 							.setExecution(async (ctx, interaction) => {
-								const embed = ctx
-									.embedify('info', 'user')
-									.setAuthor({ name: `Income Command Configuration | ${cmd}:${property}` })
-									.setThumbnail(ctx.client.emojis.resolve(parseEmoji(Emojis.MONEY_BRIEFCASE).id).url);
-
-								const prop = await collectProp(ctx, interaction, embed, property.toString(), [{ function: (input) => !!parseString(input), error: 'Could not parse input' }], (input) => parseString(input));
-								if (prop === null) return;
-								ctx.guildEntity.incomes[cmd][property] = prop;
+								ctx.guildEntity.incomes[cmd][property] = this.execute.getVariable(property, this.execute);
 								await ctx.guildEntity.save();
-								const successEmbed = ctx.embedify('success', 'user', `${Emojis.CHECK} **Successfully updated the \`${property}\` property to \`${prop}\` on command \`${cmd}\`.**`);
+								const successEmbed = ctx.embedify('success', 'user', `${Emojis.CHECK} **Successfully updated the \`${property}\` property to \`${ctx.guildEntity.incomes[cmd][property]}\` on command \`${cmd}\`.**`);
 								await interaction.editReply({ embeds: [successEmbed], components: [] });
 							}))),
 				),

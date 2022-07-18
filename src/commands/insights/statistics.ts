@@ -1,9 +1,9 @@
 import { parseEmoji } from 'discord.js';
 import ms from 'ms';
 
-import { Command as CommandEntity } from '../../entities/index.js';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures/index.js';
-import { Emojis } from '../../typings/index.js';
+import { Command as CommandEntity } from '../../entities';
+import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Emojis } from '../../typings';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()

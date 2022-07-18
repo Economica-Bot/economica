@@ -1,10 +1,10 @@
 import { parseNumber, parseString } from '@adrastopoulos/number-parser';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, parseEmoji, SnowflakeUtil, MessageMentions } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, parseEmoji } from 'discord.js';
 import ms from 'ms';
 import { IsNull, Not } from 'typeorm';
 
 import { Loan, Member, User } from '../../entities';
-import { collectProp, displayLoan, recordTransaction } from '../../lib';
+import { displayLoan, recordTransaction } from '../../lib';
 import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 import { Emojis } from '../../typings';
 
@@ -120,58 +120,48 @@ export default class implements Command {
 				.setName('Propose')
 				.setValue('propose')
 				.setDescription('Propose, or create, a loan')
+				.collectVar({
+					property: 'borrower',
+					prompt: 'Specify a user by ID',
+					validators: [{ function: (ctx, input) => !!input.match(/\d{17,19}/)?.[0], error: 'Input is not a user snowflake' },
+						{ function: async (ctx, input) => !!(await ctx.client.users.fetch(input).catch(() => null)), error: 'Could not find that user' },
+						{ function: (ctx, input) => input !== ctx.interaction.user.id, error: 'You cannot loan towards yourself!' },
+						{ function: (ctx, input) => !ctx.client.users.cache.get(input).bot, error: 'You cannot loan towards a bot!' }],
+					parse: (ctx, input) => ctx.client.users.cache.get(input),
+				})
+				.collectVar({
+					property: 'principal',
+					prompt: 'Specify a principal amount',
+					validators: [{ function: (ctx, input) => !!parseString(input), error: 'Input could not be parsed' },
+						{ function: (ctx, input) => parseString(input) <= ctx.memberEntity.wallet, error: 'Principal is more than your wallet!' },
+						{ function: (ctx, input) => parseString(input) > 0, error: 'Principal must be more than 0.' }],
+					parse: (ctx, input) => parseString(input),
+				})
+				.collectVar({
+					property: 'repayment',
+					prompt: 'Specify a repayment amount',
+					validators: [{ function: (ctx, input) => !!parseString(input), error: 'Input could not be parsed' },
+						{ function: (ctx, input) => parseString(input) > 0, error: 'Repayment must be more than 0' }],
+					parse: (ctx, input) => parseString(input),
+				})
+				.collectVar({
+					property: 'duration',
+					prompt: 'Specify the duration of the loan',
+					validators: [{ function: (ctx, input) => !!ms(input), error: 'Input could not be parsed' }],
+					parse: (ctx, input) => ms(input),
+				})
+				.collectVar({
+					property: 'message',
+					prompt: 'Specify a loan message',
+					validators: [{ function: (input) => !!input, error: 'Input could not be parsed' }],
+					parse: (ctx, input) => input,
+				})
 				.setExecution(async (ctx, interaction) => {
-					const embed = ctx
-						.embedify('info', 'user')
-						.setAuthor({ name: 'Loan Creation Menu' })
-						.setThumbnail(ctx.client.emojis.resolve(parseEmoji(Emojis.DEED).id).url);
-
-					const borrower = await collectProp(
-						ctx,
-						interaction,
-						embed,
-						'borrower',
-						[{ function: (input) => !!input.match(/\d{17,19}/)[0], error: 'Input is not a user snowflake' },
-							{ function: async (input) => !!(await ctx.client.users.fetch(input)), error: 'Could not find that user' },
-							{ function: (input) => input !== interaction.user.id, error: 'You cannot loan towards yourself!' },
-							{ function: (input) => !ctx.client.users.cache.get(input).bot, error: 'You cannot loan towards a bot!' }],
-						(input) => ctx.client.users.cache.get(input),
-					);
-					const principal = await collectProp(
-						ctx,
-						interaction,
-						embed,
-						'principal',
-						[{ function: (input) => !!parseString(input), error: 'Input could not be parsed' },
-							{ function: (input) => parseString(input) <= ctx.memberEntity.wallet, error: 'Principal is more than your wallet!' },
-							{ function: (input) => parseString(input) > 0, error: 'Principal must be more than 0.' }],
-						(input) => parseString(input),
-					);
-					const repayment = await collectProp(
-						ctx,
-						interaction,
-						embed,
-						'repayment',
-						[{ function: (input) => !!parseString(input), error: 'Input could not be parsed' },
-							{ function: (input) => parseString(input) > 0, error: 'Repayment must be more than 0' }],
-						(input) => parseString(input),
-					);
-					const duration = await collectProp(
-						ctx,
-						interaction,
-						embed,
-						'duration',
-						[{ function: (input) => !!ms(input), error: 'Input could not be parsed' }],
-						(input) => ms(input),
-					);
-					const message = await collectProp(
-						ctx,
-						interaction,
-						embed,
-						'message',
-						[{ function: (input) => !!input, error: 'Input could not be parsed' }],
-						(input) => input,
-					);
+					const borrower = this.execute.getVariable('borrower', this.execute);
+					const principal = this.execute.getVariable('principal', this.execute);
+					const repayment = this.execute.getVariable('repayment', this.execute);
+					const message = this.execute.getVariable('message', this.execute);
+					const duration = this.execute.getVariable('duration', this.execute);
 
 					// Create borrower if not exist
 					await User.upsert({ id: borrower.id }, ['id']);

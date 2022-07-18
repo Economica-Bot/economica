@@ -1,5 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder } from '@discordjs/builders';
-import { ButtonStyle, ComponentType, PermissionFlagsBits } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, PermissionFlagsBits } from 'discord.js';
 
 import { Infraction } from '../../entities';
 import { displayInfraction } from '../../lib';
@@ -51,43 +50,38 @@ export default class implements Command {
 				.setName('View User Infractions')
 				.setValue('infraction_view_user')
 				.setDescription('View all infractions by a specific user')
-				.setExecution(async (ctx, interaction) => {
-					await interaction.reply({ content: 'Mention a user', ephemeral: true });
-					const msgs = await interaction.channel.awaitMessages({ max: 1, filter: (msg) => msg.author.id === ctx.interaction.user.id });
-					const user = msgs.first().mentions.users.first();
-					if (!user) {
-						await interaction.followUp({ content: 'Could not find mention', ephemeral: true });
-						return undefined;
-					}
-
-					return new ExecutionBuilder()
-						.setName('Viewing User Infractions')
-						.setValue('infraction_viewing_user')
-						.setDescription(`Viewing <@${user.id}>'s Infractions`)
-						.setPagination(
-							(ctx) => Infraction.find({ relations: ['target', 'agent'], where: { guild: { id: ctx.interaction.guildId }, target: { userId: user.id } } }),
-							(infraction) => new ExecutionBuilder()
-								.setName(infraction.type)
-								.setValue(infraction.id)
-								.setDescription(`Moderator: <@${infraction.agent.userId}> | <t:${Math.round(infraction.createdAt.getTime() / 1000)}>\n\`\`\`${infraction.reason}\`\`\``)
-								.setExecution(async (ctx, interaction) => {
-									const embed = displayInfraction(infraction);
-									const row = new ActionRowBuilder<ButtonBuilder>()
-										.setComponents([
-											new ButtonBuilder()
-												.setCustomId('infraction_delete')
-												.setLabel('Delete')
-												.setStyle(ButtonStyle.Danger),
-										]);
-									const msg = await interaction.update({ embeds: [embed], components: [row], fetchReply: true });
-									const res = await msg.awaitMessageComponent({ componentType: ComponentType.Button, filter: (i) => i.user.id === interaction.user.id });
-									if (res.customId === 'infraction_delete') {
-										await infraction.remove();
-										const embed = ctx.embedify('success', 'user', 'Infraction Deleted');
-										res.update({ embeds: [embed], components: [] });
-									}
-								}),
-						);
-				}),
+				.collectVar({
+					property: 'user',
+					prompt: 'Insert a user ID',
+					validators: [
+						{ function: (ctx, input) => !!input.match(/\d{17,19}/)?.[0], error: 'Input is not a user snowflake' },
+						{ function: async (ctx, input) => !!(await ctx.client.users.fetch(input)), error: 'Could not find that user' },
+					],
+					parse: (ctx, input) => ctx.client.users.cache.get(input),
+				})
+				.setPagination(
+					(ctx) => Infraction.find({ relations: ['target', 'agent'], where: { guild: { id: ctx.interaction.guildId }, target: { userId: this.execute.getVariable('user', this.execute).id } } }),
+					(infraction) => new ExecutionBuilder()
+						.setName(infraction.type)
+						.setValue(infraction.id)
+						.setDescription(`Moderator: <@${infraction.agent.userId}> | <t:${Math.round(infraction.createdAt.getTime() / 1000)}>\n\`\`\`${infraction.reason}\`\`\``)
+						.setExecution(async (ctx, interaction) => {
+							const embed = displayInfraction(infraction);
+							const row = new ActionRowBuilder<ButtonBuilder>()
+								.setComponents([
+									new ButtonBuilder()
+										.setCustomId('infraction_delete')
+										.setLabel('Delete')
+										.setStyle(ButtonStyle.Danger),
+								]);
+							const msg = await interaction.update({ embeds: [embed], components: [row], fetchReply: true });
+							const res = await msg.awaitMessageComponent({ componentType: ComponentType.Button, filter: (i) => i.user.id === interaction.user.id });
+							if (res.customId === 'infraction_delete') {
+								await infraction.remove();
+								const embed = ctx.embedify('success', 'user', 'Infraction Deleted');
+								res.update({ embeds: [embed], components: [] });
+							}
+						}),
+				),
 		]);
 }

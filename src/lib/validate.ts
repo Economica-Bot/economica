@@ -1,7 +1,7 @@
 import { parseNumber, parseString } from '@adrastopoulos/number-parser';
 
-import { Context } from '../structures/index.js';
-import { Moderation } from '../typings/index.js';
+import { Context } from '../structures';
+import { Moderation } from '../typings';
 
 export async function validateAmount(
 	ctx: Context,

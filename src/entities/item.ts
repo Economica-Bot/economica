@@ -1,7 +1,7 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
 import { BaseEntity, Column, Entity, ManyToOne, Relation } from 'typeorm';
 
-import { Listing, Member } from './index.js';
+import { Listing, Member } from '.';
 
 @Entity()
 export class Item extends BaseEntity {
@@ -11,12 +11,12 @@ export class Item extends BaseEntity {
 	@ManyToOne(() => Listing, { onDelete: 'CASCADE' })
 	public listing: Relation<Listing>;
 
-	@ManyToOne(() => Member)
+	@ManyToOne(() => Member, { onDelete: 'CASCADE' })
 	public owner: Relation<Member>;
 
 	@Column({ type: 'integer' })
 	public amount: number;
 
-	@Column({ type: 'time without time zone', default: null })
+	@Column({ type: 'timestamp', default: null })
 	public lastGeneratedAt: Date;
 }

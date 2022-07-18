@@ -11,15 +11,15 @@ import {
 	Relation,
 } from 'typeorm';
 
-import { ListingString } from '../typings/index.js';
-import { Guild } from './index.js';
+import { ListingString } from '../typings';
+import { Guild } from '.';
 
 @Entity()
 export class Listing extends BaseEntity {
 	@Column({ type: 'character varying', primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
-	@ManyToOne(() => Guild)
+	@ManyToOne(() => Guild, { onDelete: 'CASCADE' })
 	@JoinColumn()
 	public guild: Relation<Guild>;
 
@@ -50,7 +50,7 @@ export class Listing extends BaseEntity {
 	@Column({ type: 'float4' })
 	public duration: number;
 
-	@ManyToMany(() => Listing, (listing) => listing.itemsRequired, { eager: false })
+	@ManyToMany(() => Listing, (listing) => listing.itemsRequired, { onDelete: 'CASCADE' })
 	@JoinTable()
 	public itemsRequired: Relation<Listing>[];
 
@@ -64,11 +64,11 @@ export class Listing extends BaseEntity {
 	public rolesRemoved: Snowflake[];
 
 	@Column({ type: 'integer', nullable: true })
-	public generatorPeriod: number;
+	public generatorPeriod: number | null;
 
 	@Column({ type: 'integer', nullable: true })
-	public generatorAmount: number;
+	public generatorAmount: number | null;
 
-	@CreateDateColumn({ type: 'time without time zone' })
+	@CreateDateColumn({ type: 'timestamp' })
 	public createdAt: Date;
 }

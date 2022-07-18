@@ -3,11 +3,10 @@ import { MessageComponentInteraction, parseEmoji } from 'discord.js';
 import ms from 'ms';
 import { ILike } from 'typeorm';
 
-import { Listing } from '../entities/index.js';
-import { Context } from '../structures/index.js';
-import { Emojis } from '../typings/constants.js';
-import { ListingDescriptions, ListingString } from '../typings/index.js';
-import { collectProp } from './util.js';
+import { collectProp } from '.';
+import { Listing } from '../entities';
+import { Context } from '../structures';
+import { Emojis, ListingDescriptions, ListingString } from '../typings';
 
 const getFormattedCreateTimestamp = (listing: Listing): string => `<t:${Math.trunc(listing.createdAt.getTime() / 1000)}:f>`;
 const getFormattedExpiresTimestamp = (listing: Listing): string => `${

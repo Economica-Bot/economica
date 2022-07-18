@@ -1,9 +1,9 @@
 import express from 'express';
 
-import authRoutes from './auth/index.js';
-import commandRoutes from './commands/index.js';
-import guildRoutes from './guilds/index.js';
-import userRoutes from './users/index.js';
+import authRoutes from './auth';
+import commandRoutes from './commands';
+import guildRoutes from './guilds';
+import userRoutes from './users';
 
 const router = express.Router();
 

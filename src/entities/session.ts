@@ -5,7 +5,7 @@ export class Session extends BaseEntity {
 	@Column({ type: 'character varying', primary: true })
 	public sid: string;
 
-	@Column({ type: 'time without time zone' })
+	@Column({ type: 'timestamp' })
 	public expire: Date;
 
 	@Column({ type: 'jsonb' })

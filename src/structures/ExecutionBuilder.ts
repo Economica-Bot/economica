@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import { Awaitable, EmbedBuilder, MessageComponentInteraction, PermissionsString } from 'discord.js';
 
 import { Context } from './Context';
@@ -14,10 +13,11 @@ export class ExecutionBuilder {
 	public execution: (ctx: Context, interaction?: MessageComponentInteraction<'cached'>) => Promise<void | ExecutionBuilder>;
 	public options: ExecutionBuilder[] = [];
 
-	public elements: (ctx: Context) => Awaitable<any[]>;
-	public func: (t: any, ctx: Context) => ExecutionBuilder;
+	public elements: (ctx: Context) => Awaitable<unknown[]>;
+	public func: (t: unknown, ctx: Context) => ExecutionBuilder;
 
-	public variables: Record<string, unknown> = {};
+	public variableCollectors: { property: string, prompt: string, validators: { function: (ctx: Context, input: string) => Awaitable<boolean>, error: string }[], parse: (ctx: Context, input: string) => Awaitable<unknown>, skippable?: boolean }[] = [];
+	public variables: Record<string, any> = {};
 
 	public setCtx(ctx: Context) {
 		this.ctx = ctx;
@@ -70,7 +70,20 @@ export class ExecutionBuilder {
 		return this;
 	}
 
-	public collectVar() {
+	public collectVar(input: typeof this.variableCollectors[0]) {
+		const { property, prompt, validators, parse, skippable } = input;
+		this.variableCollectors.push({ property, prompt, validators, parse, skippable });
 		return this;
+	}
+
+	public getVariable(input: string, ex: ExecutionBuilder) {
+		if (ex.variables[input]) return ex.variables[input];
+		// eslint-disable-next-line no-restricted-syntax
+		for (const option of ex.options) {
+			const res = this.getVariable(input, option);
+			if (res) return res;
+		}
+
+		return null;
 	}
 }

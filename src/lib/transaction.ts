@@ -2,9 +2,9 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 import { EmbedBuilder, PermissionFlagsBits, resolveColor, TextChannel } from 'discord.js';
 
-import { Guild, Member, Transaction } from '../entities/index.js';
-import { Economica } from '../structures/index.js';
-import { TransactionString } from '../typings/index.js';
+import { Guild, Member, Transaction } from '../entities';
+import { Economica } from '../structures';
+import { TransactionString } from '../typings';
 
 /**
  * Display a transaction

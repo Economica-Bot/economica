@@ -1,9 +1,8 @@
 import { parseString } from '@adrastopoulos/number-parser';
-import { parseEmoji, PermissionFlagsBits } from 'discord.js';
+import { PermissionFlagsBits } from 'discord.js';
 
-import { collectProp } from '../../lib';
 import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
-import { Emojis, IntervalCommand } from '../../typings';
+import { IntervalCommand } from '../../typings';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -45,20 +44,20 @@ export default class implements Command {
 							.setName(property)
 							.setValue(property)
 							.setDescription(`The \`${property}\` property of \`${cmd}\``)
-							.setExecution(async (ctx, interaction) => {
-								const embed = ctx
-									.embedify('info', 'user')
-									.setAuthor({ name: 'Interval Command Configuration' })
-									.setThumbnail(ctx.client.emojis.resolve(parseEmoji(Emojis.TIME).id).url);
-
-								const prop = await collectProp(ctx, interaction, embed, property.toString(), [{ function: (input) => !!parseString(input), error: 'Could not parse input' }], (input) => parseString(input));
-								ctx.guildEntity.intervals[cmd][property] = prop;
+							.collectVar({
+								property,
+								prompt: `Input a new ${property}`,
+								validators: [{ function: (ctx, input) => !!parseString(input), error: 'Could not parse input' }],
+								parse: (ctx, input) => parseString(input),
+							})
+							.setExecution(async (ctx) => {
+								const res = this.execute.getVariable(property, this.execute);
+								ctx.guildEntity.intervals[cmd][property] = res;
 								await ctx.guildEntity.save();
-
 								return new ExecutionBuilder()
 									.setName('Success')
 									.setValue('success')
-									.setDescription(`Successfully updated the \`${property}\` property on command \`${cmd}\`.`);
+									.setDescription(`Successfully updated the \`${property}\` property to \`${res}\` on command \`${cmd}\`.`);
 							}))),
 				),
 		]);

@@ -31,7 +31,7 @@ export default class implements Command {
 				return;
 			}
 
-			if (!channel.isTextBased()) {
+			if (channel.type !== ChannelType.GuildText) {
 				await ctx.embedify('error', 'bot', 'That is not a text based channel!').send(true);
 				return;
 			}

@@ -1,5 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder } from '@discordjs/builders';
-import { ButtonStyle, ComponentType, PermissionFlagsBits } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, PermissionFlagsBits } from 'discord.js';
 
 import { Transaction } from '../../entities';
 import { displayTransaction } from '../../lib';

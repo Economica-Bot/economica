@@ -1,6 +1,6 @@
 import { ColorResolvable } from 'discord.js';
 
-import { ReplyString, Incomes, Intervals, Module, ModuleString, ListingString } from './index.js';
+import { Incomes, Intervals, Module, ModuleString, ReplyString } from '.';
 
 export const defaultIntervalsObj: Intervals = {
 	minutely: {

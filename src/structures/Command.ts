@@ -1,5 +1,4 @@
-import { ExecutionBuilder } from './ExecutionBuilder.js';
-import { EconomicaSlashCommandBuilder } from './index.js';
+import { EconomicaSlashCommandBuilder, ExecutionBuilder } from '.';
 
 export class Command {
 	public data: Partial<EconomicaSlashCommandBuilder>;

@@ -11,9 +11,7 @@ import {
 	Partials,
 	PermissionFlagsBits,
 } from 'discord.js';
-import path from 'path';
 import { DataSourceOptions } from 'typeorm';
-import { fileURLToPath } from 'url';
 
 import type { ISettingsParam } from 'tslog';
 // Environment Vars
@@ -31,8 +29,12 @@ export const DISCORD_INVITE_URL = process.env.DISCORD_INVITE_URL;
 export const WEBHOOK_URIS: string[] = JSON.parse(process.env.WEBHOOK_URIS);
 export const DEPLOY_COMMANDS = +process.env.DEPLOY_COMMANDS;
 export const DEPLOY_ALL_MODULES = +process.env.DEPLOY_ALL_MODULES;
-export const DB_OPTION = +process.env.DB_OPTION;
+export const DB_HOST = process.env.DB_HOST;
+export const DB_PORT = +process.env.DB_HOST;
+export const DB_USERNAME = process.env.DB_USERNAME;
 export const DB_PASSWORD = process.env.DB_PASSWORD;
+export const DB_NAME = process.env.DB_NAME;
+export const DB_OPTION = +process.env.DB_OPTION;
 export const VALIDATE_SETTINGS = process.env.VALIDATE_SETTINGS === 'true';
 export const PRODUCTION = process.env.PRODUCTION === 'true';
 export const DEVELOPMENT = !PRODUCTION;
@@ -70,14 +72,10 @@ export const clientOptions: ClientOptions = {
 	intents: [
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMembers,
-		GatewayIntentBits.MessageContent,
-		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.DirectMessages,
 	],
 	partials: [
 		Partials.Channel,
 		Partials.GuildMember,
-		Partials.Message,
 	],
 };
 
@@ -94,17 +92,13 @@ export const inviteOptions: InviteGenerationOptions = {
 	],
 };
 
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
-
 export const databaseOptions: DataSourceOptions = {
 	type: 'postgres',
-	host: 'localhost',
-	port: 5432,
-	username: 'postgres',
+	host: DB_HOST,
+	port: DB_PORT,
+	username: DB_USERNAME,
 	password: DB_PASSWORD,
-	entities: [path.join(dirname, '/entities/*.js')],
-	database: 'postgres',
+	database: DB_NAME,
 	logging: ['info', 'log', 'warn', 'error'],
 };
 

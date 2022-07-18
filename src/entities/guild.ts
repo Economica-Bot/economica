@@ -2,7 +2,7 @@ import { Snowflake } from 'discord.js';
 import { BaseEntity, Column, Entity } from 'typeorm';
 
 import { CURRENCY_SYMBOL } from '../config.js';
-import { defaultIncomesObj, defaultIntervalsObj, defaultModulesObj } from '../typings/index.js';
+import { defaultIncomesObj, defaultIntervalsObj, defaultModulesObj } from '../typings';
 
 @Entity()
 export class Guild extends BaseEntity {

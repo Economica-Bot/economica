@@ -33,10 +33,10 @@ export default class implements Command {
 								if (operation === 'enable') {
 									if (ctx.userEntity.keys < 1) {
 										const embed = ctx.embedify('warn', 'user', 'You do not have any keys.');
-										await interaction.update({ embeds: [embed], components: [] });
+										await interaction.editReply({ embeds: [embed], components: [] });
 									} else if (ctx.guildEntity.modules[name].enabled) {
 										const embed = ctx.embedify('warn', 'user', `This server already has the \`${name}\` module enabled.`);
-										await interaction.update({ embeds: [embed], components: [] });
+										await interaction.editReply({ embeds: [embed], components: [] });
 									} else {
 										ctx.userEntity.keys -= 1;
 										await ctx.userEntity.save();

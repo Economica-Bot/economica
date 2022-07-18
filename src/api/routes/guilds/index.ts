@@ -1,11 +1,12 @@
+import { ChannelType } from 'discord.js';
 import express from 'express';
 
-import { CURRENCY_SYMBOL } from '../../../config.js';
-import { Guild } from '../../../entities/index.js';
-import { bot } from '../../../index.js';
-import infractionsRoutes from './infractions/index.js';
-import membersRoutes from './members/index.js';
-import transactionsRoutes from './transactions/index.js';
+import { bot } from '../../..';
+import { CURRENCY_SYMBOL } from '../../../config';
+import { Guild } from '../../../entities';
+import infractionsRoutes from './infractions';
+import membersRoutes from './members';
+import transactionsRoutes from './transactions';
 
 const router = express.Router();
 
@@ -52,7 +53,7 @@ router.get('/:guildId/channels', async (req, res) => {
 	const { guildId: id } = req.params;
 	const guild = await bot.guilds.fetch(id);
 	const channels = await guild.channels.fetch();
-	const textChannels = channels.filter((channel) => channel.isTextBased());
+	const textChannels = channels.filter((channel) => channel.type === ChannelType.GuildText);
 	res.send(textChannels.toJSON());
 });
 

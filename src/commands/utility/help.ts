@@ -1,5 +1,4 @@
-import { EmbedBuilder } from '@discordjs/builders';
-import { parseEmoji } from 'discord.js';
+import { EmbedBuilder, parseEmoji } from 'discord.js';
 
 import { WEBSITE_COMMANDS_URL, WEBSITE_DOCS_URL, WEBSITE_HOME_URL, WEBSITE_VOTE_URL } from '../../config';
 import {

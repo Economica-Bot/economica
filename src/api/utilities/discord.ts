@@ -2,8 +2,8 @@ import passport from 'passport';
 import { Profile, Strategy } from 'passport-discord';
 import { VerifyCallback } from 'passport-oauth2';
 
-import { Token } from '../../entities/index.js';
-import { CALLBACK_URL, CLIENT_ID, CLIENT_SECRET } from '../../config.js';
+import { Token } from '../../entities';
+import { CALLBACK_URL, CLIENT_ID, CLIENT_SECRET } from '../../config';
 
 passport.serializeUser((user: Token, done) => done(null, user.id));
 

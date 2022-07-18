@@ -1,9 +1,9 @@
 /* eslint-disable max-classes-per-file */
 import { ChatInputCommandInteraction, EmbedBuilder, resolveColor } from 'discord.js';
 
-import { Guild, Member, User } from '../entities/index.js';
-import { EmbedColors, Footer, ReplyString } from '../typings/index.js';
-import { Economica, EconomicaSlashCommandBuilder } from './index.js';
+import { Guild, Member, User } from '../entities';
+import { EmbedColors, Footer, ReplyString } from '../typings';
+import { Economica, EconomicaSlashCommandBuilder } from '.';
 
 export class ContextEmbed extends EmbedBuilder {
 	public ctx: Context;

@@ -42,10 +42,7 @@ export default class implements Command {
 				.setValue('total')
 				.setDescription('View the leaderboard by total wealth')
 				.setPagination(
-					async (ctx) => {
-						const members = await Member.find({ relations: ['guild'], order: { wallet: 'DESC', treasury: 'DESC' }, where: { guildId: ctx.interaction.guildId } });
-						return members;
-					},
+					async (ctx) => Member.find({ relations: ['guild'], order: { wallet: 'DESC', treasury: 'DESC' }, where: { guildId: ctx.interaction.guildId } }),
 					(member) => new ExecutionBuilder()
 						.setName(`Total: ${member.guild.currency} ${parseNumber(member.wallet + member.treasury)}`)
 						.setValue(member.userId)

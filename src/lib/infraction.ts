@@ -1,9 +1,9 @@
 import { EmbedBuilder, PermissionFlagsBits, resolveColor, TextChannel } from 'discord.js';
 import ms from 'ms';
 
-import { Guild, Infraction, Member } from '../entities/index.js';
-import { Economica } from '../structures/index.js';
-import { InfractionString } from '../typings/index.js';
+import { Guild, Infraction, Member } from '../entities';
+import { Economica } from '../structures';
+import { InfractionString } from '../typings';
 
 /**
  * Display an infraction

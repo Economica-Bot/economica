@@ -128,4 +128,4 @@ export type SpecialModuleString =
 	| 'INTERVAL'
 	| 'CASINO';
 export type ModuleString = DefaultModuleString | SpecialModuleString;
-export * from './constants.js';
+export * from './constants';

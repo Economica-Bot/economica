@@ -1,8 +1,8 @@
 import { GuildMember, PermissionFlagsBits, PermissionsString, TextChannel } from 'discord.js';
 import ms from 'ms';
 
-import { DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEVELOPER_IDS } from '../config.js';
-import { Context } from '../structures/index.js';
+import { DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEVELOPER_IDS } from '../config';
+import { Context } from '../structures';
 
 async function checkPermission(ctx: Context): Promise<boolean> {
 	const member = ctx.interaction.member as GuildMember;

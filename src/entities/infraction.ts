@@ -1,8 +1,8 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, Relation } from 'typeorm';
 
-import { InfractionString } from '../typings/index.js';
-import { Guild, Member } from './index.js';
+import { InfractionString } from '../typings';
+import { Guild, Member } from '.';
 
 @Entity()
 export class Infraction extends BaseEntity {
@@ -13,11 +13,11 @@ export class Infraction extends BaseEntity {
 	@JoinColumn()
 	public guild: Relation<Guild>;
 
-	@ManyToOne(() => Member)
+	@ManyToOne(() => Member, { onDelete: 'CASCADE' })
 	@JoinColumn()
 	public target: Relation<Member>;
 
-	@ManyToOne(() => Member)
+	@ManyToOne(() => Member, { onDelete: 'CASCADE' })
 	@JoinColumn()
 	public agent: Relation<Member>;
 
@@ -36,6 +36,6 @@ export class Infraction extends BaseEntity {
 	@Column({ type: 'boolean', nullable: true })
 	public permanent: boolean | null;
 
-	@CreateDateColumn({ type: 'timestamp without time zone' })
+	@CreateDateColumn({ type: 'timestamp' })
 	public createdAt: Date;
 }

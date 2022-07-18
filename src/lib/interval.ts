@@ -1,8 +1,8 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 
-import { Context } from '../structures/index.js';
-import { TransactionString, Intervals } from '../typings/index.js';
-import { recordTransaction } from './index.js';
+import { Context } from '../structures';
+import { TransactionString, Intervals } from '../typings';
+import { recordTransaction } from '.';
 
 const intervals: Record<keyof Intervals, TransactionString> = {
 	daily: 'INTERVAL_MINUTE',

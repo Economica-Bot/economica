@@ -18,14 +18,14 @@ export default class implements Command {
 			await User.upsert({ id: target.id }, ['id']);
 			await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
 			const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
-			const embed = ctx
+			await ctx
 				.embedify('info', 'user')
 				.setAuthor({ name: `${target.username}'s Balance`, iconURL: target.displayAvatarURL() })
 				.addFields([
 					{ name: 'Wallet', value: `${ctx.guildEntity.currency}${parseNumber(targetEntity.wallet)}`, inline: true },
 					{ name: 'Treasury', value: `${ctx.guildEntity.currency}${parseNumber(targetEntity.treasury)}`, inline: true },
 					{ name: 'Total', value: `${ctx.guildEntity.currency}${parseNumber(targetEntity.wallet + targetEntity.treasury)}`, inline: true },
-				]);
-			await ctx.interaction.editReply({ embeds: [embed] });
+				])
+				.send();
 		});
 }

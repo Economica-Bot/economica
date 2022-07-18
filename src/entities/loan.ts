@@ -1,22 +1,22 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, Relation } from 'typeorm';
 
-import { Guild, Member } from './index.js';
+import { Guild, Member } from '.';
 
 @Entity()
 export class Loan extends BaseEntity {
 	@Column({ type: 'character varying', primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
-	@ManyToOne(() => Guild, { eager: true })
+	@ManyToOne(() => Guild, { eager: true, onDelete: 'CASCADE' })
 	@JoinColumn()
 	public guild: Relation<Guild>;
 
-	@ManyToOne(() => Member, { eager: true })
+	@ManyToOne(() => Member, { eager: true, onDelete: 'CASCADE' })
 	@JoinColumn()
 	public lender: Relation<Member>;
 
-	@ManyToOne(() => Member, { eager: true })
+	@ManyToOne(() => Member, { eager: true, onDelete: 'CASCADE' })
 	@JoinColumn()
 	public borrower: Relation<Member>;
 
@@ -38,9 +38,9 @@ export class Loan extends BaseEntity {
 	@Column({ type: 'boolean' })
 	public active: boolean;
 
-	@Column({ type: 'time without time zone', default: null })
-	public completedAt: Date;
+	@Column({ type: 'timestamp', default: null })
+	public completedAt: Date | null;
 
-	@CreateDateColumn({ type: 'time without time zone' })
+	@CreateDateColumn({ type: 'timestamp' })
 	public createdAt: Date;
 }

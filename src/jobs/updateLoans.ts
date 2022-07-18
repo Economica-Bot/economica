@@ -1,8 +1,8 @@
-import { Loan } from '../entities/index.js';
-import { recordTransaction } from '../lib/transaction.js';
-import { Economica, Job } from '../structures/index.js';
+import { Loan } from '../entities';
+import { recordTransaction } from '../lib';
+import { Economica, Job } from '../structures';
 
-export default class implements Job {
+export class LoansJob implements Job {
 	public name = 'update-loans';
 	public cooldown = 1000 * 60 * 5;
 	public execute = async (client: Economica): Promise<void> => {

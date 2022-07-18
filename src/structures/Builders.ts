@@ -1,7 +1,6 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { PermissionsString } from 'discord.js';
+import { PermissionsString, SlashCommandBuilder } from 'discord.js';
 
-import { ModuleString } from '../typings/index.js';
+import { ModuleString } from '../typings';
 
 export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	public module: ModuleString;

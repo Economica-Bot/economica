@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { Transaction } from '../../../../entities/index.js';
+import { Transaction } from '../../../../entities';
 
 const router = express.Router();
 router.get('/', async (_req, res) => {
