@@ -30,16 +30,12 @@ export default class implements Command {
 				.setName('Set')
 				.setValue('set')
 				.setDescription('Set the transaction log')
-				.collectVar({
-					property: 'channel',
-					prompt: 'Specify a channel by ID',
-					validators: [
-						{ function: (ctx, input) => !!input.match(/\d{17,19}/)?.[0], error: 'Input is not a channel snowflake!' },
-						{ function: (ctx, input) => !!ctx.interaction.guild.channels.cache.get(input), error: 'Could not find that channel.' },
-						{ function: (ctx, input) => ctx.interaction.guild.channels.cache.get(input).type === ChannelType.GuildText, error: 'That is not a text channel.' },
-					],
-					parse: (ctx, input) => ctx.interaction.guild.channels.cache.get(input),
-				})
+				.collectVar((collector) => collector
+					.setProperty('channel')
+					.setPrompt('Specify a channel')
+					.addValidator((msg) => !!msg.mentions.channels.size, 'No channels mentioned.')
+					.addValidator((msg) => msg.mentions.channels.first().type === ChannelType.GuildText, 'Invalid channel type - must be text.')
+					.setParser((msg) => msg.mentions.channels.first()))
 				.setExecution(async (ctx, interaction) => {
 					const channel = this.execute.getVariable('channel');
 					if (!channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.SendMessages) || !channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.EmbedLinks)) {

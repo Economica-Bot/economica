@@ -5,7 +5,7 @@ import { IsNull, Not } from 'typeorm';
 
 import { Loan, Member, User } from '../../entities';
 import { displayLoan, recordTransaction } from '../../lib';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, Context, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 import { Emojis } from '../../typings';
 
 export default class implements Command {
@@ -77,11 +77,10 @@ export default class implements Command {
 												.setDisabled(!(loan.pending && loan.borrower.userId === ctx.interaction.user.id)),
 										]);
 
-									const message = await interaction.reply({ embeds: [embed], components: [row], fetchReply: true });
+									const message = await interaction.update({ embeds: [embed], components: [row] });
 									const action = await message.awaitMessageComponent({ componentType: ComponentType.Button, filter: (i) => i.user.id === interaction.user.id });
 									if (action.customId === 'loan_cancel') {
-										loan.pending = false;
-										await loan.save();
+										await loan.remove();
 										await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'LOAN_CANCEL', loan.principal, 0);
 										const cancelEmbed = ctx.embedify('warn', 'user', `${Emojis.CROSS} **Loan Cancelled**`);
 										await action.update({ embeds: [cancelEmbed], components: [] });
@@ -120,42 +119,35 @@ export default class implements Command {
 				.setName('Propose')
 				.setValue('propose')
 				.setDescription('Propose, or create, a loan')
-				.collectVar({
-					property: 'borrower',
-					prompt: 'Specify a user by ID',
-					validators: [{ function: (ctx, input) => !!input.match(/\d{17,19}/)?.[0], error: 'Input is not a user snowflake' },
-						{ function: async (ctx, input) => !!(await ctx.client.users.fetch(input).catch(() => null)), error: 'Could not find that user' },
-						{ function: (ctx, input) => input !== ctx.interaction.user.id, error: 'You cannot loan towards yourself!' },
-						{ function: (ctx, input) => !ctx.client.users.cache.get(input).bot, error: 'You cannot loan towards a bot!' }],
-					parse: (ctx, input) => ctx.client.users.cache.get(input),
-				})
-				.collectVar({
-					property: 'principal',
-					prompt: 'Specify a principal amount',
-					validators: [{ function: (ctx, input) => !!parseString(input), error: 'Input could not be parsed' },
-						{ function: (ctx, input) => parseString(input) <= ctx.memberEntity.wallet, error: 'Principal is more than your wallet!' },
-						{ function: (ctx, input) => parseString(input) > 0, error: 'Principal must be more than 0.' }],
-					parse: (ctx, input) => parseString(input),
-				})
-				.collectVar({
-					property: 'repayment',
-					prompt: 'Specify a repayment amount',
-					validators: [{ function: (ctx, input) => !!parseString(input), error: 'Input could not be parsed' },
-						{ function: (ctx, input) => parseString(input) > 0, error: 'Repayment must be more than 0' }],
-					parse: (ctx, input) => parseString(input),
-				})
-				.collectVar({
-					property: 'duration',
-					prompt: 'Specify the duration of the loan',
-					validators: [{ function: (ctx, input) => !!ms(input), error: 'Input could not be parsed' }],
-					parse: (ctx, input) => ms(input),
-				})
-				.collectVar({
-					property: 'message',
-					prompt: 'Specify a loan message',
-					validators: [{ function: (input) => !!input, error: 'Input could not be parsed' }],
-					parse: (ctx, input) => input,
-				})
+				.collectVar((collector) => collector
+					.setProperty('borrower')
+					.setPrompt('Specify a user')
+					.addValidator((msg) => !!msg.mentions.users.size, 'Could not find a user mention.')
+					.setParser((msg) => msg.mentions.users.first()))
+				.collectVar((collector) => collector
+					.setProperty('principal')
+					.setPrompt('Specify a principal amount')
+					.addValidator((msg) => !!parseString(msg.content), 'Did not enter a numerical value.')
+					.addValidator((msg, ctx) => parseString(msg.content) <= ctx.memberEntity.wallet, 'Principal exceeds current wallet balance.')
+					.addValidator((msg) => parseString(msg.content) > 0, 'Principal must be more than 0.')
+					.setParser((msg) => parseString(msg.content)))
+				.collectVar((collector) => collector
+					.setProperty('repayment')
+					.setPrompt('Specify a repayment amount')
+					.addValidator((msg) => !!parseString(msg.content), 'Did not enter a numerical value.')
+					.addValidator((msg) => parseString(msg.content) > 0, 'Repayment must be more than 0.')
+					.setParser((msg) => parseString(msg.content)))
+				.collectVar((collector) => collector
+					.setProperty('duration')
+					.setPrompt('Specify the duration of the loan')
+					.addValidator((msg) => !!ms(msg.content), 'Did not enter a duration value.')
+					.addValidator((msg) => ms(msg.content) > 0, 'Duration must be positive.')
+					.setParser((msg) => ms(msg.content)))
+				.collectVar((collector) => collector
+					.setProperty('message')
+					.setPrompt('Specify a loan message')
+					.addValidator((msg) => !!msg.content, 'Input could not be parsed.')
+					.setParser((msg) => msg.content))
 				.setExecution(async (ctx, interaction) => {
 					const borrower = this.execute.getVariable('borrower');
 					const principal = this.execute.getVariable('principal');

@@ -27,15 +27,11 @@ export default class implements Command {
 						.setName('Give Item')
 						.setValue('item_give')
 						.setDescription('Give this item to another user')
-						.collectVar({
-							property: 'target',
-							prompt: 'Specify a user by ID',
-							validators: [{ function: (ctx, input) => !!input.match(/\d{17,19}/)?.[0], error: 'Input is not a user snowflake' },
-								{ function: async (ctx, input) => !!(await ctx.client.users.fetch(input).catch(() => null)), error: 'Could not find that user' },
-								{ function: (ctx, input) => input !== ctx.interaction.user.id, error: 'You cannot loan towards yourself!' },
-								{ function: (ctx, input) => !ctx.client.users.cache.get(input).bot, error: 'You cannot loan towards a bot!' }],
-							parse: (ctx, input) => ctx.client.users.cache.get(input),
-						})
+						.collectVar((collector) => collector
+							.setProperty('target')
+							.setPrompt('Specify a user')
+							.addValidator((msg) => !!msg.mentions.users.size, 'Could not find any user mentions.')
+							.setParser((msg) => msg.mentions.users.first()))
 						.setExecution(async (ctx, interaction) => {
 							const target = this.execute.getVariable('target');
 

@@ -1,4 +1,4 @@
-import { parseNumber, parseString } from '@adrastopoulos/number-parser';
+import { parseInteger, parseNumber, parseString } from '@adrastopoulos/number-parser';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import ms from 'ms';
 import { ILike } from 'typeorm';
@@ -195,138 +195,122 @@ export default class implements Command {
 								.setName('Collectable')
 								.setValue('collectable')
 								.setDescription('Create a collectable shop item.')
-								.setExecution(() => this.itemCreator()),
+								.setExecution(() => this.itemCreator(this.execute)),
 							new ExecutionBuilder()
 								.setName('Instant')
 								.setValue('instant')
 								.setDescription('Create an instant shop item.')
-								.setExecution(() => this.itemCreator()),
+								.setExecution(() => this.itemCreator(this.execute)),
 							new ExecutionBuilder()
 								.setName('Usable')
 								.setValue('usable')
 								.setDescription('Create a usable shop item.')
-								.setExecution(() => this.itemCreator()),
+								.setExecution(() => this.itemCreator(this.execute)),
 							new ExecutionBuilder()
 								.setName('Generator')
 								.setValue('generator')
 								.setDescription('Create a generator shop item.')
-								.collectVar({
-									property: 'generator amount',
-									prompt: 'The amount generated per iteration.',
-									validators: [{ function: (ctx, input) => !!parseString(input), error: 'Input must be numerical' }],
-									parse: (ctx, input) => parseString(input),
-								})
-								.collectVar({
-									property: 'generator period',
-									prompt: 'The duration between generation.',
-									validators: [{ function: (ctx, input) => !!ms(input), error: 'Input must be valid duration' }],
-									parse: (ctx, input) => ms(input),
-								})
-								.setExecution(() => this.itemCreator()),
+								.collectVar((collector) => collector
+									.setProperty('generator amount')
+									.setPrompt('The amount generated per iteration.')
+									.addValidator((msg) => !!parseString(msg.content), 'Input must be numerical.')
+									.setParser((msg) => parseString(msg.content)))
+								.collectVar((collector) => collector
+									.setProperty('generator period')
+									.setPrompt('The duration between generation.')
+									.addValidator((msg) => !!ms(msg.content), 'Input must be a valid duration.')
+									.setParser((msg) => ms(msg.content)))
+								.setExecution(() => this.itemCreator(this.execute)),
 						]),
 				]),
 		]);
 
-	private itemCreator = async () => new ExecutionBuilder()
-		.collectVar({
-			property: 'name',
-			prompt: "Specify the listing's name.",
-			validators: [{ function: (ctx, input) => !!input, error: 'Could not parse input' }],
-			parse: (ctx, input) => input,
-		})
-		.collectVar({
-			property: 'price',
-			prompt: 'The wallet balance required to purchase.',
-			validators: [{ function: (ctx, input) => parseString(input) !== null, error: 'Input must be numerical' },
-				{ function: (ctx, input) => parseString(input) > 0, error: 'Input must be positive.' }],
-			parse: (ctx, input) => parseString(input),
-		})
-		.collectVar({
-			property: 'required treasury',
-			prompt: 'The minimum treasury balance to purchase.',
-			validators: [{ function: (ctx, input) => !!parseString(input), error: 'Input must be numerical' },
-				{ function: (ctx, input) => parseString(input) > 0, error: 'Input must be positive.' }],
-			parse: (ctx, input) => parseString(input),
-			skippable: true,
-		})
-		.collectVar({
-			property: 'description',
-			prompt: 'Give a short description.',
-			validators: [{ function: (ctx, input) => !!input, error: 'Could not parse input.' }],
-			parse: (ctx, input) => input,
-			skippable: true,
-		})
-		.collectVar({
-			property: 'duration',
-			prompt: 'Specify how long this listing is available.',
-			validators: [{ function: (ctx, input) => !!ms(input), error: 'Input must be a valid duration. Ex) 1m, 4d' }],
-			parse: (ctx, input) => ms(input),
-			skippable: true,
-		})
-		.collectVar({
-			property: 'stock',
-			prompt: 'Specify how many of this listing are to be sold.',
-			validators: [{ function: (ctx, input) => !!parseString(input), error: 'Input must be numerical.' }],
-			parse: (ctx, input) => parseString(input),
-			skippable: true,
-		})
-		.collectVar({
-			property: 'stackable',
-			prompt: 'Whether users can own multiple of this listing.',
-			validators: [{ function: (ctx, input) => ['false', 'true'].includes(input.toLowerCase()), error: 'Input must be one of `false` or `true`' }],
-			parse: (ctx, input) => input.toLowerCase() === 'true',
-			skippable: true,
-		})
-		.collectVar({
-			property: 'required items',
-			prompt: 'Items required to own in order to purchase.',
-			validators: [{ function: async (ctx, input) => !!(await Listing.findBy({ guild: { id: ctx.interaction.guildId }, name: ILike(input) })).length, error: 'Could not find that item in the market' }],
-			parse: async (ctx, input) => Listing.findBy({ guild: { id: ctx.interaction.guildId }, name: ILike(input) }),
-			skippable: true,
-		})
-		.collectVar({
-			property: 'required roles',
-			prompt: 'Roles required to own in order to purchase.',
-			validators: [{ function: (ctx, input) => ctx.interaction.guild.roles.cache.has(input), error: 'Could not find that role' }],
-			parse: (ctx, input) => [input],
-			skippable: true,
-		})
-		.collectVar({
-			property: 'granted roles',
-			prompt: 'Roles granted upon purchase.',
-			validators: [{ function: (ctx, input) => ctx.interaction.guild.roles.cache.has(input), error: 'Could not find that role' }],
-			parse: (ctx, input) => [input],
-			skippable: true,
-		})
-		.collectVar({
-			property: 'removed roles',
-			prompt: 'Roles removed upon purchase.',
-			validators: [{ function: (ctx, input) => ctx.interaction.guild.roles.cache.has(input), error: 'Could not find that role' }],
-			parse: (ctx, input) => [input],
-			skippable: true,
-		})
-
+	private itemCreator = async (ex: ExecutionBuilder) => new ExecutionBuilder()
+		.collectVar((collector) => collector
+			.setProperty('name')
+			.setPrompt('The listing name.')
+			.setParser((msg) => msg.content))
+		.collectVar((collector) => collector
+			.setProperty('price')
+			.setPrompt('The minimum wallet balance required to purchase.')
+			.addValidator((msg) => parseString(msg.content) !== null, 'Input must be numerical.')
+			.addValidator((msg) => parseString(msg.content) >= 0, 'Input must be positive')
+			.setParser((msg) => parseString(msg.content)))
+		.collectVar((collector) => collector
+			.setProperty('required treasury')
+			.setPrompt('The minimum treasury balance required to purchase.')
+			.addValidator((msg) => parseString(msg.content) !== null, 'Input must be numerical.')
+			.addValidator((msg) => parseString(msg.content) >= 0, 'Input must be positive')
+			.setParser((msg) => parseString(msg.content))
+			.setSkippable())
+		.collectVar((collector) => collector
+			.setProperty('description')
+			.setPrompt('The listing description.')
+			.setParser((msg) => msg.content))
+		.collectVar((collector) => collector
+			.setProperty('duration')
+			.setPrompt('How long this listing is available.')
+			.addValidator((msg) => !!ms(msg.content), 'Input must be a valid duration.')
+			.setParser((msg) => ms(msg.content))
+			.setSkippable())
+		.collectVar((collector) => collector
+			.setProperty('stock')
+			.setPrompt('How many of this listing can be sold.')
+			.addValidator((msg) => parseInteger(msg.content) !== null, 'Input must be numerical.')
+			.addValidator((msg) => parseInteger(msg.content) >= 0, 'Input must be positive')
+			.setParser((msg) => parseInteger(msg.content))
+			.setSkippable())
+		.collectVar((collector) => collector
+			.setProperty('stackable')
+			.setPrompt('Whether users can own multiple items.')
+			.addValidator((msg) => ['false', 'true'].includes(msg.content.toLowerCase()), 'Input must be one of `false`, `true`.')
+			.setParser((msg) => msg.content.toLowerCase() === 'true')
+			.setSkippable())
+		.collectVar((collector) => collector
+			.setProperty('required items')
+			.setPrompt('Items required to own in order to purchase.')
+			.addValidator(async (msg, ctx) => !!(await Listing.findBy({ guild: { id: ctx.interaction.guildId }, name: ILike(msg.content) })).length, 'Could not find that item in the market.')
+			.setParser(async (msg, ctx) => Listing.findBy({ guild: { id: ctx.interaction.guildId }, name: ILike(msg.content) }))
+			.setSkippable())
+		.collectVar((collector) => collector
+			.setProperty('required roles')
+			.setPrompt('Roles required to own in order to purchase.')
+			.addValidator((msg) => !!msg.mentions.roles.size, 'No roles mentioned.')
+			.setParser((msg) => Array.from(msg.mentions.roles.values()))
+			.setSkippable())
+		.collectVar((collector) => collector
+			.setProperty('granted roles')
+			.setPrompt('Roles granted upon purchasing.')
+			.addValidator((msg) => !!msg.mentions.roles.size, 'No roles mentioned.')
+			.setParser((msg) => Array.from(msg.mentions.roles.values()))
+			.setSkippable())
+		.collectVar((collector) => collector
+			.setProperty('removed roles')
+			.setPrompt('Roles removed upon purchasing.')
+			.addValidator((msg) => !!msg.mentions.roles.size, 'No roles mentioned.')
+			.setParser((msg) => Array.from(msg.mentions.roles.values()))
+			.setSkippable())
 		.setExecution(async (ctx, interaction) => {
 			const listing = new Listing();
 			listing.guild = ctx.guildEntity;
 			listing.createdAt = new Date();
 			listing.active = true;
 
-			listing.name = this.execute.getVariable('name');
-			listing.price = this.execute.getVariable('price');
-			listing.type = this.execute.getVariable('type');
-			listing.treasuryRequired = this.execute.getVariable('required treasury') ?? 0;
-			listing.description = this.execute.getVariable('description') ?? 'No description.';
-			listing.duration = this.execute.getVariable('duration') ?? Infinity;
-			listing.stock = this.execute.getVariable('stock') ?? Infinity;
-			listing.stackable = this.execute.getVariable('stackable') ?? false;
-			listing.itemsRequired = this.execute.getVariable('items required') ?? [];
-			listing.rolesRequired = this.execute.getVariable('roles required') ?? [];
-			listing.rolesGranted = this.execute.getVariable('roles granted') ?? [];
-			listing.rolesRemoved = this.execute.getVariable('roles removed') ?? [];
+			listing.name = ex.getVariable('name');
+			listing.price = ex.getVariable('price');
+			listing.type = ex.getVariable('type');
+			listing.treasuryRequired = ex.getVariable('required treasury') ?? 0;
+			listing.description = ex.getVariable('description') ?? 'No description.';
+			listing.duration = ex.getVariable('duration') ?? Infinity;
+			listing.stock = ex.getVariable('stock') ?? Infinity;
+			listing.stackable = ex.getVariable('stackable') ?? false;
+			listing.itemsRequired = ex.getVariable('items required') ?? [];
+			listing.rolesRequired = ex.getVariable('roles required') ?? [];
+			listing.rolesGranted = ex.getVariable('roles granted') ?? [];
+			listing.rolesRemoved = ex.getVariable('roles removed') ?? [];
 			if (listing.type === 'GENERATOR') {
-				listing.generatorAmount = this.execute.getVariable('generator amount');
-				listing.generatorPeriod = this.execute.getVariable('generator period');
+				listing.generatorAmount = ex.getVariable('generator amount');
+				listing.generatorPeriod = ex.getVariable('generator period');
 			}
 
 			const listingEmbed = displayListing(ctx, listing);

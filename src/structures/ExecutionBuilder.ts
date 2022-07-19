@@ -3,13 +3,13 @@ import { Awaitable, EmbedBuilder, Message, MessageComponentInteraction, Permissi
 
 import { Context } from './Context';
 
-class VariableCollector {
+export class VariableCollector {
 	public property: string;
 	public prompt: string;
 	public validators: {
-		function: (msg: Message, ctx: Context) => Awaitable<boolean>,
+		func: (msg: Message, ctx: Context) => Awaitable<boolean>,
 		error: string,
-	}[];
+	}[] = [];
 
 	public parse: (msg: Message, ctx: Context) => Awaitable<unknown>;
 	public skippable = false;
@@ -24,8 +24,8 @@ class VariableCollector {
 		return this;
 	}
 
-	public addValidator(validator: typeof this.validators[0]) {
-		this.validators.push(validator);
+	public addValidator(func: typeof this.validators[0]['func'], error: typeof this.validators[0]['error']) {
+		this.validators.push({ func, error });
 		return this;
 	}
 
@@ -54,7 +54,7 @@ export class ExecutionBuilder {
 	public elements: (ctx: Context) => Awaitable<unknown[]>;
 	public func: (t: unknown, ctx: Context) => ExecutionBuilder;
 
-	public variableCollectors: VariableCollector[];
+	public variableCollectors: VariableCollector[] = [];
 	public variables: Record<string, any> = {};
 
 	public setCtx(ctx: Context) {

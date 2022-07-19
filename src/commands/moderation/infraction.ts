@@ -50,15 +50,11 @@ export default class implements Command {
 				.setName('View User Infractions')
 				.setValue('infraction_view_user')
 				.setDescription('View all infractions by a specific user')
-				.collectVar({
-					property: 'user',
-					prompt: 'Insert a user ID',
-					validators: [
-						{ function: (ctx, input) => !!input.match(/\d{17,19}/)?.[0], error: 'Input is not a user snowflake' },
-						{ function: async (ctx, input) => !!(await ctx.client.users.fetch(input)), error: 'Could not find that user' },
-					],
-					parse: (ctx, input) => ctx.client.users.cache.get(input),
-				})
+				.collectVar((collector) => collector
+					.setProperty('user')
+					.setPrompt('Specify a user')
+					.addValidator((msg) => !!msg.mentions.users.size, 'Could not find any user mentions.')
+					.setParser((msg) => msg.mentions.users.first()))
 				.setPagination(
 					(ctx) => Infraction.find({ relations: ['target', 'agent'], where: { guild: { id: ctx.interaction.guildId }, target: { userId: this.execute.getVariable('user').id } } }),
 					(infraction) => new ExecutionBuilder()

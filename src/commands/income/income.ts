@@ -49,12 +49,11 @@ export default class implements Command {
 							.setName(property)
 							.setValue(property)
 							.setDescription(`The \`${property}\` property of \`${cmd}\``)
-							.collectVar({
-								property,
-								prompt: `Enter a new ${property}`,
-								validators: [{ function: (ctx, input) => !!parseString(input), error: 'Could not parse input!' }],
-								parse: (ctx, input) => parseString(input),
-							})
+							.collectVar((collector) => collector
+								.setProperty(property)
+								.setPrompt(`Enter a new ${property}`)
+								.addValidator((msg) => !!parseString(msg.content), 'Could not parse input.')
+								.setParser((msg) => parseString(msg.content)))
 							.setExecution(async (ctx, interaction) => {
 								ctx.guildEntity.incomes[cmd][property] = this.execute.getVariable(property);
 								await ctx.guildEntity.save();

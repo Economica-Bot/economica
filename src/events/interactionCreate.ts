@@ -39,10 +39,9 @@ export class InteractionCreateEvent implements Event {
 		if (ex.variableCollectors) {
 			// eslint-disable-next-line no-restricted-syntax
 			for await (const variableCollector of ex.variableCollectors) {
-				const { property, prompt, validators, parse, skippable } = variableCollector;
-				const res = await collectProp(ctx, interaction, property, prompt, validators, parse, skippable);
-				if ((res === null || res === undefined) && !skippable) return;
-				ex.variables[property] = res;
+				const res = await collectProp(ctx, interaction, variableCollector);
+				if ((res === null || res === undefined) && !variableCollector.skippable) return;
+				ex.variables[variableCollector.property] = res;
 			}
 		}
 
