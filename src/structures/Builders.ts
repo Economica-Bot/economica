@@ -5,8 +5,8 @@ import { ModuleString } from '../typings';
 export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	public module: ModuleString;
 	public format: string;
-	public examples: string[];
-	public clientPermissions: PermissionsString[];
+	public examples: string[] = [];
+	public clientPermissions: PermissionsString[] = [];
 	public global = false;
 	public enabled = true;
 

@@ -1,8 +1,10 @@
-import { parseNumber } from '@adrastopoulos/number-parser';
+import { parseNumber, parseString } from '@adrastopoulos/number-parser';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
+import ms from 'ms';
+import { ILike } from 'typeorm';
 
 import { Item, Listing } from '../../entities';
-import { displayListing, editListing, recordTransaction } from '../../lib';
+import { displayListing, recordTransaction } from '../../lib';
 import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 import { Emojis } from '../../typings';
 
@@ -102,31 +104,48 @@ export default class implements Command {
 								.setValue('edit')
 								.setDescription('Edit this listing\'s properties')
 								.setPermissions(['ManageGuild'])
+								.setPagination(
+									(ctx) => Object.keys(listing),
+									(key, ctx) => new ExecutionBuilder()
+										.setName(key)
+										.setValue(key)
+										.setDescription(`Edit the ${key} property of ${listing.name}.`),
+								)
 								.setExecution(async (ctx, interaction) => {
-									await editListing(ctx, interaction, listing, true);
-									const listingEmbed = displayListing(ctx, listing);
-									const row = new ActionRowBuilder<ButtonBuilder>()
-										.setComponents([
-											new ButtonBuilder()
-												.setCustomId('listing_edit_cancel')
-												.setLabel('Cancel')
-												.setStyle(ButtonStyle.Danger),
-											new ButtonBuilder()
-												.setCustomId('listing_edit_update')
-												.setLabel('Update')
-												.setStyle(ButtonStyle.Success),
-										]);
-
-									const message = await interaction.editReply({ embeds: [listingEmbed], components: [row] });
-									const action = await message.awaitMessageComponent({ componentType: ComponentType.Button, filter: (i) => i.user.id === interaction.user.id });
-									if (action.customId === 'listing_edit_cancel') {
-										const cancelEmbed = ctx.embedify('warn', 'user', `${Emojis.CROSS} **Shop Listing Edit Cancelled**`);
-										await action.update({ embeds: [cancelEmbed], components: [] });
-									} else if (action.customId === 'listing_edit_update') {
-										await listing.save();
-										const successEmbed = ctx.embedify('success', 'user', `${Emojis.DEED} **Shop Listing Edited Successfully**`);
-										await action.update({ embeds: [successEmbed], components: [] });
+									listing.name = this.execute.getVariable('name') ?? listing.name;
+									listing.price = this.execute.getVariable('price') ?? listing.price;
+									listing.type = this.execute.getVariable('type') ?? listing.type;
+									listing.treasuryRequired = this.execute.getVariable('required treasury') ?? listing.treasuryRequired;
+									listing.description = this.execute.getVariable('description') ?? listing.description;
+									listing.duration = this.execute.getVariable('duration') ?? listing.duration;
+									listing.stock = this.execute.getVariable('stock') ?? listing.stock;
+									listing.stackable = this.execute.getVariable('stackable') ?? listing.stackable;
+									listing.itemsRequired = this.execute.getVariable('items required') ?? listing.itemsRequired;
+									listing.rolesRequired = this.execute.getVariable('roles required') ?? listing.rolesRequired;
+									listing.rolesGranted = this.execute.getVariable('roles granted') ?? listing.rolesGranted;
+									listing.rolesRemoved = this.execute.getVariable('roles removed') ?? listing.rolesRemoved;
+									if (listing.type === 'GENERATOR') {
+										listing.generatorAmount = this.execute.getVariable('generator amount') ?? listing.generatorAmount;
+										listing.generatorPeriod = this.execute.getVariable('generator period') ?? listing.generatorPeriod;
 									}
+
+									return new ExecutionBuilder()
+										.setEmbed(displayListing(ctx, listing))
+										.setOptions([
+											new ExecutionBuilder()
+												.setName('Cancel')
+												.setValue('cancel')
+												.setDescription('Cancel this listing')
+												.setEmbed(ctx.embedify('warn', 'user', `${Emojis.CROSS} **Shop Listing Edit Cancelled**`)),
+											new ExecutionBuilder()
+												.setName('Update')
+												.setValue('update')
+												.setDescription('Update this listing')
+												.setExecution(async (ctx, interaction) => {
+													await listing.save();
+													await interaction.update({ embeds: [ctx.embedify('success', 'user', `${Emojis.DEED} **Shop Listing Edited Successfully**`)] });
+												}),
+										]);
 								}),
 							new ExecutionBuilder()
 								.setName('Delete Listing')
@@ -171,38 +190,158 @@ export default class implements Command {
 						.setName('Create Shop Listing')
 						.setValue('create')
 						.setDescription('Create a new shop listing')
-						.setExecution(async (ctx, interaction) => {
-							const listing = new Listing();
-							listing.guild = ctx.guildEntity;
-							listing.createdAt = new Date();
-							listing.active = true;
-
-							await editListing(ctx, interaction, listing);
-
-							const listingEmbed = displayListing(ctx, listing);
-							const row = new ActionRowBuilder<ButtonBuilder>()
-								.setComponents([
-									new ButtonBuilder()
-										.setCustomId('listing_cancel')
-										.setLabel('Cancel')
-										.setStyle(ButtonStyle.Danger),
-									new ButtonBuilder()
-										.setCustomId('listing_create')
-										.setLabel('Create')
-										.setStyle(ButtonStyle.Success),
-								]);
-
-							const message = await interaction.editReply({ embeds: [listingEmbed], components: [row] });
-							const action = await message.awaitMessageComponent({ componentType: ComponentType.Button, filter: (i) => i.user.id === interaction.user.id });
-							if (action.customId === 'listing_cancel') {
-								const cancelEmbed = ctx.embedify('warn', 'user', `${Emojis.CROSS} **Shop Listing Cancelled**`);
-								await action.update({ embeds: [cancelEmbed], components: [] });
-							} else if (action.customId === 'listing_create') {
-								await listing.save();
-								const successEmbed = ctx.embedify('success', 'user', `${Emojis.DEED} **Shop Listing Created Successfully**`);
-								await action.update({ embeds: [successEmbed], components: [] });
-							}
-						}),
+						.setOptions([
+							new ExecutionBuilder()
+								.setName('Collectable')
+								.setValue('collectable')
+								.setDescription('Create a collectable shop item.')
+								.setExecution(() => this.itemCreator()),
+							new ExecutionBuilder()
+								.setName('Instant')
+								.setValue('instant')
+								.setDescription('Create an instant shop item.')
+								.setExecution(() => this.itemCreator()),
+							new ExecutionBuilder()
+								.setName('Usable')
+								.setValue('usable')
+								.setDescription('Create a usable shop item.')
+								.setExecution(() => this.itemCreator()),
+							new ExecutionBuilder()
+								.setName('Generator')
+								.setValue('generator')
+								.setDescription('Create a generator shop item.')
+								.collectVar({
+									property: 'generator amount',
+									prompt: 'The amount generated per iteration.',
+									validators: [{ function: (ctx, input) => !!parseString(input), error: 'Input must be numerical' }],
+									parse: (ctx, input) => parseString(input),
+								})
+								.collectVar({
+									property: 'generator period',
+									prompt: 'The duration between generation.',
+									validators: [{ function: (ctx, input) => !!ms(input), error: 'Input must be valid duration' }],
+									parse: (ctx, input) => ms(input),
+								})
+								.setExecution(() => this.itemCreator()),
+						]),
 				]),
 		]);
+
+	private itemCreator = async () => new ExecutionBuilder().collectVar({
+		property: 'name',
+		prompt: "Specify the listing's name.",
+		validators: [{ function: (ctx, input) => !!input, error: 'Could not parse input' }],
+		parse: (ctx, input) => input,
+	})
+		.collectVar({
+			property: 'required treasury',
+			prompt: 'The minimum treasury balance to purchase.',
+			validators: [{ function: (ctx, input) => !!parseString(input), error: 'Input must be numerical' }],
+			parse: (ctx, input) => parseString(input),
+			skippable: true,
+		})
+		.collectVar({
+			property: 'description',
+			prompt: 'Give a short description.',
+			validators: [{ function: (ctx, input) => !!input, error: 'Could not parse input.' }],
+			parse: (ctx, input) => input,
+			skippable: true,
+		})
+		.collectVar({
+			property: 'duration',
+			prompt: 'Specify how long this listing is available.',
+			validators: [{ function: (ctx, input) => !!ms(input), error: 'Input must be a valid duration. Ex) 1m, 4d' }],
+			parse: (ctx, input) => ms(input),
+			skippable: true,
+		})
+		.collectVar({
+			property: 'stock',
+			prompt: 'Specify how many of this listing are to be sold.',
+			validators: [{ function: (ctx, input) => !!parseString(input), error: 'Input must be numerical.' }],
+			parse: (ctx, input) => parseString(input),
+			skippable: true,
+		})
+		.collectVar({
+			property: 'stackable',
+			prompt: 'Whether users can own multiple of this listing.',
+			validators: [{ function: (ctx, input) => ['false', 'true'].includes(input.toLowerCase()), error: 'Input must be one of `false` or `true`' }],
+			parse: (ctx, input) => input.toLowerCase() === 'true',
+			skippable: true,
+		})
+		.collectVar({
+			property: 'required items',
+			prompt: 'Items required to own in order to purchase.',
+			validators: [{ function: async (ctx, input) => !!(await Listing.findBy({ guild: { id: ctx.interaction.guildId }, name: ILike(input) })).length, error: 'Could not find that item in the market' }],
+			parse: async (ctx, input) => Listing.findBy({ guild: { id: ctx.interaction.guildId }, name: ILike(input) }),
+			skippable: true,
+		})
+		.collectVar({
+			property: 'required roles',
+			prompt: 'Roles required to own in order to purchase.',
+			validators: [{ function: (ctx, input) => ctx.interaction.guild.roles.cache.has(input), error: 'Could not find that role' }],
+			parse: (ctx, input) => [input],
+			skippable: true,
+		})
+		.collectVar({
+			property: 'granted roles',
+			prompt: 'Roles granted upon purchase.',
+			validators: [{ function: (ctx, input) => ctx.interaction.guild.roles.cache.has(input), error: 'Could not find that role' }],
+			parse: (ctx, input) => [input],
+			skippable: true,
+		})
+		.collectVar({
+			property: 'removed roles',
+			prompt: 'Roles removed upon purchase.',
+			validators: [{ function: (ctx, input) => ctx.interaction.guild.roles.cache.has(input), error: 'Could not find that role' }],
+			parse: (ctx, input) => [input],
+			skippable: true,
+		})
+
+		.setExecution(async (ctx, interaction) => {
+			const listing = new Listing();
+			listing.guild = ctx.guildEntity;
+			listing.createdAt = new Date();
+			listing.active = true;
+
+			listing.name = this.execute.getVariable('name');
+			listing.price = this.execute.getVariable('price');
+			listing.type = this.execute.getVariable('type');
+			listing.treasuryRequired = this.execute.getVariable('required treasury') ?? 0;
+			listing.description = this.execute.getVariable('description') ?? 'No description.';
+			listing.duration = this.execute.getVariable('duration') ?? Infinity;
+			listing.stock = this.execute.getVariable('stock') ?? Infinity;
+			listing.stackable = this.execute.getVariable('stackable') ?? false;
+			listing.itemsRequired = this.execute.getVariable('items required') ?? [];
+			listing.rolesRequired = this.execute.getVariable('roles required') ?? [];
+			listing.rolesGranted = this.execute.getVariable('roles granted') ?? [];
+			listing.rolesRemoved = this.execute.getVariable('roles removed') ?? [];
+			if (listing.type === 'GENERATOR') {
+				listing.generatorAmount = this.execute.getVariable('generator amount');
+				listing.generatorPeriod = this.execute.getVariable('generator period');
+			}
+
+			const listingEmbed = displayListing(ctx, listing);
+			const row = new ActionRowBuilder<ButtonBuilder>()
+				.setComponents([
+					new ButtonBuilder()
+						.setCustomId('listing_cancel')
+						.setLabel('Cancel')
+						.setStyle(ButtonStyle.Danger),
+					new ButtonBuilder()
+						.setCustomId('listing_create')
+						.setLabel('Create')
+						.setStyle(ButtonStyle.Success),
+				]);
+
+			const message = await interaction.editReply({ embeds: [listingEmbed], components: [row] });
+			const action = await message.awaitMessageComponent({ componentType: ComponentType.Button, filter: (i) => i.user.id === interaction.user.id });
+			if (action.customId === 'listing_cancel') {
+				const cancelEmbed = ctx.embedify('warn', 'user', `${Emojis.CROSS} **Shop Listing Cancelled**`);
+				await action.update({ embeds: [cancelEmbed], components: [] });
+			} else if (action.customId === 'listing_create') {
+				await listing.save();
+				const successEmbed = ctx.embedify('success', 'user', `${Emojis.DEED} **Shop Listing Created Successfully**`);
+				await action.update({ embeds: [successEmbed], components: [] });
+			}
+		});
 }

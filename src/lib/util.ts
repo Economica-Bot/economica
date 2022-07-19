@@ -78,8 +78,7 @@ export async function collectProp<T>(ctx: Context, interaction: MessageComponent
 		await modalSubmit.reply({ content: 'Input success.', ephemeral: true });
 		return parse(ctx, input);
 	} if (res.customId === 'skip') {
-		const embed = ctx.embedify('warn', 'user', `${Emojis.CONTROLS} Input Skipped`);
-		await res.update({ embeds: [embed], components: [] });
+		await res.deferReply();
 		return null;
 	} if (res.customId === 'cancel') {
 		const embed = ctx.embedify('warn', 'user', `${Emojis.CROSS} Input Canceled`);

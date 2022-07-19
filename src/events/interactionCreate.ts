@@ -41,7 +41,7 @@ export class InteractionCreateEvent implements Event {
 			for await (const variableCollector of ex.variableCollectors) {
 				const { property, prompt, validators, parse, skippable } = variableCollector;
 				const res = await collectProp(ctx, interaction, property, prompt, validators, parse, skippable);
-				if (!res && !skippable) return;
+				if ((res === null || res === undefined) && !skippable) return;
 				ex.variables[property] = res;
 			}
 		}
@@ -93,7 +93,7 @@ export class InteractionCreateEvent implements Event {
 		}
 
 		const embed = (ex.embed ?? ctx
-			.embedify('info', 'user', `${ex.description}`)
+			.embedify('info', 'user', ex.description)
 			.setAuthor({ name: ex.name }))
 			.setFooter({ text: `Page ${index + 1} / ${Math.ceil(ex.options.length / PAGINATION_LIMIT) || 1}` })
 			.addFields(fields);

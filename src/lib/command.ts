@@ -61,7 +61,6 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 	} if (!isDeveloper || !DEV_PERMISSION_EXEMPT) {
 		const valid = await checkPermission(ctx);
 		if (!valid) return false;
-		return false;
 	} if (!isDeveloper || !DEV_COOLDOWN_EXEMPT) {
 		const valid = await checkCooldown(ctx);
 		if (!valid) return false;

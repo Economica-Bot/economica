@@ -1,5 +1,5 @@
 import { Item, Member, User } from '../../entities';
-import { collectProp, displayListing } from '../../lib';
+import { displayListing } from '../../lib';
 import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 import { Emojis } from '../../typings';
 
@@ -27,22 +27,24 @@ export default class implements Command {
 						.setName('Give Item')
 						.setValue('item_give')
 						.setDescription('Give this item to another user')
+						.collectVar({
+							property: 'target',
+							prompt: 'Specify a user by ID',
+							validators: [{ function: (ctx, input) => !!input.match(/\d{17,19}/)?.[0], error: 'Input is not a user snowflake' },
+								{ function: async (ctx, input) => !!(await ctx.client.users.fetch(input).catch(() => null)), error: 'Could not find that user' },
+								{ function: (ctx, input) => input !== ctx.interaction.user.id, error: 'You cannot loan towards yourself!' },
+								{ function: (ctx, input) => !ctx.client.users.cache.get(input).bot, error: 'You cannot loan towards a bot!' }],
+							parse: (ctx, input) => ctx.client.users.cache.get(input),
+						})
 						.setExecution(async (ctx, interaction) => {
-							const embed = ctx.embedify('info', 'user', 'Specify a user');
-							const target = await collectProp(
-								ctx,
-								interaction,
-								embed,
-								'target',
-								[{ function: (input) => ctx.client.users.cache.has(input), error: 'Could not find that user' },
-									{ function: (input) => input !== interaction.user.id, error: 'You cannot give yourself items' },
-									{ function: (input) => !ctx.client.users.cache.get(input).bot, error: 'You cannot give items to a bot' }],
-								(input) => ctx.client.users.cache.get(input),
-							);
+							const target = this.execute.getVariable('target');
+
+							// Create borrower if not exist
 							await User.upsert({ id: target.id }, ['id']);
-							await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
-							const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
+							await Member.upsert({ userId: target.id, guildId: interaction.guildId }, ['userId', 'guildId']);
+							const targetEntity = await Member.findOneBy({ userId: target.id, guildId: interaction.guildId });
 							const targetItem = await Item.findOne({ where: { id: item.listing.id, owner: { userId: targetEntity.userId, guildId: targetEntity.guildId } } });
+
 							if (targetEntity.userId === ctx.memberEntity.userId) {
 								const embed = ctx.embedify('warn', 'user', 'You cannot give items to yourself.');
 								await interaction.editReply({ embeds: [embed] });

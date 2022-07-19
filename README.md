@@ -28,7 +28,7 @@ Current Modules:
 | Economy      | Economy management, balance, leaderboard, inventory, collect, loan, transfer, logging, deposit and withdraw.  |
 | Income       | Work, beg, crime, coinflip, rob.                                                                              |
 | Moderation   | Warn, mute, kick, ban, unmute, unban, clear warnings, logs.                                                   |
-| Listing         | Items creation, purchasing, and deletion.                                                                     |
+| Listing      | Items creation, purchasing, and deletion.                                                                     |
 | Statistics   | Charts.                                                                                                       |
 | Utility      | Help and info, invite bot, ping, server list, clear channel.                                                  |
 
