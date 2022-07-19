@@ -1,10 +1,10 @@
-import { Client, Collection, EmbedBuilder, Util, WebhookClient } from 'discord.js';
-import { readdirSync } from 'fs';
-import path from 'path';
+import { Client, Collection, EmbedBuilder, resolveColor, WebhookClient } from 'discord.js';
+import { readdirSync, statSync } from 'fs';
+import { resolve } from 'path';
 import { Logger } from 'tslog';
 import { DataSource } from 'typeorm';
-import { fileURLToPath } from 'url';
-import 'reflect-metadata';
+
+import { Command } from '.';
 import {
 	ACTIVITY_NAME,
 	ACTIVITY_TYPE,
@@ -22,42 +22,41 @@ import {
 	PUBLIC_GUILD_ID,
 	VALIDATE_SETTINGS,
 	WEBHOOK_URIS,
-} from '../config.js';
-import { Command } from './Command.js';
-
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
+} from '../config';
 
 export class Economica extends Client {
-	public commands: Collection<string, Command<true>>;
-	public cooldowns: Collection<string, Date>;
+	public commands: Collection<string, Command>;
 	public webhooks: WebhookClient[];
 	public AppDataSource: DataSource;
 	public log: Logger;
 
 	public constructor() {
 		super(clientOptions);
-		this.commands = new Collection<string, Command<true>>();
-		this.cooldowns = new Collection<string, Date>();
+		this.commands = new Collection<string, Command>();
 		this.webhooks = new Array<WebhookClient>();
 		this.log = new Logger(loggerOptions);
 	}
 
 	public async init() {
-		if (VALIDATE_SETTINGS) await this.validateSettings();
+		await this.validateSettings();
 		await this.initWebHooks();
 		await this.errorHandler();
 		await this.connectDB();
 		await this.registerEvents();
 		await this.registerCommands();
 		await this.registerJobs();
-		this.registerAPI();
+		await this.registerAPI();
 		await this.login(BOT_TOKEN);
-		this.log.info(`${this.user.tag} logged in`);
+		this.log.info(`${this.user.tag} Initialized`);
 		return this;
 	}
 
 	private async validateSettings(): Promise<void> {
+		if (!VALIDATE_SETTINGS) {
+			this.log.info('Skipping validation...');
+			return;
+		}
+
 		// BOT_TOKEN
 		this.log.debug('Validating BOT_TOKEN');
 		const token = BOT_TOKEN;
@@ -148,7 +147,7 @@ export class Economica extends Client {
 
 		const description = `\`\`\`ts${err.stack}\`\`\``;
 		const embed = new EmbedBuilder()
-			.setColor(Util.resolveColor('Blurple'))
+			.setColor(resolveColor('Blurple'))
 			.setAuthor({ name: 'Unhandled Rejection' })
 			.setDescription(description)
 			.setTimestamp();
@@ -158,7 +157,7 @@ export class Economica extends Client {
 	private async uncaughtException(err: Error, origin: string) {
 		this.log.fatal(err);
 		const embed = new EmbedBuilder()
-			.setColor(Util.resolveColor('Red'))
+			.setColor(resolveColor('Red'))
 			.setAuthor({ name: 'CRITICAL | Uncaught Exception' })
 			.setDescription(`Caught exception: ${err}\nException origin: ${origin}`)
 			.setTimestamp();
@@ -168,7 +167,8 @@ export class Economica extends Client {
 
 	private async connectDB() {
 		this.log.debug('Connecting to DB');
-		this.AppDataSource = await new DataSource(databaseOptions).initialize();
+		const entityFiles = await import('../entities');
+		this.AppDataSource = await new DataSource({ ...databaseOptions, entities: Object.values(entityFiles) }).initialize();
 		if (DB_OPTION === 1) {
 			await this.AppDataSource.synchronize();
 			this.log.debug('Database synchronized');
@@ -176,19 +176,19 @@ export class Economica extends Client {
 			await this.AppDataSource.synchronize(true);
 			this.log.debug('Database dropped and synchronized');
 		}
+
 		this.log.info('Connected to DB');
 	}
 
 	private async registerEvents() {
 		this.log.debug('Registering events');
-		const eventFiles = readdirSync(path.resolve(dirname, '../events')).filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
-		eventFiles.forEach(async (file) => {
-			const { default: Event } = await import(`../events/${file}`);
-			const event = new Event();
+		const eventFiles = await import('../events');
+		Object.values(eventFiles).forEach(async (Constructor) => {
+			const event = new Constructor();
 			this.log.debug(`Loading event ${event.event}`);
-			this.on(event.event, async (...args) => {
+			this.on(event.event, async (args) => {
 				this.log.debug(`Received event ${event.event}`);
-				await event.execute(this, ...args);
+				await event.execute(this, args as any);
 			});
 		});
 		this.log.info('Events loaded');
@@ -196,10 +196,9 @@ export class Economica extends Client {
 
 	private async registerJobs() {
 		this.log.debug('Registering jobs');
-		const jobFiles = readdirSync(path.resolve(dirname, '../jobs')).filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
-		jobFiles.forEach(async (file) => {
-			const { default: Job } = await import(`../jobs/${file}`);
-			const job = new Job();
+		const jobFiles = await import('../jobs');
+		Object.values(jobFiles).forEach(async (Constructor) => {
+			const job = new Constructor();
 			this.log.debug(`Loading job ${job.name}`);
 			setInterval(async () => {
 				this.log.info(`Executing ${job.name}`);
@@ -209,29 +208,38 @@ export class Economica extends Client {
 		this.log.info('Jobs registered');
 	}
 
+	public findCommands(dir: string) {
+		const results: string[] = [];
+		readdirSync(dir).forEach((path) => {
+			const stat = statSync(resolve(dir, path));
+			if (stat.isDirectory()) results.concat(this.findCommands(resolve(dir, path)));
+			else if (stat.isFile()) results.push(resolve(dir, path));
+		});
+
+		return results;
+	}
+
 	public async registerCommands() {
 		this.log.debug('Registering commands');
-		const dirs = readdirSync(path.resolve(dirname, '../commands'));
-		dirs.forEach((dir) => {
-			const files = readdirSync(path.resolve(dirname, `../commands/${dir}/`)).filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
-			files.forEach(async (file) => {
-				const { default: CommandClass } = await import(`../commands/${dir}/${file}`);
-				const command = new CommandClass() as Command<true>;
 
-				// Validation
-				if (!command.data.module) throw new Error(`Command ${command.data.name} missing module!`);
-				if (!command.data.format) throw new Error(`Command ${command.data.name} missing format!`);
-				if (!command.data.examples) throw new Error(`Command ${command.data.name} missing examples!`);
-				this.log.debug(`Registering command ${command.data.name}`);
-				this.commands.set(command.data.name, command);
-			});
+		const files = await import('../commands');
+		Object.values(files).forEach(async (Constructor) => {
+			const command = new Constructor();
+
+			// Validation
+			if (!command.data.module) throw new Error(`Command ${command.data.name} missing module!`);
+			if (!command.data.format) throw new Error(`Command ${command.data.name} missing format!`);
+			if (!command.data.examples) throw new Error(`Command ${command.data.name} missing examples!`);
+			this.log.debug(`Registering command ${command.data.name}`);
+			this.commands.set(command.data.name, command);
 		});
+
 		this.log.info('Commands registered');
 	}
 
 	private async registerAPI() {
 		this.log.debug('Registering API...');
-		import('../api/index.js');
+		import('../api');
 		this.log.info(`API listening on port ${PORT}`);
 	}
 }

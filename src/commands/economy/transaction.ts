@@ -1,84 +1,92 @@
-import { PermissionFlagsBits } from 'discord.js';
-import { displayTransaction } from '../../lib/index.js';
-import { Transaction } from '../../entities/index.js';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, PermissionFlagsBits } from 'discord.js';
+
+import { Transaction } from '../../entities';
+import { displayTransaction } from '../../lib';
+import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
 		.setName('transaction')
-		.setDescription('View and delete transactions')
-		.setModule('ECONOMY')
-		.setFormat('transaction <view | delete> [...arguments]')
-		.setExamples([
-			'transaction view 615a88b83f908631d40632c1',
-			'transaction delete id 615a88b83f908631d40632c1',
-			'transaction delete user @user',
-			'transaction delete all',
-		])
-		.setPermissions(PermissionFlagsBits.ManageGuild.toString())
-		.addSubcommandGroup((subcommandgroup) => subcommandgroup
-			.setName('view')
-			.setDescription('View transaction data')
-			.addSubcommand((subcommand) => subcommand
-				.setName('single')
-				.setDescription('View a single transaction')
-				.addStringOption((option) => option.setName('transaction_id').setDescription('Specify a transaction').setRequired(true)))
-			.addSubcommand((subcommand) => subcommand
-				.setName('user')
-				.setDescription('View all transactions for a user')
-				.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(true)))
-			.addSubcommand((subcommand) => subcommand.setName('all').setDescription('View all transactions')))
-		.addSubcommandGroup((subcommandgroup) => subcommandgroup
-			.setName('delete')
-			.setDescription('Delete transaction data')
-			.addSubcommand((subcommand) => subcommand
-				.setName('single')
-				.setDescription('Delete a single transaction')
-				.addStringOption((option) => option.setName('transaction_id').setDescription('Specify a transaction').setRequired(true)))
-			.addSubcommand((subcommand) => subcommand
-				.setName('user')
-				.setDescription('Delete all transactions for a user')
-				.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(true)))
-			.addSubcommand((subcommand) => subcommand.setName('all').setDescription('Delete all transactions')));
+		.setDescription('View and manage transactions')
+		.setModule('MODERATION')
+		.setFormat('transaction')
+		.setExamples(['transaction'])
+		.setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers);
 
-	public execute = async (ctx: Context): Promise<void> => {
-		const subcommandgroup = ctx.interaction.options.getSubcommandGroup(false);
-		const subcommand = ctx.interaction.options.getSubcommand();
-		const user = ctx.interaction.options.getUser('user', false);
-		const id = ctx.interaction.options.getString('transaction_id', false);
-		const transaction = await Transaction.findOne({ relations: ['guild', 'target', 'agent', 'target.user', 'agent.user'], where: { id, guild: { id: ctx.guildEntity.id } } });
-		if (id && !transaction) {
-			await ctx.embedify('error', 'user', `Could not find transaction with id \`${id}\``).send(true);
-			return;
-		}
+	public execute = new ExecutionBuilder()
+		.setName('Transactions')
+		.setValue('transaction_top')
+		.setDescription('View and manage transactions')
+		.setOptions([
+			new ExecutionBuilder()
+				.setName('View Server transactions')
+				.setValue('transaction_view_server')
+				.setDescription('Viewing all server transactions')
+				.setPagination(
+					(ctx) => Transaction.find({ relations: ['target', 'agent', 'guild'], where: { guild: { id: ctx.interaction.guildId } } }),
+					(transaction) => new ExecutionBuilder()
+						.setName(transaction.type)
+						.setValue(transaction.id)
+						.setDescription(`Target: <@!${transaction.target.userId}> | Agent: <@!${transaction.agent.userId}>`)
+						.setExecution(async (ctx, interaction) => {
+							const embed = displayTransaction(transaction);
+							const row = new ActionRowBuilder<ButtonBuilder>()
+								.setComponents([
+									new ButtonBuilder()
+										.setCustomId('transaction_delete')
+										.setLabel('Delete')
+										.setStyle(ButtonStyle.Danger),
+								]);
+							const msg = await interaction.update({ embeds: [embed], components: [row], fetchReply: true });
+							const res = await msg.awaitMessageComponent({ componentType: ComponentType.Button, filter: (i) => i.user.id === interaction.user.id });
+							if (res.customId === 'transaction_delete') {
+								await transaction.remove();
+								const embed = ctx.embedify('success', 'user', 'Transaction deleted.');
+								res.update({ embeds: [embed], components: [] });
+							}
+						}),
+				),
+			new ExecutionBuilder()
+				.setName('View User Transactions')
+				.setValue('transaction_view_user')
+				.setDescription('View all transactions by a specific user')
+				.setExecution(async (ctx, interaction) => {
+					await interaction.reply({ content: 'Mention a user', ephemeral: true });
+					const msgs = await interaction.channel.awaitMessages({ max: 1, filter: (msg) => msg.author.id === ctx.interaction.user.id });
+					const user = msgs.first().mentions.users.first();
+					if (!user) {
+						await interaction.followUp({ content: 'Could not find mention', ephemeral: true });
+						return undefined;
+					}
 
-		if (subcommandgroup === 'view') {
-			if (subcommand === 'single') {
-				const embed = await displayTransaction(transaction);
-				await ctx.interaction.reply({ embeds: [embed] });
-			} else if (subcommand === 'user') {
-				const transactions = await Transaction.find({ relations: ['target', 'target.user'], where: { guild: { id: ctx.guildEntity.id }, target: { user: { id: user.id } } } });
-				await ctx.embedify('info', 'user', `**${user.tag}'s Transactions:**\n\`${transactions.map((v) => v.id).join('`, `')}\``).send();
-			} else if (subcommand === 'all') {
-				const transactions = await Transaction.find({ where: { guild: { id: ctx.guildEntity.id } } });
-				await ctx.embedify('info', 'user', `**All Transactions:**\n\`${transactions.map((v) => v.id).join('`, `')}\``).send();
-			}
-		} if (subcommandgroup === 'delete') {
-			if (subcommand === 'single') {
-				await transaction.remove();
-				await ctx.embedify('success', 'guild', `Deleted transaction \`${id}\``).send(true);
-			} else if (subcommand === 'user') {
-				const transactions = await Transaction.find({ relations: ['guild', 'target', 'target.user'], where: { guild: { id: ctx.guildEntity.id }, target: { user: { id: user.id } } } });
-				await Transaction.remove(transactions);
-				await ctx.embedify('success', 'guild', `Deleted \`${transactions.length}\` transactions.`).send(true);
-			} else if (subcommand === 'all') {
-				const transactions = await Transaction
-					.createQueryBuilder('transaction')
-					.where('guild = :id', { id: ctx.interaction.guildId })
-					.delete()
-					.execute();
-				await ctx.embedify('success', 'guild', `Deleted \`${transactions.affected}\` transactions.`).send(true);
-			}
-		}
-	};
+					return new ExecutionBuilder()
+						.setName('Viewing User transactions')
+						.setValue('transaction_viewing_user')
+						.setDescription(`Viewing <@${user.id}>'s transactions`)
+						.setPagination(
+							(ctx) => Transaction.find({ relations: ['target', 'agent', 'guild'], where: { guild: { id: ctx.interaction.guildId }, target: { userId: user.id } } }),
+							(transaction) => new ExecutionBuilder()
+								.setName(transaction.type)
+								.setValue(transaction.id)
+								.setDescription(`Target: <@!${transaction.target.userId}> | Agent: <@!${transaction.agent.userId}>`)
+								.setExecution(async (ctx, interaction) => {
+									const embed = displayTransaction(transaction);
+									const row = new ActionRowBuilder<ButtonBuilder>()
+										.setComponents([
+											new ButtonBuilder()
+												.setCustomId('transaction_delete')
+												.setLabel('Delete')
+												.setStyle(ButtonStyle.Danger),
+										]);
+									const msg = await interaction.update({ embeds: [embed], components: [row], fetchReply: true });
+									const res = await msg.awaitMessageComponent({ componentType: ComponentType.Button, filter: (i) => i.user.id === interaction.user.id });
+									if (res.customId === 'transaction_delete') {
+										await transaction.remove();
+										const embed = ctx.embedify('success', 'user', 'Transaction Deleted');
+										res.update({ embeds: [embed], components: [] });
+									}
+								}),
+						);
+				}),
+		]);
 }

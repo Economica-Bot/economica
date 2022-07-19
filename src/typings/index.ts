@@ -55,11 +55,11 @@ export type ReplyString = 'success' | 'info' | 'warn' | 'error';
 export type Footer = 'bot' | 'user' | 'guild' | EmbedFooterData;
 export type Moderation = 'ban' | 'kick' | 'timeout' | 'unban' | 'untimeout';
 export type BalanceString = 'wallet' | 'treasury';
-export type ListingString = 'CLASSIC' | 'INSTANT' | 'USABLE' | 'GENERATOR';
+export type ListingString = 'COLLECTABLE' | 'INSTANT' | 'USABLE' | 'GENERATOR';
 export const ListingDescriptions: Record<ListingString, string> = {
-	CLASSIC: 'Classic items are just that; classic. They exist in the inventory forever (unless sold) and have no particular quirks or abilities.',
-	INSTANT: 'Instant items are special items that are used instantly when purchased. They may grant a role or do something else.',
-	USABLE: 'Usable items may be used after purchasing to achieve some task or another.',
+	COLLECTABLE: 'Collectable items are just that; collectable. They exist in the inventory forever (unless sold or given away) and have no particular quirks or abilities, besides looking cool.',
+	INSTANT: 'Instant items are special items that are used instantly when purchased.',
+	USABLE: 'Usable items may be used after purchasing to the owner\'s discretion - when used, they may grant a role or special effect.',
 	GENERATOR: 'Generator items generate money that can be collected with `/collect` based on a duration specific to that particular generator.',
 };
 export type InfractionString = 'BAN' | 'KICK' | 'TIMEOUT' | 'UNBAN' | 'UNTIMEOUT';
@@ -128,4 +128,4 @@ export type SpecialModuleString =
 	| 'INTERVAL'
 	| 'CASINO';
 export type ModuleString = DefaultModuleString | SpecialModuleString;
-export * from './constants.js';
+export * from './constants';

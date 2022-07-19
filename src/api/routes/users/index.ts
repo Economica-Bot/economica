@@ -2,8 +2,8 @@ import { PermissionsBitField } from 'discord.js';
 import { RESTGetAPICurrentUserGuildsResult, Routes } from 'discord-api-types/v10';
 import express from 'express';
 
-import { Token } from '../../../entities/token.js';
-import { bot } from '../../../index.js';
+import { Token } from '../../../entities';
+import { bot } from '../../..';
 
 const router = express.Router();
 

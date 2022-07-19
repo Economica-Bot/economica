@@ -1,6 +1,6 @@
-import { ChannelType, PermissionFlagsBits, TextChannel } from 'discord.js';
+import { ChannelType, PermissionFlagsBits } from 'discord.js';
 
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -10,28 +10,34 @@ export default class implements Command {
 		.setFormat('purge [channel] [amount]')
 		.setExamples(['purge', 'purge #general', 'purge #general 50'])
 		.setClientPermissions(['ManageMessages'])
-		.setPermissions(PermissionFlagsBits.ManageMessages.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
 		.addChannelOption((option) => option
 			.setName('channel')
 			.setDescription('Specify a channel')
 			.addChannelTypes(ChannelType.GuildText)
 			.setRequired(false))
-		.addNumberOption((option) => option
+		.addIntegerOption((option) => option
 			.setName('amount')
 			.setDescription('Specify an amount.')
 			.setMinValue(1)
 			.setMaxValue(100)
 			.setRequired(false));
 
-	public execute = async (ctx: Context): Promise<void> => {
-		const channel = (ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel) as TextChannel;
-		if (!channel.permissionsFor(ctx.interaction.guild.me).has('ManageMessages')) {
-			await ctx.embedify('error', 'bot', 'I need `MANAGE_MESSAGES` in that channel.').send(true);
-			return;
-		}
+	public execute = new ExecutionBuilder()
+		.setExecution(async (ctx) => {
+			const channel = (ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel);
+			if (!channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.ManageMessages)) {
+				await ctx.embedify('error', 'bot', 'I need `MANAGE_MESSAGES` in that channel.').send(true);
+				return;
+			}
 
-		const amount = ctx.interaction.options.getNumber('amount') ?? 100;
-		const count = await channel.bulkDelete(amount, true);
-		await ctx.embedify('success', 'user', `Deleted \`${count.size}\` messages.`).send(true);
-	};
+			if (channel.type !== ChannelType.GuildText) {
+				await ctx.embedify('error', 'bot', 'That is not a text based channel!').send(true);
+				return;
+			}
+
+			const amount = ctx.interaction.options.getInteger('amount') ?? 100;
+			await ctx.embedify('success', 'user', 'Deleting messages...').send(true);
+			await channel.bulkDelete(amount, true);
+		});
 }

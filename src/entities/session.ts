@@ -2,10 +2,10 @@ import { BaseEntity, Column, Entity } from 'typeorm';
 
 @Entity({ name: 'session' })
 export class Session extends BaseEntity {
-	@Column({ primary: true })
+	@Column({ type: 'character varying', primary: true })
 	public sid: string;
 
-	@Column()
+	@Column({ type: 'timestamp' })
 	public expire: Date;
 
 	@Column({ type: 'jsonb' })

@@ -1,9 +1,9 @@
 /* eslint-disable max-classes-per-file */
-import { ChatInputCommandInteraction, EmbedBuilder, Util } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, resolveColor } from 'discord.js';
 
-import { Guild, Member, User } from '../entities/index.js';
-import { EmbedColors, Footer, ReplyString } from '../typings/index.js';
-import { Economica, EconomicaSlashCommandBuilder } from './index.js';
+import { Guild, Member, User } from '../entities';
+import { EmbedColors, Footer, ReplyString } from '../typings';
+import { Economica, EconomicaSlashCommandBuilder } from '.';
 
 export class ContextEmbed extends EmbedBuilder {
 	public ctx: Context;
@@ -22,7 +22,7 @@ export class ContextEmbed extends EmbedBuilder {
 export class Context {
 	public client: Economica;
 	public interaction: ChatInputCommandInteraction<'cached'>;
-	public data: EconomicaSlashCommandBuilder;
+	public data: Partial<EconomicaSlashCommandBuilder>;
 	public userEntity: User;
 	public guildEntity: Guild;
 	public memberEntity: Member;
@@ -54,11 +54,12 @@ export class Context {
 			?? await User.create({ id: this.client.user.id }).save();
 		this.clientMemberEntity = await Member.findOne({ where: { user: { id: this.clientUserEntity.id }, guild: { id: this.guildEntity.id } } })
 			?? await Member.create({ user: this.clientUserEntity, guild: this.guildEntity }).save();
+
 		return this;
 	}
 
 	public embedify(type: ReplyString, footer: Footer, description?: string | null): ContextEmbed {
-		const embed = new ContextEmbed(this).setColor(Util.resolveColor(EmbedColors[type]));
+		const embed = new ContextEmbed(this).setColor(resolveColor(EmbedColors[type]));
 		if (description) embed.setDescription(description);
 		if (footer === 'bot') embed.setFooter({ text: this.interaction.client.user.tag, iconURL: this.interaction.client.user.displayAvatarURL() });
 		else if (footer === 'user') embed.setFooter({ text: this.interaction.user.tag, iconURL: this.interaction.user.displayAvatarURL() });

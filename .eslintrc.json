@@ -17,7 +17,6 @@
   },
   "plugins": ["@typescript-eslint", "import"],
   "rules": {
-    "linebreak-style": ["error", "unix"],  // changes the file to LF
     "import/no-cycle": "off",
     "import/prefer-default-export": "off",
     "no-tabs": ["error", { "allowIndentationTabs": true }],
@@ -28,11 +27,14 @@
       { "exceptAfterSingleLine": true }
     ],
 		"object-curly-newline": "off",
-    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
+    "no-plusplus": "off",
     "max-len": "off",
     "class-methods-use-this": "off",
     "newline-per-chained-call": "off",
-    "radix": "off"
+    "radix": "off",
+    "no-param-reassign": "off",
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": "off"
   },
   "settings": {
     "import/parsers": {

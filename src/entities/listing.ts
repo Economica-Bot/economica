@@ -1,37 +1,47 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, ManyToOne, Relation } from 'typeorm';
+import {
+	BaseEntity,
+	Column,
+	CreateDateColumn,
+	Entity,
+	JoinColumn,
+	JoinTable,
+	ManyToMany,
+	ManyToOne,
+	Relation,
+} from 'typeorm';
 
-import { ListingString } from '../typings/index.js';
-import { Guild } from './index.js';
+import { ListingString } from '../typings';
+import { Guild } from '.';
 
 @Entity()
 export class Listing extends BaseEntity {
-	@Column({ primary: true })
+	@Column({ type: 'character varying', primary: true })
 	public id: Snowflake = SnowflakeUtil.generate().toString();
 
-	@ManyToOne(() => Guild)
+	@ManyToOne(() => Guild, { onDelete: 'CASCADE' })
 	@JoinColumn()
 	public guild: Relation<Guild>;
 
-	@Column()
+	@Column({ type: 'character varying' })
 	public type: ListingString;
 
-	@Column()
+	@Column({ type: 'character varying' })
 	public name: string;
 
-	@Column()
+	@Column({ type: 'integer' })
 	public price: number;
 
-	@Column()
+	@Column({ type: 'integer' })
 	public treasuryRequired: number;
 
-	@Column()
+	@Column({ type: 'boolean' })
 	public active: boolean;
 
-	@Column()
+	@Column({ type: 'character varying' })
 	public description: string;
 
-	@Column()
+	@Column({ type: 'boolean' })
 	public stackable: boolean;
 
 	@Column({ type: 'float4' })
@@ -40,25 +50,25 @@ export class Listing extends BaseEntity {
 	@Column({ type: 'float4' })
 	public duration: number;
 
-	@ManyToMany(() => Listing, (listing) => listing.itemsRequired)
-	@JoinColumn()
-	public itemsRequired: Listing[];
+	@ManyToMany(() => Listing, (listing) => listing.itemsRequired, { onDelete: 'CASCADE' })
+	@JoinTable()
+	public itemsRequired: Relation<Listing>[];
 
-	@Column('simple-array')
+	@Column({ type: 'simple-array' })
 	public rolesRequired: Snowflake[];
 
-	@Column('simple-array')
-	public rolesGiven: Snowflake[];
+	@Column({ type: 'simple-array' })
+	public rolesGranted: Snowflake[];
 
-	@Column('simple-array')
+	@Column({ type: 'simple-array' })
 	public rolesRemoved: Snowflake[];
 
-	@Column({ nullable: true })
-	public generatorPeriod: number;
+	@Column({ type: 'integer', nullable: true })
+	public generatorPeriod: number | null;
 
-	@Column({ nullable: true })
-	public generatorAmount: number;
+	@Column({ type: 'integer', nullable: true })
+	public generatorAmount: number | null;
 
-	@CreateDateColumn()
+	@CreateDateColumn({ type: 'timestamp' })
 	public createdAt: Date;
 }

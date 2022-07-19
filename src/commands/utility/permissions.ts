@@ -1,13 +1,7 @@
-import { Util } from 'discord.js';
+import { parseEmoji, PermissionsBitField } from 'discord.js';
 
-import {
-	Command,
-	Context,
-	EconomicaSlashCommandBuilder,
-	EconomicaSlashCommandSubcommandBuilder,
-	EconomicaSlashCommandSubcommandGroupBuilder,
-} from '../../structures/index.js';
-import { Emojis } from '../../typings/constants.js';
+import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Emojis } from '../../typings';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -19,29 +13,19 @@ export default class implements Command {
 		.setGlobal(true)
 		.addStringOption((option) => option.setName('command').setDescription('Specify a command').setRequired(true));
 
-	public execute = async (ctx: Context): Promise<void> => {
-		const commandInput = ctx.interaction.options.getString('command');
-		const command = ctx.client.commands.get(commandInput);
-		if (!command) {
-			ctx.embedify('error', 'user', 'Could not find that command.').send(true);
-			return;
-		}
-
-		const embed = ctx
-			.embedify('info', 'user')
-			.setAuthor({ name: `Permissions for ${command.data.name}`, iconURL: ctx.client.emojis.resolve(Util.parseEmoji(Emojis.COMMAND).id)?.url })
-			.addFields([{ name: 'Base', value: `Client Permissions: \`${command.data.clientPermissions ?? '`None`'}\` Default Member Permissions: \`${command.data.default_member_permissions ?? '`None`'}\`` }]);
-		command.data.options.forEach((option) => {
-			if (option instanceof EconomicaSlashCommandSubcommandBuilder) {
-				embed.addFields([{ name: `${command.data.name} ${option.name}`, value: `Client Permissions: \`${option.clientPermissions ?? '`None`'}\``, inline: true }]);
-			} else if (option instanceof EconomicaSlashCommandSubcommandGroupBuilder) {
-				embed.addFields([{ name: `${command.data.name} ${option.name}`, value: `Client Permissions: \`${option.clientPermissions ?? '`None`'}\`` }]);
-				option.options.forEach((opt: EconomicaSlashCommandSubcommandBuilder) => {
-					embed.addFields([{ name: `${command.data.name} ${option.name} ${opt.name}`, value: `Client Permissions: \`${opt.clientPermissions ?? '`None`'}\``, inline: true }]);
-				});
+	public execute = new ExecutionBuilder()
+		.setExecution(async (ctx) => {
+			const commandInput = ctx.interaction.options.getString('command');
+			const command = ctx.client.commands.get(commandInput);
+			if (!command) {
+				ctx.embedify('error', 'user', 'Could not find that command.').send(true);
+				return;
 			}
-		});
 
-		ctx.interaction.reply({ embeds: [embed] });
-	};
+			const embed = ctx
+				.embedify('info', 'user', `Client Permissions: \`${command.data.clientPermissions ?? '`None`'}\`\nMember Permissions: \`${command.data.default_member_permissions ? new PermissionsBitField(BigInt(command.data.default_member_permissions)).toArray() : '`None`'}\``)
+				.setAuthor({ name: `Permissions for ${command.data.name}`, iconURL: ctx.client.emojis.resolve(parseEmoji(Emojis.PERSON_ADD).id)?.url });
+
+			ctx.interaction.editReply({ embeds: [embed] });
+		});
 }

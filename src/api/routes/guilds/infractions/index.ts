@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { Infraction } from '../../../../entities/index.js';
+import { Infraction } from '../../../../entities';
 
 const router = express.Router();
 

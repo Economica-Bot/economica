@@ -1,7 +1,6 @@
-import { PermissionFlagsBits } from 'discord.js';
-import { syncPermissions } from '../../lib/permissions.js';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
-import { ModuleString } from '../../typings/index.js';
+import { PermissionFlagsBits, SelectMenuInteraction } from 'discord.js';
+
+import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -10,70 +9,71 @@ export default class implements Command {
 		.setModule('UTILITY')
 		.setFormat('module <view | add | remove> [module]')
 		.setExamples(['module view', 'module add Interval', 'module remove Interval'])
-		.setPermissions(PermissionFlagsBits.Administrator.toString())
-		.addSubcommand((subcommand) => subcommand.setName('view').setDescription('View the enabled modules on this server'))
-		.addSubcommand((subcommand) => subcommand
-			.setName('add')
-			.setDescription('Add a module to this server.')
-			.addStringOption((option) => option.setName('module').setDescription('Specify a module').setRequired(true)))
-		.addSubcommand((subcommand) => subcommand
-			.setName('remove')
-			.setDescription('Remove a module from this server.')
-			.addStringOption((option) => option.setName('module').setDescription('Specify a module').setRequired(true)));
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-	public execute = async (ctx: Context): Promise<void> => {
-		const subcommand = ctx.interaction.options.getSubcommand();
-		const moduleName = ctx.interaction.options.getString('module', false) as ModuleString;
-		if (moduleName && !(moduleName in ctx.guildEntity.modules)) {
-			await ctx.embedify('error', 'user', `Invalid module: \`${moduleName}\``).send(true);
-		} else if (subcommand === 'view') {
-			const description = `**View ${ctx.interaction.guild}'s Modules!**`;
-			const embed = ctx
-				.embedify('info', 'guild', description)
-				.setAuthor({ iconURL: ctx.interaction.guild.iconURL(), name: 'Modules' })
-				.addFields([
-					{ name: 'Default Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([,module]) => module.type === 'DEFAULT').map(([module]) => `\`${module}\``).join('\n') },
-					{ name: 'Enabled Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([,module]) => module.enabled).map(([module]) => `\`${module}\``).join('\n') },
-					{ name: 'Disabled Modules', inline: true, value: Object.entries(ctx.guildEntity.modules).filter(([,module]) => !module.enabled).map(([module]) => `\`${module}\``).join('\n') },
-				]);
-			await ctx.interaction.reply({ embeds: [embed] });
-		} else if (subcommand === 'add') {
-			if (ctx.userEntity.keys < 1) {
-				await ctx.embedify('warn', 'user', 'You do not have any keys.').send(true);
-			} else if (ctx.guildEntity.modules[moduleName].enabled) {
-				await ctx.embedify('warn', 'user', `This server already has the \`${moduleName}\` module enabled.`).send(true);
-			} else {
-				ctx.userEntity.keys -= 1;
-				await ctx.userEntity.save();
-				ctx.guildEntity.modules[moduleName].enabled = true;
-				ctx.guildEntity.modules[moduleName].user = ctx.userEntity.id;
-				await ctx.guildEntity.save();
-				await Promise.all(ctx.client.commands
-					.filter((command) => command.data.module === moduleName)
-					.map(async (command) => {
-						await ctx.interaction.guild.commands.create(command.data.toJSON());
-					}));
-				await syncPermissions(ctx.client, ctx.interaction.guild);
-				await ctx.embedify('success', 'user', `Added the \`${moduleName}\` module.`).send(true);
-			}
-		} else if (subcommand === 'remove') {
-			if (ctx.guildEntity.modules[moduleName].user !== ctx.userEntity.id) {
-				await ctx.embedify('warn', 'user', 'You have not enabled this module in this server.').send(true);
-			} else {
-				ctx.userEntity.keys += 1;
-				await ctx.userEntity.save();
-				ctx.guildEntity.modules[moduleName].enabled = false;
-				ctx.guildEntity.modules[moduleName].user = null;
-				await ctx.guildEntity.save();
-				const applicationCommands = await ctx.interaction.guild.commands.fetch();
-				ctx.client.commands
-					.filter((command) => command.data.module === moduleName)
-					.forEach(async (command) => {
-						const cmd = applicationCommands.find((applicationCommand) => applicationCommand.name === command.data.name);
-						if (cmd) await ctx.interaction.guild.commands.delete(cmd);
-					});
-				await ctx.embedify('success', 'user', `Removed the \`${moduleName}\` module.`).send(true);
-			}
-		}
-	};
+	public execute = new ExecutionBuilder()
+		.setName('Module Configuration Menu')
+		.setValue('module')
+		.setDescription('Manage server modules')
+		.setPagination(
+			(ctx) => Object.entries(ctx.guildEntity.modules),
+			([name, module]) => new ExecutionBuilder()
+				.setName(name)
+				.setValue(name)
+				.setDescription(`\`${module.enabled ? 'ENABLED' : 'DISABLED'}\`\nType: \`${module.type}\``)
+				.setOptions(
+					module.type !== 'DEFAULT'
+						? [new ExecutionBuilder()
+							.setName(module.enabled ? 'Disable' : 'Enable')
+							.setValue(module.enabled ? 'disable' : 'enable')
+							.setDescription(`${module.enabled ? 'Disable' : 'Enable'} the \`${name}\` module`)
+							.setExecution(async (ctx, interaction) => {
+								await interaction.deferReply();
+								const operation = (interaction as SelectMenuInteraction).values[0];
+								if (operation === 'enable') {
+									if (ctx.userEntity.keys < 1) {
+										const embed = ctx.embedify('warn', 'user', 'You do not have any keys.');
+										await interaction.editReply({ embeds: [embed], components: [] });
+									} else if (ctx.guildEntity.modules[name].enabled) {
+										const embed = ctx.embedify('warn', 'user', `This server already has the \`${name}\` module enabled.`);
+										await interaction.editReply({ embeds: [embed], components: [] });
+									} else {
+										ctx.userEntity.keys -= 1;
+										await ctx.userEntity.save();
+										ctx.guildEntity.modules[name].enabled = true;
+										ctx.guildEntity.modules[name].user = ctx.userEntity.id;
+										await ctx.guildEntity.save();
+										await Promise.all(ctx.client.commands
+											.filter((command) => command.data.module === name)
+											.map(async (command) => {
+												await ctx.interaction.guild.commands.create(command.data.toJSON());
+											}));
+										const embed = ctx.embedify('success', 'user', `Added the \`${name}\` module.`);
+										interaction.editReply({ embeds: [embed], components: [] });
+									}
+								} else if (operation === 'disable') {
+									if (ctx.guildEntity.modules[name].user !== ctx.userEntity.id) {
+										const embed = ctx.embedify('warn', 'user', 'You have not enabled this module in this server.');
+										await interaction.update({ embeds: [embed], components: [] });
+									} else {
+										ctx.userEntity.keys += 1;
+										await ctx.userEntity.save();
+										ctx.guildEntity.modules[name].enabled = false;
+										ctx.guildEntity.modules[name].user = null;
+										await ctx.guildEntity.save();
+										const applicationCommands = await ctx.interaction.guild.commands.fetch();
+										ctx.client.commands
+											.filter((command) => command.data.module === name)
+											.forEach(async (command) => {
+												const cmd = applicationCommands.find((applicationCommand) => applicationCommand.name === command.data.name);
+												if (cmd) await ctx.interaction.guild.commands.delete(cmd);
+											});
+										const embed = ctx.embedify('success', 'user', `Removed the \`${name}\` module.`);
+										await interaction.editReply({ embeds: [embed], components: [] });
+									}
+								}
+							})]
+						: [],
+				),
+		);
 }

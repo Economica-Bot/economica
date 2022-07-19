@@ -1,9 +1,9 @@
-import { GuildMember, PermissionFlagsBits } from 'discord.js';
+import { PermissionFlagsBits } from 'discord.js';
 import ms from 'ms';
 
-import { Member, User } from '../../entities/index.js';
-import { recordInfraction, validateTarget } from '../../lib/index.js';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+import { Member, User } from '../../entities';
+import { recordInfraction, validateTarget } from '../../lib';
+import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -13,7 +13,7 @@ export default class implements Command {
 		.setFormat('ban <member> [duration] [reason] [days]')
 		.setExamples(['ban @user', 'ban @user 3h', 'ban @user spamming', 'ban @user 3h spamming'])
 		.setClientPermissions(['BanMembers'])
-		.setPermissions(PermissionFlagsBits.BanMembers.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target').setRequired(true))
 		.addStringOption((option) => option.setName('duration').setDescription('Specify a duration').setRequired(false))
 		.addStringOption((option) => option.setName('reason').setDescription('Specify a reason').setRequired(false))
@@ -24,22 +24,21 @@ export default class implements Command {
 			.setMaxValue(7)
 			.setRequired(false));
 
-	public execute = async (ctx: Context): Promise<void> => {
-		if (!(await validateTarget(ctx))) return;
-		const target = ctx.interaction.options.getMember('target') as GuildMember;
-		const targetEntity = await Member.findOne({ where: { userId: target.id, guildId: ctx.guildEntity.id } })
-			?? await (async () => {
-				const user = await User.create({ id: target.id }).save();
-				return Member.create({ user, guild: ctx.guildEntity }).save();
-			})();
-		const duration = ctx.interaction.options.getString('duration') ?? 'Permanent';
-		const permanent = duration === 'Permanent';
-		const milliseconds = ms(duration);
-		const formattedDuration = milliseconds ? `**${ms(milliseconds)}**` : '**Permanent**';
-		const reason = ctx.interaction.options.getString('reason') ?? 'No reason provided';
-		const deleteMessageDays = ctx.interaction.options.getNumber('days') ?? 0;
-		await target.ban({ deleteMessageDays, reason });
-		await ctx.embedify('success', 'user', `Banned \`${target.user.tag}\` | Length: ${formattedDuration}`).send(true);
-		await recordInfraction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'BAN', reason, true, milliseconds, permanent);
-	};
+	public execute = new ExecutionBuilder()
+		.setExecution(async (ctx) => {
+			if (!(await validateTarget(ctx))) return;
+			const target = ctx.interaction.options.getMember('target');
+			await User.upsert({ id: target.id }, ['id']);
+			await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
+			const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
+			const duration = ctx.interaction.options.getString('duration') ?? 'Permanent';
+			const permanent = duration === 'Permanent';
+			const milliseconds = ms(duration);
+			const formattedDuration = milliseconds ? `**${ms(milliseconds)}**` : '**Permanent**';
+			const reason = ctx.interaction.options.getString('reason') ?? 'No reason provided';
+			const deleteMessageDays = ctx.interaction.options.getNumber('days') ?? 0;
+			await target.ban({ deleteMessageDays, reason });
+			await ctx.embedify('success', 'user', `Banned \`${target.user.tag}\` | Length: ${formattedDuration}`).send(true);
+			await recordInfraction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'BAN', reason, true, milliseconds, permanent);
+		});
 }

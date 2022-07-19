@@ -2,20 +2,20 @@ import { Snowflake } from 'discord.js';
 import { BaseEntity, Column, Entity } from 'typeorm';
 
 import { CURRENCY_SYMBOL } from '../config.js';
-import { defaultIncomesObj, defaultIntervalsObj, defaultModulesObj } from '../typings/index.js';
+import { defaultIncomesObj, defaultIntervalsObj, defaultModulesObj } from '../typings';
 
 @Entity()
 export class Guild extends BaseEntity {
-	@Column({ primary: true })
+	@Column({ type: 'character varying', primary: true })
 	public id: Snowflake;
 
-	@Column({ default: CURRENCY_SYMBOL })
+	@Column({ type: 'character varying', default: CURRENCY_SYMBOL })
 	public currency: string;
 
-	@Column({ default: null })
+	@Column({ type: 'character varying', default: null })
 	public transactionLogId: string | null;
 
-	@Column({ default: null })
+	@Column({ type: 'character varying', default: null })
 	public infractionLogId: string | null;
 
 	@Column({ type: 'jsonb', default: defaultIncomesObj })

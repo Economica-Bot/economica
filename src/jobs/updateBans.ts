@@ -1,7 +1,7 @@
-import { Infraction } from '../entities/index.js';
-import { Economica, Job } from '../structures/index.js';
+import { Infraction } from '../entities';
+import { Economica, Job } from '../structures';
 
-export default class implements Job {
+export class BansJob implements Job {
 	public name = 'update-bans';
 	public cooldown = 1000 * 60;
 	public execute = async (client: Economica) => {

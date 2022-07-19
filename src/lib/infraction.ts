@@ -1,20 +1,20 @@
-import { EmbedBuilder, PermissionFlagsBits, TextChannel, Util } from 'discord.js';
+import { EmbedBuilder, PermissionFlagsBits, resolveColor, TextChannel } from 'discord.js';
 import ms from 'ms';
 
-import { Guild, Infraction, Member } from '../entities/index.js';
-import { Economica } from '../structures/index.js';
-import { InfractionString } from '../typings/index.js';
+import { Guild, Infraction, Member } from '../entities';
+import { Economica } from '../structures';
+import { InfractionString } from '../typings';
 
 /**
  * Display an infraction
  * @param infraction - The infraction to display
  * @returns {EmbedBuilder}
  */
-export async function displayInfraction(infraction: Infraction): Promise<EmbedBuilder> {
+export function displayInfraction(infraction: Infraction) {
 	const { id, type, target, agent, reason, duration, active, permanent, createdAt } = infraction;
 	const description = `Target: <@!${target.userId}> | Agent: <@!${agent.userId}>`;
 	return new EmbedBuilder()
-		.setColor(Util.resolveColor('Red'))
+		.setColor(resolveColor('Red'))
 		.setAuthor({ name: `Infraction | ${type}` })
 		.setDescription(description)
 		.addFields([
@@ -56,7 +56,7 @@ export async function recordInfraction(
 		const channel = client.channels.cache.get(infractionLogId) as TextChannel;
 		const member = channel.guild.members.cache.get(client.user.id);
 		if (!channel.permissionsFor(member).has(PermissionFlagsBits.SendMessages) || !channel.permissionsFor(member).has(PermissionFlagsBits.EmbedLinks)) return;
-		const embed = await displayInfraction(infractionEntity);
+		const embed = displayInfraction(infractionEntity);
 		await channel.send({ embeds: [embed] });
 	}
 }

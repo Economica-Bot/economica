@@ -1,5 +1,5 @@
 import express from 'express';
-import { bot } from '../../../index.js';
+import { bot } from '../../..';
 
 const router = express.Router();
 

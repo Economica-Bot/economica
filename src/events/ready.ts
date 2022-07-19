@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ApplicationCommandDataResolvable } from 'discord.js';
 
-import { DEPLOY_ALL_MODULES, DEPLOY_COMMANDS, DEVELOPMENT_GUILD_IDS, PRODUCTION } from '../config.js';
-import { Economica, Event } from '../structures/index.js';
-import { defaultModulesObj } from '../typings/constants.js';
+import { DEPLOY_ALL_MODULES, DEPLOY_COMMANDS, DEVELOPMENT_GUILD_IDS, PRODUCTION } from '../config';
+import { Economica, Event } from '../structures';
+import { defaultModulesObj } from '../typings';
 
-export default class implements Event {
+export class ReadyEvent implements Event {
 	public event = 'ready' as const;
 	public async execute(client: Economica) {
 		if (DEPLOY_COMMANDS === 0) {
@@ -51,9 +51,7 @@ export default class implements Event {
 			client.log.debug(`Reset commands in dev guild ${guild.name}`);
 		});
 
-		if (PRODUCTION) {
-			await client.application.commands.set([]);
-			client.log.debug('Reset global commands');
-		}
+		await client.application.commands.set([]);
+		client.log.debug('Reset global commands');
 	}
 }

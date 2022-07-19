@@ -1,8 +1,8 @@
-import { GuildMember, PermissionFlagsBits } from 'discord.js';
+import { PermissionFlagsBits } from 'discord.js';
 
-import { Infraction, Member, User } from '../../entities/index.js';
-import { validateTarget } from '../../lib/index.js';
-import { Command, Context, EconomicaSlashCommandBuilder } from '../../structures/index.js';
+import { Infraction, Member, User } from '../../entities';
+import { validateTarget } from '../../lib';
+import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -12,24 +12,23 @@ export default class implements Command {
 		.setFormat('untimeout <member> [reason]')
 		.setExamples(['untimeout @user', 'untimeout 796906750569611294 forgiveness'])
 		.setClientPermissions(['ModerateMembers'])
-		.setPermissions(PermissionFlagsBits.ModerateMembers.toString())
+		.setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target.').setRequired(true))
 		.addStringOption((option) => option.setName('string').setDescription('Specify a reason.'));
 
-	public execute = async (ctx: Context): Promise<void> => {
-		if (!(await validateTarget(ctx))) return;
-		const target = ctx.interaction.options.getMember('target') as GuildMember;
-		const targetEntity = await Member.findOne({ where: { userId: target.id, guildId: ctx.guildEntity.id } })
-			?? await (async () => {
-				const user = await User.create({ id: target.id }).save();
-				return Member.create({ user, guild: ctx.guildEntity }).save();
-			})();
-		const reason = ctx.interaction.options.getString('reason', false) || 'No reason provided';
-		await target.timeout(null, reason);
-		await Infraction.update(
-			{ target: { userId: targetEntity.userId, guildId: targetEntity.guildId }, type: 'TIMEOUT', active: true },
-			{ active: false },
-		);
-		await ctx.embedify('success', 'user', `Timeout canceled for ${target}.`).send();
-	};
+	public execute = new ExecutionBuilder()
+		.setExecution(async (ctx) => {
+			if (!(await validateTarget(ctx))) return;
+			const target = ctx.interaction.options.getMember('target');
+			await User.upsert({ id: target.id }, ['id']);
+			await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
+			const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
+			const reason = ctx.interaction.options.getString('reason', false) || 'No reason provided';
+			await target.timeout(null, reason);
+			await Infraction.update(
+				{ target: { userId: targetEntity.userId, guildId: targetEntity.guildId }, type: 'TIMEOUT', active: true },
+				{ active: false },
+			);
+			await ctx.embedify('success', 'user', `Timeout canceled for ${target}.`).send();
+		});
 }

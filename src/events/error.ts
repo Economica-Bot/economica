@@ -1,8 +1,8 @@
 import { EmbedBuilder } from 'discord.js';
 
-import { Economica, Event } from '../structures/index.js';
+import { Economica, Event } from '../structures';
 
-export default class implements Event {
+export class ErrorEvent implements Event {
 	public event = 'error' as const;
 	public async execute(client: Economica, error: Error): Promise<void> {
 		client.log.error(error);

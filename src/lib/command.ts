@@ -1,55 +1,41 @@
-import { GuildMember, PermissionFlagsBits, PermissionsString, TextChannel } from 'discord.js';
+import { PermissionFlagsBits, PermissionsString } from 'discord.js';
 import ms from 'ms';
 
-import { DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEVELOPER_IDS } from '../config.js';
-import { Context } from '../structures/index.js';
+import { DEV_COOLDOWN_EXEMPT, DEV_MODULE_EXEMPT, DEV_PERMISSION_EXEMPT, DEVELOPER_IDS } from '../config';
+import { Command } from '../entities';
+import { Context } from '../structures';
 
 async function checkPermission(ctx: Context): Promise<boolean> {
-	const member = ctx.interaction.member as GuildMember;
-	const channel = ctx.interaction.channel as TextChannel;
-	const group = ctx.data.getSubcommandGroup(ctx.interaction.options.getSubcommandGroup(false))[0];
-	const subcommand = ctx.data.getSubcommand(ctx.interaction.options.getSubcommand(false))[0];
-	const clientPermissions: PermissionsString[] = [];
 	const missingClientPermissions: PermissionsString[] = [];
-	if (ctx.data.clientPermissions) clientPermissions.push(...ctx.data.clientPermissions);
-	if (group?.clientPermissions) clientPermissions.push(...group.clientPermissions);
-	if (subcommand?.clientPermissions) clientPermissions.push(...subcommand.clientPermissions);
-	clientPermissions.forEach((permission) => {
-		if (!ctx.interaction.guild.me.permissionsIn(channel).has(permission)) missingClientPermissions.push(permission);
+	ctx.data.clientPermissions.forEach((permission) => {
+		if (!ctx.interaction.appPermissions.has(permission)) missingClientPermissions.push(permission);
 	});
 	if (missingClientPermissions.length) {
 		await ctx.embedify('warn', 'bot', `Missing Bot Permissions: \`${missingClientPermissions}\``).send(true);
 		return false;
 	}
-	if (ctx.interaction.guild.ownerId === member.id || member.permissions.has(PermissionFlagsBits.Administrator)) {
+
+	if (ctx.interaction.guild.ownerId === ctx.interaction.user.id || ctx.interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
 		return true;
 	}
+
 	return true;
 }
 
 async function checkCooldown(ctx: Context): Promise<boolean> {
 	const { incomes, intervals } = ctx.guildEntity;
-	const key = `${ctx.interaction.guildId}-${ctx.interaction.user.id}-${ctx.interaction.commandName}`;
 	if (!(ctx.interaction.commandName in { ...incomes, ...intervals })) return true;
-	const date = ctx.client.cooldowns.get(key);
-	let cooldown: number;
-	if (!date) {
-		ctx.client.cooldowns.set(key, new Date());
-		return true;
-	}
-	if (ctx.interaction.commandName in { ...intervals, ...incomes }) {
-		Object.keys({ ...intervals, ...incomes }).forEach((k) => {
-			if (k === ctx.interaction.commandName) cooldown = { ...intervals, ...incomes }[k].cooldown;
-		});
-	}
-	if (date.getTime() + cooldown > Date.now()) {
-		const embed = ctx
-			.embedify('warn', 'user', `You may run this command in \`${ms(date.getTime() + cooldown - Date.now())}\``)
-			.setFooter({ text: `Cooldown: ${ms(cooldown)}` });
-		ctx.interaction.reply({ embeds: [embed], ephemeral: true });
+	const command = await Command.findOne({ order: { createdAt: 'DESC' }, where: { member: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId }, command: ctx.interaction.commandName } });
+	if (!command) return true;
+	const { cooldown } = { ...intervals, ...incomes }[ctx.interaction.commandName];
+	if (command.createdAt.getTime() + cooldown > Date.now()) {
+		await ctx
+			.embedify('warn', 'user', `You may run this command in \`${ms(command.createdAt.getTime() + cooldown - Date.now())}\``)
+			.setFooter({ text: `Cooldown: ${ms(cooldown)}` })
+			.send(true);
 		return false;
 	}
-	ctx.client.cooldowns.set(key, new Date());
+
 	return true;
 }
 
@@ -58,6 +44,7 @@ async function validateModule(ctx: Context): Promise<boolean> {
 		await ctx.embedify('warn', 'user', `The \`${ctx.data.module}\` module is not enabled in this server.`).send(true);
 		return false;
 	}
+
 	return true;
 }
 
@@ -71,8 +58,9 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 		return false;
 	} if (!ctx.interaction.inGuild()) {
 		return true;
-	} if (!(await checkPermission(ctx))) {
-		return false;
+	} if (!isDeveloper || !DEV_PERMISSION_EXEMPT) {
+		const valid = await checkPermission(ctx);
+		if (!valid) return false;
 	} if (!isDeveloper || !DEV_COOLDOWN_EXEMPT) {
 		const valid = await checkCooldown(ctx);
 		if (!valid) return false;
