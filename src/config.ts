@@ -106,9 +106,9 @@ export const databaseOptions: DataSourceOptions = {
 };
 
 export const loggerOptions: ISettingsParam = {
-	instanceName: 'Bot',
 	overwriteConsole: true,
+	displayFilePath: 'displayAll',
+	displayFunctionName: false,
 	dateTimeTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-	displayInstanceName: true,
 	minLevel: DEBUG ? 'silly' : 'info',
 };

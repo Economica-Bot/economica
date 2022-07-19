@@ -20,7 +20,7 @@ import { Emojis, Icons, PAGINATION_LIMIT } from '../typings';
 export class InteractionCreateEvent implements Event {
 	public event = 'interactionCreate' as const;
 	public async execute(client: Economica, interaction: Interaction<'cached'>): Promise<void> {
-		client.log.debug(`Executing interaction ${InteractionType[interaction.type]}`);
+		client.log.debug(`Received ${InteractionType[interaction.type]} Interaction | ${interaction.user.username} (${interaction.user.id}) > ${interaction.guild} (${interaction.guild.id})`);
 		if (interaction.isChatInputCommand()) {
 			await this.chatInputCommand(client, interaction);
 		}
