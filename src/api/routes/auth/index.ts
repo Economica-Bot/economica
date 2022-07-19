@@ -13,8 +13,8 @@ router.get('/discord/redirect', passport.authenticate('discord', {
 router.get('/status', (req, res) => (req.user ? res.send(req.user) : res.sendStatus(401)));
 
 router.get('/logout', async (req, res) => {
+	req.logout();
 	req.session.destroy(() => {
-		req.logout();
 		res.redirect('http://localhost:3001');
 	});
 });
