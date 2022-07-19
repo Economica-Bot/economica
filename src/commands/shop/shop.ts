@@ -227,16 +227,25 @@ export default class implements Command {
 				]),
 		]);
 
-	private itemCreator = async () => new ExecutionBuilder().collectVar({
-		property: 'name',
-		prompt: "Specify the listing's name.",
-		validators: [{ function: (ctx, input) => !!input, error: 'Could not parse input' }],
-		parse: (ctx, input) => input,
-	})
+	private itemCreator = async () => new ExecutionBuilder()
+		.collectVar({
+			property: 'name',
+			prompt: "Specify the listing's name.",
+			validators: [{ function: (ctx, input) => !!input, error: 'Could not parse input' }],
+			parse: (ctx, input) => input,
+		})
+		.collectVar({
+			property: 'price',
+			prompt: 'The wallet balance required to purchase.',
+			validators: [{ function: (ctx, input) => parseString(input) !== null, error: 'Input must be numerical' },
+				{ function: (ctx, input) => parseString(input) > 0, error: 'Input must be positive.' }],
+			parse: (ctx, input) => parseString(input),
+		})
 		.collectVar({
 			property: 'required treasury',
 			prompt: 'The minimum treasury balance to purchase.',
-			validators: [{ function: (ctx, input) => !!parseString(input), error: 'Input must be numerical' }],
+			validators: [{ function: (ctx, input) => !!parseString(input), error: 'Input must be numerical' },
+				{ function: (ctx, input) => parseString(input) > 0, error: 'Input must be positive.' }],
 			parse: (ctx, input) => parseString(input),
 			skippable: true,
 		})

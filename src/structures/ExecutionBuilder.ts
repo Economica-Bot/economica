@@ -1,6 +1,44 @@
-import { Awaitable, EmbedBuilder, MessageComponentInteraction, PermissionsString } from 'discord.js';
+/* eslint-disable max-classes-per-file */
+import { Awaitable, EmbedBuilder, Message, MessageComponentInteraction, PermissionsString } from 'discord.js';
 
 import { Context } from './Context';
+
+class VariableCollector {
+	public property: string;
+	public prompt: string;
+	public validators: {
+		function: (msg: Message, ctx: Context) => Awaitable<boolean>,
+		error: string,
+	}[];
+
+	public parse: (msg: Message, ctx: Context) => Awaitable<unknown>;
+	public skippable = false;
+
+	public setProperty(property: string) {
+		this.property = property;
+		return this;
+	}
+
+	public setPrompt(prompt: string) {
+		this.prompt = prompt;
+		return this;
+	}
+
+	public addValidator(validator: typeof this.validators[0]) {
+		this.validators.push(validator);
+		return this;
+	}
+
+	public setParser(parse: typeof this.parse) {
+		this.parse = parse;
+		return this;
+	}
+
+	public setSkippable(skippable = true) {
+		this.skippable = skippable;
+		return this;
+	}
+}
 
 export class ExecutionBuilder {
 	public ctx: Context;
@@ -16,7 +54,7 @@ export class ExecutionBuilder {
 	public elements: (ctx: Context) => Awaitable<unknown[]>;
 	public func: (t: unknown, ctx: Context) => ExecutionBuilder;
 
-	public variableCollectors: { property: string, prompt: string, validators: { function: (ctx: Context, input: string) => Awaitable<boolean>, error: string }[], parse: (ctx: Context, input: string) => Awaitable<unknown>, skippable?: boolean }[] = [];
+	public variableCollectors: VariableCollector[];
 	public variables: Record<string, any> = {};
 
 	public setCtx(ctx: Context) {
@@ -70,9 +108,9 @@ export class ExecutionBuilder {
 		return this;
 	}
 
-	public collectVar(input: typeof this.variableCollectors[0]) {
-		const { property, prompt, validators, parse, skippable } = input;
-		this.variableCollectors.push({ property, prompt, validators, parse, skippable });
+	public collectVar(input: (variableCollector: VariableCollector) => VariableCollector) {
+		const result = input(new VariableCollector());
+		this.variableCollectors.push(result);
 		return this;
 	}
 
