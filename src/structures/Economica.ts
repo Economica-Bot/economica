@@ -26,8 +26,11 @@ import {
 
 export class Economica extends Client {
 	public commands: Collection<string, Command>;
+
 	public webhooks: WebhookClient[];
+
 	public AppDataSource: DataSource;
+
 	public log: Logger;
 
 	public constructor() {
@@ -168,7 +171,10 @@ export class Economica extends Client {
 	private async connectDB() {
 		this.log.debug('Connecting to DB');
 		const entityFiles = await import('../entities');
-		this.AppDataSource = await new DataSource({ ...databaseOptions, entities: Object.values(entityFiles) }).initialize();
+		this.AppDataSource = await new DataSource({
+			...databaseOptions,
+			entities: Object.values(entityFiles),
+		}).initialize();
 		if (DB_OPTION === 1) {
 			await this.AppDataSource.synchronize();
 			this.log.debug('Database synchronized');

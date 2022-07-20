@@ -41,8 +41,8 @@
 		"useDefineForClassFields": true,
 
 		// Completeness
-		"skipLibCheck": true,
+		"skipLibCheck": true
 		// "baseUrl": "./"
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["src/**/*.ts"]
 }

@@ -27,18 +27,21 @@ export default class implements Command {
 					(infraction) => new ExecutionBuilder()
 						.setName(infraction.type)
 						.setValue(infraction.id)
-						.setDescription(`User: <@${infraction.target.userId}> | <t:${Math.round(infraction.createdAt.getTime() / 1000)}>\n\`\`\`${infraction.reason}\`\`\``)
+						.setDescription(
+							`User: <@${infraction.target.userId}> | <t:${Math.round(
+								infraction.createdAt.getTime() / 1000,
+							)}>\n\`\`\`${infraction.reason}\`\`\``,
+						)
 						.setExecution(async (ctx, interaction) => {
 							const embed = displayInfraction(infraction);
-							const row = new ActionRowBuilder<ButtonBuilder>()
-								.setComponents([
-									new ButtonBuilder()
-										.setCustomId('infraction_delete')
-										.setLabel('Delete')
-										.setStyle(ButtonStyle.Danger),
-								]);
+							const row = new ActionRowBuilder<ButtonBuilder>().setComponents([
+								new ButtonBuilder().setCustomId('infraction_delete').setLabel('Delete').setStyle(ButtonStyle.Danger),
+							]);
 							const msg = await interaction.update({ embeds: [embed], components: [row], fetchReply: true });
-							const res = await msg.awaitMessageComponent({ componentType: ComponentType.Button, filter: (i) => i.user.id === interaction.user.id });
+							const res = await msg.awaitMessageComponent({
+								componentType: ComponentType.Button,
+								filter: (i) => i.user.id === interaction.user.id,
+							});
 							if (res.customId === 'infraction_delete') {
 								await infraction.remove();
 								const embed = ctx.embedify('success', 'user', 'Infraction deleted.');
@@ -56,22 +59,31 @@ export default class implements Command {
 					.addValidator((msg) => !!msg.mentions.users.size, 'Could not find any user mentions.')
 					.setParser((msg) => msg.mentions.users.first()))
 				.setPagination(
-					(ctx) => Infraction.find({ relations: ['target', 'agent'], where: { guild: { id: ctx.interaction.guildId }, target: { userId: this.execute.getVariable('user').id } } }),
+					(ctx) => Infraction.find({
+						relations: ['target', 'agent'],
+						where: {
+							guild: { id: ctx.interaction.guildId },
+							target: { userId: this.execute.getVariable('user').id },
+						},
+					}),
 					(infraction) => new ExecutionBuilder()
 						.setName(infraction.type)
 						.setValue(infraction.id)
-						.setDescription(`Moderator: <@${infraction.agent.userId}> | <t:${Math.round(infraction.createdAt.getTime() / 1000)}>\n\`\`\`${infraction.reason}\`\`\``)
+						.setDescription(
+							`Moderator: <@${infraction.agent.userId}> | <t:${Math.round(
+								infraction.createdAt.getTime() / 1000,
+							)}>\n\`\`\`${infraction.reason}\`\`\``,
+						)
 						.setExecution(async (ctx, interaction) => {
 							const embed = displayInfraction(infraction);
-							const row = new ActionRowBuilder<ButtonBuilder>()
-								.setComponents([
-									new ButtonBuilder()
-										.setCustomId('infraction_delete')
-										.setLabel('Delete')
-										.setStyle(ButtonStyle.Danger),
-								]);
+							const row = new ActionRowBuilder<ButtonBuilder>().setComponents([
+								new ButtonBuilder().setCustomId('infraction_delete').setLabel('Delete').setStyle(ButtonStyle.Danger),
+							]);
 							const msg = await interaction.update({ embeds: [embed], components: [row], fetchReply: true });
-							const res = await msg.awaitMessageComponent({ componentType: ComponentType.Button, filter: (i) => i.user.id === interaction.user.id });
+							const res = await msg.awaitMessageComponent({
+								componentType: ComponentType.Button,
+								filter: (i) => i.user.id === interaction.user.id,
+							});
 							if (res.customId === 'infraction_delete') {
 								await infraction.remove();
 								const embed = ctx.embedify('success', 'user', 'Infraction Deleted');

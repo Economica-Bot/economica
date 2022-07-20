@@ -4,6 +4,7 @@ import { Economica, Event } from '../structures';
 
 export class ErrorEvent implements Event {
 	public event = 'error' as const;
+
 	public async execute(client: Economica, error: Error): Promise<void> {
 		client.log.error(error);
 		client.webhooks.forEach(async (webhook) => {

@@ -9,8 +9,7 @@ export default class implements Command {
 		.setFormat('minutely')
 		.setExamples(['minutely']);
 
-	public execute = new ExecutionBuilder()
-		.setExecution(async (ctx) => {
-			interval(ctx, 'minutely');
-		});
+	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
+		interval(ctx, 'minutely');
+	});
 }

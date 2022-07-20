@@ -5,13 +5,16 @@ import { Context } from './Context';
 
 export class VariableCollector {
 	public property: string;
+
 	public prompt: string;
+
 	public validators: {
-		func: (msg: Message, ctx: Context) => Awaitable<boolean>,
-		error: string,
+		func: (msg: Message, ctx: Context) => Awaitable<boolean>;
+		error: string;
 	}[] = [];
 
 	public parse: (msg: Message, ctx: Context) => Awaitable<unknown>;
+
 	public skippable = false;
 
 	public setProperty(property: string) {
@@ -42,19 +45,32 @@ export class VariableCollector {
 
 export class ExecutionBuilder {
 	public ctx: Context;
+
 	public name: string;
+
 	public value: string;
+
 	public description: string;
+
 	public embed: EmbedBuilder;
+
 	public enabled = true;
+
 	public permissions: PermissionsString[] = [];
-	public execution: (ctx: Context, interaction?: MessageComponentInteraction<'cached'>) => Promise<void | ExecutionBuilder>;
+
+	public execution: (
+		ctx: Context,
+		interaction?: MessageComponentInteraction<'cached'>,
+	) => Promise<void | ExecutionBuilder>;
+
 	public options: ExecutionBuilder[] = [];
 
 	public elements: (ctx: Context) => Awaitable<unknown[]>;
+
 	public func: (t: unknown, ctx: Context) => ExecutionBuilder;
 
 	public variableCollectors: VariableCollector[] = [];
+
 	public variables: Record<string, any> = {};
 
 	public setCtx(ctx: Context) {

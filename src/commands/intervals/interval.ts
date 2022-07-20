@@ -5,9 +5,12 @@ import ms from 'ms';
 import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder, VariableCollector } from '../../structures';
 import { IntervalCommand } from '../../typings';
 
-const validators: Record<keyof IntervalCommand, {
-	validators: Parameters<Pick<VariableCollector, 'addValidator'>['addValidator']>[]
-} & Pick<VariableCollector, 'parse'>> = {
+const validators: Record<
+keyof IntervalCommand,
+{
+	validators: Parameters<Pick<VariableCollector, 'addValidator'>['addValidator']>[];
+} & Pick<VariableCollector, 'parse'>
+> = {
 	amount: {
 		validators: [
 			[(msg) => !!parseString(msg.content), 'Could not parse input'],
@@ -66,27 +69,31 @@ export default class implements Command {
 						.setName(cmd)
 						.setValue(cmd)
 						.setDescription(`The \`${cmd}\` interval command`)
-						.setOptions(Object.keys(ctx.guildEntity.intervals[cmd]).map((property: keyof IntervalCommand) => new ExecutionBuilder()
-							.setName(property)
-							.setValue(property)
-							.setDescription(`The \`${property}\` property of \`${cmd}\``)
-							.collectVar((collector) => {
-								collector
-									.setProperty(property)
-									.setPrompt(`Enter a new ${property}`)
-									.setParser(validators[property].parse);
-								validators[property].validators.forEach((validator) => collector.addValidator(...validator));
-								return collector;
-							})
-							.setExecution(async (ctx) => {
-								const res = this.execute.getVariable(property);
-								ctx.guildEntity.intervals[cmd][property] = res;
-								await ctx.guildEntity.save();
-								return new ExecutionBuilder()
-									.setName('Success')
-									.setValue('success')
-									.setDescription(`Successfully updated the \`${property}\` property to \`${res}\` on command \`${cmd}\`.`);
-							}))),
+						.setOptions(
+							Object.keys(ctx.guildEntity.intervals[cmd]).map((property: keyof IntervalCommand) => new ExecutionBuilder()
+								.setName(property)
+								.setValue(property)
+								.setDescription(`The \`${property}\` property of \`${cmd}\``)
+								.collectVar((collector) => {
+									collector
+										.setProperty(property)
+										.setPrompt(`Enter a new ${property}`)
+										.setParser(validators[property].parse);
+									validators[property].validators.forEach((validator) => collector.addValidator(...validator));
+									return collector;
+								})
+								.setExecution(async (ctx) => {
+									const res = this.execute.getVariable(property);
+									ctx.guildEntity.intervals[cmd][property] = res;
+									await ctx.guildEntity.save();
+									return new ExecutionBuilder()
+										.setName('Success')
+										.setValue('success')
+										.setDescription(
+											`Successfully updated the \`${property}\` property to \`${res}\` on command \`${cmd}\`.`,
+										);
+								})),
+						),
 				),
 		]);
 }

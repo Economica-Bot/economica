@@ -13,13 +13,18 @@ export async function validateAmount(
 	if (!result && result !== 0) {
 		await ctx.embedify('error', 'user', 'Please enter a valid input.').send(true);
 		return { validated: false };
-	} if (result < 1) {
+	}
+	if (result < 1) {
 		await ctx.embedify('error', 'user', 'Input less than 1.').send(true);
 		return { validated: false };
-	} if (result > balance) {
-		await ctx.embedify('error', 'user', `Input exceeds current ${target}: ${ctx.guildEntity.currency}${parseNumber(balance)}`).send(true);
+	}
+	if (result > balance) {
+		await ctx
+			.embedify('error', 'user', `Input exceeds current ${target}: ${ctx.guildEntity.currency}${parseNumber(balance)}`)
+			.send(true);
 		return { validated: false };
-	} return { validated: true, result };
+	}
+	return { validated: true, result };
 }
 
 export async function validateTarget(ctx: Context, memberRequired = true): Promise<boolean> {
@@ -30,27 +35,34 @@ export async function validateTarget(ctx: Context, memberRequired = true): Promi
 	if (!target && (!targetUser || memberRequired)) {
 		await ctx.embedify('error', 'user', 'Target not found.').send(true);
 		return false;
-	} if (targetUser.id === ctx.interaction.user.id) {
+	}
+	if (targetUser.id === ctx.interaction.user.id) {
 		await ctx.embedify('warn', 'user', 'You cannot target yourself.').send(true);
 		return false;
-	} if (targetUser.id === ctx.client.user.id) {
+	}
+	if (targetUser.id === ctx.client.user.id) {
 		await ctx.embedify('warn', 'user', 'You cannot target me.').send(true);
 		return false;
-	} if (target) {
+	}
+	if (target) {
 		if (target.roles.highest.position > member.roles.highest.position) {
 			await ctx.embedify('warn', 'user', "Target's roles are too high.").send(true);
 			return false;
-		} if (type === 'ban' && !target.bannable) {
+		}
+		if (type === 'ban' && !target.bannable) {
 			await ctx.embedify('warn', 'user', 'Target is unbannable.').send(true);
 			return false;
-		} if (type === 'kick' && !target.kickable) {
+		}
+		if (type === 'kick' && !target.kickable) {
 			await ctx.embedify('warn', 'user', 'Target is unkickable.').send(true);
 			return false;
-		} if (type === 'timeout') {
+		}
+		if (type === 'timeout') {
 			if (!target.moderatable) {
 				await ctx.embedify('warn', 'user', 'Target is unmoderatable.').send(true);
 				return false;
-			} if (target.communicationDisabledUntil && target.communicationDisabledUntil.getTime() > Date.now()) {
+			}
+			if (target.communicationDisabledUntil && target.communicationDisabledUntil.getTime() > Date.now()) {
 				await ctx.embedify('warn', 'user', 'Target is already in a timeout.').send(true);
 				return false;
 			}

@@ -31,12 +31,22 @@ export default class implements Command {
 				.setDescription('Set the infraction log')
 				.setExecution(async (ctx, interaction) => {
 					await interaction.reply({ content: 'Mention a channel', ephemeral: true });
-					const msgs = await interaction.channel.awaitMessages({ max: 1, filter: (msg) => msg.author.id === ctx.interaction.user.id });
+					const msgs = await interaction.channel.awaitMessages({
+						max: 1,
+						filter: (msg) => msg.author.id === ctx.interaction.user.id,
+					});
 					const channel = msgs.first().mentions.channels.first() as TextChannel;
 					if (!channel) {
 						await interaction.followUp({ content: 'Could not find mention', ephemeral: true });
-					} else if (!channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.SendMessages) || !channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.EmbedLinks)) {
-						const embed = ctx.embedify('error', 'user', 'I need `SEND_MESSAGES` and `EMBED_LINKS` permissions in that channel.');
+					} else if (
+						!channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.SendMessages)
+						|| !channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.EmbedLinks)
+					) {
+						const embed = ctx.embedify(
+							'error',
+							'user',
+							'I need `SEND_MESSAGES` and `EMBED_LINKS` permissions in that channel.',
+						);
 						await interaction.followUp({ embeds: [embed], components: [] });
 					} else {
 						ctx.guildEntity.infractionLogId = channel.id;

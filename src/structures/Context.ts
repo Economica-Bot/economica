@@ -7,6 +7,7 @@ import { Economica, EconomicaSlashCommandBuilder } from '.';
 
 export class ContextEmbed extends EmbedBuilder {
 	public ctx: Context;
+
 	constructor(ctx: Context) {
 		super();
 		this.ctx = ctx;
@@ -21,13 +22,21 @@ export class ContextEmbed extends EmbedBuilder {
 
 export class Context {
 	public client: Economica;
+
 	public interaction: ChatInputCommandInteraction<'cached'>;
+
 	public data: Partial<EconomicaSlashCommandBuilder>;
+
 	public userEntity: User;
+
 	public guildEntity: Guild;
+
 	public memberEntity: Member;
+
 	public clientUserEntity: User;
+
 	public clientMemberEntity: Member;
+
 	public constructor(client: Economica, interaction?: ChatInputCommandInteraction<'cached'>) {
 		this.client = client;
 		this.interaction = interaction;
@@ -44,16 +53,17 @@ export class Context {
 		this.data = command.data;
 		if (!this.interaction.inCachedGuild()) return this;
 
-		this.userEntity = await User.findOne({ where: { id: this.interaction.user.id } })
-			?? await User.create({ id: this.interaction.user.id }).save();
-		this.guildEntity = await Guild.findOne({ where: { id: this.interaction.guildId } })
-			?? await Guild.create({ id: this.interaction.guildId }).save();
-		this.memberEntity = await Member.findOne({ where: { user: { id: this.userEntity.id }, guild: { id: this.guildEntity.id } } })
-			?? await Member.create({ user: this.userEntity, guild: this.guildEntity }).save();
-		this.clientUserEntity = await User.findOne({ where: { id: this.client.user.id } })
-			?? await User.create({ id: this.client.user.id }).save();
-		this.clientMemberEntity = await Member.findOne({ where: { user: { id: this.clientUserEntity.id }, guild: { id: this.guildEntity.id } } })
-			?? await Member.create({ user: this.clientUserEntity, guild: this.guildEntity }).save();
+		this.userEntity = (await User.findOne({ where: { id: this.interaction.user.id } }))
+			?? (await User.create({ id: this.interaction.user.id }).save());
+		this.guildEntity = (await Guild.findOne({ where: { id: this.interaction.guildId } }))
+			?? (await Guild.create({ id: this.interaction.guildId }).save());
+		this.memberEntity = (await Member.findOne({ where: { user: { id: this.userEntity.id }, guild: { id: this.guildEntity.id } } }))
+			?? (await Member.create({ user: this.userEntity, guild: this.guildEntity }).save());
+		this.clientUserEntity = (await User.findOne({ where: { id: this.client.user.id } }))
+			?? (await User.create({ id: this.client.user.id }).save());
+		this.clientMemberEntity = (await Member.findOne({
+			where: { user: { id: this.clientUserEntity.id }, guild: { id: this.guildEntity.id } },
+		})) ?? (await Member.create({ user: this.clientUserEntity, guild: this.guildEntity }).save());
 
 		return this;
 	}
@@ -61,8 +71,12 @@ export class Context {
 	public embedify(type: ReplyString, footer: Footer, description?: string | null): ContextEmbed {
 		const embed = new ContextEmbed(this).setColor(resolveColor(EmbedColors[type]));
 		if (description) embed.setDescription(description);
-		if (footer === 'bot') embed.setFooter({ text: this.interaction.client.user.tag, iconURL: this.interaction.client.user.displayAvatarURL() });
-		else if (footer === 'user') embed.setFooter({ text: this.interaction.user.tag, iconURL: this.interaction.user.displayAvatarURL() });
+		if (footer === 'bot') {
+			embed.setFooter({
+				text: this.interaction.client.user.tag,
+				iconURL: this.interaction.client.user.displayAvatarURL(),
+			});
+		} else if (footer === 'user') embed.setFooter({ text: this.interaction.user.tag, iconURL: this.interaction.user.displayAvatarURL() });
 		else if (footer === 'guild') embed.setFooter({ text: this.interaction.guild.name, iconURL: this.interaction.guild.iconURL() });
 		else embed.setFooter(footer);
 		return embed;

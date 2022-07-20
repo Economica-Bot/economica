@@ -11,12 +11,11 @@ export default class implements Command {
 		.setFormat('work')
 		.setExamples(['work']);
 
-	public execute = new ExecutionBuilder()
-		.setExecution(async (ctx) => {
-			const { currency } = ctx.guildEntity;
-			const { min, max } = ctx.guildEntity.incomes.work;
-			const amount = Math.ceil(Math.random() * (max - min) + min);
-			await ctx.embedify('success', 'user', `You worked and earned ${currency}${parseNumber(amount)}`).send();
-			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'WORK', amount, 0);
-		});
+	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
+		const { currency } = ctx.guildEntity;
+		const { min, max } = ctx.guildEntity.incomes.work;
+		const amount = Math.ceil(Math.random() * (max - min) + min);
+		await ctx.embedify('success', 'user', `You worked and earned ${currency}${parseNumber(amount)}`).send();
+		await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'WORK', amount, 0);
+	});
 }

@@ -4,6 +4,7 @@ import { Economica, Event } from '../structures';
 
 export class WarnEvent implements Event {
 	public event = 'warn' as const;
+
 	public async execute(client: Economica, error: Error): Promise<void> {
 		client.webhooks.forEach(async (webhook) => {
 			const description = `\`\`\`ts\n${error}\`\`\``;

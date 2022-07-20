@@ -31,13 +31,15 @@ export function createApp(): Express {
 			cookie: {
 				maxAge: 1000 * 60 * 60 * 24 * 7,
 			},
-			store: new (PGStore(session))({ conObject: {
-				host: 'localhost',
-				port: 5432,
-				user: 'postgres',
-				password: 'password',
-				database: 'postgres',
-			} }),
+			store: new (PGStore(session))({
+				conObject: {
+					host: 'localhost',
+					port: 5432,
+					user: 'postgres',
+					password: 'password',
+					database: 'postgres',
+				},
+			}),
 		}),
 	);
 

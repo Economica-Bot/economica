@@ -21,12 +21,7 @@ passport.use(
 			callbackURL: CALLBACK_URL,
 			scope: ['identify', 'guilds'],
 		},
-		async (
-			accessToken: string,
-			refreshToken: string,
-			profile: Profile,
-			done: VerifyCallback,
-		) => {
+		async (accessToken: string, refreshToken: string, profile: Profile, done: VerifyCallback) => {
 			await Token.upsert({ id: profile.id, accessToken, refreshToken }, ['id']);
 			const user = await Token.findOne({ where: { id: profile.id } });
 			done(null, user);

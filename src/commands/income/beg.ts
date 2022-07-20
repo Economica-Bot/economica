@@ -11,15 +11,16 @@ export default class implements Command {
 		.setFormat('beg')
 		.setExamples(['beg']);
 
-	public execute = new ExecutionBuilder()
-		.setExecution(async (ctx) => {
-			const { min, max, chance } = ctx.guildEntity.incomes.beg;
-			const amount = Math.ceil(Math.random() * (max - min) + min);
-			if (Math.random() * 100 > chance) {
-				await ctx.embedify('warn', 'user', 'You begged and earned nothing :cry:').send();
-				return;
-			}
-			await ctx.embedify('success', 'user', `You begged and earned ${ctx.guildEntity.currency}${parseNumber(amount)}.`).send();
-			await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'BEG', amount, 0);
-		});
+	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
+		const { min, max, chance } = ctx.guildEntity.incomes.beg;
+		const amount = Math.ceil(Math.random() * (max - min) + min);
+		if (Math.random() * 100 > chance) {
+			await ctx.embedify('warn', 'user', 'You begged and earned nothing :cry:').send();
+			return;
+		}
+		await ctx
+			.embedify('success', 'user', `You begged and earned ${ctx.guildEntity.currency}${parseNumber(amount)}.`)
+			.send();
+		await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'BEG', amount, 0);
+	});
 }

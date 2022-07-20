@@ -57,10 +57,13 @@ export type Moderation = 'ban' | 'kick' | 'timeout' | 'unban' | 'untimeout';
 export type BalanceString = 'wallet' | 'treasury';
 export type ListingString = 'COLLECTABLE' | 'INSTANT' | 'USABLE' | 'GENERATOR';
 export const ListingDescriptions: Record<ListingString, string> = {
-	COLLECTABLE: 'Collectable items are just that; collectable. They exist in the inventory forever (unless sold or given away) and have no particular quirks or abilities, besides looking cool.',
+	COLLECTABLE:
+		'Collectable items are just that; collectable. They exist in the inventory forever (unless sold or given away) and have no particular quirks or abilities, besides looking cool.',
 	INSTANT: 'Instant items are special items that are used instantly when purchased.',
-	USABLE: 'Usable items may be used after purchasing to the owner\'s discretion - when used, they may grant a role or special effect.',
-	GENERATOR: 'Generator items generate money that can be collected with `/collect` based on a duration specific to that particular generator.',
+	USABLE:
+		"Usable items may be used after purchasing to the owner's discretion - when used, they may grant a role or special effect.",
+	GENERATOR:
+		'Generator items generate money that can be collected with `/collect` based on a duration specific to that particular generator.',
 };
 export type InfractionString = 'BAN' | 'KICK' | 'TIMEOUT' | 'UNBAN' | 'UNTIMEOUT';
 export type TransactionString =
@@ -113,19 +116,8 @@ export enum Occupations {
 	'Dog Walker',
 }
 export type OccupationString = keyof typeof Occupations;
-export type ModuleTypeString =
-	| 'DEFAULT'
-	| 'SPECIAL';
-export type DefaultModuleString =
-	| 'ADMIN'
-	| 'ECONOMY'
-	| 'INCOME'
-	| 'MODERATION'
-	| 'SHOP'
-	| 'UTILITY';
-export type SpecialModuleString =
-	| 'INSIGHTS'
-	| 'INTERVAL'
-	| 'CASINO';
+export type ModuleTypeString = 'DEFAULT' | 'SPECIAL';
+export type DefaultModuleString = 'ADMIN' | 'ECONOMY' | 'INCOME' | 'MODERATION' | 'SHOP' | 'UTILITY';
+export type SpecialModuleString = 'INSIGHTS' | 'INTERVAL' | 'CASINO';
 export type ModuleString = DefaultModuleString | SpecialModuleString;
 export * from './constants';

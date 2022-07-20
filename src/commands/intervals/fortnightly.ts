@@ -9,8 +9,7 @@ export default class implements Command {
 		.setFormat('fortnightly')
 		.setExamples(['fortnightly']);
 
-	public execute = new ExecutionBuilder()
-		.setExecution(async (ctx) => {
-			interval(ctx, 'fortnightly');
-		});
+	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
+		interval(ctx, 'fortnightly');
+	});
 }

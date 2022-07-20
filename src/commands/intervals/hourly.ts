@@ -9,8 +9,7 @@ export default class implements Command {
 		.setFormat('hourly')
 		.setExamples(['hourly']);
 
-	public execute = new ExecutionBuilder()
-		.setExecution(async (ctx) => {
-			interval(ctx, 'hourly');
-		});
+	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
+		interval(ctx, 'hourly');
+	});
 }

@@ -7,6 +7,7 @@ import { defaultModulesObj } from '../typings';
 
 export class ReadyEvent implements Event {
 	public event = 'ready' as const;
+
 	public async execute(client: Economica) {
 		if (DEPLOY_COMMANDS === 0) {
 			client.log.info('Commands Idle');

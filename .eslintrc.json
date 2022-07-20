@@ -1,54 +1,48 @@
 {
-  "env": {
-    "browser": true,
-    "es2021": true
-  },
-  "extends": [
-    "airbnb-base",
-    "airbnb-typescript/base",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:import/typescript"
-  ],
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaVersion": "latest",
-    "sourceType": "module",
-    "project": "./tsconfig.json"
-  },
-  "plugins": ["@typescript-eslint", "import"],
-  "rules": {
-    "import/no-cycle": "off",
-    "import/prefer-default-export": "off",
-    "no-tabs": ["error", { "allowIndentationTabs": true }],
-    "@typescript-eslint/indent": [2, "tab"],
-    "@typescript-eslint/lines-between-class-members": [
-      "error",
-      "always",
-      { "exceptAfterSingleLine": true }
-    ],
+	"env": {
+		"browser": true,
+		"es2021": true
+	},
+	"extends": [
+		"airbnb-base",
+		"airbnb-typescript/base",
+		"plugin:import/typescript"
+	],
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"ecmaVersion": "latest",
+		"sourceType": "module",
+		"project": "./tsconfig.json"
+	},
+	"plugins": ["@typescript-eslint", "import"],
+	"rules": {
+		"import/no-cycle": "off",
+		"import/prefer-default-export": "off",
+		"no-tabs": ["error", { "allowIndentationTabs": true }],
+		"@typescript-eslint/indent": [2, "tab"],
 		"object-curly-newline": "off",
-    "no-plusplus": "off",
-    "max-len": "off",
-    "class-methods-use-this": "off",
-    "newline-per-chained-call": "off",
-    "radix": "off",
-    "no-param-reassign": "off",
-    "no-shadow": "off",
-    "@typescript-eslint/no-shadow": "off"
-  },
-  "settings": {
-    "import/parsers": {
-      "@typescript-eslint/parser": [".ts"]
-    },
-    "import/resolver": {
-      // "project": {},
-      "node": {
-        "extensions": [".ts"],
-        "moduleDirectory": ["./src", "./node_modules"]
-      },
-      "typescript": {
-        "alwaysTryTypes": true
-      }
-    }
-  }
+		"no-plusplus": "off",
+		"max-len": "off",
+		"class-methods-use-this": "off",
+		// "newline-per-chained-call": 2,
+		"radix": "off",
+		"no-param-reassign": "off",
+		"no-shadow": "off",
+		"@typescript-eslint/no-shadow": "off"
+	},
+	"settings": {
+		"import/parsers": {
+			"@typescript-eslint/parser": [".ts"]
+		},
+		"import/resolver": {
+			// "project": {},
+			"node": {
+				"extensions": [".ts"],
+				"moduleDirectory": ["./src", "./node_modules"]
+			},
+			"typescript": {
+				"alwaysTryTypes": true
+			}
+		}
+	}
 }

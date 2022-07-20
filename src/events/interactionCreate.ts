@@ -19,8 +19,12 @@ import { Emojis, Icons, PAGINATION_LIMIT } from '../typings';
 
 export class InteractionCreateEvent implements Event {
 	public event = 'interactionCreate' as const;
+
 	public async execute(client: Economica, interaction: Interaction<'cached'>): Promise<void> {
-		client.log.debug(`Received ${InteractionType[interaction.type]} Interaction | ${interaction.user.username} (${interaction.user.id}) > ${interaction.guild} (${interaction.guild.id})`);
+		client.log.debug(
+			`Received ${InteractionType[interaction.type]} Interaction | ${interaction.user.username} (${interaction.user.id
+			}) > ${interaction.guild} (${interaction.guild.id})`,
+		);
 		if (interaction.isChatInputCommand()) {
 			await this.chatInputCommand(client, interaction);
 		}
@@ -35,7 +39,12 @@ export class InteractionCreateEvent implements Event {
 		}
 	}
 
-	private async execution(ctx: Context, ex: ExecutionBuilder, index = 0, interaction?: MessageComponentInteraction<'cached'>): Promise<void> {
+	private async execution(
+		ctx: Context,
+		ex: ExecutionBuilder,
+		index = 0,
+		interaction?: MessageComponentInteraction<'cached'>,
+	): Promise<void> {
 		if (ex.variableCollectors) {
 			// eslint-disable-next-line no-restricted-syntax
 			for await (const variableCollector of ex.variableCollectors) {
@@ -59,10 +68,11 @@ export class InteractionCreateEvent implements Event {
 		const options = ex.options
 			.filter((option) => ctx.interaction.member.permissions.has(option.permissions) && option.enabled)
 			.slice(index * PAGINATION_LIMIT, index * PAGINATION_LIMIT + PAGINATION_LIMIT);
-		const fields = options.map((option) => ({ name: option.name, value: option.description }) as APIEmbedField);
-		const selectOptions = options.map((option) => ({ label: option.name, value: option.value }) as APISelectMenuOption);
-		const row1 = new ActionRowBuilder<SelectMenuBuilder>()
-			.setComponents([new SelectMenuBuilder().setCustomId('option').setOptions(selectOptions)]);
+		const fields = options.map((option) => ({ name: option.name, value: option.description } as APIEmbedField));
+		const selectOptions = options.map((option) => ({ label: option.name, value: option.value } as APISelectMenuOption));
+		const row1 = new ActionRowBuilder<SelectMenuBuilder>().setComponents([
+			new SelectMenuBuilder().setCustomId('option').setOptions(selectOptions),
+		]);
 		const row2 = new ActionRowBuilder<ButtonBuilder>();
 		for (let i = 0; i < fields.length; i++) {
 			fields[i].name = `${Icons[i]} ${fields[i].name}`;
@@ -91,9 +101,7 @@ export class InteractionCreateEvent implements Event {
 			]);
 		}
 
-		const embed = (ex.embed ?? ctx
-			.embedify('info', 'user', ex.description)
-			.setAuthor({ name: ex.name }))
+		const embed = (ex.embed ?? ctx.embedify('info', 'user', ex.description).setAuthor({ name: ex.name }))
 			.setFooter({ text: `Page ${index + 1} / ${Math.ceil(ex.options.length / PAGINATION_LIMIT) || 1}` })
 			.addFields(fields);
 		const components = [];
@@ -106,7 +114,9 @@ export class InteractionCreateEvent implements Event {
 			: ctx.interaction.replied
 				? await ctx.interaction.editReply(payload)
 				: await ctx.interaction.reply({ ...payload, fetchReply: true });
-		const int = await msg.awaitMessageComponent({ filter: (i) => i.user.id === ctx.interaction.user.id }) as MessageComponentInteraction<'cached'>;
+		const int = (await msg.awaitMessageComponent({
+			filter: (i) => i.user.id === ctx.interaction.user.id,
+		})) as MessageComponentInteraction<'cached'>;
 		if (int.isButton()) {
 			await this.execution(ctx, ex, int.customId === 'next' ? ++index : --index, int);
 		} else if (int.isSelectMenu()) {

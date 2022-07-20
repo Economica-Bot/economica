@@ -4,10 +4,15 @@ import { ModuleString } from '../typings';
 
 export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	public module: ModuleString;
+
 	public format: string;
+
 	public examples: string[] = [];
+
 	public clientPermissions: PermissionsString[] = [];
+
 	public global = false;
+
 	public enabled = true;
 
 	public setGlobal(global: boolean): this {
@@ -41,6 +46,15 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 	}
 
 	public override toJSON() {
-		return { ...super.toJSON(), module: this.module, format: this.format, examples: this.examples, clientPermissions: this.clientPermissions, global: this.global, enabled: this.enabled, default_member_permissions: this.default_member_permissions };
+		return {
+			...super.toJSON(),
+			module: this.module,
+			format: this.format,
+			examples: this.examples,
+			clientPermissions: this.clientPermissions,
+			global: this.global,
+			enabled: this.enabled,
+			default_member_permissions: this.default_member_permissions,
+		};
 	}
 }

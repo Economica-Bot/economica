@@ -22,7 +22,9 @@ export default class implements Command {
 				.setDescription('View the current transaction log')
 				.setExecution(async (ctx, interaction) => {
 					const { transactionLogId } = ctx.guildEntity;
-					const content = transactionLogId ? `The current transaction log is <#${transactionLogId}>.` : 'There is no transaction log.';
+					const content = transactionLogId
+						? `The current transaction log is <#${transactionLogId}>.`
+						: 'There is no transaction log.';
 					const embed = ctx.embedify('info', 'user', content);
 					await interaction.update({ embeds: [embed], components: [] });
 				}),
@@ -34,12 +36,22 @@ export default class implements Command {
 					.setProperty('channel')
 					.setPrompt('Specify a channel')
 					.addValidator((msg) => !!msg.mentions.channels.size, 'No channels mentioned.')
-					.addValidator((msg) => msg.mentions.channels.first().type === ChannelType.GuildText, 'Invalid channel type - must be text.')
+					.addValidator(
+						(msg) => msg.mentions.channels.first().type === ChannelType.GuildText,
+						'Invalid channel type - must be text.',
+					)
 					.setParser((msg) => msg.mentions.channels.first()))
 				.setExecution(async (ctx, interaction) => {
 					const channel = this.execute.getVariable('channel');
-					if (!channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.SendMessages) || !channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.EmbedLinks)) {
-						const embed = ctx.embedify('error', 'user', 'I need `SEND_MESSAGES` and `EMBED_LINKS` permissions in that channel.');
+					if (
+						!channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.SendMessages)
+						|| !channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.EmbedLinks)
+					) {
+						const embed = ctx.embedify(
+							'error',
+							'user',
+							'I need `SEND_MESSAGES` and `EMBED_LINKS` permissions in that channel.',
+						);
 						await interaction.editReply({ embeds: [embed], components: [] });
 					} else {
 						ctx.guildEntity.transactionLogId = channel.id;

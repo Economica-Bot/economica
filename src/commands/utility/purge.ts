@@ -16,16 +16,12 @@ export default class implements Command {
 			.setDescription('Specify a channel')
 			.addChannelTypes(ChannelType.GuildText)
 			.setRequired(false))
-		.addIntegerOption((option) => option
-			.setName('amount')
-			.setDescription('Specify an amount.')
-			.setMinValue(1)
-			.setMaxValue(100)
+		.addIntegerOption((option) => option.setName('amount').setDescription('Specify an amount.').setMinValue(1).setMaxValue(100)
 			.setRequired(false));
 
 	public execute = new ExecutionBuilder()
 		.setExecution(async (ctx) => {
-			const channel = (ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel);
+			const channel = ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel;
 			if (!channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.ManageMessages)) {
 				await ctx.embedify('error', 'bot', 'I need `MANAGE_MESSAGES` in that channel.').send(true);
 				return;

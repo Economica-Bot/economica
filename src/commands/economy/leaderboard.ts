@@ -20,7 +20,11 @@ export default class implements Command {
 				.setValue('wallet')
 				.setDescription('View the leaderboard by wallet')
 				.setPagination(
-					async (ctx) => Member.find({ relations: ['guild'], order: { wallet: 'DESC' }, where: { guildId: ctx.interaction.guildId } }),
+					async (ctx) => Member.find({
+						relations: ['guild'],
+						order: { wallet: 'DESC' },
+						where: { guildId: ctx.interaction.guildId },
+					}),
 					(member) => new ExecutionBuilder()
 						.setName(`Wallet: ${member.guild.currency} ${parseNumber(member.wallet)}`)
 						.setValue(member.userId)
@@ -31,7 +35,11 @@ export default class implements Command {
 				.setValue('treasury')
 				.setDescription('View the leaderboard by treasury')
 				.setPagination(
-					async (ctx) => Member.find({ relations: ['guild'], order: { treasury: 'DESC' }, where: { guildId: ctx.interaction.guildId } }),
+					async (ctx) => Member.find({
+						relations: ['guild'],
+						order: { treasury: 'DESC' },
+						where: { guildId: ctx.interaction.guildId },
+					}),
 					(member) => new ExecutionBuilder()
 						.setName(`Treasury: ${member.guild.currency} ${parseNumber(member.treasury)}`)
 						.setValue(member.userId)
@@ -42,7 +50,11 @@ export default class implements Command {
 				.setValue('total')
 				.setDescription('View the leaderboard by total wealth')
 				.setPagination(
-					async (ctx) => Member.find({ relations: ['guild'], order: { wallet: 'DESC', treasury: 'DESC' }, where: { guildId: ctx.interaction.guildId } }),
+					async (ctx) => Member.find({
+						relations: ['guild'],
+						order: { wallet: 'DESC', treasury: 'DESC' },
+						where: { guildId: ctx.interaction.guildId },
+					}),
 					(member) => new ExecutionBuilder()
 						.setName(`Total: ${member.guild.currency} ${parseNumber(member.wallet + member.treasury)}`)
 						.setValue(member.userId)

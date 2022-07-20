@@ -22,7 +22,11 @@ export default class implements Command {
 				.setValue('view')
 				.setDescription('View the current currency symbol')
 				.setExecution(async (ctx, interaction) => {
-					const embed = ctx.embedify('info', 'user', `The server currency is ${ctx.guildEntity.currency}. (\`${ctx.guildEntity.currency}\`)`);
+					const embed = ctx.embedify(
+						'info',
+						'user',
+						`The server currency is ${ctx.guildEntity.currency}. (\`${ctx.guildEntity.currency}\`)`,
+					);
 					await interaction.update({ embeds: [embed], components: [] });
 				}),
 			new ExecutionBuilder()
@@ -31,7 +35,10 @@ export default class implements Command {
 				.setDescription('Set the currency')
 				.setExecution(async (ctx, interaction) => {
 					await interaction.reply({ content: 'Enter the new currency', ephemeral: true });
-					const msgs = await interaction.channel.awaitMessages({ max: 1, filter: (msg) => msg.author.id === ctx.interaction.user.id });
+					const msgs = await interaction.channel.awaitMessages({
+						max: 1,
+						filter: (msg) => msg.author.id === ctx.interaction.user.id,
+					});
 					const currency = msgs.first().content;
 					ctx.guildEntity.currency = currency;
 					await ctx.guildEntity.save();

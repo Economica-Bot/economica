@@ -15,7 +15,10 @@ async function checkPermission(ctx: Context): Promise<boolean> {
 		return false;
 	}
 
-	if (ctx.interaction.guild.ownerId === ctx.interaction.user.id || ctx.interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+	if (
+		ctx.interaction.guild.ownerId === ctx.interaction.user.id
+		|| ctx.interaction.member.permissions.has(PermissionFlagsBits.Administrator)
+	) {
 		return true;
 	}
 
@@ -25,12 +28,22 @@ async function checkPermission(ctx: Context): Promise<boolean> {
 async function checkCooldown(ctx: Context): Promise<boolean> {
 	const { incomes, intervals } = ctx.guildEntity;
 	if (!(ctx.interaction.commandName in { ...incomes, ...intervals })) return true;
-	const command = await Command.findOne({ order: { createdAt: 'DESC' }, where: { member: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId }, command: ctx.interaction.commandName } });
+	const command = await Command.findOne({
+		order: { createdAt: 'DESC' },
+		where: {
+			member: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId },
+			command: ctx.interaction.commandName,
+		},
+	});
 	if (!command) return true;
 	const { cooldown } = { ...intervals, ...incomes }[ctx.interaction.commandName];
 	if (command.createdAt.getTime() + cooldown > Date.now()) {
 		await ctx
-			.embedify('warn', 'user', `You may run this command in \`${ms(command.createdAt.getTime() + cooldown - Date.now())}\``)
+			.embedify(
+				'warn',
+				'user',
+				`You may run this command in \`${ms(command.createdAt.getTime() + cooldown - Date.now())}\``,
+			)
 			.setFooter({ text: `Cooldown: ${ms(cooldown)}` })
 			.send(true);
 		return false;
@@ -53,18 +66,23 @@ export async function commandCheck(ctx: Context): Promise<boolean> {
 	if (!ctx.data.enabled) {
 		await ctx.embedify('warn', 'user', 'This command is disabled.').send(true);
 		return false;
-	} if (!ctx.data.global && !ctx.interaction.inGuild()) {
+	}
+	if (!ctx.data.global && !ctx.interaction.inGuild()) {
 		await ctx.embedify('warn', 'user', 'This command may only be used within servers.').send(true);
 		return false;
-	} if (!ctx.interaction.inGuild()) {
+	}
+	if (!ctx.interaction.inGuild()) {
 		return true;
-	} if (!isDeveloper || !DEV_PERMISSION_EXEMPT) {
+	}
+	if (!isDeveloper || !DEV_PERMISSION_EXEMPT) {
 		const valid = await checkPermission(ctx);
 		if (!valid) return false;
-	} if (!isDeveloper || !DEV_COOLDOWN_EXEMPT) {
+	}
+	if (!isDeveloper || !DEV_COOLDOWN_EXEMPT) {
 		const valid = await checkCooldown(ctx);
 		if (!valid) return false;
-	} if (!isDeveloper || !DEV_MODULE_EXEMPT) {
+	}
+	if (!isDeveloper || !DEV_MODULE_EXEMPT) {
 		const valid = await validateModule(ctx);
 		if (!valid) return false;
 	}

@@ -75,11 +75,7 @@ export const clientOptions: ClientOptions = {
 		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.GuildMessages,
 	],
-	partials: [
-		Partials.Channel,
-		Partials.GuildMember,
-		Partials.Message,
-	],
+	partials: [Partials.Channel, Partials.GuildMember, Partials.Message],
 };
 
 export const inviteOptions: InviteGenerationOptions = {

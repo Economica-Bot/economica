@@ -15,28 +15,34 @@ export default class implements Command {
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 		.addUserOption((option) => option.setName('user').setDescription('Specify a user').setRequired(true))
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true))
-		.addStringOption((option) => option.setName('balance').setDescription('Specify the target balance').setRequired(true).addChoices(
-			{ name: 'wallet', value: 'wallet' },
-			{ name: 'treasury', value: 'treasury' },
-		));
+		.addStringOption((option) => option
+			.setName('balance')
+			.setDescription('Specify the target balance')
+			.setRequired(true)
+			.addChoices({ name: 'wallet', value: 'wallet' }, { name: 'treasury', value: 'treasury' }));
 
-	public execute = new ExecutionBuilder()
-		.setExecution(async (ctx) => {
-			const target = ctx.interaction.options.getMember('user');
-			await User.upsert({ id: target.id }, ['id']);
-			await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
-			const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
-			const amount = parseString(ctx.interaction.options.getString('amount'));
-			const balance = ctx.interaction.options.getString('balance');
-			const { wallet: w, treasury: t } = targetEntity;
-			const difference = balance === 'wallet' ? amount - w : amount - t;
-			const wallet = balance === 'wallet' ? difference : 0;
-			const treasury = balance === 'treasury' ? difference : 0;
-			if (!amount) {
-				await ctx.embedify('error', 'user', 'Please enter a valid amount.').send(true);
-				return;
-			}
-			await ctx.embedify('success', 'user', `Set ${target}'s \`${balance}\` to ${ctx.guildEntity.currency}${parseNumber(amount)}.`).send();
-			await recordTransaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'SET_MONEY', wallet, treasury);
-		});
+	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
+		const target = ctx.interaction.options.getMember('user');
+		await User.upsert({ id: target.id }, ['id']);
+		await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
+		const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
+		const amount = parseString(ctx.interaction.options.getString('amount'));
+		const balance = ctx.interaction.options.getString('balance');
+		const { wallet: w, treasury: t } = targetEntity;
+		const difference = balance === 'wallet' ? amount - w : amount - t;
+		const wallet = balance === 'wallet' ? difference : 0;
+		const treasury = balance === 'treasury' ? difference : 0;
+		if (!amount) {
+			await ctx.embedify('error', 'user', 'Please enter a valid amount.').send(true);
+			return;
+		}
+		await ctx
+			.embedify(
+				'success',
+				'user',
+				`Set ${target}'s \`${balance}\` to ${ctx.guildEntity.currency}${parseNumber(amount)}.`,
+			)
+			.send();
+		await recordTransaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'SET_MONEY', wallet, treasury);
+	});
 }

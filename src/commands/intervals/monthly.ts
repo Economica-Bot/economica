@@ -9,8 +9,7 @@ export default class implements Command {
 		.setFormat('monthly')
 		.setExamples(['monthly']);
 
-	public execute = new ExecutionBuilder()
-		.setExecution(async (ctx) => {
-			interval(ctx, 'monthly');
-		});
+	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
+		interval(ctx, 'monthly');
+	});
 }

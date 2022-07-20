@@ -4,7 +4,10 @@ import { Transaction } from '../../../../entities';
 
 const router = express.Router();
 router.get('/', async (_req, res) => {
-	const transactions = await Transaction.find({ relations: ['agent', 'target'], where: { guild: { id: res.locals.guild.id } } });
+	const transactions = await Transaction.find({
+		relations: ['agent', 'target'],
+		where: { guild: { id: res.locals.guild.id } },
+	});
 	res.status(200).send(transactions);
 });
 

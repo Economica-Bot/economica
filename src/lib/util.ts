@@ -3,7 +3,11 @@ import { MessageComponentInteraction } from 'discord.js';
 import { Context, VariableCollector } from '../structures';
 import { Emojis } from '../typings';
 
-export async function collectProp(ctx: Context, interaction: MessageComponentInteraction<'cached'>, variableCollector: VariableCollector) {
+export async function collectProp(
+	ctx: Context,
+	interaction: MessageComponentInteraction<'cached'>,
+	variableCollector: VariableCollector,
+) {
 	await ctx.clientMemberEntity.reload();
 	await ctx.clientUserEntity.reload();
 	await ctx.memberEntity.reload();
@@ -13,7 +17,9 @@ export async function collectProp(ctx: Context, interaction: MessageComponentInt
 		.embedify('info', 'user', variableCollector.prompt)
 		.setAuthor({ name: `Specifying the ${variableCollector.property} property` })
 		.setFooter({ text: `Enter "cancel" to cancel ${variableCollector.skippable ? ', "skip" to skip' : ''}.` });
-	const message = interaction.replied ? await interaction.editReply({ embeds: [embed], components: [] }) : await interaction.update({ embeds: [embed], components: [], fetchReply: true });
+	const message = interaction.replied
+		? await interaction.editReply({ embeds: [embed], components: [] })
+		: await interaction.update({ embeds: [embed], components: [], fetchReply: true });
 	const res = await message.channel.awaitMessages({ filter: (msg) => msg.author.id === interaction.user.id, max: 1 });
 	const input = res.first();
 

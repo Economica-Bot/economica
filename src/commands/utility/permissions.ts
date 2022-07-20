@@ -13,19 +13,29 @@ export default class implements Command {
 		.setGlobal(true)
 		.addStringOption((option) => option.setName('command').setDescription('Specify a command').setRequired(true));
 
-	public execute = new ExecutionBuilder()
-		.setExecution(async (ctx) => {
-			const commandInput = ctx.interaction.options.getString('command');
-			const command = ctx.client.commands.get(commandInput);
-			if (!command) {
-				ctx.embedify('error', 'user', 'Could not find that command.').send(true);
-				return;
-			}
+	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
+		const commandInput = ctx.interaction.options.getString('command');
+		const command = ctx.client.commands.get(commandInput);
+		if (!command) {
+			ctx.embedify('error', 'user', 'Could not find that command.').send(true);
+			return;
+		}
 
-			const embed = ctx
-				.embedify('info', 'user', `Client Permissions: \`${command.data.clientPermissions ?? '`None`'}\`\nMember Permissions: \`${command.data.default_member_permissions ? new PermissionsBitField(BigInt(command.data.default_member_permissions)).toArray() : '`None`'}\``)
-				.setAuthor({ name: `Permissions for ${command.data.name}`, iconURL: ctx.client.emojis.resolve(parseEmoji(Emojis.PERSON_ADD).id)?.url });
+		const embed = ctx
+			.embedify(
+				'info',
+				'user',
+				`Client Permissions: \`${command.data.clientPermissions ?? '`None`'}\`\nMember Permissions: \`${
+					command.data.default_member_permissions
+						? new PermissionsBitField(BigInt(command.data.default_member_permissions)).toArray()
+						: '`None`'
+				}\``,
+			)
+			.setAuthor({
+				name: `Permissions for ${command.data.name}`,
+				iconURL: ctx.client.emojis.resolve(parseEmoji(Emojis.PERSON_ADD).id)?.url,
+			});
 
-			ctx.interaction.editReply({ embeds: [embed] });
-		});
+		ctx.interaction.editReply({ embeds: [embed] });
+	});
 }

@@ -5,13 +5,19 @@ import ms from 'ms';
 import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder, VariableCollector } from '../../structures';
 import { Emojis, IncomeCommand } from '../../typings';
 
-const validators: Record<keyof IncomeCommand, {
-	validators: Parameters<Pick<VariableCollector, 'addValidator'>['addValidator']>[]
-} & Pick<VariableCollector, 'parse'>> = {
+const validators: Record<
+keyof IncomeCommand,
+{
+	validators: Parameters<Pick<VariableCollector, 'addValidator'>['addValidator']>[];
+} & Pick<VariableCollector, 'parse'>
+> = {
 	chance: {
 		validators: [
 			[(msg) => !!parseFloat(msg.content), 'Could not parse percentage.'],
-			[(msg) => parseFloat(msg.content) <= 100 && parseFloat(msg.content) >= 0, 'Chance must be between 0 and 100, inclusive.'],
+			[
+				(msg) => parseFloat(msg.content) <= 100 && parseFloat(msg.content) >= 0,
+				'Chance must be between 0 and 100, inclusive.',
+			],
 		],
 		parse: (msg) => parseFloat(msg.content),
 	},
@@ -80,7 +86,11 @@ export default class implements Command {
 					(cmd, ctx) => new ExecutionBuilder()
 						.setName(cmd)
 						.setValue(cmd)
-						.setDescription(`\`\`\`${Object.entries(ctx.guildEntity.incomes[cmd]).map((prop) => `${prop[0]}: ${prop[1]}`).join('\n')}\`\`\``),
+						.setDescription(
+							`\`\`\`${Object.entries(ctx.guildEntity.incomes[cmd])
+								.map((prop) => `${prop[0]}: ${prop[1]}`)
+								.join('\n')}\`\`\``,
+						),
 				),
 			new ExecutionBuilder()
 				.setName('Edit')
@@ -93,24 +103,30 @@ export default class implements Command {
 						.setName(cmd)
 						.setValue(cmd)
 						.setDescription(`The \`${cmd}\` income command`)
-						.setOptions(Object.keys(ctx.guildEntity.incomes[cmd]).map((property: keyof IncomeCommand) => new ExecutionBuilder()
-							.setName(property)
-							.setValue(property)
-							.setDescription(`The \`${property}\` property of \`${cmd}\``)
-							.collectVar((collector) => {
-								collector
-									.setProperty(property)
-									.setPrompt(`Enter a new ${property}`)
-									.setParser(validators[property].parse);
-								validators[property].validators.forEach((validator) => collector.addValidator(...validator));
-								return collector;
-							})
-							.setExecution(async (ctx, interaction) => {
-								ctx.guildEntity.incomes[cmd][property] = this.execute.getVariable(property);
-								await ctx.guildEntity.save();
-								const successEmbed = ctx.embedify('success', 'user', `${Emojis.CHECK} **Successfully updated the \`${property}\` property to \`${ctx.guildEntity.incomes[cmd][property]}\` on command \`${cmd}\`.**`);
-								await interaction.editReply({ embeds: [successEmbed], components: [] });
-							}))),
+						.setOptions(
+							Object.keys(ctx.guildEntity.incomes[cmd]).map((property: keyof IncomeCommand) => new ExecutionBuilder()
+								.setName(property)
+								.setValue(property)
+								.setDescription(`The \`${property}\` property of \`${cmd}\``)
+								.collectVar((collector) => {
+									collector
+										.setProperty(property)
+										.setPrompt(`Enter a new ${property}`)
+										.setParser(validators[property].parse);
+									validators[property].validators.forEach((validator) => collector.addValidator(...validator));
+									return collector;
+								})
+								.setExecution(async (ctx, interaction) => {
+									ctx.guildEntity.incomes[cmd][property] = this.execute.getVariable(property);
+									await ctx.guildEntity.save();
+									const successEmbed = ctx.embedify(
+										'success',
+										'user',
+										`${Emojis.CHECK} **Successfully updated the \`${property}\` property to \`${ctx.guildEntity.incomes[cmd][property]}\` on command \`${cmd}\`.**`,
+									);
+									await interaction.editReply({ embeds: [successEmbed], components: [] });
+								})),
+						),
 				),
 		]);
 }

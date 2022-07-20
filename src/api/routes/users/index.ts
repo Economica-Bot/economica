@@ -26,8 +26,10 @@ router.get('/@me/guilds', async (req, res) => {
 		res.sendStatus(404);
 		return;
 	}
-	const guilds = await bot.rest
-		.get(`${Routes.userGuilds()}`, { auth: false, headers: { Authorization: `Bearer ${token?.accessToken}` } }) as RESTGetAPICurrentUserGuildsResult;
+	const guilds = (await bot.rest.get(`${Routes.userGuilds()}`, {
+		auth: false,
+		headers: { Authorization: `Bearer ${token?.accessToken}` },
+	})) as RESTGetAPICurrentUserGuildsResult;
 	if (!guilds) {
 		res.sendStatus(404);
 		return;

@@ -16,7 +16,10 @@ export default class implements Command {
 		.setValue('inventory')
 		.setDescription('View items that you own')
 		.setPagination(
-			async (ctx) => Item.find({ relations: ['listing', 'listing.itemsRequired'], where: { owner: { userId: ctx.interaction.user.id, guildId: ctx.interaction.guildId } } }),
+			async (ctx) => Item.find({
+				relations: ['listing', 'listing.itemsRequired'],
+				where: { owner: { userId: ctx.interaction.user.id, guildId: ctx.interaction.guildId } },
+			}),
 			(item, ctx) => new ExecutionBuilder()
 				.setName(item.listing.name)
 				.setValue(item.listing.id)
@@ -39,7 +42,9 @@ export default class implements Command {
 							await User.upsert({ id: target.id }, ['id']);
 							await Member.upsert({ userId: target.id, guildId: interaction.guildId }, ['userId', 'guildId']);
 							const targetEntity = await Member.findOneBy({ userId: target.id, guildId: interaction.guildId });
-							const targetItem = await Item.findOne({ where: { id: item.listing.id, owner: { userId: targetEntity.userId, guildId: targetEntity.guildId } } });
+							const targetItem = await Item.findOne({
+								where: { id: item.listing.id, owner: { userId: targetEntity.userId, guildId: targetEntity.guildId } },
+							});
 
 							if (targetEntity.userId === ctx.memberEntity.userId) {
 								const embed = ctx.embedify('warn', 'user', 'You cannot give items to yourself.');
@@ -64,7 +69,11 @@ export default class implements Command {
 							if (item.amount === 0) await item.remove();
 							else item.save();
 
-							const successEmbed = ctx.embedify('success', 'user', `${Emojis.CHECK} Gave \`1\` x **${item.listing.name}** to <@${target.id}>.`);
+							const successEmbed = ctx.embedify(
+								'success',
+								'user',
+								`${Emojis.CHECK} Gave \`1\` x **${item.listing.name}** to <@${target.id}>.`,
+							);
 							await interaction.editReply({ embeds: [successEmbed] });
 						}),
 					new ExecutionBuilder()
@@ -73,8 +82,12 @@ export default class implements Command {
 						.setDescription('Use this item')
 						.setEnabled(item.listing.type === 'USABLE')
 						.setExecution(async (ctx, interaction) => {
-							item.listing.rolesGranted.forEach((role) => { ctx.interaction.member.roles.add(role, `Used ${item.listing.name}`); });
-							item.listing.rolesRemoved.forEach((role) => { ctx.interaction.member.roles.remove(role, `Used ${item.listing.name}`); });
+							item.listing.rolesGranted.forEach((role) => {
+								ctx.interaction.member.roles.add(role, `Used ${item.listing.name}`);
+							});
+							item.listing.rolesRemoved.forEach((role) => {
+								ctx.interaction.member.roles.remove(role, `Used ${item.listing.name}`);
+							});
 							item.amount -= 1;
 							if (item.amount === 0) await item.remove();
 							else await item.save();

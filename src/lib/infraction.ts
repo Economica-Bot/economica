@@ -50,12 +50,24 @@ export async function recordInfraction(
 	duration?: number,
 	permanent?: boolean,
 ) {
-	const infractionEntity = await Infraction.create({ guild, target, agent, type, reason, active, duration, permanent }).save();
+	const infractionEntity = await Infraction.create({
+		guild,
+		target,
+		agent,
+		type,
+		reason,
+		active,
+		duration,
+		permanent,
+	}).save();
 	const { infractionLogId } = guild;
 	if (infractionLogId) {
 		const channel = client.channels.cache.get(infractionLogId) as TextChannel;
 		const member = channel.guild.members.cache.get(client.user.id);
-		if (!channel.permissionsFor(member).has(PermissionFlagsBits.SendMessages) || !channel.permissionsFor(member).has(PermissionFlagsBits.EmbedLinks)) return;
+		if (
+			!channel.permissionsFor(member).has(PermissionFlagsBits.SendMessages)
+			|| !channel.permissionsFor(member).has(PermissionFlagsBits.EmbedLinks)
+		) return;
 		const embed = displayInfraction(infractionEntity);
 		await channel.send({ embeds: [embed] });
 	}
