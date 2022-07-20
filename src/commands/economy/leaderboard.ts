@@ -22,7 +22,7 @@ export default class implements Command {
 				.setPagination(
 					async (ctx) => Member.find({ relations: ['guild'], order: { wallet: 'DESC' }, where: { guildId: ctx.interaction.guildId } }),
 					(member) => new ExecutionBuilder()
-						.setName(`Total: ${member.guild.currency} ${parseNumber(member.wallet)}`)
+						.setName(`Wallet: ${member.guild.currency} ${parseNumber(member.wallet)}`)
 						.setValue(member.userId)
 						.setDescription(`<@${member.userId}>`),
 				),
@@ -33,7 +33,7 @@ export default class implements Command {
 				.setPagination(
 					async (ctx) => Member.find({ relations: ['guild'], order: { treasury: 'DESC' }, where: { guildId: ctx.interaction.guildId } }),
 					(member) => new ExecutionBuilder()
-						.setName(`${member.guild.currency} ${parseNumber(member.treasury)}`)
+						.setName(`Treasury: ${member.guild.currency} ${parseNumber(member.treasury)}`)
 						.setValue(member.userId)
 						.setDescription(`<@${member.userId}>`),
 				),
