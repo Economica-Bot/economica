@@ -5,7 +5,7 @@ import { IsNull, Not } from 'typeorm';
 
 import { Loan, Member, User } from '../../entities';
 import { displayLoan, recordTransaction } from '../../lib';
-import { Command, Context, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 import { Emojis } from '../../typings';
 
 export default class implements Command {
