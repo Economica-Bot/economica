@@ -32,8 +32,8 @@ export async function collectProp(ctx: Context, interaction: MessageComponentInt
 		const res = await validator.func(input, ctx);
 		if (!res) {
 			const embed = ctx
-				.embedify('error' ,'user', `\`\`\`${validator.error}\`\`\``)
-				.setFooter({ text: "Try again, or type 'cancel' to cancel input." })
+				.embedify('error', 'user', `\`\`\`${validator.error}\`\`\``)
+				.setFooter({ text: "Try again, or type 'cancel' to cancel input." });
 			await interaction.followUp({ embeds: [embed], ephemeral: true });
 			return collectProp(ctx, interaction, variableCollector);
 		}

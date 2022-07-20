@@ -13,20 +13,20 @@ const validators: Record<keyof IntervalCommand, {
 			[(msg) => !!parseString(msg.content), 'Could not parse input'],
 			[(msg) => parseString(msg.content) > 0, 'Input must be greater than 0.'],
 		],
-		parse: (msg) => parseString(msg.content)
+		parse: (msg) => parseString(msg.content),
 	},
 	cooldown: {
 		validators: [
 			[(msg) => !!ms(msg.content), 'Invalid cooldown time submitted.'],
 			[(msg) => ms(msg.content) > 0, 'Cooldown must be greater than 0.'],
 		],
-		parse: (msg) => ms(msg.content)
+		parse: (msg) => ms(msg.content),
 	},
 	enabled: {
 		validators: [
 			[(msg) => ['false', 'true'].includes(msg.content.toLowerCase()), 'Input must be one of `false`, `true`.'],
 		],
-		parse: (msg) => msg.content.toLowerCase() === 'true'
+		parse: (msg) => msg.content.toLowerCase() === 'true',
 	},
 };
 

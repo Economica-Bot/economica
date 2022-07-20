@@ -11,45 +11,45 @@ const validators: Record<keyof IncomeCommand, {
 	chance: {
 		validators: [
 			[(msg) => !!parseFloat(msg.content), 'Could not parse percentage.'],
-			[(msg) => parseFloat(msg.content) <= 100 && parseFloat(msg.content) >= 0, 'Chance must be between 0 and 100, inclusive.']
+			[(msg) => parseFloat(msg.content) <= 100 && parseFloat(msg.content) >= 0, 'Chance must be between 0 and 100, inclusive.'],
 		],
-		parse: (msg) => parseFloat(msg.content)
+		parse: (msg) => parseFloat(msg.content),
 	},
 	cooldown: {
 		validators: [
-			[(msg) => !!ms(msg.content) , 'Invalid cooldown time submitted.'],
+			[(msg) => !!ms(msg.content), 'Invalid cooldown time submitted.'],
 			[(msg) => ms(msg.content) > 0, 'Cooldown must be greater than 0.'],
 		],
-		parse: (msg) => ms(msg.content)
+		parse: (msg) => ms(msg.content),
 	},
 	max: {
 		validators: [
 			[(msg) => !!parseString(msg.content), 'Could not parse input'],
 			[(msg) => parseString(msg.content) > 0, 'Input must be greater than 0.'],
 		],
-		parse: (msg) => parseString(msg.content)
+		parse: (msg) => parseString(msg.content),
 	},
 	maxfine: {
 		validators: [
 			[(msg) => !!parseString(msg.content), 'Could not parse input'],
 			[(msg) => parseString(msg.content) > 0, 'Input must be greater than 0.'],
 		],
-		parse: (msg) => parseString(msg.content)
+		parse: (msg) => parseString(msg.content),
 	},
 	min: {
 		validators: [
 			[(msg) => !!parseString(msg.content), 'Could not parse input'],
 			[(msg) => parseString(msg.content) > 0, 'Input must be greater than 0.'],
 		],
-		parse: (msg) => parseString(msg.content)
+		parse: (msg) => parseString(msg.content),
 	},
 	minfine: {
 		validators: [
 			[(msg) => !!parseString(msg.content), 'Could not parse input'],
 			[(msg) => parseString(msg.content) > 0, 'Input must be greater than 0.'],
 		],
-		parse: (msg) => parseString(msg.content)
-	}
+		parse: (msg) => parseString(msg.content),
+	},
 };
 
 export default class implements Command {
