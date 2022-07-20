@@ -1,8 +1,34 @@
 import { parseString } from '@adrastopoulos/number-parser';
 import { PermissionFlagsBits } from 'discord.js';
+import ms from 'ms';
 
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder, VariableCollector } from '../../structures';
 import { IntervalCommand } from '../../typings';
+
+const validators: Record<keyof IntervalCommand, {
+	validators: Parameters<Pick<VariableCollector, 'addValidator'>['addValidator']>[]
+} & Pick<VariableCollector, 'parse'>> = {
+	amount: {
+		validators: [
+			[(msg) => !!parseString(msg.content), 'Could not parse input'],
+			[(msg) => parseString(msg.content) > 0, 'Input must be greater than 0.'],
+		],
+		parse: (msg) => parseString(msg.content)
+	},
+	cooldown: {
+		validators: [
+			[(msg) => !!ms(msg.content), 'Invalid cooldown time submitted.'],
+			[(msg) => ms(msg.content) > 0, 'Cooldown must be greater than 0.'],
+		],
+		parse: (msg) => ms(msg.content)
+	},
+	enabled: {
+		validators: [
+			[(msg) => ['false', 'true'].includes(msg.content.toLowerCase()), 'Input must be one of `false`, `true`.'],
+		],
+		parse: (msg) => msg.content.toLowerCase() === 'true'
+	},
+};
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -44,11 +70,14 @@ export default class implements Command {
 							.setName(property)
 							.setValue(property)
 							.setDescription(`The \`${property}\` property of \`${cmd}\``)
-							.collectVar((collector) => collector
-								.setProperty(property)
-								.setPrompt(`Input a new ${property}`)
-								.addValidator((msg) => !!parseString(msg.content), 'Could not parse input.')
-								.setParser((msg) => parseString(msg.content)))
+							.collectVar((collector) => {
+								collector
+									.setProperty(property)
+									.setPrompt(`Enter a new ${property}`)
+									.setParser(validators[property].parse);
+								validators[property].validators.forEach((validator) => collector.addValidator(...validator));
+								return collector;
+							})
 							.setExecution(async (ctx) => {
 								const res = this.execute.getVariable(property);
 								ctx.guildEntity.intervals[cmd][property] = res;

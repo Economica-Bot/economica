@@ -1,8 +1,56 @@
 import { parseString } from '@adrastopoulos/number-parser';
 import { PermissionFlagsBits } from 'discord.js';
+import ms from 'ms';
 
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder, VariableCollector } from '../../structures';
 import { Emojis, IncomeCommand } from '../../typings';
+
+const validators: Record<keyof IncomeCommand, {
+	validators: Parameters<Pick<VariableCollector, 'addValidator'>['addValidator']>[]
+} & Pick<VariableCollector, 'parse'>> = {
+	chance: {
+		validators: [
+			[(msg) => !!parseFloat(msg.content), 'Could not parse percentage.'],
+			[(msg) => parseFloat(msg.content) <= 100 && parseFloat(msg.content) >= 0, 'Chance must be between 0 and 100, inclusive.']
+		],
+		parse: (msg) => parseFloat(msg.content)
+	},
+	cooldown: {
+		validators: [
+			[(msg) => !!ms(msg.content) , 'Invalid cooldown time submitted.'],
+			[(msg) => ms(msg.content) > 0, 'Cooldown must be greater than 0.'],
+		],
+		parse: (msg) => ms(msg.content)
+	},
+	max: {
+		validators: [
+			[(msg) => !!parseString(msg.content), 'Could not parse input'],
+			[(msg) => parseString(msg.content) > 0, 'Input must be greater than 0.'],
+		],
+		parse: (msg) => parseString(msg.content)
+	},
+	maxfine: {
+		validators: [
+			[(msg) => !!parseString(msg.content), 'Could not parse input'],
+			[(msg) => parseString(msg.content) > 0, 'Input must be greater than 0.'],
+		],
+		parse: (msg) => parseString(msg.content)
+	},
+	min: {
+		validators: [
+			[(msg) => !!parseString(msg.content), 'Could not parse input'],
+			[(msg) => parseString(msg.content) > 0, 'Input must be greater than 0.'],
+		],
+		parse: (msg) => parseString(msg.content)
+	},
+	minfine: {
+		validators: [
+			[(msg) => !!parseString(msg.content), 'Could not parse input'],
+			[(msg) => parseString(msg.content) > 0, 'Input must be greater than 0.'],
+		],
+		parse: (msg) => parseString(msg.content)
+	}
+};
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -49,11 +97,14 @@ export default class implements Command {
 							.setName(property)
 							.setValue(property)
 							.setDescription(`The \`${property}\` property of \`${cmd}\``)
-							.collectVar((collector) => collector
-								.setProperty(property)
-								.setPrompt(`Enter a new ${property}`)
-								.addValidator((msg) => !!parseString(msg.content), 'Could not parse input.')
-								.setParser((msg) => parseString(msg.content)))
+							.collectVar((collector) => {
+								collector
+									.setProperty(property)
+									.setPrompt(`Enter a new ${property}`)
+									.setParser(validators[property].parse);
+								validators[property].validators.forEach((validator) => collector.addValidator(...validator));
+								return collector;
+							})
 							.setExecution(async (ctx, interaction) => {
 								ctx.guildEntity.incomes[cmd][property] = this.execute.getVariable(property);
 								await ctx.guildEntity.save();
