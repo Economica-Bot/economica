@@ -42,7 +42,8 @@ export default class implements Command {
 								.setName(`Loan ${loan.id}`)
 								.setValue(loan.id)
 								.setDescription(
-									`**Created At**: \`${loan.createdAt.toLocaleString()}\`\n**Completed At**: \`${loan.completedAt?.toLocaleString() || 'N/A'
+									`>>> **Created At**: \`${loan.createdAt.toLocaleString()}\`\n**Completed At**: \`${
+										loan.completedAt?.toLocaleString() || 'N/A'
 									}\``,
 								)
 								.setExecution(async (ctx, interaction) => {
@@ -66,24 +67,24 @@ export default class implements Command {
 								.setName(`Loan ${loan.id}`)
 								.setValue(loan.id)
 								.setDescription(
-									`**Created At**: \`${loan.createdAt.toLocaleString()}\`\n**Completed At**: \`${loan.completedAt?.toLocaleString() || 'N/A'
+									`>>> **Created At**: \`${loan.createdAt.toLocaleString()}\`\n**Completed At**: \`${
+										loan.completedAt?.toLocaleString() || 'N/A'
 									}\``,
 								)
 								.setExecution(async (ctx, interaction) => {
 									const embed = displayLoan(loan);
-									const row = new ActionRowBuilder<ButtonBuilder>()
-										.setComponents([
-											new ButtonBuilder()
-												.setCustomId('loan_cancel')
-												.setLabel('Cancel')
-												.setStyle(ButtonStyle.Danger)
-												.setDisabled(!(loan.pending && loan.lender.userId === ctx.interaction.user.id)),
-											new ButtonBuilder()
-												.setCustomId('loan_accept')
-												.setLabel('Accept')
-												.setStyle(ButtonStyle.Success)
-												.setDisabled(!(loan.pending && loan.borrower.userId === ctx.interaction.user.id)),
-										]);
+									const row = new ActionRowBuilder<ButtonBuilder>().setComponents([
+										new ButtonBuilder()
+											.setCustomId('loan_cancel')
+											.setLabel('Cancel')
+											.setStyle(ButtonStyle.Danger)
+											.setDisabled(!(loan.pending && loan.lender.userId === ctx.interaction.user.id)),
+										new ButtonBuilder()
+											.setCustomId('loan_accept')
+											.setLabel('Accept')
+											.setStyle(ButtonStyle.Success)
+											.setDisabled(!(loan.pending && loan.borrower.userId === ctx.interaction.user.id)),
+									]);
 
 									const message = await interaction.update({ embeds: [embed], components: [row] });
 									const action = await message.awaitMessageComponent({
@@ -137,7 +138,8 @@ export default class implements Command {
 								.setName(`Loan ${loan.id}`)
 								.setValue(loan.id)
 								.setDescription(
-									`**Created At**: \`${loan.createdAt.toLocaleString()}\`\n**Completed At**: \`${loan.completedAt?.toLocaleString() || 'N/A'
+									`>>> **Created At**: \`${loan.createdAt.toLocaleString()}\`\n**Completed At**: \`${
+										loan.completedAt?.toLocaleString() || 'N/A'
 									}\``,
 								)
 								.setExecution(async (ctx, interaction) => {

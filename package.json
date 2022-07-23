@@ -1,15 +1,26 @@
 {
 	"name": "economica",
 	"version": "1.0.0",
-	"main": "index.js",
+	"main": "dist/index.js",
 	"type": "module",
+	"bugs": {
+		"url": "https://github.com/economica-bot/economica/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/economica-bot/economica.git"
+	},
+	"contributors": [
+		"Adrastopoulos#6969",
+		"QiNG-agar#0540"
+	],
 	"scripts": {
-		"lint": "prettier --check . eslint src",
+		"lint": "prettier --check . && eslint src",
 		"format": "prettier --write . && eslint src --fix",
 		"clean": "rimraf dist",
 		"prebuild": "npm run clean",
 		"build": "esbuild ./src/index.ts --platform=node --format=esm --sourcemap --minify-whitespace --minify-syntax --target=esnext --bundle --external:./node_modules/* --outdir=dist",
-		"postbuild": "node --enable-source-maps --es-module-specifier-resolution=node --experimental-modules dist/index.js"
+		"start": "node --enable-source-maps --es-module-specifier-resolution=node --experimental-modules dist/index.js"
 	},
 	"license": "ISC",
 	"dependencies": {

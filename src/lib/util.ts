@@ -16,7 +16,7 @@ export async function collectProp(
 	const embed = ctx
 		.embedify('info', 'user', variableCollector.prompt)
 		.setAuthor({ name: `Specifying the ${variableCollector.property} property` })
-		.setFooter({ text: `Enter "cancel" to cancel ${variableCollector.skippable ? ', "skip" to skip' : ''}.` });
+		.setFooter({ text: `Enter "cancel" to cancel${variableCollector.skippable ? ', "skip" to skip' : ''}.` });
 	const message = interaction.replied
 		? await interaction.editReply({ embeds: [embed], components: [] })
 		: await interaction.update({ embeds: [embed], components: [], fetchReply: true });
@@ -28,7 +28,7 @@ export async function collectProp(
 	}
 
 	if (input.content === 'cancel') {
-		const embed = ctx.embedify('warn', 'user', `${Emojis.CROSS} Input Cancelled`);
+		const embed = ctx.embedify('warn', 'user', `${Emojis.CROSS} **Input Cancelled**`);
 		await interaction.editReply({ embeds: [embed], components: [] });
 		return null;
 	}

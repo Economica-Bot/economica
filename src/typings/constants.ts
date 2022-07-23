@@ -1,6 +1,6 @@
 import { ColorResolvable } from 'discord.js';
 
-import { Incomes, Intervals, Module, ModuleString, ReplyString } from '.';
+import { Incomes, Intervals, ListingString, Module, ModuleString, ReplyString } from '.';
 
 export const defaultIntervalsObj: Intervals = {
 	minutely: {
@@ -67,11 +67,6 @@ export const defaultModulesObj: Record<ModuleString, Module> = {
 	ADMIN: {
 		type: 'DEFAULT',
 		enabled: true,
-		user: null,
-	},
-	CASINO: {
-		type: 'SPECIAL',
-		enabled: false,
 		user: null,
 	},
 	ECONOMY: {
@@ -235,6 +230,12 @@ export enum Emojis {
 	URANIUM = '<:uranium:975152152198660248>',
 	WOOD = '<:wood:974924909383917568>',
 }
+export const ListingEmojis: Record<ListingString, `${Emojis}`> = {
+	COLLECTABLE: '<:collectable:974924859895336971>',
+	GENERATOR: '<:generator:990007141320523827>',
+	INSTANT: '<a:unlock:975152087384068096>',
+	USABLE: '<a:unknown:975152087115661372>',
+};
 export const Icons: Record<number, `${Emojis}`> = {
 	0: '<:icon_1:974903674868498482>',
 	1: '<:icon_2:974903675891879997>',

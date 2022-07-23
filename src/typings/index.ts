@@ -118,6 +118,6 @@ export enum Occupations {
 export type OccupationString = keyof typeof Occupations;
 export type ModuleTypeString = 'DEFAULT' | 'SPECIAL';
 export type DefaultModuleString = 'ADMIN' | 'ECONOMY' | 'INCOME' | 'MODERATION' | 'SHOP' | 'UTILITY';
-export type SpecialModuleString = 'INSIGHTS' | 'INTERVAL' | 'CASINO';
+export type SpecialModuleString = 'INSIGHTS' | 'INTERVAL';
 export type ModuleString = DefaultModuleString | SpecialModuleString;
 export * from './constants';

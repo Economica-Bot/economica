@@ -7,9 +7,9 @@ import { Emojis } from '../typings';
 
 export function displayLoan(loan: Loan) {
 	const embed = new EmbedBuilder()
-		.setAuthor({ name: `Loan ${loan.id}` })
+		.setTitle('Loan Viewer')
 		.setDescription(
-			`**Created At**: \`${loan.createdAt.toLocaleString()}\`\n**Completed At**: \`${
+			`>>> **Created At**: \`${loan.createdAt.toLocaleString()}\`\n**Completed At**: \`${
 				loan.completedAt?.toLocaleString() || 'N/A'
 			}\``,
 		)

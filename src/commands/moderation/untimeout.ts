@@ -1,6 +1,6 @@
 import { PermissionFlagsBits } from 'discord.js';
 
-import { Infraction, Member, User } from '../../entities';
+import { Infraction } from '../../entities';
 import { validateTarget } from '../../lib';
 import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 
@@ -19,13 +19,10 @@ export default class implements Command {
 	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
 		if (!(await validateTarget(ctx))) return;
 		const target = ctx.interaction.options.getMember('target');
-		await User.upsert({ id: target.id }, ['id']);
-		await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
-		const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
 		const reason = ctx.interaction.options.getString('reason', false) || 'No reason provided';
 		await target.timeout(null, reason);
 		await Infraction.update(
-			{ target: { userId: targetEntity.userId, guildId: targetEntity.guildId }, type: 'TIMEOUT', active: true },
+			{ target: { userId: target.id, guildId: target.guild.id }, type: 'TIMEOUT', active: true },
 			{ active: false },
 		);
 		await ctx.embedify('success', 'user', `Timeout canceled for ${target}.`).send();

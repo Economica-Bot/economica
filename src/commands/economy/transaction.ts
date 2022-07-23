@@ -49,7 +49,8 @@ export default class implements Command {
 						}),
 				),
 			new ExecutionBuilder()
-				.setName('View User Transactions').setValue('transaction_view_user')
+				.setName('View User Transactions')
+				.setValue('transaction_view_user')
 				.setDescription('View all transactions by a specific user')
 				.setExecution(async (ctx, interaction) => {
 					await interaction.reply({ content: 'Mention a user', ephemeral: true });

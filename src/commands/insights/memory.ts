@@ -12,18 +12,26 @@ export default class implements Command {
 		.setExamples(['memory']);
 
 	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
-		const description = '**View bots usage of memory in various measures.**\n\n'
-			+ '```rss: Resident Set Size, the total memory allocated for the process execution\n'
-			+ 'heapTotal: The total size of the allocated heap.\n'
-			+ 'heapUsed: The actual memory used during process execution.\n'
-			+ 'external: Memory used by C++ objects bound to JS objects managed by V8.\n'
-			+ 'arrayBuffers: Memory allocated for `ArrayBuffer`s and `SharedArrayBuffer`s.```';
-		const embed = ctx
-			.embedify('info', 'bot', description)
-			.setAuthor({ name: 'Bot Memory Levels', iconURL: ctx.client.emojis.resolve(parseEmoji(Emojis.RAM).id)?.url });
-		Object.entries(process.memoryUsage()).forEach((key, value) => embed.addFields([
-			{ name: key[0], value: `\`${Math.round((value / 1024 / 1024) * 100) / 100}Mb\``, inline: true },
-		]));
-		await ctx.interaction.editReply({ embeds: [embed] });
+		const memoryUsage = process.memoryUsage();
+		const descriptions: Record<keyof typeof memoryUsage, string> = {
+			rss: 'Resident Set Size, the total memory allocated for the process execution.',
+			heapTotal: 'The total size of the allocated heap.',
+			heapUsed: 'The actual memory used during process execution.',
+			external: 'Memory used by C++ objects bound to JS objects managed by V8.',
+			arrayBuffers: 'Memory allocated for `ArrayBuffer`s and `SharedArrayBuffer`s.',
+		};
+
+		await ctx
+			.embedify('info', 'bot', '**View bots usage of memory in various measures.**')
+			.setAuthor({ name: 'Bot Memory Levels', iconURL: ctx.client.emojis.resolve(parseEmoji(Emojis.RAM).id)?.url })
+			.addFields(Object
+				.keys(process.memoryUsage())
+				.map((key) => ([
+					{ name: `${key}`, value: `\`${Math.round((memoryUsage[key] / 1024 / 1024) * 100) / 100}Mb\``, inline: true },
+					{ name: '‎', value: `>>> *${descriptions[key]}*`, inline: true },
+					{ name: '‎', value: '‎', inline: true },
+				]))
+				.reduce((arr, newarr) => arr.concat(newarr)))
+			.send();
 	});
 }

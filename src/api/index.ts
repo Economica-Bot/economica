@@ -54,4 +54,4 @@ export function createApp(): Express {
 }
 
 const app = createApp();
-app.listen(PORT, () => console.log('App Ready'));
+app.listen(PORT);

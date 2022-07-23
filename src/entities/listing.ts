@@ -44,6 +44,9 @@ export class Listing extends BaseEntity {
 	@Column({ type: 'boolean' })
 	public stackable: boolean;
 
+	@Column({ type: 'boolean' })
+	public tradeable: boolean;
+
 	@Column({ type: 'float4' })
 	public stock: number;
 

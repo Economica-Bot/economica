@@ -1,6 +1,6 @@
 import { PermissionFlagsBits } from 'discord.js';
 
-import { Infraction, Member, User } from '../../entities';
+import { Infraction } from '../../entities';
 import { validateTarget } from '../../lib';
 import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
 
@@ -18,21 +18,19 @@ export default class implements Command {
 
 	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
 		if (!(await validateTarget(ctx, false))) return;
-		const target = ctx.interaction.options.getUser('target');
-		await User.upsert({ id: target.id }, ['id']);
-		await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
-		const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
+		const target = ctx.interaction.options.getMember('target');
 		const reason = ctx.interaction.options.getString('reason', false) || 'No reason provided';
 		const ban = (await ctx.interaction.guild.bans.fetch()).get(target.id);
 		if (!ban) {
 			await ctx.embedify('error', 'user', 'Could not find banned user.').send(true);
-		} else {
-			await ctx.interaction.guild.members.unban(target, reason);
-			await Infraction.update(
-				{ target: { userId: targetEntity.userId, guildId: targetEntity.guildId }, type: 'BAN', active: true },
-				{ active: false },
-			);
-			await ctx.embedify('success', 'user', `Unbanned \`${target.tag}\``).send(true);
+			return;
 		}
+
+		await ctx.interaction.guild.members.unban(target, reason);
+		await Infraction.update(
+			{ target: { userId: target.id, guildId: target.guild.id }, type: 'BAN', active: true },
+			{ active: false },
+		);
+		await ctx.embedify('success', 'user', `Unbanned \`${target.user.tag}\``).send(true);
 	});
 }

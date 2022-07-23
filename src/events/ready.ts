@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ApplicationCommandDataResolvable } from 'discord.js';
 
-import { DEPLOY_ALL_MODULES, DEPLOY_COMMANDS, DEVELOPMENT_GUILD_IDS, PRODUCTION } from '../config';
+import { DEPLOY_ALL_MODULES, DEPLOY_COMMANDS, DEVELOPMENT_GUILD_IDS } from '../config';
 import { Economica, Event } from '../structures';
 import { defaultModulesObj } from '../typings';
 
@@ -22,27 +22,21 @@ export class ReadyEvent implements Event {
 	}
 
 	private async updateCommands(client: Economica) {
-		const commandData: ApplicationCommandDataResolvable[] = [];
 		const defaultCommandData: ApplicationCommandDataResolvable[] = [];
+		const specialCommandData: ApplicationCommandDataResolvable[] = [];
 		client.commands.forEach((command) => {
-			commandData.push(command.data.toJSON());
-			if (defaultModulesObj[command.data.module].type === 'DEFAULT') {
-				defaultCommandData.push(command.data.toJSON());
-			}
+			if (defaultModulesObj[command.data.module].type === 'DEFAULT') defaultCommandData.push(command.data.toJSON());
+			else specialCommandData.push(command.data.toJSON());
 		});
 
 		DEVELOPMENT_GUILD_IDS.forEach(async (id) => {
 			const guild = await client.guilds.fetch(id);
-			if (DEPLOY_ALL_MODULES) {
-				await guild.commands.set(commandData);
-			} else await guild.commands.set(defaultCommandData);
-			client.log.debug(`Registered commands in dev guild ${guild.name}`);
+			if (DEPLOY_ALL_MODULES) await guild.commands.set(specialCommandData);
+			client.log.debug(`Registered special commands in dev guild ${guild.name}`);
 		});
 
-		if (PRODUCTION) {
-			await client.application.commands.set(defaultCommandData);
-			client.log.debug('Registered global commands');
-		}
+		await client.application.commands.set(defaultCommandData);
+		client.log.debug('Registered global commands');
 	}
 
 	private async resetCommands(client: Economica) {

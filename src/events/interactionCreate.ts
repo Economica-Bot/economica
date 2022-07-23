@@ -23,7 +23,7 @@ export class InteractionCreateEvent implements Event {
 	public async execute(client: Economica, interaction: Interaction<'cached'>): Promise<void> {
 		client.log.debug(
 			`Received ${InteractionType[interaction.type]} Interaction | ${interaction.user.username} (${interaction.user.id
-			}) > ${interaction.guild} (${interaction.guild.id})`,
+			}) > ${interaction.inGuild() ? `${interaction.guild} (${interaction.guild.id})` : 'Direct Message'}`,
 		);
 		if (interaction.isChatInputCommand()) {
 			await this.chatInputCommand(client, interaction);
@@ -35,7 +35,7 @@ export class InteractionCreateEvent implements Event {
 		const check = await commandCheck(ctx);
 		if (check) {
 			await this.execution(ctx, client.commands.get(interaction.commandName).execute);
-			await Command.create({ member: ctx.memberEntity, command: interaction.commandName }).save();
+			if (ctx.interaction.inGuild()) await Command.create({ member: ctx.memberEntity, command: interaction.commandName }).save();
 		}
 	}
 
@@ -56,7 +56,11 @@ export class InteractionCreateEvent implements Event {
 
 		if (ex.execution) {
 			const res = await ex.execution(ctx, interaction);
-			if (res) await this.execution(ctx, res, index, interaction);
+			if (res) {
+				ex.options.push(res);
+				await this.execution(ctx, res, index, interaction);
+			}
+
 			return;
 		}
 
@@ -66,7 +70,12 @@ export class InteractionCreateEvent implements Event {
 		}
 
 		const options = ex.options
-			.filter((option) => ctx.interaction.member.permissions.has(option.permissions) && option.enabled)
+			.filter((option) => {
+				if (!option.enabled) return false;
+				if (ctx.interaction.inGuild() && !ctx.interaction.member.permissions.has(option.permissions)) return false;
+				if (!option.predicate(ctx)) return false;
+				return true;
+			})
 			.slice(index * PAGINATION_LIMIT, index * PAGINATION_LIMIT + PAGINATION_LIMIT);
 		const fields = options.map((option) => ({ name: option.name, value: option.description } as APIEmbedField));
 		const selectOptions = options.map((option) => ({ label: option.name, value: option.value } as APISelectMenuOption));

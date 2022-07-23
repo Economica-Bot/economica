@@ -2,7 +2,7 @@ import { EmbedBuilder, parseEmoji } from 'discord.js';
 
 import { WEBSITE_COMMANDS_URL, WEBSITE_DOCS_URL, WEBSITE_HOME_URL, WEBSITE_VOTE_URL } from '../../config';
 import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
-import { Emojis } from '../../typings';
+import { defaultModulesObj, Emojis } from '../../typings';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -20,7 +20,7 @@ export default class implements Command {
 			`${Emojis.GEM} **Welcome to the Economica Help Dashboard!**\nHere, you can get information about any command or module. Use the select menu below to specify a module.\n\n${Emojis.MENU} **The Best New Discord Economy Bot**\nTo become more familiar with Economica, please refer to the [documentation](${WEBSITE_DOCS_URL}). There you can set up various permissions-related settings and get detailed information about all command modules.\n\n🔗 **Useful Links**:\n**[Home Page](${WEBSITE_HOME_URL}) | [Command Docs](${WEBSITE_COMMANDS_URL}) | [Vote For Us](${WEBSITE_VOTE_URL})**`,
 		)
 		.setPagination(
-			(ctx) => Object.keys(ctx.guildEntity.modules),
+			(ctx) => Object.keys(ctx.guildEntity?.modules ?? defaultModulesObj),
 			(module) => new ExecutionBuilder()
 				.setName(module)
 				.setValue(module)
@@ -38,7 +38,8 @@ export default class implements Command {
 									iconURL: ctx.client.emojis.resolve(parseEmoji(Emojis.COGS).id)?.url,
 								})
 								.setDescription(
-									`${Emojis.FOCUS} **Format**: \`${command.data.format}\`\n${Emojis.TEXTING
+									`${Emojis.FOCUS} **Format**: \`${command.data.format}\`\n${
+										Emojis.TEXTING
 									} **Examples**: \`\`\`${command.data.examples.join('\n')}\`\`\``,
 								)
 								.setFooter({ text: ctx.interaction.user.tag, iconURL: ctx.interaction.user.displayAvatarURL() })

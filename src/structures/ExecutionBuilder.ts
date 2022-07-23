@@ -58,6 +58,8 @@ export class ExecutionBuilder {
 
 	public permissions: PermissionsString[] = [];
 
+	public predicate: (ctx: Context) => boolean = () => true;
+
 	public execution: (
 		ctx: Context,
 		interaction?: MessageComponentInteraction<'cached'>,
@@ -105,6 +107,11 @@ export class ExecutionBuilder {
 
 	public setPermissions(permissions: PermissionsString[]) {
 		this.permissions = permissions;
+		return this;
+	}
+
+	public setPredicate(predicate: typeof this.predicate) {
+		this.predicate = predicate;
 		return this;
 	}
 

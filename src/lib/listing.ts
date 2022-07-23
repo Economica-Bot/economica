@@ -4,7 +4,7 @@ import ms from 'ms';
 
 import { Listing } from '../entities';
 import { Context } from '../structures';
-import { Emojis, ListingDescriptions } from '../typings';
+import { Emojis, ListingDescriptions, ListingEmojis } from '../typings';
 
 const getFormattedCreateTimestamp = (listing: Listing): string => `<t:${Math.trunc(listing.createdAt.getTime() / 1000)}:f>`;
 const getFormattedExpiresTimestamp = (listing: Listing): string => `${
@@ -62,7 +62,10 @@ export const displayListing = (ctx: Context, listing: Listing) => {
 				value: listing.rolesGranted.length ? listing.rolesGranted.map((role) => `<@&${role}>`).join('\n') : '`None`',
 				inline: true,
 			},
-			{ name: `${Emojis[listing.type]} \`${listing.type}\` Item`, value: `>>> ${ListingDescriptions[listing.type]}` },
+			{
+				name: `${ListingEmojis[listing.type]} \`${listing.type}\` Item`,
+				value: `>>> ${ListingDescriptions[listing.type]}`,
+			},
 		]);
 
 	if (listing.type === 'GENERATOR') {
