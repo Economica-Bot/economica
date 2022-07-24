@@ -1,0 +1,13 @@
+# Dependency directories
+node_modules/
+
+# Environment Variables
+.env
+
+#build
+dist/
+
+# Not in .gitignore
+.git
+.github
+.vscode
