@@ -1,13 +1,37 @@
+# Logs
+logs
+*.log
+yarn-debug.log*
+yarn-error.log*
+
 # Dependency directories
 node_modules/
 
-# Environment Variables
+# Optional eslint cache
+.eslintcache
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variable files
 .env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
 
-#build
-dist/
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
 
-# Not in .gitignore
+
+# local configurations
+.vscode
 .git
 .github
-.vscode
+
+# built project
+dist/
