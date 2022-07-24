@@ -20,7 +20,6 @@
 		"no-plusplus": "off",
 		"max-len": "off",
 		"class-methods-use-this": "off",
-		// "newline-per-chained-call": 2,
 		"radix": "off",
 		"no-param-reassign": "off",
 		"no-shadow": "off",

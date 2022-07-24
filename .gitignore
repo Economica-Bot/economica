@@ -27,8 +27,10 @@ node_modules/
 .yarn/install-state.gz
 .pnp.*
 
-# IDE user settings
+# local configurations
 .vscode
+.git
+.github
 
 # built project
-dist
+dist/

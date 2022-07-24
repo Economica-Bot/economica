@@ -5,6 +5,8 @@ yarn-error.log*
 
 node_modules/
 
+commitlint.config.js
+
 .eslintcache
 
 .yarn-integrity
