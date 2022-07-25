@@ -1,12 +1,13 @@
-import express, { Express } from 'express';
+import './utilities/discord';
+
+import PGStore from 'connect-pg-simple';
 import cors from 'cors';
+import express, { Express } from 'express';
 import session from 'express-session';
 import passport from 'passport';
-import PGStore from 'connect-pg-simple';
 
-import './utilities/discord';
+import { DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USERNAME, PORT, SECRET } from '../config';
 import routes from './routes';
-import { PORT, SECRET } from '../config';
 
 export function createApp(): Express {
 	const app = express();
@@ -33,11 +34,11 @@ export function createApp(): Express {
 			},
 			store: new (PGStore(session))({
 				conObject: {
-					host: 'localhost',
-					port: 5432,
-					user: 'postgres',
-					password: 'password',
-					database: 'postgres',
+					host: DB_HOST,
+					port: DB_PORT,
+					user: DB_USERNAME,
+					password: DB_PASSWORD,
+					database: DB_NAME,
 				},
 			}),
 		}),
