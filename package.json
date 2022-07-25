@@ -23,7 +23,7 @@
 		"lint": "eslint .",
 		"format": "eslint --fix .",
 		"prepare": "yarn husky install",
-		"clean": "rimraf dist",
+		"clean": "./node_modules/.bin/rimraf dist",
 		"prebuild": "yarn run clean",
 		"build": "esbuild ./src/index.ts --platform=node --format=esm --sourcemap --minify-whitespace --minify-syntax --target=esnext --bundle --external:./node_modules/* --outdir=dist",
 		"start": "node --enable-source-maps --es-module-specifier-resolution=node --experimental-modules dist/index.js",

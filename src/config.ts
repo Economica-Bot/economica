@@ -1,5 +1,4 @@
 /* eslint-disable prefer-destructuring */
-import 'dotenv/config';
 import 'reflect-metadata';
 
 import {
@@ -11,9 +10,16 @@ import {
 	Partials,
 	PermissionFlagsBits,
 } from 'discord.js';
+import { config } from 'dotenv';
+import path from 'path';
 import { DataSourceOptions } from 'typeorm';
 
 import type { ISettingsParam } from 'tslog';
+
+if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+	config({ path: `${path.join(process.cwd(), '.env.development')}` });
+}
+
 // Environment Vars
 
 export const BOT_TOKEN = process.env.BOT_TOKEN;

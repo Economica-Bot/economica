@@ -1,24 +1,23 @@
-version: '1.0.0'
-
 services:
-  economica:
+  bot:
     build: .
-    container_name: Economica
+    container_name: bot
     restart: always
-    env_file: .env
+    env_file: 
+      - .env
     ports: 
       - "3000"
     depends_on:
-      - economica-postgres
+      - postgres
     networks: 
       - default
-  economica-postgres:
+  postgres:
     image: postgres:latest
-    container_name: Economica-DB
+    container_name: postgres
     expose:
       - "${DB_PORT}:${DB_PORT}"
     environment:
-      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_USER: "${DB_USERNAME}"
       POSTGRES_PASSWORD: "${DB_PASSWORD}"
     networks: 
       - default
