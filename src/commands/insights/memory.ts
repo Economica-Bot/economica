@@ -24,14 +24,19 @@ export default class implements Command {
 		await ctx
 			.embedify('info', 'bot', '**View bots usage of memory in various measures.**')
 			.setAuthor({ name: 'Bot Memory Levels', iconURL: ctx.client.emojis.resolve(parseEmoji(Emojis.RAM).id)?.url })
-			.addFields(Object
-				.keys(process.memoryUsage())
-				.map((key) => ([
-					{ name: `${key}`, value: `\`${Math.round((memoryUsage[key] / 1024 / 1024) * 100) / 100}Mb\``, inline: true },
-					{ name: '‎', value: `>>> *${descriptions[key]}*`, inline: true },
-					{ name: '‎', value: '‎', inline: true },
-				]))
-				.reduce((arr, newarr) => arr.concat(newarr)))
+			.addFields(
+				Object.keys(process.memoryUsage())
+					.map((key) => [
+						{
+							name: `${key}`,
+							value: `\`${Math.round((memoryUsage[key] / 1024 / 1024) * 100) / 100}Mb\``,
+							inline: true,
+						},
+						{ name: '‎', value: `>>> *${descriptions[key]}*`, inline: true },
+						{ name: '‎', value: '‎', inline: true },
+					])
+					.reduce((arr, newarr) => arr.concat(newarr)),
+			)
 			.send();
 	});
 }

@@ -76,9 +76,11 @@ export class Context {
 				text: this.interaction.client.user.tag,
 				iconURL: this.interaction.client.user.displayAvatarURL(),
 			});
-		} else if (footer === 'user') embed.setFooter({ text: this.interaction.user.tag, iconURL: this.interaction.user.displayAvatarURL() });
-		else if (footer === 'guild') embed.setFooter({ text: this.interaction.guild.name, iconURL: this.interaction.guild.iconURL() });
-		else embed.setFooter(footer);
+		} else if (footer === 'user') {
+			embed.setFooter({ text: this.interaction.user.tag, iconURL: this.interaction.user.displayAvatarURL() });
+		} else if (footer === 'guild') {
+			embed.setFooter({ text: this.interaction.guild.name, iconURL: this.interaction.guild.iconURL() });
+		} else embed.setFooter(footer);
 		return embed;
 	}
 }

@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { Awaitable, EmbedBuilder, Message, MessageComponentInteraction, PermissionsString } from 'discord.js';
+import { Awaitable, EmbedBuilder, Message, MessageComponentInteraction } from 'discord.js';
 
 import { Context } from './Context';
 
@@ -54,10 +54,6 @@ export class ExecutionBuilder {
 
 	public embed: EmbedBuilder;
 
-	public enabled = true;
-
-	public permissions: PermissionsString[] = [];
-
 	public predicate: (ctx: Context) => boolean = () => true;
 
 	public execution: (
@@ -97,16 +93,6 @@ export class ExecutionBuilder {
 
 	public setEmbed(embed: EmbedBuilder) {
 		this.embed = embed;
-		return this;
-	}
-
-	public setEnabled(enabled: boolean) {
-		this.enabled = enabled;
-		return this;
-	}
-
-	public setPermissions(permissions: PermissionsString[]) {
-		this.permissions = permissions;
 		return this;
 	}
 

@@ -5,32 +5,24 @@ import ms from 'ms';
 import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder, VariableCollector } from '../../structures';
 import { IntervalCommand } from '../../typings';
 
-const validators: Record<
-keyof IntervalCommand,
-{
-	validators: Parameters<Pick<VariableCollector, 'addValidator'>['addValidator']>[];
-} & Pick<VariableCollector, 'parse'>
-> = {
-	amount: {
-		validators: [
-			[(msg) => !!parseString(msg.content), 'Could not parse input'],
-			[(msg) => parseString(msg.content) > 0, 'Input must be greater than 0.'],
-		],
-		parse: (msg) => parseString(msg.content),
-	},
-	cooldown: {
-		validators: [
-			[(msg) => !!ms(msg.content), 'Invalid cooldown time submitted.'],
-			[(msg) => ms(msg.content) > 0, 'Cooldown must be greater than 0.'],
-		],
-		parse: (msg) => ms(msg.content),
-	},
-	enabled: {
-		validators: [
-			[(msg) => ['false', 'true'].includes(msg.content.toLowerCase()), 'Input must be one of `false`, `true`.'],
-		],
-		parse: (msg) => msg.content.toLowerCase() === 'true',
-	},
+const collectors: Record<keyof IntervalCommand, (collector: VariableCollector) => VariableCollector> = {
+	amount: (collector) => collector
+		.setProperty('amount')
+		.setPrompt('The amount of money received upon command usage.')
+		.addValidator((msg) => !!parseString(msg.content), 'Could not parse input')
+		.addValidator((msg) => parseString(msg.content) > 0, 'Input must be greater than 0.')
+		.setParser((msg) => parseString(msg.content)),
+	cooldown: (collector) => collector
+		.setProperty('cooldown')
+		.setPrompt('The length of time between this interval command\'s execution.')
+		.addValidator((msg) => !!ms(msg.content), 'Invalid cooldown time submitted.')
+		.addValidator((msg) => ms(msg.content) > 0, 'Cooldown must be greater than 0.')
+		.setParser((msg) => ms(msg.content)),
+	enabled: (collector) => collector
+		.setProperty('enabled')
+		.setPrompt('Whether or not this command can be run.')
+		.addValidator((msg) => ['false', 'true'].includes(msg.content.toLowerCase()), 'Input must be one of `false`, `true`.')
+		.setParser((msg) => msg.content.toLowerCase() === 'true'),
 };
 
 export default class implements Command {
@@ -74,14 +66,7 @@ export default class implements Command {
 								.setName(property)
 								.setValue(property)
 								.setDescription(`The \`${property}\` property of \`${cmd}\``)
-								.collectVar((collector) => {
-									collector
-										.setProperty(property)
-										.setPrompt(`Enter a new ${property}`)
-										.setParser(validators[property].parse);
-									validators[property].validators.forEach((validator) => collector.addValidator(...validator));
-									return collector;
-								})
+								.collectVar(collectors[property])
 								.setExecution(async (ctx) => {
 									const res = this.execute.getVariable(property);
 									ctx.guildEntity.intervals[cmd][property] = res;

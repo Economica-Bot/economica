@@ -25,8 +25,14 @@ export default class implements Command {
 			.embedify(
 				'info',
 				'user',
-				`Client Permissions: \`${command.data.clientPermissions.length ? command.data.clientPermissions.join(', ') : 'None'}\`\n`
-				+ `Member Permissions: \`${command.data.default_member_permissions ? new PermissionsBitField(BigInt(command.data.default_member_permissions)).toArray() : 'None'}\``,
+				`Client Permissions: \`${
+					command.data.clientPermissions.length ? command.data.clientPermissions.join(', ') : 'None'
+				}\`\n`
+					+ `Member Permissions: \`${
+						command.data.default_member_permissions
+							? new PermissionsBitField(BigInt(command.data.default_member_permissions)).toArray()
+							: 'None'
+					}\``,
 			)
 			.setAuthor({
 				name: `Permissions for ${command.data.name}`,

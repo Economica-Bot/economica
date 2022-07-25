@@ -264,7 +264,7 @@ export default class implements Command {
 								.setName('Edit Listing')
 								.setValue('edit')
 								.setDescription("Edit this listing's properties")
-								.setPermissions(['ManageGuild'])
+								.setPredicate((ctx) => ctx.interaction.member.permissions.has(['ManageGuild']))
 								.setPagination(
 									() => Object.keys(listing).filter((value) => editableListingProps.includes(value as any)),
 									(key) => new ExecutionBuilder()
@@ -318,7 +318,7 @@ export default class implements Command {
 								.setName('Delete Listing')
 								.setValue('delete')
 								.setDescription('Delete this listing from the shop')
-								.setPermissions(['ManageGuild'])
+								.setPredicate((ctx) => ctx.interaction.member.permissions.has(['ManageGuild']))
 								.setExecution(async (ctx, interaction) => {
 									const affectedMembers = await Item.findBy({ listing: { id: listing.id } });
 									const embed = ctx.embedify(
@@ -362,7 +362,7 @@ export default class implements Command {
 				.setName('Manage')
 				.setValue('manage')
 				.setDescription('Manage the local server shop')
-				.setPermissions(['ManageGuild'])
+				.setPredicate((ctx) => ctx.interaction.member.permissions.has(['ManageGuild']))
 				.setOptions([
 					new ExecutionBuilder()
 						.setName('Create Shop Listing')

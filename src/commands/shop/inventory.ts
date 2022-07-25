@@ -111,7 +111,7 @@ export default class implements Command {
 									&& ctx.interaction.user.id === ctx.interaction.options.getUser('user').id
 									&& item.listing.type === 'USABLE',
 						)
-						.setEnabled(item.listing.type === 'USABLE')
+						.setPredicate(() => item.listing.type === 'USABLE')
 						.setExecution(async (ctx, interaction) => {
 							item.listing.rolesGranted.forEach((role) => {
 								ctx.interaction.member.roles.add(role, `Used ${item.listing.name}`);

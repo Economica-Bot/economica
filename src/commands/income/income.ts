@@ -96,7 +96,7 @@ export default class implements Command {
 				.setName('Edit')
 				.setValue('edit')
 				.setDescription('Edit income command configurations')
-				.setPermissions(['ManageGuild'])
+				.setPredicate((ctx) => ctx.interaction.member.permissions.has(['ManageGuild']))
 				.setPagination(
 					async (ctx) => Object.keys(ctx.guildEntity.incomes),
 					(cmd, ctx) => new ExecutionBuilder()

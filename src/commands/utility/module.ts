@@ -25,7 +25,7 @@ export default class implements Command {
 					new ExecutionBuilder()
 						.setName(module.enabled ? 'Disable' : 'Enable')
 						.setValue(module.enabled ? 'disable' : 'enable')
-						.setEnabled(module.type === 'SPECIAL')
+						.setPredicate(() => module.type === 'SPECIAL')
 						.setDescription(`${module.enabled ? 'Disable' : 'Enable'} the \`${name}\` module`)
 						.setExecution(async (ctx, interaction) => {
 							await interaction.update({ content: 'Loading...', embeds: [], components: [] });
@@ -48,18 +48,16 @@ export default class implements Command {
 									ctx.guildEntity.modules[name].user = ctx.userEntity.id;
 									await ctx.guildEntity.save();
 									const oldCommandData = (await ctx.interaction.guild.commands.fetch()).map((command) => command.toJSON()) as ApplicationCommandDataResolvable[];
-									const newCommandData = ctx.client.commands.filter((command) => command.data.module === name).map((command) => command.data.toJSON());
+									const newCommandData = ctx.client.commands
+										.filter((command) => command.data.module === name)
+										.map((command) => command.data.toJSON());
 									await ctx.interaction.guild.commands.set(oldCommandData.concat(newCommandData));
 									const embed = ctx.embedify('success', 'user', `Added the \`${name}\` module.`);
 									await interaction.editReply({ content: '', embeds: [embed], components: [] });
 								}
 							} else if (operation === 'disable') {
 								if (ctx.guildEntity.modules[name].user !== ctx.userEntity.id) {
-									const embed = ctx.embedify(
-										'warn',
-										'user',
-										'You have not enabled this module in this server.',
-									);
+									const embed = ctx.embedify('warn', 'user', 'You have not enabled this module in this server.');
 									await interaction.update({ embeds: [embed], components: [] });
 								} else {
 									ctx.userEntity.keys += 1;

@@ -19,7 +19,9 @@ export default class implements Command {
 			+ `Bot Uptime: \`${ms(ctx.client.uptime)}\`\n`
 			+ `Commands Ran: \`${(await CommandEntity.findBy({ member: { guildId: ctx.memberEntity.guildId } })).length}\``;
 		const memberStats = `Roles: \`${ctx.interaction.member.roles.cache.size}\`\n`
-			+ `Commands Used: \`${(await CommandEntity.findBy({ member: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId } })).length}\`\n`
+			+ `Commands Used: \`${(await CommandEntity.findBy({ member: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId } }))
+				.length
+			}\`\n`
 			+ `Joined: <t:${Math.round(ctx.interaction.member.joinedAt.getTime() / 1000)}:f>`;
 		const serverStats = `Roles: \`${ctx.interaction.guild.roles.cache.size}\`\n`
 			+ `Members: \`${ctx.interaction.guild.members.cache.size}\`\n`

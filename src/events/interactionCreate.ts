@@ -70,12 +70,7 @@ export class InteractionCreateEvent implements Event {
 		}
 
 		const options = ex.options
-			.filter((option) => {
-				if (!option.enabled) return false;
-				if (ctx.interaction.inGuild() && !ctx.interaction.member.permissions.has(option.permissions)) return false;
-				if (!option.predicate(ctx)) return false;
-				return true;
-			})
+			.filter((option) => option.predicate(ctx))
 			.slice(index * PAGINATION_LIMIT, index * PAGINATION_LIMIT + PAGINATION_LIMIT);
 		const fields = options.map((option) => ({ name: option.name, value: option.description } as APIEmbedField));
 		const selectOptions = options.map((option) => ({ label: option.name, value: option.value } as APISelectMenuOption));
