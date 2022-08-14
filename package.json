@@ -25,7 +25,7 @@
 		"prepare": "yarn husky install",
 		"clean": "./node_modules/.bin/rimraf dist",
 		"prebuild": "yarn run clean",
-		"build": "esbuild ./src/index.ts --platform=node --format=esm --sourcemap --minify-whitespace --minify-syntax --target=esnext --bundle --external:./node_modules/* --outdir=dist",
+		"build": "esbuild ./src/index.ts --platform=node --format=esm --external:./node_modules/* --bundle --sourcemap --minify-whitespace --minify-syntax --outdir=dist",
 		"start": "node --enable-source-maps --es-module-specifier-resolution=node --experimental-modules dist/index.js",
 		"docker": "docker compose up --build --force-recreate"
 	},
