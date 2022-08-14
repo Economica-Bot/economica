@@ -11,8 +11,8 @@ import {
 	Relation,
 } from 'typeorm';
 
-import { ListingString } from '../typings';
 import { Guild } from '.';
+import { ListingString } from '../typings';
 
 @Entity()
 export class Listing extends BaseEntity {
@@ -32,14 +32,14 @@ export class Listing extends BaseEntity {
 	@Column({ type: 'integer' })
 	public price: number;
 
+	@Column({ type: 'character varying' })
+	public description: string;
+
 	@Column({ type: 'integer' })
 	public treasuryRequired: number;
 
 	@Column({ type: 'boolean' })
 	public active: boolean;
-
-	@Column({ type: 'character varying' })
-	public description: string;
 
 	@Column({ type: 'boolean' })
 	public stackable: boolean;

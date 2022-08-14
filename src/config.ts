@@ -42,7 +42,7 @@ export const DB_PASSWORD = process.env.DB_PASSWORD;
 export const DB_NAME = process.env.DB_NAME;
 export const DB_OPTION = +process.env.DB_OPTION;
 export const VALIDATE_SETTINGS = process.env.VALIDATE_SETTINGS === 'true';
-export const PRODUCTION = process.env.PRODUCTION === 'true';
+export const PRODUCTION = process.env.NODE_ENV === 'production';
 export const DEVELOPMENT = !PRODUCTION;
 export const DEBUG = process.env.DEBUG === 'true';
 export const CURRENCY_SYMBOL = process.env.CURRENCY_SYMBOL;
@@ -50,7 +50,6 @@ export const CURRENCY_SYMBOL = process.env.CURRENCY_SYMBOL;
 // Exemptions
 
 export const DEV_COOLDOWN_EXEMPT = process.env.DEV_COOLDOWN_EXEMPT === 'true';
-export const DEV_PERMISSION_EXEMPT = process.env.DEV_PERMISSION_EXEMPT === 'true';
 export const DEV_MODULE_EXEMPT = process.env.DEV_MODULE_EXEMPT === 'true';
 
 // Optional

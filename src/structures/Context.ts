@@ -1,31 +1,14 @@
 /* eslint-disable max-classes-per-file */
-import { ChatInputCommandInteraction, EmbedBuilder, resolveColor } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, MessageComponentInteraction, resolveColor } from 'discord.js';
 
+import { Command } from '.';
 import { Guild, Member, User } from '../entities';
 import { EmbedColors, Footer, ReplyString } from '../typings';
-import { Economica, EconomicaSlashCommandBuilder } from '.';
 
-export class ContextEmbed extends EmbedBuilder {
-	public ctx: Context;
+export class Context<T extends ChatInputCommandInteraction<'cached'> | MessageComponentInteraction<'cached'> = ChatInputCommandInteraction<'cached'> | MessageComponentInteraction<'cached'>> {
+	public interaction: T;
 
-	constructor(ctx: Context) {
-		super();
-		this.ctx = ctx;
-	}
-
-	public async send(ephemeral = false) {
-		if (this.ctx.interaction.deferred) await this.ctx.interaction.editReply({ embeds: [this] });
-		else if (this.ctx.interaction.replied) await this.ctx.interaction.followUp({ embeds: [this], ephemeral });
-		else await this.ctx.interaction.reply({ embeds: [this], ephemeral });
-	}
-}
-
-export class Context {
-	public client: Economica;
-
-	public interaction: ChatInputCommandInteraction<'cached'>;
-
-	public data: Partial<EconomicaSlashCommandBuilder>;
+	public command: Command;
 
 	public userEntity: User;
 
@@ -37,20 +20,28 @@ export class Context {
 
 	public clientMemberEntity: Member;
 
-	public constructor(client: Economica, interaction?: ChatInputCommandInteraction<'cached'>) {
-		this.client = client;
+	public constructor(interaction: T) {
 		this.interaction = interaction;
 	}
 
-	public async init(): Promise<this> {
-		const command = this.client.commands.get(this.interaction.commandName);
-		if (!command) {
-			const content = 'There was an error while executing this command';
-			this.interaction.reply({ content, ephemeral: true });
-			throw new Error(content);
-		}
+	public isChatInput(): this is Context<ChatInputCommandInteraction<'cached'>> {
+		return this.interaction.isChatInputCommand();
+	}
 
-		this.data = command.data;
+	public isMessageComponent(): this is Context<MessageComponentInteraction<'cached'>> {
+		return this.interaction.isButton() || this.interaction.isSelectMenu();
+	}
+
+	public async init(): Promise<this> {
+		let commandName: string;
+		if (this.interaction.isChatInputCommand()) commandName = this.interaction.commandName;
+		else if (this.interaction.isButton()) [commandName] = JSON.parse(this.interaction.customId).key.split('_');
+		else if (this.interaction.isSelectMenu()) [commandName] = JSON.parse(this.interaction.values.at(0)).key.split('_');
+		const command = this.interaction.client.commands.get(commandName);
+		if (!command) throw new Error('There was an error while executing this command.');
+
+		this.command = command;
+
 		if (!this.interaction.inCachedGuild()) return this;
 
 		this.userEntity = (await User.findOne({ where: { id: this.interaction.user.id } }))
@@ -59,17 +50,16 @@ export class Context {
 			?? (await Guild.create({ id: this.interaction.guildId }).save());
 		this.memberEntity = (await Member.findOne({ where: { user: { id: this.userEntity.id }, guild: { id: this.guildEntity.id } } }))
 			?? (await Member.create({ user: this.userEntity, guild: this.guildEntity }).save());
-		this.clientUserEntity = (await User.findOne({ where: { id: this.client.user.id } }))
-			?? (await User.create({ id: this.client.user.id }).save());
-		this.clientMemberEntity = (await Member.findOne({
-			where: { user: { id: this.clientUserEntity.id }, guild: { id: this.guildEntity.id } },
-		})) ?? (await Member.create({ user: this.clientUserEntity, guild: this.guildEntity }).save());
+		this.clientUserEntity = (await User.findOne({ where: { id: this.interaction.client.user.id } }))
+			?? (await User.create({ id: this.interaction.client.user.id }).save());
+		this.clientMemberEntity = (await Member.findOne({ where: { user: { id: this.clientUserEntity.id }, guild: { id: this.guildEntity.id } } }))
+			?? (await Member.create({ user: this.clientUserEntity, guild: this.guildEntity }).save());
 
 		return this;
 	}
 
-	public embedify(type: ReplyString, footer: Footer, description?: string | null): ContextEmbed {
-		const embed = new ContextEmbed(this).setColor(resolveColor(EmbedColors[type]));
+	public embedify(type: ReplyString, footer: Footer, description?: string | null) {
+		const embed = new EmbedBuilder().setColor(resolveColor(EmbedColors[type]));
 		if (description) embed.setDescription(description);
 		if (footer === 'bot') {
 			embed.setFooter({

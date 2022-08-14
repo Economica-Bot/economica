@@ -1,6 +1,6 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 
-import { Context } from '../structures';
+import { CommandError, Context } from '../structures';
 import { TransactionString, Intervals } from '../typings';
 import { recordTransaction } from '.';
 
@@ -13,20 +13,11 @@ const intervals: Record<keyof Intervals, TransactionString> = {
 	weekly: 'INTERVAL_WEEK',
 };
 
-export async function interval(ctx: Context, type: keyof typeof intervals): Promise<void> {
-	if (!ctx.guildEntity.intervals[type].enabled) {
-		await ctx.embedify('warn', 'user', 'This interval command is disabled.').send(true);
-	} else {
+export async function interval(ctx: Context, type: keyof typeof intervals) {
+	if (!ctx.guildEntity.intervals[type].enabled) throw new CommandError('This interval command is disabled.');
+	else {
 		const { amount } = ctx.guildEntity.intervals[type];
-		recordTransaction(
-			ctx.client,
-			ctx.guildEntity,
-			ctx.memberEntity,
-			ctx.clientMemberEntity,
-			intervals[type],
-			amount,
-			0,
-		);
-		await ctx.embedify('success', 'user', `You earned ${ctx.guildEntity.currency}${parseNumber(amount)}!`).send(false);
+		recordTransaction(ctx.interaction.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, intervals[type], amount, 0);
+		return `You earned ${ctx.guildEntity.currency} \`${parseNumber(amount)}!\``;
 	}
 }

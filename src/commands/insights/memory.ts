@@ -1,6 +1,6 @@
 import { parseEmoji } from 'discord.js';
 
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
 import { Emojis } from '../../typings';
 
 export default class implements Command {
@@ -11,7 +11,7 @@ export default class implements Command {
 		.setFormat('memory')
 		.setExamples(['memory']);
 
-	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
+	public execution = () => new ExecutionNode().setExecution(async (ctx) => {
 		const memoryUsage = process.memoryUsage();
 		const descriptions: Record<keyof typeof memoryUsage, string> = {
 			rss: 'Resident Set Size, the total memory allocated for the process execution.',
@@ -23,7 +23,7 @@ export default class implements Command {
 
 		await ctx
 			.embedify('info', 'bot', '**View bots usage of memory in various measures.**')
-			.setAuthor({ name: 'Bot Memory Levels', iconURL: ctx.client.emojis.resolve(parseEmoji(Emojis.RAM).id)?.url })
+			.setAuthor({ name: 'Bot Memory Levels', iconURL: ctx.interaction.client.emojis.resolve(parseEmoji(Emojis.RAM).id)?.url })
 			.addFields(
 				Object.keys(process.memoryUsage())
 					.map((key) => [

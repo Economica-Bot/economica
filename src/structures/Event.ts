@@ -1,7 +1,8 @@
 import { ClientEvents } from 'discord.js';
+import { Economica } from './Economica';
 
-export class Event {
-	public event: keyof ClientEvents;
+export class Event<T extends keyof ClientEvents> {
+	public readonly event: T;
 
-	public execute: (...args: unknown[]) => unknown | Promise<unknown>;
+	public execute: (client: Economica, ...args: ClientEvents[T]) => unknown;
 }

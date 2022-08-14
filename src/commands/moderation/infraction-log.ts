@@ -1,6 +1,6 @@
-import { PermissionFlagsBits, TextChannel } from 'discord.js';
+import { ChannelType, PermissionFlagsBits } from 'discord.js';
 
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, CommandError, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -11,59 +11,52 @@ export default class implements Command {
 		.setExamples(['infraction-log view', 'infraction-log set #infraction-logs', 'infraction-log reset'])
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild);
 
-	public execute = new ExecutionBuilder()
+	public execution = new ExecutionNode()
 		.setName('Infraction Log')
 		.setValue('infraction-log')
-		.setDescription('Manage the infraction logging channel')
-		.setOptions([
-			new ExecutionBuilder()
-				.setName('View')
-				.setValue('view')
-				.setDescription('View the current infraction log')
-				.setExecution(async (ctx, interaction) => {
-					const channelId = ctx.guildEntity.infractionLogId;
-					const embed = ctx.embedify('info', 'user', `The current infraction log is <#${channelId}>.`);
-					await interaction.update({ embeds: [embed], components: [] });
-				}),
-			new ExecutionBuilder()
+		.setDescription((ctx) => `Manage the infraction logging channel.\n${ctx.guildEntity.infractionLogId ? `Current: <#${ctx.guildEntity.infractionLogId}> (\`${ctx.guildEntity.infractionLogId}\`)` : '**There is no infraction log.**'}`)
+		.setOptions(() => [
+			new ExecutionNode()
 				.setName('Set')
-				.setValue('set')
+				.setValue('infraction-log_set')
+				.setType('select')
 				.setDescription('Set the infraction log')
-				.setExecution(async (ctx, interaction) => {
-					await interaction.reply({ content: 'Mention a channel', ephemeral: true });
-					const msgs = await interaction.channel.awaitMessages({
-						max: 1,
-						filter: (msg) => msg.author.id === ctx.interaction.user.id,
-					});
-					const channel = msgs.first().mentions.channels.first() as TextChannel;
-					if (!channel) {
-						await interaction.followUp({ content: 'Could not find mention', ephemeral: true });
-					} else if (
-						!channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.SendMessages)
-						|| !channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.EmbedLinks)
-					) {
-						const embed = ctx.embedify(
-							'error',
-							'user',
-							'I need `SEND_MESSAGES` and `EMBED_LINKS` permissions in that channel.',
-						);
-						await interaction.followUp({ embeds: [embed], components: [] });
-					} else {
+				.collectVar((collector) => collector
+					.setProperty('channel')
+					.setPrompt('Specify a channel')
+					.addValidator((msg) => !!msg.mentions.channels.size, 'No channels mentioned.')
+					.addValidator((msg) => msg.mentions.channels.first().type === ChannelType.GuildText, 'Invalid channel type - must be text.')
+					.setParser((msg) => msg.mentions.channels.first()))
+				.setExecution(async (ctx) => {
+					const { channel } = ctx.variables;
+					if (!channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.SendMessages + PermissionFlagsBits.EmbedLinks)) throw new CommandError('I need `SEND_MESSAGES` and `EMBED_LINKS` permissions in that channel.');
+					else {
 						ctx.guildEntity.infractionLogId = channel.id;
 						await ctx.guildEntity.save();
-						const embed = ctx.embedify('success', 'user', `Infraction log set to ${channel}.`);
-						await interaction.followUp({ embeds: [embed], components: [] });
 					}
-				}),
-			new ExecutionBuilder()
+				})
+				.setOptions((ctx) => [
+					new ExecutionNode()
+						.setName('infraction Log Updated')
+						.setValue('infraction-log_set_result')
+						.setType('display')
+						.setDescription(`infraction log set to <#${ctx.guildEntity.infractionLogId}>`),
+				]),
+			new ExecutionNode()
 				.setName('Reset')
-				.setValue('reset')
+				.setValue('infraction-log_reset')
+				.setType('select')
 				.setDescription('Reset the infraction log')
-				.setExecution(async (ctx, interaction) => {
+				.setExecution(async (ctx) => {
 					ctx.guildEntity.infractionLogId = null;
 					await ctx.guildEntity.save();
-					const embed = ctx.embedify('info', 'user', 'Infraction log reset.');
-					await interaction.update({ embeds: [embed], components: [] });
-				}),
+				})
+				.setOptions(() => [
+					new ExecutionNode()
+						.setName('infraction Log Reset')
+						.setValue('infraction-log_reset_result')
+						.setType('display')
+						.setDescription('infraction Log successfully reset!'),
+				]),
 		]);
 }

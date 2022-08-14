@@ -1,7 +1,8 @@
 import { PermissionFlagsBits } from 'discord.js';
 
 import { CURRENCY_SYMBOL } from '../../config';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { VariableCollector } from '../../lib';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -12,48 +13,45 @@ export default class implements Command {
 		.setExamples(['currency view', 'currency set 💵', 'currency reset'])
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild);
 
-	public execute = new ExecutionBuilder()
+	public execution = new ExecutionNode()
 		.setName('Currency Symbol')
 		.setValue('currency')
-		.setDescription('Manage the server currency symbol')
-		.setOptions([
-			new ExecutionBuilder()
-				.setName('View')
-				.setValue('view')
-				.setDescription('View the current currency symbol')
-				.setExecution(async (ctx, interaction) => {
-					const embed = ctx.embedify(
-						'info',
-						'user',
-						`The server currency is ${ctx.guildEntity.currency}. (\`${ctx.guildEntity.currency}\`)`,
-					);
-					await interaction.update({ embeds: [embed], components: [] });
-				}),
-			new ExecutionBuilder()
+		.setDescription((ctx) => `Current currency symbol: ${ctx.guildEntity.currency} (\`${ctx.guildEntity.currency}\`)`)
+		.setOptions(() => [
+			new ExecutionNode<'select'>()
 				.setName('Set')
-				.setValue('set')
+				.setValue('currency_set')
+				.setType('select')
 				.setDescription('Set the currency')
-				.setExecution(async (ctx, interaction) => {
-					await interaction.reply({ content: 'Enter the new currency', ephemeral: true });
-					const msgs = await interaction.channel.awaitMessages({
-						max: 1,
-						filter: (msg) => msg.author.id === ctx.interaction.user.id,
-					});
-					const currency = msgs.first().content;
+				.setExecution(async (ctx) => {
+					const currency = await new VariableCollector<string>()
+						.setProperty('currency')
+						.setPrompt('Enter the new guild currency')
+						.setParser((msg) => msg.content)
+						.execute(ctx);
 					ctx.guildEntity.currency = currency;
 					await ctx.guildEntity.save();
-					const embed = ctx.embedify('success', 'user', `Currency set to \`${currency}\`.`);
-					await interaction.followUp({ embeds: [embed], components: [] });
-				}),
-			new ExecutionBuilder()
+				})
+				.setOptions((ctx) => [
+					new ExecutionNode()
+						.setName('Currency updated!')
+						.setValue('currency_set_result')
+						.setType('display')
+						.setDescription(`Currency set to ${ctx.guildEntity.currency} (\`${ctx.guildEntity.currency}\`).`),
+				]),
+			new ExecutionNode()
 				.setName('Reset')
-				.setValue('reset')
+				.setValue('currency_reset')
+				.setType('select')
 				.setDescription('Reset the currency')
-				.setExecution(async (ctx, interaction) => {
+				.setExecution(async (ctx) => {
 					ctx.guildEntity.currency = CURRENCY_SYMBOL;
 					await ctx.guildEntity.save();
-					const embed = ctx.embedify('info', 'user', 'Currency reset.');
-					await interaction.update({ embeds: [embed], components: [] });
-				}),
+				})
+				.setOptions(() => [new ExecutionNode()
+					.setName('Currency reset!')
+					.setValue('currency_reset_result')
+					.setType('display')
+					.setDescription(`Currency reset to ${CURRENCY_SYMBOL} (\`${CURRENCY_SYMBOL}\`).`)]),
 		]);
 }

@@ -1,7 +1,8 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 
 import { recordTransaction, validateAmount } from '../../lib';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
+import { Emojis } from '../../typings';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -12,18 +13,13 @@ export default class implements Command {
 		.setExamples(['deposit 1.5k', 'deposit all'])
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true));
 
-	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
-		const { validated, result } = await validateAmount(ctx, 'wallet');
-		if (!validated) return;
-		await ctx.embedify('success', 'user', `Deposited ${ctx.guildEntity.currency}${parseNumber(result)}`).send();
-		await recordTransaction(
-			ctx.client,
-			ctx.guildEntity,
-			ctx.memberEntity,
-			ctx.memberEntity,
-			'DEPOSIT',
-			-result,
-			result,
-		);
-	});
+	public execution = new ExecutionNode<'top'>()
+		.setName('Depositing Funds')
+		.setValue('deposit')
+		.setDescription((ctx) => `${Emojis.CHECK} **Deposited ${ctx.guildEntity.currency} \`${parseNumber(ctx.variables.result)}\`**`)
+		.setExecution(async (ctx) => {
+			const result = await validateAmount(ctx, 'wallet');
+			ctx.variables.result = result;
+			await recordTransaction(ctx.interaction.client, ctx.guildEntity, ctx.memberEntity, ctx.memberEntity, 'DEPOSIT', -result, result);
+		});
 }

@@ -6,9 +6,13 @@ export class ListingsJob implements Job {
 
 	public cooldown = 1000 * 60;
 
-	public execute = async () => {
-		const now = Date.now();
+	public execution = async () => {
 		const listings = await Listing.findBy({ active: true });
-		await Listing.save(listings.filter((listing) => listing.createdAt.getTime() + listing.duration > now));
+		listings
+			.filter((listing) => listing.createdAt.getTime() + listing.duration < Date.now())
+			.forEach(async (listing) => {
+				listing.active = false;
+				await listing.save();
+			});
 	};
 }

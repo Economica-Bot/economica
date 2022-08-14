@@ -1,5 +1,5 @@
 import { inviteOptions } from '../../config';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -11,14 +11,11 @@ export default class implements Command {
 		.setGlobal(true)
 		.setEnabled(false);
 
-	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
-		const invite = ctx.client.generateInvite(inviteOptions);
-		return ctx
-			.embedify(
-				'info',
-				'bot',
-				`**Invite ${ctx.client.user} to your server!**\n[Click Me!](${invite} 'Invite Economica')`,
-			)
-			.send();
-	});
+	public execution = new ExecutionNode()
+		.setName('Invite Economica')
+		.setValue('invite')
+		.setDescription((ctx) => {
+			const invite = ctx.interaction.client.generateInvite(inviteOptions);
+			return `**Invite ${ctx.interaction.client.user} to your server!**\n[Click Me!](${invite} 'Invite Economica')`;
+		});
 }

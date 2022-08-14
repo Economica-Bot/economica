@@ -23,7 +23,10 @@
 		"radix": "off",
 		"no-param-reassign": "off",
 		"no-shadow": "off",
-		"@typescript-eslint/no-shadow": "off"
+		"@typescript-eslint/no-shadow": "off",
+		"no-nested-ternary": "off",
+		"no-bitwise": "off",
+		"no-restricted-syntax": "off"
 	},
 	"settings": {
 		"import/parsers": {

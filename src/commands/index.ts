@@ -37,6 +37,5 @@ export { default as Shop } from './shop/shop';
 export { default as Help } from './utility/help';
 export { default as Invite } from './utility/invite';
 export { default as Module } from './utility/module';
-export { default as Permissions } from './utility/permissions';
 export { default as Ping } from './utility/ping';
 export { default as Purge } from './utility/purge';

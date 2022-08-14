@@ -1,6 +1,22 @@
+/* eslint-disable max-classes-per-file */
 import { parseNumber } from '@adrastopoulos/number-parser';
+import { FindOptionsOrder } from 'typeorm';
+
 import { Member } from '../../entities';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, Context, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
+
+const formatLeaderboard = async (ctx: Context, type: 'wallet' | 'treasury' | 'total') => {
+	const order: FindOptionsOrder<Member> = type === 'wallet'
+		? { wallet: 'DESC' }
+		: type === 'treasury' ? { treasury: 'DESC' }
+			: { wallet: 'DESC', treasury: 'DESC' };
+	const members = await Member.find({ order, where: { guildId: ctx.guildEntity.id } });
+	return members.map((member) => new ExecutionNode<'display'>()
+		.setName(`${ctx.guildEntity.currency} \`${parseNumber(type === 'total' ? (member.wallet + member.treasury) : type === 'treasury' ? member.treasury : member.wallet)}\``)
+		.setValue(`leaderboard_${type}_${member.userId}`)
+		.setType('displayNumbered')
+		.setDescription(`<@${member.userId}>`));
+};
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -10,55 +26,31 @@ export default class implements Command {
 		.setFormat('leaderboard [page]')
 		.setExamples(['leaderboard', 'leaderboard 3']);
 
-	public execute = new ExecutionBuilder()
+	public execution = new ExecutionNode<'top'>()
 		.setName('Leaderboard')
 		.setValue('leaderboard')
-		.setDescription('View the server leaderboard')
-		.setOptions([
-			new ExecutionBuilder()
+		.setDescription('View the top balances in the server')
+		.setOptions(() => [
+			new ExecutionNode()
 				.setName('Wallet')
-				.setValue('wallet')
-				.setDescription('View the leaderboard by wallet')
-				.setPagination(
-					async (ctx) => Member.find({
-						relations: ['guild'],
-						order: { wallet: 'DESC' },
-						where: { guildId: ctx.interaction.guildId },
-					}),
-					(member) => new ExecutionBuilder()
-						.setName(`Wallet: ${member.guild.currency} ${parseNumber(member.wallet)}`)
-						.setValue(member.userId)
-						.setDescription(`<@${member.userId}>`),
-				),
-			new ExecutionBuilder()
+				.setValue('leaderboard_wallet')
+				.setType('select')
+				.setDescription('View the top wallet balances')
+				.setReturnable()
+				.setOptions(async (ctx) => formatLeaderboard(ctx, 'wallet')),
+			new ExecutionNode()
 				.setName('Treasury')
-				.setValue('treasury')
-				.setDescription('View the leaderboard by treasury')
-				.setPagination(
-					async (ctx) => Member.find({
-						relations: ['guild'],
-						order: { treasury: 'DESC' },
-						where: { guildId: ctx.interaction.guildId },
-					}),
-					(member) => new ExecutionBuilder()
-						.setName(`Treasury: ${member.guild.currency} ${parseNumber(member.treasury)}`)
-						.setValue(member.userId)
-						.setDescription(`<@${member.userId}>`),
-				),
-			new ExecutionBuilder()
+				.setValue('leaderboard_treasury')
+				.setType('select')
+				.setDescription('View the top treasury balances')
+				.setReturnable()
+				.setOptions(async (ctx) => formatLeaderboard(ctx, 'treasury')),
+			new ExecutionNode()
 				.setName('Total')
-				.setValue('total')
-				.setDescription('View the leaderboard by total wealth')
-				.setPagination(
-					async (ctx) => Member.find({
-						relations: ['guild'],
-						order: { wallet: 'DESC', treasury: 'DESC' },
-						where: { guildId: ctx.interaction.guildId },
-					}),
-					(member) => new ExecutionBuilder()
-						.setName(`Total: ${member.guild.currency} ${parseNumber(member.wallet + member.treasury)}`)
-						.setValue(member.userId)
-						.setDescription(`<@${member.userId}>`),
-				),
+				.setValue('leaderboard_total')
+				.setType('select')
+				.setDescription('View the top combined balances')
+				.setReturnable()
+				.setOptions(async (ctx) => formatLeaderboard(ctx, 'total')),
 		]);
 }

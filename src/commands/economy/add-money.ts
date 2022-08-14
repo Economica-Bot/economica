@@ -1,9 +1,9 @@
-import { parseNumber, parseString } from '@adrastopoulos/number-parser';
+import { parseString } from '@adrastopoulos/number-parser';
 import { PermissionFlagsBits } from 'discord.js';
 
 import { Member, User } from '../../entities';
 import { recordTransaction } from '../../lib';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, CommandError, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -21,28 +21,20 @@ export default class implements Command {
 			.setRequired(true)
 			.addChoices({ name: 'Wallet', value: 'wallet' }, { name: 'Treasury', value: 'treasury' }));
 
-	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
-		const amount = ctx.interaction.options.getString('amount');
-		const balance = ctx.interaction.options.getString('balance');
-		const parsedAmount = parseString(amount);
-		if (!parsedAmount) {
-			await ctx.embedify('error', 'user', `Invalid amount: \`${amount}\``).send(true);
-			return;
-		}
-
-		const wallet = balance === 'wallet' ? parsedAmount : 0;
-		const treasury = balance === 'treasury' ? parsedAmount : 0;
-		const target = ctx.interaction.options.getMember('target');
-		await User.upsert({ id: target.id }, ['id']);
-		await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
-		const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
-		await ctx
-			.embedify(
-				'success',
-				'user',
-				`Added ${ctx.guildEntity.currency}${parseNumber(parsedAmount)} to <@!${target.id}>'s \`${balance}\`.`,
-			)
-			.send();
-		await recordTransaction(ctx.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'ADD_MONEY', wallet, treasury);
-	});
+	public execution = new ExecutionNode<'top'>()
+		.setName('Adding Money...')
+		.setType('top')
+		.setDescription('Money added successfully!')
+		.setExecution(async (ctx) => {
+			const balance = ctx.interaction.options.getString('balance');
+			const amount = parseString(ctx.interaction.options.getString('amount'));
+			if (!amount) throw new CommandError(`Invalid amount: \`${amount}\``);
+			const wallet = balance === 'wallet' ? amount : 0;
+			const treasury = balance === 'treasury' ? amount : 0;
+			const target = ctx.interaction.options.getMember('target');
+			await User.upsert({ id: target.id }, ['id']);
+			await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
+			const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
+			await recordTransaction(ctx.interaction.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'ADD_MONEY', wallet, treasury);
+		});
 }

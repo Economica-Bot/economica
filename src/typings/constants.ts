@@ -64,11 +64,6 @@ export const defaultIncomesObj: Incomes = {
 };
 
 export const defaultModulesObj: Record<ModuleString, Module> = {
-	ADMIN: {
-		type: 'DEFAULT',
-		enabled: true,
-		user: null,
-	},
 	ECONOMY: {
 		type: 'DEFAULT',
 		enabled: true,

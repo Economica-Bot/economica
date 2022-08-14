@@ -1,7 +1,7 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 
 import { recordTransaction, validateAmount } from '../../lib';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -12,12 +12,12 @@ export default class implements Command {
 		.setExamples(['withdraw 1.5k', 'withdraw all'])
 		.addStringOption((option) => option.setName('amount').setDescription('Specify an amount').setRequired(true));
 
-	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
+	public execution = () => new ExecutionNode().setExecution(async (ctx) => {
 		const { validated, result } = await validateAmount(ctx, 'treasury');
 		if (!validated) return;
 		await ctx.embedify('success', 'user', `Withdrew ${ctx.guildEntity.currency}${parseNumber(result)}`).send();
 		await recordTransaction(
-			ctx.client,
+			ctx.interaction.client,
 			ctx.guildEntity,
 			ctx.memberEntity,
 			ctx.memberEntity,

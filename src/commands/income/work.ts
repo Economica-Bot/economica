@@ -1,7 +1,7 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 
 import { recordTransaction } from '../../lib';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -11,11 +11,14 @@ export default class implements Command {
 		.setFormat('work')
 		.setExamples(['work']);
 
-	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
-		const { currency } = ctx.guildEntity;
-		const { min, max } = ctx.guildEntity.incomes.work;
-		const amount = Math.ceil(Math.random() * (max - min) + min);
-		await ctx.embedify('success', 'user', `You worked and earned ${currency}${parseNumber(amount)}`).send();
-		await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'WORK', amount, 0);
-	});
+	public execution = new ExecutionNode()
+		.setName('Working...')
+		.setValue(this.data.name)
+		.setDescription((ctx) => `You worked and earned ${ctx.guildEntity.currency} \`${parseNumber(ctx.variables.amount)}\``)
+		.setExecution(async (ctx) => {
+			const { min, max } = ctx.guildEntity.incomes.work;
+			const amount = Math.ceil(Math.random() * (max - min) + min);
+			ctx.variables.amount = amount;
+			await recordTransaction(ctx.interaction.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'WORK', amount, 0);
+		});
 }

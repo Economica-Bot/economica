@@ -1,8 +1,8 @@
 import { Snowflake, SnowflakeUtil } from 'discord.js';
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, Relation } from 'typeorm';
 
-import { InfractionString } from '../typings';
 import { Guild, Member } from '.';
+import { InfractionString } from '../typings';
 
 @Entity()
 export class Infraction extends BaseEntity {

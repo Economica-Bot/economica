@@ -7,11 +7,7 @@ import { Context } from '../structures';
 import { Emojis, ListingDescriptions, ListingEmojis } from '../typings';
 
 const getFormattedCreateTimestamp = (listing: Listing): string => `<t:${Math.trunc(listing.createdAt.getTime() / 1000)}:f>`;
-const getFormattedExpiresTimestamp = (listing: Listing): string => `${
-	listing.duration === Infinity
-		? '`Never`'
-		: `<t:${Math.trunc((listing.createdAt.getTime() + listing.duration) / 1000)}:R>`
-}`;
+const getFormattedExpiresTimestamp = (listing: Listing): string => `${listing.duration === Infinity ? '`Never`' : `<t:${Math.trunc((listing.createdAt.getTime() + listing.duration) / 1000)}:R>`}`;
 
 export const displayListing = (ctx: Context, listing: Listing) => {
 	const listingEmbed = ctx
@@ -24,7 +20,7 @@ export const displayListing = (ctx: Context, listing: Listing) => {
 		)
 		.setAuthor({
 			name: `${listing.name} — ${listing.description}`,
-			iconURL: ctx.client.emojis.resolve(parseEmoji(Emojis.BOX).id)?.url,
+			iconURL: ctx.interaction.client.emojis.resolve(parseEmoji(Emojis.BOX).id)?.url,
 		})
 		.addFields([
 			{

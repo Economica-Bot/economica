@@ -2,7 +2,7 @@ import { parseEmoji } from 'discord.js';
 import ms from 'ms';
 
 import { Command as CommandEntity } from '../../entities';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
 import { Emojis } from '../../typings';
 
 export default class implements Command {
@@ -13,10 +13,10 @@ export default class implements Command {
 		.setFormat('statistics')
 		.setExamples(['statistics']);
 
-	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
-		const description = `**Welcome to ${ctx.client.user}'s Statistics Dashboard!**`;
-		const botStats = `Websocket Ping: \`${ctx.client.ws.ping}ms\`\n`
-			+ `Bot Uptime: \`${ms(ctx.client.uptime)}\`\n`
+	public execution = () => new ExecutionNode().setExecution(async (ctx) => {
+		const description = `**Welcome to ${ctx.interaction.client.user}'s Statistics Dashboard!**`;
+		const botStats = `Websocket Ping: \`${ctx.interaction.client.ws.ping}ms\`\n`
+			+ `Bot Uptime: \`${ms(ctx.interaction.client.uptime)}\`\n`
 			+ `Commands Ran: \`${(await CommandEntity.findBy({ member: { guildId: ctx.memberEntity.guildId } })).length}\``;
 		const memberStats = `Roles: \`${ctx.interaction.member.roles.cache.size}\`\n`
 			+ `Commands Used: \`${(await CommandEntity.findBy({ member: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId } }))
@@ -29,7 +29,7 @@ export default class implements Command {
 			+ `Channels: \`${ctx.interaction.guild.channels.cache.size}\``;
 		await ctx
 			.embedify('info', 'user', description)
-			.setAuthor({ name: 'Statistics Dashboard', iconURL: ctx.client.emojis.resolve(parseEmoji(Emojis.TREND).id)?.url })
+			.setAuthor({ name: 'Statistics Dashboard', iconURL: ctx.interaction.client.emojis.resolve(parseEmoji(Emojis.TREND).id)?.url })
 			.addFields([
 				{ name: `${Emojis.CPU} \`Bot Statistics\``, value: botStats, inline: true },
 				{ name: `${Emojis.PERSON_ADD} \`Member Statistics\``, value: memberStats, inline: true },

@@ -1,5 +1,5 @@
 import { interval } from '../../lib';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -9,7 +9,9 @@ export default class implements Command {
 		.setFormat('minutely')
 		.setExamples(['minutely']);
 
-	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
-		interval(ctx, 'minutely');
-	});
+	public execution = new ExecutionNode()
+		.setName('Minutely Fund Redeemer')
+		.setValue('minutely')
+		.setDescription((ctx) => ctx.variables.result)
+		.setExecution(async (ctx) => { ctx.variables.result = await interval(ctx, 'minutely'); });
 }

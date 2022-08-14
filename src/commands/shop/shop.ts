@@ -1,12 +1,85 @@
 import { parseInteger, parseNumber, parseString } from '@adrastopoulos/number-parser';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import ms from 'ms';
 import { ILike } from 'typeorm';
 
 import { Item, Listing } from '../../entities';
-import { displayListing, recordTransaction } from '../../lib';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder, VariableCollector } from '../../structures';
-import { Emojis, ListingString } from '../../typings';
+import { recordTransaction } from '../../lib';
+import { Command, CommandError, EconomicaSlashCommandBuilder, ExecutionNode, VariableCollector } from '../../structures';
+import { Emojis, ListingDescriptions, ListingEmojis, ListingString } from '../../typings';
+
+const displayListing = (listing: Listing): ExecutionNode[] => {
+	const result = [
+		new ExecutionNode()
+			.setName(`${Emojis.MONEY_STACK} Price`)
+			.setValue('listing_view_price')
+			.setType('displayInline')
+			.setDescription(`${listing.guild.currency} \`${parseNumber(listing.price)}\``),
+		new ExecutionNode()
+			.setName(`${Emojis.MONEY_BAG} Required Treasury`)
+			.setValue('listing_view_requiredTreasury')
+			.setType('displayInline')
+			.setDescription(`${listing.guild.currency} \`${parseNumber(listing.treasuryRequired)}\``),
+		new ExecutionNode()
+			.setName(`${Emojis.BACKPACK} Items required`)
+			.setValue('listing_view_itemsRequired')
+			.setType('displayInline')
+			.setDescription(listing.itemsRequired.length
+				? listing.itemsRequired.map((item) => `\`${item.name}\``).join('\n')
+				: '`None`'),
+		new ExecutionNode()
+			.setName(`${Emojis.STACK} Stackable`)
+			.setValue('listing_view_stackable')
+			.setType('displayInline')
+			.setDescription(`\`${listing.stackable}\``),
+		new ExecutionNode()
+			.setName(`${Emojis.TREND} Active`)
+			.setValue('listing_view_active')
+			.setType('displayInline')
+			.setDescription(`\`${listing.active}\``),
+		new ExecutionNode()
+			.setName(`${Emojis.TILES} In Stock`)
+			.setValue('listing_view_stock')
+			.setType('displayInline')
+			.setDescription(`\`${listing.stock > 0}\``),
+		new ExecutionNode()
+			.setName(`${Emojis.KEY} Roles Required`)
+			.setValue('listing_view_rreq')
+			.setType('displayInline')
+			.setDescription(listing.rolesRequired.length ? listing.rolesRequired.map((role) => `<@&${role}>`).join('\n') : '`None`'),
+		new ExecutionNode()
+			.setName(`${Emojis.RED_DOWN_ARROW} Roles Removed`)
+			.setValue('listing_view_rrem')
+			.setType('displayInline')
+			.setDescription(listing.rolesRemoved.length ? listing.rolesRemoved.map((role) => `<@&${role}>`).join('\n') : '`None`'),
+		new ExecutionNode()
+			.setName(`${Emojis.GREEN_UP_ARROW} Roles Granted`)
+			.setValue('listing_view_rg')
+			.setType('displayInline')
+			.setDescription(listing.rolesGranted.length ? listing.rolesGranted.map((role) => `<@&${role}>`).join('\n') : '`None`'),
+		new ExecutionNode()
+			.setName(`${ListingEmojis[listing.type]} \`${listing.type}\` Item`)
+			.setValue('listing_view_type')
+			.setType('displayInline')
+			.setDescription(`>>> ${ListingDescriptions[listing.type]}`),
+	];
+
+	if (listing.type === 'GENERATOR') {
+		result.concat([
+			new ExecutionNode()
+				.setName('Generator Period')
+				.setValue('listing_view_period')
+				.setType('displayInline')
+				.setDescription(`\`${ms(listing.generatorPeriod)}\``),
+			new ExecutionNode()
+				.setName('Generator Amount')
+				.setValue('listing_view_amount')
+				.setType('displayInline')
+				.setDescription(`${listing.guild.currency} \`${parseNumber(listing.generatorAmount)}\``),
+		]);
+	}
+
+	return result;
+};
 
 const editableListingProps = [
 	'name',
@@ -26,16 +99,79 @@ const editableListingProps = [
 ] as const;
 
 const collectors: Record<typeof editableListingProps[number], (collector: VariableCollector) => VariableCollector> = {
+	name: (collector) => collector
+		.setProperty('name')
+		.setPrompt('The listing name.')
+		.setParser((msg) => msg.content),
+	price: (collector) => collector
+		.setProperty('price')
+		.setPrompt('The amount deducted from the buyer\'s wallet.')
+		.addValidator((msg) => parseString(msg.content) !== null && parseString(msg.content) !== undefined, 'Input must be numerical.')
+		.addValidator((msg) => parseString(msg.content) >= 0, 'Input must be positive')
+		.setParser((msg) => parseString(msg.content)),
 	description: (collector) => collector
 		.setProperty('description')
 		.setPrompt('The listing description.')
 		.setParser((msg) => msg.content)
+		.setSkippable(),
+	treasuryRequired: (collector) => collector
+		.setProperty('required treasury')
+		.setPrompt('The minimum treasury balance required to purchase.')
+		.addValidator((msg) => parseString(msg.content) !== null, 'Input must be numerical.')
+		.addValidator((msg) => parseString(msg.content) >= 0, 'Input must be positive')
+		.setParser((msg) => parseString(msg.content))
+		.setSkippable(),
+	stackable: (collector) => collector
+		.setProperty('stackable')
+		.setPrompt('Whether users can own multiple items.')
+		.addValidator((msg) => ['false', 'true'].includes(msg.content.toLowerCase()), 'Input must be one of `false`, `true`.')
+		.setParser((msg) => msg.content.toLowerCase() === 'true')
+		.setSkippable(),
+	tradeable: (collector) => collector
+		.setProperty('tradeable')
+		.setPrompt('Whether users can trade this item.')
+		.addValidator((msg) => ['false', 'true'].includes(msg.content.toLowerCase()), 'Input must be one of `false`, `true`.')
+		.setParser((msg) => msg.content.toLowerCase() === 'true')
+		.setSkippable(),
+	stock: (collector) => collector
+		.setProperty('stock')
+		.setPrompt('How many of this listing can be sold.')
+		.addValidator((msg) => parseInteger(msg.content) !== null, 'Input must be numerical.')
+		.addValidator((msg) => parseInteger(msg.content) >= 0, 'Input must be positive')
+		.setParser((msg) => parseInteger(msg.content))
 		.setSkippable(),
 	duration: (collector) => collector
 		.setProperty('duration')
 		.setPrompt('How long this listing is available.')
 		.addValidator((msg) => !!ms(msg.content), 'Input must be a valid duration.')
 		.setParser((msg) => ms(msg.content))
+		.setSkippable(),
+	itemsRequired: (collector) => collector
+		.setProperty('required items')
+		.setPrompt('Item required to own in order to purchase.')
+		.addValidator(async (msg, ctx) => !!(await Listing.findBy({ guild: { id: ctx.interaction.guildId }, name: ILike(msg.content) })).length, 'Could not find that item in the market.')
+		.setParser(async (msg, ctx) => Listing.findBy({ guild: { id: ctx.interaction.guildId }, name: ILike(msg.content) }))
+		.setSkippable(),
+	rolesRequired: (collector) => collector
+		.setProperty('required roles')
+		.setPrompt('Roles required to own in order to purchase.')
+		.addValidator((msg) => !!msg.mentions.roles.size, 'No roles mentioned.')
+		.addValidator((msg) => msg.mentions.roles.every((role) => role.comparePositionTo(msg.guild.members.me.roles.highest) < 0), 'That role is higher than mine.')
+		.setParser((msg) => Array.from(msg.mentions.roles.keys()))
+		.setSkippable(),
+	rolesGranted: (collector) => collector
+		.setProperty('granted roles')
+		.setPrompt('Roles granted upon purchasing.')
+		.addValidator((msg) => !!msg.mentions.roles.size, 'No roles mentioned.')
+		.addValidator((msg) => msg.mentions.roles.every((role) => role.comparePositionTo(msg.guild.members.me.roles.highest) < 0), 'That role is higher than mine.')
+		.setParser((msg) => Array.from(msg.mentions.roles.keys()))
+		.setSkippable(),
+	rolesRemoved: (collector) => collector
+		.setProperty('removed roles')
+		.setPrompt('Roles removed upon purchasing.')
+		.addValidator((msg) => !!msg.mentions.roles.size, 'No roles mentioned.')
+		.addValidator((msg) => msg.mentions.roles.every((role) => role.comparePositionTo(msg.guild.members.me.roles.highest) < 0), 'That role is higher than mine.')
+		.setParser((msg) => Array.from(msg.mentions.roles.keys()))
 		.setSkippable(),
 	generatorAmount: (collector) => collector
 		.setProperty('generator amount')
@@ -47,90 +183,6 @@ const collectors: Record<typeof editableListingProps[number], (collector: Variab
 		.setPrompt('The duration between generation.')
 		.addValidator((msg) => !!ms(msg.content), 'Input must be a valid duration.')
 		.setParser((msg) => ms(msg.content)),
-	itemsRequired: (collector) => collector
-		.setProperty('required items')
-		.setPrompt('Item required to own in order to purchase.')
-		.addValidator(
-			async (msg, ctx) => !!(await Listing.findBy({ guild: { id: ctx.interaction.guildId }, name: ILike(msg.content) })).length,
-			'Could not find that item in the market.',
-		)
-		.setParser(async (msg, ctx) => Listing.findBy({ guild: { id: ctx.interaction.guildId }, name: ILike(msg.content) }))
-		.setSkippable(),
-	name: (collector) => collector
-		.setProperty('name')
-		.setPrompt('The listing name.')
-		.setParser((msg) => msg.content),
-	price: (collector) => collector
-		.setProperty('price')
-		.setPrompt('The minimum wallet balance required to purchase.')
-		.addValidator(
-			(msg) => parseString(msg.content) !== null && parseString(msg.content) !== undefined,
-			'Input must be numerical.',
-		)
-		.addValidator((msg) => parseString(msg.content) >= 0, 'Input must be positive')
-		.setParser((msg) => parseString(msg.content)),
-	rolesGranted: (collector) => collector
-		.setProperty('granted roles')
-		.setPrompt('Roles granted upon purchasing.')
-		.addValidator((msg) => !!msg.mentions.roles.size, 'No roles mentioned.')
-		.addValidator(
-			(msg) => msg.mentions.roles.every((role) => role.comparePositionTo(msg.guild.members.me.roles.highest) < 0),
-			'That role is higher than mine.',
-		)
-		.setParser((msg) => Array.from(msg.mentions.roles.keys()))
-		.setSkippable(),
-	rolesRemoved: (collector) => collector
-		.setProperty('removed roles')
-		.setPrompt('Roles removed upon purchasing.')
-		.addValidator((msg) => !!msg.mentions.roles.size, 'No roles mentioned.')
-		.addValidator(
-			(msg) => msg.mentions.roles.every((role) => role.comparePositionTo(msg.guild.members.me.roles.highest) < 0),
-			'That role is higher than mine.',
-		)
-		.setParser((msg) => Array.from(msg.mentions.roles.keys()))
-		.setSkippable(),
-	rolesRequired: (collector) => collector
-		.setProperty('required roles')
-		.setPrompt('Roles required to own in order to purchase.')
-		.addValidator((msg) => !!msg.mentions.roles.size, 'No roles mentioned.')
-		.addValidator(
-			(msg) => msg.mentions.roles.every((role) => role.comparePositionTo(msg.guild.members.me.roles.highest) < 0),
-			'That role is higher than mine.',
-		)
-		.setParser((msg) => Array.from(msg.mentions.roles.keys()))
-		.setSkippable(),
-	stackable: (collector) => collector
-		.setProperty('stackable')
-		.setPrompt('Whether users can own multiple items.')
-		.addValidator(
-			(msg) => ['false', 'true'].includes(msg.content.toLowerCase()),
-			'Input must be one of `false`, `true`.',
-		)
-		.setParser((msg) => msg.content.toLowerCase() === 'true')
-		.setSkippable(),
-	stock: (collector) => collector
-		.setProperty('stock')
-		.setPrompt('How many of this listing can be sold.')
-		.addValidator((msg) => parseInteger(msg.content) !== null, 'Input must be numerical.')
-		.addValidator((msg) => parseInteger(msg.content) >= 0, 'Input must be positive')
-		.setParser((msg) => parseInteger(msg.content))
-		.setSkippable(),
-	tradeable: (collector) => collector
-		.setProperty('tradeable')
-		.setPrompt('Whether users can trade this item.')
-		.addValidator(
-			(msg) => ['false', 'true'].includes(msg.content.toLowerCase()),
-			'Input must be one of `false`, `true`.',
-		)
-		.setParser((msg) => msg.content.toLowerCase() === 'true')
-		.setSkippable(),
-	treasuryRequired: (collector) => collector
-		.setProperty('required treasury')
-		.setPrompt('The minimum treasury balance required to purchase.')
-		.addValidator((msg) => parseString(msg.content) !== null, 'Input must be numerical.')
-		.addValidator((msg) => parseString(msg.content) >= 0, 'Input must be positive')
-		.setParser((msg) => parseString(msg.content))
-		.setSkippable(),
 };
 
 export default class implements Command {
@@ -141,317 +193,261 @@ export default class implements Command {
 		.setFormat('shop')
 		.setExamples(['shop']);
 
-	public execute = new ExecutionBuilder()
+	public execution = new ExecutionNode()
 		.setName('Economica Shop')
 		.setValue('shop')
 		.setDescription('Choose which shop you wish to browse')
-		.setOptions([
-			new ExecutionBuilder()
+		.setOptions(() => [
+			new ExecutionNode()
 				.setName('Server Shop')
-				.setValue('server')
+				.setValue('shop_server')
+				.setType('select')
 				.setDescription('Browse the local server shop')
-				.setPagination(
-					(ctx) => Listing.find({
+				.setOptions(async (ctx) => {
+					const listings = await Listing.find({
 						relations: ['guild', 'itemsRequired'],
 						where: { guild: { id: ctx.interaction.guildId }, active: true },
-					}),
-					(listing, ctx) => new ExecutionBuilder()
-						.setName(`${listing.name}`)
-						.setValue(listing.id)
-						.setDescription(`${ctx.guildEntity.currency} \`${parseNumber(listing.price)}\` | ${listing.description}`)
-						.setEmbed(displayListing(ctx, listing))
-						.setOptions([
-							new ExecutionBuilder()
-								.setName('Buy Listing')
-								.setValue('buy')
-								.setDescription(`Buy this listing for ${ctx.guildEntity.currency} \`${parseNumber(listing.price)}\``)
-								.setExecution(async (ctx, interaction) => {
-									const existingItem = await Item.findOneBy({
-										owner: { guildId: ctx.guildEntity.id, userId: ctx.userEntity.id },
-										listing: { id: listing.id },
-									});
+					});
 
-									// Validation
-									const missingItems: Listing[] = [];
-									// eslint-disable-next-line no-restricted-syntax
-									for await (const item of listing.itemsRequired) {
-										const memberItem = await Item.findOneBy({
-											owner: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId },
-											listing: { id: item.id },
+					return listings.map(
+						(listing) => new ExecutionNode()
+							.setName(`${listing.name}`)
+							.setValue(listing.id)
+							.setDescription(`${ctx.guildEntity.currency} \`${parseNumber(listing.price)}\` | ${listing.description}`)
+							.setOptions(() => [
+								...displayListing(listing),
+								new ExecutionNode()
+									.setName('Buy Listing')
+									.setValue('shop_buy')
+									.setType('button')
+									.setDescription(`Buy this listing for ${ctx.guildEntity.currency} \`${parseNumber(listing.price)}\``)
+									.setExecution(async (ctx) => {
+										const existingItem = await Item.findOneBy({
+											owner: { guildId: ctx.guildEntity.id, userId: ctx.userEntity.id },
+											listing: { id: listing.id },
 										});
-										if (!memberItem) missingItems.push(item);
-									}
 
-									const missingRoles: string[] = [];
-									listing.rolesRequired.forEach(async (role) => {
-										if (!ctx.interaction.member.roles.cache.has(role)) missingRoles.push(role);
-									});
-
-									if (!listing.active) {
-										const embed = ctx.embedify('warn', 'user', 'This listing is **not active**.');
-										await interaction.update({ embeds: [embed], components: [] });
-									} else if (listing.stock < 1) {
-										const embed = ctx.embedify('warn', 'user', 'This listing is **out of stock**.');
-										await interaction.update({ embeds: [embed], components: [] });
-									} else if (!listing.stackable && existingItem) {
-										const embed = ctx.embedify('warn', 'user', 'You **already own** this item.');
-										await interaction.update({ embeds: [embed], components: [] });
-									} else if (missingItems.length) {
-										const embed = ctx.embedify(
-											'warn',
-											'user',
-											`You must own ${missingItems
-												.map((item) => `\`${item.name}\``)
-												.join(', ')} to purchase this listing.`,
-										);
-										await interaction.update({ embeds: [embed], components: [] });
-									} else if (missingRoles.length) {
-										const embed = ctx.embedify(
-											'warn',
-											'user',
-											`You must have the roles ${missingRoles
-												.map((role) => `<@&${role}>`)
-												.join(', ')} to buy this item.`,
-										);
-										await interaction.update({ embeds: [embed], components: [] });
-									} else if (listing.treasuryRequired > ctx.memberEntity.treasury) {
-										const embed = ctx.embedify(
-											'warn',
-											'user',
-											`You must have a **treasury balance** of ${ctx.guildEntity.currency}${listing.treasuryRequired} to purchase this listing.`,
-										);
-										await interaction.update({ embeds: [embed], components: [] });
-									} else if (listing.price > ctx.memberEntity.wallet) {
-										const embed = ctx.embedify('warn', 'user', 'You **cannot afford** this item.');
-										await interaction.update({ embeds: [embed], components: [] });
-									}
-
-									if (interaction.replied) return;
-
-									// Purchase complete
-									listing.stock -= 1;
-									await listing.save();
-
-									if (existingItem) {
-										existingItem.amount += 1;
-										await existingItem.save();
-									} else {
-										const item = await Item.create({
-											listing,
-											owner: ctx.memberEntity,
-											amount: 1,
-										}).save();
-										if (item.listing.type === 'INSTANT' || item.listing.type === 'COLLECTABLE') {
-											item.listing.rolesGranted.forEach((role) => ctx.interaction.member.roles.add(role, `Purchased ${item.listing.name}`));
-											item.listing.rolesRemoved.forEach((role) => ctx.interaction.member.roles.remove(role, `Purchased ${item.listing.name}`));
-											if (item.listing.type === 'INSTANT') await item.remove();
-										}
-									}
-
-									await recordTransaction(
-										ctx.client,
-										ctx.guildEntity,
-										ctx.memberEntity,
-										ctx.clientMemberEntity,
-										'BUY',
-										-listing.price,
-										0,
-									);
-									const embed = ctx.embedify('success', 'user', `${Emojis.CHECK} **Listing Purchased Successfully**`);
-									await interaction.update({ embeds: [embed], components: [] });
-								}),
-							new ExecutionBuilder()
-								.setName('Edit Listing')
-								.setValue('edit')
-								.setDescription("Edit this listing's properties")
-								.setPredicate((ctx) => ctx.interaction.member.permissions.has(['ManageGuild']))
-								.setPagination(
-									() => Object.keys(listing).filter((value) => editableListingProps.includes(value as any)),
-									(key) => new ExecutionBuilder()
-										.setName(key)
-										.setValue(key)
-										.setDescription(`Edit the ${key} property of ${listing.name}.`)
-										.collectVar(collectors[key])
-										.setExecution(async (ctx, interaction) => {
-											const res = this.execute.getVariable(key);
-											const embed = ctx.embedify(
-												'info',
-												'user',
-												`**Old property: \`${listing[key]}\` | New Property: \`${res}\`**`,
-											);
-											const row = new ActionRowBuilder<ButtonBuilder>().setComponents([
-												new ButtonBuilder()
-													.setCustomId('update_cancel')
-													.setLabel('Cancel')
-													.setStyle(ButtonStyle.Secondary),
-												new ButtonBuilder()
-													.setCustomId('listing_update')
-													.setLabel('Update')
-													.setStyle(ButtonStyle.Success),
-											]);
-
-											const message = await interaction.editReply({ embeds: [embed], components: [row] });
-											const action = await message.awaitMessageComponent({
-												componentType: ComponentType.Button,
-												filter: (i) => i.user.id === interaction.user.id,
+										// Validation
+										const missingItems: Listing[] = [];
+										for await (const item of listing.itemsRequired) {
+											const memberItem = await Item.findOneBy({
+												owner: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId },
+												listing: { id: item.id },
 											});
-											if (action.customId === 'update_cancel') {
-												const cancelEmbed = ctx.embedify(
-													'warn',
-													'user',
-													`${Emojis.CROSS} **Shop Listing Update Cancelled**`,
-												);
-												await action.update({ embeds: [cancelEmbed], components: [] });
-											} else if (action.customId === 'listing_update') {
-												listing[key] = res;
-												await listing.save();
-												const successEmbed = ctx.embedify(
-													'success',
-													'user',
-													`${Emojis.DEED} **Shop Listing Updated Successfully**`,
-												);
-												await action.update({ embeds: [successEmbed], components: [] });
-											}
-										}),
-								),
-							new ExecutionBuilder()
-								.setName('Delete Listing')
-								.setValue('delete')
-								.setDescription('Delete this listing from the shop')
-								.setPredicate((ctx) => ctx.interaction.member.permissions.has(['ManageGuild']))
-								.setExecution(async (ctx, interaction) => {
-									const affectedMembers = await Item.findBy({ listing: { id: listing.id } });
-									const embed = ctx.embedify(
-										'warn',
-										'guild',
-										`Deleting this listing will remove items from \`${affectedMembers.length}\` inventories.`,
-									);
-									const row = new ActionRowBuilder<ButtonBuilder>().setComponents([
-										new ButtonBuilder()
-											.setCustomId('listing_cancel')
-											.setLabel('Cancel')
-											.setStyle(ButtonStyle.Secondary),
-										new ButtonBuilder().setCustomId('listing_delete').setLabel('Delete').setStyle(ButtonStyle.Danger),
-									]);
+											if (!memberItem) missingItems.push(item);
+										}
 
-									const message = await interaction.update({ embeds: [embed], components: [row] });
-									const action = await message.awaitMessageComponent({
-										componentType: ComponentType.Button,
-										filter: (i) => i.user.id === interaction.user.id,
-									});
-									if (action.customId === 'listing_cancel') {
-										const cancelEmbed = ctx.embedify(
-											'warn',
-											'user',
-											`${Emojis.CROSS} **Shop Listing Deletion Cancelled**`,
-										);
-										await action.update({ embeds: [cancelEmbed], components: [] });
-									} else if (action.customId === 'listing_delete') {
-										await listing.remove();
-										const successEmbed = ctx.embedify(
-											'success',
-											'user',
-											`${Emojis.DEED} **Shop Listing Deleted Successfully**`,
-										);
-										await action.update({ embeds: [successEmbed], components: [] });
-									}
-								}),
-						]),
-				),
-			new ExecutionBuilder()
+										const missingRoles: string[] = [];
+										listing.rolesRequired.forEach(async (role) => {
+											if (!ctx.interaction.member.roles.cache.has(role)) missingRoles.push(role);
+										});
+
+										if (!listing.active) throw new CommandError('This listing is **not active**.');
+										if (listing.stock < 1) throw new CommandError('This listing is **out of stock**.');
+										if (!listing.stackable && existingItem) throw new CommandError('You **already own** this item.');
+										if (missingItems.length) throw new CommandError(`You must own ${missingItems.map((item) => `\`${item.name}\``).join(', ')} to purchase this listing.`);
+										if (missingRoles.length) throw new CommandError(`You must have the roles ${missingRoles.map((role) => `<@&${role}>`).join(', ')} to buy this item.`);
+										if (listing.treasuryRequired > ctx.memberEntity.treasury) throw new CommandError(`You must have a **treasury balance** of ${ctx.guildEntity.currency}${listing.treasuryRequired} to purchase this listing.`);
+										if (listing.price > ctx.memberEntity.wallet) throw new CommandError('You **cannot afford** this item.');
+
+										// Purchase complete
+										listing.stock -= 1;
+										await listing.save();
+
+										if (existingItem) {
+											existingItem.amount += 1;
+											await existingItem.save();
+										} else {
+											const item = await Item.create({
+												listing,
+												owner: ctx.memberEntity,
+												amount: 1,
+											}).save();
+											if (item.listing.type === 'INSTANT' || item.listing.type === 'COLLECTABLE') {
+												item.listing.rolesGranted.forEach((role) => ctx.interaction.member.roles.add(role, `Purchased ${item.listing.name}`));
+												item.listing.rolesRemoved.forEach((role) => ctx.interaction.member.roles.remove(role, `Purchased ${item.listing.name}`));
+												if (item.listing.type === 'INSTANT') await item.remove();
+											}
+										}
+
+										await recordTransaction(ctx.interaction.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'BUY', -listing.price, 0);
+									})
+									.setOptions(() => [
+										new ExecutionNode()
+											.setName('Purchasing...')
+											.setValue('shop_buy_result')
+											.setType('display')
+											.setDescription(`${Emojis.CHECK} **Listing Purchased Successfully**`),
+									]),
+								new ExecutionNode()
+									.setName('Edit Listing')
+									.setValue('shop_edit')
+									.setType('button')
+									.setDescription("Edit this listing's properties")
+									.setPredicate((ctx) => ctx.interaction.member.permissions.has(['ManageGuild']))
+									.setOptions(() => Object
+										.keys(listing)
+										.filter((value) => {
+											if (!editableListingProps.includes(value as any)) return false;
+											if (listing.type !== 'GENERATOR' && ['generatorAmount', 'generatorPeriod'].includes(value)) return false;
+											return true;
+										})
+										.map((key) => new ExecutionNode()
+											.setName(key)
+											.setValue(`shop_edit_${key}`)
+											.setDescription(`Edit the ${key} property of ${listing.name}.`)
+											.collectVar(collectors[key])
+											.setOptions(() => [
+												new ExecutionNode()
+													.setName('Cancel')
+													.setValue(`shop_edit_${key}_cancel`)
+													.setType('button')
+													.setDescription(`${Emojis.CROSS} **Shop Listing Update Cancelled**`),
+												new ExecutionNode()
+													.setName('Update')
+													.setValue(`shop_edit_${key}_update`)
+													.setType('button')
+													.setDescription(`${Emojis.DEED} **Shop Listing Updated Successfully**`)
+													.setExecution(async () => {
+														listing[key] = ctx.variables[key];
+														await listing.save();
+													}),
+											]))),
+								new ExecutionNode()
+									.setName('Delete Listing')
+									.setValue('shop_delete')
+									.setDescription('Delete this listing from the shop')
+									.setPredicate((ctx) => ctx.interaction.member.permissions.has(['ManageGuild']))
+									.setOptions((ctx) => [
+										new ExecutionNode()
+											.setName('Warning')
+											.setValue('shop_delete_warn')
+											.setType('display')
+											.setDescription(`Deleting this listing will remove \`${ctx.variables.affectedMembers.reduce(((prev, curr) => prev + curr.amount), 0)}\` items from \`${ctx.variables.affectedMembers.length}\` inventories.`),
+										new ExecutionNode()
+											.setName('Cancel')
+											.setValue('shop_delete_cancel')
+											.setType('button')
+											.setDescription(`${Emojis.CROSS} **Shop Listing Deletion Cancelled**`),
+										new ExecutionNode()
+											.setName('Delete')
+											.setValue('shop_delete_confirm')
+											.setType('button')
+											.setDescription(`${Emojis.DEED} **Shop Listing Deleted Successfully**`)
+											.setExecution(async () => {
+												await listing.remove();
+											}),
+									]),
+							]),
+					);
+				}),
+			new ExecutionNode()
 				.setName('Manage')
-				.setValue('manage')
+				.setValue('shop_manage')
+				.setType('select')
 				.setDescription('Manage the local server shop')
 				.setPredicate((ctx) => ctx.interaction.member.permissions.has(['ManageGuild']))
-				.setOptions([
-					new ExecutionBuilder()
+				.setOptions(() => [
+					new ExecutionNode()
 						.setName('Create Shop Listing')
-						.setValue('create')
+						.setValue('shop_manage_create')
+						.setType('select')
 						.setDescription('Create a new shop listing')
-						.setOptions([
-							new ExecutionBuilder()
-								.setName('Collectable')
-								.setValue('collectable')
-								.setDescription('Create a collectable shop item.')
-								.setExecution(() => this.itemCreator(this.execute, 'COLLECTABLE')),
-							new ExecutionBuilder()
-								.setName('Instant')
-								.setValue('instant')
-								.setDescription('Create an instant shop item.')
-								.setExecution(() => this.itemCreator(this.execute, 'INSTANT')),
-							new ExecutionBuilder()
-								.setName('Usable')
-								.setValue('usable')
-								.setDescription('Create a usable shop item.')
-								.setExecution(() => this.itemCreator(this.execute, 'USABLE')),
-							new ExecutionBuilder()
-								.setName('Generator')
-								.setValue('generator')
-								.setDescription('Create a generator shop item.')
-								.collectVar((collector) => collector
-									.setProperty('generator amount')
-									.setPrompt('The amount generated per iteration.')
-									.addValidator((msg) => !!parseString(msg.content), 'Input must be numerical.')
-									.setParser((msg) => parseString(msg.content)))
-								.collectVar((collector) => collector
-									.setProperty('generator period')
-									.setPrompt('The duration between generation.')
-									.addValidator((msg) => !!ms(msg.content), 'Input must be a valid duration.')
-									.setParser((msg) => ms(msg.content)))
-								.setExecution(() => this.itemCreator(this.execute, 'GENERATOR')),
+						.setOptions(async () => [
+							await this.itemCreator(
+								new ExecutionNode()
+									.setName('Collectable')
+									.setValue('shop_manage_create_collectable')
+									.setType('select')
+									.setDescription('Create a collectable shop item.'),
+								'COLLECTABLE',
+							),
+							await this.itemCreator(
+								new ExecutionNode()
+									.setName('Instant')
+									.setValue('shop_manage_create_instant')
+									.setType('select')
+									.setDescription('Create an instant shop item.'),
+								'INSTANT',
+							),
+							await this.itemCreator(
+								new ExecutionNode()
+									.setName('Usable')
+									.setValue('shop_manage_create_usable')
+									.setType('select')
+									.setDescription('Create a usable shop item.'),
+								'USABLE',
+							),
+							await this.itemCreator(
+								new ExecutionNode()
+									.setName('Generator')
+									.setValue('shop_manage_create_generator')
+									.setType('select')
+									.setDescription('Create a generator shop item.')
+									.collectVar((collector) => collector
+										.setProperty('generator amount')
+										.setPrompt('The amount generated per iteration.')
+										.addValidator((msg) => !!parseString(msg.content), 'Input must be numerical.')
+										.setParser((msg) => parseString(msg.content)))
+									.collectVar((collector) => collector
+										.setProperty('generator period')
+										.setPrompt('The duration between generation.')
+										.addValidator((msg) => !!ms(msg.content), 'Input must be a valid duration.')
+										.setParser((msg) => ms(msg.content))),
+								'GENERATOR',
+							),
 						]),
 				]),
 		]);
 
-	private itemCreator = async (ex: ExecutionBuilder, type: ListingString) => {
-		const newex = new ExecutionBuilder().setExecution(async (ctx, interaction) => {
-			const listing = new Listing();
+	private itemCreator = async (node: ExecutionNode, type: ListingString) => {
+		node
+			.setExecution(async (ctx) => {
+				const listing = new Listing();
 
-			listing.guild = ctx.guildEntity;
-			listing.createdAt = new Date();
-			listing.active = true;
-			listing.type = type;
+				listing.guild = ctx.guildEntity;
+				listing.createdAt = new Date();
+				listing.active = true;
+				listing.type = type;
 
-			listing.name = ex.getVariable('name');
-			listing.price = ex.getVariable('price');
-			listing.treasuryRequired = ex.getVariable('required treasury') ?? 0;
-			listing.description = ex.getVariable('description') ?? 'No description.';
-			listing.duration = ex.getVariable('duration') ?? Infinity;
-			listing.stock = ex.getVariable('stock') ?? Infinity;
-			listing.stackable = ex.getVariable('stackable') ?? false;
-			listing.tradeable = ex.getVariable('tradeable') ?? true;
-			listing.itemsRequired = ex.getVariable('required items') ?? [];
-			listing.rolesRequired = ex.getVariable('required roles') ?? [];
-			listing.rolesGranted = ex.getVariable('granted roles') ?? [];
-			listing.rolesRemoved = ex.getVariable('removed roles') ?? [];
-			if (listing.type === 'GENERATOR') {
-				listing.generatorAmount = ex.getVariable('generator amount');
-				listing.generatorPeriod = ex.getVariable('generator period');
-			}
+				listing.name = ctx.variables.name;
+				listing.price = ctx.variables.price;
+				listing.treasuryRequired = ctx.variables['required treasury'] ?? 0;
+				listing.description = ctx.variables.description ?? 'No description.';
+				listing.duration = ctx.variables.duration ?? Infinity;
+				listing.stock = ctx.variables.stock ?? Infinity;
+				listing.stackable = ctx.variables.stackable ?? false;
+				listing.tradeable = ctx.variables.tradeable ?? true;
+				listing.itemsRequired = ctx.variables['required items'] ?? [];
+				listing.rolesRequired = ctx.variables['required roles'] ?? [];
+				listing.rolesGranted = ctx.variables['granted roles'] ?? [];
+				listing.rolesRemoved = ctx.variables['removed roles'] ?? [];
+				if (listing.type === 'GENERATOR') {
+					listing.generatorAmount = ctx.variables['generator amount'];
+					listing.generatorPeriod = ctx.variables['generator period'];
+				}
 
-			const listingEmbed = displayListing(ctx, listing);
-			const row = new ActionRowBuilder<ButtonBuilder>().setComponents([
-				new ButtonBuilder().setCustomId('listing_cancel').setLabel('Cancel').setStyle(ButtonStyle.Danger),
-				new ButtonBuilder().setCustomId('listing_create').setLabel('Create').setStyle(ButtonStyle.Success),
+				ctx.variables.listing = listing;
+			})
+			.setOptions((ctx) => [
+				...displayListing(ctx.variables.listing),
+				new ExecutionNode()
+					.setName('Cancel')
+					.setValue('shop_create_cancel')
+					.setType('button')
+					.setDescription(`${Emojis.CROSS} **Shop Listing Cancelled**`),
+				new ExecutionNode()
+					.setName('Create')
+					.setValue('shop_create_confirm')
+					.setType('button')
+					.setDescription(`${Emojis.DEED} **Shop Listing Created Successfully**`)
+					.setExecution(async (ctx) => {
+						await ctx.variables.listing.save();
+					}),
 			]);
 
-			const message = await interaction.editReply({ embeds: [listingEmbed], components: [row] });
-			const action = await message.awaitMessageComponent({
-				componentType: ComponentType.Button,
-				filter: (i) => i.user.id === interaction.user.id,
-			});
-			if (action.customId === 'listing_cancel') {
-				const cancelEmbed = ctx.embedify('warn', 'user', `${Emojis.CROSS} **Shop Listing Cancelled**`);
-				await action.update({ embeds: [cancelEmbed], components: [] });
-			} else if (action.customId === 'listing_create') {
-				await listing.save();
-				const successEmbed = ctx.embedify('success', 'user', `${Emojis.DEED} **Shop Listing Created Successfully**`);
-				await action.update({ embeds: [successEmbed], components: [] });
-			}
-		});
-
 		// eslint-disable-next-line no-restricted-syntax
-		for (const collector of Object.keys(collectors)) if (collector !== 'generatorPeriod' && collector !== 'generatorAmount') newex.collectVar(collectors[collector]);
-		return newex;
+		for (const collector of Object.keys(collectors)) if (collector !== 'generatorPeriod' && collector !== 'generatorAmount') node.collectVar(collectors[collector]);
+		return node;
 	};
 }

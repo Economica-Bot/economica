@@ -1,5 +1,5 @@
 import { interval } from '../../lib';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -9,7 +9,9 @@ export default class implements Command {
 		.setFormat('monthly')
 		.setExamples(['monthly']);
 
-	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
-		interval(ctx, 'monthly');
-	});
+	public execution = new ExecutionNode()
+		.setName('Monthly Fund Redeemer')
+		.setValue('monthly')
+		.setDescription((ctx) => ctx.variables.result)
+		.setExecution(async (ctx) => { ctx.variables.result = await interval(ctx, 'monthly'); });
 }

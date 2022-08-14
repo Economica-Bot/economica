@@ -1,78 +1,39 @@
 import { parseNumber, parseString } from '@adrastopoulos/number-parser';
+import { ChatInputCommandInteraction } from 'discord.js';
 
-import { Context } from '../structures';
+import { CommandError, Context } from '../structures';
 import { Moderation } from '../typings';
 
 export async function validateAmount(
-	ctx: Context,
+	ctx: Context<ChatInputCommandInteraction<'cached'>>,
 	target: 'wallet' | 'treasury',
-): Promise<{ validated: boolean; result?: number }> {
+) {
 	const { [target]: balance } = ctx.memberEntity;
 	const amount = ctx.interaction.options.getString('amount');
 	const result = amount === 'all' ? balance : parseString(amount);
-	if (!result && result !== 0) {
-		await ctx.embedify('error', 'user', 'Please enter a valid input.').send(true);
-		return { validated: false };
-	}
-	if (result < 1) {
-		await ctx.embedify('error', 'user', 'Input less than 1.').send(true);
-		return { validated: false };
-	}
-	if (result > balance) {
-		await ctx
-			.embedify('error', 'user', `Input exceeds current ${target}: ${ctx.guildEntity.currency}${parseNumber(balance)}`)
-			.send(true);
-		return { validated: false };
-	}
-	return { validated: true, result };
+	if (result === null || result === undefined) throw new CommandError('Please enter a valid input');
+	if (result < 1) throw new CommandError('Input less than 1.');
+	if (result > balance) throw new CommandError(`Input exceeds current ${target}: ${parseNumber(balance)}`);
+	return result;
 }
 
-export async function validateTarget(ctx: Context, memberRequired = true): Promise<boolean> {
+export async function validateTarget(ctx: Context<ChatInputCommandInteraction<'cached'>>, memberRequired = true) {
 	const type = ctx.interaction.commandName as Moderation;
 	const member = ctx.interaction.guild.members.me;
 	const target = ctx.interaction.options.getMember('target');
 	const targetUser = ctx.interaction.options.getUser('target');
-	if (!target && (!targetUser || memberRequired)) {
-		await ctx.embedify('error', 'user', 'Target not found.').send(true);
-		return false;
-	}
-	if (targetUser.id === ctx.interaction.user.id) {
-		await ctx.embedify('warn', 'user', 'You cannot target yourself.').send(true);
-		return false;
-	}
-	if (targetUser.id === ctx.client.user.id) {
-		await ctx.embedify('warn', 'user', 'You cannot target me.').send(true);
-		return false;
-	}
+	if (!target && (!targetUser || memberRequired)) throw new CommandError('Target not found');
+	if (targetUser.id === ctx.interaction.user.id) throw new CommandError('You cannot target yourself');
+	if (targetUser.id === ctx.interaction.client.user.id) throw new CommandError('You cannot target me');
 	if (target) {
-		if (target.roles.highest.position > member.roles.highest.position) {
-			await ctx.embedify('warn', 'user', "Target's roles are too high.").send(true);
-			return false;
-		}
-		if (type === 'ban' && !target.bannable) {
-			await ctx.embedify('warn', 'user', 'Target is unbannable.').send(true);
-			return false;
-		}
-		if (type === 'kick' && !target.kickable) {
-			await ctx.embedify('warn', 'user', 'Target is unkickable.').send(true);
-			return false;
-		}
+		if (target.roles.highest.position > member.roles.highest.position) throw new CommandError("Target's roles are too high");
+		if (type === 'ban' && !target.bannable) throw new CommandError('Target is unbannable');
+		if (type === 'kick' && !target.kickable) throw new CommandError('Target is unkickable');
 		if (type === 'timeout') {
-			if (!target.moderatable) {
-				await ctx.embedify('warn', 'user', 'Target is unmoderatable.').send(true);
-				return false;
-			}
-			if (target.communicationDisabledUntil && target.communicationDisabledUntil.getTime() > Date.now()) {
-				await ctx.embedify('warn', 'user', 'Target is already in a timeout.').send(true);
-				return false;
-			}
-		} else if (type === 'untimeout') {
-			if (!target.isCommunicationDisabled) {
-				await ctx.embedify('warn', 'user', 'Target is not in a timeout.').send(true);
-				return false;
-			}
-		}
+			if (!target.moderatable) throw new CommandError('Target is unmoderatable');
+			if (target.isCommunicationDisabled()) throw new CommandError('Target is already in a timeout');
+		} else if (type === 'untimeout' && !target.isCommunicationDisabled()) throw new CommandError('Target is not in a timeout');
 	}
 
-	return true;
+	return target;
 }

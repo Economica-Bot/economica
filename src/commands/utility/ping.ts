@@ -1,4 +1,6 @@
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { codeBlock } from 'discord.js';
+
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -9,12 +11,12 @@ export default class implements Command {
 		.setModule('UTILITY')
 		.setGlobal(true);
 
-	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
-		const now = Date.now();
-		await ctx.interaction.reply('Pinging...');
-		const api = Date.now() - now;
-		const ws = ctx.client.ws.ping;
-		const content = `\`\`\`ansi\n[1;34mGateway Ping [0m: [0;35m${ws}[0mms\n[1;34mRest Ping    [0m: [0;35m${api}[0mms\n\`\`\``;
-		await ctx.interaction.editReply({ embeds: [ctx.embedify('success', 'bot', content)] });
-	});
+	public execution = new ExecutionNode()
+		.setName('Ping Pong!')
+		.setValue('ping')
+		.setDescription((ctx) => codeBlock(`ansi\n[1;34mGateway Ping [0m: [0;35m${ctx.variables.ws}[0mms\n[1;34mRest Ping    [0m: [0;35m${ctx.variables.api}[0mms\n`))
+		.setExecution(async (ctx) => {
+			ctx.variables.api = Date.now() - ctx.interaction.createdTimestamp;
+			ctx.variables.ws = ctx.interaction.client.ws.ping;
+		});
 }

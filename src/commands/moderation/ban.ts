@@ -3,7 +3,7 @@ import ms from 'ms';
 
 import { Member, User } from '../../entities';
 import { recordInfraction, validateTarget } from '../../lib';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -24,30 +24,25 @@ export default class implements Command {
 			.setMaxValue(7)
 			.setRequired(false));
 
-	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
-		if (!(await validateTarget(ctx))) return;
-		const target = ctx.interaction.options.getMember('target');
-		await User.upsert({ id: target.id }, ['id']);
-		await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
-		const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
-		const duration = ctx.interaction.options.getString('duration') ?? 'Permanent';
-		const permanent = duration === 'Permanent';
-		const milliseconds = ms(duration);
-		const formattedDuration = milliseconds ? `**${ms(milliseconds)}**` : '**Permanent**';
-		const reason = ctx.interaction.options.getString('reason') ?? 'No reason provided';
-		const deleteMessageDays = ctx.interaction.options.getNumber('days') ?? 0;
-		await target.ban({ deleteMessageDays, reason });
-		await ctx.embedify('success', 'user', `Banned \`${target.user.tag}\` | Length: ${formattedDuration}`).send(true);
-		await recordInfraction(
-			ctx.client,
-			ctx.guildEntity,
-			targetEntity,
-			ctx.memberEntity,
-			'BAN',
-			reason,
-			true,
-			milliseconds,
-			permanent,
-		);
-	});
+	public execution = new ExecutionNode<'top'>()
+		.setName('Banning...')
+		.setValue('ban')
+		.setDescription((ctx) => `Banned \`${ctx.variables.target.user.tag}\` | Length: ${ctx.variables.formattedDuration}`)
+		.setExecution(async (ctx) => {
+			await validateTarget(ctx);
+			const target = ctx.interaction.options.getMember('target');
+			ctx.variables.target = target;
+			await User.upsert({ id: target.id }, ['id']);
+			await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
+			const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
+			const duration = ctx.interaction.options.getString('duration') ?? 'Permanent';
+			const permanent = duration === 'Permanent';
+			const milliseconds = ms(duration);
+			const formattedDuration = milliseconds ? `**${ms(milliseconds)}**` : '**Permanent**';
+			ctx.variables.formattedDuration = formattedDuration;
+			const reason = ctx.interaction.options.getString('reason') ?? 'No reason provided';
+			const deleteMessageDays = ctx.interaction.options.getNumber('days') ?? 0;
+			await target.ban({ deleteMessageDays, reason });
+			await recordInfraction(ctx.interaction.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'BAN', reason, true, milliseconds, permanent);
+		});
 }

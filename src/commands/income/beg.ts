@@ -1,7 +1,7 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 
 import { recordTransaction } from '../../lib';
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, CommandError, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -11,16 +11,22 @@ export default class implements Command {
 		.setFormat('beg')
 		.setExamples(['beg']);
 
-	public execute = new ExecutionBuilder().setExecution(async (ctx) => {
-		const { min, max, chance } = ctx.guildEntity.incomes.beg;
-		const amount = Math.ceil(Math.random() * (max - min) + min);
-		if (Math.random() * 100 > chance) {
-			await ctx.embedify('warn', 'user', 'You begged and earned nothing :cry:').send();
-			return;
-		}
-		await ctx
-			.embedify('success', 'user', `You begged and earned ${ctx.guildEntity.currency}${parseNumber(amount)}.`)
-			.send();
-		await recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'BEG', amount, 0);
-	});
+	public execution = new ExecutionNode()
+		.setName('Begging for money!')
+		.setValue(this.data.name)
+		.setDescription(this.data.description)
+		.setExecution(async (ctx) => {
+			const { min, max, chance } = ctx.guildEntity.incomes.beg;
+			const amount = Math.ceil(Math.random() * (max - min) + min);
+			ctx.variables.amount = amount;
+			if (Math.random() * 100 > chance) throw new CommandError('You begged and earned nothing :cry:');
+			await recordTransaction(ctx.interaction.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, 'BEG', amount, 0);
+		})
+		.setOptions((ctx) => [
+			new ExecutionNode()
+				.setName('Begging Success!')
+				.setValue('beg_result')
+				.setType('display')
+				.setDescription(`You begged and earned ${ctx.guildEntity.currency} \`${parseNumber(ctx.variables.amount)}\``),
+		]);
 }

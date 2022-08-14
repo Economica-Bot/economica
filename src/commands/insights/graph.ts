@@ -1,7 +1,7 @@
 import QuickChart from 'quickchart-js';
 import { Transaction } from '../../entities';
 
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
 
 export default class implements Command {
 	public data = new EconomicaSlashCommandBuilder()
@@ -11,12 +11,12 @@ export default class implements Command {
 		.setFormat('graph balance [user]')
 		.setExamples(['graph balance', 'graph balance @user']);
 
-	public execute = new ExecutionBuilder()
+	public execution = () => new ExecutionNode()
 		.setName('Graph')
 		.setValue('graph')
 		.setDescription('View economy statistics in a graph format.')
-		.setOptions([
-			new ExecutionBuilder()
+		.setOptions(() => [
+			new ExecutionNode()
 				.setName('Balance')
 				.setValue('balance')
 				.setDescription('View balance statistics')

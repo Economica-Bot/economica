@@ -5,5 +5,5 @@ export class Job {
 
 	public cooldown: number;
 
-	public execute: (client: Economica) => Promise<void>;
+	public execution: (client: Economica) => Promise<void>;
 }

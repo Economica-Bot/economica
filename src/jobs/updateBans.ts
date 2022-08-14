@@ -6,19 +6,17 @@ export class BansJob implements Job {
 
 	public cooldown = 1000 * 60;
 
-	public execute = async (client: Economica) => {
-		const now = new Date();
+	public execution = async (client: Economica) => {
 		const bans = await Infraction.find({
 			relations: ['guild', 'target', 'target.user'],
 			where: { type: 'BAN', active: true, permanent: false },
 		});
-		bans.forEach(async (ban) => {
-			if (ban.createdAt.getTime() + ban.duration < now.getTime()) {
+		bans
+			.filter((ban) => ban.createdAt.getTime() + ban.duration < Date.now())
+			.forEach(async (ban) => {
 				const guild = client.guilds.cache.get(ban.guild.id);
-				await guild.members.unban(ban.target.userId, 'Economica | Ban expired.');
-			}
-		});
-
-		await Infraction.update({ type: 'BAN', active: true, permanent: false }, { active: false, permanent: true });
+				await guild.members.unban(ban.target.userId, 'Economica | Ban expired.').catch(() => null);
+				await ban.save();
+			});
 	};
 }

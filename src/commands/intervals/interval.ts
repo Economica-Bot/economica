@@ -1,8 +1,8 @@
 import { parseString } from '@adrastopoulos/number-parser';
-import { PermissionFlagsBits } from 'discord.js';
+import { codeBlock, PermissionFlagsBits } from 'discord.js';
 import ms from 'ms';
 
-import { Command, EconomicaSlashCommandBuilder, ExecutionBuilder, VariableCollector } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode, VariableCollector } from '../../structures';
 import { IntervalCommand } from '../../typings';
 
 const collectors: Record<keyof IntervalCommand, (collector: VariableCollector) => VariableCollector> = {
@@ -34,51 +34,56 @@ export default class implements Command {
 		.setExamples(['interval view', 'interval edit daily 100'])
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild);
 
-	public execute = new ExecutionBuilder()
+	public execution = new ExecutionNode()
 		.setName('Interval')
 		.setValue('interval')
 		.setDescription('Manipulate interval commands')
-		.setOptions([
-			new ExecutionBuilder()
+		.setOptions(() => [
+			new ExecutionNode()
 				.setName('View')
-				.setValue('view')
+				.setValue('interval_view')
+				.setType('select')
 				.setDescription('View interval command information')
-				.setExecution(async (ctx, interaction) => {
-					const embed = ctx.embedify('info', 'guild', '**Interval Command Information**');
-					Object.entries(ctx.guildEntity.intervals).forEach((interval) => {
-						const description = Object.entries(interval[1]).map((prop) => `${prop[0]}: ${prop[1]}`);
-						embed.addFields([{ name: interval[0], value: `\`\`\`${description.join('\n')}\`\`\``, inline: true }]);
-					});
-					await interaction.update({ embeds: [embed], components: [] });
-				}),
-			new ExecutionBuilder()
+				.setOptions((ctx) => Object
+					.entries(ctx.guildEntity.intervals)
+					.map((interval) => new ExecutionNode()
+						.setName(interval[0])
+						.setValue(`interval_view_${interval[0]}`)
+						.setType('displayInline')
+						.setDescription(codeBlock(Object.entries(interval[1]).map((prop) => `${prop[0]}: ${prop[1]}`).join('\n'))))),
+			new ExecutionNode()
 				.setName('Edit')
-				.setValue('edit')
+				.setValue('interval_edit')
+				.setType('select')
+				.setPredicate((ctx) => ctx.interaction.member.permissions.has('Administrator'))
 				.setDescription('Edit interval command configurations')
-				.setPagination(
-					async (ctx) => Object.keys(ctx.guildEntity.intervals),
-					(cmd, ctx) => new ExecutionBuilder()
-						.setName(cmd)
-						.setValue(cmd)
-						.setDescription(`The \`${cmd}\` interval command`)
-						.setOptions(
-							Object.keys(ctx.guildEntity.intervals[cmd]).map((property: keyof IntervalCommand) => new ExecutionBuilder()
+				.setOptions(
+					async (ctx) => Object
+						.keys(ctx.guildEntity.intervals)
+						.map((cmd) => new ExecutionNode()
+							.setName(cmd)
+							.setValue(`interval_${cmd}`)
+							.setType('select')
+							.setDescription(`The \`${cmd}\` interval command`)
+							.setOptions(() => Object.keys(ctx.guildEntity.intervals[cmd]).map((property: keyof IntervalCommand) => new ExecutionNode()
 								.setName(property)
-								.setValue(property)
+								.setValue(`interval_${cmd}_${property}`)
+								.setType('select')
 								.setDescription(`The \`${property}\` property of \`${cmd}\``)
 								.collectVar(collectors[property])
 								.setExecution(async (ctx) => {
-									const res = this.execute.getVariable(property);
+									const res = ctx.variables[property];
 									ctx.guildEntity.intervals[cmd][property] = res;
 									await ctx.guildEntity.save();
-									return new ExecutionBuilder()
-										.setName('Success')
-										.setValue('success')
-										.setDescription(
-											`Successfully updated the \`${property}\` property to \`${res}\` on command \`${cmd}\`.`,
-										);
-								})),
-						),
+									ctx.variables.res = res;
+								})
+								.setOptions((ctx) => [
+									new ExecutionNode()
+										.setName('Update Success')
+										.setValue(`interval_edit_${cmd}_result`)
+										.setType('display')
+										.setDescription(`Successfully updated the \`${property}\` property to \`${ctx.variables.res}\` on command \`${cmd}\`.`),
+								])))),
 				),
 		]);
 }

@@ -5,7 +5,7 @@ import { DEPLOY_ALL_MODULES, DEPLOY_COMMANDS, DEVELOPMENT_GUILD_IDS } from '../c
 import { Economica, Event } from '../structures';
 import { defaultModulesObj } from '../typings';
 
-export class ReadyEvent implements Event {
+export default class implements Event<'ready'> {
 	public event = 'ready' as const;
 
 	public async execute(client: Economica) {
