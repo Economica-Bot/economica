@@ -1,5 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { ChatInputCommandInteraction, EmbedBuilder, MessageComponentInteraction, resolveColor } from 'discord.js';
+import qs from 'qs';
 
 import { Command } from '.';
 import { Guild, Member, User } from '../entities';
@@ -35,8 +36,8 @@ export class Context<T extends ChatInputCommandInteraction<'cached'> | MessageCo
 	public async init(): Promise<this> {
 		let commandName: string;
 		if (this.interaction.isChatInputCommand()) commandName = this.interaction.commandName;
-		else if (this.interaction.isButton()) [commandName] = JSON.parse(this.interaction.customId).key.split('_');
-		else if (this.interaction.isSelectMenu()) [commandName] = JSON.parse(this.interaction.values.at(0)).key.split('_');
+		else if (this.interaction.isButton()) [commandName] = qs.parse(this.interaction.customId).path.split('/');
+		else if (this.interaction.isSelectMenu()) [commandName] = qs.parse(this.interaction.values.at(0)).path.split('/');
 		const command = this.interaction.client.commands.get(commandName);
 		if (!command) throw new Error('There was an error while executing this command.');
 

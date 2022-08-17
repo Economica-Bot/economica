@@ -1,7 +1,7 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 
 import { CommandError, Context } from '../structures';
-import { TransactionString, Intervals } from '../typings';
+import { TransactionString, Intervals, Emojis } from '../typings';
 import { recordTransaction } from '.';
 
 const intervals: Record<keyof Intervals, TransactionString> = {
@@ -18,6 +18,6 @@ export async function interval(ctx: Context, type: keyof typeof intervals) {
 	else {
 		const { amount } = ctx.guildEntity.intervals[type];
 		recordTransaction(ctx.interaction.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, intervals[type], amount, 0);
-		return `You earned ${ctx.guildEntity.currency} \`${parseNumber(amount)}!\``;
+		return `${Emojis.TIME} You earned ${ctx.guildEntity.currency} \`${parseNumber(amount)}\`!`;
 	}
 }

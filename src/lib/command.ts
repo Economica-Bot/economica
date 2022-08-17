@@ -24,15 +24,15 @@ async function checkCooldown(ctx: Context<ChatInputCommandInteraction<'cached'>>
 
 export async function commandCheck(ctx: Context<ChatInputCommandInteraction<'cached'>>): Promise<boolean> {
 	const isDeveloper = DEVELOPER_IDS.includes(ctx.interaction.user.id);
-	if (!ctx.command.data.enabled) throw new CommandError('This command is disabled.');
-	if (!ctx.command.data.global && !ctx.interaction.inGuild()) throw new CommandError('This command may only be used within servers.');
+	if (!ctx.command.metadata.enabled) throw new CommandError('This command is disabled.');
+	if (!ctx.command.metadata.global && !ctx.interaction.inGuild()) throw new CommandError('This command may only be used within servers.');
 	if (!ctx.interaction.inGuild()) return true;
-	if (!ctx.command.data.clientPermissions.every((permission) => ctx.interaction.appPermissions.has(permission))) throw new CommandError('I am missing permissions.');
+	if (!ctx.command.metadata.clientPermissions.every((permission) => ctx.interaction.appPermissions.has(permission))) throw new CommandError('I am missing permissions.');
 	if (!isDeveloper || !DEV_COOLDOWN_EXEMPT) {
 		const valid = await checkCooldown(ctx);
 		if (!valid) throw new CommandError('This command is still under cooldown.');
 	}
-	if ((!isDeveloper || !DEV_MODULE_EXEMPT) && !ctx.guildEntity.modules[ctx.command.data.module].enabled) throw new CommandError(`The \`${ctx.command.data.module}\` module is not enabled in this server.`);
+	if ((!isDeveloper || !DEV_MODULE_EXEMPT) && !ctx.guildEntity.modules[ctx.command.metadata.module].enabled) throw new CommandError(`The \`${ctx.command.metadata.module}\` module is not enabled in this server.`);
 
 	return true;
 }

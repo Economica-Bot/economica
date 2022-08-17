@@ -14,10 +14,12 @@ import {
 	SelectMenuBuilder,
 	WebhookEditMessageOptions,
 } from 'discord.js';
+import { pathToRegexp } from 'path-to-regexp';
+import qs from 'qs';
 
 import { Command } from '../entities';
 import { commandCheck } from '../lib';
-import { CommandError, Context, Economica, Event, ExecutionNode } from '../structures';
+import { CommandError, Context, Economica, Event } from '../structures';
 import { Emojis, Icons, PAGINATION_LIMIT } from '../typings';
 
 export default class implements Event<'interactionCreate'> {
@@ -33,10 +35,13 @@ export default class implements Event<'interactionCreate'> {
 		} catch (err) {
 			assert(interaction.isRepliable());
 			let description: string;
-			if (err instanceof Error) {
+			if (err instanceof CommandError) {
+				description = err.toString();
+			} else if (err instanceof Error) {
 				client.log.error(err);
 				description = codeBlock('ts', err.toString());
-			} else if (err instanceof CommandError) description = err.toString();
+			}
+
 			const embed = new EmbedBuilder()
 				.setAuthor({ name: 'Error', iconURL: client.emojis.resolve(parseEmoji(Emojis.CROSS).id).url })
 				.setColor('Red')
@@ -49,14 +54,17 @@ export default class implements Event<'interactionCreate'> {
 	private async chatInputCommand(interaction: ChatInputCommandInteraction<'cached'>) {
 		const ctx = await new Context(interaction).init();
 		await commandCheck(ctx);
-		await this.executionHandler(ctx);
-		await Command.create({ member: ctx.memberEntity, command: ctx.interaction.commandName }).save();
+		try {
+			await this.executionHandler(ctx);
+		} finally {
+			await Command.create({ member: ctx.memberEntity, command: ctx.interaction.commandName }).save();
+		}
 	}
 
 	private async messageComponent(interaction: MessageComponentInteraction<'cached'>) {
 		let metadata: Record<string, any>;
-		if (interaction.isButton()) metadata = JSON.parse(interaction.customId);
-		else if (interaction.isSelectMenu()) metadata = JSON.parse(interaction.values.at(0));
+		if (interaction.isButton()) metadata = qs.parse(interaction.customId);
+		else if (interaction.isSelectMenu()) metadata = qs.parse(interaction.values.at(0));
 		if (metadata.user !== interaction.user.id) {
 			await interaction.deferUpdate();
 			return;
@@ -66,89 +74,108 @@ export default class implements Event<'interactionCreate'> {
 		await this.executionHandler(ctx);
 	}
 
-	private async findNode(ctx: Context, node: ExecutionNode, key: string): Promise<{ parent: ExecutionNode, node: ExecutionNode }> {
-		if (node.value === key) return { parent: null, node };
-		const options = node.resolver({});
-		for await (const option of options) {
-			if (option.value === key) return { parent: node, node: option };
-			const result = await this.findNode(ctx, option, key);
-			if (result.node) return result;
-		}
-
-		return { parent: null, node: null };
-	}
-
 	private async executionHandler(ctx: Context) {
-		const rawKey = (ctx.interaction.isButton()
+		const rawpath = (ctx.interaction.isButton()
 			? ctx.interaction.customId
 			: ctx.interaction.isSelectMenu()
 				? ctx.interaction.values[0]
 				: ctx.interaction.isChatInputCommand()
-					? JSON.stringify({ key: ctx.command.execution.value, index: 0, user: ctx.interaction.user.id })
+					? qs.stringify({ path: `${ctx.command.metadata.name}`, index: 0, user: ctx.interaction.user.id })
 					: null);
-		const metadata = JSON.parse(rawKey);
-		const { parent, node } = await this.findNode(ctx, ctx.command.execution, metadata.key);
+		const metadata = qs.parse(rawpath);
+		const { path, index: indexString } = metadata as { path: string, index: string };
+		const index = parseInt(indexString);
 
-		if (node.execution) await node.execution(ctx);
+		let match: RegExpExecArray;
+		const params = {};
+		const keys = [];
+		const layer = ctx.command.execution.stack.find((layer) => {
+			keys.length = 0;
+			const regex = pathToRegexp(`${ctx.command.metadata.name}${layer.path}`, keys);
+			match = regex.exec(path);
+			return !!match;
+		});
 
+		for (let i = 1; i < match.length; i++) {
+			const key = keys[i - 1];
+			const prop = key.name;
+			const val = match[i];
+			params[prop] = val;
+		}
+
+		const node = await layer.handle(ctx, params);
+
+		const embed = ctx
+			.embedify('info', 'user', node.description)
+			.setAuthor({ name: node.name });
 		const fields: APIEmbedField[] = [];
-		const select = new SelectMenuBuilder().setCustomId(node.value);
+		const select = new SelectMenuBuilder().setCustomId(ctx.command.metadata.name);
 		const buttons = new ActionRowBuilder<ButtonBuilder>();
 
-		const options = node.resolver(await node.data(ctx)) ?? [];
-		options.forEach((option) => {
-			const description = option.description instanceof Function ? option.description(ctx) : option.description;
-			if (option.type === 'button') {
-				buttons.components.push(new ButtonBuilder()
-					.setCustomId(JSON.stringify({ ...metadata, key: option.value, index: 0 }))
-					.setLabel(option.name)
-					.setStyle(ButtonStyle.Secondary));
-			} else if (option.type === 'display' || option.type === 'displayInline') {
-				fields.push({ name: option.name, value: description, inline: option.type === 'displayInline' });
+		node.options.forEach((option) => {
+			if (option[0] === 'button') {
+				buttons.components.push(
+					new ButtonBuilder()
+						.setCustomId(qs.stringify({ path: `${ctx.command.metadata.name}${option[1]}`, index: 0, user: ctx.interaction.user.id }))
+						.setLabel(option[2])
+						.setStyle(ButtonStyle.Success),
+				);
+			} else if (option[0] === 'display') {
+				fields.push({ name: option[1], value: option[2] });
+			} else if (option[0] === 'displayInline') {
+				fields.push({ name: option[1], value: option[2], inline: true });
+			} else if (option[0] === 'back') {
+				buttons.components.unshift(
+					new ButtonBuilder()
+						.setCustomId(qs.stringify({ path: `${ctx.command.metadata.name}${option[1]}`, index: 0, user: ctx.interaction.user.id }))
+						.setLabel('Back')
+						.setStyle(ButtonStyle.Secondary)
+						.setEmoji({ id: parseEmoji(Emojis.TRIANGLE_UP).id }),
+				);
+			} else if (option[0] === 'image') {
+				embed.setImage(option[1]);
 			}
 		});
 
-		if (parent && node.returnable) {
-			buttons.components.unshift(new ButtonBuilder()
-				.setCustomId(JSON.stringify({ ...metadata, key: node.destination ?? parent.value, index: 0 }))
-				.setLabel('Back')
-				.setStyle(ButtonStyle.Secondary)
-				.setEmoji({ id: parseEmoji(Emojis.TRIANGLE_UP).id }));
-		}
-
 		let pages: number;
-		options
-			.filter((option) => option.type === 'select' || option.type === 'displayNumbered')
+		node.options
+			.filter((option) => option[0] === 'select' || option[0] === 'displayNumbered')
 			.map((v, _, arr) => { pages = Math.ceil(arr.length / PAGINATION_LIMIT); return v; })
-			.slice(metadata.index * PAGINATION_LIMIT, metadata.index * PAGINATION_LIMIT + PAGINATION_LIMIT)
+			.slice(index * PAGINATION_LIMIT, index * PAGINATION_LIMIT + PAGINATION_LIMIT)
 			.forEach((option, index) => {
-				const description = typeof option.description === 'function' ? option.description(ctx) : option.description;
-				fields.push({ name: `${Icons[index]} ${option.name}`, value: description });
-				if (option.type === 'select') select.addOptions({ label: option.name, value: JSON.stringify({ ...metadata, key: option.value, index: 0 }), emoji: { id: parseEmoji(Icons[index]).id } });
+				if (option[0] === 'select') {
+					fields.push({ name: `${Icons[index]} ${option[2]}`, value: option[3] });
+					select.addOptions({
+						label: option[2],
+						value: qs.stringify({ path: `${ctx.command.metadata.name}${option[1]}`, index: 0, user: ctx.interaction.user.id }),
+						emoji: {
+							id: parseEmoji(Icons[index]).id,
+						},
+					});
+				} else if (option[0] === 'displayNumbered') {
+					fields.push({ name: `${Icons[index]} ${option[1]}`, value: option[2] });
+				}
 			});
 
-		const embed = ctx
-			.embedify('info', 'user', typeof node.description === 'function' ? node.description(ctx) : node.description)
-			.setAuthor({ name: node.name })
-			.addFields(fields);
+		embed.addFields(fields);
 		if (pages > 1) {
-			embed.setFooter({ text: `Page ${metadata.index + 1} / ${pages}` });
+			embed.setFooter({ text: `Page ${index + 1} / ${pages}` });
 			buttons.addComponents([
 				new ButtonBuilder()
-					.setCustomId(JSON.stringify({ ...metadata, index: metadata.index - 1 }))
+					.setCustomId(qs.stringify({ ...metadata, index: index - 1 }))
 					.setLabel('Previous')
-					.setDisabled(metadata.index <= 0)
+					.setDisabled(index <= 0)
 					.setEmoji({ id: parseEmoji(Emojis.PREVIOUS).id })
 					.setStyle(ButtonStyle.Primary),
 				new ButtonBuilder()
-					.setCustomId(JSON.stringify({ ...metadata, index: metadata.index + 1 }))
+					.setCustomId(qs.stringify({ ...metadata, index: index + 1 }))
 					.setLabel('Next')
-					.setDisabled(metadata.index + 1 >= pages)
+					.setDisabled(index + 1 >= pages)
 					.setEmoji({ id: parseEmoji(Emojis.NEXT).id })
 					.setStyle(ButtonStyle.Primary),
 			]);
-			if (metadata.index > 0) fields.unshift({ name: `${Emojis.PREVIOUS} Previous`, value: 'Use `previous` to go to the previous page.' });
-			if (metadata.index + 1 < pages) fields.push({ name: `${Emojis.NEXT} Next`, value: 'Use `next` to go to the next page.' });
+			if (index > 0) fields.unshift({ name: `${Emojis.PREVIOUS} Previous`, value: 'Use `previous` to go to the previous page.' });
+			if (index + 1 < pages) fields.push({ name: `${Emojis.NEXT} Next`, value: 'Use `next` to go to the next page.' });
 		}
 
 		const components: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
@@ -157,10 +184,10 @@ export default class implements Event<'interactionCreate'> {
 
 		const payload: WebhookEditMessageOptions = { embeds: [embed], components };
 
-		if (ctx.interaction.isChatInputCommand()) await ctx.interaction.reply({ ...payload, fetchReply: true });
+		if (ctx.interaction.isChatInputCommand()) await ctx.interaction.reply(payload);
 		else if (ctx.interaction.isButton() || ctx.interaction.isSelectMenu()) {
 			if (ctx.interaction.replied) await ctx.interaction.editReply(payload);
-			else await ctx.interaction.update({ ...payload, fetchReply: true });
+			else await ctx.interaction.update(payload);
 		}
 	}
 }

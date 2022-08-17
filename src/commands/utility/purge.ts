@@ -1,9 +1,9 @@
 import { ChannelType, PermissionFlagsBits } from 'discord.js';
 
-import { Command, CommandError, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
+import { Command, CommandError, EconomicaSlashCommandBuilder, ExecutionNode, Router } from '../../structures';
 
 export default class implements Command {
-	public data = new EconomicaSlashCommandBuilder()
+	public metadata = new EconomicaSlashCommandBuilder()
 		.setName('purge')
 		.setDescription('Delete messages in a channel')
 		.setModule('UTILITY')
@@ -23,16 +23,15 @@ export default class implements Command {
 			.setMaxValue(100)
 			.setRequired(false));
 
-	public execution = new ExecutionNode<'top'>()
-		.setName('Purging messages...')
-		.setValue('purge')
-		.setDescription((ctx) => `Deleted \`${ctx.variables.deleted}\` messages.`)
-		.setExecution(async (ctx) => {
+	public execution = new Router()
+		.get('', async (ctx) => {
 			const channel = ctx.interaction.options.getChannel('channel') ?? ctx.interaction.channel;
 			if (!channel.permissionsFor(ctx.interaction.guild.members.me).has(PermissionFlagsBits.ManageMessages)) throw new CommandError('I need `MANAGE_MESSAGES` in that channel.');
 			if (channel.type !== ChannelType.GuildText) throw new CommandError('Invalid channel.');
 			const amount = ctx.interaction.options.getInteger('amount') ?? 100;
 			const deleted = await channel.bulkDelete(amount, true);
-			ctx.variables.deleted = deleted.size;
+			return new ExecutionNode()
+				.setName('Purging messages...')
+				.setDescription(`Deleted \`${deleted.size}\` messages.`);
 		});
 }

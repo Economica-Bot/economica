@@ -180,12 +180,12 @@ Object.values(files).forEach((Constructor) => {
 	const command = new Constructor();
 
 	// Validation
-	if (!command.data.module) throw new Error(`Command ${command.data.name} missing module!`);
-	if (!command.data.format) throw new Error(`Command ${command.data.name} missing format!`);
-	if (!command.data.examples) throw new Error(`Command ${command.data.name} missing examples!`);
+	if (!command.metadata.module) throw new Error(`Command ${command.metadata.name} missing module!`);
+	if (!command.metadata.format) throw new Error(`Command ${command.metadata.name} missing format!`);
+	if (!command.metadata.examples) throw new Error(`Command ${command.metadata.name} missing examples!`);
 
-	bot.log.debug(`Registering command ${command.data.name}`);
-	bot.commands.set(command.data.name, command);
+	bot.log.debug(`Registering command ${command.metadata.name}`);
+	bot.commands.set(command.metadata.name, command);
 });
 
 bot.log.info('Commands registered');

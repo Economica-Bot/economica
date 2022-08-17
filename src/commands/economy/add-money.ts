@@ -1,12 +1,12 @@
-import { parseString } from '@adrastopoulos/number-parser';
+import { parseNumber, parseString } from '@adrastopoulos/number-parser';
 import { PermissionFlagsBits } from 'discord.js';
 
 import { Member, User } from '../../entities';
 import { recordTransaction } from '../../lib';
-import { Command, CommandError, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
+import { Command, CommandError, EconomicaSlashCommandBuilder, ExecutionNode, Router } from '../../structures';
 
 export default class implements Command {
-	public data = new EconomicaSlashCommandBuilder()
+	public metadata = new EconomicaSlashCommandBuilder()
 		.setName('add-money')
 		.setDescription('Manipulate balances')
 		.setModule('ECONOMY')
@@ -21,11 +21,8 @@ export default class implements Command {
 			.setRequired(true)
 			.addChoices({ name: 'Wallet', value: 'wallet' }, { name: 'Treasury', value: 'treasury' }));
 
-	public execution = new ExecutionNode<'top'>()
-		.setName('Adding Money...')
-		.setType('top')
-		.setDescription('Money added successfully!')
-		.setExecution(async (ctx) => {
+	public execution = new Router()
+		.get('', async (ctx) => {
 			const balance = ctx.interaction.options.getString('balance');
 			const amount = parseString(ctx.interaction.options.getString('amount'));
 			if (!amount) throw new CommandError(`Invalid amount: \`${amount}\``);
@@ -36,5 +33,9 @@ export default class implements Command {
 			await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
 			const targetEntity = await Member.findOneBy({ userId: target.id, guildId: ctx.guildEntity.id });
 			await recordTransaction(ctx.interaction.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'ADD_MONEY', wallet, treasury);
+
+			return new ExecutionNode()
+				.setName('Adding Money...')
+				.setDescription(`Added ${ctx.guildEntity.currency} \`${parseNumber(amount)}\` to <@!${target.id}>'s \`${balance}\``);
 		});
 }

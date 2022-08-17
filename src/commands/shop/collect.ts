@@ -2,22 +2,19 @@ import { parseNumber } from '@adrastopoulos/number-parser';
 
 import { Item } from '../../entities';
 import { recordTransaction } from '../../lib';
-import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode, Router } from '../../structures';
 import { Emojis } from '../../typings';
 
 export default class implements Command {
-	public data = new EconomicaSlashCommandBuilder()
+	public metadata = new EconomicaSlashCommandBuilder()
 		.setName('collect')
 		.setDescription('Collect all money from generators.')
 		.setModule('SHOP')
 		.setFormat('collect')
 		.setExamples(['collect']);
 
-	public execution = new ExecutionNode()
-		.setName('Collecting generator funds...')
-		.setValue('collect')
-		.setDescription((ctx) => ctx.variables.result)
-		.setExecution(async (ctx) => {
+	public execution = new Router()
+		.get('', async (ctx) => {
 			const items = await Item.find({
 				relations: ['listing'],
 				where: {
@@ -46,6 +43,8 @@ export default class implements Command {
 					)}:R>`)}`;
 			}
 
-			ctx.variables.result = result;
+			return new ExecutionNode()
+				.setName('Collecting Generator Funds...')
+				.setDescription(result);
 		});
 }

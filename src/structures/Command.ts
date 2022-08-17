@@ -1,98 +1,71 @@
 /* eslint-disable max-classes-per-file */
 import { ChatInputCommandInteraction, MessageComponentInteraction } from 'discord.js';
+import { RouteParameters } from 'express-serve-static-core';
 
 import { EconomicaSlashCommandBuilder } from '.';
 import { Context } from './Context';
 
-/* eslint-disable max-classes-per-file */
+export class Layer {
+	path: string;
 
-export class Command {
-	public data: Partial<EconomicaSlashCommandBuilder>;
+	handle: (ctx: Context, params: Object) => ExecutionNode | Promise<ExecutionNode>;
 
-	public execution: ExecutionNode;
+	constructor(path: string, handle: (ctx: Context, params: Object) => ExecutionNode | Promise<ExecutionNode>) {
+		this.path = path;
+		this.handle = handle;
+	}
 }
 
-type ExecutionNodeType = 'top' | 'select' | 'display' | 'displayInline' | 'displayNumbered' | 'button' | 'back';
-type ContextType<T> = Context<T extends 'top' ? ChatInputCommandInteraction<'cached'> : MessageComponentInteraction<'cached'>>;
+export class Router {
+	stack: Layer[] = [];
 
-export class ExecutionNode<T extends ExecutionNodeType = ExecutionNodeType> {
-	public name: string;
-
-	public data: (ctx: ContextType<T>) => Promise<unknown>;
-
-	public resolver: (args: unknown) => ExecutionNode[];
-
-	public value: string;
-
-	public type: ExecutionNodeType;
-
-	public description: string | ((ctx: Context) => string);
-
-	public returnable: boolean = true;
-
-	public destination: string;
-
-	public endpoints: Map<string, ExecutionNodeType> = new Map();
-
-	addEndpoint(destination: string, type: ExecutionNodeType) {
-		this.endpoints.set(destination, type);
+	get<Route extends string, P = RouteParameters<Route>>(
+		path: Route,
+		handle: (ctx: Route extends '' ? ContextType<'top'> : ContextType<'sub'>, params: P) => ExecutionNode | Promise<ExecutionNode>,
+	): this {
+		const layer = new Layer(path, handle);
+		this.stack.push(layer);
 		return this;
 	}
+}
 
-	public predicate: (ctx: ContextType<T>) => boolean = () => true;
+export class Command {
+	public metadata: Partial<EconomicaSlashCommandBuilder>;
 
-	public options: (ctx: ContextType<T>) => ExecutionNode[] | Promise<ExecutionNode[]>;
+	public execution: Router;
+}
 
-	public execution: (ctx: ContextType<T>) => Promise<void> | void;
+export type ExecutionNodeType = 'top' | 'select' | 'display' | 'displayInline' | 'displayNumbered' | 'button' | 'back' | 'image';
+type ContextType<T extends 'top' | 'sub'> = Context<T extends 'top' ? ChatInputCommandInteraction<'cached'> : MessageComponentInteraction<'cached'>>;
+
+type OptionType<T extends ExecutionNodeType>
+	= T extends 'back' | 'image'
+		? readonly [T, string]
+		: T extends 'button'
+			? readonly [T, string, string]
+			: T extends 'display' | 'displayInline' | 'displayNumbered'
+				? readonly [T, string, string]
+				: readonly [T, string, string, string];
+
+export class ExecutionNode {
+	public name: string;
+
+	public description: string;
+
+	public options: OptionType<ExecutionNodeType>[] = [];
 
 	public setName(name: string) {
 		this.name = name;
 		return this;
 	}
 
-	public setValue(value: string) {
-		this.value = value;
-		return this;
-	}
-
-	public setType(type: ExecutionNodeType) {
-		this.type = type;
-		return this;
-	}
-
-	public setDescription(description: typeof this.description) {
+	public setDescription(description: string) {
 		this.description = description;
 		return this;
 	}
 
-	public setReturnable(returnable: boolean = true) {
-		this.returnable = returnable;
-		return this;
-	}
-
-	public setDestination(destination: string) {
-		this.destination = destination;
-		return this;
-	}
-
-	public setPredicate(predicate: typeof this.predicate) {
-		this.predicate = predicate;
-		return this;
-	}
-
-	public setOptions(options: typeof this.options) {
-		this.options = options;
-		return this;
-	}
-
-	public setPagination<S>(data: (ctx: ContextType<T>) => Promise<S>, resolver: (args: S) => ExecutionNode[]) {
-		this.data = data;
-		this.resolver = resolver;
-		return this;
-	}
-
-	public setExecution(input: typeof this.execution) {
-		this.execution = input;
+	public setOptions(...args: OptionType<ExecutionNodeType>[]) {
+		this.options = args;
 		return this;
 	}
 }

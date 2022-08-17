@@ -2,7 +2,7 @@ import { Awaitable, codeBlock, Message, MessageComponentInteraction } from 'disc
 
 import { CommandError, Context } from '../structures';
 
-export class VariableCollector<T> {
+export class VariableCollector<T extends any = any> {
 	property: string;
 
 	prompt: string;
@@ -33,7 +33,7 @@ export class VariableCollector<T> {
 		return this;
 	}
 
-	setSkippable(skippable: boolean) {
+	setSkippable(skippable: boolean = true) {
 		this.skippable = skippable;
 		return this;
 	}

@@ -1,17 +1,19 @@
 import { interval } from '../../lib';
-import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode, Router } from '../../structures';
 
 export default class implements Command {
-	public data = new EconomicaSlashCommandBuilder()
+	public metadata = new EconomicaSlashCommandBuilder()
 		.setName('hourly')
 		.setDescription('Earn funds on a hourly basis')
 		.setModule('INTERVAL')
 		.setFormat('hourly')
 		.setExamples(['hourly']);
 
-	public execution = new ExecutionNode()
-		.setName('Hourly Fund Redeemer')
-		.setValue('hourly')
-		.setDescription((ctx) => ctx.variables.result)
-		.setExecution(async (ctx) => { ctx.variables.result = await interval(ctx, 'hourly'); });
+	public execution = new Router()
+		.get('', async (ctx) => {
+			const result = await interval(ctx, 'hourly');
+			return new ExecutionNode()
+				.setName('Hourly Fund Redeemer')
+				.setDescription(result);
+		});
 }

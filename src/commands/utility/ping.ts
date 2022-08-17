@@ -1,9 +1,9 @@
 import { codeBlock } from 'discord.js';
 
-import { Command, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode, Router } from '../../structures';
 
 export default class implements Command {
-	public data = new EconomicaSlashCommandBuilder()
+	public metadata = new EconomicaSlashCommandBuilder()
 		.setName('ping')
 		.setDescription("Get Economica's latency")
 		.setFormat('ping')
@@ -11,12 +11,8 @@ export default class implements Command {
 		.setModule('UTILITY')
 		.setGlobal(true);
 
-	public execution = new ExecutionNode()
-		.setName('Ping Pong!')
-		.setValue('ping')
-		.setDescription((ctx) => codeBlock(`ansi\n[1;34mGateway Ping [0m: [0;35m${ctx.variables.ws}[0mms\n[1;34mRest Ping    [0m: [0;35m${ctx.variables.api}[0mms\n`))
-		.setExecution(async (ctx) => {
-			ctx.variables.api = Date.now() - ctx.interaction.createdTimestamp;
-			ctx.variables.ws = ctx.interaction.client.ws.ping;
-		});
+	public execution = new Router()
+		.get('', (ctx) => new ExecutionNode()
+			.setName('Ping Pong!')
+			.setDescription(codeBlock('ansi', `[1;34mGateway Ping [0m: [0;35m${ctx.interaction.client.ws.ping}[0mms\n[1;34mRest Ping    [0m: [0;35m${Date.now() - ctx.interaction.createdTimestamp}[0mms\n`)));
 }

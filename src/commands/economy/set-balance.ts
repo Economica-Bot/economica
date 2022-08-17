@@ -3,10 +3,10 @@ import { PermissionFlagsBits } from 'discord.js';
 
 import { Member, User } from '../../entities';
 import { recordTransaction } from '../../lib';
-import { Command, CommandError, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
+import { Command, CommandError, EconomicaSlashCommandBuilder, ExecutionNode, Router } from '../../structures';
 
 export default class implements Command {
-	public data = new EconomicaSlashCommandBuilder()
+	public metadata = new EconomicaSlashCommandBuilder()
 		.setName('set-balance')
 		.setDescription('Set a balance')
 		.setModule('ECONOMY')
@@ -21,11 +21,8 @@ export default class implements Command {
 			.setRequired(true)
 			.addChoices({ name: 'wallet', value: 'wallet' }, { name: 'treasury', value: 'treasury' }));
 
-	public execution = new ExecutionNode<'top'>()
-		.setName('Setting Balance')
-		.setValue('set-balance')
-		.setDescription((ctx) => `Set <@${ctx.variables.target.id}>'s \`${ctx.variables.balance}\` to ${ctx.guildEntity.currency} \`${parseNumber(ctx.variables.amount)}\`.`)
-		.setExecution(async (ctx) => {
+	public execution = new Router()
+		.get('', async (ctx) => {
 			const target = ctx.interaction.options.getMember('user');
 			await User.upsert({ id: target.id }, ['id']);
 			await Member.upsert({ userId: target.id, guildId: ctx.guildEntity.id }, ['userId', 'guildId']);
@@ -38,5 +35,9 @@ export default class implements Command {
 			const treasury = balance === 'treasury' ? difference : 0;
 			if (!amount) throw new CommandError('Invalid amount submitted.');
 			await recordTransaction(ctx.interaction.client, ctx.guildEntity, targetEntity, ctx.memberEntity, 'SET_MONEY', wallet, treasury);
+
+			return new ExecutionNode()
+				.setName('Setting balance...')
+				.setDescription(`Set ${target}'s \`${balance}\` to ${ctx.guildEntity.currency} \`${parseNumber(amount)}\`.`);
 		});
 }

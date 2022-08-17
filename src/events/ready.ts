@@ -25,8 +25,8 @@ export default class implements Event<'ready'> {
 		const defaultCommandData: ApplicationCommandDataResolvable[] = [];
 		const specialCommandData: ApplicationCommandDataResolvable[] = [];
 		client.commands.forEach((command) => {
-			if (defaultModulesObj[command.data.module].type === 'DEFAULT') defaultCommandData.push(command.data.toJSON());
-			else specialCommandData.push(command.data.toJSON());
+			if (defaultModulesObj[command.metadata.module].type === 'DEFAULT') defaultCommandData.push(command.metadata.toJSON());
+			else specialCommandData.push(command.metadata.toJSON());
 		});
 
 		DEVELOPMENT_GUILD_IDS.forEach(async (id) => {

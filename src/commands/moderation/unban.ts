@@ -2,10 +2,11 @@ import { PermissionFlagsBits } from 'discord.js';
 
 import { Infraction } from '../../entities';
 import { validateTarget } from '../../lib';
-import { Command, CommandError, EconomicaSlashCommandBuilder, ExecutionNode } from '../../structures';
+import { Command, CommandError, EconomicaSlashCommandBuilder, ExecutionNode, Router } from '../../structures';
+import { Emojis } from '../../typings';
 
 export default class implements Command {
-	public data = new EconomicaSlashCommandBuilder()
+	public metadata = new EconomicaSlashCommandBuilder()
 		.setName('unban')
 		.setDescription('Unban a user')
 		.setModule('MODERATION')
@@ -16,11 +17,8 @@ export default class implements Command {
 		.addUserOption((option) => option.setName('target').setDescription('Specify a target').setRequired(true))
 		.addStringOption((option) => option.setName('string').setDescription('Specify a reason'));
 
-	public execution = new ExecutionNode<'top'>()
-		.setName('Unbanning...')
-		.setDescription('Remove a user\'s ban')
-		.setValue('unban')
-		.setExecution(async (ctx) => {
+	public execution = new Router()
+		.get('', async (ctx) => {
 			await validateTarget(ctx, false);
 			const target = ctx.interaction.options.getMember('target');
 			const reason = ctx.interaction.options.getString('reason', false) || 'No reason provided';
@@ -31,11 +29,8 @@ export default class implements Command {
 				{ target: { userId: target.id, guildId: target.guild.id }, type: 'BAN', active: true },
 				{ active: false },
 			);
-		})
-		.setOptions((ctx) => [
-			new ExecutionNode()
-				.setName('Unban Successful')
-				.setType('display')
-				.setDescription(`Unbanned \`${ctx.variables.target.user.tag}\``),
-		]);
+			return new ExecutionNode()
+				.setName('Unbanning...')
+				.setDescription(`${Emojis.CHECK} Unbanned ${target}`);
+		});
 }

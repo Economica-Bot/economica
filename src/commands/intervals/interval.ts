@@ -2,10 +2,11 @@ import { parseString } from '@adrastopoulos/number-parser';
 import { codeBlock, PermissionFlagsBits } from 'discord.js';
 import ms from 'ms';
 
-import { Command, EconomicaSlashCommandBuilder, ExecutionNode, VariableCollector } from '../../structures';
-import { IntervalCommand } from '../../typings';
+import { VariableCollector } from '../../lib';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode, Router } from '../../structures';
+import { Emojis, IntervalCommand } from '../../typings';
 
-const collectors: Record<keyof IntervalCommand, (collector: VariableCollector) => VariableCollector> = {
+const collectors: Record<keyof IntervalCommand, (collector: VariableCollector<any>) => VariableCollector<any>> = {
 	amount: (collector) => collector
 		.setProperty('amount')
 		.setPrompt('The amount of money received upon command usage.')
@@ -26,7 +27,7 @@ const collectors: Record<keyof IntervalCommand, (collector: VariableCollector) =
 };
 
 export default class implements Command {
-	public data = new EconomicaSlashCommandBuilder()
+	public metadata = new EconomicaSlashCommandBuilder()
 		.setName('interval')
 		.setDescription('Manage the interval commands')
 		.setModule('INTERVAL')
@@ -34,56 +35,58 @@ export default class implements Command {
 		.setExamples(['interval view', 'interval edit daily 100'])
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild);
 
-	public execution = new ExecutionNode()
-		.setName('Interval')
-		.setValue('interval')
-		.setDescription('Manipulate interval commands')
-		.setOptions(() => [
-			new ExecutionNode()
-				.setName('View')
-				.setValue('interval_view')
-				.setType('select')
-				.setDescription('View interval command information')
-				.setOptions((ctx) => Object
-					.entries(ctx.guildEntity.intervals)
-					.map((interval) => new ExecutionNode()
-						.setName(interval[0])
-						.setValue(`interval_view_${interval[0]}`)
-						.setType('displayInline')
-						.setDescription(codeBlock(Object.entries(interval[1]).map((prop) => `${prop[0]}: ${prop[1]}`).join('\n'))))),
-			new ExecutionNode()
-				.setName('Edit')
-				.setValue('interval_edit')
-				.setType('select')
-				.setPredicate((ctx) => ctx.interaction.member.permissions.has('Administrator'))
-				.setDescription('Edit interval command configurations')
+	public execution = new Router()
+		.get('', () => new ExecutionNode()
+			.setName('Interval')
+			.setDescription('View and manipulate interval commands')
+			.setOptions(
+				['select', '/view', 'View', 'View interval command settings'],
+				['select', '/edit', 'Edit', 'Edit interval command settings'],
+			))
+		.get('/view', (ctx) => new ExecutionNode()
+			.setName('View')
+			.setDescription('Viewing interval command configurations')
+			.setOptions(
+				...Object
+					.keys(ctx.guildEntity.intervals)
+					.map((interval) => [
+						'displayInline',
+						interval,
+						codeBlock(Object.entries(ctx.guildEntity.intervals[interval])
+							.map((prop) => `${prop[0]}: ${prop[1]}`)
+							.join('\n')),
+					] as const),
+				['back', ''],
+			))
+		.get('/edit', (ctx) => new ExecutionNode()
+			.setName('Edit')
+			.setDescription('Editing interval command configurations')
+			.setOptions(
+				...Object
+					.keys(ctx.guildEntity.intervals)
+					.map((cmd) => ['select', `/edit/${cmd}`, cmd, `The \`${cmd}\` interval command`] as const),
+				['back', ''],
+			))
+		.get('/edit/:command', (ctx, params) => {
+			const { command } = params;
+			return new ExecutionNode()
+				.setName(command)
+				.setDescription(`Editing the \`${command}\` interval command`)
 				.setOptions(
-					async (ctx) => Object
-						.keys(ctx.guildEntity.intervals)
-						.map((cmd) => new ExecutionNode()
-							.setName(cmd)
-							.setValue(`interval_${cmd}`)
-							.setType('select')
-							.setDescription(`The \`${cmd}\` interval command`)
-							.setOptions(() => Object.keys(ctx.guildEntity.intervals[cmd]).map((property: keyof IntervalCommand) => new ExecutionNode()
-								.setName(property)
-								.setValue(`interval_${cmd}_${property}`)
-								.setType('select')
-								.setDescription(`The \`${property}\` property of \`${cmd}\``)
-								.collectVar(collectors[property])
-								.setExecution(async (ctx) => {
-									const res = ctx.variables[property];
-									ctx.guildEntity.intervals[cmd][property] = res;
-									await ctx.guildEntity.save();
-									ctx.variables.res = res;
-								})
-								.setOptions((ctx) => [
-									new ExecutionNode()
-										.setName('Update Success')
-										.setValue(`interval_edit_${cmd}_result`)
-										.setType('display')
-										.setDescription(`Successfully updated the \`${property}\` property to \`${ctx.variables.res}\` on command \`${cmd}\`.`),
-								])))),
-				),
-		]);
+					...Object
+						.keys(ctx.guildEntity.intervals[command])
+						.map((prop) => ['select', `/edit/${command}/${prop}`, prop, `The \`${prop}\` property of \`${command}\``] as const),
+					['back', '/edit'],
+				);
+		})
+		.get('/edit/:command/:property', async (ctx, params) => {
+			const { command, property } = params;
+			const value = await collectors[property](new VariableCollector()).execute(ctx);
+			ctx.guildEntity.intervals[command][property] = value;
+			await ctx.guildEntity.save();
+			return new ExecutionNode()
+				.setName('Update Success')
+				.setDescription(`${Emojis.CHECK} **Successfully updated the \`${property}\` property to \`${ctx.guildEntity.intervals[command][property]}\` on command \`${command}\`.**`)
+				.setOptions(['back', `/edit/${command}`]);
+		});
 }

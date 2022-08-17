@@ -22,7 +22,7 @@ router.use('/:guildId', async (req, res, next) => {
 	next();
 });
 
-router.get('/:guildId', async (_req, res) => {
+router.get('/:guildId', async (req, res) => {
 	res.send(res.locals.guild);
 });
 

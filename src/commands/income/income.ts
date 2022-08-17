@@ -2,10 +2,11 @@ import { parseString } from '@adrastopoulos/number-parser';
 import { codeBlock } from 'discord.js';
 import ms from 'ms';
 
-import { Command, EconomicaSlashCommandBuilder, ExecutionNode, VariableCollector } from '../../structures';
+import { VariableCollector } from '../../lib';
+import { Command, EconomicaSlashCommandBuilder, ExecutionNode, Router } from '../../structures';
 import { Emojis, IncomeCommand } from '../../typings';
 
-const collectors: Record<keyof IncomeCommand, (collector: VariableCollector) => VariableCollector> = {
+const collectors: Record<keyof IncomeCommand, (collector: VariableCollector<any>) => VariableCollector<any>> = {
 	chance: (collector) => collector
 		.setProperty('chance')
 		.setPrompt('Specify the success chance of this command.')
@@ -45,7 +46,7 @@ const collectors: Record<keyof IncomeCommand, (collector: VariableCollector) => 
 };
 
 export default class implements Command {
-	public data = new EconomicaSlashCommandBuilder()
+	public metadata = new EconomicaSlashCommandBuilder()
 		.setName('income')
 		.setDescription('Manipulate income commands')
 		.setModule('INCOME')
@@ -57,58 +58,58 @@ export default class implements Command {
 			'income edit beg cooldown: 5m',
 		]);
 
-	public execution = new ExecutionNode()
-		.setName('Income')
-		.setValue('income')
-		.setDescription('View and manipulate income commands')
-		.setOptions(() => [
-			new ExecutionNode()
-				.setName('View')
-				.setValue('income_view')
-				.setType('select')
-				.setDescription('View income command information')
-				.setOptions((ctx) => Object
+	public execution = new Router()
+		.get('', () => new ExecutionNode()
+			.setName('Income')
+			.setDescription('View and manipulate income commands')
+			.setOptions(
+				['select', '/view', 'View', 'View income command settings'],
+				['select', '/edit', 'Edit', 'Edit income command settings'],
+			))
+		.get('/view', (ctx) => new ExecutionNode()
+			.setName('View')
+			.setDescription('Viewing income command configurations')
+			.setOptions(
+				...Object
 					.keys(ctx.guildEntity.incomes)
-					.map((cmd) => new ExecutionNode()
-						.setName(cmd)
-						.setValue(`income_view_${cmd}`)
-						.setType('displayInline')
-						.setDescription(
-							codeBlock(Object.entries(ctx.guildEntity.incomes[cmd])
-								.map((prop) => `${prop[0]}: ${prop[1]}`)
-								.join('\n')),
-						))),
-			new ExecutionNode()
-				.setName('Edit')
-				.setValue('income_edit')
-				.setType('select')
-				.setDescription('Edit income command configurations')
-				.setPredicate((ctx) => ctx.interaction.member.permissions.has(['ManageGuild']))
+					.map((income) => [
+						'displayInline',
+						income,
+						codeBlock(Object.entries(ctx.guildEntity.incomes[income])
+							.map((prop) => `${prop[0]}: ${prop[1]}`)
+							.join('\n')),
+					] as const),
+				['back', ''],
+			))
+		.get('/edit', (ctx) => new ExecutionNode()
+			.setName('Edit')
+			.setDescription('Editing income command configurations')
+			.setOptions(
+				...Object
+					.keys(ctx.guildEntity.incomes)
+					.map((cmd) => ['select', `/edit/${cmd}`, cmd, `The \`${cmd}\` income command`] as const),
+				['back', ''],
+			))
+		.get('/edit/:command', (ctx, params) => {
+			const { command } = params;
+			return new ExecutionNode()
+				.setName(command)
+				.setDescription(`Editing the \`${command}\` income command`)
 				.setOptions(
-					async (ctx) => Object.keys(ctx.guildEntity.incomes).map((cmd) => new ExecutionNode()
-						.setName(cmd)
-						.setValue(`income_edit_${cmd}`)
-						.setType('select')
-						.setDescription(`The \`${cmd}\` income command`)
-						.setOptions(() => Object
-							.keys(ctx.guildEntity.incomes[cmd])
-							.map((property: keyof IncomeCommand) => new ExecutionNode()
-								.setName(property)
-								.setValue(`income_edit_${cmd}_${property}`)
-								.setType('select')
-								.setDescription(`The \`${property}\` property of \`${cmd}\``)
-								.collectVar(collectors[property])
-								.setExecution(async (ctx) => {
-									ctx.guildEntity.incomes[cmd][property] = ctx.variables[property];
-									await ctx.guildEntity.save();
-								})
-								.setOptions((ctx) => [
-									new ExecutionNode()
-										.setName('Update Success')
-										.setValue('income_edit_result')
-										.setType('display')
-										.setDescription(`${Emojis.CHECK} **Successfully updated the \`${property}\` property to \`${ctx.guildEntity.incomes[cmd][property]}\` on command \`${cmd}\`.**`),
-								])))),
-				),
-		]);
+					...Object
+						.keys(ctx.guildEntity.incomes[command])
+						.map((prop: keyof IncomeCommand) => ['select', `/edit/${command}/${prop}`, prop, `The \`${prop}\` property of \`${command}\``] as const),
+					['back', '/edit'],
+				);
+		})
+		.get('/edit/:command/:property', async (ctx, params) => {
+			const { command, property } = params;
+			const value = await collectors[property](new VariableCollector()).execute(ctx);
+			ctx.guildEntity.incomes[command][property] = value;
+			await ctx.guildEntity.save();
+			return new ExecutionNode()
+				.setName('Update Success')
+				.setDescription(`${Emojis.CHECK} **Successfully updated the \`${property}\` property to \`${ctx.guildEntity.incomes[command][property]}\` on command \`${command}\`.**`)
+				.setOptions(['back', `/edit/${command}`]);
+		});
 }
