@@ -3,7 +3,7 @@ import { ApplicationCommandDataResolvable } from 'discord.js';
 
 import { DEPLOY_ALL_MODULES, DEPLOY_COMMANDS, DEVELOPMENT_GUILD_IDS } from '../config';
 import { Economica, Event } from '../structures';
-import { defaultModulesObj } from '../typings';
+import { DefaultModulesObj } from '../typings';
 
 export default class implements Event<'ready'> {
 	public event = 'ready' as const;
@@ -25,7 +25,7 @@ export default class implements Event<'ready'> {
 		const defaultCommandData: ApplicationCommandDataResolvable[] = [];
 		const specialCommandData: ApplicationCommandDataResolvable[] = [];
 		client.commands.forEach((command) => {
-			if (defaultModulesObj[command.metadata.module].type === 'DEFAULT') defaultCommandData.push(command.metadata.toJSON());
+			if (DefaultModulesObj[command.metadata.module].type === 'DEFAULT') defaultCommandData.push(command.metadata.toJSON());
 			else specialCommandData.push(command.metadata.toJSON());
 		});
 

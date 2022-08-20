@@ -2,7 +2,9 @@ import { ColorResolvable } from 'discord.js';
 
 import { Incomes, Intervals, ListingString, Module, ModuleString, ReplyString } from '.';
 
-export const defaultIntervalsObj: Intervals = {
+export const DefaultCurrencySymbol = '💵';
+
+export const DefaultIntervalsObj: Intervals = {
 	minutely: {
 		amount: 50,
 		cooldown: 1000 * 60,
@@ -35,7 +37,7 @@ export const defaultIntervalsObj: Intervals = {
 	},
 };
 
-export const defaultIncomesObj: Incomes = {
+export const DefaultIncomesObj: Incomes = {
 	work: {
 		min: 100,
 		max: 500,
@@ -63,7 +65,7 @@ export const defaultIncomesObj: Incomes = {
 	},
 };
 
-export const defaultModulesObj: Record<ModuleString, Module> = {
+export const DefaultModulesObj: Record<ModuleString, Module> = {
 	ECONOMY: {
 		type: 'DEFAULT',
 		enabled: true,
@@ -238,7 +240,6 @@ export const Icons: Record<number, `${Emojis}`> = {
 	3: '<:icon_4:974903678920196157>',
 	4: '<:icon_5:974903678018404372>',
 };
-export const INTERACTION_COMPONENT_COOLDOWN = 1000 * 45;
 export enum Properties {
 	TEXTILE_MILL = 'MANUFACTURING',
 	OIL_REFINERY = 'MANUFACTURING',
@@ -391,4 +392,4 @@ export const RouletteBets: Record<RouletteBetsNamesType, RouletteBet> = {
 		description: 'A special bet that covers the numbers 1, 5, 9, 12, 13, 16, 19, 23, 27, 30, 32, and 34',
 	},
 };
-export const PAGINATION_LIMIT = 5;
+export const PaginationLimit = 5;

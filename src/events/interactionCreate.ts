@@ -20,7 +20,7 @@ import qs from 'qs';
 import { Command } from '../entities';
 import { commandCheck } from '../lib';
 import { CommandError, Context, Economica, Event } from '../structures';
-import { Emojis, Icons, PAGINATION_LIMIT } from '../typings';
+import { Emojis, Icons, PaginationLimit } from '../typings';
 
 export default class implements Event<'interactionCreate'> {
 	public event = 'interactionCreate' as const;
@@ -47,7 +47,7 @@ export default class implements Event<'interactionCreate'> {
 				.setColor('Red')
 				.setDescription(description);
 			if (interaction.replied) await interaction.followUp({ embeds: [embed], ephemeral: true });
-			else await interaction.reply({ embeds: [embed], ephemeral: true });
+			else await interaction.reply({ embeds: [embed], ephemeral: true }).catch(() => null);
 		}
 	}
 
@@ -140,8 +140,8 @@ export default class implements Event<'interactionCreate'> {
 		let pages: number;
 		node.options
 			.filter((option) => option[0] === 'select' || option[0] === 'displayNumbered')
-			.map((v, _, arr) => { pages = Math.ceil(arr.length / PAGINATION_LIMIT); return v; })
-			.slice(index * PAGINATION_LIMIT, index * PAGINATION_LIMIT + PAGINATION_LIMIT)
+			.map((v, _, arr) => { pages = Math.ceil(arr.length / PaginationLimit); return v; })
+			.slice(index * PaginationLimit, index * PaginationLimit + PaginationLimit)
 			.forEach((option, index) => {
 				if (option[0] === 'select') {
 					fields.push({ name: `${Icons[index]} ${option[2]}`, value: option[3] });

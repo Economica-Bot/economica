@@ -1,9 +1,8 @@
 import { PermissionFlagsBits } from 'discord.js';
 
-import { CURRENCY_SYMBOL } from '../../config';
 import { VariableCollector } from '../../lib';
 import { Command, EconomicaSlashCommandBuilder, ExecutionNode, Router } from '../../structures';
-import { Emojis } from '../../typings';
+import { DefaultCurrencySymbol, Emojis } from '../../typings';
 
 export default class implements Command {
 	public metadata = new EconomicaSlashCommandBuilder()
@@ -36,11 +35,11 @@ export default class implements Command {
 				.setOptions(['back', '']);
 		})
 		.get('/reset', async (ctx) => {
-			ctx.guildEntity.currency = CURRENCY_SYMBOL;
+			ctx.guildEntity.currency = DefaultCurrencySymbol;
 			await ctx.guildEntity.save();
 			return new ExecutionNode()
 				.setName('Resetting Currency...')
-				.setDescription(`${Emojis.CHECK} Currency reset to ${CURRENCY_SYMBOL} (\`${CURRENCY_SYMBOL}\`).`)
+				.setDescription(`${Emojis.CHECK} Currency reset to ${DefaultCurrencySymbol} (\`${DefaultCurrencySymbol}\`).`)
 				.setOptions(['back', '']);
 		});
 }

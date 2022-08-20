@@ -45,7 +45,6 @@ export const VALIDATE_SETTINGS = process.env.VALIDATE_SETTINGS === 'true';
 export const PRODUCTION = process.env.NODE_ENV === 'production';
 export const DEVELOPMENT = !PRODUCTION;
 export const DEBUG = process.env.DEBUG === 'true';
-export const CURRENCY_SYMBOL = process.env.CURRENCY_SYMBOL;
 
 // Exemptions
 

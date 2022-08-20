@@ -16,6 +16,8 @@ export class Layer {
 	}
 }
 
+type ContextType<T extends 'top' | 'sub'> = Context<T extends 'top' ? ChatInputCommandInteraction<'cached'> : MessageComponentInteraction<'cached'>>;
+
 export class Router {
 	stack: Layer[] = [];
 
@@ -36,7 +38,6 @@ export class Command {
 }
 
 export type ExecutionNodeType = 'top' | 'select' | 'display' | 'displayInline' | 'displayNumbered' | 'button' | 'back' | 'image';
-type ContextType<T extends 'top' | 'sub'> = Context<T extends 'top' ? ChatInputCommandInteraction<'cached'> : MessageComponentInteraction<'cached'>>;
 
 type OptionType<T extends ExecutionNodeType>
 	= T extends 'back' | 'image'

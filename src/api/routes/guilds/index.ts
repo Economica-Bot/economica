@@ -2,8 +2,8 @@ import { ChannelType } from 'discord.js';
 import express from 'express';
 
 import { bot } from '../../..';
-import { CURRENCY_SYMBOL } from '../../../config';
 import { Guild } from '../../../entities';
+import { DefaultCurrencySymbol } from '../../../typings';
 import infractionsRoutes from './infractions';
 import membersRoutes from './members';
 import transactionsRoutes from './transactions';
@@ -44,7 +44,7 @@ router.put('/:guildId/currency', async (req, res) => {
 router.put('/:guildId/currency/reset', async (req, res) => {
 	const { guildId: id } = req.params;
 	const botGuild = await Guild.findOneBy({ id });
-	botGuild.currency = CURRENCY_SYMBOL;
+	botGuild.currency = DefaultCurrencySymbol;
 	await botGuild.save();
 	res.sendStatus(200);
 });
