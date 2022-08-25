@@ -18,27 +18,34 @@ export default class implements Command {
 	public execution = new Router()
 		.get('', async (ctx) => {
 			const user = ctx.interaction.options.getUser('user', false) ?? ctx.interaction.user;
+			return `/user/${user.id}`;
+		})
+		.get('/user/:id', async (ctx, params) => {
+			const { id } = params;
 			const items = await Item.find({
 				relations: ['listing'],
-				where: { owner: { userId: user.id, guildId: ctx.interaction.guildId } },
+				where: { owner: { userId: id, guildId: ctx.interaction.guildId } },
 			});
 			return new ExecutionNode()
 				.setName('Viewing inventory')
-				.setDescription('View items that you or another user owns')
-				.setOptions(...items.map((item) => ['select', `/${item.id}`, `\`${item.amount}\` x ${item.listing.name}`, item.listing.description] as const));
+				.setDescription(`Viewing <@${id}>'s items | \`${items.map((item) => item.amount).reduce((prev, curr) => prev + curr, 0)}\` total`)
+				.setOptions(...items.map((item) => ['select', `/${item.id}`, `${item.amount} x ${item.listing.name}`, item.listing.description] as const));
 		})
-		.get('/:id', async (ctx, params) => {
+		.get('/item/:id', async (ctx, params) => {
 			const { id } = params;
-			const item = await Item.findOne({ relations: ['listing', 'listing.requiredItems'], where: { id } });
+			const item = await Item.findOne({ relations: ['listing', 'listing.itemsRequired', 'owner'], where: { id } });
 			const options: typeof ExecutionNode.prototype.options = [];
 			if (item.listing.tradeable && item.owner.userId === ctx.interaction.user.id) options.push(['button', `/${item.id}/give`, 'Give Item']);
 			if (item.listing.type === 'USABLE' && item.owner.userId === ctx.interaction.user.id) options.push(['button', `/${item.id}/use`, 'Use Item']);
 			return new ExecutionNode()
 				.setName(`\`${item.amount}\` x ${item.listing.name}`)
 				.setDescription(item.listing.description)
-				.setOptions(...options);
+				.setOptions(
+					['back', ''],
+					...options,
+				);
 		})
-		.get('/:id/give', async (ctx, params) => {
+		.get('item/:id/give', async (ctx, params) => {
 			const { id } = params;
 			const item = await Item.findOne({ relations: ['listing'], where: { id } });
 			const target = await new VariableCollector<GuildMember>()
@@ -80,7 +87,7 @@ export default class implements Command {
 				.setName('Item Given Successfully')
 				.setDescription(`${Emojis.CHECK} Gave \`${amount}\` x **${item.listing.name}** to ${target}`);
 		})
-		.get('/:id/use', async (ctx, params) => {
+		.get('item/:id/use', async (ctx, params) => {
 			const { id } = params;
 			const item = await Item.findOne({ relations: ['listing'], where: { id } });
 			item.listing.rolesGranted.forEach((role) => ctx.interaction.member.roles.add(role, `Used ${item.listing.name}`));

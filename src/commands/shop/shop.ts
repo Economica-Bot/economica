@@ -28,10 +28,10 @@ const displayListing = (listing: Listing): typeof ExecutionNode.prototype.option
 	];
 
 	if (listing.type === 'GENERATOR') {
-		result.concat([
+		result.push(
 			['displayInline', 'Generator Period', `\`${ms(listing.generatorPeriod)}\``],
 			['displayInline', 'Generator Amount', `${listing.guild.currency} \`${parseNumber(listing.generatorAmount)}\``],
-		]);
+		);
 	}
 
 	return result;

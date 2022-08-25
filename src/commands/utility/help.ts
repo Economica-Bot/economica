@@ -33,6 +33,6 @@ export default class implements Command {
 						`**${command.metadata.name}** | *${command.metadata.description}*`,
 						`>>> ${Emojis.FOCUS} **Format**: \`${command.metadata.format}\`\n${Emojis.TEXTING} **Examples**: ${codeBlock(command.metadata.examples.join('\n'))}**Permissions**: ${new PermissionsBitField(BigInt(command.metadata.default_member_permissions ?? 0)).toArray().map((permission) => `\`${permission}\``)}`,
 					] as const),
-				['back', `/${params.module}`],
+				['back', ''],
 			));
 }

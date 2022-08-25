@@ -74,8 +74,8 @@ export default class implements Event<'interactionCreate'> {
 		await this.executionHandler(ctx);
 	}
 
-	private async executionHandler(ctx: Context) {
-		const rawpath = (ctx.interaction.isButton()
+	private async executionHandler(ctx: Context, rawpathlike?: string) {
+		const rawpath = rawpathlike ?? (ctx.interaction.isButton()
 			? ctx.interaction.customId
 			: ctx.interaction.isSelectMenu()
 				? ctx.interaction.values[0]
@@ -85,6 +85,8 @@ export default class implements Event<'interactionCreate'> {
 		const metadata = qs.parse(rawpath);
 		const { path, index: indexString } = metadata as { path: string, index: string };
 		const index = parseInt(indexString);
+
+		console.log(rawpath, metadata);
 
 		let match: RegExpExecArray;
 		const params = {};
@@ -96,6 +98,8 @@ export default class implements Event<'interactionCreate'> {
 			return !!match;
 		});
 
+		if (!match) throw new Error('Something went wrong!');
+
 		for (let i = 1; i < match.length; i++) {
 			const key = keys[i - 1];
 			const prop = key.name;
@@ -104,6 +108,12 @@ export default class implements Event<'interactionCreate'> {
 		}
 
 		const node = await layer.handle(ctx, params);
+
+		if (typeof node === 'string') {
+			const newpath = qs.stringify({ path: `${ctx.command.metadata.name}${node}`, index: 0, user: ctx.interaction.user.id });
+			await this.executionHandler(ctx, newpath);
+			return;
+		}
 
 		const embed = ctx
 			.embedify('info', 'user', node.description)
