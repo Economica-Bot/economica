@@ -29,23 +29,23 @@ export default class implements Command {
 			return new ExecutionNode()
 				.setName('Viewing inventory')
 				.setDescription(`Viewing <@${id}>'s items | \`${items.map((item) => item.amount).reduce((prev, curr) => prev + curr, 0)}\` total`)
-				.setOptions(...items.map((item) => ['select', `/${item.id}`, `${item.amount} x ${item.listing.name}`, item.listing.description] as const));
+				.setOptions(...items.map((item) => ['select', `/item/${item.id}`, `${item.amount} x ${item.listing.name}`, item.listing.description] as const));
 		})
 		.get('/item/:id', async (ctx, params) => {
 			const { id } = params;
 			const item = await Item.findOne({ relations: ['listing', 'listing.itemsRequired', 'owner'], where: { id } });
 			const options: typeof ExecutionNode.prototype.options = [];
-			if (item.listing.tradeable && item.owner.userId === ctx.interaction.user.id) options.push(['button', `/${item.id}/give`, 'Give Item']);
-			if (item.listing.type === 'USABLE' && item.owner.userId === ctx.interaction.user.id) options.push(['button', `/${item.id}/use`, 'Use Item']);
+			if (item.listing.tradeable && item.owner.userId === ctx.interaction.user.id) options.push(['button', `/item/${item.id}/give`, 'Give Item']);
+			if (item.listing.type === 'USABLE' && item.owner.userId === ctx.interaction.user.id) options.push(['button', `/item/${item.id}/use`, 'Use Item']);
 			return new ExecutionNode()
-				.setName(`\`${item.amount}\` x ${item.listing.name}`)
+				.setName(`${item.amount} x ${item.listing.name}`)
 				.setDescription(item.listing.description)
 				.setOptions(
-					['back', ''],
+					['back', `/user/${item.owner.userId}`],
 					...options,
 				);
 		})
-		.get('item/:id/give', async (ctx, params) => {
+		.get('/item/:id/give', async (ctx, params) => {
 			const { id } = params;
 			const item = await Item.findOne({ relations: ['listing'], where: { id } });
 			const target = await new VariableCollector<GuildMember>()
@@ -85,9 +85,12 @@ export default class implements Command {
 
 			return new ExecutionNode()
 				.setName('Item Given Successfully')
-				.setDescription(`${Emojis.CHECK} Gave \`${amount}\` x **${item.listing.name}** to ${target}`);
+				.setDescription(`${Emojis.CHECK} Gave \`${amount}\` x **${item.listing.name}** to ${target}`)
+				.setOptions(
+					['back', `/user/${ctx.interaction.user.id}`],
+				);
 		})
-		.get('item/:id/use', async (ctx, params) => {
+		.get('/item/:id/use', async (ctx, params) => {
 			const { id } = params;
 			const item = await Item.findOne({ relations: ['listing'], where: { id } });
 			item.listing.rolesGranted.forEach((role) => ctx.interaction.member.roles.add(role, `Used ${item.listing.name}`));

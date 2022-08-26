@@ -12,7 +12,17 @@ export default class implements Command {
 		.setGlobal(true);
 
 	public execution = new Router()
-		.get('', (ctx) => new ExecutionNode()
-			.setName('Ping Pong!')
-			.setDescription(codeBlock('ansi', `[1;34mGateway Ping [0m: [0;35m${ctx.interaction.client.ws.ping}[0mms\n[1;34mRest Ping    [0m: [0;35m${Date.now() - ctx.interaction.createdTimestamp}[0mms\n`)));
+		.get('', async (ctx) => {
+			const now = Date.now();
+			await ctx.interaction.reply('Pinging...');
+			const ping = Date.now() - now;
+			return new ExecutionNode()
+				.setName('Ping Pong!')
+				.setDescription(
+					codeBlock(
+						'ansi',
+						`[1;34mGateway Ping [0m: [0;35m${ctx.interaction.client.ws.ping}[0mms\n[1;34mRest Ping    [0m: [0;35m${ping}[0mms\n`,
+					),
+				);
+		});
 }

@@ -18,8 +18,8 @@ export default class implements Command {
 			const botStats = `>>> Websocket Ping: \`${ctx.interaction.client.ws.ping}ms\`\n`
 				+ `Bot Uptime: \`${ms(ctx.interaction.client.uptime)}\`\n`
 				+ `Commands Ran: \`${(await CommandEntity.findBy({ member: { guildId: ctx.memberEntity.guildId } })).length}\``;
-			const memberStats = `Roles: \`${ctx.interaction.member.roles.cache.size}\`\n`
-				+ `>>> Commands Used: \`${(await CommandEntity.findBy({ member: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId } }))
+			const memberStats = `>>> Roles: \`${ctx.interaction.member.roles.cache.size}\`\n`
+				+ `Commands Used: \`${(await CommandEntity.findBy({ member: { userId: ctx.memberEntity.userId, guildId: ctx.memberEntity.guildId } }))
 					.length
 				}\`\n`
 				+ `Joined: <t:${Math.round(ctx.interaction.member.joinedAt.getTime() / 1000)}:f>`;

@@ -34,11 +34,11 @@ export default class implements Command {
 
 			let result: string;
 			if (amount) {
-				result = `${Emojis.CHECK} Collected ${ctx.guildEntity.currency}${parseNumber(amount)}`;
+				result = `${Emojis.CHECK} Collected ${ctx.guildEntity.currency} \`${parseNumber(amount)}\``;
 				await recordTransaction(ctx.interaction.client, ctx.guildEntity, ctx.memberEntity, ctx.memberEntity, 'GENERATOR', 0, amount);
 			} else {
 				result = 'You have **no money ready** to collect.'
-					+ `\n${items.map((item) => `**${item.listing.name}** - ${ctx.guildEntity.currency} \`${parseNumber(item.listing.generatorAmount)} | **Ready:** <t:${Math.trunc(
+					+ `\n${items.map((item) => `**${item.listing.name}** - ${ctx.guildEntity.currency} \`${parseNumber(item.listing.generatorAmount)}\` | **Ready:** <t:${Math.trunc(
 						(item.lastGeneratedAt.getTime() + item.listing.generatorPeriod) / 1000,
 					)}:R>`)}`;
 			}

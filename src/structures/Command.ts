@@ -8,9 +8,9 @@ import { Context } from './Context';
 export class Layer {
 	path: string;
 
-	handle: (ctx: Context, params: Object) => Awaitable<ExecutionNode> | Awaitable<string>;
+	handle: (ctx: Context, params: Object) => Awaitable<ExecutionNode | string>;
 
-	constructor(path: string, handle: (ctx: Context, params: Object) => Awaitable<ExecutionNode> | Awaitable<string>) {
+	constructor(path: string, handle: (ctx: Context, params: Object) => Awaitable<ExecutionNode | string>) {
 		this.path = path;
 		this.handle = handle;
 	}
@@ -23,7 +23,7 @@ export class Router {
 
 	get<Route extends string, P = RouteParameters<Route>>(
 		path: Route,
-		handle: (ctx: Route extends '' ? ContextType<'top'> : ContextType<'sub'>, params: P) => Awaitable<ExecutionNode> | Awaitable<string>,
+		handle: (ctx: Route extends '' ? ContextType<'top'> : ContextType<'sub'>, params: P) => Awaitable<ExecutionNode | string>,
 	): this {
 		const layer = new Layer(path, handle);
 		this.stack.push(layer);

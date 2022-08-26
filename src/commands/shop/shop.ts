@@ -24,7 +24,7 @@ const displayListing = (listing: Listing): typeof ExecutionNode.prototype.option
 		['displayInline', `${Emojis.KEY} Roles Required`, listing.rolesRequired.length ? listing.rolesRequired.map((role) => `<@&${role}>`).join('\n') : '`None`'],
 		['displayInline', `${Emojis.RED_DOWN_ARROW} Roles Removed`, listing.rolesRemoved.length ? listing.rolesRemoved.map((role) => `<@&${role}>`).join('\n') : '`None`'],
 		['displayInline', `${Emojis.GREEN_UP_ARROW} Roles Granted`, listing.rolesGranted.length ? listing.rolesGranted.map((role) => `<@&${role}>`).join('\n') : '`None`'],
-		['displayInline', `${ListingEmojis[listing.type]} \`${listing.type}\` Item`, `>>> *${ListingDescriptions[listing.type]}*`],
+		['display', `${ListingEmojis[listing.type]} \`${listing.type}\` Item`, `>>> *${ListingDescriptions[listing.type]}*`],
 	];
 
 	if (listing.type === 'GENERATOR') {
@@ -267,14 +267,17 @@ export default class implements Command {
 			return new ExecutionNode()
 				.setName(`Editing ${listing.name}`)
 				.setDescription('Edit this listing')
-				.setOptions(...Object
-					.keys(listing)
-					.filter((value) => {
-						if (!editableListingProps.includes(value as any)) return false;
-						if (listing.type !== 'GENERATOR' && ['generatorAmount', 'generatorPeriod'].includes(value)) return false;
-						return true;
-					})
-					.map((key) => ['select', `/server/${id}/edit/${key}`, key, `Edit the ${key} property of ${listing.name}.`] as const));
+				.setOptions(
+					...Object
+						.keys(listing)
+						.filter((value) => {
+							if (!editableListingProps.includes(value as any)) return false;
+							if (listing.type !== 'GENERATOR' && ['generatorAmount', 'generatorPeriod'].includes(value)) return false;
+							return true;
+						})
+						.map((key) => ['select', `/server/${id}/edit/${key}`, key, `Edit the \`${key}\` property of ${listing.name}.`] as const),
+					['back', `/server/${id}`],
+				);
 		})
 		.get('/server/:id/edit/:property', async (ctx, params) => {
 			const { id, property } = params as { id: string, property: keyof typeof collectors };

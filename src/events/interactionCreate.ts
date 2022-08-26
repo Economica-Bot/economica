@@ -86,8 +86,6 @@ export default class implements Event<'interactionCreate'> {
 		const { path, index: indexString } = metadata as { path: string, index: string };
 		const index = parseInt(indexString);
 
-		console.log(rawpath, metadata);
-
 		let match: RegExpExecArray;
 		const params = {};
 		const keys = [];
@@ -194,8 +192,10 @@ export default class implements Event<'interactionCreate'> {
 
 		const payload: WebhookEditMessageOptions = { embeds: [embed], components };
 
-		if (ctx.interaction.isChatInputCommand()) await ctx.interaction.reply(payload);
-		else if (ctx.interaction.isButton() || ctx.interaction.isSelectMenu()) {
+		if (ctx.interaction.isChatInputCommand()) {
+			if (ctx.interaction.replied) await ctx.interaction.editReply(payload);
+			else await ctx.interaction.reply(payload);
+		} else if (ctx.interaction.isButton() || ctx.interaction.isSelectMenu()) {
 			if (ctx.interaction.replied) await ctx.interaction.editReply(payload);
 			else await ctx.interaction.update(payload);
 		}

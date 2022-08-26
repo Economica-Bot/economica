@@ -4,7 +4,6 @@ export * from './infraction';
 export * from './item';
 export * from './listing';
 export * from './loan';
-export * from './market';
 export * from './member';
 export * from './session';
 export * from './token';

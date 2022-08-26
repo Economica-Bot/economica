@@ -20,9 +20,9 @@ export function displayTransaction(transaction: Transaction): EmbedBuilder {
 		.setAuthor({ name: `Transaction | ${type}` })
 		.setDescription(description)
 		.addFields([
-			{ name: '__**Wallet**__', value: `${guild.currency}${parseNumber(wallet)}`, inline: true },
-			{ name: '__**Treasury**__', value: `${guild.currency}${parseNumber(treasury)}`, inline: true },
-			{ name: '__**Total**__', value: `${guild.currency}${parseNumber(total)}`, inline: true },
+			{ name: '__**Wallet**__', value: `${guild.currency} \`${parseNumber(wallet)}\``, inline: true },
+			{ name: '__**Treasury**__', value: `${guild.currency} \`${parseNumber(treasury)}\``, inline: true },
+			{ name: '__**Total**__', value: `${guild.currency} \`${parseNumber(total)}\``, inline: true },
 		])
 		.setFooter({ text: `Id: ${id}` })
 		.setTimestamp(createdAt);
