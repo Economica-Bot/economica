@@ -1,0 +1,34 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		// Emit
+		"importHelpers": true,
+		"importsNotUsedAsValues": "remove",
+		"inlineSources": true,
+		"noEmitHelpers": true,
+		"sourceMap": true,
+		// Language and Environment
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"lib": [
+			"ESNext"
+		],
+		"target": "ESNext",
+		"useDefineForClassFields": true,
+		// Completeness
+		"skipLibCheck": true,
+		// "rootDir": ".",
+		"outDir": "./dist",
+		// "baseUrl": ".",
+		"composite": true,
+		"declaration": true,
+		"declarationMap": true
+	},
+	"include": [
+		"src/**/*.ts"
+	],
+	"exclude": [
+		"node_modules",
+		"dist"
+	]
+}

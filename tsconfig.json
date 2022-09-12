@@ -12,8 +12,9 @@
 		// "noUnusedLocals": true,
 		// "noUnusedParameters": true,
 		// "strict": true,
+	
 		// TypeScript 4.4
-		// "useUnknownInCatchVariables": true,
+		"useUnknownInCatchVariables": true,
 
 		// Modules
 		"module": "ESNext",
@@ -23,26 +24,25 @@
 		// Emit
 		"importHelpers": true,
 		// "importsNotUsedAsValues": "error",
-		"inlineSources": true,
 		"newLine": "lf",
-		"noEmitHelpers": true,
 		"outDir": "dist",
-		"preserveConstEnums": false,
-		"removeComments": false,
 		"sourceMap": true,
 		"esModuleInterop": true,
+		"experimentalDecorators": true,
+    // "isolatedModules": true,
 		"forceConsistentCasingInFileNames": true,
 
-		// Language and Environment
-		"emitDecoratorMetadata": true,
-		"experimentalDecorators": true,
-		"lib": ["ESNext"],
-		"target": "ESNext",
-		"useDefineForClassFields": true,
-
 		// Completeness
-		"skipLibCheck": true
-		// "baseUrl": "./"
+		"skipLibCheck": true,
+		"baseUrl": ".",
+		"paths": {
+			"@economica/*": [
+				"packages/*/src/index.ts"
+			]
+		},
 	},
-	"include": ["src/**/*.ts"]
+	"references": [
+		{ "path": "packages/bot" },
+		{ "path": "packages/dashboard" }
+	]
 }

@@ -1,16 +1,30 @@
 {
+	"root": true,
 	"env": {
 		"browser": true,
 		"es2021": true
 	},
-	"extends": ["airbnb-base", "airbnb-typescript/base", "plugin:import/typescript"],
 	"parser": "@typescript-eslint/parser",
 	"parserOptions": {
 		"ecmaVersion": "latest",
 		"sourceType": "module",
-		"project": "./tsconfig.json"
+		"project": [
+			"./tsconfig.eslint.json",
+			"./packages/*/tsconfig.eslint.json"
+		]
 	},
-	"plugins": ["@typescript-eslint", "import"],
+	"extends": [
+		"eslint:recommended",
+		"plugin:@typescript-eslint/eslint-recommended",
+		"plugin:@typescript-eslint/recommended",
+		"airbnb-base", 
+		"airbnb-typescript/base", 
+		"plugin:import/typescript"
+	],
+	"plugins": [
+		"@typescript-eslint", 
+		"import"
+	],
 	"rules": {
 		"import/no-cycle": "off",
 		"import/prefer-default-export": "off",
@@ -30,13 +44,13 @@
 	},
 	"settings": {
 		"import/parsers": {
-			"@typescript-eslint/parser": [".ts"]
+			"@typescript-eslint/parser": [".ts", ".tsx"]
 		},
 		"import/resolver": {
 			// "project": {},
 			"node": {
-				"extensions": [".ts"],
-				"moduleDirectory": ["./src", "./node_modules"]
+				"extensions": [".ts", ".tsx"],
+				"moduleDirectory": ["./src"]
 			},
 			"typescript": {
 				"alwaysTryTypes": true
