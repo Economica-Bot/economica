@@ -104,7 +104,7 @@ const CommandsPage: NextPageWithLayout<Props> = ({ commands }) => {
 	);
 };
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
 	const { data: commands } = await axios
 		.get('http://localhost:3001/api/commands')
 		.catch(() => ({ data: null }));
