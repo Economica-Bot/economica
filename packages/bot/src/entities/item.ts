@@ -1,4 +1,4 @@
-import { Snowflake, SnowflakeUtil } from 'discord.js';
+import { DiscordSnowflake } from '@sapphire/snowflake';
 import { BaseEntity, Relation, Column, Entity, ManyToOne } from 'typeorm';
 
 import { Listing, Member } from '.';
@@ -6,7 +6,7 @@ import { Listing, Member } from '.';
 @Entity({ name: 'item' })
 export class Item extends BaseEntity {
 	@Column({ type: 'character varying', primary: true })
-	public id: Snowflake = SnowflakeUtil.generate().toString();
+	public id: string = DiscordSnowflake.generate().toString();
 
 	@ManyToOne(() => Listing, { onDelete: 'CASCADE' })
 	public listing: Relation<Listing>;

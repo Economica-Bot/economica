@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { parseNumber } from '@adrastopoulos/number-parser';
-import { EmbedBuilder, PermissionFlagsBits, resolveColor, TextChannel } from 'discord.js';
+import { EmbedBuilder } from '@discordjs/builders';
+import { Routes } from 'discord-api-types/v10';
 
 import { Guild, Member, Transaction } from '../entities';
 import { Economica } from '../structures';
@@ -16,7 +17,6 @@ export function displayTransaction(transaction: Transaction): EmbedBuilder {
 	const total = wallet + treasury;
 	const description = `Target: <@!${target.userId}> | Agent: <@!${agent.userId}>`;
 	return new EmbedBuilder()
-		.setColor(resolveColor('Gold'))
 		.setAuthor({ name: `Transaction | ${type}` })
 		.setDescription(description)
 		.addFields([
@@ -54,10 +54,7 @@ export async function recordTransaction(
 	const transactionEntity = await Transaction.create({ guild, target, agent, type, wallet, treasury }).save();
 	const { transactionLogId } = guild;
 	if (transactionLogId) {
-		const channel = client.channels.cache.get(transactionLogId) as TextChannel;
-		const member = channel.guild.members.cache.get(client.user.id);
-		if (!channel.permissionsFor(member).has(PermissionFlagsBits.SendMessages | PermissionFlagsBits.EmbedLinks)) return;
 		const embed = displayTransaction(transactionEntity);
-		await channel.send({ embeds: [embed] });
+		await client.rest.post(Routes.channel(transactionLogId), { body: { embeds: [embed] } });
 	}
 }

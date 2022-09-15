@@ -1,5 +1,3 @@
-import { ColorResolvable } from 'discord.js';
-
 import { Incomes, Intervals, ListingString, Module, ModuleString, ReplyString } from '.';
 
 export const DefaultCurrencySymbol = '💵';
@@ -103,7 +101,7 @@ export const DefaultModulesObj: Record<ModuleString, Module> = {
 	},
 };
 
-export const EmbedColors: Record<ReplyString, ColorResolvable> = {
+export const EmbedColors: Record<ReplyString, string> = {
 	success: 'Green',
 	info: 'Blurple',
 	warn: 'Yellow',

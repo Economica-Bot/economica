@@ -1,24 +1,6 @@
-import { EmbedFooterData, EmbedBuilder, Snowflake } from 'discord.js';
+import { Snowflake } from 'discord-api-types/v10';
+import { EmbedFooterData } from '@discordjs/builders';
 
-export interface EconomyInfo {
-	wallet: number;
-	treasury: number;
-	total: number;
-	rank: number;
-}
-export interface IncomeCommandProperties {
-	command: string;
-	min: number;
-	max: number;
-	chance: number;
-	minFine: number;
-	maxFine: number;
-}
-export interface ConfirmModalEmbeds {
-	promptEmbed: EmbedBuilder;
-	confirmEmbed: EmbedBuilder;
-	cancelEmbed: EmbedBuilder;
-}
 export interface IncomeCommand {
 	min?: number;
 	max?: number;
@@ -52,7 +34,7 @@ export interface Module {
 	user: Snowflake | null;
 }
 export type ReplyString = 'success' | 'info' | 'warn' | 'error';
-export type Footer = 'bot' | 'user' | 'guild' | EmbedFooterData;
+export type Footer = 'user' | 'guild' | EmbedFooterData;
 export type Moderation = 'ban' | 'kick' | 'timeout' | 'unban' | 'untimeout';
 export type BalanceString = 'wallet' | 'treasury';
 export type ListingString = 'COLLECTABLE' | 'INSTANT' | 'USABLE' | 'GENERATOR';

@@ -1,4 +1,3 @@
-import { Snowflake } from 'discord.js';
 import { BaseEntity, Column, Entity } from 'typeorm';
 
 import { DefaultCurrencySymbol, DefaultIncomesObj, DefaultIntervalsObj, DefaultModulesObj } from '../typings';
@@ -6,7 +5,7 @@ import { DefaultCurrencySymbol, DefaultIncomesObj, DefaultIntervalsObj, DefaultM
 @Entity({ name: 'guild' })
 export class Guild extends BaseEntity {
 	@Column({ type: 'character varying', primary: true })
-	public id: Snowflake;
+	public id: string;
 
 	@Column({ type: 'character varying', default: DefaultCurrencySymbol })
 	public currency: string;

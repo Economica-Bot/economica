@@ -1,13 +1,17 @@
 /* eslint-disable max-classes-per-file */
-import { ChatInputCommandInteraction, EmbedBuilder, MessageComponentInteraction, resolveColor } from 'discord.js';
-import qs from 'qs';
+import {
+	APIApplicationCommandInteraction,
+	APIChatInputApplicationCommandInteraction,
+	APIMessageApplicationCommandInteraction,
+} from 'discord-api-types/v10';
 
-import { Command } from '.';
+import { Command, Economica } from '.';
 import { Guild, Member, User } from '../entities';
-import { EmbedColors, Footer, ReplyString } from '../typings';
 
-export class Context<T extends ChatInputCommandInteraction<'cached'> | MessageComponentInteraction<'cached'> = ChatInputCommandInteraction<'cached'> | MessageComponentInteraction<'cached'>> {
+export class Context<T extends APIApplicationCommandInteraction | APIMessageApplicationCommandInteraction = APIChatInputApplicationCommandInteraction | APIMessageApplicationCommandInteraction> {
 	public interaction: T;
+
+	public client: Economica;
 
 	public command: Command;
 
@@ -21,57 +25,29 @@ export class Context<T extends ChatInputCommandInteraction<'cached'> | MessageCo
 
 	public clientMemberEntity: Member;
 
-	public constructor(interaction: T) {
+	public constructor(interaction: T, client: Economica) {
 		this.interaction = interaction;
-	}
-
-	public isChatInput(): this is Context<ChatInputCommandInteraction<'cached'>> {
-		return this.interaction.isChatInputCommand();
-	}
-
-	public isMessageComponent(): this is Context<MessageComponentInteraction<'cached'>> {
-		return this.interaction.isButton() || this.interaction.isSelectMenu();
+		this.client = client;
 	}
 
 	public async init(): Promise<this> {
 		let commandName: string;
-		if (this.interaction.isChatInputCommand()) commandName = this.interaction.commandName;
-		else if (this.interaction.isButton()) [commandName] = qs.parse(this.interaction.customId).path.split('/');
-		else if (this.interaction.isSelectMenu()) [commandName] = qs.parse(this.interaction.values.at(0)).path.split('/');
-		const command = this.interaction.client.commands.get(commandName);
+		const command = this.client.commands.get(commandName);
 		if (!command) throw new Error('There was an error while executing this command.');
 
 		this.command = command;
 
-		if (!this.interaction.inCachedGuild()) return this;
-
 		this.userEntity = (await User.findOne({ where: { id: this.interaction.user.id } }))
 			?? (await User.create({ id: this.interaction.user.id }).save());
-		this.guildEntity = (await Guild.findOne({ where: { id: this.interaction.guildId } }))
-			?? (await Guild.create({ id: this.interaction.guildId }).save());
+		this.guildEntity = (await Guild.findOne({ where: { id: this.interaction.guild_id } }))
+			?? (await Guild.create({ id: this.interaction.guild_id }).save());
 		this.memberEntity = (await Member.findOne({ where: { user: { id: this.userEntity.id }, guild: { id: this.guildEntity.id } } }))
 			?? (await Member.create({ user: this.userEntity, guild: this.guildEntity }).save());
-		this.clientUserEntity = (await User.findOne({ where: { id: this.interaction.client.user.id } }))
-			?? (await User.create({ id: this.interaction.client.user.id }).save());
+		this.clientUserEntity = (await User.findOne({ where: { id: this.interaction.application_id } }))
+			?? (await User.create({ id: this.interaction.application_id }).save());
 		this.clientMemberEntity = (await Member.findOne({ where: { user: { id: this.clientUserEntity.id }, guild: { id: this.guildEntity.id } } }))
 			?? (await Member.create({ user: this.clientUserEntity, guild: this.guildEntity }).save());
 
 		return this;
-	}
-
-	public embedify(type: ReplyString, footer: Footer, description?: string | null) {
-		const embed = new EmbedBuilder().setColor(resolveColor(EmbedColors[type]));
-		if (description) embed.setDescription(description);
-		if (footer === 'bot') {
-			embed.setFooter({
-				text: this.interaction.client.user.tag,
-				iconURL: this.interaction.client.user.displayAvatarURL(),
-			});
-		} else if (footer === 'user') {
-			embed.setFooter({ text: this.interaction.user.tag, iconURL: this.interaction.user.displayAvatarURL() });
-		} else if (footer === 'guild') {
-			embed.setFooter({ text: this.interaction.guild.name, iconURL: this.interaction.guild.iconURL() });
-		} else embed.setFooter(footer);
-		return embed;
 	}
 }

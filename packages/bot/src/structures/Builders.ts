@@ -1,4 +1,5 @@
-import { PermissionsString, SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { Permissions } from 'discord-api-types/globals';
 
 import { ModuleString } from '../typings';
 
@@ -9,7 +10,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 
 	public examples: string[] = [];
 
-	public clientPermissions: PermissionsString[] = [];
+	public clientPermissions: Permissions | string | number | bigint = '';
 
 	public global = false;
 
@@ -35,7 +36,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	public setClientPermissions(clientPermissions: PermissionsString[]): this {
+	public setClientPermissions(clientPermissions: typeof this.clientPermissions): this {
 		this.clientPermissions = clientPermissions;
 		return this;
 	}

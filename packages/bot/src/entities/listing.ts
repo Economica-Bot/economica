@@ -1,4 +1,4 @@
-import { Snowflake, SnowflakeUtil } from 'discord.js';
+import { DiscordSnowflake } from '@sapphire/snowflake';
 import {
 	BaseEntity,
 	Column,
@@ -17,7 +17,7 @@ import { ListingString } from '../typings';
 @Entity({ name: 'listing' })
 export class Listing extends BaseEntity {
 	@Column({ type: 'character varying', primary: true })
-	public id: Snowflake = SnowflakeUtil.generate().toString();
+	public id: string = DiscordSnowflake.generate().toString();
 
 	@ManyToOne(() => Guild, { onDelete: 'CASCADE' })
 	@JoinColumn()
@@ -58,13 +58,13 @@ export class Listing extends BaseEntity {
 	public itemsRequired: Relation<Listing>[];
 
 	@Column({ type: 'simple-array' })
-	public rolesRequired: Snowflake[];
+	public rolesRequired: string[];
 
 	@Column({ type: 'simple-array' })
-	public rolesGranted: Snowflake[];
+	public rolesGranted: string[];
 
 	@Column({ type: 'simple-array' })
-	public rolesRemoved: Snowflake[];
+	public rolesRemoved: string[];
 
 	@Column({ type: 'integer', nullable: true })
 	public generatorPeriod: number | null;

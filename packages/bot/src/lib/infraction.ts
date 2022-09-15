@@ -1,4 +1,5 @@
-import { EmbedBuilder, PermissionFlagsBits, resolveColor, TextChannel } from 'discord.js';
+import { EmbedBuilder } from '@discordjs/builders';
+import { Routes } from 'discord-api-types/v10';
 import ms from 'ms';
 
 import { Guild, Infraction, Member } from '../entities';
@@ -14,7 +15,6 @@ export function displayInfraction(infraction: Infraction) {
 	const { id, type, target, agent, reason, duration, active, permanent, createdAt } = infraction;
 	const description = `Target: <@!${target.userId}> | Agent: <@!${agent.userId}>`;
 	return new EmbedBuilder()
-		.setColor(resolveColor('Red'))
 		.setAuthor({ name: `Infraction | ${type}` })
 		.setDescription(description)
 		.addFields([
@@ -62,13 +62,7 @@ export async function recordInfraction(
 	}).save();
 	const { infractionLogId } = guild;
 	if (infractionLogId) {
-		const channel = client.channels.cache.get(infractionLogId) as TextChannel;
-		const member = channel.guild.members.cache.get(client.user.id);
-		if (
-			!channel.permissionsFor(member).has(PermissionFlagsBits.SendMessages)
-			|| !channel.permissionsFor(member).has(PermissionFlagsBits.EmbedLinks)
-		) return;
 		const embed = displayInfraction(infractionEntity);
-		await channel.send({ embeds: [embed] });
+		await client.rest.post(Routes.channel(infractionLogId), { body: { embeds: [embed] } });
 	}
 }

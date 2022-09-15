@@ -10,7 +10,6 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
-    "noEmit": true,
     "jsx": "preserve",
     "incremental": true,
     "allowSyntheticDefaultImports": true,
@@ -20,7 +19,8 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "noEmit": false
   },
   "include": [
     "next-env.d.ts",

@@ -1,4 +1,4 @@
-import { Snowflake } from 'discord.js';
+import { Snowflake } from 'discord-api-types/v10';
 import { BaseEntity, Column, Entity } from 'typeorm';
 
 @Entity({ name: 'discuser' })

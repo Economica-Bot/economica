@@ -1,4 +1,4 @@
-import { Snowflake, SnowflakeUtil } from 'discord.js';
+import { DiscordSnowflake } from '@sapphire/snowflake';
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, Relation } from 'typeorm';
 
 import { Guild, Member } from '.';
@@ -7,7 +7,7 @@ import { InfractionString } from '../typings';
 @Entity({ name: 'infraction' })
 export class Infraction extends BaseEntity {
 	@Column({ type: 'character varying', primary: true })
-	public id: Snowflake = SnowflakeUtil.generate().toString();
+	public id: string = DiscordSnowflake.generate().toString();
 
 	@ManyToOne(() => Guild)
 	@JoinColumn()

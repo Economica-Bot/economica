@@ -28,3 +28,5 @@ passport.use(
 		},
 	),
 );
+
+export const discord = passport;
