@@ -1,17 +1,17 @@
 import PGStore from 'connect-pg-simple';
 import cors from 'cors';
-import { Router, json } from 'express';
+import { json, Router } from 'express';
 import session from 'express-session';
-import { DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USERNAME, SECRET } from 'packages/bot/src/config';
 import passport from 'passport';
 
+import { DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USERNAME, SECRET } from '../../../config';
 import authRoutes from './auth';
 import commandRoutes from './commands';
 import guildRoutes from './guilds';
 import userRoutes from './users';
 
 const router = Router()
-	.use(json)
+	.use(json())
 	.use(cors({
 		origin: ['http://localhost:3000'],
 		credentials: true,

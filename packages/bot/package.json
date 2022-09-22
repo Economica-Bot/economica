@@ -16,7 +16,7 @@
 		"build": "esbuild ./src/index.ts --platform=node --format=esm --sourcemap --minify --bundle --external:./node_modules/* --external:../../node_modules/* --outdir=dist",
 		"start": "node --enable-source-maps --es-module-specifier-resolution=node --experimental-modules dist/index.js",
 		"dev": "yarn run build && yarn run start",
-		"docker": "docker compose up --build --force-recreate"
+		"docker": "docker compose --env-file ../../.env up --build --force-recreate"
 	},
 	"license": "ISC",
 	"dependencies": {
@@ -61,6 +61,7 @@
 		"@types/passport-discord": "^0.1.5",
 		"@typescript-eslint/eslint-plugin": "^5.12.1",
 		"@typescript-eslint/parser": "^5.12.1",
+		"eslint": "^8.23.1",
 		"rimraf": "^3.0.2",
 		"typescript": "^4.5.5",
 		"typescript-eslint": "^0.0.1-alpha.0"

@@ -1,3 +1,4 @@
+import { Routes } from 'discord-api-types/v10';
 import { Infraction } from '../entities';
 import { Economica, Job } from '../structures';
 
@@ -14,8 +15,7 @@ export class BansJob implements Job {
 		bans
 			.filter((ban) => ban.createdAt.getTime() + ban.duration < Date.now())
 			.forEach(async (ban) => {
-				const guild = client.guilds.cache.get(ban.guild.id);
-				await guild.members.unban(ban.target.userId, 'Economica | Ban expired.').catch(() => null);
+				await client.rest.delete(Routes.guildBans(ban.guild.id), { body: { reason: 'Economica | Ban expired.' } });
 				await ban.save();
 			});
 	};

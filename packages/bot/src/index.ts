@@ -6,15 +6,37 @@
 // | $$      | $$      | $$  | $$| $$  | $$| $$  | $$| $$ | $$ | $$| $$| $$       /$$__  $$
 // | $$$$$$$$|  $$$$$$$|  $$$$$$/| $$  | $$|  $$$$$$/| $$ | $$ | $$| $$|  $$$$$$$|  $$$$$$$
 // |________/ \_______/ \______/ |__/  |__/ \______/ |__/ |__/ |__/|__/ \_______/ \_______/
+import { Collection } from '@discordjs/collection';
+import { REST } from '@discordjs/rest';
 import { RESTPostAPIApplicationCommandsJSONBody, Routes } from 'discord-api-types/v10';
+import express from 'express';
+import { Logger } from 'tslog';
 import { DataSource } from 'typeorm';
 
 import { routes } from './api';
-import { CLIENT_ID, databaseOptions, DB_OPTION, DEBUG, DEPLOY_ALL_MODULES, DEPLOY_COMMANDS, DEVELOPMENT, DEVELOPMENT_GUILD_IDS, PORT } from './config.js';
+import {
+	BOT_TOKEN,
+	CLIENT_ID,
+	databaseOptions,
+	DB_OPTION,
+	DEBUG,
+	DEPLOY_ALL_MODULES,
+	DEPLOY_COMMANDS,
+	DEVELOPMENT,
+	DEVELOPMENT_GUILD_IDS,
+	loggerOptions,
+	PORT,
+	restOptions,
+} from './config.js';
 import { Economica } from './structures/index.js';
 import { DefaultModulesObj } from './typings';
 
 const client = new Economica();
+
+client.server = express();
+client.rest = new REST(restOptions).setToken(BOT_TOKEN);
+client.commands = new Collection();
+client.log = new Logger(loggerOptions);
 
 async function unhandledRejection(err: Error): Promise<void> {
 	if (DEBUG) {

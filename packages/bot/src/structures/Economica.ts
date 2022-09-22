@@ -5,7 +5,6 @@ import { Logger } from 'tslog';
 import { DataSource } from 'typeorm';
 
 import { Command } from '.';
-import { BOT_TOKEN, databaseOptions, loggerOptions, restOptions } from '../config';
 
 export class Economica {
 	server: express.Express;
@@ -17,12 +16,4 @@ export class Economica {
 	log: Logger;
 
 	db: DataSource;
-
-	public constructor() {
-		this.server = express();
-		this.rest = new REST(restOptions).setToken(BOT_TOKEN);
-		this.commands = new Collection();
-		this.log = new Logger(loggerOptions);
-		this.db = new DataSource(databaseOptions);
-	}
 }

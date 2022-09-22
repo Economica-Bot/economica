@@ -17,7 +17,7 @@ export async function interval(ctx: Context, type: keyof typeof intervals) {
 	if (!ctx.guildEntity.intervals[type].enabled) throw new CommandError('This interval command is disabled.');
 	else {
 		const { amount } = ctx.guildEntity.intervals[type];
-		recordTransaction(ctx.interaction.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, intervals[type], amount, 0);
+		recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, intervals[type], amount, 0);
 		return `${Emojis.TIME} You earned ${ctx.guildEntity.currency} \`${parseNumber(amount)}\`!`;
 	}
 }

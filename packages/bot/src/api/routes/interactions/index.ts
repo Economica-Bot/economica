@@ -1,8 +1,9 @@
-import { bot } from '@economica/bot';
 import { APIInteraction, InteractionType } from 'discord-api-types/v10';
 import { verifyKeyMiddleware } from 'discord-interactions';
 import express, { raw } from 'express';
-import { PUB_KEY } from 'packages/bot/src/config';
+
+import { bot } from '../../..';
+import { PUB_KEY } from '../../../config';
 
 const router = express.Router()
 	.use(raw({ type: 'application/json' }), verifyKeyMiddleware(PUB_KEY))
