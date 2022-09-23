@@ -52,7 +52,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 			module: this.module,
 			format: this.format,
 			examples: this.examples,
-			clientPermissions: this.clientPermissions,
+			clientPermissions: this.clientPermissions.toString(),
 			global: this.global,
 			enabled: this.enabled,
 			default_member_permissions: this.default_member_permissions,

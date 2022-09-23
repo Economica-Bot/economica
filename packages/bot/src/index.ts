@@ -134,8 +134,9 @@ if (DEPLOY_COMMANDS === 0) {
 client.log.info('Commands registered');
 
 client.server
+	.use((req, res, next) => { res.locals.client = client; next(); })
 	.use('/api', routes)
-	.listen(PORT, () => 'Listening!');
+	.listen(PORT, () => client.log.info(`Listening on port ${PORT}`));
 
 process.on('unhandledRejection', (err: Error) => unhandledRejection(err));
 process.on('uncaughtException', (err) => uncaughtException(err));
