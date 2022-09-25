@@ -25,8 +25,9 @@
 		"declarationMap": true
 	},
 	"include": [
-		"src/**/*.ts"
-, "src/deployments/deployGlobal.js", "src/deployments/deploy.js"	],
+		"src/**/*.ts",
+		"index.d.ts" 
+	],
 	"exclude": [
 		"node_modules",
 		"dist"

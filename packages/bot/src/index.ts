@@ -54,6 +54,7 @@ async function uncaughtException(err: Error) {
 
 client.log.debug('Connecting to DB');
 const entityFiles = await import('./entities');
+
 client.db = await new DataSource({
 	...databaseOptions,
 	entities: Object.values(entityFiles),

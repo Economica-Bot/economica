@@ -15,7 +15,7 @@ export default class implements Command {
 	public execution: Router = Router()
 		.use('/', async (req, res) => {
 			const interaction = req.body as APIChatInputApplicationCommandInteraction;
-			const ping = Number(DiscordSnowflake.deconstruct(interaction.id).timestamp) - Date.now();
+			const ping = Date.now() - Number(DiscordSnowflake.deconstruct(interaction.id).timestamp);
 			const dbStart = Date.now();
 			await res.locals.client.db.query('');
 			const dbPing = Date.now() - dbStart;

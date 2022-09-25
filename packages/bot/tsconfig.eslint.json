@@ -4,7 +4,8 @@
     "noEmit": true
   },
   "include": [
-    "src"
+    "src",
+    "index.d.ts"
   ],
   "exclude": [
     "node_modules",
