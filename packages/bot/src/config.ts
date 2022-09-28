@@ -65,9 +65,6 @@ export const databaseOptions: DataSourceOptions = {
 	port: DB_PORT,
 	database: DB_NAME,
 	logger: 'advanced-console',
-	ssl: {
-		rejectUnauthorized: false,
-	},
 };
 
 export const loggerOptions: ISettingsParam = {

@@ -31,14 +31,13 @@ export class Context<T extends APIApplicationCommandInteraction | APIMessageAppl
 	}
 
 	public async init(): Promise<this> {
-		let commandName: string;
-		const command = this.client.commands.get(commandName);
+		const command = this.client.commands.get(this.interaction.data.name);
 		if (!command) throw new Error('There was an error while executing this command.');
 
 		this.command = command;
 
-		this.userEntity = (await User.findOne({ where: { id: this.interaction.user.id } }))
-			?? (await User.create({ id: this.interaction.user.id }).save());
+		this.userEntity = (await User.findOne({ where: { id: this.interaction.member.user.id } }))
+			?? (await User.create({ id: this.interaction.member.user.id }).save());
 		this.guildEntity = (await Guild.findOne({ where: { id: this.interaction.guild_id } }))
 			?? (await Guild.create({ id: this.interaction.guild_id }).save());
 		this.memberEntity = (await Member.findOne({ where: { user: { id: this.userEntity.id }, guild: { id: this.guildEntity.id } } }))
