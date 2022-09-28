@@ -8,7 +8,7 @@ import {
 import { Command, Economica } from '.';
 import { Guild, Member, User } from '../entities';
 
-export class Context<T extends APIApplicationCommandInteraction | APIMessageApplicationCommandInteraction = APIChatInputApplicationCommandInteraction | APIMessageApplicationCommandInteraction> {
+export class Context<T extends APIApplicationCommandInteraction | APIMessageApplicationCommandInteraction = APIChatInputApplicationCommandInteraction> {
 	public interaction: T;
 
 	public client: Economica;
