@@ -12,7 +12,7 @@ const router = express.Router()
 		const message = req.body as Exclude<APIInteraction, APIPingInteraction>;
 		if (message.type === InteractionType.ApplicationCommand) {
 			const ctx = await new Context(message, res.locals.client).init();
-			res.locals.ctx = ctx;
+			req.ctx = ctx;
 			const command = bot.commands.get(message.data.name);
 			command.execution(req, res, next);
 		}

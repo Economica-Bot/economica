@@ -35,7 +35,7 @@ export default class implements Command {
 			.setMaxValue(100)
 			.setRequired(false));
 
-	public execution: Router = Router()
+	public execution = Router()
 		.use('/', async (req, res) => {
 			const interaction = req.body as APIChatInputApplicationCommandInteraction;
 			const channel = (interaction.data.options?.find((option) => option.name === 'channel') as APIApplicationCommandInteractionDataChannelOption)?.value ?? interaction.channel_id;
@@ -47,12 +47,12 @@ export default class implements Command {
 				.filter((msg) => Date.now() - DiscordSnowflake.timestampFrom(msg.id) < 1000 * 60 * 60 * 24 * 14)
 				.map((msg) => msg.id);
 			if (messages.length < 2) throw new Error('Too few messages to delete.');
-			await res.locals.client.rest.post(
+			await req.ctx.client.rest.post(
 				Routes.channelBulkDelete(channel),
 				{ body: { messages } },
 			);
 			const embed = new EmbedBuilder()
-				.setAuthor({ name: 'Purging messages...' })
+				.setTitle('Purging messages...')
 				.setDescription(`Deleted \`${messages.length}\` messages.`);
 			res.send({
 				type: InteractionResponseType.ChannelMessageWithSource,
