@@ -53,7 +53,7 @@ router.get('/:guildId/channels', async (req, res) => {
 	const { guildId: id } = req.params;
 	const channels = await bot.rest.get(Routes.guildChannels(id));
 	const textChannels = channels.filter((channel) => channel.type === ChannelType.GuildText);
-	res.send(textChannels.toJSON());
+	res.send(textChannels);
 });
 
 router.get('/:guildId/transaction_log', async (req, res) => {
