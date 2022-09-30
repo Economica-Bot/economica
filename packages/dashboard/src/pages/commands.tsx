@@ -1,4 +1,3 @@
-import { Command } from '@economica/bot/src/structures';
 import axios from 'axios';
 import { RESTGetAPICurrentUserResult } from 'discord-api-types/v10';
 import { GetServerSidePropsContext, NextPage } from 'next';
@@ -9,8 +8,8 @@ import { NavBar } from '../components/misc/NavBar';
 import { validateCookies } from '../lib/helpers';
 
 type Props = {
-	commands: Array<Command>;
-	user: RESTGetAPICurrentUserResult
+	commands: any[],
+	user: RESTGetAPICurrentUserResult,
 };
 
 const CommandsPage: NextPage<Props> = ({ commands, user }) => {
@@ -21,14 +20,14 @@ const CommandsPage: NextPage<Props> = ({ commands, user }) => {
 	const [module, setModule] = useState('ALL');
 
 	useEffect(() => {
-		commands?.forEach((command) => {
-			if (!modules.find((module) => module === command.metadata.module)) modules.push(command.metadata.module);
+		currCommands.forEach((command) => {
+			if (!modules.find((module) => module === command.module)) modules.push(command.module);
 			setModules(modules);
 		});
 
 		setCurrCommands(
 			commands
-				?.filter(({ metadata }) => {
+				.filter((metadata) => {
 					if (
 						query
 						&& !metadata.name.toLowerCase().includes(query.toLowerCase())
@@ -39,9 +38,9 @@ const CommandsPage: NextPage<Props> = ({ commands, user }) => {
 
 					return true;
 				})
-				.sort((a, b) => a.metadata.name.localeCompare(b.metadata.name)),
+				.sort((a, b) => a.name.localeCompare(b.name)),
 		);
-	}, [module, query, commands]);
+	}, [module, query, currCommands]);
 
 	return (
 		<>
@@ -68,7 +67,7 @@ const CommandsPage: NextPage<Props> = ({ commands, user }) => {
 						))}
 					</div>
 
-					{currCommands && currCommands.map(({ metadata }) => (
+					{currCommands && currCommands.map((metadata) => (
 						<div
 							key={metadata.name}
 							tabIndex={0}
@@ -110,15 +109,14 @@ const CommandsPage: NextPage<Props> = ({ commands, user }) => {
 	);
 };
 
-export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 	const headers = validateCookies(ctx);
-	if (!headers) return { props: { user: null } };
 	const res = await axios
 		.get<RESTGetAPICurrentUserResult>('http://localhost:3000/api/users/@me', { headers })
 		.catch(() => null);
 	const { data: commands } = await axios
 		.get('http://localhost:3000/api/commands');
 	return { props: { commands, user: res ? res.data : null } as Props };
-}
+};
 
 export default CommandsPage;

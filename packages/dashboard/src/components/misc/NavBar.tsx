@@ -27,13 +27,14 @@ export const NavBar: FC<Props> = ({ user }) => {
 				className="mx-3 flex items-center justify-left cursor-pointer flex-grow"
 				onClick={() => Router.push('/')}
 			>
-				<Image
-					src="/ecnmca-logo2.png"
-					alt="Economica Navbar Logo"
-					className="rotate"
-					width={40}
-					height={40}
-				/>
+				<div className='relative h-10 w-10'>
+					<Image
+						src="/ecnmca-logo2.png"
+						alt="Economica Navbar Logo"
+						className="rotate"
+						layout='fill'
+					/>
+				</div>
 				<h1 className="px-3 text-white text-3xl font-thin my-auto">
 					Economica
 				</h1>

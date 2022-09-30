@@ -1,8 +1,8 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 
-import { CommandError, Context } from '../structures';
-import { TransactionString, Intervals, Emojis } from '../typings';
 import { recordTransaction } from '.';
+import { Context } from '../structures';
+import { Emojis, Intervals, TransactionString } from '../typings';
 
 const intervals: Record<keyof Intervals, TransactionString> = {
 	daily: 'INTERVAL_MINUTE',
@@ -14,7 +14,7 @@ const intervals: Record<keyof Intervals, TransactionString> = {
 };
 
 export async function interval(ctx: Context, type: keyof typeof intervals) {
-	if (!ctx.guildEntity.intervals[type].enabled) throw new CommandError('This interval command is disabled.');
+	if (!ctx.guildEntity.intervals[type].enabled) throw new Error('This interval command is disabled.');
 	else {
 		const { amount } = ctx.guildEntity.intervals[type];
 		recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, intervals[type], amount, 0);

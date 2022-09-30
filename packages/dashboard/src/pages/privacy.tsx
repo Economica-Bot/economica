@@ -14,7 +14,7 @@ const PrivacyPage: NextPage<Props> = ({ user }) => (
 	<>
 		<NavBar user={user} />
 		<div className="flex justify-center">
-			<article className="prose prose-sm md:prose-base lg:prose-lg xl:prose-xl mt-40 mb-5 p-3">
+			<article className="prose prose-sm md:prose-base lg:prose-lg mt-40 mb-5 p-3">
 				<h1>PRIVACY POLICY</h1>
 				<h4>Last updated and effective: May 1st, 2022</h4>
 				<p>

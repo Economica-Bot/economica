@@ -6,7 +6,6 @@
 // | $$      | $$      | $$  | $$| $$  | $$| $$  | $$| $$ | $$ | $$| $$| $$       /$$__  $$
 // | $$$$$$$$|  $$$$$$$|  $$$$$$/| $$  | $$|  $$$$$$/| $$ | $$ | $$| $$|  $$$$$$$|  $$$$$$$
 // |________/ \_______/ \______/ |__/  |__/ \______/ |__/ |__/ |__/|__/ \_______/ \_______/
-import { Collection } from '@discordjs/collection';
 import { REST } from '@discordjs/rest';
 import { RESTPostAPIApplicationCommandsJSONBody, Routes } from 'discord-api-types/v10';
 import express from 'express';
@@ -28,6 +27,7 @@ import {
 	PORT,
 	restOptions,
 } from './config.js';
+import { commandData } from './lib';
 import { Economica } from './structures/index.js';
 import { DefaultModulesObj } from './typings';
 
@@ -35,7 +35,6 @@ const client = new Economica();
 
 client.server = express();
 client.rest = new REST(restOptions).setToken(BOT_TOKEN);
-client.commands = new Collection();
 client.log = new Logger(loggerOptions);
 
 async function unhandledRejection(err: Error): Promise<void> {
@@ -83,25 +82,15 @@ client.log.info('Jobs registered');
 
 client.log.debug('Registering commands');
 
-const files = await import('./commands');
-Object.values(files).forEach((Constructor) => {
-	const command = new Constructor();
-
-	// Validation
-	if (!command.metadata.module) throw new Error(`Command ${command.metadata.name} missing module!`);
-	if (!command.metadata.format) throw new Error(`Command ${command.metadata.name} missing format!`);
-	if (!command.metadata.examples) throw new Error(`Command ${command.metadata.name} missing examples!`);
-
-	client.log.debug(`Registering command ${command.metadata.name}`);
-	client.commands.set(command.metadata.name, command);
-});
-
 const updateCommands = async () => {
 	const defaultCommandData: RESTPostAPIApplicationCommandsJSONBody[] = [];
 	const specialCommandData: RESTPostAPIApplicationCommandsJSONBody[] = [];
-	client.commands.forEach((command) => {
-		if (DefaultModulesObj[command.metadata.module].type === 'DEFAULT') defaultCommandData.push(command.metadata.toJSON());
-		else specialCommandData.push(command.metadata.toJSON());
+	commandData.forEach((metadata) => {
+		if (DefaultModulesObj[metadata.module].type === 'DEFAULT') {
+			defaultCommandData.push(metadata);
+		} else {
+			specialCommandData.push(metadata);
+		}
 	});
 
 	DEVELOPMENT_GUILD_IDS.forEach(async (id) => {

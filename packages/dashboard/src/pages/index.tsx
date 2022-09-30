@@ -52,11 +52,12 @@ const Home: NextPage<Props> = ({ user }) => (
 					</button>
 				</div>
 			</div>
-			<div className="relative h-[250px] w-[300px] hover:scale-110 transition duration-700 hidden md:block">
+			<div className="relative h-[250px] w-[300px]  hover:scale-110 transition duration-700 hidden md:block m-10">
 				<Image
 					src="/Economica Mockup.png"
 					alt="Economica Mockup"
 					layout='fill'
+					className='object-scale-down'
 				/>
 			</div>
 		</section>

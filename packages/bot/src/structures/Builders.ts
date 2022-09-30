@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Permissions } from 'discord-api-types/globals';
+import { Permissions } from 'discord-api-types/v10';
 
 import { ModuleString } from '../typings';
 
@@ -46,16 +46,10 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	public override toJSON(): ReturnType<typeof SlashCommandBuilder.prototype.toJSON> & {
-		module: ModuleString,
-		format: string,
-		examples: string[],
-		clientPermissions: Permissions | string | number | bigint,
-		global: boolean,
-		enabled: boolean,
-	} {
+	public override toJSON() {
 		return {
 			...super.toJSON(),
+			description: this.description,
 			module: this.module,
 			format: this.format,
 			examples: this.examples,

@@ -1,5 +1,5 @@
-import { Snowflake } from 'discord-api-types/v10';
 import { EmbedFooterData } from '@discordjs/builders';
+import { Snowflake } from 'discord-api-types/v10';
 
 export interface IncomeCommand {
 	min?: number;

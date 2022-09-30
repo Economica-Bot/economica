@@ -15,7 +15,7 @@ export const FeatureCard: FC<Props> = ({ src, header, description, order }) => (
 				src={src}
 				alt=""
 				layout='fill'
-				className="rounded-xl shadow-3xl"
+				className="rounded-xl shadow-3xl object-contain"
 			/>
 		</figure>
 		<div className="card-body">

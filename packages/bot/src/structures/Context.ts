@@ -2,18 +2,16 @@
 import {
 	APIApplicationCommandInteraction,
 	APIChatInputApplicationCommandInteraction,
-	APIMessageApplicationCommandInteraction,
+	APIMessageComponentInteraction,
 } from 'discord-api-types/v10';
 
-import { Command, Economica } from '.';
+import { Economica } from '.';
 import { Guild, Member, User } from '../entities';
 
-export class Context<T extends APIApplicationCommandInteraction | APIMessageApplicationCommandInteraction = APIChatInputApplicationCommandInteraction> {
+export class Context<T extends APIApplicationCommandInteraction | APIMessageComponentInteraction = APIChatInputApplicationCommandInteraction> {
 	public interaction: T;
 
 	public client: Economica;
-
-	public command: Command;
 
 	public userEntity: User;
 
@@ -31,11 +29,6 @@ export class Context<T extends APIApplicationCommandInteraction | APIMessageAppl
 	}
 
 	public async init(): Promise<this> {
-		const command = this.client.commands.get(this.interaction.data.name);
-		if (!command) throw new Error('There was an error while executing this command.');
-
-		this.command = command;
-
 		this.userEntity = (await User.findOne({ where: { id: this.interaction.member.user.id } }))
 			?? (await User.create({ id: this.interaction.member.user.id }).save());
 		this.guildEntity = (await Guild.findOne({ where: { id: this.interaction.guild_id } }))

@@ -15,7 +15,9 @@ function MyApp(AppProps: AppProps) {
 	return (
 		<>
 			<ToastContainer theme="dark" position="bottom-right" newestOnTop={true} />
-			<AppProps.Component {...AppProps.pageProps} />
+			<div className='flex-1'>
+				<AppProps.Component {...AppProps.pageProps} />
+			</div>
 		</>
 	);
 }
