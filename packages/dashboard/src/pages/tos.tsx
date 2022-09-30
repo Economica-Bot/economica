@@ -3,6 +3,7 @@ import { RESTGetAPICurrentUserResult } from 'discord-api-types/v10';
 import { GetServerSidePropsContext, NextPage } from 'next';
 import Link from 'next/link';
 
+import { Footer } from '../components/misc/Footer';
 import { NavBar } from '../components/misc/NavBar';
 import { validateCookies } from '../lib/helpers';
 
@@ -14,7 +15,7 @@ const TOS: NextPage<Props> = ({ user }) => (
 	<>
 		<NavBar user={user} />
 		<div className="flex justify-center">
-			<article className="prose prose-sm md:prose-base lg:prose-lg mt-40 mb-5 p-3">
+			<article className="prose prose-sm md:prose-base lg:prose-lg my-40 p-3">
 				<h1 className="uppercase">Terms of Service</h1>
 				<h4>Last updated: May 1st, 2022</h4>
 				<p>
@@ -187,6 +188,7 @@ const TOS: NextPage<Props> = ({ user }) => (
 				</p>
 			</article>
 		</div>
+		<Footer />
 	</>
 
 );

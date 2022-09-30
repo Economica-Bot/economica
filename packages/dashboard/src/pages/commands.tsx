@@ -114,9 +114,10 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 	const res = await axios
 		.get<RESTGetAPICurrentUserResult>('http://localhost:3000/api/users/@me', { headers })
 		.catch(() => null);
-	const { data: commands } = await axios
-		.get('http://localhost:3000/api/commands');
-	return { props: { commands, user: res ? res.data : null } as Props };
+	const res2 = await axios
+		.get('http://localhost:3000/api/commands')
+		.catch(() => null);
+	return { props: { commands: res2 ? res2.data : [], user: res ? res.data : null } as Props };
 };
 
 export default CommandsPage;
