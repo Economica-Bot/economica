@@ -3,7 +3,7 @@ import { FaDiscord, FaExclamationCircle } from 'react-icons/fa';
 
 export const LoginPage: FC = () => {
 	const handleLogin = () => {
-		window.location.href = 'http://localhost:3001/api/auth/discord';
+		window.location.href = 'http://localhost:3000/api/auth/discord';
 	};
 
 	return (

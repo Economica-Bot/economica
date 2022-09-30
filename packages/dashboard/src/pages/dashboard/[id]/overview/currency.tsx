@@ -1,12 +1,10 @@
 import axios from 'axios';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
-import { DashboardLayout } from '../../../../components/layouts/dashboard';
-import { NextPageWithLayout } from '../../../../lib/types';
-
-const CurrencyPage: NextPageWithLayout = () => {
+const CurrencyPage: NextPage = () => {
 	const router = useRouter();
 	const guildId = router.query.id;
 
@@ -15,13 +13,13 @@ const CurrencyPage: NextPageWithLayout = () => {
 
 	const getCurrency = async () => {
 		const { data: currency } = await axios.get(
-			`http://localhost:3001/api/guilds/${guildId}/currency`,
+			`http://localhost:3000/api/guilds/${guildId}/currency`,
 		);
 		setCurrCurrency(currency);
 	};
 
 	const changeCurrency = async () => {
-		await axios.put(`http://localhost:3001/api/guilds/${guildId}/currency`, {
+		await axios.put(`http://localhost:3000/api/guilds/${guildId}/currency`, {
 			currency: newCurrency,
 		});
 		toast.success('Currency Symbol Updated');
@@ -30,7 +28,7 @@ const CurrencyPage: NextPageWithLayout = () => {
 
 	const resetCurrency = async () => {
 		await axios.put(
-			`http://localhost:3001/api/guilds/${guildId}/currency/reset`,
+			`http://localhost:3000/api/guilds/${guildId}/currency/reset`,
 		);
 		toast.warn('Currency Symbol Reset');
 		getCurrency();
@@ -85,7 +83,5 @@ const CurrencyPage: NextPageWithLayout = () => {
 		</>
 	);
 };
-
-CurrencyPage.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default CurrencyPage;

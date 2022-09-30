@@ -9,7 +9,7 @@ type Props = {
 export const ChannelNavBar: FC<Props> = ({ guild }) => {
 	const router = useRouter();
 	const handleLogout = async () => {
-		window.location.href = 'http://localhost:3001/api/auth/logout';
+		window.location.href = 'http://localhost:3000/api/auth/logout';
 	};
 	return (
 		<div className="flex-none w-64 flex flex-col mt-5">

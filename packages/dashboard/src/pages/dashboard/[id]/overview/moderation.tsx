@@ -1,14 +1,14 @@
-import { GetServerSidePropsContext } from 'next';
-import { DashboardLayout } from '../../../../components/layouts/dashboard';
+import { Infraction } from '@economica/bot/src/entities';
+import { GetServerSidePropsContext, NextPage } from 'next';
+
 import { InfractionBar } from '../../../../components/misc/InfractionBar';
 import { fetchInfractions } from '../../../../lib/api';
-import { Infraction, NextPageWithLayout } from '../../../../lib/types';
 
 type Props = {
 	infractions: Infraction[];
 };
 
-const ModerationPage: NextPageWithLayout<Props> = ({ infractions }) => (
+const ModerationPage: NextPage<Props> = ({ infractions }) => (
 	<>
 		<h1 className="text-3xl mt-5 font-economica">Moderation Log</h1>
 		<div className="mt-5">
@@ -28,9 +28,5 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 	const infractions = await fetchInfractions(ctx);
 	return { props: { infractions } as Props };
 }
-
-ModerationPage.getLayout = function (page) {
-	return <DashboardLayout>{page}</DashboardLayout>;
-};
 
 export default ModerationPage;

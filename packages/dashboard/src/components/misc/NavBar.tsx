@@ -1,4 +1,5 @@
 import { APIUser, RouteBases } from 'discord-api-types/v10';
+import Image from 'next/image';
 import Link from 'next/link';
 import Router, { useRouter } from 'next/router';
 import { FC } from 'react';
@@ -12,10 +13,10 @@ export const NavBar: FC<Props> = ({ user }) => {
 	const router = useRouter();
 
 	const handleLogin = () => {
-		router.replace('http://localhost:3001/api/auth/discord');
+		router.replace('http://localhost:3000/api/auth/discord');
 	};
 	const handleLogout = () => {
-		router.replace('http://localhost:3001/api/auth/logout');
+		router.replace('http://localhost:3000/api/auth/logout');
 	};
 	return (
 		<nav
@@ -26,14 +27,15 @@ export const NavBar: FC<Props> = ({ user }) => {
 				className="mx-3 flex items-center justify-left cursor-pointer flex-grow"
 				onClick={() => Router.push('/')}
 			>
-				<img
+				<Image
 					src="/ecnmca-logo2.png"
 					alt="Economica Navbar Logo"
 					className="rotate"
 					width={40}
+					height={40}
 				/>
 				<h1 className="px-3 text-white text-3xl font-thin my-auto">
-          Economica
+					Economica
 				</h1>
 			</div>
 
@@ -46,7 +48,7 @@ export const NavBar: FC<Props> = ({ user }) => {
 					className="dropdown-content menu p-2 rounded-box w-52 bg-discord-900 shadow-drop"
 				>
 					<li className="hover:text-white font-semibold">
-						<Link href="localhost:3001/api/invite">
+						<Link href="localhost:3000/api/invite">
 							<a>Invite</a>
 						</Link>
 					</li>
@@ -56,7 +58,7 @@ export const NavBar: FC<Props> = ({ user }) => {
 						</Link>
 					</li>
 					<li className="hover:text-white font-semibold">
-						<Link href="localhost:3001/api/support">
+						<Link href="localhost:3000/api/support">
 							<a>Support</a>
 						</Link>
 					</li>
@@ -64,7 +66,7 @@ export const NavBar: FC<Props> = ({ user }) => {
 			</div>
 
 			<div className="hidden md:flex text-xl children:mx-3 children:flex children:items-center children:children:mx-1 children:text-discord-400 children:transition">
-				<Link href='localhost:3001/api/invite'>
+				<Link href='localhost:3000/api/invite'>
 					<a className="hover:text-white text-underline">
 						<FaDiscord size={25} />
 						<h2>Invite</h2>
@@ -76,7 +78,7 @@ export const NavBar: FC<Props> = ({ user }) => {
 						<h2>Commands</h2>
 					</a>
 				</Link>
-				<Link href='localhost:3001/api/support'>
+				<Link href='localhost:3000/api/support'>
 					<a className="hover:text-white text-underline">
 						<FaCogs size={25} />
 						<h2>Support</h2>
@@ -90,9 +92,11 @@ export const NavBar: FC<Props> = ({ user }) => {
 						<div className="dropdown dropdown-end">
 							<label tabIndex={0} className="btn btn-ghost btn-circle avatar">
 								<div className="w-10 rounded-full">
-									<img
+									<Image
 										src={`${RouteBases.cdn}/avatars/${user.id}/${user.avatar}.png`}
 										alt=""
+										width={40}
+										height={40}
 									/>
 								</div>
 							</label>
@@ -102,7 +106,7 @@ export const NavBar: FC<Props> = ({ user }) => {
 							>
 								<li>
 									<Link href="/dashboard">
-                    Dashboard
+										Dashboard
 									</Link>
 								</li>
 								<li>

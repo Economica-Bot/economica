@@ -1,16 +1,14 @@
 import { Transaction } from '@economica/bot/src/entities';
-import { GetServerSidePropsContext } from 'next';
+import { GetServerSidePropsContext, NextPage } from 'next';
 
-import { DashboardLayout } from '../../../../components/layouts/dashboard';
 import { TransactionBar } from '../../../../components/misc/TransactionBar';
 import { fetchTransactions } from '../../../../lib/api';
-import { NextPageWithLayout } from '../../../../lib/types';
 
 type Props = {
 	transactions: Transaction[];
 };
 
-const ModerationPage: NextPageWithLayout<Props> = ({ transactions }) => (
+const ModerationPage: NextPage<Props> = ({ transactions }) => (
 	<>
 		<h1 className="text-3xl mt-5 font-economica">Transaction Log</h1>
 		<div className='mt-5'>
@@ -31,7 +29,5 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 	const transactions = await fetchTransactions(ctx);
 	return { props: { transactions } as Props };
 }
-
-ModerationPage.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default ModerationPage;

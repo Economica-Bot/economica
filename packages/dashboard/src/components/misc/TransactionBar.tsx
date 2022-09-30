@@ -1,9 +1,10 @@
+import { Transaction } from '@economica/bot/src/entities';
 import { FC } from 'react';
 
 import { UserCard } from './UserCard';
 
 type Props = {
-	transaction: any;
+	transaction: Transaction;
 };
 
 export const TransactionBar: FC<Props> = ({ transaction }) => (

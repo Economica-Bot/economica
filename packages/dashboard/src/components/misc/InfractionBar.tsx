@@ -1,6 +1,6 @@
+import { Infraction } from '@economica/bot/src/entities';
 import { FC } from 'react';
 
-import { Infraction } from '../../lib/types';
 import { UserCard } from './UserCard';
 
 type Props = {

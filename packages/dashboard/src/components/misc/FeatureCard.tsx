@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { FC } from 'react';
 
 type Props = {
@@ -9,10 +10,11 @@ type Props = {
 
 export const FeatureCard: FC<Props> = ({ src, header, description, order }) => (
 	<div data-aos={order} className="card bg-discord-600 shadow-xl w-96 m-10">
-		<figure>
-			<img
+		<figure className='relative h-96'>
+			<Image
 				src={src}
 				alt=""
+				layout='fill'
 				className="rounded-xl shadow-3xl"
 			/>
 		</figure>

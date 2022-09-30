@@ -1,15 +1,19 @@
 import { Command } from '@economica/bot/src/structures';
 import axios from 'axios';
+import { RESTGetAPICurrentUserResult } from 'discord-api-types/v10';
+import { GetServerSidePropsContext, NextPage } from 'next';
 import { useEffect, useState } from 'react';
 
-import { BaseLayout } from '../components/layouts/base';
-import { NextPageWithLayout } from '../lib/types';
+import { Footer } from '../components/misc/Footer';
+import { NavBar } from '../components/misc/NavBar';
+import { validateCookies } from '../lib/helpers';
 
 type Props = {
 	commands: Array<Command>;
+	user: RESTGetAPICurrentUserResult
 };
 
-const CommandsPage: NextPageWithLayout<Props> = ({ commands }) => {
+const CommandsPage: NextPage<Props> = ({ commands, user }) => {
 	const [currCommands, setCurrCommands] = useState(commands);
 
 	const [query, setQuery] = useState('');
@@ -17,14 +21,14 @@ const CommandsPage: NextPageWithLayout<Props> = ({ commands }) => {
 	const [module, setModule] = useState('ALL');
 
 	useEffect(() => {
-		commands.forEach((command) => {
+		commands?.forEach((command) => {
 			if (!modules.find((module) => module === command.metadata.module)) modules.push(command.metadata.module);
 			setModules(modules);
 		});
 
 		setCurrCommands(
 			commands
-				.filter(({ metadata }) => {
+				?.filter(({ metadata }) => {
 					if (
 						query
 						&& !metadata.name.toLowerCase().includes(query.toLowerCase())
@@ -41,6 +45,7 @@ const CommandsPage: NextPageWithLayout<Props> = ({ commands }) => {
 
 	return (
 		<>
+			<NavBar user={user} />
 			<div className="mt-20 p-10 flex flex-col items-center min-h-screen">
 				<h1 className="text-3xl font-bold m-3">Economica Commands</h1>
 				<div className="w-full max-w-[50em] flex flex-col items-center">
@@ -63,7 +68,7 @@ const CommandsPage: NextPageWithLayout<Props> = ({ commands }) => {
 						))}
 					</div>
 
-					{currCommands.map(({ metadata }) => (
+					{currCommands && currCommands.map(({ metadata }) => (
 						<div
 							key={metadata.name}
 							tabIndex={0}
@@ -100,17 +105,20 @@ const CommandsPage: NextPageWithLayout<Props> = ({ commands }) => {
 					))}
 				</div>
 			</div>
+			<Footer />
 		</>
 	);
 };
 
-export async function getServerSideProps() {
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+	const headers = validateCookies(ctx);
+	if (!headers) return { props: { user: null } };
+	const res = await axios
+		.get<RESTGetAPICurrentUserResult>('http://localhost:3000/api/users/@me', { headers })
+		.catch(() => null);
 	const { data: commands } = await axios
-		.get('http://localhost:3001/api/commands')
-		.catch(() => ({ data: null }));
-	return { props: { commands } as Props };
+		.get('http://localhost:3000/api/commands');
+	return { props: { commands, user: res ? res.data : null } as Props };
 }
-
-CommandsPage.getLayout = (page) => <BaseLayout>{page}</BaseLayout>;
 
 export default CommandsPage;

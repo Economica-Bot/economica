@@ -1,7 +1,5 @@
-import {
-	APIUser,
-	RESTGetAPICurrentUserGuildsResult,
-} from 'discord-api-types/v10';
+import { APIUser, RESTGetAPICurrentUserGuildsResult } from 'discord-api-types/v10';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { FC } from 'react';
 
@@ -13,18 +11,20 @@ type Props = {
 };
 
 const GuildNavBarIcon: FC<GuildIconProps> = ({ src }) => (
-	<img
+	<Image
 		src={src}
 		className="mt-3 flex-none w-12 cursor-pointer rounded-3xl hover:rounded-xl transition-all"
 		alt={src}
 		draggable={false}
+		width={64}
+		height={64}
 	/>
 );
 
 export const GuildNavBar: FC<Props> = ({ user, guilds }) => {
 	const router = useRouter();
 	return (
-		<div className="flex-none bg-discord-900 flex flex-col items-center overflow-scroll no-scrollbar w-16">
+		<div className="flex-none bg-discord-900 flex flex-col items-center overflow-scroll no-scrollbar px-3 py-5">
 			<div onClick={() => router.push('/dashboard')}>
 				<GuildNavBarIcon
 					src={`http://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`}

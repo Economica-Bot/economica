@@ -1,20 +1,14 @@
 import axios from 'axios';
-import { APIGuildTextChannel, ChannelType } from 'discord-api-types/v10';
-import { GetServerSidePropsContext } from 'next';
+import { RESTGetAPIGuildChannelsResult } from 'discord-api-types/v10';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
+import { fetchChannels } from 'packages/dashboard/src/lib/api';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
-import { DashboardLayout } from '../../../../components/layouts/dashboard';
-import { NextPageWithLayout } from '../../../../lib/types';
-
-type Props = {
-	channels: APIGuildTextChannel<ChannelType.GuildText>[];
-};
-
-const LogsPage: NextPageWithLayout<Props> = ({ channels }) => {
+const LogsPage: NextPage = () => {
 	const router = useRouter();
-	const guildId = router.query.id;
+	const guildId = router.query.id as string;
 
 	const [currTransactionLog, setCurrTransactionLog] = useState('');
 	const [newTransactionLog, setNewTransactionLog] = useState('');
@@ -22,18 +16,20 @@ const LogsPage: NextPageWithLayout<Props> = ({ channels }) => {
 	const [currInfractionLog, setCurrInfractionLog] = useState('');
 	const [newInfractionLog, setNewInfractionLog] = useState('');
 
+	const [channels, setChannels] = useState<RESTGetAPIGuildChannelsResult>([]);
+
 	const getTransactionLog = async () => {
 		const {
 			data: { transactionLogId },
 		} = await axios.get(
-			`http://localhost:3001/api/guilds/${guildId}/transaction_log`,
+			`http://localhost:3000/api/guilds/${guildId}/transaction_log`,
 		);
 		setCurrTransactionLog(transactionLogId);
 	};
 
 	const changeTransactionLogId = async () => {
 		await axios.put(
-			`http://localhost:3001/api/guilds/${guildId}/transaction_log`,
+			`http://localhost:3000/api/guilds/${guildId}/transaction_log`,
 			{ transactionLogId: newTransactionLog },
 		);
 		toast.success('Transaction Log Updated');
@@ -42,7 +38,7 @@ const LogsPage: NextPageWithLayout<Props> = ({ channels }) => {
 
 	const resetTransactionLog = async () => {
 		await axios.put(
-			`http://localhost:3001/api/guilds/${guildId}/transaction_log/reset`,
+			`http://localhost:3000/api/guilds/${guildId}/transaction_log/reset`,
 		);
 		toast.warn('Transaction Log Reset');
 		getTransactionLog();
@@ -52,14 +48,14 @@ const LogsPage: NextPageWithLayout<Props> = ({ channels }) => {
 		const {
 			data: { infractionLogId },
 		} = await axios.get(
-			`http://localhost:3001/api/guilds/${guildId}/infraction_log`,
+			`http://localhost:3000/api/guilds/${guildId}/infraction_log`,
 		);
 		setCurrInfractionLog(infractionLogId);
 	};
 
 	const changeInfractionLogId = async () => {
 		await axios.put(
-			`http://localhost:3001/api/guilds/${guildId}/infraction_log`,
+			`http://localhost:3000/api/guilds/${guildId}/infraction_log`,
 			{ infractionLogId: newInfractionLog },
 		);
 		toast.success('Infraction Log Updated');
@@ -68,7 +64,7 @@ const LogsPage: NextPageWithLayout<Props> = ({ channels }) => {
 
 	const resetInfractionLog = async () => {
 		await axios.put(
-			`http://localhost:3001/api/guilds/${guildId}/infraction_log/reset`,
+			`http://localhost:3000/api/guilds/${guildId}/infraction_log/reset`,
 		);
 		toast.warn('Infraction Log Reset');
 		getInfractionLog();
@@ -77,6 +73,7 @@ const LogsPage: NextPageWithLayout<Props> = ({ channels }) => {
 	useEffect(() => {
 		getTransactionLog();
 		getInfractionLog();
+		fetchChannels(guildId).then((channels) => setChannels(channels));
 	}, []);
 
 	return (
@@ -163,15 +160,5 @@ const LogsPage: NextPageWithLayout<Props> = ({ channels }) => {
 		</>
 	);
 };
-
-export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-	const { data: channels } = await axios.get(
-		`http://localhost:3001/api/guilds/${ctx.params!.id}/channels`,
-	);
-	const res = { props: { channels } as Props };
-	return res;
-}
-
-LogsPage.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default LogsPage;

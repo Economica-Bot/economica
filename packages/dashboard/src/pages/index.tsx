@@ -1,3 +1,7 @@
+import axios from 'axios';
+import { RESTGetAPICurrentUserResult } from 'discord-api-types/v10';
+import { GetServerSidePropsContext, NextPage } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
 	FaChartBar,
@@ -12,14 +16,20 @@ import {
 	FaTools,
 } from 'react-icons/fa';
 
-import { BaseLayout } from '../components/layouts/base';
 import { DeveloperCard } from '../components/misc/DeveloperCard';
 import { FeatureCard } from '../components/misc/FeatureCard';
+import { Footer } from '../components/misc/Footer';
 import { ModuleCard } from '../components/misc/ModuleCard';
-import { NextPageWithLayout } from '../lib/types';
+import { NavBar } from '../components/misc/NavBar';
+import { validateCookies } from '../lib/helpers';
 
-const Home: NextPageWithLayout = () => (
+type Props = {
+	user: RESTGetAPICurrentUserResult
+};
+
+const Home: NextPage<Props> = ({ user }) => (
 	<>
+		<NavBar user={user} />
 		<section className="h-screen flex items-center justify-center p-8">
 			<div className="flex flex-col items-center justify-between text-center">
 				<h1 className="text-5xl inline-block cursor-pointer text-white text-underline">
@@ -30,24 +40,24 @@ const Home: NextPageWithLayout = () => (
 				</h2>
 				<div className="flex">
 					<button className="bg-blurple shadow-drop mr-4 rounded-lg flex items-center py-1 px-4 drop-shadow-lg transition duration-500 hover:shadow-2xl hover:scale-110">
-						<Link href='localhost:3001/api/invite'>
+						<Link href='localhost:3000/api/invite'>
 							<a>Invite</a>
 						</Link>
-						<FaDiscord size={30} />
+						<FaDiscord className='ml-2' size={30} />
 					</button>
-					<button
-						onClick={() => window.scroll({
-							top: document.getElementById('features')?.getBoundingClientRect()?.top ?? 0 - 100,
-						})
-						}
-						className="bg-discord-700 shadow-drop rounded-lg flex items-center py-1 px-4 drop-shadow-lg transition duration-500 hover:shadow-2xl hover:scale-110"
-					>
-						<h5>Preview</h5>
+					<button className="bg-discord-700 shadow-drop rounded-lg flex items-center py-1 px-4 drop-shadow-lg transition duration-500 hover:shadow-2xl hover:scale-110">
+						<Link href="#features">
+							<a>Preview</a>
+						</Link>
 					</button>
 				</div>
 			</div>
-			<div className="hover:scale-110 transition duration-700 hidden md:flex md:w-[400px] lg:w-[500px]">
-				<img src="/Economica Mockup.png" alt="Economica Mockup" />
+			<div className="relative h-[250px] w-[300px] hover:scale-110 transition duration-700 hidden md:block">
+				<Image
+					src="/Economica Mockup.png"
+					alt="Economica Mockup"
+					layout='fill'
+				/>
 			</div>
 		</section>
 
@@ -62,7 +72,7 @@ const Home: NextPageWithLayout = () => (
 			id="features"
 			className="flex flex-col items-center text-center bg-discord-900 overflow-hidden"
 		>
-			<h1 className="text-underline text-4xl my-10">Features</h1>
+			<h1 className="text-underline text-4xl mt-32 mb-10">Features</h1>
 
 			<div className="carousel">
 				<div className="carousel-inn"></div>
@@ -153,7 +163,7 @@ const Home: NextPageWithLayout = () => (
 					<strong className="text-underline">Open Beta</strong>
 				</h3>
 				<button className="bg-blurple shadow-drop mr-4 rounded-lg flex items-center py-1 px-4 drop-shadow-lg transition duration-500 hover:shadow-2xl hover:scale-110">
-					<Link href='localhost:3001/api/invite'>
+					<Link href='localhost:3000/api/invite'>
 						<a>Invite</a>
 					</Link>
 					<FaDiscord size={30} />
@@ -220,9 +230,17 @@ const Home: NextPageWithLayout = () => (
 				/>
 			</div>
 		</section>
+		<Footer />
 	</>
 );
 
-Home.getLayout = (page) => <BaseLayout>{page}</BaseLayout>;
+export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
+	const headers = validateCookies(ctx);
+	if (!headers) return { props: { user: null } };
+	const res = await axios
+		.get<RESTGetAPICurrentUserResult>('http://localhost:3000/api/users/@me', { headers })
+		.catch(() => null);
+	return { props: { user: res ? res.data : null } };
+};
 
 export default Home;

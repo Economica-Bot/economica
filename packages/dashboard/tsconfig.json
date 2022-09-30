@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "es5",
+    "target": "ESNext",
     "lib": [
       "dom",
       "dom.iterable",
@@ -9,24 +9,23 @@
     ],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
-    "jsx": "preserve",
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
     "incremental": true,
-    "allowSyntheticDefaultImports": true,
-    "noFallthroughCasesInSwitch": true,
-    "rootDir": ".",
-    "baseUrl": ".",
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
     "composite": true,
-    "declaration": true,
-    "declarationMap": true,
     "isolatedModules": true,
-    "noEmit": false
+    "jsx": "preserve"
   },
-  "include": [
-    "next-env.d.ts",
-    "src/**/*.{ts,tsx}"
-  ],
   "exclude": [
     "tailwind.config.js"
+  ],
+  "include": [
+    "next-env.d.ts",
+    "./src/**/*.tsx",
   ]
 }
