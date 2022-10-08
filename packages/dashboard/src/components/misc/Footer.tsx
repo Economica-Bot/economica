@@ -5,7 +5,7 @@ import { FC } from 'react';
 export const Footer: FC = () => (
 	<footer className="bg-discord-900 bottom-0 z-50 flex flex-col items-center justify-center p-5 shadow-3xl">
 		<Image
-			src="/ecnmca-logo2.png"
+			src="/economica.png"
 			alt="Economica Navbar Logo"
 			className="rotate"
 			width={40}

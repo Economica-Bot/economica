@@ -3,29 +3,18 @@
   "compilerOptions": {
     "target": "ESNext",
     "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
     ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": false,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "incremental": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "composite": true,
-    "isolatedModules": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "noEmit": false
   },
   "exclude": [
     "tailwind.config.js"
   ],
   "include": [
-    "next-env.d.ts",
-    "./src/**/*.tsx",
+    "src/**/*.tsx",
+    "next-env.d.ts"
   ]
 }

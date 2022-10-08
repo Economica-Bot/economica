@@ -7,7 +7,7 @@ export class Guild extends BaseEntity {
 	@Column({ type: 'character varying', primary: true })
 	public id: string;
 
-	@Column({ type: 'character varying', default: DefaultCurrencySymbol })
+	@Column({ type: "character varying", default: DefaultCurrencySymbol })
 	public currency: string;
 
 	@Column({ type: 'character varying', default: null })

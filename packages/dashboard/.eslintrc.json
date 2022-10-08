@@ -1,8 +1,4 @@
 {
-  "extends": ["next/core-web-vitals", "../../.eslintrc.json"],
-  "root": true,
-  "rules": {
-    "@next/next/no-img-element": 0,
-    "react-hooks/exhaustive-deps": 0
-  }
+	"extends": "../../.eslintrc.json",
+	"root": true
 }

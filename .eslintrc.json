@@ -1,9 +1,5 @@
 {
 	"root": true,
-	"env": {
-		"browser": true,
-		"es2021": true
-	},
 	"parser": "@typescript-eslint/parser",
 	"parserOptions": {
 		"ecmaVersion": "latest",
@@ -17,6 +13,8 @@
 		"eslint:recommended",
 		"plugin:@typescript-eslint/eslint-recommended",
 		"plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:@typescript-eslint/strict",
 		"airbnb-base", 
 		"airbnb-typescript/base", 
 		"plugin:import/typescript"
@@ -49,8 +47,7 @@
 		"import/resolver": {
 			// "project": {},
 			"node": {
-				"extensions": [".ts", ".tsx"],
-				"moduleDirectory": ["./src"]
+				"extensions": [".ts", ".tsx"]
 			},
 			"typescript": {
 				"alwaysTryTypes": true

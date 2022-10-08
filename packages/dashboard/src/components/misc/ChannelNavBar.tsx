@@ -17,7 +17,7 @@ export const ChannelNavBar: FC<Props> = ({ guild }) => (
 					<h1 className="font-extrabold text-sm mb-2 cursor-default">
 						OVERVIEW
 					</h1>
-					<div>
+					<div className='flex flex-col'>
 						<Link href={`/dashboard/${guild?.id}/overview/currency`}>
 							<a className="hover:bg-discord-600 p-1 rounded-md cursor-pointer">
 								# currency-symbol
@@ -41,11 +41,13 @@ export const ChannelNavBar: FC<Props> = ({ guild }) => (
 					</div>
 				</div>
 			</div>
-			<Link href='http://localhost:3000/api/auth/logout'>
-				<a className="bg-danger w-32 h-8 rounded-xl m-5 self-center font-pt_sans font-extrabold">
-					Logout
-				</a>
-			</Link>
+			<div className='mx-auto my-5'>
+				<Link href='http://localhost:3000/api/auth/logout'>
+					<a className="btn btn-error">
+						Logout
+					</a>
+				</Link>
+			</div>
 		</div>
 	</div>
 );

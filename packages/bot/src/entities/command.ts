@@ -4,7 +4,7 @@ import { Member } from '.';
 
 @Entity({ name: 'command' })
 export class Command extends BaseEntity {
-	@Column({ type: 'character varying', primary: true })
+	@Column({ type: "character varying", primary: true })
 	public id: string = DiscordSnowflake.generate().toString();
 
 	@ManyToOne(() => Member, { onDelete: 'CASCADE' })

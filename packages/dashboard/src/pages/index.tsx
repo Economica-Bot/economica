@@ -1,7 +1,14 @@
+import {
+	DiscordCommand,
+	DiscordEmbed,
+	DiscordEmbedDescription,
+	DiscordMention,
+	DiscordMessage,
+	DiscordMessages,
+} from '@skyra/discord-components-react';
 import axios from 'axios';
 import { RESTGetAPICurrentUserResult } from 'discord-api-types/v10';
 import { GetServerSidePropsContext, NextPage } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import {
 	FaChartBar,
@@ -30,7 +37,7 @@ type Props = {
 const Home: NextPage<Props> = ({ user }) => (
 	<>
 		<NavBar user={user} />
-		<section className="h-screen flex items-center justify-center p-8">
+		<section className="h-screen min-h[80vh] flex items-center justify-center p-8">
 			<div className="flex flex-col items-center justify-between text-center">
 				<h1 className="text-5xl inline-block cursor-pointer text-white text-underline">
 					ECONOMICA
@@ -52,13 +59,22 @@ const Home: NextPage<Props> = ({ user }) => (
 					</button>
 				</div>
 			</div>
-			<div className="relative h-[250px] w-[300px]  hover:scale-110 transition duration-700 hidden md:block m-10">
-				<Image
-					src="/Economica Mockup.png"
-					alt="Economica Mockup"
-					layout='fill'
-					className='object-scale-down'
-				/>
+			<div className='mx-20 hidden lg:block'>
+				<DiscordMessages>
+					<DiscordMessage author='Economica' avatar='/economica.png' bot verified>
+						<DiscordCommand slot='reply' author='Adrastopoulos' avatar='/adrastopoulos.png' command='pay' />
+						<DiscordEmbed
+							slot="embeds"
+							authorImage="/adrastopoulos.png"
+							authorName="Adrastopoulos"
+							color="#06af17"
+						>
+							<DiscordEmbedDescription slot='description'>
+								Paid <DiscordMention>Kamaji</DiscordMention> 💵115
+							</DiscordEmbedDescription>
+						</DiscordEmbed>
+					</DiscordMessage>
+				</DiscordMessages>
 			</div>
 		</section>
 

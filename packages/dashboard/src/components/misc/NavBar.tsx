@@ -17,7 +17,7 @@ export const NavBar: FC<Props> = ({ user }) => (
 			<a className="mx-3 flex items-center justify-left cursor-pointer flex-grow">
 				<div className='relative h-10 w-10'>
 					<Image
-						src="/ecnmca-logo2.png"
+						src="/economica.png"
 						alt="Economica Navbar Logo"
 						className="rotate"
 						layout='fill'
