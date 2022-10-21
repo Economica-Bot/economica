@@ -10,7 +10,7 @@ type Props = {
 export const InfractionBar: FC<Props> = ({ infraction }) => (
 	<div
 		key={infraction.id}
-		className="w-full py-3 px-6 grid gap-10 grid-cols-5 bg-discord-900 mb-1 font-expletus_sans"
+		className='mb-1 grid w-full grid-cols-5 gap-10 bg-base-300 py-3 px-6 font-expletus_sans'
 	>
 		<UserCard id={infraction.target.userId} />
 		<h1>{infraction.type}</h1>

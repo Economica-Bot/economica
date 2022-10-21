@@ -1,51 +1,65 @@
-import { Incomes, Intervals, ListingString, Module, ModuleString, ReplyString } from '.';
+import {
+	IncomeCommand,
+	IncomeString,
+	IntervalCommand,
+	IntervalString,
+	ListingType,
+	ModuleObj,
+	ModuleString,
+	ReplyString
+} from '.';
 
 export const DefaultCurrencySymbol = '💵';
 
-export const DefaultIntervalsObj: Intervals = {
+export const DefaultIntervalsObj: Record<IntervalString, IntervalCommand> = {
 	minutely: {
 		amount: 50,
 		cooldown: 1000 * 60,
-		enabled: true,
+		enabled: true
 	},
 	hourly: {
 		amount: 500,
 		cooldown: 1000 * 60 * 60,
-		enabled: true,
+		enabled: true
 	},
 	daily: {
 		amount: 5_000,
 		cooldown: 1000 * 60 * 60 * 24,
-		enabled: true,
+		enabled: true
 	},
 	weekly: {
 		amount: 50_000,
 		cooldown: 1000 * 60 * 60 * 24 * 7,
-		enabled: true,
+		enabled: true
 	},
 	fortnightly: {
 		amount: 125_000,
 		cooldown: 1000 * 60 * 60 * 24 * 7 * 2,
-		enabled: true,
+		enabled: true
 	},
 	monthly: {
 		amount: 300_000,
 		cooldown: 1000 * 60 * 60 * 24 * 7 * 4,
-		enabled: true,
-	},
+		enabled: true
+	}
 };
 
-export const DefaultIncomesObj: Incomes = {
+export const DefaultIncomesObj: Record<IncomeString, IncomeCommand> = {
 	work: {
 		min: 100,
 		max: 500,
 		cooldown: 1000 * 30,
+		minfine: null,
+		maxfine: null,
+		chance: null
 	},
 	beg: {
 		min: 25,
 		max: 125,
+		minfine: null,
+		maxfine: null,
 		chance: 40,
-		cooldown: 1000 * 30,
+		cooldown: 1000 * 30
 	},
 	crime: {
 		min: 300,
@@ -53,59 +67,61 @@ export const DefaultIncomesObj: Incomes = {
 		chance: 60,
 		minfine: 300,
 		maxfine: 1500,
-		cooldown: 1000 * 60,
+		cooldown: 1000 * 60
 	},
 	rob: {
+		min: null,
+		max: null,
 		chance: 20,
 		minfine: 500,
 		maxfine: 2000,
-		cooldown: 1000 * 60,
-	},
+		cooldown: 1000 * 60
+	}
 };
 
-export const DefaultModulesObj: Record<ModuleString, Module> = {
+export const DefaultModulesObj: Record<ModuleString, ModuleObj> = {
 	ECONOMY: {
 		type: 'DEFAULT',
 		enabled: true,
-		user: null,
+		user: null
 	},
 	INCOME: {
 		type: 'DEFAULT',
 		enabled: true,
-		user: null,
+		user: null
 	},
 	INSIGHTS: {
 		type: 'SPECIAL',
 		enabled: false,
-		user: null,
+		user: null
 	},
 	INTERVAL: {
 		type: 'SPECIAL',
 		enabled: false,
-		user: null,
+		user: null
 	},
 	MODERATION: {
 		type: 'DEFAULT',
 		enabled: true,
-		user: null,
+		user: null
 	},
 	SHOP: {
 		type: 'DEFAULT',
 		enabled: true,
-		user: null,
+		user: null
 	},
 	UTILITY: {
 		type: 'DEFAULT',
 		enabled: true,
-		user: null,
-	},
+		user: null
+	}
 };
 
 export const EmbedColors: Record<ReplyString, string> = {
 	success: 'Green',
 	info: 'Blurple',
 	warn: 'Yellow',
-	error: 'Red',
+	error: 'Red'
 };
 export enum Emojis {
 	APPLE = '<a:apple:975152086700408842>',
@@ -223,20 +239,20 @@ export enum Emojis {
 	UNKNOWN = '<a:unknown:975152087115661372>',
 	UNLOCK = '<a:unlock:975152087384068096>',
 	URANIUM = '<:uranium:975152152198660248>',
-	WOOD = '<:wood:974924909383917568>',
+	WOOD = '<:wood:974924909383917568>'
 }
-export const ListingEmojis: Record<ListingString, `${Emojis}`> = {
+export const ListingEmojis: Record<keyof typeof ListingType, `${Emojis}`> = {
 	COLLECTABLE: '<:collectable:974924859895336971>',
 	GENERATOR: '<:generator:990007141320523827>',
 	INSTANT: '<a:unlock:975152087384068096>',
-	USABLE: '<a:unknown:975152087115661372>',
+	USABLE: '<a:unknown:975152087115661372>'
 };
 export const Icons: Record<number, `${Emojis}`> = {
 	0: '<:icon_1:974903674868498482>',
 	1: '<:icon_2:974903675891879997>',
 	2: '<:icon_3:974903677087281222>',
 	3: '<:icon_4:974903678920196157>',
-	4: '<:icon_5:974903678018404372>',
+	4: '<:icon_5:974903678018404372>'
 };
 export enum Properties {
 	TEXTILE_MILL = 'MANUFACTURING',
@@ -272,7 +288,7 @@ export enum Properties {
 	DIESEL_LOCOMOTIVE = 'TRANSPORATION',
 	ELECTRIC_LOCOMOTIVE = 'TRANSPORATION',
 	CESSNA = 'TRANSPORATION',
-	JUMBO_JET = 'TRANSPORATION',
+	JUMBO_JET = 'TRANSPORATION'
 }
 export type PropertyString = `${Properties}`;
 export type IndustryString = keyof typeof Properties;
@@ -327,67 +343,69 @@ export const RouletteBets: Record<RouletteBetsNamesType, RouletteBet> = {
 	single: {
 		type: 'Inside',
 		formatted: 'Single',
-		description: 'Bet on a single number',
+		description: 'Bet on a single number'
 	},
 	split: {
 		type: 'Inside',
 		formatted: 'Split',
-		description: 'Bet on two distinct vertically/horizontally adjacent numbers',
+		description: 'Bet on two distinct vertically/horizontally adjacent numbers'
 	},
 	street: {
 		type: 'Inside',
 		formatted: 'Street',
-		description: 'Bet on three distinct consecutive numbers in a horizontal line',
+		description:
+			'Bet on three distinct consecutive numbers in a horizontal line'
 	},
 	corner: {
 		type: 'Inside',
 		formatted: 'Corner',
-		description: 'Bet on four numbers that meet at one corner',
+		description: 'Bet on four numbers that meet at one corner'
 	},
 	double_street: {
 		type: 'Inside',
 		formatted: 'Double Street',
-		description: 'Bet on six consecutive numbers that form two horizontal lines',
+		description: 'Bet on six consecutive numbers that form two horizontal lines'
 	},
 	trio: {
 		type: 'Inside',
 		formatted: 'Trio',
-		description: 'A three-number bet that involves at least one zero',
+		description: 'A three-number bet that involves at least one zero'
 	},
 	first_four: {
 		type: 'Inside',
 		formatted: 'First Four',
-		description: 'Bet on 0-1-2-3',
+		description: 'Bet on 0-1-2-3'
 	},
 	half: {
 		type: 'Outside',
 		formatted: 'Half',
-		description: 'A bet that the number will be in the chosen range',
+		description: 'A bet that the number will be in the chosen range'
 	},
 	color: {
 		type: 'Outside',
 		formatted: 'Color',
-		description: 'A bet that the number will be the chosen color',
+		description: 'A bet that the number will be the chosen color'
 	},
 	even_or_odd: {
 		type: 'Outside',
 		formatted: 'Even or Odd',
-		description: 'A bet that the number will be of the chosen type',
+		description: 'A bet that the number will be of the chosen type'
 	},
 	dozen: {
 		type: 'Outside',
 		formatted: 'Dozen',
-		description: 'A bet that the number will be in the chosen dozen',
+		description: 'A bet that the number will be in the chosen dozen'
 	},
 	column: {
 		type: 'Outside',
 		formatted: 'Column',
-		description: 'A bet that the number will be in the chosen vertical column',
+		description: 'A bet that the number will be in the chosen vertical column'
 	},
 	snake: {
 		type: 'Outside',
 		formatted: 'Snake',
-		description: 'A special bet that covers the numbers 1, 5, 9, 12, 13, 16, 19, 23, 27, 30, 32, and 34',
-	},
+		description:
+			'A special bet that covers the numbers 1, 5, 9, 12, 13, 16, 19, 23, 27, 30, 32, and 34'
+	}
 };
 export const PaginationLimit = 5;

@@ -3,7 +3,7 @@ import Document, {
 	Head,
 	Html,
 	Main,
-	NextScript,
+	NextScript
 } from 'next/document';
 
 class MyDocument extends Document {
@@ -16,29 +16,29 @@ class MyDocument extends Document {
 		return (
 			<Html lang='en'>
 				<Head />
-				<meta charSet="UTF-8" />
-				<meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+				<meta charSet='UTF-8' />
+				<meta httpEquiv='X-UA-Compatible' content='IE=edge' />
+				<meta name='viewport' content='width=device-width, initial-scale=1.0' />
 
 				{/* Google Font */}
-				<link rel="preconnect" href="https://fonts.googleapis.com" />
+				<link rel='preconnect' href='https://fonts.googleapis.com' />
 				<link
-					href="https://fonts.googleapis.com/css2?family=Expletus+Sans:wght@400;700&family=Lato&family=Roboto:wght@100;400;700&family=Economica&family=PT+Sans&display=swap"
-					rel="stylesheet"
+					href='https://fonts.googleapis.com/css2?family=Expletus+Sans:wght@400;700&family=Lato&family=Roboto:wght@100;400;700&family=Economica&family=PT+Sans&display=swap'
+					rel='stylesheet'
 				/>
 
 				{/* Browser Metadata */}
 				<title>Economica</title>
-				<link rel="icon" type="image/png" href="/economica.png" />
-				<meta property="og:title" content="Economica - Discord Economy Bot" />
-				<meta property="og:site_name" content="Economica" />
+				<link rel='icon' type='image/png' href='/economica.png' />
+				<meta property='og:title' content='Economica - Discord Economy Bot' />
+				<meta property='og:site_name' content='Economica' />
 				<meta
-					property="og:description"
-					content="The Best New Discord Economy Bot."
+					property='og:description'
+					content='The Best New Discord Economy Bot.'
 				/>
-				<meta property="og:image" content="/assets/economica.png" />
-				<meta name="theme-color" content="#8c8ceb" />
-				<body className="font-roboto text-white bg-discord-800">
+				<meta property='og:image' content='/assets/economica.png' />
+				<meta name='theme-color' content='#8c8ceb' />
+				<body className='bg-base-100 font-roboto'>
 					<Main />
 					<NextScript />
 				</body>

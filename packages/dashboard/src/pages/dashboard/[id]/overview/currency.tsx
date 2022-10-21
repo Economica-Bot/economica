@@ -1,87 +1,95 @@
-import axios from 'axios';
-import { NextPage } from 'next';
+import { DefaultCurrencySymbol } from '@economica/bot/src/typings';
+import {
+	RESTGetAPICurrentUserGuildsResult,
+	RESTGetAPICurrentUserResult
+} from 'discord-api-types/v10';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
-const CurrencyPage: NextPage = () => {
+import DashboardLayout from '../../../../components/layouts/DashboardLayout';
+import { trpc } from '../../../../lib/trpc';
+import { NextPageWithLayout } from '../../../_app';
+
+type Props = {
+	guilds: RESTGetAPICurrentUserGuildsResult;
+	user: RESTGetAPICurrentUserResult;
+};
+
+const CurrencyPage: NextPageWithLayout<Props> = () => {
 	const router = useRouter();
-	const guildId = router.query.id;
+	const [currency, setCurrency] = useState('');
+	const guildId = router.query.id as string;
 
-	const [currCurrency, setCurrCurrency] = useState('');
-	const [newCurrency, setNewCurrency] = useState('');
-
-	const getCurrency = async () => {
-		const { data: currency } = await axios.get(
-			`http://localhost:3000/api/guilds/${guildId}/currency`,
-		);
-		setCurrCurrency(currency);
-	};
-
-	const changeCurrency = async () => {
-		await axios.put(`http://localhost:3000/api/guilds/${guildId}/currency`, {
-			currency: newCurrency,
-		});
-		toast.success('Currency Symbol Updated');
-		getCurrency();
-	};
-
-	const resetCurrency = async () => {
-		await axios.put(
-			`http://localhost:3000/api/guilds/${guildId}/currency/reset`,
-		);
-		toast.warn('Currency Symbol Reset');
-		getCurrency();
-	};
+	const { data, refetch, isLoading } = trpc.guild.byId.useQuery(guildId);
+	const mutation = trpc.guild.update.useMutation();
 
 	useEffect(() => {
-		getCurrency();
-	});
+		if (data?.currency) setCurrency(data.currency);
+	}, [isLoading, data, data?.currency, mutation.isLoading]);
+
+	const changeCurrency = async (currency: string) => {
+		mutation.mutate({ id: guildId, currency });
+		await refetch();
+		toast.success('Currency Symbol Updated');
+	};
 
 	return (
-		<>
-			<div className="bg-discord-900 mt-5 py-3 px-6 rounded-full flex items-center justify-between">
-				<div>
-					<h1 className="text-5xl max-w-full cursor-default select-none">
-						{currCurrency}
-					</h1>
-				</div>
-				<div className="flex items-center justify-center">
-					<label className="btn btn-success mr-5" htmlFor="my-modal">
-						Edit
-					</label>
-					<input type="checkbox" id="my-modal" className="modal-toggle" />
-					<div className="modal">
-						<div className="modal-box bg-discord-800">
-							<label className="label">
-								<span className="label-text">Enter A New Currency Symbol</span>
+		<div className='mt-5 flex items-center justify-between rounded-full bg-base-300 py-3 px-6'>
+			<div>
+				<h1 className='max-w-full cursor-default select-none text-5xl'>
+					{currency}
+				</h1>
+			</div>
+			<div className='flex items-center justify-center'>
+				<input type='checkbox' id='currency-modal' className='modal-toggle' />
+				<div className='modal'>
+					<div className='modal-box bg-base-300'>
+						<label className='label'>
+							<span className='label-text'>Enter A New Currency Symbol</span>
+						</label>
+						<input
+							id='new_currency'
+							minLength={1}
+							className='input input-bordered mt-5 w-full bg-base-200 text-5xl'
+						/>
+						<div className='modal-action'>
+							<label
+								htmlFor='currency-modal'
+								className='btn btn-success'
+								onClick={() =>
+									changeCurrency(
+										(
+											document.getElementById(
+												'new_currency'
+											) as HTMLInputElement
+										).value
+									)
+								}
+							>
+								Update
 							</label>
-							<input
-								className="bg-discord-800 text-5xl mt-5 w-full input input-bordered"
-								onChange={(e) => setNewCurrency(e.target.value)}
-							></input>
-							<div className="modal-action">
-								<label
-									htmlFor="my-modal"
-									className="btn"
-									onClick={changeCurrency}
-								>
-									Update
-								</label>
-								<label htmlFor="my-modal" className="btn">
-									Cancel
-								</label>
-							</div>
+							<label htmlFor='currency-modal' className='btn btn-warning'>
+								Cancel
+							</label>
 						</div>
 					</div>
-
-					<button className="btn btn-error" onClick={resetCurrency}>
-						Reset
-					</button>
 				</div>
+
+				<label className='btn btn-success mr-5' htmlFor='currency-modal'>
+					Edit
+				</label>
+				<button
+					className='btn btn-error'
+					onClick={() => changeCurrency(DefaultCurrencySymbol)}
+				>
+					Reset
+				</button>
 			</div>
-		</>
+		</div>
 	);
 };
+
+CurrencyPage.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default CurrencyPage;

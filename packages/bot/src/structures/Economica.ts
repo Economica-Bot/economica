@@ -4,11 +4,11 @@ import { Logger } from 'tslog';
 import { DataSource } from 'typeorm';
 
 export class Economica {
-	server: express.Express;
+	server!: express.Express;
 
-	rest: REST;
+	rest!: REST;
 
-	log: Logger;
+	log!: Logger;
 
-	db: DataSource;
+	db!: DataSource;
 }

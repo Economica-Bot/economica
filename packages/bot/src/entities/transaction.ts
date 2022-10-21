@@ -1,8 +1,19 @@
 import { DiscordSnowflake } from '@sapphire/snowflake';
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, Relation } from 'typeorm';
+import {
+	BaseEntity,
+	Column,
+	CreateDateColumn,
+	Entity,
+	JoinColumn,
+	ManyToOne
+} from 'typeorm';
 
-import { Guild, Member } from '.';
-import { TransactionString } from '../typings';
+import type { Relation } from 'typeorm';
+
+import { z } from 'zod';
+import { TransactionString, TransactionStringArr } from '../typings';
+import { Guild, GuildSchema } from './guild';
+import { Member, MemberSchema } from './member';
 
 @Entity({ name: 'transaction' })
 export class Transaction extends BaseEntity {
@@ -11,25 +22,36 @@ export class Transaction extends BaseEntity {
 
 	@ManyToOne(() => Guild, { onDelete: 'CASCADE' })
 	@JoinColumn()
-	public guild: Relation<Guild>;
+	public guild!: Relation<Guild>;
 
 	@ManyToOne(() => Member, { onDelete: 'CASCADE' })
 	@JoinColumn()
-	public target: Relation<Member>;
+	public target!: Relation<Member>;
 
 	@ManyToOne(() => Member, { onDelete: 'CASCADE' })
 	@JoinColumn()
-	public agent: Relation<Member>;
+	public agent!: Relation<Member>;
 
 	@Column({ type: 'character varying' })
-	public type: TransactionString;
+	public type!: TransactionString;
 
 	@Column({ type: 'float' })
-	public wallet: number;
+	public wallet!: number;
 
 	@Column({ type: 'float' })
-	public treasury: number;
+	public treasury!: number;
 
 	@CreateDateColumn({ type: 'timestamp' })
-	public createdAt: Date;
+	public createdAt!: Date;
 }
+
+export const TransactionSchema = z.object({
+	id: z.string(),
+	guild: GuildSchema,
+	target: MemberSchema,
+	agent: MemberSchema,
+	type: z.enum(TransactionStringArr),
+	wallet: z.number(),
+	treasury: z.number(),
+	createdAt: z.date()
+});

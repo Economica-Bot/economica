@@ -1,46 +1,40 @@
 {
-	// Mapped from https://www.typescriptlang.org/tsconfig
 	"compilerOptions": {
-
 		// Type Checking
-		"allowUnreachableCode": false,
-		"allowUnusedLabels": false,
-		// "exactOptionalPropertyTypes": true,
-		"noFallthroughCasesInSwitch": true,
+		"strict": true,
 		"noImplicitOverride": true,
 		"noImplicitReturns": true,
 		// "noUnusedLocals": true,
 		// "noUnusedParameters": true,
 		// "strict": true,
 		"strictNullChecks": true,
+		"noErrorTruncation": true,
 
-		// Modules
+		// Language Compilation
 		"module": "ESNext",
 		"moduleResolution": "node",
+		"target": "ESNext",
 		"resolveJsonModule": true,
+		"allowJs": true,
 
 		// Emit
 		"importHelpers": true,
 		"importsNotUsedAsValues": "remove",
 		"newLine": "lf",
-		"outDir": "dist",
+		"outDir": "./dist",
 		"sourceMap": true,
 		"esModuleInterop": true,
 		"experimentalDecorators": true,
-    "isolatedModules": true,
-		"forceConsistentCasingInFileNames": true,
+		"isolatedModules": true,
 
 		// Completeness
 		"skipLibCheck": true,
-		"baseUrl": ".",
 		"paths": {
-			"@economica/*": [
-				"packages/*/src"
-			]
-		},
+			"@economica/*": ["./packages/*/src"]
+		}
 	},
 	"references": [
-		{ "path": "packages/bot" },
-		{ "path": "packages/dashboard" }
+		{ "path": "./packages/bot" },
+		{ "path": "./packages/dashboard" }
 	]
 }

@@ -1,20 +1,13 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "target": "ESNext",
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ESNext"
-    ],
-    "jsx": "preserve",
-    "noEmit": false
-  },
-  "exclude": [
-    "tailwind.config.js"
-  ],
-  "include": [
-    "src/**/*.tsx",
-    "next-env.d.ts"
-  ]
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"composite": true,
+		"lib": ["DOM", "DOM.Iterable", "ESNext"],
+		"jsx": "preserve",
+		"noEmit": false,
+		"incremental": true,
+		"forceConsistentCasingInFileNames": true
+	},
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+	"exclude": ["node_modules"]
 }

@@ -1,65 +1,66 @@
-import axios from 'axios';
-import { RESTGetAPICurrentUserResult } from 'discord-api-types/v10';
-import { GetServerSidePropsContext, NextPage } from 'next';
+import { NextPage } from 'next';
 import { useEffect, useState } from 'react';
 
 import { Footer } from '../components/misc/Footer';
 import { NavBar } from '../components/misc/NavBar';
-import { validateCookies } from '../lib/helpers';
 
-type Props = {
-	commands: any[],
-	user: RESTGetAPICurrentUserResult,
-};
+import { commandData } from '@economica/bot/src/lib/commandData';
+import { CommandDropDown } from '../components/misc/CommandDropDown';
 
-const CommandsPage: NextPage<Props> = ({ commands, user }) => {
+const CommandsPage: NextPage = () => {
+	const commands = commandData;
 	const [currCommands, setCurrCommands] = useState(commands);
-
 	const [query, setQuery] = useState('');
 	const [modules, setModules] = useState(['ALL']);
 	const [module, setModule] = useState('ALL');
 
 	useEffect(() => {
-		currCommands.forEach((command) => {
-			if (!modules.find((module) => module === command.module)) modules.push(command.module);
+		currCommands?.forEach((command) => {
+			if (!modules.find((module) => module === command.module))
+				modules.push(command.module);
 			setModules(modules);
 		});
 
 		setCurrCommands(
 			commands
-				.filter((metadata) => {
+				?.filter((command) => {
 					if (
-						query
-						&& !metadata.name.toLowerCase().includes(query.toLowerCase())
-						&& !metadata.description.toLowerCase().includes(query.toLowerCase())
-					) return false;
+						query &&
+						!command.name.toLowerCase().includes(query.toLowerCase()) &&
+						!command.description.toLowerCase().includes(query.toLowerCase())
+					)
+						return false;
 
-					if (module !== 'ALL' && metadata.module !== module) return false;
+					if (module !== 'ALL' && command.module !== module) return false;
 
 					return true;
 				})
-				.sort((a, b) => a.name.localeCompare(b.name)),
+				.sort((a, b) => a.name.localeCompare(b.name))
 		);
-	}, [module, query, currCommands]);
+	}, [module, query]);
 
 	return (
 		<>
-			<NavBar user={user} />
-			<div className="mt-20 p-10 flex flex-col items-center min-h-screen">
-				<h1 className="text-3xl font-bold m-3">Economica Commands</h1>
-				<div className="w-full max-w-[50em] flex flex-col items-center">
+			<NavBar />
+			<div className='mt-20 flex min-h-screen w-full flex-col items-center p-10'>
+				<h1 className='m-3 text-3xl font-bold'>Economica Commands</h1>
+				<div className='flex w-full max-w-[50em] flex-col items-center'>
 					<input
-						type="text"
-						placeholder="Search"
-						className="input input-ghost input-bordered w-full my-3"
+						type='text'
+						placeholder='Search'
+						className='input input-bordered input-ghost my-3 w-full'
 						onChange={(e) => setQuery(e.target.value)}
 					/>
 
-					<div className="btn-group">
-						{modules.map((m) => (
+					<div className='btn-group'>
+						{modules.map((m, index) => (
 							<button
-								key={m}
-								className={`btn ${m.toUpperCase() === module ? 'btn-active btn-secondary' : ''}`}
+								key={index}
+								type='button'
+								aria-current='page'
+								className={`btn inline-block px-6 py-3 ${
+									m.toUpperCase() === module ? 'btn-active' : ''
+								}`}
 								onClick={() => setModule(m.toUpperCase())}
 							>
 								{m}
@@ -67,57 +68,21 @@ const CommandsPage: NextPage<Props> = ({ commands, user }) => {
 						))}
 					</div>
 
-					{currCommands && currCommands.map((metadata) => (
-						<div
-							key={metadata.name}
-							tabIndex={0}
-							className="collapse collapse-plus w-full bg-discord-900 m-2 rounded-xl"
-						>
-							<input type="checkbox" />
-							<h1 className="collapse-title text-xl font-bold ">
-								/{metadata.name}
-								<span className="text-sm font-normal text-discord-500">
-									{' '}
-									- {metadata.description}
-								</span>
-							</h1>
-
-							<div className="collapse-content">
-								<div>
-									<h2 className="text-base">Format:</h2>
-									<p className="font-mono text-discord-500 p-3">
-										/{metadata.format}
-									</p>
-								</div>
-								<div>
-									<h2>Examples:</h2>
-									<ul className="font-mono text-discord-500 p-3">
-										{metadata.examples
-											? metadata.examples.map((example) => (
-												<li key={example}>/{example}</li>
-											))
-											: 'None'}
-									</ul>
-								</div>
-							</div>
-						</div>
+					{currCommands.map((command, index) => (
+						<CommandDropDown
+							key={index}
+							name={command.name}
+							description={command.description}
+							format={command.format}
+							examples={command.examples}
+						/>
 					))}
 				</div>
 			</div>
+
 			<Footer />
 		</>
 	);
-};
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-	const headers = validateCookies(ctx);
-	const res = await axios
-		.get<RESTGetAPICurrentUserResult>('http://localhost:3000/api/users/@me', { headers })
-		.catch(() => null);
-	const res2 = await axios
-		.get('http://localhost:3000/api/commands')
-		.catch(() => null);
-	return { props: { commands: res2 ? res2.data : [], user: res ? res.data : null } as Props };
 };
 
 export default CommandsPage;

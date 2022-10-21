@@ -1,46 +1,47 @@
-import '../styles/globals.css';
-import 'aos/dist/aos.css';
 import 'react-toastify/dist/ReactToastify.css';
-import type { } from '@skyra/discord-components-core';
+import '../styles/globals.css';
 
-import Aos from 'aos';
+import type {} from '@skyra/discord-components-core';
+import { NextPage } from 'next';
+import { Session } from 'next-auth';
+import { SessionProvider } from 'next-auth/react';
+import { ThemeProvider } from 'next-themes';
 import { AppProps } from 'next/app';
-import { useEffect } from 'react';
+import { ReactElement, ReactNode, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
+import { discordMessageOptions } from '../lib/config';
+import { trpc } from '../lib/trpc';
 
-function MyApp(AppProps: AppProps) {
+export type NextPageWithLayout<P = Record<string, any>, IP = P> = NextPage<
+	P,
+	IP
+> & {
+	getLayout?: (page: ReactElement) => ReactNode;
+};
+
+type AppPropsWithLayout = AppProps<{ session: Session }> & {
+	Component: NextPageWithLayout;
+};
+
+const App = ({ Component, pageProps }: AppPropsWithLayout) => {
 	useEffect(() => {
-		Aos.init({ duration: 1000 });
-		window.$discordMessage = {
-			profiles: {
-				economica: {
-					author: 'Economica',
-					avatar: '/economica.png',
-					roleColor: '#f9d61b',
-				},
-				adrastopoulos: {
-					author: 'Adrastopoulos',
-					avatar: '/adrastopoulos.png',
-					roleColor: '#0097ff',
-				},
-			},
-			emojis: {
-				economica: {
-					name: 'economica',
-					url: '/economica.png',
-				},
-			},
-		};
+		window.$discordMessage = discordMessageOptions;
 	}, []);
+
+	const getLayout = Component.getLayout ?? ((page) => page);
 
 	return (
 		<>
-			<ToastContainer theme="dark" position="bottom-right" newestOnTop={true} />
-			<div className='flex-1'>
-				<AppProps.Component {...AppProps.pageProps} />
-			</div>
+			<ThemeProvider>
+				<ToastContainer position='bottom-right' newestOnTop={true} />
+				<div className='flex flex-col'>
+					<SessionProvider session={pageProps.session}>
+						{getLayout(<Component {...pageProps} />)}
+					</SessionProvider>
+				</div>
+			</ThemeProvider>
 		</>
 	);
-}
+};
 
-export default MyApp;
+export default trpc.withTRPC(App);

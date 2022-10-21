@@ -10,14 +10,25 @@ const intervals: Record<keyof Intervals, TransactionString> = {
 	hourly: 'INTERVAL_HOUR',
 	minutely: 'INTERVAL_MINUTE',
 	monthly: 'INTERVAL_MONTH',
-	weekly: 'INTERVAL_WEEK',
+	weekly: 'INTERVAL_WEEK'
 };
 
 export async function interval(ctx: Context, type: keyof typeof intervals) {
-	if (!ctx.guildEntity.intervals[type].enabled) throw new Error('This interval command is disabled.');
+	if (!ctx.guildEntity.intervals[type].enabled)
+		throw new Error('This interval command is disabled.');
 	else {
 		const { amount } = ctx.guildEntity.intervals[type];
-		recordTransaction(ctx.client, ctx.guildEntity, ctx.memberEntity, ctx.clientMemberEntity, intervals[type], amount, 0);
-		return `${Emojis.TIME} You earned ${ctx.guildEntity.currency} \`${parseNumber(amount)}\`!`;
+		recordTransaction(
+			ctx.client,
+			ctx.guildEntity,
+			ctx.memberEntity,
+			ctx.clientMemberEntity,
+			intervals[type],
+			amount,
+			0
+		);
+		return `${Emojis.TIME} You earned ${
+			ctx.guildEntity.currency
+		} \`${parseNumber(amount)}\`!`;
 	}
 }

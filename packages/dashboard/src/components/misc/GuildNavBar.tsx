@@ -1,47 +1,71 @@
-import { APIUser, RESTGetAPICurrentUserGuildsResult } from 'discord-api-types/v10';
+import {
+	APIUser,
+	PermissionFlagsBits,
+	RESTAPIPartialCurrentUserGuild,
+	RESTGetAPICurrentUserGuildsResult,
+	RouteBases
+} from 'discord-api-types/v10';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
 import { FC } from 'react';
 
-import { getIcon } from '../../lib/helpers';
-
 type Props = {
-	user: APIUser;
+	user?: APIUser;
 	guilds?: RESTGetAPICurrentUserGuildsResult;
 };
 
-const GuildNavBarIcon: FC<GuildIconProps> = ({ src }) => (
-	<Image
-		src={src}
-		className="mt-3 flex-none w-12 cursor-pointer rounded-3xl hover:rounded-xl transition-all"
-		alt={src}
-		draggable={false}
-		width={64}
-		height={64}
-	/>
+type GuildIconProps = {
+	guild: RESTAPIPartialCurrentUserGuild;
+};
+
+const GuildNavBarIcon: FC<GuildIconProps> = ({ guild }) => (
+	<a href={`/dashboard/${guild.id}`}>
+		<div className='tooltip tooltip-right' data-tip={guild.name}>
+			<Image
+				src={
+					guild.icon
+						? `${RouteBases.cdn}/icons/${guild.id}/${guild.icon}`
+						: 'https://cdn.discordapp.com/embed/avatars/5.png'
+				}
+				className='w-full rounded-3xl transition-all hover:rounded-xl'
+				alt={guild.name}
+				draggable={false}
+				objectFit='scale-down'
+				width={56}
+				height={56}
+			/>
+		</div>
+	</a>
 );
 
-export const GuildNavBar: FC<Props> = ({ user, guilds }) => {
-	const router = useRouter();
-	return (
-		<div className="flex-none bg-discord-900 flex flex-col items-center overflow-scroll no-scrollbar px-3 py-5">
-			<div onClick={() => router.push('/dashboard')}>
-				<GuildNavBarIcon
-					src={`http://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`}
-				/>
-			</div>
-			{guilds?.map((guild) => (
-				<div
-					key={guild.id}
-					onClick={() => router.push(`/dashboard/${guild.id}`)}
-				>
-					<GuildNavBarIcon src={getIcon(guild)} />
-				</div>
-			))}
-		</div>
-	);
+type UserIconProps = {
+	user: APIUser;
 };
 
-type GuildIconProps = {
-	src: string;
-};
+const UserNavBarIcon: FC<UserIconProps> = ({ user }) => (
+	<a href={`/dashboard`}>
+		<Image
+			src={`http://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`}
+			className='w-full rounded-[48px] transition-all ease-in hover:rounded-xl'
+			alt={user.username}
+			draggable={false}
+			objectFit='scale-down'
+			width={56}
+			height={56}
+		/>
+	</a>
+);
+
+export const GuildNavBar: FC<Props> = ({ user, guilds }) => (
+	<div className='w-18 flex flex-none flex-col items-center gap-1 px-3 py-8'>
+		{user && <UserNavBarIcon user={user} />}
+		<div className='divider' />
+		{guilds
+			?.filter(
+				(guild) =>
+					Number(guild.permissions) & Number(PermissionFlagsBits.Administrator)
+			)
+			.map((guild, index) => (
+				<GuildNavBarIcon key={index} guild={guild} />
+			))}
+	</div>
+);

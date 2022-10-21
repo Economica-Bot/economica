@@ -1,57 +1,13 @@
 {
 	"root": true,
 	"parser": "@typescript-eslint/parser",
+	"extends": [
+		"plugin:@typescript-eslint/recommended",
+		"plugin:prettier/recommended"
+	],
 	"parserOptions": {
 		"ecmaVersion": "latest",
 		"sourceType": "module",
-		"project": [
-			"./tsconfig.eslint.json",
-			"./packages/*/tsconfig.eslint.json"
-		]
-	},
-	"extends": [
-		"eslint:recommended",
-		"plugin:@typescript-eslint/eslint-recommended",
-		"plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "plugin:@typescript-eslint/strict",
-		"airbnb-base", 
-		"airbnb-typescript/base", 
-		"plugin:import/typescript"
-	],
-	"plugins": [
-		"@typescript-eslint", 
-		"import"
-	],
-	"rules": {
-		"import/no-cycle": "off",
-		"import/prefer-default-export": "off",
-		"no-tabs": ["error", { "allowIndentationTabs": true }],
-		"@typescript-eslint/indent": [2, "tab"],
-		"object-curly-newline": "off",
-		"no-plusplus": "off",
-		"max-len": "off",
-		"class-methods-use-this": "off",
-		"radix": "off",
-		"no-param-reassign": "off",
-		"no-shadow": "off",
-		"@typescript-eslint/no-shadow": "off",
-		"no-nested-ternary": "off",
-		"no-bitwise": "off",
-		"no-restricted-syntax": "off"
-	},
-	"settings": {
-		"import/parsers": {
-			"@typescript-eslint/parser": [".ts", ".tsx"]
-		},
-		"import/resolver": {
-			// "project": {},
-			"node": {
-				"extensions": [".ts", ".tsx"]
-			},
-			"typescript": {
-				"alwaysTryTypes": true
-			}
-		}
+		"project": ["./tsconfig.eslint.json", "./packages/*/tsconfig.eslint.json"]
 	}
 }

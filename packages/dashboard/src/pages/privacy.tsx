@@ -1,21 +1,14 @@
-import axios from 'axios';
-import { RESTGetAPICurrentUserResult } from 'discord-api-types/v10';
-import { GetServerSidePropsContext, NextPage } from 'next';
+import { NextPage } from 'next';
 import Link from 'next/link';
 
 import { Footer } from '../components/misc/Footer';
 import { NavBar } from '../components/misc/NavBar';
-import { validateCookies } from '../lib/helpers';
 
-type Props = {
-	user: RESTGetAPICurrentUserResult
-};
-
-const PrivacyPage: NextPage<Props> = ({ user }) => (
+const PrivacyPage: NextPage = () => (
 	<>
-		<NavBar user={user} />
-		<div className="flex justify-center">
-			<article className="prose prose-sm md:prose-base lg:prose-lg my-40 p-3">
+		<NavBar />
+		<div className='flex justify-center'>
+			<article className='prose prose-sm my-40 p-3 md:prose-base lg:prose-lg'>
 				<h1>PRIVACY POLICY</h1>
 				<h4>Last updated and effective: May 1st, 2022</h4>
 				<p>
@@ -381,7 +374,7 @@ const PrivacyPage: NextPage<Props> = ({ user }) => (
 						<p>
 							For more information on the privacy practices of Google, please
 							visit the{' '}
-							<a href="https://policies.google.com/privacy?hl=en">
+							<a href='https://policies.google.com/privacy?hl=en'>
 								Google Privacy & Terms web page
 							</a>
 							.
@@ -405,7 +398,7 @@ const PrivacyPage: NextPage<Props> = ({ user }) => (
 						<p>
 							You may opt out of the use of the DoubleClick Cookie for
 							interest-based advertising by visiting the{' '}
-							<a href="http://www.google.com/ads/preferences/">
+							<a href='http://www.google.com/ads/preferences/'>
 								Google Ads Settings web page
 							</a>
 							.
@@ -480,21 +473,12 @@ const PrivacyPage: NextPage<Props> = ({ user }) => (
 				<h2>Contact Us</h2>
 				<p>
 					If you have any questions about our Privacy Policy, please contact us
-					on our <Link href="localhost:3000/api/support">support server</Link>.
+					on our <Link href='localhost:3000/api/support'>support server</Link>.
 				</p>
 			</article>
-		</div >
+		</div>
 		<Footer />
 	</>
 );
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-	const headers = validateCookies(ctx);
-	if (!headers) return { props: { user: null } };
-	const res = await axios
-		.get<RESTGetAPICurrentUserResult>('http://localhost:3000/api/users/@me', { headers })
-		.catch(() => null);
-	return { props: { user: res ? res.data : null } };
-};
 
 export default PrivacyPage;

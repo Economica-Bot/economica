@@ -8,11 +8,12 @@ import {
 	JoinTable,
 	ManyToMany,
 	ManyToOne,
-	Relation,
+	Relation
 } from 'typeorm';
+import { z } from 'zod';
+import { ListingType } from '../typings';
 
-import { Guild } from '.';
-import { ListingString } from '../typings';
+import { Guild, GuildSchema } from './guild';
 
 @Entity({ name: 'listing' })
 export class Listing extends BaseEntity {
@@ -21,57 +22,81 @@ export class Listing extends BaseEntity {
 
 	@ManyToOne(() => Guild, { onDelete: 'CASCADE' })
 	@JoinColumn()
-	public guild: Relation<Guild>;
+	public guild!: Relation<Guild>;
 
 	@Column({ type: 'character varying' })
-	public type: ListingString;
+	public type!: keyof typeof ListingType;
 
 	@Column({ type: 'character varying' })
-	public name: string;
+	public name!: string;
 
 	@Column({ type: 'integer' })
-	public price: number;
+	public price!: number;
 
 	@Column({ type: 'character varying' })
-	public description: string;
+	public description!: string;
 
 	@Column({ type: 'integer' })
-	public treasuryRequired: number;
+	public treasuryRequired!: number;
 
 	@Column({ type: 'boolean' })
-	public active: boolean;
+	public active!: boolean;
 
 	@Column({ type: 'boolean' })
-	public stackable: boolean;
+	public stackable!: boolean;
 
 	@Column({ type: 'boolean' })
-	public tradeable: boolean;
+	public tradeable!: boolean;
 
 	@Column({ type: 'float4' })
-	public stock: number;
+	public stock!: number;
 
 	@Column({ type: 'float4' })
-	public duration: number;
+	public duration!: number;
 
-	@ManyToMany(() => Listing, (listing) => listing.itemsRequired, { onDelete: 'CASCADE' })
+	@ManyToMany(() => Listing, (listing) => listing.itemsRequired, {
+		onDelete: 'CASCADE'
+	})
 	@JoinTable()
-	public itemsRequired: Relation<Listing>[];
+	public itemsRequired!: Relation<Listing>[];
 
 	@Column({ type: 'simple-array' })
-	public rolesRequired: string[];
+	public rolesRequired!: string[];
 
 	@Column({ type: 'simple-array' })
-	public rolesGranted: string[];
+	public rolesGranted!: string[];
 
 	@Column({ type: 'simple-array' })
-	public rolesRemoved: string[];
+	public rolesRemoved!: string[];
 
 	@Column({ type: 'integer', nullable: true })
-	public generatorPeriod: number | null;
+	public generatorPeriod!: number | null;
 
 	@Column({ type: 'integer', nullable: true })
-	public generatorAmount: number | null;
+	public generatorAmount!: number | null;
 
 	@CreateDateColumn({ type: 'timestamp' })
-	public createdAt: Date;
+	public createdAt!: Date;
 }
+
+export const ListingSchema = z.object({
+	id: z.string(),
+	guild: GuildSchema,
+	type: z.nativeEnum(ListingType),
+	name: z.string(),
+	price: z.number(),
+	description: z.string(),
+	treasuryRequired: z.number(),
+	active: z.boolean(),
+	stackable: z.boolean(),
+	tradeable: z.boolean(),
+	stock: z.number(),
+	duration: z.number(),
+	itemsRequired: z.array(ListingSchema),
+	rolesRequired: z.array(z.string()),
+	rolesGranted: z.array(z.string()),
+	rolesRemoved: z.array(z.string()),
+	generatorPeriod: z.number(),
+	generatorAmount: z.number(),
+	createdAt: z.date()
+});

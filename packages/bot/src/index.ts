@@ -1,18 +1,13 @@
-// /$$$$$$$$$                                                       /$$
-// | $$_____/                                                      |__/
-// | $$        /$$$$$$$  /$$$$$$  /$$$$$$$   /$$$$$$  /$$$$$$/$$$$  /$$  /$$$$$$$  /$$$$$$
-// | $$$$$    /$$_____/ /$$__  $$| $$__  $$ /$$__  $$| $$_  $$_  $$| $$ /$$_____/ |____  $$
-// | $$__/   | $$      | $$  \ $$| $$  \ $$| $$  \ $$| $$ \ $$ \ $$| $$| $$        /$$$$$$$
-// | $$      | $$      | $$  | $$| $$  | $$| $$  | $$| $$ | $$ | $$| $$| $$       /$$__  $$
-// | $$$$$$$$|  $$$$$$$|  $$$$$$/| $$  | $$|  $$$$$$/| $$ | $$ | $$| $$|  $$$$$$$|  $$$$$$$
-// |________/ \_______/ \______/ |__/  |__/ \______/ |__/ |__/ |__/|__/ \_______/ \_______/
 import { REST } from '@discordjs/rest';
-import { RESTPostAPIApplicationCommandsJSONBody, Routes } from 'discord-api-types/v10';
-import express from 'express';
+import {
+	RESTPostAPIApplicationCommandsJSONBody,
+	Routes
+} from 'discord-api-types/v10';
 import { Logger } from 'tslog';
 import { DataSource } from 'typeorm';
 
-import { routes } from './api';
+import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import express from 'express';
 import {
 	BOT_TOKEN,
 	CLIENT_ID,
@@ -25,15 +20,16 @@ import {
 	DEVELOPMENT_GUILD_IDS,
 	loggerOptions,
 	PORT,
-	restOptions,
-} from './config.js';
+	restOptions
+} from './config';
 import { commandData } from './lib';
+import { appRouter } from './routers/_app';
 import { Economica } from './structures/index.js';
+import { createContext } from './trpc';
 import { DefaultModulesObj } from './typings';
 
 const client = new Economica();
 
-client.server = express();
 client.rest = new REST(restOptions).setToken(BOT_TOKEN);
 client.log = new Logger(loggerOptions);
 
@@ -56,7 +52,7 @@ const entityFiles = await import('./entities');
 
 client.db = await new DataSource({
 	...databaseOptions,
-	entities: Object.values(entityFiles),
+	entities: Object.values(entityFiles)
 }).initialize();
 if (DB_OPTION === 1) {
 	await client.db.synchronize();
@@ -94,17 +90,24 @@ const updateCommands = async () => {
 	});
 
 	DEVELOPMENT_GUILD_IDS.forEach(async (id) => {
-		if (DEPLOY_ALL_MODULES) await client.rest.put(Routes.applicationGuildCommands(CLIENT_ID, id), { body: specialCommandData });
+		if (DEPLOY_ALL_MODULES)
+			await client.rest.put(Routes.applicationGuildCommands(CLIENT_ID, id), {
+				body: specialCommandData
+			});
 		client.log.debug(`Registered special commands in dev guild ${id}`);
 	});
 
-	await client.rest.put(Routes.applicationCommands(CLIENT_ID), { body: defaultCommandData });
+	await client.rest.put(Routes.applicationCommands(CLIENT_ID), {
+		body: defaultCommandData
+	});
 	client.log.debug('Registered global commands');
 };
 
 const resetCommands = async () => {
 	DEVELOPMENT_GUILD_IDS.forEach(async (id) => {
-		await client.rest.put(Routes.applicationGuildCommands(CLIENT_ID, id), { body: [] });
+		await client.rest.put(Routes.applicationGuildCommands(CLIENT_ID, id), {
+			body: []
+		});
 		client.log.debug(`Reset commands in dev guild ${id}`);
 	});
 
@@ -123,10 +126,23 @@ if (DEPLOY_COMMANDS === 0) {
 
 client.log.info('Commands registered');
 
+client.server = express();
+
 client.server
-	.use((req, res, next) => { res.locals.client = client; next(); })
-	.use('/api', routes)
-	.listen(PORT, () => client.log.info(`Listening on port ${PORT}`));
+	// .use(
+	// 	cors({
+	// 		origin: ['http://localhost:3000']
+	// 	})
+	// )
+	.use(express.json())
+	.use(
+		'/trpc',
+		createExpressMiddleware({
+			router: appRouter,
+			createContext
+		})
+	);
+client.server.listen(PORT, () => client.log.info(`Listening on port ${PORT}`));
 
 process.on('unhandledRejection', (err: Error) => unhandledRejection(err));
 process.on('uncaughtException', (err) => uncaughtException(err));

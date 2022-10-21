@@ -4,9 +4,9 @@ import { Permissions } from 'discord-api-types/v10';
 import { ModuleString } from '../typings';
 
 export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
-	public module: ModuleString;
+	public module!: ModuleString;
 
-	public format: string;
+	public format = '';
 
 	public examples: string[] = [];
 
@@ -36,7 +36,9 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 		return this;
 	}
 
-	public setClientPermissions(clientPermissions: typeof this.clientPermissions): this {
+	public setClientPermissions(
+		clientPermissions: typeof this.clientPermissions
+	): this {
 		this.clientPermissions = clientPermissions;
 		return this;
 	}
@@ -56,7 +58,7 @@ export class EconomicaSlashCommandBuilder extends SlashCommandBuilder {
 			clientPermissions: this.clientPermissions.toString(),
 			global: this.global,
 			enabled: this.enabled,
-			default_member_permissions: this.default_member_permissions,
+			default_member_permissions: this.default_member_permissions
 		};
 	}
 }

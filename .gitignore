@@ -15,8 +15,7 @@ node_modules/
 
 # dotenv environment variable files
 .env
-.env.development
-.env.development.local
+.env.local
 .env.test.local
 .env.production
 .env.production.local
@@ -36,3 +35,5 @@ node_modules/
 
 # built project
 dist/
+.next
+out

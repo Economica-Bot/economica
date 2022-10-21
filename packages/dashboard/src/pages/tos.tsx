@@ -1,23 +1,16 @@
-import axios from 'axios';
-import { RESTGetAPICurrentUserResult } from 'discord-api-types/v10';
-import { GetServerSidePropsContext, NextPage } from 'next';
+import { NextPage } from 'next';
 import Link from 'next/link';
 
 import { Footer } from '../components/misc/Footer';
 import { NavBar } from '../components/misc/NavBar';
-import { validateCookies } from '../lib/helpers';
 
-type Props = {
-	user: RESTGetAPICurrentUserResult
-};
-
-const TOS: NextPage<Props> = ({ user }) => (
+const TOS: NextPage = () => (
 	<>
-		<NavBar user={user} />
-		<div className="flex justify-center">
-			<article className="prose prose-sm md:prose-base lg:prose-lg my-40 p-3">
-				<h1 className="uppercase">Terms of Service</h1>
-				<h4>Last updated: May 1st, 2022</h4>
+		<NavBar />
+		<div className='flex justify-center'>
+			<article className='prose prose-sm my-40 p-3 md:prose-base lg:prose-lg'>
+				<h1 className='uppercase'>Terms of Service</h1>
+				<h4>Last updated and effective: May 1st, 2022</h4>
 				<p>
 					Please read these Terms of Service (&quot;Terms&quot;, &quot;Terms of
 					Service&quot;) carefully before using the https://www.economicabot.com
@@ -184,22 +177,12 @@ const TOS: NextPage<Props> = ({ user }) => (
 				<h2>Contact Us</h2>
 				<p>
 					If you have any questions about our Privacy Policy, please contact us
-					on our <Link href="localhost:3000/api/support">support server</Link>.
+					on our <Link href='localhost:3000/api/support'>support server</Link>.
 				</p>
 			</article>
 		</div>
 		<Footer />
 	</>
-
 );
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-	const headers = validateCookies(ctx);
-	if (!headers) return { props: { user: null } };
-	const res = await axios
-		.get<RESTGetAPICurrentUserResult>('http://localhost:3000/api/users/@me', { headers })
-		.catch(() => null);
-	return { props: { user: res ? res.data : null } };
-};
 
 export default TOS;

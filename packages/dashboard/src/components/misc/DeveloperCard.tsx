@@ -9,19 +9,19 @@ type Props = {
 };
 
 export const DeveloperCard: FC<Props> = ({ src, name, link }) => (
-	<div className="py-5 flex flex-col items-center" data-aos="fade-zoom-in">
-		<div className="transition hover:scale-110 duration-500">
+	<div className='flex flex-col items-center py-5'>
+		<div className='transition duration-500 hover:scale-110'>
 			<Image
 				src={src}
 				alt={src}
-				className="rounded-full drop-shadow-md"
+				className='rounded-full drop-shadow-md'
 				width={100}
 				height={100}
 			/>
 		</div>
 		<Link href={link}>
 			<a href={link}>
-				<h4 className="font-thin text-underline mt-3 text-lg">{name}</h4>
+				<h4 className='text-underline mt-3 text-lg font-thin'>{name}</h4>
 			</a>
 		</Link>
 	</div>

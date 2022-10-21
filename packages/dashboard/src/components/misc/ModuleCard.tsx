@@ -7,9 +7,9 @@ type Props = {
 };
 
 export const ModuleCard: FC<Props> = ({ icon, title, description }) => (
-	<div className="bg-discord-900 rounded-2xl w-[300px] h-[275px] drop-shadow-lg my-4 flex flex-col items-center justify-center cursor-pointer hover:border-[6px] border-discord-600 hover:bg-discord-700 shadow-drop" data-aos-easing='ease-out-back' data-aos='fade-up'>
+	<div className='my-4 flex h-[275px] w-[300px] cursor-pointer flex-col items-center justify-center rounded-2xl border-8 bg-base-300 shadow-drop'>
 		{icon}
 		<h3 className='m-2 text-2xl'>{title}</h3>
-		<h5 className="font-thin text-lg">{description}</h5>
+		<h5 className='text-lg font-thin'>{description}</h5>
 	</div>
 );

@@ -1,26 +1,43 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, Relation } from 'typeorm';
-
-import { Guild, User } from '.';
+import {
+	BaseEntity,
+	Column,
+	Entity,
+	JoinColumn,
+	ManyToOne,
+	Relation
+} from 'typeorm';
+import { z } from 'zod';
+import { Guild, GuildSchema } from './guild';
+import { User, UserSchema } from './user';
 
 @Entity({ name: 'member' })
 export class Member extends BaseEntity {
 	@Column({ type: 'character varying', primary: true })
-	public userId: string;
+	public userId!: string;
 
 	@Column({ type: 'character varying', primary: true })
-	public guildId: string;
+	public guildId!: string;
 
 	@ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
 	@JoinColumn({ name: 'userId' })
-	public user: Relation<User>;
+	public user!: Relation<User>;
 
 	@ManyToOne(() => Guild, (guild) => guild.id, { onDelete: 'CASCADE' })
 	@JoinColumn({ name: 'guildId' })
-	public guild: Relation<Guild>;
+	public guild!: Relation<Guild>;
 
 	@Column({ type: 'float', default: 0 })
-	public treasury: number;
+	public treasury!: number;
 
 	@Column({ type: 'float', default: 0 })
-	public wallet: number;
+	public wallet!: number;
 }
+
+export const MemberSchema = z.object({
+	userId: z.string(),
+	guildId: z.string(),
+	user: UserSchema,
+	guild: GuildSchema,
+	treasury: z.number(),
+	wallet: z.number()
+});

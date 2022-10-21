@@ -13,16 +13,29 @@ import { TransactionString } from '../typings';
  * @returns {EmbedBuilder}
  */
 export function displayTransaction(transaction: Transaction): EmbedBuilder {
-	const { id, guild, type, target, agent, wallet, treasury, createdAt } = transaction;
+	const { id, guild, type, target, agent, wallet, treasury, createdAt } =
+		transaction;
 	const total = wallet + treasury;
 	const description = `Target: <@!${target.userId}> | Agent: <@!${agent.userId}>`;
 	return new EmbedBuilder()
 		.setAuthor({ name: `Transaction | ${type}` })
 		.setDescription(description)
 		.addFields([
-			{ name: '__**Wallet**__', value: `${guild.currency} \`${parseNumber(wallet)}\``, inline: true },
-			{ name: '__**Treasury**__', value: `${guild.currency} \`${parseNumber(treasury)}\``, inline: true },
-			{ name: '__**Total**__', value: `${guild.currency} \`${parseNumber(total)}\``, inline: true },
+			{
+				name: '__**Wallet**__',
+				value: `${guild.currency} \`${parseNumber(wallet)}\``,
+				inline: true
+			},
+			{
+				name: '__**Treasury**__',
+				value: `${guild.currency} \`${parseNumber(treasury)}\``,
+				inline: true
+			},
+			{
+				name: '__**Total**__',
+				value: `${guild.currency} \`${parseNumber(total)}\``,
+				inline: true
+			}
 		])
 		.setFooter({ text: `Id: ${id}` })
 		.setTimestamp(createdAt);
@@ -46,15 +59,24 @@ export async function recordTransaction(
 	agent: Member,
 	type: TransactionString,
 	wallet: number,
-	treasury: number,
+	treasury: number
 ): Promise<void> {
 	target.wallet += wallet;
 	target.treasury += treasury;
 	await target.save();
-	const transactionEntity = await Transaction.create({ guild, target, agent, type, wallet, treasury }).save();
+	const transactionEntity = await Transaction.create({
+		guild,
+		target,
+		agent,
+		type,
+		wallet,
+		treasury
+	}).save();
 	const { transactionLogId } = guild;
 	if (transactionLogId) {
 		const embed = displayTransaction(transactionEntity);
-		await client.rest.post(Routes.channel(transactionLogId), { body: { embeds: [embed] } });
+		await client.rest.post(Routes.channel(transactionLogId), {
+			body: { embeds: [embed] }
+		});
 	}
 }

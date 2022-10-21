@@ -12,9 +12,9 @@ export const DashNavBar: FC<Props> = ({ guild }) => {
 		router.route.split('/')[3] ?? 'Channel Group'
 	} / ${router.route.split('/')[4] ?? 'Channel'}`;
 	return (
-		<div className="flex-none h-16 mt-5 bg-discord-700 px-5 border-b-2 border-discord-900 flex items-center">
+		<div className='mt-5 flex h-16 flex-none items-center border-b-2 border-base-300 bg-base-100 px-5'>
 			<div>
-				<h1 className="text-xl font-pt_sans">
+				<h1 className='font-pt_sans text-xl'>
 					<code>{navigation}</code>
 				</h1>
 			</div>

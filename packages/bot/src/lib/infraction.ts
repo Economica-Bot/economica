@@ -12,16 +12,30 @@ import { InfractionString } from '../typings';
  * @returns {EmbedBuilder}
  */
 export function displayInfraction(infraction: Infraction) {
-	const { id, type, target, agent, reason, duration, active, permanent, createdAt } = infraction;
+	const {
+		id,
+		type,
+		target,
+		agent,
+		reason,
+		duration,
+		active,
+		permanent,
+		createdAt
+	} = infraction;
 	const description = `Target: <@!${target.userId}> | Agent: <@!${agent.userId}>`;
 	return new EmbedBuilder()
 		.setAuthor({ name: `Infraction | ${type}` })
 		.setDescription(description)
 		.addFields([
 			{ name: '__**Reason**__', value: reason },
-			{ name: '**Permanent**', value: `\`${permanent ?? 'N/A'}\``, inline: true },
+			{
+				name: '**Permanent**',
+				value: `\`${permanent ?? 'N/A'}\``,
+				inline: true
+			},
 			{ name: '**Active**', value: `\`${active ?? 'N/A'}\``, inline: true },
-			{ name: '**Duration**', value: `\`${ms(duration ?? 0)}\``, inline: true },
+			{ name: '**Duration**', value: `\`${ms(duration ?? 0)}\``, inline: true }
 		])
 		.setFooter({ text: `ID: ${id}` })
 		.setTimestamp(createdAt);
@@ -48,7 +62,7 @@ export async function recordInfraction(
 	reason: string,
 	active?: boolean,
 	duration?: number,
-	permanent?: boolean,
+	permanent?: boolean
 ) {
 	const infractionEntity = await Infraction.create({
 		guild,
@@ -58,11 +72,13 @@ export async function recordInfraction(
 		reason,
 		active,
 		duration,
-		permanent,
+		permanent
 	}).save();
 	const { infractionLogId } = guild;
 	if (infractionLogId) {
 		const embed = displayInfraction(infractionEntity);
-		await client.rest.post(Routes.channel(infractionLogId), { body: { embeds: [embed] } });
+		await client.rest.post(Routes.channel(infractionLogId), {
+			body: { embeds: [embed] }
+		});
 	}
 }
