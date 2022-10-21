@@ -56,7 +56,7 @@ const UserNavBarIcon: FC<UserIconProps> = ({ user }) => (
 );
 
 export const GuildNavBar: FC<Props> = ({ user, guilds }) => (
-	<div className='w-18 flex flex-none flex-col items-center gap-1 px-3 py-8'>
+	<div className='w-18 flex flex-none flex-col items-center gap-1 px-3 py-8 overflow-y-scroll overflow-x-clip no-scrollbar'>
 		{user && <UserNavBarIcon user={user} />}
 		<div className='divider' />
 		{guilds

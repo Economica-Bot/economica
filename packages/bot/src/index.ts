@@ -27,6 +27,7 @@ import { appRouter } from './routers/_app';
 import { Economica } from './structures/index.js';
 import { createContext } from './trpc';
 import { DefaultModulesObj } from './typings';
+import cors from 'cors';
 
 const client = new Economica();
 
@@ -129,11 +130,11 @@ client.log.info('Commands registered');
 client.server = express();
 
 client.server
-	// .use(
-	// 	cors({
-	// 		origin: ['http://localhost:3000']
-	// 	})
-	// )
+	.use(
+		cors({
+			origin: ['http://localhost:3000']
+		})
+	)
 	.use(express.json())
 	.use(
 		'/trpc',
