@@ -1,0 +1,10 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"composite": true,
+		"lib": ["ESNext", "DOM"],
+		"declaration": true,
+		"declarationMap": true
+	},
+	"include": ["**/*.ts", "**/*.mjs", "index.d.ts"]
+}
