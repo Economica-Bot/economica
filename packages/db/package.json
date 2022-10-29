@@ -1,0 +1,14 @@
+{
+	"name": "@economica/db",
+	"version": "0.1.0",
+	"main": "index.ts",
+	"types": "index.ts",
+	"dependencies": {
+		"@economica/common": "*",
+		"typeorm": "^0.3.10",
+		"zod": "^3.19.1"
+	},
+	"devDependencies": {
+		"typescript": "^4.8.4"
+	}
+}
