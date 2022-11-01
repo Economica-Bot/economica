@@ -8,6 +8,5 @@
 			"@economica/db": ["../../../packages/db"]
 		}
 	},
-	"include": ["**/*.ts", "index.d.ts"],
-	"exclude": ["./dist"]
+	"include": ["**/*.ts"],
 }

@@ -5,10 +5,10 @@ yarn-error.log*
 
 node_modules/
 
-commitlint.config.js
-tailwind.config.js
-postcss.config.js
-next.config.js
+commitlint.config.cjs
+tailwind.config.cjs
+postcss.config.cjs
+next.config.mjs
 
 .eslintcache
 
@@ -26,5 +26,6 @@ next.config.js
 .yarn/install-state.gz
 .pnp.*
 
-dist/
+packages/**/dist
+packages/**/node_modules
 docker-compose.yml
