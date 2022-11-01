@@ -1,11 +1,13 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import DiscordProvider from 'next-auth/providers/discord';
 
+import { env } from '../../../env.mjs';
+
 export const authOptions: NextAuthOptions = {
 	providers: [
 		DiscordProvider({
-			clientId: process.env.DISCORD_CLIENT_ID as string,
-			clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
+			clientId: env.DISCORD_CLIENT_ID,
+			clientSecret: env.DISCORD_CLIENT_SECRET,
 			authorization: { params: { scope: 'identify guilds' } }
 		})
 	],

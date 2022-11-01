@@ -1,6 +1,7 @@
-import { Guild } from '@economica/db/entities';
+import { Guild } from '@economica/db';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+
 import { GuildSchema } from '../schemas';
 import { t } from '../trpc';
 

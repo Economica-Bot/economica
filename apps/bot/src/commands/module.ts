@@ -1,5 +1,5 @@
 import { ModuleString } from '@economica/common';
-import { Guild, Member, User } from '@economica/db/entities';
+import { Guild, Member, User } from '@economica/db';
 import {
 	ChatInputCommandInteraction,
 	EmbedBuilder,

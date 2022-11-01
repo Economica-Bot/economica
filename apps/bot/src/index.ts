@@ -1,4 +1,5 @@
 import { Client } from 'discord.js';
+
 import { env } from './env.mjs';
 import { resetCommands, updateCommands } from './lib/commands';
 
@@ -19,7 +20,7 @@ if (env.DEPLOY_COMMANDS === 'nothing') {
 
 client.on('interactionCreate', (interaction) => {
 	if (interaction.isChatInputCommand()) {
-		interaction;
+		interaction.reply('Hello World!');
 	}
 });
 

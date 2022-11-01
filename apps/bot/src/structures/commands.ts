@@ -16,7 +16,7 @@ export const ApplyOptions = ({
 	command: string;
 	subcommand: string;
 }): ClassDecorator => {
-	return (target: any) => {
+	return (target: object) => {
 		Reflect.defineProperty(target, 'command', command);
 		Reflect.defineProperty(target, 'subcommand', subcommand);
 	};

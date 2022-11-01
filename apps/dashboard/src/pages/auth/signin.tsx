@@ -1,6 +1,5 @@
 import { NextPage } from 'next';
 import Link from 'next/link';
-
 import { signIn } from 'next-auth/react';
 
 const SignIn: NextPage = () => (
@@ -22,7 +21,7 @@ const SignIn: NextPage = () => (
 			>
 				Login with Discord
 			</button>
-			<Link className="btn-secondary btn mt-3" href="/">
+			<Link href="/" className="btn-secondary btn mt-3">
 				Home
 			</Link>
 		</div>

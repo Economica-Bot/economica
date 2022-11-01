@@ -1,6 +1,7 @@
 import { RouteBases } from 'discord-api-types/v10';
 import Image from 'next/image';
 import { FC } from 'react';
+
 import { trpc } from '../../lib/trpc';
 
 type Props = {
@@ -19,7 +20,8 @@ export const UserCard: FC<Props> = ({ id }) => {
 						src={`${RouteBases.cdn}/avatars/${data.id}/${data.avatar}.png`}
 						alt="Profile"
 						className="rounded-full object-contain"
-						fill
+						width={128}
+						height={128}
 					/>
 				</div>
 			</div>

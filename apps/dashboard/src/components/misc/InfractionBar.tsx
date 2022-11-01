@@ -1,4 +1,4 @@
-import { Infraction } from '@economica/bot/src/entities';
+import { Infraction } from '@economica/db';
 import { FC } from 'react';
 
 import { UserCard } from './UserCard';

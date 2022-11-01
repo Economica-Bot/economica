@@ -1,4 +1,4 @@
-import { Transaction } from '@economica/bot/src/entities';
+import { Transaction } from '@economica/db';
 import { FC } from 'react';
 
 import { UserCard } from './UserCard';

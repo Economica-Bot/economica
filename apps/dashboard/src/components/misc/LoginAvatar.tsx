@@ -1,30 +1,25 @@
-'use client';
-
 import { RouteBases } from 'discord-api-types/v10';
-import { signIn, signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { signIn, signOut, useSession } from 'next-auth/react';
 import { FaSpinner } from 'react-icons/fa';
 
 export const LoginAvatar: React.FC = () => {
 	const { data: session, status } = useSession();
 
 	if (status === 'loading') {
-		return (
-			<div className="animate-spin">
-				<FaSpinner className="h-5 w-5" />
-			</div>
-		);
+		return <FaSpinner className="h-5 w-5 animate-spin" />;
 	} else if (status === 'authenticated') {
 		return (
 			<div className="dropdown-end dropdown">
-				<label tabIndex={0} className="online btn btn-ghost btn-circle avatar">
+				<label tabIndex={0} className="online btn-ghost btn-circle avatar btn">
 					<div className="h-10 w-10 rounded-full">
 						<Image
 							src={`${RouteBases.cdn}/avatars/${session.user.id}/${session.user.avatar}.png`}
 							alt=""
 							className="rounded-full"
-							fill
+							width={128}
+							height={128}
 						/>
 					</div>
 				</label>
@@ -50,7 +45,7 @@ export const LoginAvatar: React.FC = () => {
 		return (
 			<button
 				onClick={() => signIn('discord', { callbackUrl: '/dashboard' })}
-				className="btn btn-accent"
+				className="btn-accent btn"
 			>
 				Login
 			</button>

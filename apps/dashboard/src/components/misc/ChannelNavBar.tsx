@@ -3,9 +3,8 @@ import {
 	RESTGetAPICurrentUserResult
 } from 'discord-api-types/v10';
 import Link from 'next/link';
-import { FC, PropsWithChildren } from 'react';
-
 import { signOut } from 'next-auth/react';
+import { FC, PropsWithChildren } from 'react';
 
 const ChannelGroup: FC<PropsWithChildren & { text: string }> = ({
 	text,
@@ -25,8 +24,8 @@ const Channel: FC<PropsWithChildren & { text: string; url: string }> = ({
 	children
 }) => (
 	<Link
-		className="inline-flex cursor-pointer items-center justify-between rounded-md p-1 hover:bg-base-300"
 		href={url}
+		className="inline-flex cursor-pointer items-center justify-between rounded-md p-1 hover:bg-base-300"
 	>
 		# {text}
 		{children}
@@ -86,7 +85,7 @@ export const ChannelNavBar: FC<Props> = ({ guild, user }) => (
 			</div>
 			<div className="mx-auto my-5">
 				<button
-					className="btn btn-error"
+					className="btn-error btn"
 					onClick={() => signOut({ callbackUrl: '/' })}
 				>
 					Logout

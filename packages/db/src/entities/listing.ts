@@ -11,6 +11,7 @@ import {
 	ManyToOne,
 	Relation
 } from 'typeorm';
+
 import { Guild } from './guild';
 
 @Entity({ name: 'listing' })

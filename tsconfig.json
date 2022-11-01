@@ -6,7 +6,6 @@
 		"noImplicitReturns": true,
 		// "noUnusedLocals": true,
 		// "noUnusedParameters": true,
-		// "strict": true,
 		"strictNullChecks": true,
 		"noErrorTruncation": true,
 
@@ -21,16 +20,22 @@
 		"importHelpers": true,
 		"importsNotUsedAsValues": "remove",
 		"newLine": "lf",
-		"outDir": "./dist",
 		"sourceMap": true,
 		"esModuleInterop": true,
 		"experimentalDecorators": true,
 		"isolatedModules": true,
+		"declaration": true,
+		"declarationMap": true,
+		"incremental": true,
 
 		// Completeness
 		"skipLibCheck": true,
+		"baseUrl": ".",
+		"outDir": "./dist",
+		"rootDir": ".",
 		"paths": {
-			"@economica/*": ["./packages/*/src", "./apps/*/src"]
+			"@economica/*": ["packages/*", "apps/*"]
 		}
-	}
+	},
+	"exclude": ["node_modules", "dist"]
 }

@@ -1,5 +1,3 @@
-import { schema } from './env/schema.mjs';
-
 import { config } from 'dotenv';
 import path from 'path';
 import { z } from 'zod';

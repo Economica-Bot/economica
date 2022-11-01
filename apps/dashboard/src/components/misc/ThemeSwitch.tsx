@@ -1,5 +1,4 @@
 import { useTheme } from 'next-themes';
-
 import React from 'react';
 import { FaMoon, FaSun } from 'react-icons/fa';
 
@@ -14,18 +13,17 @@ export const ThemeSwitch: React.FC = () => {
 	if (!mounted) return null;
 
 	return (
-		<button
-			className="btn btn-ghost"
-			onClick={() => {
-				if (theme === 'dark') setTheme('light');
-				else setTheme('dark');
-			}}
-		>
-			{theme === 'dark' ? (
-				<FaMoon className="h-5 w-5" />
-			) : (
-				<FaSun className="h-5 w-5" />
-			)}
-		</button>
+		<label className="swap btn-ghost swap-rotate btn">
+			<input
+				type="checkbox"
+				checked={theme === 'dark'}
+				onChange={() => {
+					if (theme === 'dark') setTheme('light');
+					else setTheme('dark');
+				}}
+			/>
+			<FaMoon className="swap-on h-5 w-5" />
+			<FaSun className="swap-off h-5 w-5" />
+		</label>
 	);
 };

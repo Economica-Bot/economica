@@ -15,11 +15,11 @@ export const LoginPage: FC = () => (
 
 		<div className="flex flex-1 items-center justify-center">
 			<Link
-				className="btn btn-primary gap-2"
 				href="http://localhost:3000/api/auth/discord"
+				className="btn-primary btn gap-2"
 			>
 				<FaDiscord size={30} />
-				<h5>Login</h5>
+				Login
 			</Link>
 		</div>
 	</div>

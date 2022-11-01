@@ -1,20 +1,23 @@
-import path from 'path';
-import url from 'url';
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+import './src/env.mjs';
 
-/**
- * @type {import('next').NextConfig}
- */
+/** @type {import('next').NextConfig} */
 const nextConfig = {
 	reactStrictMode: true,
-	swcMinify: true,
 	images: {
 		domains: ['cdn.discordapp.com']
 	},
+	typescript: {
+		tsconfigPath: './tsconfig.json'
+	},
 	experimental: {
-		// this includes files from the monorepo base two directories up
-		outputFileTracingRoot: path.join(__dirname, '../../'),
-		appDir: true
+		transpilePackages: ['@economica/api', '@economica/db', '@economica/common']
+	},
+	webpack: (config) => {
+		// this will override the experiments
+		config.experiments = { ...config.experiments, ...{ topLevelAwait: true } };
+		// this will just update topLevelAwait property of config.experiments
+		// config.experiments.topLevelAwait = true
+		return config;
 	}
 };
 

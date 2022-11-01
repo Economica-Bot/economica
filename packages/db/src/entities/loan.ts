@@ -8,6 +8,7 @@ import {
 	ManyToOne,
 	Relation
 } from 'typeorm';
+
 import { Guild } from './guild';
 import { Member } from './member';
 

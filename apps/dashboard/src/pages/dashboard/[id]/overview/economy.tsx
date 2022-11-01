@@ -1,15 +1,14 @@
+import { ChannelType, RouteBases } from 'discord-api-types/v10';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+
 import DashboardLayout from '../../../../components/layouts/DashboardLayout';
+import { DashCard } from '../../../../components/misc/DashCard';
+import { DashTitleField } from '../../../../components/misc/DashTitleField';
 import { TransactionBar } from '../../../../components/misc/TransactionBar';
 import { trpc } from '../../../../lib/trpc';
 import { NextPageWithLayout } from '../../../_app';
-
-import { ChannelType, RouteBases } from 'discord-api-types/v10';
-import { useRouter } from 'next/router';
-import { DashCard } from '../../../../components/misc/DashCard';
-import { DashTitleField } from '../../../../components/misc/DashTitleField';
-
-import Image from 'next/image';
 
 const EconomyPage: NextPageWithLayout = () => {
 	const router = useRouter();
@@ -101,7 +100,8 @@ const EconomyPage: NextPageWithLayout = () => {
 											src={`${RouteBases.cdn}/emojis/${emoji.id}.png?size=32`}
 											alt={emoji.name ?? ''}
 											className="mask-square object-scale-down"
-											fill
+											width={128}
+											height={128}
 										/>
 									</div>
 									<span className="rounded bg-base-300 p-2 font-mono text-sm">

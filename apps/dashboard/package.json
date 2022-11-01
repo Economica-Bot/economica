@@ -1,7 +1,6 @@
 {
 	"name": "@economica/dashboard",
 	"version": "0.1.0",
-	"private": true,
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
@@ -11,6 +10,7 @@
 	},
 	"dependencies": {
 		"@economica/api": "*",
+		"@economica/common": "*",
 		"@economica/db": "*",
 		"@skyra/discord-components-core": "^3.4.1",
 		"@skyra/discord-components-react": "^3.4.1",
@@ -21,8 +21,9 @@
 		"@trpc/server": "^10.0.0-rc.1",
 		"daisyui": "^2.31.0",
 		"discord-api-types": "^0.37.9",
-		"eslint": "^8.25.0",
-		"next": "^13.0.0",
+		"eslint": "^8.26.0",
+		"eslint-config-next": "13.0.0",
+		"next": "13.0.0",
 		"next-auth": "^4.13.0",
 		"next-themes": "^0.2.1",
 		"react": "^18.2.0",
@@ -41,8 +42,6 @@
 		"@typescript-eslint/eslint-plugin": "^5.39.0",
 		"@typescript-eslint/parser": "^5.39.0",
 		"autoprefixer": "^10.4.4",
-		"eslint": "^8.25.0",
-		"eslint-config-next": "^13.0.0",
 		"postcss": "^8.4.16",
 		"prettier-plugin-tailwindcss": "^0.1.13",
 		"tailwindcss": "^3.0.23",

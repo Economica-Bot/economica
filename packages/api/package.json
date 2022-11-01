@@ -1,8 +1,8 @@
 {
 	"name": "@economica/api",
 	"version": "0.1.0",
-	"main": "index.ts",
-	"types": "index.ts",
+	"main": "index",
+	"typings": "index",
 	"dependencies": {
 		"@discordjs/rest": "^1.3.0",
 		"@economica/db": "*",

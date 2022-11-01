@@ -9,14 +9,15 @@ export const Footer: FC = () => (
 				src="/economica.png"
 				alt="Economica Navbar Logo"
 				className="rotate"
-				fill
+				width={128}
+				height={128}
 			/>
 		</div>
 		<div className="text-md my-5 flex flex-col flex-wrap items-center justify-center font-semibold children:m-3 children:text-xl sm:flex-row">
-			<Link href="localhost:3000/api/support">
+			<Link href="/api/support">
 				<h5 className="text-underline">Support</h5>
 			</Link>
-			<Link href="https://localhost:3000/api/support">
+			<Link href="/api/support">
 				<h5 className="text-underline">Report A Bug</h5>
 			</Link>
 			<Link href="/tos">

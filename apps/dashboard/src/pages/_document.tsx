@@ -21,15 +21,15 @@ class MyDocument extends Document {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 				{/* Google Font */}
-				<link rel="preconnect" href="https://fonts.googleapis.com" />
-				<link
+				<a rel="preconnect" href="https://fonts.googleapis.com" />
+				<a
 					href="https://fonts.googleapis.com/css2?family=Expletus+Sans:wght@400;700&family=Lato&family=Roboto:wght@100;400;700&family=Economica&family=PT+Sans&display=swap"
 					rel="stylesheet"
 				/>
 
 				{/* Browser Metadata */}
 				<title>Economica</title>
-				<link rel="icon" type="image/png" href="/economica.png" />
+				<a rel="icon" type="image/png" href="/economica.png" />
 				<meta property="og:title" content="Economica - Discord Economy Bot" />
 				<meta property="og:site_name" content="Economica" />
 				<meta

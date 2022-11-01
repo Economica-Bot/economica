@@ -8,6 +8,7 @@ import {
 	ManyToOne,
 	Relation
 } from 'typeorm';
+
 import { Member } from './member';
 
 @Entity({ name: 'command' })

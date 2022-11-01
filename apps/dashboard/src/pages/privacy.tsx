@@ -1,7 +1,9 @@
-import { NextPage } from 'next';
-import Link from 'next/link';
+import { ReactElement } from 'react';
 
-const PrivacyPage: NextPage = () => (
+import MainLayout from '../components/layouts/MainLayout';
+import { NextPageWithLayout } from './_app';
+
+const PrivacyPage: NextPageWithLayout = () => (
 	<div className="flex justify-center">
 		<article className="prose-sm prose my-40 p-3 md:prose-base lg:prose-lg">
 			<h1>PRIVACY POLICY</h1>
@@ -367,9 +369,9 @@ const PrivacyPage: NextPage = () => (
 					<p>
 						For more information on the privacy practices of Google, please
 						visit the{' '}
-						<Link href="https://policies.google.com/privacy?hl=en">
+						<a href="https://policies.google.com/privacy?hl=en">
 							Google Privacy & Terms web page
-						</Link>
+						</a>
 						.
 					</p>
 				</li>
@@ -391,9 +393,9 @@ const PrivacyPage: NextPage = () => (
 					<p>
 						You may opt out of the use of the DoubleClick Cookie for
 						interest-based advertising by visiting the{' '}
-						<Link href="http://www.google.com/ads/preferences/">
+						<a href="http://www.google.com/ads/preferences/">
 							Google Ads Settings web page
-						</Link>
+						</a>
 						.
 					</p>
 				</li>
@@ -465,10 +467,14 @@ const PrivacyPage: NextPage = () => (
 			<h2>Contact Us</h2>
 			<p>
 				If you have any questions about our Privacy Policy, please contact us on
-				our <Link href="localhost:3000/api/support">support server</Link>.
+				our <a href="localhost:3000/api/support">support server</a>.
 			</p>
 		</article>
 	</div>
 );
+
+PrivacyPage.getLayout = function getLayout(page: ReactElement) {
+	return <MainLayout>{page}</MainLayout>;
+};
 
 export default PrivacyPage;

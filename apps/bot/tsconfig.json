@@ -1,10 +1,13 @@
 {
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
-		"composite": true,
-		"lib": ["ESNext", "DOM"],
-		"declaration": true,
-		"declarationMap": true
+		"baseUrl": ".",
+		"paths": {
+			"@economica/api": ["../../../packages/api"],
+			"@economica/common": ["../../../packages/common"],
+			"@economica/db": ["../../../packages/db"]
+		}
 	},
-	"include": ["**/*.ts", "**/*.mjs", "index.d.ts"]
+	"include": ["**/*.ts", "index.d.ts"],
+	"exclude": ["./dist"]
 }

@@ -1,6 +1,7 @@
-import { Transaction } from '@economica/db/entities';
+import { Transaction } from '@economica/db';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+
 import { TransactionCreateSchema, TransactionUpdateSchema } from '../schemas';
 import { t } from '../trpc';
 

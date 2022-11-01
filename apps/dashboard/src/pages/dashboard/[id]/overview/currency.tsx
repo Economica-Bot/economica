@@ -1,4 +1,4 @@
-import { DefaultCurrencySymbol } from '@economica/bot/src/typings';
+import { DefaultCurrencySymbol } from '@economica/common';
 import {
 	RESTGetAPICurrentUserGuildsResult,
 	RESTGetAPICurrentUserResult

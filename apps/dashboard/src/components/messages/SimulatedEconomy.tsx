@@ -1,5 +1,3 @@
-'use client';
-
 import {
 	DiscordBold,
 	DiscordCommand,
@@ -21,8 +19,8 @@ const SimulatedEconomy: React.FC = () => {
 	const { resolvedTheme } = useTheme();
 	return (
 		<DiscordMessages
-			className="rounded-lg"
 			lightTheme={resolvedTheme === 'light'}
+			className="rounded-lg"
 		>
 			<DiscordMessage author="Economica" avatar="/economica.png" bot verified>
 				<DiscordCommand

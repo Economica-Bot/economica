@@ -1,10 +1,9 @@
 import { EmbedBuilder } from '@discordjs/builders';
-import { Routes } from 'discord-api-types/v10';
+import { InfractionString } from '@economica/common';
+import { Guild, Infraction, Member } from '@economica/db';
+import { ChannelType, Routes } from 'discord-api-types/v10';
 import ms from 'ms';
-import { rest } from '..';
-
-import { Guild, Infraction, Member } from '../entities';
-import { InfractionString } from '../typings/interfaces';
+import { client } from 'src';
 
 export function displayInfraction(infraction: Infraction) {
 	const {
@@ -70,8 +69,8 @@ export async function recordInfraction(
 	const { infractionLogId } = guild;
 	if (infractionLogId) {
 		const embed = displayInfraction(infractionEntity);
-		await rest.post(Routes.channel(infractionLogId), {
-			body: { embeds: [embed] }
-		});
+		const channel = await client.channels.fetch(infractionLogId);
+		if (!channel || channel.type !== ChannelType.GuildText) return;
+		await channel.send({ embeds: [embed] });
 	}
 }

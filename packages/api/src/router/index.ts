@@ -1,4 +1,5 @@
 import { commandData } from '@economica/common';
+
 import { t } from '../trpc';
 import { discordRouter } from './discord';
 import { guildRouter } from './guild';

@@ -1,5 +1,4 @@
 import { FC } from 'react';
-
 import { CgSpinnerTwo } from 'react-icons/cg';
 
 export const LoadingSkeleton: FC = () => (

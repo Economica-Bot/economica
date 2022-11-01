@@ -1,6 +1,7 @@
-import { Infraction } from '@economica/db/entities';
+import { Infraction } from '@economica/db';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+
 import { InfractionSchema } from '../schemas';
 import { t } from '../trpc';
 

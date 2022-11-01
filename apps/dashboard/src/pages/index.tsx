@@ -1,7 +1,6 @@
-'use client';
-
-import { NextPage } from 'next';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { ReactElement } from 'react';
 import {
 	FaChartBar,
 	FaCog,
@@ -14,14 +13,27 @@ import {
 	FaShoppingCart,
 	FaTools
 } from 'react-icons/fa';
-import { DeveloperCard } from './DeveloperCard';
-import DiscordHero from './DiscordHero';
-import { InquiryAccordion } from './InquiryAccordion';
-import { ModuleCard } from './ModuleCard';
-import SimulatedEconomy from './SimulatedEconomy';
-import StatisticsDashboard from './StatisticsDashboard';
 
-const Home: NextPage = () => (
+import MainLayout from '../components/layouts/MainLayout';
+import { DeveloperCard } from '../components/misc/DeveloperCard';
+import { InquiryAccordion } from '../components/misc/InquiryAccordion';
+import { ModuleCard } from '../components/misc/ModuleCard';
+import { NextPageWithLayout } from './_app';
+
+const DiscordHero = dynamic(
+	() => import('../components/messages/DiscordHero'),
+	{ ssr: false }
+);
+const SimulatedEconomy = dynamic(
+	() => import('../components/messages/SimulatedEconomy'),
+	{ ssr: false }
+);
+const StatisticsDashboard = dynamic(
+	() => import('../components/messages/StatisticsDashboard'),
+	{ ssr: false }
+);
+
+const Home: NextPageWithLayout = () => (
 	<>
 		<section className="flex min-h-[80vh] items-center justify-center p-8">
 			<div>
@@ -31,15 +43,15 @@ const Home: NextPage = () => (
 				</h2>
 				<div className="flex gap-5">
 					<Link
-						className="btn-primary btn"
 						href="http://localhost:3000/api/invite"
+						className="btn btn-primary"
 					>
 						Invite
 						<FaDiscord className="ml-2" size={30} />
 					</Link>
 					<Link
-						className="btn-secondary btn"
 						href="http://localhost:3000/api/support"
+						className="btn btn-secondary"
 					>
 						Server
 					</Link>
@@ -66,8 +78,8 @@ const Home: NextPage = () => (
 			className="flex w-full flex-col items-center bg-base-300 py-32 px-5"
 		>
 			<h1 className="text-underline text-4xl font-bold">Features</h1>
-			<div className="my-10 grid max-w-5xl grid-cols-1 gap-10 md:grid-cols-2">
-				<div className="flex flex-col justify-center">
+			<div className="my-10 flex flex-col gap-10 lg:flex-row">
+				<div className="max-w-md">
 					<h1 className="text-3xl">Simulated Economy</h1>
 					<p className="mt-2">
 						Earn, exchange, and spend money in a variety of ways, including
@@ -75,15 +87,11 @@ const Home: NextPage = () => (
 						income commands.
 					</p>
 				</div>
-				<div className="hidden md:block">
-					<SimulatedEconomy />
-				</div>
+				<SimulatedEconomy />
 			</div>
-			<div className="my-10 grid max-w-5xl grid-cols-1 gap-10 md:grid-cols-2">
-				<div className="col-span-1 hidden md:block">
-					<StatisticsDashboard />
-				</div>
-				<div className="col-span-1 flex flex-col justify-center">
+			<div className="my-10 flex flex-col-reverse gap-10 lg:flex-row">
+				<StatisticsDashboard />
+				<div className="max-w-md">
 					<h1 className="text-3xl">Detailed Oversight</h1>
 					<p className="mt-2">
 						View and manipulate a variety of server settings and view trends
@@ -162,7 +170,7 @@ const Home: NextPage = () => (
 					Economica is currently in{' '}
 					<strong className="text-underline">Open Beta</strong>
 				</h3>
-				<Link className="btn-primary btn" href="localhost:3000/api/invite">
+				<Link href="localhost:3000/api/invite" className="btn btn-primary">
 					Invite
 					<FaDiscord className="ml-2" size={30} />
 				</Link>
@@ -208,5 +216,9 @@ const Home: NextPage = () => (
 		</section>
 	</>
 );
+
+Home.getLayout = function getLayout(page: ReactElement) {
+	return <MainLayout>{page}</MainLayout>;
+};
 
 export default Home;

@@ -1,10 +1,11 @@
 {
 	"name": "@economica/db",
 	"version": "0.1.0",
-	"main": "index.ts",
-	"types": "index.ts",
+	"main": "index",
+	"typings": "index",
 	"dependencies": {
 		"@economica/common": "*",
+		"pg": "^8.8.0",
 		"typeorm": "^0.3.10",
 		"zod": "^3.19.1"
 	},

@@ -1,6 +1,7 @@
 import { DefaultModulesObj, ModuleString } from '@economica/common';
 import { RESTPostAPIApplicationCommandsJSONBody } from 'discord-api-types/v10';
 import { Client } from 'discord.js';
+
 import { env } from '../env.mjs';
 import { commandData } from './commandData.js';
 

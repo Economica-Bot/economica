@@ -1,5 +1,4 @@
-import { t } from '../trpc';
-
+import { REST } from '@discordjs/rest';
 import {
 	RESTGetAPIGuildChannelsResult,
 	RESTGetAPIGuildEmojiResult,
@@ -8,32 +7,34 @@ import {
 	RESTGetAPIGuildResult,
 	RESTGetAPIGuildRolesResult,
 	RESTGetAPIUserResult,
+	RESTGetAPICurrentUserGuildsResult,
 	Routes
 } from 'discord-api-types/v10';
-
-import { REST } from '@discordjs/rest';
 import { z } from 'zod';
 
-const rest = new REST();
+import { t } from '../trpc';
+
+const botRest = new REST({ authPrefix: 'Bot' });
+const userRest = new REST({ authPrefix: 'Bearer' });
 
 export const discordRouter = t.router({
 	user: t.procedure
 		.input(z.string())
 		.query(
 			async ({ input }) =>
-				(await rest.get(Routes.user(input))) as RESTGetAPIUserResult
+				(await botRest.get(Routes.user(input))) as RESTGetAPIUserResult
 		),
 	guild: t.procedure
 		.input(z.string())
 		.query(
 			async ({ input }) =>
-				(await rest.get(Routes.guild(input))) as RESTGetAPIGuildResult
+				(await botRest.get(Routes.guild(input))) as RESTGetAPIGuildResult
 		),
 	guildChannels: t.procedure
 		.input(z.string())
 		.query(
 			async ({ input }) =>
-				(await rest.get(
+				(await botRest.get(
 					Routes.guildChannels(input)
 				)) as RESTGetAPIGuildChannelsResult
 		),
@@ -41,13 +42,15 @@ export const discordRouter = t.router({
 		.input(z.string())
 		.query(
 			async ({ input }) =>
-				(await rest.get(Routes.guildRoles(input))) as RESTGetAPIGuildRolesResult
+				(await botRest.get(
+					Routes.guildRoles(input)
+				)) as RESTGetAPIGuildRolesResult
 		),
 	guildEmojis: t.procedure
 		.input(z.string())
 		.query(
 			async ({ input }) =>
-				(await rest.get(
+				(await botRest.get(
 					Routes.guildEmojis(input)
 				)) as RESTGetAPIGuildEmojisResult
 		),
@@ -68,7 +71,7 @@ export const discordRouter = t.router({
 					name: input.emoji.name
 				})
 			);
-			return (await rest.get(
+			return (await botRest.get(
 				Routes.guildEmoji(input.guildId, emojiId)
 			)) as RESTGetAPIGuildEmojiResult;
 		}),
@@ -76,8 +79,14 @@ export const discordRouter = t.router({
 		.input(z.object({ guildId: z.string(), userId: z.string() }))
 		.query(
 			async ({ input }) =>
-				(await rest.get(
+				(await botRest.get(
 					Routes.guildMember(input.guildId, input.userId)
 				)) as RESTGetAPIGuildMemberResult
-		)
+		),
+	userGuilds: t.procedure.input(z.string()).query(async ({ input }) => {
+		userRest.setToken(input);
+		return (await userRest.get(
+			Routes.userGuilds()
+		)) as RESTGetAPICurrentUserGuildsResult;
+	})
 });

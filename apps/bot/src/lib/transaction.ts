@@ -1,6 +1,7 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
 import { EmbedBuilder } from '@discordjs/builders';
-import { TransactionString } from '@economica/api/src/types/interfaces';
+import { TransactionString } from '@economica/common';
+
 import { trpc } from './trpc';
 
 export const displayTransaction = async (transactionId: string) => {

@@ -1,6 +1,7 @@
-import { Member } from '@economica/db/entities';
+import { Member } from '@economica/db';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+
 import { MemberUpdateSchema, MemberViewSchema } from '../schemas';
 import { t } from '../trpc';
 

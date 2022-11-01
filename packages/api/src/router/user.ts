@@ -1,6 +1,7 @@
-import { User } from '@economica/db/entities';
+import { User } from '@economica/db';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+
 import { UserSchema } from '../schemas';
 import { t } from '../trpc';
 

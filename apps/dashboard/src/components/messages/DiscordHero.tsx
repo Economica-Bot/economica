@@ -1,5 +1,3 @@
-'use client';
-
 import {
 	DiscordCommand,
 	DiscordEmbed,
@@ -8,23 +6,22 @@ import {
 	DiscordMessage,
 	DiscordMessages
 } from '@skyra/discord-components-react';
-import React from 'react';
-
 import { useTheme } from 'next-themes';
+import React from 'react';
 
 const DiscordHero: React.FC = () => {
 	const { resolvedTheme } = useTheme();
 	return (
 		<DiscordMessages
-			className="rounded-lg"
 			lightTheme={resolvedTheme === 'light'}
+			className="rounded-lg"
 		>
 			<DiscordMessage author="Economica" avatar="/economica.png" bot verified>
 				<DiscordCommand
 					slot="reply"
 					author="Adrastopoulos"
 					avatar="/adrastopoulos.png"
-					command="pay"
+					command="/pay"
 				/>
 				<DiscordEmbed
 					slot="embeds"

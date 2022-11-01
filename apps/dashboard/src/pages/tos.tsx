@@ -1,7 +1,9 @@
-import { NextPage } from 'next';
-import Link from 'next/link';
+import { ReactElement } from 'react';
 
-const TOS: NextPage = () => (
+import MainLayout from '../components/layouts/MainLayout';
+import { NextPageWithLayout } from './_app';
+
+const TOS: NextPageWithLayout = () => (
 	<div className="flex justify-center">
 		<article className="prose-sm prose my-40 p-3 md:prose-base lg:prose-lg">
 			<h1 className="uppercase">Terms of Service</h1>
@@ -168,10 +170,14 @@ const TOS: NextPage = () => (
 			<h2>Contact Us</h2>
 			<p>
 				If you have any questions about our Privacy Policy, please contact us on
-				our <Link href="localhost:3000/api/support">support server</Link>.
+				our <a href="localhost:3000/api/support">support server</a>.
 			</p>
 		</article>
 	</div>
 );
+
+TOS.getLayout = function getLayout(page: ReactElement) {
+	return <MainLayout>{page}</MainLayout>;
+};
 
 export default TOS;

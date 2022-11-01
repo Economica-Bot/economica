@@ -1,5 +1,6 @@
 import { DiscordSnowflake } from '@sapphire/snowflake';
 import { BaseEntity, Column, Entity, ManyToOne, Relation } from 'typeorm';
+
 import { Listing } from './listing';
 import { Member } from './member';
 
