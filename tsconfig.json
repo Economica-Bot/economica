@@ -36,6 +36,5 @@
 		"paths": {
 			"@economica/*": ["packages/*", "apps/*"]
 		}
-	},
-	"exclude": ["node_modules", "dist"]
+	}
 }

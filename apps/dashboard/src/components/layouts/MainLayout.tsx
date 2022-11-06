@@ -1,5 +1,4 @@
 import { FC, PropsWithChildren } from 'react';
-
 import { Footer } from '../misc/Footer';
 import { Navbar } from '../misc/Navbar';
 

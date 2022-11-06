@@ -162,7 +162,7 @@ const EconomyPage: NextPageWithLayout = () => {
 			<DashCard title="Transactions" subtitle="View all transactions">
 				<div className="my-3 inline-flex items-center gap-3">
 					<button
-						className={`btn btn-secondary btn-xs ${
+						className={`btn-secondary btn-xs btn ${
 							page === 1 ? 'btn-disabled' : ''
 						}`}
 						onClick={() => setPage(page - 1)}
@@ -170,7 +170,7 @@ const EconomyPage: NextPageWithLayout = () => {
 						Previous Page
 					</button>
 					<button
-						className={`btn btn-primary btn-xs ${
+						className={`btn-primary btn-xs btn ${
 							page * limit >= count ? 'btn-disabled' : ''
 						}`}
 						onClick={() => setPage(page + 1)}
@@ -212,12 +212,12 @@ const EconomyPage: NextPageWithLayout = () => {
 					</h1>
 					<div className="inline-flex gap-3">
 						<button
-							className="btn btn-warning"
+							className="btn-warning btn"
 							onClick={() => setNewGuild(guild)}
 						>
 							Nay
 						</button>
-						<button className="btn btn-success" onClick={updateGuild}>
+						<button className="btn-success btn" onClick={updateGuild}>
 							Aye
 						</button>
 					</div>

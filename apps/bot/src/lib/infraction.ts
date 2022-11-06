@@ -1,9 +1,9 @@
 import { EmbedBuilder } from '@discordjs/builders';
 import { InfractionString } from '@economica/common';
 import { Guild, Infraction, Member } from '@economica/db';
-import { ChannelType, Routes } from 'discord-api-types/v10';
+import { ChannelType } from 'discord-api-types/v10';
+import { Client } from 'discord.js';
 import ms from 'ms';
-import { client } from 'src';
 
 export function displayInfraction(infraction: Infraction) {
 	const {
@@ -47,6 +47,7 @@ export function displayInfraction(infraction: Infraction) {
  * @param {boolean} permanent - Whether the punishment is permanent.
  */
 export async function recordInfraction(
+	client: Client,
 	guild: Guild,
 	target: Member,
 	agent: Member,

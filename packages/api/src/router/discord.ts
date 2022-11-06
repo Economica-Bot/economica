@@ -1,5 +1,6 @@
 import { REST } from '@discordjs/rest';
 import {
+	RESTGetAPICurrentUserGuildsResult,
 	RESTGetAPIGuildChannelsResult,
 	RESTGetAPIGuildEmojiResult,
 	RESTGetAPIGuildEmojisResult,
@@ -7,14 +8,14 @@ import {
 	RESTGetAPIGuildResult,
 	RESTGetAPIGuildRolesResult,
 	RESTGetAPIUserResult,
-	RESTGetAPICurrentUserGuildsResult,
 	Routes
 } from 'discord-api-types/v10';
+import { env } from '../env.mjs';
 import { z } from 'zod';
 
 import { t } from '../trpc';
 
-const botRest = new REST({ authPrefix: 'Bot' });
+const botRest = new REST({ authPrefix: 'Bot' }).setToken(env.DISCORD_BOT_TOKEN);
 const userRest = new REST({ authPrefix: 'Bearer' });
 
 export const discordRouter = t.router({

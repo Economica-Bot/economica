@@ -1,16 +1,13 @@
 {
 	"name": "@economica/api",
-	"version": "0.1.0",
-	"main": "index",
-	"typings": "index",
+	"type": "module",
 	"dependencies": {
 		"@discordjs/rest": "^1.3.0",
-		"@economica/db": "*",
-		"@economica/common": "*",
-		"@trpc/server": "^10.0.0-rc.1",
+		"@economica/common": "workspace:*",
+		"@economica/db": "workspace:*",
+		"@trpc/server": "^10.0.0-rc.6",
+		"discord-api-types": "^0.37.16",
+		"dotenv": "^16.0.3",
 		"zod": "^3.19.1"
-	},
-	"devDependencies": {
-		"typescript": "^4.8.4"
 	}
 }

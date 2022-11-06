@@ -1,9 +1,7 @@
 {
 	"name": "@economica/common",
-	"version": "0.1.0",
-	"main": "index",
-	"typings": "index",
+	"type": "module",
 	"dependencies": {
-		"discord-api-types": "^0.37.15"
+		"discord-api-types": "^0.37.16"
 	}
 }

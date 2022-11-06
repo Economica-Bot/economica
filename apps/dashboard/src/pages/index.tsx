@@ -44,14 +44,14 @@ const Home: NextPageWithLayout = () => (
 				<div className="flex gap-5">
 					<Link
 						href="http://localhost:3000/api/invite"
-						className="btn btn-primary"
+						className="btn-primary btn"
 					>
 						Invite
 						<FaDiscord className="ml-2" size={30} />
 					</Link>
 					<Link
 						href="http://localhost:3000/api/support"
-						className="btn btn-secondary"
+						className="btn-secondary btn"
 					>
 						Server
 					</Link>
@@ -170,7 +170,7 @@ const Home: NextPageWithLayout = () => (
 					Economica is currently in{' '}
 					<strong className="text-underline">Open Beta</strong>
 				</h3>
-				<Link href="localhost:3000/api/invite" className="btn btn-primary">
+				<Link href="localhost:3000/api/invite" className="btn-primary btn">
 					Invite
 					<FaDiscord className="ml-2" size={30} />
 				</Link>

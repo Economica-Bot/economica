@@ -1,15 +1,10 @@
 {
 	"name": "@economica/db",
-	"version": "0.1.0",
-	"main": "index",
-	"typings": "index",
+	"type": "module",
 	"dependencies": {
-		"@economica/common": "*",
-		"pg": "^8.8.0",
-		"typeorm": "^0.3.10",
-		"zod": "^3.19.1"
-	},
-	"devDependencies": {
-		"typescript": "^4.8.4"
+		"@economica/common": "workspace:*",
+		"@sapphire/snowflake": "^3.2.2",
+		"discord-api-types": "^0.37.16",
+		"typeorm": "^0.3.10"
 	}
 }

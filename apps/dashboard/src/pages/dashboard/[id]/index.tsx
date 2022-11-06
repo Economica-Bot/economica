@@ -7,33 +7,23 @@ import { NextPageWithLayout } from '../../_app';
 const HomePage: NextPageWithLayout = () => {
 	const router = useRouter();
 
-	const { data, isLoading } = trpc.guild.byId.useQuery(
+	const guildQuery = trpc.guild.byId.useQuery(router.query.id as string);
+	const discordGuildQuery = trpc.discord.guild.useQuery(
 		router.query.id as string
 	);
 
-	if (isLoading) return <p>Loading...</p>;
-	if (!data) return <p>Guild is not setup</p>;
+	if (guildQuery.isLoading || discordGuildQuery.isLoading)
+		return <p>Loading...</p>;
+	if (!guildQuery.data || !discordGuildQuery.data)
+		return <p>Guild is not setup</p>;
 
 	return (
 		<div className="w-full">
 			<h1 className="font-economica text-3xl">Overview</h1>
-			<hr />
-			<p>{JSON.stringify(data)}</p>
-			<hr />
-			<div>
-				<div>
-					<h2>New Messages</h2>
-					<p>1000</p>
-				</div>
-				<div>
-					<h2>Joins/Leaves</h2>
-					<p>1000</p>
-				</div>
-				<div>
-					<h2>Total Members</h2>
-					<p>1000</p>
-				</div>
-			</div>
+			<pre className="m-3 rounded-md bg-base-300 p-5">
+				{JSON.stringify(guildQuery.data, null, '\t')}
+				{JSON.stringify(discordGuildQuery.data, null, '\t')}
+			</pre>
 		</div>
 	);
 };
