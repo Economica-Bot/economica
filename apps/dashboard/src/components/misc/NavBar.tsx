@@ -6,7 +6,7 @@ import { FaBars, FaCode, FaCogs, FaDiscord } from 'react-icons/fa';
 import { LoginAvatar } from './LoginAvatar';
 import { ThemeSwitch } from './ThemeSwitch';
 
-export const Navbar: FC = () => (
+export const NavBar: FC = () => (
 	<nav
 		className="fixed top-0 z-50 inline-flex h-20 w-full justify-center bg-base-300 p-3 font-thin shadow-drop"
 		role="navigation"
