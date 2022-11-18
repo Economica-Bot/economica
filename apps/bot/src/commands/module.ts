@@ -1,77 +1,29 @@
-import { ModuleString } from '@economica/common';
-import { Guild, Member, User } from '@economica/db';
-import {
-	ChatInputCommandInteraction,
-	EmbedBuilder,
-	PermissionFlagsBits,
-	SlashCommandBuilder
-} from 'discord.js';
+import { CommandData, ModuleString } from '@economica/common';
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import { trpc } from 'src/lib/trpc';
+import { Command } from 'src/structures/commands';
 
-interface Context {
-	interaction: ChatInputCommandInteraction<'cached'>;
-	guildEntity: Guild;
-	memberEntity: Member;
-	userEntity: User;
-}
-
-interface Command {
-	data: Partial<SlashCommandBuilder>;
-	execute: (ctx: Context) => Promise<void> | void;
-}
-
-export default class implements Command {
-	public data = new SlashCommandBuilder()
-		.setName('module')
-		.setDescription('Manage server modules')
-		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName('view')
-				.setDescription('View the enabled modules on this server')
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName('add')
-				.setDescription('Add a module to this server.')
-				.addStringOption((option) =>
-					option
-						.setName('module')
-						.setDescription('Specify a module')
-						.setRequired(true)
-				)
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName('remove')
-				.setDescription('Remove a module from this server.')
-				.addStringOption((option) =>
-					option
-						.setName('module')
-						.setDescription('Specify a module')
-						.setRequired(true)
-				)
-		);
-
-	public execute = async (ctx: Context): Promise<void> => {
-		const subcommand = ctx.interaction.options.getSubcommand();
-		const moduleName = ctx.interaction.options.getString(
-			'module',
-			false
-		) as ModuleString;
-		if (moduleName && !(moduleName in ctx.guildEntity.modules)) {
-			throw new Error(`Invalid module: \`${moduleName}\``);
-		} else if (subcommand === 'view') {
+export default {
+	name: 'module',
+	execute: async (
+		interaction: ChatInputCommandInteraction<'cached'>
+	): Promise<void> => {
+		const subcommand = interaction.options.getSubcommand();
+		if (subcommand === 'view') {
+			const guildEntity = await trpc.guild.byId.query(interaction.guildId);
+			const description = `**View ${interaction.guild}'s Modules!**`;
 			const embed = new EmbedBuilder()
 				.setAuthor({
-					iconURL: ctx.interaction.guild.iconURL() ?? '',
+					iconURL:
+						interaction.guild.iconURL() ?? interaction.user.displayAvatarURL(),
 					name: 'Modules'
 				})
-				.setDescription(`**View ${ctx.interaction.guild}'s Modules!**`)
+				.setDescription(description)
 				.addFields([
 					{
 						name: 'Default Modules',
 						inline: true,
-						value: Object.entries(ctx.guildEntity.modules)
+						value: Object.entries(guildEntity.modules)
 							.filter(([, module]) => module.type === 'DEFAULT')
 							.map(([module]) => `\`${module}\``)
 							.join('\n')
@@ -79,7 +31,7 @@ export default class implements Command {
 					{
 						name: 'Enabled Modules',
 						inline: true,
-						value: Object.entries(ctx.guildEntity.modules)
+						value: Object.entries(guildEntity.modules)
 							.filter(([, module]) => module.enabled)
 							.map(([module]) => `\`${module}\``)
 							.join('\n')
@@ -87,64 +39,74 @@ export default class implements Command {
 					{
 						name: 'Disabled Modules',
 						inline: true,
-						value: Object.entries(ctx.guildEntity.modules)
+						value: Object.entries(guildEntity.modules)
 							.filter(([, module]) => !module.enabled)
 							.map(([module]) => `\`${module}\``)
 							.join('\n')
 					}
 				]);
-			await ctx.interaction.reply({ embeds: [embed] });
+			await interaction.reply({ embeds: [embed] });
 		} else if (subcommand === 'add') {
-			if (ctx.userEntity.keys < 1) {
+			const moduleName = interaction.options.getString(
+				'module',
+				true
+			) as ModuleString;
+			const userEntity = await trpc.user.byId.query(interaction.user.id);
+			const guildEntity = await trpc.guild.byId.query(interaction.guildId);
+			if (userEntity.keys < 1) {
 				throw new Error('You do not have any keys.');
-			} else if (ctx.guildEntity.modules[moduleName].enabled) {
+			} else if (guildEntity.modules[moduleName].enabled) {
 				throw new Error(
 					`This server already has the \`${moduleName}\` module enabled.`
 				);
 			} else {
-				ctx.userEntity.keys -= 1;
-				await ctx.userEntity.save();
-				ctx.guildEntity.modules[moduleName].enabled = true;
-				ctx.guildEntity.modules[moduleName].user = ctx.userEntity.id;
-				await ctx.guildEntity.save();
-				// await Promise.all(
-				// 	ctx.client.commands
-				// 		.filter((command) => command.data.module === moduleName)
-				// 		.map(async (command) => {
-				// 			await ctx.interaction.guild.commands.create(
-				// 				command.data.toJSON()
-				// 			);
-				// 		})
-				// );
-				// await syncPermissions(ctx.client, ctx.interaction.guild);
-				// await ctx
-				// 	.embedify('success', 'user', `Added the \`${moduleName}\` module.`)
-				// 	.send(true);
+				userEntity.keys -= 1;
+				await trpc.user.update.mutate(userEntity);
+				await userEntity.save();
+				guildEntity.modules[moduleName].enabled = true;
+				guildEntity.modules[moduleName].user = userEntity.id;
+				await trpc.guild.update.mutate(guildEntity);
+				await Promise.all(
+					CommandData.filter((command) => command.module === moduleName).map(
+						async (command) => {
+							await interaction.guild.commands.create(command);
+						}
+					)
+				);
+				const embed = new EmbedBuilder()
+					.setAuthor({ name: 'Success!' })
+					.setDescription(`Added the \`${moduleName}\` module.`);
+				await interaction.reply({ embeds: [embed] });
 			}
 		} else if (subcommand === 'remove') {
-			if (ctx.guildEntity.modules[moduleName].user !== ctx.userEntity.id) {
+			const moduleName = interaction.options.getString(
+				'module',
+				true
+			) as ModuleString;
+			const userEntity = await trpc.user.byId.query(interaction.user.id);
+			const guildEntity = await trpc.guild.byId.query(interaction.guildId);
+			if (guildEntity.modules[moduleName].user !== userEntity.id) {
 				throw new Error('You have not enabled this module in this server.');
 			} else {
-				ctx.userEntity.keys += 1;
-				await ctx.userEntity.save();
-				ctx.guildEntity.modules[moduleName].enabled = false;
-				ctx.guildEntity.modules[moduleName].user = null;
-				await ctx.guildEntity.save();
-				const applicationCommands =
-					await ctx.interaction.guild.commands.fetch();
-				// ctx.client.commands
-				// 	.filter((command) => command.data.module === moduleName)
-				// 	.forEach(async (command) => {
-				// 		const cmd = applicationCommands.find(
-				// 			(applicationCommand) =>
-				// 				applicationCommand.name === command.data.name
-				// 		);
-				// 		if (cmd) await ctx.interaction.guild.commands.delete(cmd);
-				// 	});
-				// await ctx
-				// 	.embedify('success', 'user', `Removed the \`${moduleName}\` module.`)
-				// 	.send(true);
+				userEntity.keys += 1;
+				await trpc.user.update.mutate(userEntity);
+				guildEntity.modules[moduleName].enabled = false;
+				guildEntity.modules[moduleName].user = null;
+				await trpc.guild.update.mutate(guildEntity);
+				const applicationCommands = await interaction.guild.commands.fetch();
+				CommandData.filter((command) => command.module === moduleName).forEach(
+					async (command) => {
+						const cmd = applicationCommands.find(
+							(applicationCommand) => applicationCommand.name === command.name
+						);
+						if (cmd) await interaction.guild.commands.delete(cmd);
+					}
+				);
+				const embed = new EmbedBuilder()
+					.setAuthor({ name: 'Success!' })
+					.setDescription(`Removed the \`${moduleName}\` module.`);
+				await interaction.reply({ embeds: [embed] });
 			}
 		}
-	};
-}
+	}
+} as Command;

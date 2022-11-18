@@ -3,7 +3,7 @@ import { ReactElement, useState } from 'react';
 import MainLayout from '../components/layouts/MainLayout';
 import { CommandDropDown } from '../components/misc/CommandDropDown';
 import { NextPageWithLayout } from './_app';
-import { commandData } from '@economica/common';
+import { CommandData } from '@economica/common';
 
 const CommandsPage: NextPageWithLayout = () => {
 	const [query, setQuery] = useState('');
@@ -21,20 +21,20 @@ const CommandsPage: NextPageWithLayout = () => {
 				/>
 
 				<div className="btn-group">
-					{commandData
-						.filter(
-							(command, index) =>
-								commandData.findIndex(
-									(command2) => command2.module === command.module
-								) === index
-						)
+					{CommandData.filter(
+						(command, index) =>
+							CommandData.findIndex((c) => c.module === command.module) ===
+							index
+					)
 						.map((command) => (
 							<button
 								key={command.name}
 								type="button"
 								aria-current="page"
 								className={`btn inline-block px-6 py-3 ${
-									command.module.toUpperCase() === module ? 'btn-active' : ''
+									command.module.toUpperCase() === module
+										? 'btn-active'
+										: 'btn-ghost'
 								}`}
 								onClick={() => setModule(command.module.toUpperCase())}
 							>
@@ -47,7 +47,7 @@ const CommandsPage: NextPageWithLayout = () => {
 								type="button"
 								aria-current="page"
 								className={`btn inline-block px-6 py-3 ${
-									module === 'ALL' ? 'btn-active' : ''
+									module === 'ALL' ? 'btn-active' : 'btn-ghost'
 								}`}
 								onClick={() => setModule('ALL')}
 							>
@@ -57,19 +57,18 @@ const CommandsPage: NextPageWithLayout = () => {
 						.reverse()}
 				</div>
 
-				{commandData
-					.filter((command) => {
-						if (
-							query &&
-							!command.name.toLowerCase().includes(query.toLowerCase()) &&
-							!command.description.toLowerCase().includes(query.toLowerCase())
-						)
-							return false;
+				{CommandData.filter((command) => {
+					if (
+						query &&
+						!command.name.toLowerCase().includes(query.toLowerCase()) &&
+						!command.description.toLowerCase().includes(query.toLowerCase())
+					)
+						return false;
 
-						if (module !== 'ALL' && command.module !== module) return false;
+					if (module !== 'ALL' && command.module !== module) return false;
 
-						return true;
-					})
+					return true;
+				})
 					.sort((a, b) => a.name.localeCompare(b.name))
 					.map((command) => (
 						<CommandDropDown

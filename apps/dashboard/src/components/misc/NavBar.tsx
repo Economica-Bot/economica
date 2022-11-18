@@ -11,7 +11,7 @@ export const Navbar: FC = () => (
 		className="fixed top-0 z-50 inline-flex h-20 w-full justify-center bg-base-300 p-3 font-thin shadow-drop"
 		role="navigation"
 	>
-		<div className="inline-flex max-w-screen-xl grow items-center justify-between gap-2">
+		<div className="inline-flex max-w-screen-xl grow items-center gap-2">
 			<Link
 				href="/"
 				className="justify-left mx-3 flex grow cursor-pointer items-center"
@@ -25,11 +25,13 @@ export const Navbar: FC = () => (
 						height={128}
 					/>
 				</div>
-				<h1 className="my-auto px-3 text-3xl font-thin">Economica</h1>
+				<h1 className="my-auto hidden px-3 text-3xl font-thin md:block">
+					Economica
+				</h1>
 			</Link>
 
-			<div className="dropdown-end dropdown dropdown-hover mx-5 md:hidden">
-				<label tabIndex={0} className="btn m-1 border-0">
+			<div className="dropdown dropdown-end dropdown-hover mx-5 md:hidden">
+				<label tabIndex={0} className="btn-ghost btn m-1 border-0">
 					<FaBars size={25} />
 				</label>
 				<ul
@@ -37,13 +39,13 @@ export const Navbar: FC = () => (
 					className="dropdown-content menu w-52 bg-base-300 p-2 shadow-drop"
 				>
 					<li className="font-semibold">
-						<Link href="localhost:3000/api/invite">Invite</Link>
+						<Link href="/api/invite">Invite</Link>
 					</li>
 					<li className="font-semibold">
 						<Link href="/commands">Commands</Link>
 					</li>
 					<li className="font-semibold">
-						<Link href="localhost:3000/api/support">Support</Link>
+						<Link href="/api/support">Support</Link>
 					</li>
 					<li>
 						<ThemeSwitch />
@@ -53,7 +55,7 @@ export const Navbar: FC = () => (
 
 			<div className="hidden items-center gap-6 md:inline-flex">
 				<Link
-					href="localhost:3000/api/invite"
+					href="/api/invite"
 					className="inline-flex items-center gap-2 text-xl hover:underline"
 				>
 					<span>
@@ -69,7 +71,7 @@ export const Navbar: FC = () => (
 					<h2>Commands</h2>
 				</Link>
 				<Link
-					href="localhost:3000/api/support"
+					href="/api/support"
 					className="inline-flex items-center gap-2 text-xl hover:underline"
 				>
 					<FaCogs size={25} />

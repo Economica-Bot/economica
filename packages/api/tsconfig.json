@@ -1,11 +1,10 @@
 {
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
-		"composite": true,
 		"baseUrl": ".",
 		"paths": {
 			"@economica/common": ["../../packages/common"],
 			"@economica/db": ["../../packages/db"]
 		}
-	},
+	}
 }

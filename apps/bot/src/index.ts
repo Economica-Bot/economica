@@ -1,5 +1,5 @@
 import { Client } from 'discord.js';
-
+import module from './commands/module.js';
 import { env } from './env.mjs';
 import { resetCommands, updateCommands } from './lib/commands';
 
@@ -18,9 +18,24 @@ if (env.DEPLOY_COMMANDS === 'nothing') {
 	await updateCommands(client);
 }
 
-client.on('interactionCreate', (interaction) => {
-	if (interaction.isChatInputCommand()) {
-		interaction.reply('Hello World!');
+client.on('interactionCreate', async (interaction) => {
+	console.log('Interaction received');
+	try {
+		if (interaction.isChatInputCommand()) {
+			if (!interaction.inCachedGuild()) return;
+
+			if (interaction.commandName === 'module')
+				await module.execute(interaction);
+			else interaction.reply('Unhandled interaction');
+		}
+	} catch (err) {
+		console.log('Error caught');
+		console.error(err);
+		if (err instanceof Error) {
+			if (interaction.isRepliable()) interaction.reply(err.toString());
+		} else {
+			if (interaction.isRepliable()) interaction.reply('Unknown error :(');
+		}
 	}
 });
 

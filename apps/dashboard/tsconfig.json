@@ -1,38 +1,25 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "composite": true,
-    "baseUrl": ".",
-    "paths": {
-      "@economica/api": [
-        "../../packages/api"
-      ],
-      "@economica/common": [
-        "../../packages/common"
-      ],
-      "@economica/db": [
-        "../../packages/db"
-      ]
-    },
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ESNext"
-    ],
-    "jsx": "preserve",
-    "noEmit": true,
-    "incremental": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.mjs",
-    "**/*.cjs",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@economica/api": ["../../packages/api"],
+			"@economica/common": ["../../packages/common"],
+			"@economica/db": ["../../packages/db"]
+		},
+		"lib": ["DOM", "DOM.Iterable", "ESNext"],
+		"jsx": "preserve",
+		"noEmit": true,
+		"incremental": true,
+		"forceConsistentCasingInFileNames": true
+	},
+	"include": [
+		"next-env.d.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		"**/*.mjs",
+		"**/*.cjs",
+		".next/types/**/*.ts"
+	],
+	"exclude": ["node_modules"]
 }

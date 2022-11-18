@@ -1,5 +1,4 @@
 import { User } from '@economica/db';
-import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
 import { UserSchema } from '../schemas';
@@ -25,25 +24,13 @@ export const userRouter = t.router({
 			})
 		),
 	byId: t.procedure.input(z.string()).query(async ({ ctx, input }) => {
-		const user = await ctx.datasource
-			.getRepository(User)
-			.findOneBy({ id: input });
-		if (!user)
-			throw new TRPCError({
-				code: 'NOT_FOUND',
-				message: `No user with id ${input}`
-			});
-		return user;
+		await ctx.datasource.getRepository(User).upsert({ id: input }, ['id']);
+		return ctx.datasource.getRepository(User).findOneByOrFail({ id: input });
 	}),
 	update: t.procedure.input(UserSchema).mutation(async ({ ctx, input }) => {
 		const user = await ctx.datasource
 			.getRepository(User)
-			.findOneBy({ id: input.id });
-		if (!user)
-			throw new TRPCError({
-				code: 'NOT_FOUND',
-				message: `No user with id ${input.id}`
-			});
+			.findOneByOrFail({ id: input.id });
 		ctx.datasource.getRepository(User).merge(user, input);
 		await user.save();
 		return user;

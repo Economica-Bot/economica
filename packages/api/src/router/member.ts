@@ -1,5 +1,4 @@
 import { Member } from '@economica/db';
-import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
 import { MemberUpdateSchema, MemberViewSchema } from '../schemas';
@@ -24,28 +23,19 @@ export const memberRouter = t.router({
 				skip: (input.page - 1) * input.limit
 			})
 		),
-	byId: t.procedure.input(MemberViewSchema).query(async ({ ctx, input }) => {
-		const user = await ctx.datasource
-			.getRepository(Member)
-			.findOneBy({ userId: input.userId, guildId: input.guildId });
-		if (!user)
-			throw new TRPCError({
-				code: 'NOT_FOUND',
-				message: `No member with user id ${input.userId} and guild id ${input.guildId}`
-			});
-		return user;
-	}),
+	byId: t.procedure
+		.input(MemberViewSchema)
+		.query(async ({ ctx, input }) =>
+			ctx.datasource
+				.getRepository(Member)
+				.findOneByOrFail({ userId: input.userId, guildId: input.guildId })
+		),
 	update: t.procedure
 		.input(MemberUpdateSchema)
 		.mutation(async ({ ctx, input }) => {
 			const member = await ctx.datasource
 				.getRepository(Member)
-				.findOneBy({ userId: input.userId, guildId: input.guildId });
-			if (!member)
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: `No member with user id ${input.userId} and guild id ${input.guildId}`
-				});
+				.findOneByOrFail({ userId: input.userId, guildId: input.guildId });
 			return ctx.datasource.getRepository(Member).merge(member, input).save();
 		})
 });

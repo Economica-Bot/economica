@@ -42,17 +42,11 @@ const Home: NextPageWithLayout = () => (
 					The best new discord economy bot
 				</h2>
 				<div className="flex gap-5">
-					<Link
-						href="http://localhost:3000/api/invite"
-						className="btn-primary btn"
-					>
+					<Link href="/api/invite" className="btn btn-primary">
 						Invite
 						<FaDiscord className="ml-2" size={30} />
 					</Link>
-					<Link
-						href="http://localhost:3000/api/support"
-						className="btn-secondary btn"
-					>
+					<Link href="/api/support" className="btn btn-secondary">
 						Server
 					</Link>
 				</div>
@@ -170,7 +164,7 @@ const Home: NextPageWithLayout = () => (
 					Economica is currently in{' '}
 					<strong className="text-underline">Open Beta</strong>
 				</h3>
-				<Link href="localhost:3000/api/invite" className="btn-primary btn">
+				<Link href="/api/invite" className="btn btn-primary">
 					Invite
 					<FaDiscord className="ml-2" size={30} />
 				</Link>
@@ -194,9 +188,12 @@ const Home: NextPageWithLayout = () => (
 			/>
 		</section>
 
-		<section id="developers" className="py-[250px] px-[50px] text-center">
+		<section
+			id="developers"
+			className="flex flex-col items-center py-[250px] px-[50px]"
+		>
 			<h1 className="text-underline my-10 text-4xl">Developers</h1>
-			<div className="grid lg:grid-cols-3">
+			<div className="grid w-full max-w-screen-2xl lg:grid-cols-3">
 				<DeveloperCard
 					src="/adrastopoulos.png"
 					name="Adrastopoulos#0001"

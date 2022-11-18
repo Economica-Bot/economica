@@ -27,6 +27,6 @@ export const Footer: FC = () => (
 				<h5 className="text-underline">Privacy Policy</h5>
 			</Link>
 		</div>
-		<h3 className="text-lg font-thin">Copyright Economica 2022</h3>
+		<h3 className="my-3 	text-lg font-thin">Copyright Economica 2022</h3>
 	</footer>
 );

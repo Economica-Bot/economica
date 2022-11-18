@@ -1,5 +1,4 @@
 import { Infraction } from '@economica/db';
-import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
 import { InfractionSchema } from '../schemas';
@@ -32,26 +31,15 @@ export const infractionRouter = t.router({
 				}
 			})
 		),
-	byId: t.procedure.input(z.string()).query(async ({ input }) => {
-		const infraction = await Infraction.findOneBy({ id: input });
-		if (!infraction)
-			throw new TRPCError({
-				code: 'NOT_FOUND',
-				message: `No infraction with id ${input}`
-			});
-		return infraction;
-	}),
+	byId: t.procedure
+		.input(z.string())
+		.query(async ({ input }) => Infraction.findOneByOrFail({ id: input })),
 	update: t.procedure
 		.input(InfractionSchema)
 		.mutation(async ({ ctx, input }) => {
 			const infraction = await ctx.datasource
 				.getRepository(Infraction)
-				.findOneBy({ id: input.id });
-			if (!infraction)
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: `No infraction with id ${input.id}`
-				});
+				.findOneByOrFail({ id: input.id });
 			ctx.datasource.getRepository(Infraction).merge(infraction, input);
 			await infraction.save();
 			return infraction;

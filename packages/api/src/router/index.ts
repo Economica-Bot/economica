@@ -1,6 +1,7 @@
-import { commandData } from '@economica/common';
+import { CommandData } from '@economica/common';
 
 import { t } from '../trpc';
+
 import { discordRouter } from './discord';
 import { guildRouter } from './guild';
 import { infractionRouter } from './infraction';
@@ -9,7 +10,7 @@ import { transactionRouter } from './transaction';
 import { userRouter } from './user';
 
 export const appRouter = t.router({
-	commands: t.procedure.query(() => commandData),
+	commands: t.procedure.query(() => CommandData),
 	discord: discordRouter,
 	guild: guildRouter,
 	infraction: infractionRouter,

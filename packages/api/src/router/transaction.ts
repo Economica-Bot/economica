@@ -1,5 +1,4 @@
 import { Transaction } from '@economica/db';
-import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
 import { TransactionCreateSchema, TransactionUpdateSchema } from '../schemas';
@@ -34,15 +33,9 @@ export const transactionRouter = t.router({
 				}
 			})
 		),
-	byId: t.procedure.input(z.string()).query(async ({ input }) => {
-		const transaction = await Transaction.findOneBy({ id: input });
-		if (!transaction)
-			throw new TRPCError({
-				code: 'NOT_FOUND',
-				message: `No transaction with id ${input}`
-			});
-		return transaction;
-	}),
+	byId: t.procedure
+		.input(z.string())
+		.query(async ({ input }) => Transaction.findOneByOrFail({ id: input })),
 	create: t.procedure
 		.input(TransactionCreateSchema)
 		.mutation(async ({ ctx, input }) =>
@@ -53,12 +46,7 @@ export const transactionRouter = t.router({
 		.mutation(async ({ ctx, input }) => {
 			const transaction = await ctx.datasource
 				.getRepository(Transaction)
-				.findOneBy({ id: input.id });
-			if (!transaction)
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: `No transaction with id ${input.id}`
-				});
+				.findOneByOrFail({ id: input.id });
 			ctx.datasource.getRepository(Transaction).merge(transaction, input);
 			await transaction.save();
 			return transaction;

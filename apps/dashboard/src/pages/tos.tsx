@@ -170,7 +170,7 @@ const TOS: NextPageWithLayout = () => (
 			<h2>Contact Us</h2>
 			<p>
 				If you have any questions about our Privacy Policy, please contact us on
-				our <a href="localhost:3000/api/support">support server</a>.
+				our <a href="/api/support">support server</a>.
 			</p>
 		</article>
 	</div>

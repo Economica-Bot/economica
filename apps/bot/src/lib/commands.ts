@@ -1,13 +1,16 @@
-import { DefaultModulesObj, ModuleString } from '@economica/common';
+import {
+	CommandData,
+	DefaultModulesObj,
+	ModuleString
+} from '@economica/common';
 import { RESTPostAPIApplicationCommandsJSONBody } from 'discord-api-types/v10';
 import { Client } from 'discord.js';
 import { env } from '../env.mjs';
-import { commandData } from './commandData.js';
 
 export const updateCommands = async (client: Client<true>) => {
 	const defaultCommandData: RESTPostAPIApplicationCommandsJSONBody[] = [];
 	const specialCommandData: RESTPostAPIApplicationCommandsJSONBody[] = [];
-	commandData.forEach((metadata) => {
+	CommandData.forEach((metadata) => {
 		if (DefaultModulesObj[metadata.module as ModuleString].type === 'DEFAULT') {
 			defaultCommandData.push(metadata);
 		} else {
