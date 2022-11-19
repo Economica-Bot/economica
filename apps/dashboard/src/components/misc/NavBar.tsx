@@ -30,7 +30,7 @@ export const NavBar: FC = () => (
 				</h1>
 			</Link>
 
-			<div className="dropdown dropdown-end dropdown-hover mx-5 md:hidden">
+			<div className="dropdown-end dropdown dropdown-hover mx-5 md:hidden">
 				<label tabIndex={0} className="btn-ghost btn m-1 border-0">
 					<FaBars size={25} />
 				</label>

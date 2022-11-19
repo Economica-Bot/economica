@@ -1,6 +1,6 @@
 import { parseNumber } from '@adrastopoulos/number-parser';
-import { EmbedBuilder } from '@discordjs/builders';
 import { TransactionString } from '@economica/common';
+import { EmbedBuilder } from 'discord.js';
 
 import { trpc } from './trpc';
 

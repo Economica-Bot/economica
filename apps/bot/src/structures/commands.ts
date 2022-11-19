@@ -1,8 +1,21 @@
-import { ChatInputCommandInteraction } from 'discord.js';
+import {
+	ButtonInteraction,
+	ChatInputCommandInteraction,
+	SelectMenuInteraction
+} from 'discord.js';
 
-export interface Command {
-	name: string;
-	execute: (
-		interaction: ChatInputCommandInteraction<'cached'>
-	) => Promise<void> | void;
+export interface Command<T extends InteractionInput> {
+	identifier: RegExp;
+	readonly type: T;
+	execute: (interaction: InteractionForm<T>) => Promise<void> | void;
 }
+
+type InteractionInput = 'chatInput' | 'selectMenu' | 'button';
+
+type InteractionForm<T> = T extends 'chatInput'
+	? ChatInputCommandInteraction<'cached'>
+	: T extends 'selectMenu'
+	? SelectMenuInteraction<'cached'>
+	: T extends 'button'
+	? ButtonInteraction<'cached'>
+	: never;

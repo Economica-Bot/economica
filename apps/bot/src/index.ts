@@ -1,5 +1,5 @@
 import { Client } from 'discord.js';
-import module from './commands/module.js';
+import * as Commands from './commands';
 import { env } from './env.mjs';
 import { resetCommands, updateCommands } from './lib/commands';
 
@@ -20,13 +20,28 @@ if (env.DEPLOY_COMMANDS === 'nothing') {
 
 client.on('interactionCreate', async (interaction) => {
 	console.log('Interaction received');
+	if (!interaction.inCachedGuild()) return;
 	try {
 		if (interaction.isChatInputCommand()) {
-			if (!interaction.inCachedGuild()) return;
+			const command = Object.values(Commands)
+				.filter((command) => command.type === 'chatInput')
+				.find((command) => {
+					console.log(command.identifier.exec(interaction.commandName));
+					return command.identifier.test(interaction.commandName);
+				});
 
-			if (interaction.commandName === 'module')
-				await module.execute(interaction);
-			else interaction.reply('Unhandled interaction');
+			if (command) await command.execute(interaction as any);
+			else await interaction.reply('Unknown interaction');
+		} else if (interaction.isSelectMenu()) {
+			const command = Object.values(Commands)
+				.filter((command) => command.type === 'selectMenu')
+				.find((command) => {
+					console.log(command.identifier.exec(interaction.values.at(0)!));
+					return command.identifier.test(interaction.values.at(0)!);
+				});
+
+			if (command) await command.execute(interaction as any);
+			else await interaction.reply('Unknown interaction');
 		}
 	} catch (err) {
 		console.log('Error caught');

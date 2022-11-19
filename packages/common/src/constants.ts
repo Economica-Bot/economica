@@ -1,9 +1,11 @@
 import {
 	ApplicationCommandOptionType,
 	ChannelType,
+	OAuth2Scopes,
 	PermissionFlagsBits,
 	RESTPostAPIChatInputApplicationCommandsJSONBody
 } from 'discord-api-types/v10';
+import { InviteGenerationOptions } from 'discord.js';
 import {
 	IncomeCommand,
 	IncomeString,
@@ -459,52 +461,51 @@ export const ModuleStringArr = [
 	...DefaultModuleStringArr,
 	...SpecialModuleStringArr
 ] as const;
+export const inviteOptions: InviteGenerationOptions = {
+	scopes: [OAuth2Scopes.Bot, OAuth2Scopes.ApplicationsCommands],
+	permissions: [
+		PermissionFlagsBits.ViewChannel,
+		PermissionFlagsBits.SendMessages,
+		PermissionFlagsBits.EmbedLinks,
+		PermissionFlagsBits.BanMembers,
+		PermissionFlagsBits.ModerateMembers,
+		PermissionFlagsBits.ManageMessages,
+		PermissionFlagsBits.UseExternalEmojis
+	]
+};
 export const CommandData: (RESTPostAPIChatInputApplicationCommandsJSONBody & {
 	module: ModuleString;
-	format?: string;
-	examples?: string[];
+	format: string;
+	examples: string[];
 })[] = [
 	{
-		name: 'add-money',
-		description: 'Manipulate balances',
-		module: 'ECONOMY',
-		format: '<user> <amount> <target>',
-		examples: ['add-money @user 300 wallet', 'add-money @user 100 treasury'],
-		default_member_permissions: PermissionFlagsBits.ManageGuild.toString(),
+		name: 'help',
+		description: 'Get information about a command or module',
+		module: 'UTILITY',
+		format: 'help [command]',
+		examples: ['help', 'help permission'],
 		options: [
 			{
-				type: ApplicationCommandOptionType.User,
-				name: 'target',
-				description: 'Specify a user',
-				required: true
-			},
-			{
 				type: ApplicationCommandOptionType.String,
-				name: 'amount',
-				description: 'Specify an amount',
-				required: true
-			},
-			{
-				type: ApplicationCommandOptionType.String,
-				name: 'balance',
-				description: 'Specify the balance',
-				required: true,
-				choices: [
-					{ name: 'Wallet', value: 'wallet' },
-					{ name: 'Treasury', value: 'treasury' }
-				]
+				name: 'query',
+				description: 'Specify a command',
+				required: false
 			}
 		]
 	},
 	{
 		name: 'invite',
-		description: 'Get the invite link',
-		module: 'UTILITY'
+		description: 'Get the invite link for Economica',
+		module: 'UTILITY',
+		format: 'invite',
+		examples: ['invite']
 	},
 	{
 		name: 'module',
 		description: 'Manage server modules',
 		module: 'UTILITY',
+		format: 'module <view | add | remove> [module]',
+		examples: ['module view', 'module add INTERVAL', 'module remove CASINO'],
 		default_member_permissions: PermissionFlagsBits.Administrator.toString(),
 		options: [
 			{
@@ -549,15 +550,33 @@ export const CommandData: (RESTPostAPIChatInputApplicationCommandsJSONBody & {
 		]
 	},
 	{
+		name: 'permissions',
+		description: 'View command permission levels',
+		module: 'UTILITY',
+		format: 'permissions <command>',
+		examples: ['permissions infraction'],
+		options: [
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'command',
+				description: 'Specify a command',
+				required: true
+			}
+		]
+	},
+	{
 		name: 'ping',
 		description: 'Pingpong!',
-		module: 'UTILITY'
+		module: 'UTILITY',
+		format: 'ping',
+		examples: ['ping']
 	},
 	{
 		name: 'purge',
 		description: 'Delete messages in a channel',
 		module: 'UTILITY',
 		format: '[channel] [amount]',
+		examples: ['purge', 'purge #general', '#purge #general 50'],
 		default_member_permissions: PermissionFlagsBits.ManageMessages.toString(),
 		options: [
 			{

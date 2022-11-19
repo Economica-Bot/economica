@@ -2,6 +2,7 @@
 	"name": "@economica/common",
 	"type": "module",
 	"dependencies": {
-		"discord-api-types": "^0.37.16"
+		"discord-api-types": "^0.37.16",
+		"discord.js": "^14.6.0"
 	}
 }

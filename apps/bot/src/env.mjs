@@ -34,7 +34,11 @@ export const schema = z.object({
 		.enum(['true', 'false'])
 		.transform((val) => val === 'true'),
 	DB_URI: z.string(),
-	DB_OPTION: z.enum(['nothing', 'sync', 'drop'])
+	DB_OPTION: z.enum(['nothing', 'sync', 'drop']),
+	DOCS_URL: z.string().url(),
+	HOME_URL: z.string().url(),
+	COMMANDS_URL: z.string().url(),
+	VOTE_URL: z.string().url()
 });
 
 export const formatErrors = (

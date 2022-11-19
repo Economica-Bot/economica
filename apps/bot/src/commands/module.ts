@@ -1,13 +1,12 @@
 import { CommandData, ModuleString } from '@economica/common';
-import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { trpc } from 'src/lib/trpc';
 import { Command } from 'src/structures/commands';
 
-export default {
-	name: 'module',
-	execute: async (
-		interaction: ChatInputCommandInteraction<'cached'>
-	): Promise<void> => {
+export const module = {
+	identifier: /^module$/,
+	type: 'chatInput' as const,
+	execute: async (interaction) => {
 		const subcommand = interaction.options.getSubcommand();
 		if (subcommand === 'view') {
 			const guildEntity = await trpc.guild.byId.query(interaction.guildId);
@@ -109,4 +108,4 @@ export default {
 			}
 		}
 	}
-} as Command;
+} satisfies Command<'chatInput'>;

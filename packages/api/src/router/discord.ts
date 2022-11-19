@@ -10,8 +10,8 @@ import {
 	RESTGetAPIUserResult,
 	Routes
 } from 'discord-api-types/v10';
-import { env } from '../env.mjs';
 import { z } from 'zod';
+import { env } from '../env.mjs';
 
 import { t } from '../trpc';
 
