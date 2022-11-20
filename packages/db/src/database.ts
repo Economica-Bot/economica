@@ -5,7 +5,10 @@ import { env } from './env.mjs';
 
 export const datasource = await new DataSource({
 	type: 'postgres',
-	url: env.DB_URI,
+	host: env.DB_HOST,
+	port: env.DB_PORT,
+	username: env.DB_USERNAME,
+	password: env.DB_PASSWORD,
 	entities: Object.values(entityFiles),
 	synchronize: true
 }).initialize();

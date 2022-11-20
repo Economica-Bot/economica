@@ -1,5 +1,9 @@
 {
 	"extends": "../../tsconfig.json",
+	"env": {
+    "node": true,
+    "es6": true,
+  },
 	"compilerOptions": {
 		"baseUrl": ".",
 		"paths": {

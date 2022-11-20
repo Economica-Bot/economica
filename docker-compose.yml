@@ -1,0 +1,40 @@
+services:
+  dashboard:
+    container_name: dashboard
+    build:
+      context: .
+      dockerfile: ./apps/dashboard/Dockerfile
+    restart: always
+    env_file:
+      - .env.production
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+    networks:
+      - default
+  bot:
+    container_name: bot
+    build:
+      context: .
+      dockerfile: ./apps/bot/Dockerfile
+    restart: always
+    ports:
+      - 3001:3001
+    env_file:
+      - .env.production
+    depends_on:
+      - postgres
+      - dashboard
+    networks:
+      - default
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    expose:
+      - '${DB_PORT}:${DB_PORT}'
+    environment:
+      POSTGRES_USER: '${DB_USERNAME}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD}'
+    networks:
+      - default

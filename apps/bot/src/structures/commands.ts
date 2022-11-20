@@ -4,7 +4,7 @@ import {
 	SelectMenuInteraction
 } from 'discord.js';
 
-export interface Command<T extends InteractionInput> {
+export interface Command<T extends InteractionInput = InteractionInput> {
 	identifier: RegExp;
 	readonly type: T;
 	execute: (interaction: InteractionForm<T>) => Promise<void> | void;

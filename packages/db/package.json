@@ -1,8 +1,9 @@
 {
 	"name": "@economica/db",
+	"version": "0.0.1",
 	"type": "module",
 	"dependencies": {
-		"@economica/common": "workspace:*",
+		"@economica/common": "*",
 		"@sapphire/snowflake": "^3.2.2",
 		"discord-api-types": "^0.37.16",
 		"typeorm": "^0.3.10"

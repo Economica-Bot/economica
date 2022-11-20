@@ -1,6 +1,6 @@
 {
 	"name": "@economica/dashboard",
-	"type": "module",
+	"version": "0.0.1",
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
@@ -9,9 +9,9 @@
 		"export": "next export"
 	},
 	"dependencies": {
-		"@economica/api": "workspace:*",
-		"@economica/common": "workspace:*",
-		"@economica/db": "workspace:*",
+		"@economica/api": "*",
+		"@economica/common": "*",
+		"@economica/db": "*",
 		"@skyra/discord-components-core": "^3.4.1",
 		"@skyra/discord-components-react": "^3.4.1",
 		"@tanstack/react-query": "^4.12.0",
@@ -32,6 +32,7 @@
 		"react-icons": "^4.3.1",
 		"react-query": "^3.39.2",
 		"react-toastify": "^8.2.0",
+		"sharp": "^0.31.2",
 		"typeorm": "^0.3.10",
 		"zod": "^3.19.1"
 	},

@@ -3,6 +3,8 @@ import * as Commands from './commands';
 import { env } from './env.mjs';
 import { resetCommands, updateCommands } from './lib/commands';
 
+console.log(process.version);
+
 export const client = new Client({
 	intents: ['Guilds', 'GuildMessages']
 });

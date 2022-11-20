@@ -119,4 +119,4 @@ export const helpSelect = {
 			ephemeral: true
 		});
 	}
-} as const satisfies Command<'selectMenu'>;
+} satisfies Command<'selectMenu'>;

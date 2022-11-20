@@ -1,5 +1,6 @@
 {
 	"name": "@economica/common",
+	"version": "0.0.1",
 	"type": "module",
 	"dependencies": {
 		"discord-api-types": "^0.37.16",
