@@ -1,17 +1,10 @@
-import {
-	BaseEntity,
-	Column,
-	Entity,
-	JoinColumn,
-	ManyToOne,
-	Relation
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, Relation } from 'typeorm';
 
 import { Guild } from './guild';
 import { User } from './user';
 
 @Entity({ name: 'member' })
-export class Member extends BaseEntity {
+export class Member {
 	@Column({ type: 'character varying', primary: true })
 	public userId!: string;
 

@@ -45,42 +45,22 @@ const SimulatedEconomy: React.FC = () => {
 						</DiscordQuote>
 					</DiscordEmbedDescription>
 					<DiscordEmbedFields slot="fields">
-						<DiscordEmbedField
-							fieldTitle="money_bag Lender"
-							inline
-							inlineIndex={1}
-						>
+						<DiscordEmbedField fieldTitle="💰 Lender" inline inlineIndex={1}>
 							<DiscordMention>Adrastopoulos</DiscordMention>
 						</DiscordEmbedField>
-						<DiscordEmbedField
-							fieldTitle="person_add Borrower"
-							inline
-							inlineIndex={2}
-						>
+						<DiscordEmbedField fieldTitle="🤵 Borrower" inline inlineIndex={2}>
 							<DiscordMention>Kamaji</DiscordMention>
 						</DiscordEmbedField>
-						<DiscordEmbedField fieldTitle="deed Message">
+						<DiscordEmbedField fieldTitle="📜 Message">
 							<DiscordItalic>This is a test loan my fren!</DiscordItalic>
 						</DiscordEmbedField>
-						<DiscordEmbedField
-							fieldTitle="money Principal"
-							inline
-							inlineIndex={1}
-						>
+						<DiscordEmbedField fieldTitle="💸 Principal" inline inlineIndex={1}>
 							<DiscordInlineCode>💵 1.00k</DiscordInlineCode>
 						</DiscordEmbedField>
-						<DiscordEmbedField
-							fieldTitle="money Repayment"
-							inline
-							inlineIndex={2}
-						>
+						<DiscordEmbedField fieldTitle="💳 Repayment" inline inlineIndex={2}>
 							<DiscordInlineCode>💵 2.00k</DiscordInlineCode>
 						</DiscordEmbedField>
-						<DiscordEmbedField
-							fieldTitle="time Duration"
-							inline
-							inlineIndex={3}
-						>
+						<DiscordEmbedField fieldTitle="🕰 Duration" inline inlineIndex={3}>
 							<DiscordInlineCode>1 minute</DiscordInlineCode>
 						</DiscordEmbedField>
 					</DiscordEmbedFields>

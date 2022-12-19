@@ -21,19 +21,19 @@ export const updateCommands = async (client: Client<true>) => {
 	env.DEV_GUILD_IDS.forEach(async (id) => {
 		if (env.DEPLOY_ALL_MODULES)
 			await client.guilds.cache.get(id)?.commands.set(specialCommandData);
-		console.log(`Registered special commands in dev guild ${id}`);
+		console.debug(`Registered special commands in dev guild ${id}`);
 	});
 
 	await client.application.commands.set(defaultCommandData);
-	console.log('Registered global commands');
+	console.debug('Registered global commands');
 };
 
 export const resetCommands = async (client: Client) => {
 	env.DEV_GUILD_IDS.forEach(async (id) => {
 		await client.guilds.cache.get(id)?.commands.set([]);
-		console.log(`Reset commands in dev guild ${id}`);
+		console.debug(`Reset commands in dev guild ${id}`);
 	});
 
 	await client.application?.commands.set([]);
-	console.log('Reset global commands');
+	console.debug('Reset global commands');
 };

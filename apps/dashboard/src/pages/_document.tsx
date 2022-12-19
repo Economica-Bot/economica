@@ -29,14 +29,14 @@ class MyDocument extends Document {
 
 				{/* Browser Metadata */}
 				<title>Economica</title>
-				<a rel="icon" type="image/png" href="/economica.png" />
+				<link rel="icon" type="image/png" href="/economica.png" />
 				<meta property="og:title" content="Economica - Discord Economy Bot" />
 				<meta property="og:site_name" content="Economica" />
 				<meta
 					property="og:description"
 					content="The Best New Discord Economy Bot."
 				/>
-				<meta property="og:image" content="/assets/economica.png" />
+				<meta property="og:image" content="/economica.png" />
 				<meta name="theme-color" content="#8c8ceb" />
 				<body className="bg-base-100 font-roboto">
 					<Main />

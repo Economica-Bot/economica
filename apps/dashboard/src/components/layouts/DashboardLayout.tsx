@@ -1,12 +1,11 @@
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import { FC, PropsWithChildren } from 'react';
-
+import { trpc } from '../../lib/trpc';
+import { LoadingSkeleton } from '../misc/LoadingSkeleton';
+import { GuildNavBar } from '../misc/GuildNavBar';
 import { ChannelNavBar } from '../misc/ChannelNavBar';
 import { DashNavBar } from '../misc/DashNavBar';
-import { GuildNavBar } from '../misc/GuildNavBar';
-import { LoadingSkeleton } from '../misc/LoadingSkeleton';
-import { trpc } from '../../lib/trpc';
 
 const DashboardLayout: FC<PropsWithChildren> = ({ children }) => {
 	const router = useRouter();

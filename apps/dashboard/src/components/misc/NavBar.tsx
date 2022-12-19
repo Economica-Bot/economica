@@ -53,7 +53,7 @@ export const NavBar: FC = () => (
 				</ul>
 			</div>
 
-			<div className="hidden items-center gap-6 md:inline-flex">
+			<div className="hidden items-center gap-6 md:flex">
 				<Link
 					href="/api/invite"
 					className="inline-flex items-center gap-2 text-xl hover:underline"
@@ -65,7 +65,7 @@ export const NavBar: FC = () => (
 				</Link>
 				<Link
 					href="/commands"
-					className="inline-flex items-center gap-2 text-xl hover:underline"
+					className="inline-flex items-center  gap-2 text-xl hover:underline"
 				>
 					<FaCode size={25} />
 					<h2>Commands</h2>

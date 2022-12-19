@@ -5,7 +5,6 @@
     "es6": true,
   },
 	"compilerOptions": {
-		"baseUrl": ".",
 		"paths": {
 			"@economica/api": ["../../packages/api"],
 			"@economica/common": ["../../packages/common"],

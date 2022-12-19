@@ -11,7 +11,7 @@
 
 		// Language Compilation
 		"module": "ESNext",
-		"moduleResolution": "node",
+		"moduleResolution": "Node",
 		"target": "ESNext",
 		"resolveJsonModule": true,
 		"allowJs": true,
@@ -30,11 +30,10 @@
 
 		// Completeness
 		"skipLibCheck": true,
-		"baseUrl": ".",
 		"outDir": "./dist",
 		"rootDir": ".",
 		"paths": {
-			"@economica/*": ["packages/*", "apps/*"]
+			"@economica/*": ["./packages/*", "./apps/*"]
 		}
 	}
 }

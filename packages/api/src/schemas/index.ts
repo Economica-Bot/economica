@@ -10,12 +10,12 @@ import {
 import { z } from 'zod';
 
 export const IncomeCommandSchema = z.object({
-	min: z.number().nullish(),
+	// min: z.number(),
 	max: z.number().nullish(),
 	chance: z.number().nullish(),
 	minfine: z.number().nullish(),
 	maxfine: z.number().nullish(),
-	cooldown: z.number().nullish()
+	cooldown: z.number().optional()
 });
 
 export const IntervalCommandSchema = z.object({
@@ -40,7 +40,7 @@ export const GuildFindSchema = z.object({
 });
 
 export const GuildSchema = z.object({
-	id: z.string().optional(),
+	id: z.string(),
 	currency: z.string().optional(),
 	transactionLogId: z.string().nullish(),
 	infractionLogId: z.string().nullish(),
@@ -60,18 +60,17 @@ export const MemberSchema = z.object({
 
 export const MemberViewSchema = z.object({
 	userId: z.string(),
-	guildId: z.string(),
-	user: UserSchema.optional(),
-	guild: GuildSchema.optional(),
-	treasury: z.number().optional(),
-	wallet: z.number().optional()
+	guildId: z.string()
+});
+
+export const MemberCreateSchema = z.object({
+	userId: z.string(),
+	guildId: z.string()
 });
 
 export const MemberUpdateSchema = z.object({
 	userId: z.string(),
 	guildId: z.string(),
-	user: UserSchema.optional(),
-	guild: GuildSchema.optional(),
 	treasury: z.number().optional(),
 	wallet: z.number().optional()
 });
@@ -155,9 +154,9 @@ export const TransactionUpdateSchema = z.object({
 });
 
 export const TransactionCreateSchema = z.object({
-	guild: GuildFindSchema,
-	target: MemberViewSchema,
-	agent: MemberViewSchema,
+	guild: z.object({ id: z.string() }),
+	target: z.object({ userId: z.string(), guildId: z.string() }),
+	agent: z.object({ userId: z.string(), guildId: z.string() }),
 	type: z.enum(TransactionStringArr),
 	wallet: z.number(),
 	treasury: z.number()
@@ -165,15 +164,32 @@ export const TransactionCreateSchema = z.object({
 
 export const InfractionSchema = z.object({
 	id: z.string(),
-	guild: GuildSchema,
-	target: MemberSchema,
-	agent: MemberSchema,
+	guild: z.object({ id: z.string() }),
+	target: z.object({ userId: z.string(), guildId: z.string() }),
+	agent: z.object({ userId: z.string(), guildId: z.string() }),
 	type: z.enum(InfractionStringArr),
 	reason: z.string(),
 	active: z.boolean(),
 	duration: z.number(),
-	permanent: z.boolean(),
 	createdAt: z.date()
+});
+
+export const InfractionUpdateSchema = z.object({
+	id: z.string(),
+	reason: z.string().optional(),
+	active: z.boolean().optional(),
+	duration: z.number().optional(),
+	createdAt: z.date().optional()
+});
+
+export const InfractionCreateSchema = z.object({
+	guild: z.object({ id: z.string() }),
+	target: z.object({ userId: z.string(), guildId: z.string() }),
+	agent: z.object({ userId: z.string(), guildId: z.string() }),
+	type: z.enum(InfractionStringArr),
+	reason: z.string(),
+	duration: z.number().nullish(),
+	active: z.boolean().nullish()
 });
 
 export const ItemSchema = z.object({
@@ -182,4 +198,9 @@ export const ItemSchema = z.object({
 	owner: MemberSchema,
 	amount: z.number(),
 	lastGeneratedAt: z.date()
+});
+
+export const ExecutionSchema = z.object({
+	userId: z.string().optional(),
+	guildId: z.string()
 });

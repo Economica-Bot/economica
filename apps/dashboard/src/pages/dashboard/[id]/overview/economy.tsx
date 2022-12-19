@@ -1,26 +1,30 @@
-import { ChannelType, RouteBases } from 'discord-api-types/v10';
-import Image from 'next/image';
+import { ChannelType } from 'discord-api-types/v10';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-
+import { FaInfoCircle } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layouts/DashboardLayout';
 import { DashCard } from '../../../../components/misc/DashCard';
 import { DashTitleField } from '../../../../components/misc/DashTitleField';
+import { Emoji } from '../../../../components/misc/Emoji';
 import { TransactionBar } from '../../../../components/misc/TransactionBar';
+import { resolveIdentifier } from '../../../../lib';
 import { trpc } from '../../../../lib/trpc';
 import { NextPageWithLayout } from '../../../_app';
 
 const EconomyPage: NextPageWithLayout = () => {
 	const router = useRouter();
 	const guildId = router.query.id as string;
-	const limit = 15;
+	const limit = 5;
 	const [page, setPage] = useState(1);
 
+	const context = trpc.useContext();
 	const mutation = trpc.guild.update.useMutation();
 
 	const updateGuild = async () => {
 		if (newGuild) {
-			mutation.mutate(newGuild);
+			await mutation.mutateAsync(newGuild);
+			context.guild.byId.invalidate();
+			context.transaction.list.invalidate();
 		}
 	};
 
@@ -47,7 +51,7 @@ const EconomyPage: NextPageWithLayout = () => {
 		data: guild,
 		isLoading: isLoading4,
 		error: error4
-	} = trpc.guild.byId.useQuery(guildId);
+	} = trpc.guild.byId.useQuery({ id: guildId });
 	const {
 		data: roles,
 		isLoading: isLoading5,
@@ -64,7 +68,14 @@ const EconomyPage: NextPageWithLayout = () => {
 		if (guild) setNewGuild(guild);
 	}, [guild]);
 
-	if (isLoading2 || isLoading3 || isLoading4 || isLoading5 || isLoading6)
+	if (
+		isLoading2 ||
+		isLoading3 ||
+		isLoading4 ||
+		isLoading5 ||
+		isLoading6 ||
+		!newGuild
+	)
 		return <p>Loading...</p>;
 	if (error2 || error3 || error4 || error5 || error6) return <p>Error</p>;
 
@@ -81,28 +92,25 @@ const EconomyPage: NextPageWithLayout = () => {
 					</h3>
 					<div className="dropdown w-64">
 						<label
-							tabIndex={0}
+							tabIndex={1}
 							className="inline-flex w-full items-center justify-center rounded-lg bg-base-200 p-2 text-4xl"
 						>
-							{newGuild?.currency}
+							<Emoji text={newGuild?.currency ?? guild.currency} />
 						</label>
 						<ul className="dropdown-content mt-4 max-h-40 w-full overflow-auto rounded-md bg-base-200 p-2">
 							{emojis.map((emoji, index) => (
 								<li
 									className="relative flex h-10 cursor-default select-none items-center justify-between rounded p-3 hover:bg-base-100"
 									key={index}
-									// onMouseDown={(e) =>
-									// 	setNewGuild({ ...newGuild, currency: e.target.value })
-									// }
+									onMouseDown={() => {
+										setNewGuild({
+											...newGuild!,
+											currency: resolveIdentifier(emoji!)
+										});
+									}}
 								>
 									<div className="relative h-10 w-10">
-										<Image
-											src={`${RouteBases.cdn}/emojis/${emoji.id}.png?size=32`}
-											alt={emoji.name ?? ''}
-											className="mask-square object-scale-down"
-											width={128}
-											height={128}
-										/>
+										<Emoji text={emoji.id!} />
 									</div>
 									<span className="rounded bg-base-300 p-2 font-mono text-sm">
 										{emoji.name}
@@ -120,38 +128,41 @@ const EconomyPage: NextPageWithLayout = () => {
 						<h3 className="text-md my-2 font-bold text-neutral-focus">
 							Transaction Channel
 						</h3>
-						<select
-							className="select w-64"
-							// onChange={(e) =>
-							// 	setNewGuild({ ...newGuild, transactionLogId: e.target.value })
-							// }
-						>
-							<option
-								selected
-								disabled
-								value={newGuild?.transactionLogId ?? undefined}
+						<div className="input-group">
+							<select
+								className="select w-64"
+								onChange={(e) =>
+									setNewGuild({ ...newGuild, transactionLogId: e.target.value })
+								}
+								value={newGuild.transactionLogId ?? 'asd'}
 							>
-								{channels.find(
-									(channel) => channel.id === newGuild?.transactionLogId
-								)?.name ?? 'None'}
-							</option>
-							{channels
-								.filter((channel) => channel.type === ChannelType.GuildText)
-								.map((channel, index) => (
-									<option key={index} value={channel.id}>
-										{channel.name}
-									</option>
-								))}
-						</select>
+								<option disabled value={'asd'}>
+									None
+								</option>
+								{channels
+									.filter((channel) => channel.type === ChannelType.GuildText)
+									.map((channel, index) => (
+										<option key={index} value={channel.id}>
+											{channel.name}
+										</option>
+									))}
+							</select>
+							<button
+								className="btn glass text-base-content"
+								onClick={() =>
+									setNewGuild({ ...newGuild, transactionLogId: null })
+								}
+							>
+								Reset
+							</button>
+						</div>
 					</div>
 					<div className="my-5">
 						<h3 className="text-md my-2 font-bold text-neutral-focus">
 							Role Ping <span className="badge">WIP</span>
 						</h3>
-						<select className="select-disabled select w-64">
-							<option disabled selected>
-								{guild.transactionLogId ?? 'None'}
-							</option>
+						<select disabled className="select-disabled select w-64">
+							<option disabled>{'None'}</option>
 							{roles.map((role, index) => (
 								<option key={index}>{role.name}</option>
 							))}
@@ -178,15 +189,15 @@ const EconomyPage: NextPageWithLayout = () => {
 						Next Page
 					</button>
 					<h1 className="font-mono">
-						Transactions {(page - 1) * limit + 1}-{(page - 1) * limit + limit}{' '}
-						of {count}
+						Transactions {(page - 1) * limit + 1}-
+						{Math.min(count, (page - 1) * limit + limit)} of {count}
 					</h1>
 				</div>
 				<table className="table w-full table-fixed">
 					<thead>
 						<tr>
-							<th>Target</th>
-							<th>Agent</th>
+							<th className="w-48">Target</th>
+							<th className="w-48">Agent</th>
 							<th>Type</th>
 							<th>Wallet</th>
 							<th>Treasury</th>
@@ -205,21 +216,29 @@ const EconomyPage: NextPageWithLayout = () => {
 					</tbody>
 				</table>
 			</DashCard>
-			{newGuild !== guild && (
-				<div className="absolute bottom-10 left-1/2 z-40 flex w-5/6 -translate-x-1/2 items-center justify-between rounded-lg border-4 bg-base-300 p-4 text-xl shadow-lg">
-					<h1 className="font-expletus_sans text-sm">
-						Careful there! You have some unsaved changes. Save?
-					</h1>
-					<div className="inline-flex gap-3">
-						<button
-							className="btn btn-warning"
-							onClick={() => setNewGuild(guild)}
-						>
-							Nay
-						</button>
-						<button className="btn btn-success" onClick={updateGuild}>
-							Aye
-						</button>
+			{JSON.stringify(newGuild) !== JSON.stringify(guild) && (
+				<div className="toast-bottom toast-center toast z-50 w-full max-w-lg">
+					<div className="alert shadow-lg">
+						<div>
+							<FaInfoCircle />
+							<div>
+								<h3 className="font-bold">Careful There!</h3>
+								<div className="text-xs">
+									You have some unsaved changes. Save?
+								</div>
+							</div>
+						</div>
+						<div className="flex-none">
+							<button
+								className="btn btn-ghost btn-sm"
+								onClick={() => setNewGuild(guild)}
+							>
+								Nay
+							</button>
+							<button className="btn btn-primary btn-sm" onClick={updateGuild}>
+								Aye
+							</button>
+						</div>
 					</div>
 				</div>
 			)}

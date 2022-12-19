@@ -1,7 +1,6 @@
 import { RouteBases } from 'discord-api-types/v10';
 import Image from 'next/image';
 import { FC } from 'react';
-
 import { trpc } from '../../lib/trpc';
 
 type Props = {

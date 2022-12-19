@@ -13,7 +13,6 @@ import {
 	FaShoppingCart,
 	FaTools
 } from 'react-icons/fa';
-
 import MainLayout from '../components/layouts/MainLayout';
 import { DeveloperCard } from '../components/misc/DeveloperCard';
 import { InquiryAccordion } from '../components/misc/InquiryAccordion';

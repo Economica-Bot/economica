@@ -28,7 +28,7 @@ export const schema = z.object({
 		return z.NEVER;
 	}),
 	SUPPORT_GUILD_ID: z.string(),
-	INVITE_URL: z.string(),
+	SUPPORT_GUILD_URL: z.string(),
 	DEPLOY_COMMANDS: z.enum(['nothing', 'update', 'reset']),
 	DEPLOY_ALL_MODULES: z
 		.enum(['true', 'false'])

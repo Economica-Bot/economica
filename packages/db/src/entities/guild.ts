@@ -4,10 +4,10 @@ import {
 	DefaultIntervalsObj,
 	DefaultModulesObj
 } from '@economica/common';
-import { BaseEntity, Column, Entity } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
 @Entity({ name: 'guild' })
-export class Guild extends BaseEntity {
+export class Guild {
 	@Column({ type: 'character varying', primary: true })
 	public id!: string;
 
@@ -15,10 +15,10 @@ export class Guild extends BaseEntity {
 	public currency!: string;
 
 	@Column({ type: 'character varying', default: null, nullable: true })
-	public transactionLogId!: string | null;
+	public infractionLogId!: string | null;
 
 	@Column({ type: 'character varying', default: null, nullable: true })
-	public infractionLogId!: string | null;
+	public transactionLogId!: string | null;
 
 	@Column({ type: 'jsonb', default: DefaultIncomesObj })
 	public incomes!: typeof DefaultIncomesObj;

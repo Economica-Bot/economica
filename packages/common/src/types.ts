@@ -62,12 +62,13 @@ export type RouletteBetsDescriptionsType =
 	| 'A bet that the number will be in the chosen vertical column'
 	| 'A special bet that covers the numbers 1, 5, 9, 12, 13, 16, 19, 23, 27, 30, 32, and 34';
 export interface IncomeCommand {
-	min: number | null;
+	// Can't display more than 5 components in modal :(
+	// min: number | null;
 	max: number | null;
 	chance: number | null;
 	minfine: number | null;
 	maxfine: number | null;
-	cooldown: number | null;
+	cooldown: number;
 }
 export type IncomeString = typeof IncomeArr[number];
 export interface IntervalCommand {

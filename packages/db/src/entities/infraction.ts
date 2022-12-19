@@ -1,7 +1,6 @@
 import { InfractionString } from '@economica/common';
 import { DiscordSnowflake } from '@sapphire/snowflake';
 import {
-	BaseEntity,
 	Column,
 	CreateDateColumn,
 	Entity,
@@ -14,9 +13,7 @@ import { Guild } from './guild';
 import { Member } from './member';
 
 @Entity({ name: 'infraction' })
-export class Infraction<
-	offense extends InfractionString = InfractionString
-> extends BaseEntity {
+export class Infraction<offense extends InfractionString = InfractionString> {
 	@Column({ type: 'character varying', primary: true })
 	public id: string = DiscordSnowflake.generate().toString();
 
@@ -44,15 +41,6 @@ export class Infraction<
 	@Column({ type: 'integer', nullable: true })
 	public duration!: offense extends 'BAN' | 'MUTE' | 'TIMEOUT' ? number : null;
 
-	@Column({ type: 'boolean', nullable: true })
-	public permanent!: offense extends 'BAN' | 'MUTE' | 'TIMEOUT'
-		? boolean
-		: null;
-
-	@CreateDateColumn({ type: 'timestamp' })
+	@CreateDateColumn({ type: 'timestamptz' })
 	public createdAt!: Date;
-
-	public isBan(): this is Infraction<'BAN'> {
-		return this.type === 'BAN';
-	}
 }

@@ -1,5 +1,4 @@
 import { useSession } from 'next-auth/react';
-
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import { NextPageWithLayout } from '../_app';
 

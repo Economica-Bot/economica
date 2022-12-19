@@ -1,15 +1,17 @@
 import { CommandData, ModuleString } from '@economica/common';
 import { EmbedBuilder } from 'discord.js';
-import { trpc } from 'src/lib/trpc';
-import { Command } from 'src/structures/commands';
+import { trpc } from '../lib/trpc';
+import { Command } from '../structures/commands';
 
-export const module = {
+export const Module = {
 	identifier: /^module$/,
 	type: 'chatInput' as const,
 	execute: async (interaction) => {
 		const subcommand = interaction.options.getSubcommand();
 		if (subcommand === 'view') {
-			const guildEntity = await trpc.guild.byId.query(interaction.guildId);
+			const guildEntity = await trpc.guild.byId.query({
+				id: interaction.guildId
+			});
 			const description = `**View ${interaction.guild}'s Modules!**`;
 			const embed = new EmbedBuilder()
 				.setAuthor({
@@ -50,8 +52,12 @@ export const module = {
 				'module',
 				true
 			) as ModuleString;
-			const userEntity = await trpc.user.byId.query(interaction.user.id);
-			const guildEntity = await trpc.guild.byId.query(interaction.guildId);
+			const userEntity = await trpc.user.byId.query({
+				id: interaction.user.id
+			});
+			const guildEntity = await trpc.guild.byId.query({
+				id: interaction.guildId
+			});
 			if (userEntity.keys < 1) {
 				throw new Error('You do not have any keys.');
 			} else if (guildEntity.modules[moduleName].enabled) {
@@ -61,7 +67,6 @@ export const module = {
 			} else {
 				userEntity.keys -= 1;
 				await trpc.user.update.mutate(userEntity);
-				await userEntity.save();
 				guildEntity.modules[moduleName].enabled = true;
 				guildEntity.modules[moduleName].user = userEntity.id;
 				await trpc.guild.update.mutate(guildEntity);
@@ -82,8 +87,12 @@ export const module = {
 				'module',
 				true
 			) as ModuleString;
-			const userEntity = await trpc.user.byId.query(interaction.user.id);
-			const guildEntity = await trpc.guild.byId.query(interaction.guildId);
+			const userEntity = await trpc.user.byId.query({
+				id: interaction.user.id
+			});
+			const guildEntity = await trpc.guild.byId.query({
+				id: interaction.guildId
+			});
 			if (guildEntity.modules[moduleName].user !== userEntity.id) {
 				throw new Error('You have not enabled this module in this server.');
 			} else {

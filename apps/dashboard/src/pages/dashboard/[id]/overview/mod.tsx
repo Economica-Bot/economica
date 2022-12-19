@@ -1,6 +1,5 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-
 import DashboardLayout from '../../../../components/layouts/DashboardLayout';
 import { InfractionBar } from '../../../../components/misc/InfractionBar';
 import { trpc } from '../../../../lib/trpc';

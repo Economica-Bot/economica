@@ -1,9 +1,9 @@
 import { AppRouter } from '@economica/api';
-import { createTRPCProxyClient } from '@trpc/client';
-import { httpLink } from '@trpc/client/links/httpLink';
+import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 import fetch from 'node-fetch';
-import { env } from 'src/env.mjs';
 import ws from 'ws';
+import { env } from '../env.mjs';
+import SuperJSON from 'superjson';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const globalAny = global as any;
@@ -14,8 +14,9 @@ const host =
 	env.NODE_ENV === 'production' ? 'host.docker.internal' : 'localhost';
 
 export const trpc = createTRPCProxyClient<AppRouter>({
+	transformer: SuperJSON,
 	links: [
-		httpLink({
+		httpBatchLink({
 			url: `http://${host}:3000/api/trpc`
 		})
 	]

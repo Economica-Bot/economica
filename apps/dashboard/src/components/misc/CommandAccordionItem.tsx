@@ -7,13 +7,13 @@ type Props = {
 	examples?: string[];
 };
 
-export const CommandDropDown: FC<Props> = ({
+export const CommandAccordionItem: FC<Props> = ({
 	name,
 	description,
 	format,
 	examples
 }) => (
-	<div className="collapse-arrow collapse m-2 w-full rounded-xl bg-base-300 p-3">
+	<div className="collapse-arrow collapse w-full rounded-xl bg-base-300 p-3">
 		<input type="checkbox" />
 		<h1 className="collapse-title text-xl font-bold">
 			/{name}
@@ -23,9 +23,7 @@ export const CommandDropDown: FC<Props> = ({
 		<div className="collapse-content">
 			<div>
 				<h2 className="mt-5 text-base">Format:</h2>
-				<p className="p-3 font-mono">
-					/{name} {format}
-				</p>
+				<p className="p-3 font-mono">/{format}</p>
 			</div>
 			<div>
 				<h2>Examples:</h2>

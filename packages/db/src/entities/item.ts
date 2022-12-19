@@ -1,11 +1,11 @@
 import { DiscordSnowflake } from '@sapphire/snowflake';
-import { BaseEntity, Column, Entity, ManyToOne, Relation } from 'typeorm';
+import { Column, Entity, ManyToOne, Relation } from 'typeorm';
 
 import { Listing } from './listing';
 import { Member } from './member';
 
 @Entity({ name: 'item' })
-export class Item extends BaseEntity {
+export class Item {
 	@Column({ type: 'character varying', primary: true })
 	public id: string = DiscordSnowflake.generate().toString();
 
@@ -18,6 +18,6 @@ export class Item extends BaseEntity {
 	@Column({ type: 'integer' })
 	public amount!: number;
 
-	@Column({ type: 'timestamp', default: null })
+	@Column({ type: 'timestamptz', default: null })
 	public lastGeneratedAt!: Date;
 }

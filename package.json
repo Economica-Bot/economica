@@ -1,6 +1,6 @@
 {
 	"name": "economica",
-	"version": "0.1.0",
+	"version": "0.0.1",
 	"private": true,
 	"packageManager": "yarn@1.22.19",
 	"workspaces": {
@@ -13,7 +13,7 @@
 		"build": "turbo build",
 		"dev": "turbo dev --parallel",
 		"lint": "turbo lint",
-		"format": "prettier --write \"**/*.{ts,tsx,md}\"",
+		"format": "./node_modules/.bin/prettier --write \"**/*.{ts,tsx}\"",
 		"docker": "docker compose --env-file ./.env.production up --build --force-recreate"
 	},
 	"devDependencies": {
@@ -21,16 +21,17 @@
 		"@commitlint/config-conventional": "^17.1.0",
 		"@types/node": "^18.11.9",
 		"@types/prettier": "^2",
-		"@typescript-eslint/eslint-plugin": "^5.43.0",
-		"@typescript-eslint/parser": "^5.43.0",
+		"@typescript-eslint/eslint-plugin": "^5.45.0",
+		"@typescript-eslint/parser": "^5.45.0",
 		"eslint": "^8.26.0",
-		"eslint-config-prettier": "latest",
-		"eslint-plugin-prettier": "latest",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-plugin-prettier": "^4.2.1",
 		"husky": "^8.0.1",
-		"prettier": "next",
+		"prettier": "^2.8.1",
 		"prettier-plugin-organize-imports": "^3.2.0",
 		"ts-node": "^10.9.1",
 		"turbo": "latest",
 		"typescript": "^4.9.3"
-	}
+	},
+	"dependencies": {}
 }

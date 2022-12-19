@@ -10,7 +10,6 @@ import { ThemeProvider } from 'next-themes';
 import type { ReactElement, ReactNode } from 'react';
 import { useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
-
 import { discordMessageOptions } from '../lib/config';
 import { trpc } from '../lib/trpc';
 

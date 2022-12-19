@@ -1,5 +1,6 @@
 import { Transaction } from '@economica/db';
 import { FC } from 'react';
+import { Emoji } from './Emoji';
 
 import { UserCard } from './UserCard';
 
@@ -17,10 +18,20 @@ export const TransactionBar: FC<Props> = ({ transaction }) => (
 		</th>
 		<th className="font-mono text-xs">{transaction.type}</th>
 		<th className="font-economica">
-			{transaction.guild.currency} {transaction.wallet.toLocaleString()}
+			<div className="inline-flex items-center gap-2">
+				<span className="inline-block h-6 w-6">
+					<Emoji text={transaction.guild.currency} />{' '}
+				</span>
+				<code>{transaction.wallet.toLocaleString()}</code>
+			</div>
 		</th>
 		<th className="font-economica">
-			{transaction.guild.currency} {transaction.treasury.toLocaleString()}
+			<div className="inline-flex items-center gap-2">
+				<span className="inline-block h-6 w-6">
+					<Emoji text={transaction.guild.currency} />{' '}
+				</span>
+				<code>{transaction.treasury.toLocaleString()}</code>
+			</div>
 		</th>
 		<th className="whitespace-pre-wrap text-sm font-thin">
 			{new Date(transaction.createdAt).toLocaleString()}

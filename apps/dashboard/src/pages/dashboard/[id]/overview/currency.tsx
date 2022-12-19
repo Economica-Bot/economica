@@ -6,7 +6,6 @@ import {
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-
 import DashboardLayout from '../../../../components/layouts/DashboardLayout';
 import { trpc } from '../../../../lib/trpc';
 import { NextPageWithLayout } from '../../../_app';
@@ -21,7 +20,9 @@ const CurrencyPage: NextPageWithLayout<Props> = () => {
 	const [currency, setCurrency] = useState('');
 	const guildId = router.query.id as string;
 
-	const { data, refetch, isLoading } = trpc.guild.byId.useQuery(guildId);
+	const { data, refetch, isLoading } = trpc.guild.byId.useQuery({
+		id: guildId
+	});
 	const mutation = trpc.guild.update.useMutation();
 
 	useEffect(() => {

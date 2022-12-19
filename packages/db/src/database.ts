@@ -10,5 +10,6 @@ export const datasource = await new DataSource({
 	username: env.DB_USERNAME,
 	password: env.DB_PASSWORD,
 	entities: Object.values(entityFiles),
-	synchronize: true
+	synchronize: true,
+	useUTC: true
 }).initialize();

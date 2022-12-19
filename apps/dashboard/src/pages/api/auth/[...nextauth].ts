@@ -1,6 +1,5 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import DiscordProvider from 'next-auth/providers/discord';
-
 import { env } from '../../../env.mjs';
 
 export const authOptions: NextAuthOptions = {

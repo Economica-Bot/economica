@@ -25,7 +25,7 @@ const Channel: FC<PropsWithChildren & { text: string; url: string }> = ({
 }) => (
 	<Link
 		href={url}
-		className="inline-flex cursor-pointer items-center justify-between rounded-md p-1 hover:bg-base-300"
+		className="inline-flex items-center justify-between rounded-md p-1 hover:bg-base-300"
 	>
 		# {text}
 		{children}
@@ -40,23 +40,31 @@ const GuildChannelNavBar: FC<{ guild: RESTAPIPartialCurrentUserGuild }> = ({
 			<Channel text="moderation" url={`/dashboard/${guild.id}/overview/mod`} />
 			<Channel text="economy" url={`/dashboard/${guild.id}/overview/economy`} />
 		</ChannelGroup>
-		<ChannelGroup text="modules">
-			<Channel text="application" url={`/dashboard/${guild.id}/modules/app`} />
-			<Channel text="config" url={`/dashboard/${guild.id}/modules/config`} />
-			<Channel text="utility" url={`/dashboard/${guild.id}/modules/util`} />
-			<Channel text="moderation" url={`/dashboard/${guild.id}/modules/mod`} />
-			<Channel text="economy" url={`/dashboard/${guild.id}/modules/economy`} />
-			<Channel text="income" url={`/dashboard/${guild.id}/modules/income`} />
-			<Channel text="statistics" url={`/dashboard/${guild.id}/modules/stats`}>
-				<span className="badge-warning badge font-bold">beta</span>
-			</Channel>
-			<Channel text="casino" url={`/dashboard/${guild.id}/modules/casino`}>
-				<span className="badge-primary badge font-bold">NEW!</span>
-			</Channel>
-			<Channel text="business" url={`/dashboard/${guild.id}/modules/corp`}>
-				<span className="badge-primary badge font-bold">NEW!</span>
-			</Channel>
-		</ChannelGroup>
+		<div className="pointer-events-none">
+			<ChannelGroup text="modules">
+				<Channel
+					text="application"
+					url={`/dashboard/${guild.id}/modules/app`}
+				/>
+				<Channel text="config" url={`/dashboard/${guild.id}/modules/config`} />
+				<Channel text="utility" url={`/dashboard/${guild.id}/modules/util`} />
+				<Channel text="moderation" url={`/dashboard/${guild.id}/modules/mod`} />
+				<Channel
+					text="economy"
+					url={`/dashboard/${guild.id}/modules/economy`}
+				/>
+				<Channel text="income" url={`/dashboard/${guild.id}/modules/income`} />
+				<Channel text="statistics" url={`/dashboard/${guild.id}/modules/stats`}>
+					<span className="badge-warning badge font-bold">beta</span>
+				</Channel>
+				<Channel text="casino" url={`/dashboard/${guild.id}/modules/casino`}>
+					<span className="badge-primary badge font-bold">NEW!</span>
+				</Channel>
+				<Channel text="business" url={`/dashboard/${guild.id}/modules/corp`}>
+					<span className="badge-primary badge font-bold">NEW!</span>
+				</Channel>
+			</ChannelGroup>
+		</div>
 	</div>
 );
 const UserChannelNavBar: FC = () => (

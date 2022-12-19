@@ -1,7 +1,6 @@
 import { ListingType } from '@economica/common';
 import { DiscordSnowflake } from '@sapphire/snowflake';
 import {
-	BaseEntity,
 	Column,
 	CreateDateColumn,
 	Entity,
@@ -15,7 +14,7 @@ import {
 import { Guild } from './guild';
 
 @Entity({ name: 'listing' })
-export class Listing extends BaseEntity {
+export class Listing<type extends ListingType = ListingType> {
 	@Column({ type: 'character varying', primary: true })
 	public id: string = DiscordSnowflake.generate().toString();
 
@@ -23,8 +22,8 @@ export class Listing extends BaseEntity {
 	@JoinColumn()
 	public guild!: Relation<Guild>;
 
-	@Column({ type: 'character varying' })
-	public type!: keyof typeof ListingType;
+	@Column({ type: 'character varying', enum: ListingType })
+	public type!: type;
 
 	@Column({ type: 'character varying' })
 	public name!: string;
@@ -47,11 +46,11 @@ export class Listing extends BaseEntity {
 	@Column({ type: 'boolean' })
 	public tradeable!: boolean;
 
-	@Column({ type: 'float4' })
-	public stock!: number;
+	@Column({ type: 'integer', nullable: true })
+	public stock!: number | null;
 
-	@Column({ type: 'float4' })
-	public duration!: number;
+	@Column({ type: 'integer', nullable: true })
+	public duration!: number | null;
 
 	@ManyToMany(() => Listing, (listing) => listing.itemsRequired, {
 		onDelete: 'CASCADE'
@@ -69,11 +68,17 @@ export class Listing extends BaseEntity {
 	public rolesRemoved!: string[];
 
 	@Column({ type: 'integer', nullable: true })
-	public generatorPeriod!: number | null;
+	public generatorPeriod!: type extends ListingType.GENERATOR ? number : null;
 
 	@Column({ type: 'integer', nullable: true })
-	public generatorAmount!: number | null;
+	public generatorAmount!: type extends ListingType.GENERATOR ? number : null;
 
-	@CreateDateColumn({ type: 'timestamp' })
+	@CreateDateColumn({ type: 'timestamptz' })
 	public createdAt!: Date;
 }
+
+export const isGenerator = (
+	listing: Listing
+): listing is Listing<ListingType.GENERATOR> => {
+	return listing.type === ListingType.GENERATOR;
+};

@@ -1,6 +1,6 @@
+import { LoanStatus } from '@economica/common';
 import { DiscordSnowflake } from '@sapphire/snowflake';
 import {
-	BaseEntity,
 	Column,
 	CreateDateColumn,
 	Entity,
@@ -13,7 +13,7 @@ import { Guild } from './guild';
 import { Member } from './member';
 
 @Entity({ name: 'loan' })
-export class Loan extends BaseEntity {
+export class Loan {
 	@Column({ type: 'character varying', primary: true })
 	public id: string = DiscordSnowflake.generate().toString();
 
@@ -41,15 +41,12 @@ export class Loan extends BaseEntity {
 	@Column({ type: 'integer' })
 	public duration!: number;
 
-	@Column({ type: 'boolean' })
-	public pending!: boolean;
+	@Column({ type: 'enum', enum: LoanStatus })
+	public status!: LoanStatus;
 
-	@Column({ type: 'boolean' })
-	public active!: boolean;
-
-	@Column({ type: 'timestamp', default: null })
+	@Column({ type: 'timestamptz', default: null })
 	public completedAt!: Date | null;
 
-	@CreateDateColumn({ type: 'timestamp' })
+	@CreateDateColumn({ type: 'timestamptz' })
 	public createdAt!: Date;
 }

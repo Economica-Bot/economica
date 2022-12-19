@@ -8,7 +8,9 @@ export const schema = z.object({
 	DISCORD_CLIENT_ID: z.string(),
 	DISCORD_CLIENT_SECRET: z.string(),
 	NEXTAUTH_SECRET: z.string(),
-	NEXTAUTH_URL: z.string().url()
+	NEXTAUTH_URL: z.string().url(),
+	SUPPORT_GUILD_URL: z.string().url(),
+	INVITE_BOT_URL: z.string().url()
 });
 
 export const formatErrors = (

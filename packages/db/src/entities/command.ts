@@ -1,6 +1,5 @@
 import { DiscordSnowflake } from '@sapphire/snowflake';
 import {
-	BaseEntity,
 	Column,
 	CreateDateColumn,
 	Entity,
@@ -12,7 +11,7 @@ import {
 import { Member } from './member';
 
 @Entity({ name: 'command' })
-export class Command extends BaseEntity {
+export class Command {
 	@Column({ type: 'character varying', primary: true })
 	public id: string = DiscordSnowflake.generate().toString();
 
@@ -23,6 +22,6 @@ export class Command extends BaseEntity {
 	@Column({ type: 'character varying' })
 	public command!: string;
 
-	@CreateDateColumn({ type: 'timestamp' })
+	@CreateDateColumn({ type: 'timestamptz' })
 	public createdAt!: Date;
 }

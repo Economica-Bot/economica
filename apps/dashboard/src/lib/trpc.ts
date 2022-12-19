@@ -1,10 +1,12 @@
 import { AppRouter } from '@economica/api';
 import { httpBatchLink, loggerLink } from '@trpc/client';
 import { createTRPCNext } from '@trpc/next';
+import SuperJSON from 'superjson';
 
 export const trpc = createTRPCNext<AppRouter>({
-	config({ ctx }) {
+	config() {
 		return {
+			transformer: SuperJSON,
 			links: [
 				httpBatchLink({
 					url: '/api/trpc'

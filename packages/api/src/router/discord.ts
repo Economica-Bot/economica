@@ -12,7 +12,6 @@ import {
 } from 'discord-api-types/v10';
 import { z } from 'zod';
 import { env } from '../env.mjs';
-
 import { t } from '../trpc';
 
 const botRest = new REST({ authPrefix: 'Bot' }).setToken(env.DISCORD_BOT_TOKEN);

@@ -1,5 +1,5 @@
+import Link from 'next/link';
 import { ReactElement } from 'react';
-
 import MainLayout from '../components/layouts/MainLayout';
 import { NextPageWithLayout } from './_app';
 
@@ -170,7 +170,7 @@ const TOS: NextPageWithLayout = () => (
 			<h2>Contact Us</h2>
 			<p>
 				If you have any questions about our Privacy Policy, please contact us on
-				our <a href="/api/support">support server</a>.
+				our <Link href="/api/support">support server</Link>.
 			</p>
 		</article>
 	</div>

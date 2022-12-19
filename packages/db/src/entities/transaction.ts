@@ -2,7 +2,6 @@ import { TransactionString } from '@economica/common';
 import { DiscordSnowflake } from '@sapphire/snowflake';
 import type { Relation } from 'typeorm';
 import {
-	BaseEntity,
 	Column,
 	CreateDateColumn,
 	Entity,
@@ -14,7 +13,7 @@ import { Guild } from './guild';
 import { Member } from './member';
 
 @Entity({ name: 'transaction' })
-export class Transaction extends BaseEntity {
+export class Transaction {
 	@Column({ type: 'character varying', primary: true })
 	public id: string = DiscordSnowflake.generate().toString();
 
@@ -39,6 +38,6 @@ export class Transaction extends BaseEntity {
 	@Column({ type: 'float' })
 	public treasury!: number;
 
-	@CreateDateColumn({ type: 'timestamp' })
+	@CreateDateColumn({ type: 'timestamptz' })
 	public createdAt!: Date;
 }

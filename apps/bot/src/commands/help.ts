@@ -3,16 +3,16 @@ import {
 	ActionRowBuilder,
 	EmbedBuilder,
 	parseEmoji,
-	SelectMenuBuilder,
-	SelectMenuOptionBuilder,
 	SlashCommandSubcommandBuilder,
-	SlashCommandSubcommandGroupBuilder
+	SlashCommandSubcommandGroupBuilder,
+	StringSelectMenuBuilder,
+	StringSelectMenuOptionBuilder
 } from 'discord.js';
-import { env } from 'src/env.mjs';
-import { trpc } from 'src/lib/trpc';
-import { Command } from 'src/structures/commands';
+import { env } from '../env.mjs';
+import { trpc } from '../lib/trpc';
+import { Command } from '../structures/commands.js';
 
-export const help = {
+export const Help = {
 	identifier: /^help$/,
 	type: 'chatInput',
 	async execute(interaction) {
@@ -26,22 +26,24 @@ export const help = {
 				.setDescription(
 					`${Emojis.GEM} **Welcome to the ${interaction.client.user} Help Dashboard!**\nHere, you can get information about any command or module. Use the select menu below to specify a module.\n\n${Emojis.MENU} **The Best New Discord Economy Bot**\nTo become more familiar with Economica, please refer to the [documentation](${env.DOCS_URL}). There you can set up various permissions-related settings and get detailed information about all command modules.\n\n🔗 **Useful Links**:\n**[Home Page](${env.HOME_URL}) | [Command Docs](${env.COMMANDS_URL}) | [Vote For Us](${env.VOTE_URL})**`
 				);
-			const guildEntity = await trpc.guild.byId.query(interaction.guildId);
+			const guildEntity = await trpc.guild.byId.query({
+				id: interaction.guildId
+			});
 			const labels = Object.keys(guildEntity.modules).map((module) =>
-				new SelectMenuOptionBuilder()
+				new StringSelectMenuOptionBuilder()
 					.setLabel(module)
 					.setValue(`help_${module}`)
 					.toJSON()
 			);
-			const dropdown = new ActionRowBuilder<SelectMenuBuilder>().setComponents([
-				new SelectMenuBuilder()
-					.setCustomId('help_select')
-					.setPlaceholder('None Selected')
-					.setOptions(labels)
-			]);
+			const dropdown =
+				new ActionRowBuilder<StringSelectMenuBuilder>().setComponents([
+					new StringSelectMenuBuilder()
+						.setCustomId(`help_select:${interaction.user.id}`)
+						.setPlaceholder('None Selected')
+						.setOptions(labels)
+				]);
 			await interaction.reply({
 				embeds: [helpEmbed],
-				ephemeral: true,
 				components: [dropdown],
 				fetchReply: true
 			});
@@ -65,7 +67,7 @@ export const help = {
 					Emojis.TEXTING
 				} **Examples**: \`\`\`${command.examples.join('\n')}\`\`\``
 			)
-			
+
 			.setFooter({
 				text: interaction.user.tag,
 				iconURL: interaction.user.displayAvatarURL()
@@ -81,10 +83,7 @@ export const help = {
 				]);
 			} else if (option instanceof SlashCommandSubcommandGroupBuilder) {
 				commandEmbed.addFields([
-					{
-						name: `${command.name} ${option.name}`,
-						value: option.description
-					}
+					{ name: `${command.name} ${option.name}`, value: option.description }
 				]);
 				option.options.forEach((opt: SlashCommandSubcommandBuilder) => {
 					commandEmbed.addFields([
@@ -97,11 +96,11 @@ export const help = {
 				});
 			}
 		});
-		await interaction.reply({ embeds: [commandEmbed], ephemeral: true })
+		await interaction.reply({ embeds: [commandEmbed] });
 	}
 } satisfies Command<'chatInput'>;
 
-export const helpSelect = {
+export const HelpSelect = {
 	identifier: /^help_(.*)$/,
 	type: 'selectMenu',
 	execute: async (interaction) => {
@@ -115,8 +114,7 @@ export const helpSelect = {
 			.setAuthor({ name: `${module} Module` })
 			.setDescription(description.length ? description : 'No commands found');
 		await interaction.reply({
-			embeds: [moduleEmbed.toJSON()],
-			ephemeral: true
+			embeds: [moduleEmbed.toJSON()]
 		});
 	}
 } satisfies Command<'selectMenu'>;

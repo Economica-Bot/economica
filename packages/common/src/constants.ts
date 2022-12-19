@@ -5,7 +5,9 @@ import {
 	PermissionFlagsBits,
 	RESTPostAPIChatInputApplicationCommandsJSONBody
 } from 'discord-api-types/v10';
-import { InviteGenerationOptions } from 'discord.js';
+import { ColorResolvable, InviteGenerationOptions } from 'discord.js';
+import { describe } from 'node:test';
+import { type } from 'os';
 import {
 	IncomeCommand,
 	IncomeString,
@@ -53,15 +55,13 @@ export const DefaultIntervalsObj: Record<IntervalString, IntervalCommand> = {
 };
 export const DefaultIncomesObj: Record<IncomeString, IncomeCommand> = {
 	work: {
-		min: 100,
 		max: 500,
-		cooldown: 1000 * 30,
 		minfine: null,
 		maxfine: null,
-		chance: null
+		chance: null,
+		cooldown: 1000 * 30
 	},
 	beg: {
-		min: 25,
 		max: 125,
 		minfine: null,
 		maxfine: null,
@@ -69,7 +69,6 @@ export const DefaultIncomesObj: Record<IncomeString, IncomeCommand> = {
 		cooldown: 1000 * 30
 	},
 	crime: {
-		min: 300,
 		max: 1500,
 		chance: 60,
 		minfine: 300,
@@ -77,7 +76,6 @@ export const DefaultIncomesObj: Record<IncomeString, IncomeCommand> = {
 		cooldown: 1000 * 60
 	},
 	rob: {
-		min: null,
 		max: null,
 		chance: 20,
 		minfine: 500,
@@ -122,12 +120,12 @@ export const DefaultModulesObj: Record<ModuleString, ModuleObj> = {
 		user: null
 	}
 };
-export const EmbedColors: Record<ReplyString, string> = {
+export const EmbedColors = {
 	success: 'Green',
 	info: 'Blurple',
 	warn: 'Yellow',
 	error: 'Red'
-};
+} satisfies Record<ReplyString, ColorResolvable>;
 export enum Emojis {
 	APPLE = '<a:apple:975152086700408842>',
 	ARMOR_CHESTPLATE = '<:armor_chestplate:974903632665407518>',
@@ -246,19 +244,19 @@ export enum Emojis {
 	URANIUM = '<:uranium:975152152198660248>',
 	WOOD = '<:wood:974924909383917568>'
 }
-export const ListingEmojis: Record<keyof typeof ListingType, `${Emojis}`> = {
-	COLLECTABLE: '<:collectable:974924859895336971>',
-	GENERATOR: '<:generator:990007141320523827>',
-	INSTANT: '<a:unlock:975152087384068096>',
-	USABLE: '<a:unknown:975152087115661372>'
-};
-export const Icons: Record<number, `${Emojis}`> = {
+export const ListingEmojis = {
+	Collectable: '<:collectable:974924859895336971>',
+	Generator: '<:generator:990007141320523827>',
+	Instant: '<a:unlock:975152087384068096>',
+	Usable: '<a:unknown:975152087115661372>'
+} satisfies Record<`${ListingType}`, `${Emojis}`>;
+export const Icons = {
 	0: '<:icon_1:974903674868498482>',
 	1: '<:icon_2:974903675891879997>',
 	2: '<:icon_3:974903677087281222>',
 	3: '<:icon_4:974903678920196157>',
 	4: '<:icon_5:974903678018404372>'
-};
+} satisfies Record<number, `${Emojis}`>;
 export enum Properties {
 	TEXTILE_MILL = 'MANUFACTURING',
 	OIL_REFINERY = 'MANUFACTURING',
@@ -296,7 +294,7 @@ export enum Properties {
 	JUMBO_JET = 'TRANSPORATION'
 }
 
-export const RouletteBets: Record<RouletteBetsNamesType, RouletteBet> = {
+export const RouletteBets = {
 	single: {
 		type: 'Inside',
 		formatted: 'Single',
@@ -364,7 +362,7 @@ export const RouletteBets: Record<RouletteBetsNamesType, RouletteBet> = {
 		description:
 			'A special bet that covers the numbers 1, 5, 9, 12, 13, 16, 19, 23, 27, 30, 32, and 34'
 	}
-};
+} satisfies Record<RouletteBetsNamesType, RouletteBet>;
 export const PaginationLimit = 5;
 export const IncomeArr = ['work', 'beg', 'crime', 'rob'] as const;
 export const IntervalArr = [
@@ -376,21 +374,21 @@ export const IntervalArr = [
 	'monthly'
 ] as const;
 export enum ListingType {
-	'COLLECTABLE',
-	'INSTANT',
-	'USABLE',
-	'GENERATOR'
+	COLLECTABLE = 'Collectable',
+	INSTANT = 'Instant',
+	USABLE = 'Usable',
+	GENERATOR = 'Generator'
 }
-export const ListingDescriptions: Record<keyof typeof ListingType, string> = {
-	COLLECTABLE:
+export const ListingDescriptions = {
+	Collectable:
 		'Collectable items are just that; collectable. They exist in the inventory forever (unless sold or given away) and have no particular quirks or abilities, besides looking cool.',
-	INSTANT:
+	Instant:
 		'Instant items are special items that are used instantly when purchased.',
-	USABLE:
+	Usable:
 		"Usable items may be used after purchasing to the owner's discretion - when used, they may grant a role or special effect.",
-	GENERATOR:
+	Generator:
 		'Generator items generate money that can be collected with `/collect` based on a duration specific to that particular generator.'
-};
+} satisfies Record<`${ListingType}`, string>;
 export const InfractionStringArr = [
 	'BAN',
 	'KICK',
@@ -473,11 +471,14 @@ export const inviteOptions: InviteGenerationOptions = {
 		PermissionFlagsBits.UseExternalEmojis
 	]
 };
-export const CommandData: (RESTPostAPIChatInputApplicationCommandsJSONBody & {
-	module: ModuleString;
-	format: string;
-	examples: string[];
-})[] = [
+export enum LoanStatus {
+	PENDING,
+	ACTIVE,
+	COMPLETE,
+	REJECTED,
+	CANCELED
+}
+export const CommandData = [
 	{
 		name: 'help',
 		description: 'Get information about a command or module',
@@ -595,5 +596,729 @@ export const CommandData: (RESTPostAPIChatInputApplicationCommandsJSONBody & {
 				required: false
 			}
 		]
+	},
+	{
+		name: 'beg',
+		description: 'Grovel in hopes of earning a meager sum',
+		module: 'INCOME',
+		format: 'beg',
+		examples: ['beg']
+	},
+	{
+		name: 'crime',
+		description: 'Commit a felony to swindle a sum',
+		module: 'INCOME',
+		format: 'crime',
+		examples: ['crime']
+	},
+	{
+		name: 'income',
+		description: 'Manipulate income commands',
+		module: 'INCOME',
+		format: 'income <view | edit> [..args]',
+		examples: [
+			'income view',
+			'income edit work minimum: 100',
+			'income edit crime maxfine: 20%',
+			'income edit beg cooldown: 5m'
+		],
+		options: [
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'view',
+				description: 'View income command configurations'
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'edit',
+				description: 'Edit income command condigurations'
+			}
+		]
+	},
+	{
+		name: 'rob',
+		description: 'Rob an innocent user for a sweet sum',
+		module: 'INCOME',
+		format: 'rob <user>',
+		examples: ['rob @QiNG-agar'],
+		options: [
+			{
+				type: ApplicationCommandOptionType.User,
+				name: 'user',
+				description: 'Specify a user',
+				required: true
+			}
+		]
+	},
+	{
+		name: 'work',
+		description: 'Work to earn a sum',
+		module: 'INCOME',
+		format: 'work',
+		examples: ['work']
+	},
+	{
+		name: 'graph',
+		description: 'View economy statistics in a graph format',
+		module: 'INSIGHTS',
+		format: 'graph [user]',
+		examples: ['graph', 'graph @user']
+	},
+	{
+		name: 'memory',
+		description: 'View various bot memory and performance statistics',
+		module: 'INSIGHTS',
+		format: 'memory',
+		examples: ['memory']
+	},
+	{
+		name: 'statistics',
+		description: 'View server and bot statistics',
+		module: 'INSIGHTS',
+		format: 'statistics',
+		examples: ['statistics']
+	},
+	{
+		name: 'minutely',
+		description: 'Earn funds on a minutely basis',
+		module: 'INTERVAL',
+		format: 'minutely',
+		examples: ['minutely']
+	},
+	{
+		name: 'hourly',
+		description: 'Earn funds on an hourly basis',
+		module: 'INTERVAL',
+		format: 'hourly',
+		examples: ['hourly']
+	},
+	{
+		name: 'daily',
+		description: 'Earn funds on a daily basis',
+		module: 'INTERVAL',
+		format: 'daily',
+		examples: ['daily']
+	},
+	{
+		name: 'weekly',
+		description: 'Earn funds on a weekly basis',
+		module: 'INTERVAL',
+		format: 'weekly',
+		examples: ['weekly']
+	},
+	{
+		name: 'fortnightly',
+		description: 'Earn funds on a fortnightly basis',
+		module: 'INTERVAL',
+		format: 'fortnightly',
+		examples: ['fortnightly']
+	},
+	{
+		name: 'monthly',
+		description: 'Earn funds on a monthly basis',
+		module: 'INTERVAL',
+		format: 'monthly',
+		examples: ['monthly']
+	},
+	{
+		name: 'interval',
+		description: 'Manage the interval commands',
+		module: 'INTERVAL',
+		format: 'interval <view | edit> [..args]',
+		examples: ['interval view', 'interval edit daily 100'],
+		options: [
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'view',
+				description: 'View interval command configurations'
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'edit',
+				description: 'Edit interval command configurations'
+			}
+		]
+	},
+	{
+		name: 'add-money',
+		description: 'Manipulate balances',
+		module: 'ECONOMY',
+		format: 'add-money <user> <amount> <balance>',
+		examples: ['add-money @user 300 wallet', 'add-money @user 100 treasury'],
+		default_member_permissions: PermissionFlagsBits.ManageGuild.toString(),
+		options: [
+			{
+				type: ApplicationCommandOptionType.User,
+				name: 'target',
+				description: 'Specify a user',
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'amount',
+				description: 'Specify an amount',
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'balance',
+				description: 'Specify the balance',
+				required: true,
+				choices: [
+					{ name: 'Wallet', value: 'wallet' },
+					{ name: 'Treasury', value: 'treasury' }
+				]
+			}
+		]
+	},
+	{
+		name: 'balance',
+		description: 'View a balance',
+		module: 'ECONOMY',
+		format: 'balance [user]',
+		examples: ['balance', 'balance @user'],
+		options: [
+			{
+				type: ApplicationCommandOptionType.User,
+				name: 'user',
+				description: 'Specify a user'
+			}
+		]
+	},
+	{
+		name: 'currency',
+		description: 'Manage the currency symbol',
+		module: 'ECONOMY',
+		format: 'currency <view | set | reset> [currency]',
+		examples: ['currency view', 'currency set 💵', 'currency reset'],
+		default_member_permissions: PermissionFlagsBits.ManageGuild.toString(),
+		options: [
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'view',
+				description: 'View the currency symbol'
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'set',
+				description: 'Set the currency symbol',
+				options: [
+					{
+						type: ApplicationCommandOptionType.String,
+						name: 'currency',
+						description: 'Specify a symbol',
+						required: true
+					}
+				]
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'reset',
+				description: 'Reset the currency symbol'
+			}
+		]
+	},
+	{
+		name: 'deposit',
+		description: 'Transfer funds from your wallet to your treasury',
+		module: 'ECONOMY',
+		format: 'deposit <amount>',
+		examples: ['deposit 1.5k', 'deposit all'],
+		options: [
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'amount',
+				description: 'Specify an amount',
+				required: true
+			}
+		]
+	},
+	{
+		name: 'leaderboard',
+		description: 'View top balances',
+		module: 'ECONOMY',
+		format: 'leaderboard [page]',
+		examples: ['leaderboard', 'leaderboard 3'],
+		options: [
+			{
+				type: ApplicationCommandOptionType.Integer,
+				name: 'page',
+				description: 'Specify a page',
+				min_value: 1
+			}
+		]
+	},
+	{
+		name: 'loan',
+		description: 'Loan money to other users',
+		module: 'ECONOMY',
+		format: 'loan <manage | propose>',
+		examples: ['loan manage', 'loan propose @economica 100 200 1d'],
+		options: [
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'manage',
+				description: 'Manage your loans'
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'propose',
+				description: 'Propose a loan',
+				options: [
+					{
+						type: ApplicationCommandOptionType.User,
+						name: 'borrower',
+						description: 'Specify a borrower',
+						required: true
+					},
+					{
+						type: ApplicationCommandOptionType.String,
+						name: 'principal',
+						description: 'Specify the initial payment of the loan',
+						required: true
+					},
+					{
+						type: ApplicationCommandOptionType.String,
+						name: 'repayment',
+						description: 'Specify the repayment of the loan',
+						required: true
+					},
+					{
+						type: ApplicationCommandOptionType.String,
+						name: 'duration',
+						description: 'Specify the duration of the loan',
+						required: true
+					},
+					{
+						type: ApplicationCommandOptionType.String,
+						name: 'message',
+						description: 'Specify a message'
+					}
+				]
+			}
+		]
+	},
+	{
+		name: 'pay',
+		description: 'Transfer funds to another user',
+		module: 'ECONOMY',
+		format: 'pay <user> <amount>',
+		examples: ['pay @user 100', 'pay @user all'],
+		options: [
+			{
+				type: ApplicationCommandOptionType.User,
+				name: 'user',
+				description: 'Specify a user',
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'amount',
+				description: 'Specify an amount',
+				required: true
+			}
+		]
+	},
+	{
+		name: 'set-balance',
+		description: 'Set a balance',
+		module: 'ECONOMY',
+		format: 'set-balance <user> <amount> <balance>',
+		examples: [
+			'set-balance @user 300 wallet',
+			'set-balance @user 100 treasury'
+		],
+		default_member_permissions: PermissionFlagsBits.ManageGuild.toString(),
+		options: [
+			{
+				type: ApplicationCommandOptionType.User,
+				name: 'target',
+				description: 'Specify a user',
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'amount',
+				description: 'Specify an amount',
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'balance',
+				description: 'Specify the balance',
+				required: true,
+				choices: [
+					{ name: 'Wallet', value: 'wallet' },
+					{ name: 'Treasury', value: 'treasury' }
+				]
+			}
+		]
+	},
+	{
+		name: 'transaction-log',
+		description: 'Manage the transaction logging channel',
+		module: 'ECONOMY',
+		format: 'transaction-log <view | set | reset> [channel]',
+		examples: [
+			'transaction-log view',
+			'transaction-log set #transactions',
+			'transaction-log reset'
+		],
+		default_member_permissions: PermissionFlagsBits.ManageGuild.toString(),
+		options: [
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'view',
+				description: 'View the transaction log channel'
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'set',
+				description: 'Set the transaction log channel',
+				options: [
+					{
+						type: ApplicationCommandOptionType.Channel,
+						name: 'channel',
+						description: 'Specify a channel',
+						channel_types: [ChannelType.GuildText],
+						required: true
+					}
+				]
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'reset',
+				description: 'Reset the transaction log channel'
+			}
+		]
+	},
+	{
+		name: 'withdraw',
+		description: 'Transfer funds from your treasury to your wallet',
+		module: 'ECONOMY',
+		format: 'withdraw <amount>',
+		examples: ['withdraw 1.5k', 'withdraw all'],
+		options: [
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'amount',
+				description: 'Specify an amount',
+				required: true
+			}
+		]
+	},
+	{
+		name: 'ban',
+		description: 'Ban a member',
+		module: 'MODERATION',
+		format: 'ban <member> [duration] [reason] [days]',
+		examples: [
+			'ban @user',
+			'ban @user 3h',
+			'ban @user spamming',
+			'ban @user 3h spamming'
+		],
+		default_member_permissions: PermissionFlagsBits.BanMembers.toString(),
+		options: [
+			{
+				type: ApplicationCommandOptionType.User,
+				name: 'target',
+				description: 'Specify a target',
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'duration',
+				description: 'Specify a duration'
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'reason',
+				description: 'Specify a reason'
+			},
+			{
+				type: ApplicationCommandOptionType.Integer,
+				name: 'days',
+				description: 'Specify the number of days of messages to delete',
+				min_value: 0,
+				max_value: 7
+			}
+		]
+	},
+	{
+		name: 'infraction-log',
+		description: 'Manage the infraction logging channel',
+		module: 'MODERATION',
+		format: 'infraction-log <view | set | reset> [channel]',
+		examples: [
+			'infraction-log view',
+			'infraction-log set #infraction-logs',
+			'infraction-log reset'
+		],
+		default_member_permissions: PermissionFlagsBits.ManageGuild.toString(),
+		options: [
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'view',
+				description: 'View the infraction log channel'
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'set',
+				description: 'Set the infraction log channel',
+				options: [
+					{
+						type: ApplicationCommandOptionType.Channel,
+						name: 'channel',
+						description: 'Specify a channel',
+						channel_types: [ChannelType.GuildText],
+						required: true
+					}
+				]
+			},
+			{
+				type: ApplicationCommandOptionType.Subcommand,
+				name: 'reset',
+				description: 'Reset the infraction log channel'
+			}
+		]
+	},
+	{
+		name: 'kick',
+		description: 'Give a member the boot',
+		module: 'MODERATION',
+		format: 'kick <target> [reason]',
+		examples: ['kick @user', 'kick @user harrassment'],
+		default_member_permissions: PermissionFlagsBits.KickMembers.toString(),
+		options: [
+			{
+				type: ApplicationCommandOptionType.User,
+				name: 'target',
+				description: 'Specify a target',
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'reason',
+				description: 'Specify a reason'
+			}
+		]
+	},
+	{
+		name: 'timeout',
+		description: 'Send a member to the quiet corner',
+		module: 'MODERATION',
+		format: 'timeout <member> [duration] [reason]',
+		examples: [
+			'timeout @user',
+			'timeout @user 3h',
+			'timeout @user spamming',
+			'timeout @user 3h spamming'
+		],
+		default_member_permissions: PermissionFlagsBits.ModerateMembers.toString(),
+		options: [
+			{
+				type: ApplicationCommandOptionType.User,
+				name: 'target',
+				description: 'Specify a target',
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'duration',
+				description: 'Specify a duration',
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'reason',
+				description: 'Specify a reason'
+			}
+		]
+	},
+	{
+		name: 'unban',
+		description: 'Unban a user',
+		module: 'MODERATION',
+		format: 'unban <user> [reason]',
+		examples: ['unban @user', 'unban 796906750569611294 forgiveness'],
+		default_member_permissions: PermissionFlagsBits.BanMembers.toString(),
+		options: [
+			{
+				type: ApplicationCommandOptionType.User,
+				name: 'target',
+				description: 'Specify a target',
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'reason',
+				description: 'Specify a reason'
+			}
+		]
+	},
+	{
+		name: 'untimeout',
+		description: 'Untimeout a member',
+		module: 'MODERATION',
+		format: 'untimeout <member> [reason]',
+		examples: ['untimeout @user', 'untimeout 796906750569611294 forgiveness'],
+		default_member_permissions: PermissionFlagsBits.ModerateMembers.toString(),
+		options: [
+			{
+				type: ApplicationCommandOptionType.User,
+				name: 'target',
+				description: 'Specify a target',
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'reason',
+				description: 'Specify a reason'
+			}
+		]
+	},
+	{
+		name: 'create-item',
+		description: 'Create a market listing',
+		module: 'SHOP',
+		format: 'create-item',
+		examples: ['create-item'],
+		default_member_permissions: PermissionFlagsBits.ManageGuild.toString(),
+		options: [
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'name',
+				description: 'Specify the item name',
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'price',
+				description: 'Specify the price',
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'type',
+				description: 'Specify the type',
+				choices: Object.values(ListingType).map((listing) => ({
+					name: listing,
+					value: listing
+				})),
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.Boolean,
+				name: 'active',
+				description: 'Whether or not this listing is active in the market',
+				required: true
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'treasury_required',
+				description:
+					'Specify the treasury balance required to purchase this listing'
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'description',
+				description: 'Enter a description for this listing'
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'duration',
+				description: 'Specify the time that this listing stays on the shop'
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'stock',
+				description:
+					'Specify the number of items that may be sold from this listing'
+			},
+			{
+				type: ApplicationCommandOptionType.Boolean,
+				name: 'stackable',
+				description: 'Whether or not a user may have more than a single item'
+			},
+			{
+				type: ApplicationCommandOptionType.Boolean,
+				name: 'tradeable',
+				description: 'Whether or not a user may trade this item'
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'items_required',
+				description: 'Items required to purchase this listing'
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'roles_required',
+				description: 'Roles required to purchase this listing'
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'roles_granted',
+				description: 'Roles granted when purchasing this listing'
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'roles_removed',
+				description: 'Roles removed when purchasing this listing'
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'generator_period',
+				description: 'If a generator, duration between generating money'
+			},
+			{
+				type: ApplicationCommandOptionType.String,
+				name: 'generator_amount',
+				description:
+					'If a generator, the amount of money generated at each period'
+			}
+		]
+	},
+	{
+		name: 'shop',
+		description: 'Interact with the server shop',
+		module: 'SHOP',
+		format: 'shop',
+		examples: ['shop']
+	},
+	{
+		name: 'inventory',
+		description: 'View items that you own',
+		module: 'SHOP',
+		format: 'inventory [user] [page]',
+		examples: [
+			'inventory',
+			'inventory @user',
+			'inventory @user 2',
+			'inventory 3'
+		],
+		options: [
+			{
+				type: ApplicationCommandOptionType.User,
+				name: 'user',
+				description: 'Specify a user'
+			},
+			{
+				type: ApplicationCommandOptionType.Integer,
+				name: 'page',
+				description: 'Specify the page'
+			}
+		]
+	},
+	{
+		name: 'collect',
+		description: 'Collect all money from generators',
+		module: 'SHOP',
+		format: 'collect',
+		examples: ['collect']
 	}
-];
+] satisfies (RESTPostAPIChatInputApplicationCommandsJSONBody & {
+	module: ModuleString;
+	format: string;
+	examples: string[];
+})[];
