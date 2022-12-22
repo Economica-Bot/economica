@@ -1,17 +1,17 @@
+import { datasource, Guild, Member } from '@economica/db';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	EmbedBuilder
 } from 'discord.js';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const Leaderboard = {
 	identifier: /^leaderboard$/,
 	type: 'chatInput',
 	execute: async (interaction) =>
-		LeaderboardPage.execute(interaction, undefined as any)
+		LeaderboardPage.execute(interaction, undefined as never)
 } satisfies Command<'chatInput'>;
 
 export const LeaderboardPage = {
@@ -25,13 +25,18 @@ export const LeaderboardPage = {
 
 		const limit = 5;
 
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
-		});
-		const members = await trpc.member.list.query({
-			guildId: interaction.guildId,
-			page,
-			limit
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
+		const members = await datasource.getRepository(Member).find({
+			where: {
+				guildId: interaction.guildId
+			},
+			skip: (page - 1) * limit,
+			take: limit,
+			order: {
+				wallet: 'ASC'
+			}
 		});
 		const description = members
 			.map(

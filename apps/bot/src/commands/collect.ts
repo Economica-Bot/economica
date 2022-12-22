@@ -22,10 +22,12 @@ export const Collect = {
 		generators.forEach(async (generator) => {
 			if (
 				Date.now() <
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				generator.listing.generatorPeriod! +
 					(generator.lastGeneratedAt?.getTime() ?? 0)
 			)
 				return;
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			amount += generator.listing.generatorAmount!;
 			await datasource
 				.getRepository(Item)
@@ -53,9 +55,11 @@ export const Collect = {
 						`**${generator.listing.name}** - ${
 							guildEntity.currency
 						} \`${parseNumber(
+							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							generator.listing.generatorAmount!
 						)}\` | **Ready:** <t:${Math.trunc(
 							(generator.lastGeneratedAt.getTime() +
+								// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 								generator.listing.generatorPeriod!) /
 								1000
 						)}:R>`

@@ -1,15 +1,15 @@
 import { Emojis, IncomeCommand, IncomeString } from '@economica/common';
+import { datasource, Guild } from '@economica/db';
 import {
 	ActionRowBuilder,
 	EmbedBuilder,
 	ModalBuilder,
-	SelectMenuBuilder,
+	StringSelectMenuBuilder,
 	TextInputBuilder,
 	TextInputStyle
 } from 'discord.js';
 import { z } from 'zod';
 import zodError from 'zod-validation-error';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const Income = {
@@ -17,9 +17,9 @@ export const Income = {
 	type: 'chatInput',
 	execute: async (interaction) => {
 		const subcommand = interaction.options.getSubcommand();
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
-		});
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
 		if (subcommand === 'view') {
 			const embed = new EmbedBuilder().setTitle('Income command information');
 			Object.entries(guildEntity.incomes).forEach((income) => {
@@ -40,7 +40,7 @@ export const Income = {
 			const embed = new EmbedBuilder()
 				.setTitle('Edit')
 				.setDescription('Editing income command configurations');
-			const select = new SelectMenuBuilder().setCustomId(
+			const select = new StringSelectMenuBuilder().setCustomId(
 				`income_edit_select:${interaction.user.id}`
 			);
 			Object.keys(guildEntity.incomes).forEach((command) => {
@@ -52,7 +52,7 @@ export const Income = {
 					{ label: command, value: `income_edit_${command}` }
 				]);
 			});
-			const row = new ActionRowBuilder<SelectMenuBuilder>().setComponents(
+			const row = new ActionRowBuilder<StringSelectMenuBuilder>().setComponents(
 				select
 			);
 			await interaction.reply({ embeds: [embed], components: [row] });
@@ -67,9 +67,9 @@ export const IncomeEdit = {
 		const command = /^income_edit_(.*)$/
 			.exec(interaction.values[0])
 			?.at(1) as IncomeString;
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
-		});
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
 		const modal = new ModalBuilder()
 			.setCustomId(`income_result_${command}`)
 			.setTitle(`Edit ${command}`)
@@ -121,9 +121,9 @@ export const IncomeSubmit = {
 		const command = /^income_result_(.*)$/
 			.exec(interaction.customId)
 			?.at(1) as IncomeString;
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
-		});
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
 		const embed = new EmbedBuilder().setTitle(
 			`Income Command Updated: ${command}`
 		);
@@ -152,7 +152,7 @@ export const IncomeSubmit = {
 				})
 		);
 
-		await trpc.guild.update.mutate(guildEntity);
+		await datasource.getRepository(Guild).save(guildEntity);
 		await interaction.reply({ embeds: [embed] });
 	}
 } satisfies Command<'modal'>;

@@ -1,9 +1,9 @@
+import { datasource, Member, User } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import ms from 'ms';
 
 import { recordInfraction } from '../lib';
 import { validateTarget } from '../lib/moderation';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const Timeout = {
@@ -15,11 +15,10 @@ export const Timeout = {
 		const targetMember = await interaction.guild.members.fetch({
 			user: target
 		});
-		await trpc.user.create.mutate({ id: target.id });
-		await trpc.member.create.mutate({
-			userId: target.id,
-			guildId: interaction.guildId
-		});
+		await datasource.getRepository(User).save({ id: target.id });
+		await datasource
+			.getRepository(Member)
+			.save({ userId: target.id, guildId: interaction.guildId });
 		const durationInput = interaction.options.getString('duration', true);
 		const duration = ms(durationInput);
 		if (duration > 1000 * 60 * 60 * 24 * 28)

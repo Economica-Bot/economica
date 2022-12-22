@@ -1,13 +1,13 @@
-import { trpc } from '../lib/trpc';
+import { datasource, Guild } from '@economica/db';
 import { Command } from '../structures/commands';
 
 export const InfractionLog = {
 	identifier: /^infraction-log$/,
 	type: 'chatInput',
 	execute: async (interaction) => {
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
-		});
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
 		const subcommand = interaction.options.getSubcommand();
 		if (subcommand === 'view') {
 			const channelId = guildEntity.infractionLogId;
@@ -27,17 +27,15 @@ export const InfractionLog = {
 				throw new Error(
 					'I need `SEND_MESSAGES` and `EMBED_LINKS` in that channel.'
 				);
-			await trpc.guild.update.mutate({
-				id: interaction.guildId,
-				infractionLogId: channel.id
-			});
+			await datasource
+				.getRepository(Guild)
+				.update({ id: interaction.guildId }, { infractionLogId: channel.id });
 			await interaction.reply(`Infraction log set to ${channel}.`);
 		}
 		if (subcommand === 'reset') {
-			await trpc.guild.update.mutate({
-				id: interaction.guildId,
-				infractionLogId: null
-			});
+			await datasource
+				.getRepository(Guild)
+				.update({ id: interaction.guildId }, { infractionLogId: null });
 			await interaction.reply('Infraction log reset.');
 		}
 	}

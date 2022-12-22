@@ -1,11 +1,11 @@
 import { recordTransaction } from '../lib';
 import cron from 'node-cron';
 import { LoanStatus } from '@economica/common';
-import { trpc } from '../lib/trpc';
+import { datasource, Loan } from '@economica/db';
 
 export const LoanJob = cron.schedule('* * * * *', async () => {
 	console.info('updating active loans');
-	const loans = await trpc.loan.getActive.query();
+	const loans = await datasource.getRepository(Loan).find();
 	loans
 		.filter((loan) => loan.createdAt.getTime() + loan.duration < Date.now())
 		.forEach(async (loan) => {
@@ -18,10 +18,14 @@ export const LoanJob = cron.schedule('* * * * *', async () => {
 				0,
 				repayment
 			);
-			await trpc.loan.update.mutate({
-				id: loan.id,
-				status: LoanStatus.COMPLETE,
-				completedAt: new Date()
-			});
+			await datasource.getRepository(Loan).update(
+				{
+					id: loan.id
+				},
+				{
+					status: LoanStatus.COMPLETE,
+					completedAt: new Date()
+				}
+			);
 		});
 });

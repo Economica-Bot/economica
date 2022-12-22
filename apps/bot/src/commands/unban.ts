@@ -1,8 +1,8 @@
 import { Emojis } from '@economica/common';
+import { datasource, Infraction } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 
 import { validateTarget } from '../lib/moderation';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const Unban = {
@@ -16,12 +16,14 @@ export const Unban = {
 		const reason =
 			interaction.options.getString('reason') ?? 'No reason provided';
 		await interaction.guild.members.unban(target, reason);
-		const infraction = await trpc.infraction.find.query({
+		const infraction = await datasource.getRepository(Infraction).findOneBy({
 			target: { userId: target.id, guildId: interaction.guildId },
 			type: 'BAN'
 		});
 		if (infraction) {
-			await trpc.infraction.update.mutate({ id: infraction.id, active: false });
+			await datasource
+				.getRepository(Infraction)
+				.update({ id: infraction.id }, { active: false });
 		}
 		const embed = new EmbedBuilder()
 			.setTitle('Unbanning...')

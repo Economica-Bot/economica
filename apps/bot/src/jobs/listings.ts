@@ -1,16 +1,17 @@
+import { datasource, Listing } from '@economica/db';
 import cron from 'node-cron';
-import { trpc } from '../lib/trpc';
 
 export const ListingsJob = cron.schedule('* * * * *', async () => {
 	console.info('updating active listings');
-	const listings = await trpc.listing.getActive.query();
-	listings
+	const listings = await datasource.getRepository(Listing).find();
+	const expiredListings = listings
 		.filter(
 			(listing) =>
 				listing.duration &&
 				listing.createdAt.getTime() + listing.duration < Date.now()
 		)
-		.forEach(async (listing) => {
-			await trpc.listing.update.mutate({ id: listing.id, active: false });
-		});
+		.map((listing) => listing.id);
+	await datasource
+		.getRepository(Listing)
+		.update(expiredListings, { active: false });
 });

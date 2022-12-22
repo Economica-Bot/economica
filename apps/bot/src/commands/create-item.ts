@@ -1,7 +1,7 @@
 import { Emojis, ListingType } from '@economica/common';
-import { EmbedBuilder, FormattingPatterns, MessageMentions } from 'discord.js';
+import { datasource, Listing } from '@economica/db';
+import { EmbedBuilder, MessageMentions } from 'discord.js';
 import { z } from 'zod';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 const validator = z
@@ -34,7 +34,9 @@ const validator = z
 			.superRefine(async (val, ctx) => {
 				if (!val) return;
 				for await (const listingId of val.split(',')) {
-					const listing = await trpc.listing.byId.query({ id: listingId });
+					const listing = await datasource
+						.getRepository(Listing)
+						.findOneBy({ id: listingId });
 					if (!listing) {
 						ctx.addIssue({
 							code: z.ZodIssueCode.custom,
@@ -63,11 +65,10 @@ const validator = z
 			})
 			.transform((roles) =>
 				roles?.length
-					? roles
-							.split(',')
-							.map(
-								(role) => MessageMentions.RolesPattern.exec(role)!.groups!.id
-							)
+					? roles.split(',').map(
+							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+							(role) => MessageMentions.RolesPattern.exec(role)!.groups!.id
+					  )
 					: []
 			),
 		rolesGranted: z
@@ -87,11 +88,10 @@ const validator = z
 			})
 			.transform((roles) =>
 				roles?.length
-					? roles
-							.split(',')
-							.map(
-								(role) => MessageMentions.RolesPattern.exec(role)!.groups!.id
-							)
+					? roles.split(',').map(
+							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+							(role) => MessageMentions.RolesPattern.exec(role)!.groups!.id
+					  )
 					: []
 			),
 		rolesRemoved: z
@@ -111,11 +111,10 @@ const validator = z
 			})
 			.transform((roles) =>
 				roles?.length
-					? roles
-							.split(',')
-							.map(
-								(role) => MessageMentions.RolesPattern.exec(role)!.groups!.id
-							)
+					? roles.split(',').map(
+							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+							(role) => MessageMentions.RolesPattern.exec(role)!.groups!.id
+					  )
 					: []
 			),
 		generatorPeriod: z.preprocess(
@@ -185,9 +184,9 @@ export const CreateItem = {
 			generatorAmount
 		});
 
-		await trpc.listing.create.mutate({
-			...result,
-			guild: { id: interaction.guildId }
+		await datasource.getRepository(Listing).save({
+			guild: { id: interaction.guildId },
+			...result
 		});
 
 		const embed = new EmbedBuilder()

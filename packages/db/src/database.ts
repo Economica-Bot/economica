@@ -5,11 +5,9 @@ import { env } from './env.mjs';
 
 export const datasource = await new DataSource({
 	type: 'postgres',
-	host: env.DB_HOST,
-	port: env.DB_PORT,
-	username: env.DB_USERNAME,
-	password: env.DB_PASSWORD,
+	url: env.DB_URL,
 	entities: Object.values(entityFiles),
-	synchronize: true,
+	synchronize: env.DB_OPTION === 'sync',
+	dropSchema: env.DB_OPTION === 'drop',
 	useUTC: true
 }).initialize();

@@ -1,5 +1,12 @@
 import { Emojis, LoanStatus } from '@economica/common';
 import {
+	datasource,
+	Guild,
+	Loan as LoanEntity,
+	Member,
+	User
+} from '@economica/db';
+import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
@@ -11,53 +18,66 @@ import {
 import ms from 'ms';
 import { recordTransaction } from '../lib';
 import { parseNumber, parseString } from '../lib/economy';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const Loan = {
 	identifier: /^loan$/,
 	type: 'chatInput',
 	execute: async (interaction) => {
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
-		});
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
 		const subcommand = interaction.options.getSubcommand();
 		if (subcommand === 'manage') {
-			const outgoingPendingLoanCount = await trpc.loan.count.query({
-				guild: { id: interaction.guildId },
-				lender: { user: { id: interaction.user.id } },
-				status: LoanStatus.PENDING
-			});
-			const incomingPendingLoanCount = await trpc.loan.count.query({
-				guild: { id: interaction.guildId },
-				borrower: { user: { id: interaction.user.id } },
-				status: LoanStatus.PENDING
-			});
-			const outgoingActiveLoanCount = await trpc.loan.count.query({
-				guild: { id: interaction.guildId },
-				lender: { user: { id: interaction.user.id } },
-				status: LoanStatus.ACTIVE
-			});
-			const incomingActiveLoanCount = await trpc.loan.count.query({
-				guild: { id: interaction.guildId },
-				borrower: { user: { id: interaction.user.id } },
-				status: LoanStatus.ACTIVE
-			});
-			const outgoingCompleteLoanCount = await trpc.loan.count.query({
-				guild: { id: interaction.guildId },
-				lender: { user: { id: interaction.user.id } },
-				status: LoanStatus.COMPLETE
-			});
-			const incomingCompleteLoanCount = await trpc.loan.count.query({
-				guild: { id: interaction.guildId },
-				borrower: { user: { id: interaction.user.id } },
-				status: LoanStatus.COMPLETE
-			});
+			const outgoingPendingLoanCount = await datasource
+				.getRepository(LoanEntity)
+				.findBy({
+					guild: { id: interaction.guildId },
+					lender: { user: { id: interaction.user.id } },
+					status: LoanStatus.PENDING
+				});
+			const incomingPendingLoanCount = await datasource
+				.getRepository(LoanEntity)
+				.findBy({
+					guild: { id: interaction.guildId },
+					borrower: { user: { id: interaction.user.id } },
+					status: LoanStatus.PENDING
+				});
+			const outgoingActiveLoanCount = await datasource
+				.getRepository(LoanEntity)
+				.findBy({
+					guild: { id: interaction.guildId },
+					lender: { user: { id: interaction.user.id } },
+					status: LoanStatus.ACTIVE
+				});
+			const incomingActiveLoanCount = await datasource
+				.getRepository(LoanEntity)
+				.findBy({
+					guild: { id: interaction.guildId },
+					borrower: { user: { id: interaction.user.id } },
+					status: LoanStatus.ACTIVE
+				});
+			const outgoingCompleteLoanCount = await datasource
+				.getRepository(LoanEntity)
+				.findBy({
+					guild: { id: interaction.guildId },
+					lender: { user: { id: interaction.user.id } },
+					status: LoanStatus.COMPLETE
+				});
+			const incomingCompleteLoanCount = await datasource
+				.getRepository(LoanEntity)
+				.findBy({
+					guild: { id: interaction.guildId },
+					borrower: { user: { id: interaction.user.id } },
+					status: LoanStatus.COMPLETE
+				});
 
 			const loansEmbed = new EmbedBuilder()
 				.setAuthor({
 					name: 'Loan Management Menu',
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					iconURL: interaction.client.emojis.resolve(
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						parseEmoji(Emojis.DEED)!.id!
 					)!.url
 				})
@@ -134,10 +154,12 @@ export const Loan = {
 			const duration = interaction.options.getString('duration', true);
 			const message = interaction.options.getString('message') ?? 'No Message';
 
-			const memberEntity = await trpc.member.byId.query({
-				userId: interaction.user.id,
-				guildId: interaction.guildId
-			});
+			const memberEntity = await datasource
+				.getRepository(Member)
+				.findOneByOrFail({
+					userId: interaction.user.id,
+					guildId: interaction.guildId
+				});
 
 			// Validate parameters
 			if (borrower.id === interaction.client.user.id)
@@ -157,13 +179,12 @@ export const Loan = {
 				throw new Error(`Could not parse duration \`${duration}\`.`);
 
 			// Create borrower if not exist
-			await trpc.user.create.mutate({ id: borrower.id });
-			await trpc.member.create.mutate({
+			await datasource.getRepository(User).save({ id: borrower.id });
+			await datasource.getRepository(Member).save({
 				userId: borrower.id,
 				guildId: interaction.guildId
 			});
-
-			const loan = await trpc.loan.create.mutate({
+			const loan = await datasource.getRepository(LoanEntity).save({
 				guild: { id: interaction.guildId },
 				lender: { userId: interaction.user.id, guildId: interaction.guildId },
 				borrower: { userId: borrower.id, guildId: interaction.guildId },
@@ -241,7 +262,9 @@ export const LoanCancel = {
 	identifier: /^loan_cancel:(?<userId>(.*)):(?<loanId>(.*))$/,
 	type: 'button',
 	execute: async (interaction, args) => {
-		const loan = await trpc.loan.delete.mutate({ id: args.groups.loanId });
+		const loan = await datasource
+			.getRepository(LoanEntity)
+			.findOneByOrFail({ id: args.groups.loanId });
 		await recordTransaction(
 			interaction.guildId,
 			interaction.user.id,
@@ -250,6 +273,7 @@ export const LoanCancel = {
 			0,
 			loan.principal
 		);
+		await datasource.getRepository(LoanEntity).remove(loan);
 		const embed = new EmbedBuilder().setDescription(
 			`${Emojis.CROSS} **Loan Proposal Cancelled**`
 		);
@@ -261,10 +285,12 @@ export const LoanCreate = {
 	identifier: /^loan_create:(?<userId>(.*)):(?<loanId>(.*))$/,
 	type: 'button',
 	execute: async (interaction, args) => {
-		await trpc.loan.update.mutate({
-			id: args.groups.loanId,
-			status: LoanStatus.PENDING
-		});
+		await datasource.getRepository(LoanEntity).update(
+			{
+				id: args.groups.loanId
+			},
+			{ status: LoanStatus.PENDING }
+		);
 		const embed = new EmbedBuilder().setDescription(
 			`${Emojis.DEED} **Loan Proposal Created**`
 		);
@@ -276,9 +302,8 @@ export const LoanAccept = {
 	identifier: /^loan_accept:(?<userId>(.*)):(?<loanId>(.*))$/,
 	type: 'button',
 	execute: async (interaction, args) => {
-		const loan = await trpc.loan.update.mutate({
-			id: args.groups.loanId,
-			status: LoanStatus.ACTIVE
+		const loan = await datasource.getRepository(LoanEntity).findOneByOrFail({
+			id: args.groups.loanId
 		});
 		await recordTransaction(
 			interaction.guildId,
@@ -287,6 +312,14 @@ export const LoanAccept = {
 			'LOAN_ACCEPT',
 			loan.principal,
 			0
+		);
+		await datasource.getRepository(LoanEntity).update(
+			{
+				id: args.groups.loanId
+			},
+			{
+				status: LoanStatus.ACTIVE
+			}
 		);
 		const embed = new EmbedBuilder().setDescription(
 			`${Emojis.CHECK} **Loan Accepted**`
@@ -303,13 +336,15 @@ export const LoanViewType = {
 		const page = +args.groups.page;
 
 		const limit = 4;
-		const loans = await trpc.loan.list.query({
-			page,
-			limit,
-			guild: { id: interaction.guildId },
-			lender: { user: { id: interaction.user.id } },
-			borrower: { user: { id: interaction.user.id } },
-			status
+		const loans = await datasource.getRepository(LoanEntity).find({
+			take: limit,
+			skip: (page - 1) * limit,
+			where: {
+				guild: { id: interaction.guildId },
+				lender: { user: { id: interaction.user.id } },
+				borrower: { user: { id: interaction.user.id } },
+				status
+			}
 		});
 
 		const embed = new EmbedBuilder()
@@ -356,7 +391,9 @@ export const LoanViewSingle = {
 	identifier: /^loan_view_single_(?<loanId>(.*))$/,
 	type: 'selectMenu',
 	execute: async (interaction, args) => {
-		const loan = await trpc.loan.byId.query({ id: args.groups.loanId });
+		const loan = await datasource
+			.getRepository(LoanEntity)
+			.findOneByOrFail({ id: args.groups.loanId });
 		const embed = new EmbedBuilder()
 			.setTitle(`Loan ${loan.id}`)
 			.setDescription(

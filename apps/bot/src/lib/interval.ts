@@ -1,7 +1,7 @@
 import { IntervalString, TransactionString } from '@economica/common';
+import { datasource, Guild } from '@economica/db';
 import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { recordTransaction } from './transaction';
-import { trpc } from './trpc.js';
 
 const intervals: Record<IntervalString, TransactionString> = {
 	minutely: 'INTERVAL_MINUTE',
@@ -16,7 +16,9 @@ export async function interval(
 	interaction: ChatInputCommandInteraction<'cached'>,
 	type: keyof typeof intervals
 ): Promise<void> {
-	const guildEntity = await trpc.guild.byId.query({ id: interaction.guildId });
+	const guildEntity = await datasource
+		.getRepository(Guild)
+		.findOneByOrFail({ id: interaction.guildId });
 	if (!guildEntity.intervals[type].enabled)
 		throw new Error('This interval command is disabled.');
 	const { amount } = guildEntity.intervals[type];

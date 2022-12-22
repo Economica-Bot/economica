@@ -1,8 +1,8 @@
 import { InfractionString } from '@economica/common';
+import { datasource, Guild, Infraction } from '@economica/db';
 import { EmbedBuilder, resolveColor } from 'discord.js';
 import ms from 'ms';
 import { client } from '..';
-import { trpc } from './trpc';
 
 export const recordInfraction = async (
 	guildId: string,
@@ -13,8 +13,10 @@ export const recordInfraction = async (
 	duration?: number,
 	active?: boolean
 ) => {
-	const guildEntity = await trpc.guild.byId.query({ id: guildId });
-	const infraction = await trpc.infraction.create.mutate({
+	const guildEntity = await datasource
+		.getRepository(Guild)
+		.findOneByOrFail({ id: guildId });
+	const infraction = await datasource.getRepository(Infraction).save({
 		guild: { id: guildId },
 		target: { userId: targetId, guildId },
 		agent: { userId: agentId, guildId },

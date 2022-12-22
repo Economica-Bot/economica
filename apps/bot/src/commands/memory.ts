@@ -15,6 +15,7 @@ export const Memory = {
 			'**arrayBuffers**: Memory allocated for `ArrayBuffer`s and `SharedArrayBuffer`s.';
 		const embed = new EmbedBuilder().setDescription(description).setAuthor({
 			name: 'Bot Memory Levels',
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			iconURL: interaction.client.emojis.resolve(parseEmoji(Emojis.RAM)!.id!)!
 				.url
 		});

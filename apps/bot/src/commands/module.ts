@@ -1,6 +1,6 @@
 import { CommandData, ModuleString } from '@economica/common';
+import { datasource, Guild, User } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const Module = {
@@ -9,9 +9,9 @@ export const Module = {
 	execute: async (interaction) => {
 		const subcommand = interaction.options.getSubcommand();
 		if (subcommand === 'view') {
-			const guildEntity = await trpc.guild.byId.query({
-				id: interaction.guildId
-			});
+			const guildEntity = await datasource
+				.getRepository(Guild)
+				.findOneByOrFail({ id: interaction.guildId });
 			const description = `**View ${interaction.guild}'s Modules!**`;
 			const embed = new EmbedBuilder()
 				.setAuthor({
@@ -52,12 +52,12 @@ export const Module = {
 				'module',
 				true
 			) as ModuleString;
-			const userEntity = await trpc.user.byId.query({
-				id: interaction.user.id
-			});
-			const guildEntity = await trpc.guild.byId.query({
-				id: interaction.guildId
-			});
+			const userEntity = await datasource
+				.getRepository(User)
+				.findOneByOrFail({ id: interaction.user.id });
+			const guildEntity = await datasource
+				.getRepository(Guild)
+				.findOneByOrFail({ id: interaction.guildId });
 			if (userEntity.keys < 1) {
 				throw new Error('You do not have any keys.');
 			} else if (guildEntity.modules[moduleName].enabled) {
@@ -66,10 +66,12 @@ export const Module = {
 				);
 			} else {
 				userEntity.keys -= 1;
-				await trpc.user.update.mutate(userEntity);
+				await datasource.getRepository(User).save(userEntity);
 				guildEntity.modules[moduleName].enabled = true;
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				//@ts-ignore
 				guildEntity.modules[moduleName].user = userEntity.id;
-				await trpc.guild.update.mutate(guildEntity);
+				await datasource.getRepository(Guild).save(guildEntity);
 				await Promise.all(
 					CommandData.filter((command) => command.module === moduleName).map(
 						async (command) => {
@@ -87,20 +89,20 @@ export const Module = {
 				'module',
 				true
 			) as ModuleString;
-			const userEntity = await trpc.user.byId.query({
-				id: interaction.user.id
-			});
-			const guildEntity = await trpc.guild.byId.query({
-				id: interaction.guildId
-			});
+			const userEntity = await datasource
+				.getRepository(User)
+				.findOneByOrFail({ id: interaction.user.id });
+			const guildEntity = await datasource
+				.getRepository(Guild)
+				.findOneByOrFail({ id: interaction.guildId });
 			if (guildEntity.modules[moduleName].user !== userEntity.id) {
 				throw new Error('You have not enabled this module in this server.');
 			} else {
 				userEntity.keys += 1;
-				await trpc.user.update.mutate(userEntity);
+				await datasource.getRepository(User).save(userEntity);
 				guildEntity.modules[moduleName].enabled = false;
 				guildEntity.modules[moduleName].user = null;
-				await trpc.guild.update.mutate(guildEntity);
+				await datasource.getRepository(Guild).save(guildEntity);
 				const applicationCommands = await interaction.guild.commands.fetch();
 				CommandData.filter((command) => command.module === moduleName).forEach(
 					async (command) => {

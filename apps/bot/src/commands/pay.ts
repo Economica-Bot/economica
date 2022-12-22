@@ -1,7 +1,7 @@
+import { datasource, Guild, Member, User } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import { recordTransaction } from '../lib';
 import { parseNumber, validateAmount } from '../lib/economy';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const Pay = {
@@ -9,18 +9,19 @@ export const Pay = {
 	type: 'chatInput',
 	execute: async (interaction) => {
 		const target = interaction.options.getUser('user', true);
-		await trpc.user.create.mutate({ id: target.id });
-		await trpc.member.create.mutate({
-			userId: target.id,
-			guildId: interaction.guildId
-		});
-		const memberEntity = await trpc.member.byId.query({
-			userId: interaction.user.id,
-			guildId: interaction.guildId
-		});
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
-		});
+		await datasource.getRepository(User).save({ id: target.id });
+		await datasource
+			.getRepository(Member)
+			.save({ userId: target.id, guildId: interaction.guildId });
+		const memberEntity = await datasource
+			.getRepository(Member)
+			.findOneByOrFail({
+				userId: interaction.user.id,
+				guildId: interaction.guildId
+			});
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
 		const amount = interaction.options.getString('amount', true);
 		const result = validateAmount(memberEntity.wallet, amount, 'wallet');
 		await recordTransaction(

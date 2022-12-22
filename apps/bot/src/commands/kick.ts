@@ -1,9 +1,9 @@
 import { Emojis } from '@economica/common';
+import { datasource, Member, User } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 
 import { recordInfraction } from '../lib';
 import { validateTarget } from '../lib/moderation';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const Kick = {
@@ -15,11 +15,10 @@ export const Kick = {
 		const targetMember = await interaction.guild.members.fetch({
 			user: target
 		});
-		await trpc.user.create.mutate({ id: target.id });
-		await trpc.member.create.mutate({
-			userId: target.id,
-			guildId: interaction.guildId
-		});
+		await datasource.getRepository(User).save({ id: target.id });
+		await datasource
+			.getRepository(Member)
+			.save({ userId: target.id, guildId: interaction.guildId });
 		const reason =
 			interaction.options.getString('reason') ?? 'No reason provided';
 		await targetMember.kick(reason);

@@ -1,5 +1,5 @@
 import { DefaultCurrencySymbol } from '@economica/common';
-import { trpc } from '../lib/trpc';
+import { datasource, Guild } from '@economica/db';
 import { Command } from '../structures/commands';
 
 export const Currency = {
@@ -7,9 +7,9 @@ export const Currency = {
 	type: 'chatInput',
 	execute: async (interaction) => {
 		const subcommand = interaction.options.getSubcommand();
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
-		});
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
 		if (subcommand === 'view') {
 			await interaction.reply({
 				embeds: [
@@ -21,7 +21,7 @@ export const Currency = {
 			});
 		} else if (subcommand === 'set') {
 			const newCurrency = interaction.options.getString('currency', true);
-			await trpc.guild.update.mutate({
+			await datasource.getRepository(Guild).save({
 				id: interaction.guildId,
 				currency: newCurrency
 			});
@@ -34,7 +34,7 @@ export const Currency = {
 				]
 			});
 		} else if (subcommand === 'reset') {
-			await trpc.guild.update.mutate({
+			await datasource.getRepository(Guild).save({
 				id: interaction.guildId,
 				currency: DefaultCurrencySymbol
 			});

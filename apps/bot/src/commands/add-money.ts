@@ -1,7 +1,7 @@
+import { datasource, Guild, Member, User } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import { recordTransaction } from '../lib';
 import { parseNumber, parseString } from '../lib/economy';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const AddMoney = {
@@ -15,12 +15,12 @@ export const AddMoney = {
 		const wallet = balance === 'wallet' ? parsedAmount : 0;
 		const treasury = balance === 'treasury' ? parsedAmount : 0;
 		const target = interaction.options.getUser('target', true);
-		await trpc.user.create.mutate({ id: target.id });
-		await trpc.member.create.mutate({
+		await datasource.getRepository(User).save({ id: target.id });
+		await datasource.getRepository(Member).save({
 			userId: target.id,
 			guildId: interaction.guildId
 		});
-		const guildEntity = await trpc.guild.byId.query({
+		const guildEntity = await datasource.getRepository(Guild).findOneByOrFail({
 			id: interaction.guildId
 		});
 		const embed = new EmbedBuilder()

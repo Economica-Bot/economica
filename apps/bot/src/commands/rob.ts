@@ -1,7 +1,7 @@
+import { datasource, Guild, Member } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import { recordTransaction } from '../lib';
 import { parseNumber } from '../lib/economy';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const Rob = {
@@ -9,12 +9,12 @@ export const Rob = {
 	type: 'chatInput',
 	execute: async (interaction) => {
 		const target = interaction.options.getUser('user', true);
-		const targetEntity = await trpc.member.byId.query({
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
+		const targetEntity = await datasource.getRepository(Member).save({
 			userId: target.id,
 			guildId: interaction.guildId
-		});
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
 		});
 		const amount = Math.ceil(Math.random() * targetEntity.wallet);
 		const { chance, minfine, maxfine } = guildEntity.incomes.rob;

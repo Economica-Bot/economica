@@ -1,10 +1,10 @@
+import { datasource, Guild, Infraction } from '@economica/db';
 import cron from 'node-cron';
 import { client } from '..';
-import { trpc } from '../lib/trpc';
 
 export const BansJob = cron.schedule('* * * * *', async () => {
 	console.info('updating active bans');
-	const bans = await trpc.infraction.getActiveBans.query();
+	const bans = await datasource.getRepository(Infraction).find();
 	bans
 		.filter(
 			(ban) =>

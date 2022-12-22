@@ -6,8 +6,6 @@ import {
 	RESTPostAPIChatInputApplicationCommandsJSONBody
 } from 'discord-api-types/v10';
 import { ColorResolvable, InviteGenerationOptions } from 'discord.js';
-import { describe } from 'node:test';
-import { type } from 'os';
 import {
 	IncomeCommand,
 	IncomeString,
@@ -21,7 +19,7 @@ import {
 } from './types';
 
 export const DefaultCurrencySymbol = '💵';
-export const DefaultIntervalsObj: Record<IntervalString, IntervalCommand> = {
+export const DefaultIntervalsObj = {
 	minutely: {
 		amount: 50,
 		cooldown: 1000 * 60,
@@ -52,8 +50,8 @@ export const DefaultIntervalsObj: Record<IntervalString, IntervalCommand> = {
 		cooldown: 1000 * 60 * 60 * 24 * 7 * 4,
 		enabled: true
 	}
-};
-export const DefaultIncomesObj: Record<IncomeString, IncomeCommand> = {
+} satisfies Record<IntervalString, IntervalCommand>;
+export const DefaultIncomesObj = {
 	work: {
 		max: 500,
 		minfine: null,
@@ -82,8 +80,8 @@ export const DefaultIncomesObj: Record<IncomeString, IncomeCommand> = {
 		maxfine: 2000,
 		cooldown: 1000 * 60
 	}
-};
-export const DefaultModulesObj: Record<ModuleString, ModuleObj> = {
+} satisfies Record<IncomeString, IncomeCommand>;
+export const DefaultModulesObj = {
 	ECONOMY: {
 		type: 'DEFAULT',
 		enabled: true,
@@ -119,7 +117,7 @@ export const DefaultModulesObj: Record<ModuleString, ModuleObj> = {
 		enabled: true,
 		user: null
 	}
-};
+} satisfies Record<ModuleString, ModuleObj>;
 export const EmbedColors = {
 	success: 'Green',
 	info: 'Blurple',

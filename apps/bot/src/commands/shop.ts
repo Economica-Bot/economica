@@ -4,7 +4,14 @@ import {
 	ListingEmojis,
 	ListingType
 } from '@economica/common';
-import { isGenerator, Listing } from '@economica/db';
+import {
+	datasource,
+	Guild,
+	isGenerator,
+	Item,
+	Listing,
+	Member
+} from '@economica/db';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -21,14 +28,13 @@ import ms from 'ms';
 import { z } from 'zod';
 import { recordTransaction } from '../lib';
 import { parseInteger, parseNumber } from '../lib/economy';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const Shop = {
 	identifier: /^shop$/,
 	type: 'chatInput',
 	execute: async (interaction) =>
-		ShopPage.execute(interaction, undefined as any)
+		ShopPage.execute(interaction, undefined as never)
 } satisfies Command<'chatInput'>;
 
 export const ShopPage = {
@@ -42,13 +48,13 @@ export const ShopPage = {
 
 		const limit = 2;
 
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
-		});
-		const listings = await trpc.listing.list.query({
-			guildId: interaction.guildId,
-			page,
-			limit
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
+		const listings = await datasource.getRepository(Listing).find({
+			take: limit,
+			skip: (page - 1) * limit,
+			where: { guild: { id: interaction.guildId } }
 		});
 		const embed = new EmbedBuilder()
 			.setAuthor({
@@ -78,11 +84,13 @@ export const ShopPage = {
 		const paginators = new ActionRowBuilder<ButtonBuilder>().setComponents(
 			new ButtonBuilder()
 				.setCustomId(`shop_page:${interaction.user.id}:${page - 1}`)
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				.setEmoji({ id: parseEmoji(Emojis.PREVIOUS)!.id! })
 				.setStyle(ButtonStyle.Secondary)
 				.setDisabled(page === 1),
 			new ButtonBuilder()
 				.setCustomId(`shop_page:${interaction.user.id}:${page + 1}`)
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				.setEmoji({ id: parseEmoji(Emojis.NEXT)!.id! })
 				.setStyle(ButtonStyle.Primary)
 				.setDisabled(listings.length < limit)
@@ -103,17 +111,20 @@ export const ShopItem = {
 	identifier: /^shop_item:(?<item>(.*))$/,
 	type: 'selectMenu',
 	execute: async (interaction, args) => {
-		const listing = await trpc.listing.byId.query({ id: args.groups.item });
-		if (!listing) throw new Error('Could not find listing :(');
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
-		});
+		const listing = await datasource
+			.getRepository(Listing)
+			.findOneByOrFail({ id: args.groups.item });
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
 		await interaction.update({
 			embeds: [
 				{
 					author: {
 						name: `${listing.name} - ${listing.description}`,
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						icon_url: interaction.client.emojis.resolve(
+							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							parseEmoji(Emojis.BOX)!.id!
 						)!.url
 					},
@@ -253,14 +264,13 @@ export const ShopItemDelete = {
 	identifier: /^shop_item_delete:(?<userId>(.*)):(?<listingId>(.*))$/,
 	type: 'button',
 	execute: async (interaction, args) => {
-		const listing = await trpc.listing.byId.query({
-			id: args.groups.listingId
-		});
-		if (!listing) throw new Error('Could not find listing :(');
-		const items = await trpc.item.byListingId.query({
+		const listing = await datasource
+			.getRepository(Listing)
+			.findOneByOrFail({ id: args.groups.listingId });
+		const items = await datasource.getRepository(Item).findBy({
 			listing: { id: args.groups.listingId }
 		});
-		await trpc.listing.delete.mutate({ id: listing.id });
+		await datasource.getRepository(Listing).delete({ id: listing.id });
 		await interaction.update({
 			embeds: [
 				{
@@ -308,18 +318,20 @@ export const ShopItemBuyConfirm = {
 	type: 'modal',
 	execute: async (interaction, args) => {
 		const amount = interaction.fields.getTextInputValue('amount');
-		const listing = await trpc.listing.byId.query({
-			id: args.groups.listingId
-		});
+		const listing = await datasource
+			.getRepository(Listing)
+			.findOneByOrFail({ id: args.groups.listingId });
 		if (!listing) throw new Error('Could not find listing :(');
-		const memberEntity = await trpc.member.byId.query({
-			userId: interaction.user.id,
-			guildId: interaction.guildId
-		});
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
-		});
-		const existingItem = await trpc.item.byListingOwnerId.query({
+		const memberEntity = await datasource
+			.getRepository(Member)
+			.findOneByOrFail({
+				userId: interaction.user.id,
+				guildId: interaction.guildId
+			});
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
+		const existingItem = await datasource.getRepository(Item).findOneBy({
 			listing: { id: args.groups.listingId },
 			owner: { userId: interaction.user.id, guildId: interaction.guildId }
 		});
@@ -333,7 +345,7 @@ export const ShopItemBuyConfirm = {
 		// Validation
 		const missingItems: Listing[] = [];
 		for await (const item of listing.itemsRequired) {
-			const memberItem = await trpc.item.byListingOwnerId.query({
+			const memberItem = await datasource.getRepository(Item).findOneBy({
 				owner: {
 					userId: interaction.user.id,
 					guildId: interaction.guildId
@@ -374,17 +386,25 @@ export const ShopItemBuyConfirm = {
 
 		// Purchase complete
 		if (listing.stock) {
-			await trpc.listing.update.mutate({
-				id: listing.id,
-				stock: listing.stock - parsedAmount
-			});
+			await datasource.getRepository(Listing).update(
+				{
+					id: listing.id
+				},
+				{
+					stock: listing.stock - parsedAmount
+				}
+			);
 		}
 
 		if (existingItem) {
-			await trpc.item.update.mutate({
-				id: existingItem.id,
-				amount: existingItem.amount + parsedAmount
-			});
+			await datasource.getRepository(Item).update(
+				{
+					id: existingItem.id
+				},
+				{
+					amount: existingItem.amount + parsedAmount
+				}
+			);
 		} else {
 			listing.rolesGranted.forEach((role) =>
 				interaction.member.roles.add(role, `Purchased ${listing.name}`)
@@ -394,7 +414,7 @@ export const ShopItemBuyConfirm = {
 			);
 
 			if (listing.type !== ListingType.INSTANT) {
-				await trpc.item.create.mutate({
+				await datasource.getRepository(Item).save({
 					amount: parsedAmount,
 					listing: { id: listing.id },
 					owner: { userId: interaction.user.id, guildId: interaction.guildId }

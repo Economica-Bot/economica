@@ -4,14 +4,19 @@ import { z } from 'zod';
 
 config({ path: `${path.join(process.cwd(), '../../.env.local')}` });
 
-const schema = z.object({
-	NODE_ENV: z.enum(['development', 'test', 'production']),
-	DB_OPTION: z.enum(['nothing', 'sync', 'drop']),
-	DB_HOST: z.string(),
-	DB_PORT: z.string().transform((s) => Number(s)),
-	DB_USERNAME: z.string(),
-	DB_PASSWORD: z.string()
-});
+const schema = z
+	.object({
+		NODE_ENV: z.enum(['development', 'test', 'production']),
+		DB_URL: z.string(),
+		DB_OPTION: z.enum(['nothing', 'sync', 'drop'])
+	})
+	.superRefine((e, ctx) => {
+		if (e.NODE_ENV === 'production' && e.DB_OPTION === 'drop')
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Do not drop DB in production!'
+			});
+	});
 
 const _env = schema.safeParse(process.env);
 
@@ -20,7 +25,7 @@ if (!_env.success) {
 		'❌ Invalid environment variables:\n',
 		JSON.stringify(_env.error.format(), null, 4)
 	);
-	process.exit(1);
+	throw new Error('Invalid environment variables');
 }
 
 export const env = _env.data;

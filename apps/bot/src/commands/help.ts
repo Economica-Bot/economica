@@ -1,4 +1,5 @@
 import { CommandData, Emojis } from '@economica/common';
+import { datasource, Guild } from '@economica/db';
 import {
 	ActionRowBuilder,
 	EmbedBuilder,
@@ -9,7 +10,6 @@ import {
 	StringSelectMenuOptionBuilder
 } from 'discord.js';
 import { env } from '../env.mjs';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands.js';
 
 export const Help = {
@@ -26,9 +26,9 @@ export const Help = {
 				.setDescription(
 					`${Emojis.GEM} **Welcome to the ${interaction.client.user} Help Dashboard!**\nHere, you can get information about any command or module. Use the select menu below to specify a module.\n\n${Emojis.MENU} **The Best New Discord Economy Bot**\nTo become more familiar with Economica, please refer to the [documentation](${env.DOCS_URL}). There you can set up various permissions-related settings and get detailed information about all command modules.\n\n🔗 **Useful Links**:\n**[Home Page](${env.HOME_URL}) | [Command Docs](${env.COMMANDS_URL}) | [Vote For Us](${env.VOTE_URL})**`
 				);
-			const guildEntity = await trpc.guild.byId.query({
-				id: interaction.guildId
-			});
+			const guildEntity = await datasource
+				.getRepository(Guild)
+				.findOneByOrFail({ id: interaction.guildId });
 			const labels = Object.keys(guildEntity.modules).map((module) =>
 				new StringSelectMenuOptionBuilder()
 					.setLabel(module)

@@ -11,7 +11,7 @@ export const Inventory = {
 	identifier: /^inventory$/,
 	type: 'chatInput',
 	execute: async (interaction) => {
-		await InventoryPage.execute(interaction, undefined as any);
+		await InventoryPage.execute(interaction, undefined as never);
 	}
 } satisfies Command<'chatInput'>;
 

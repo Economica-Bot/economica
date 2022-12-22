@@ -1,6 +1,6 @@
+import { datasource, Guild, Member } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import { parseNumber } from '../lib/economy';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const Balance = {
@@ -8,17 +8,24 @@ export const Balance = {
 	type: 'chatInput',
 	execute: async (interaction) => {
 		const target = interaction.options.getUser('user') ?? interaction.user;
-		await trpc.member.create.mutate({
-			userId: target.id,
-			guildId: interaction.guildId
-		});
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
-		});
-		const targetEntity = await trpc.member.byId.query({
-			userId: target.id,
-			guildId: interaction.guildId
-		});
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
+		await datasource.getRepository(Member).upsert(
+			{
+				userId: target.id,
+				guildId: interaction.guildId
+			},
+			{
+				conflictPaths: ['userId', 'guildId']
+			}
+		);
+		const targetEntity = await datasource
+			.getRepository(Member)
+			.findOneByOrFail({
+				userId: target.id,
+				guildId: interaction.guildId
+			});
 		const embed = new EmbedBuilder()
 			.setAuthor({
 				name: `${target.username}'s Balance`,

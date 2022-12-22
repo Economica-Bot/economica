@@ -11,8 +11,6 @@ export const schema = z.object({
 	DISCORD_CLIENT_SECRET: z.string(),
 	DISCORD_PUB_KEY: z.string(),
 	DISCORD_CALLBACK_URL: z.string(),
-	PORT: z.string(),
-	DEV_IDS: z.string().transform((string) => JSON.parse(string)),
 	DEV_GUILD_IDS: z.string().transform((val, ctx) => {
 		const parsed = JSON.parse(val);
 		if (
@@ -33,8 +31,6 @@ export const schema = z.object({
 	DEPLOY_ALL_MODULES: z
 		.enum(['true', 'false'])
 		.transform((val) => val === 'true'),
-	DB_URI: z.string(),
-	DB_OPTION: z.enum(['nothing', 'sync', 'drop']),
 	DOCS_URL: z.string().url(),
 	HOME_URL: z.string().url(),
 	COMMANDS_URL: z.string().url(),

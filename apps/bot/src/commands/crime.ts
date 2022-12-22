@@ -1,16 +1,16 @@
+import { datasource, Guild } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import { recordTransaction } from '../lib';
 import { parseNumber } from '../lib/economy';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const Crime = {
 	identifier: /^crime$/,
 	type: 'chatInput',
 	execute: async (interaction) => {
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
-		});
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
 		const { max, chance, minfine, maxfine } = guildEntity.incomes.crime;
 		const amount = Math.ceil(Math.random() * max);
 		const fine = Math.ceil(Math.random() * (maxfine - minfine) + minfine);

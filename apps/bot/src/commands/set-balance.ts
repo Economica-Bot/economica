@@ -1,7 +1,7 @@
+import { datasource, Guild, Member } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import { recordTransaction } from '../lib';
 import { parseNumber, parseString } from '../lib/economy';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const SetBalance = {
@@ -9,17 +9,13 @@ export const SetBalance = {
 	type: 'chatInput',
 	execute: async (interaction) => {
 		const target = interaction.options.getUser('user', true);
-		const targetEntity = await trpc.member.create.mutate({
+		const targetEntity = await datasource.getRepository(Member).save({
 			userId: target.id,
 			guildId: interaction.guildId
 		});
-		const guildEntity = await trpc.guild.byId.query({
-			id: interaction.guildId
-		});
-		await trpc.member.byId.query({
-			userId: target.id,
-			guildId: interaction.guildId
-		});
+		const guildEntity = await datasource
+			.getRepository(Guild)
+			.findOneByOrFail({ id: interaction.guildId });
 		const amount = parseString(interaction.options.getString('amount', true));
 		const balance = interaction.options.getString('balance', true);
 		const { wallet: w, treasury: t } = targetEntity;

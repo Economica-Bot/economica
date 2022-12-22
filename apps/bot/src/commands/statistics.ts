@@ -1,7 +1,7 @@
 import { Emojis } from '@economica/common';
+import { Command as DiscordCommand, datasource } from '@economica/db';
 import { EmbedBuilder, parseEmoji } from 'discord.js';
 import ms from 'ms';
-import { trpc } from '../lib/trpc';
 import { Command } from '../structures/commands';
 
 export const Statistics = {
@@ -12,19 +12,24 @@ export const Statistics = {
 		const botStats =
 			`Websocket Ping: \`${interaction.client.ws.ping}ms\`\n` +
 			`Bot Uptime: \`${ms(interaction.client.uptime)}\`\n` +
-			`Commands Ran: \`${await trpc.execution.count.query({
-				guildId: interaction.guildId
-			})}\``;
+			`Commands Ran: \`${await datasource
+				.getRepository(DiscordCommand)
+				.countBy({ member: { guildId: interaction.guildId } })}\``;
 		const memberStats =
 			`Roles: \`${interaction.member.roles.cache.size}\`\n` +
-			`Commands Used: \`${await trpc.execution.count.query({
-				guildId: interaction.guildId,
-				userId: interaction.user.id
-			})}\`\n` +
+			`Commands Used: \`${await datasource
+				.getRepository(DiscordCommand)
+				.countBy({
+					member: { guildId: interaction.guildId, userId: interaction.user.id }
+				})}\`\n` +
 			!!interaction.member.joinedAt
-				? `Joined: <t:${Math.round(
-						interaction.member.joinedAt!.getTime() / 1000
-				  )}:f>`
+				? `Est. ${
+						interaction.member.joinedAt
+							? `<t:${Math.round(
+									interaction.member.joinedAt.getTime() / 1000
+							  )}:f>`
+							: 'n/a'
+				  }`
 				: '';
 		const serverStats =
 			`Roles: \`${interaction.guild.roles.cache.size}\`\n` +
@@ -34,7 +39,9 @@ export const Statistics = {
 			.setDescription(description)
 			.setAuthor({
 				name: 'Statistics Dashboard',
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				iconURL: interaction.client.emojis.resolve(
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					parseEmoji(Emojis.TREND)!.id!
 				)!.url
 			})
