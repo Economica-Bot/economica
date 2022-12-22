@@ -1,4 +1,4 @@
-import { datasource, Guild, Infraction } from '@economica/db';
+import { datasource, Infraction } from '@economica/db';
 import cron from 'node-cron';
 import { client } from '..';
 

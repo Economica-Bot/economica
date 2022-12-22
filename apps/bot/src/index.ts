@@ -12,7 +12,6 @@ import * as Jobs from './jobs';
 import { env } from './env.mjs';
 import { resetCommands, updateCommands } from './lib/commands.js';
 import { Command, datasource, Guild, Member, User } from '@economica/db';
-import { exec } from 'child_process';
 
 export const client = new Client({
 	intents: ['Guilds', 'GuildMessages']
