@@ -1,4 +1,4 @@
-version: 3.9
+version: "3.9"
 
 services:
   dashboard:
@@ -25,6 +25,8 @@ services:
     restart: always
     env_file:
       - .env.production
+    networks:
+      - default
   nginx:
     container_name: proxy
     ports:
