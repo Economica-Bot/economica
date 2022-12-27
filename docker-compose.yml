@@ -1,3 +1,5 @@
+version: 3.9
+
 services:
   dashboard:
     x-aws-pull_credentials: arn:aws:secretsmanager:us-east-1:787454512443:secret:aws-7Z7iwX
@@ -23,3 +25,17 @@ services:
     restart: always
     env_file:
       - .env.production
+  nginx:
+    container_name: proxy
+    ports:
+      - 80:80
+    depends_on:
+      - dashboard
+      - bot
+    networks:
+      - default
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
