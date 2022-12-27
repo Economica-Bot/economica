@@ -1,6 +1,8 @@
 services:
   dashboard:
+    x-aws-pull_credentials: arn:aws:secretsmanager:us-east-1:787454512443:secret:aws-7Z7iwX
     container_name: dashboard
+    image: adrastopoulos/economica:dash
     build:
       context: .
       dockerfile: ./apps/dashboard/Dockerfile
@@ -9,32 +11,15 @@ services:
       - .env.production
     ports:
       - 3000:3000
-    depends_on:
-      - postgres
     networks:
       - default
   bot:
+    x-aws-pull_credentials: arn:aws:secretsmanager:us-east-1:787454512443:secret:aws-7Z7iwX
     container_name: bot
+    image: adrastopoulos/economica:bot
     build:
       context: .
       dockerfile: ./apps/bot/Dockerfile
     restart: always
-    ports:
-      - 3001:3001
     env_file:
       - .env.production
-    depends_on:
-      - postgres
-      - dashboard
-    networks:
-      - default
-  postgres:
-    image: postgres:latest
-    container_name: postgres
-    expose:
-      - '${DB_PORT}:${DB_PORT}'
-    environment:
-      POSTGRES_USER: '${DB_USERNAME}'
-      POSTGRES_PASSWORD: '${DB_PASSWORD}'
-    networks:
-      - default

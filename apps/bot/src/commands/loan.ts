@@ -357,12 +357,8 @@ export const LoanViewType = {
 			.setFields(
 				loans.map((loan) => ({
 					name: `Loan ${loan.id}`,
-					value: `>>> **Created At**: \`${new Date(
-						loan.createdAt
-					).toLocaleString()}\`\n**Completed At**: \`${
-						loan.completedAt
-							? new Date(loan.completedAt).toLocaleString()
-							: 'N/A'
+					value: `>>> **Created At**: \`${loan.createdAt.toLocaleString()}\`\n**Completed At**: \`${
+						loan.completedAt ? loan.completedAt.toLocaleString() : 'N/A'
 					}\``
 				}))
 			);
@@ -397,10 +393,8 @@ export const LoanViewSingle = {
 		const embed = new EmbedBuilder()
 			.setTitle(`Loan ${loan.id}`)
 			.setDescription(
-				`>>> **Created At**: \`${new Date(
-					loan.createdAt
-				).toLocaleString()}\`\n**Completed At**: \`${
-					loan.completedAt ? new Date(loan.completedAt).toLocaleString() : 'N/A'
+				`>>> **Created At**: \`${loan.createdAt.toLocaleString()}\`\n**Completed At**: \`${
+					loan.completedAt ? loan.completedAt.toLocaleString() : 'N/A'
 				}\``
 			)
 			.setFields(

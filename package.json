@@ -10,11 +10,12 @@
 		]
 	},
 	"scripts": {
-		"build": "turbo build",
 		"dev": "turbo dev --parallel",
+		"build": "turbo build",
+		"start": "turbo start --parallel",
 		"lint": "turbo lint",
 		"format": "./node_modules/.bin/prettier --write \"**/*.{ts,tsx}\"",
-		"docker": "docker compose --env-file ./.env.production up --build --force-recreate"
+		"deploy": "docker compose --env-file .env.production up --build --force-recreate"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^17.1.2",

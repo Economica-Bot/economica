@@ -1,18 +1,10 @@
-import { config } from 'dotenv';
-import path from 'path';
 import { z } from 'zod';
 
-config({ path: `${path.join(process.cwd(), '../../.env.local')}` });
-
-export const schema = z.object({
+const schema = z.object({
 	NODE_ENV: z.enum(['development', 'test', 'production']),
 	DISCORD_BOT_TOKEN: z.string(),
-	DISCORD_CLIENT_ID: z.string(),
-	DISCORD_CLIENT_SECRET: z.string(),
-	DISCORD_PUB_KEY: z.string(),
-	DISCORD_CALLBACK_URL: z.string(),
 	DEV_GUILD_IDS: z.string().transform((val, ctx) => {
-		const parsed = JSON.parse(val);
+		const parsed = val.split(',').map((v) => v.trim());
 		if (
 			Array.isArray(parsed) &&
 			parsed.every((item) => typeof item === 'string')
@@ -25,8 +17,7 @@ export const schema = z.object({
 		});
 		return z.NEVER;
 	}),
-	SUPPORT_GUILD_ID: z.string(),
-	SUPPORT_GUILD_URL: z.string(),
+	SUPPORT_GUILD_INVITE_URL: z.string(),
 	DEPLOY_COMMANDS: z.enum(['nothing', 'update', 'reset']),
 	DEPLOY_ALL_MODULES: z
 		.enum(['true', 'false'])
@@ -56,6 +47,8 @@ if (!_env.success) {
 		...formatErrors(_env.error.format())
 	);
 	throw new Error('Invalid environment variables');
+} else {
+	console.log('✔ Environment variables loaded');
 }
 
 export const env = _env.data;

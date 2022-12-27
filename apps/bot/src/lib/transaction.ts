@@ -36,7 +36,7 @@ export const recordTransaction = async (
 		wallet,
 		treasury
 	});
-	// await datasource.manager.save(transaction);
+	await datasource.manager.save(transaction);
 	if (!guildEntity.transactionLogId) return;
 	const channel = await client.channels.fetch(guildEntity.transactionLogId);
 	if (channel && channel.isTextBased()) {
@@ -67,7 +67,7 @@ export const recordTransaction = async (
 				}
 			])
 			.setFooter({ text: `Id: ${transaction.id}` })
-			.setTimestamp(new Date(transaction.createdAt));
+			.setTimestamp(transaction.createdAt);
 		channel.send({ embeds: [embed] });
 	}
 };

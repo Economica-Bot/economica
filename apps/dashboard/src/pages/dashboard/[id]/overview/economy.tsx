@@ -148,7 +148,7 @@ const EconomyPage: NextPageWithLayout = () => {
 									))}
 							</select>
 							<button
-								className="btn glass text-base-content"
+								className="glass btn text-base-content"
 								onClick={() =>
 									setNewGuild({ ...newGuild, transactionLogId: null })
 								}
@@ -173,7 +173,7 @@ const EconomyPage: NextPageWithLayout = () => {
 			<DashCard title="Transactions" subtitle="View all transactions">
 				<div className="my-3 inline-flex items-center gap-3">
 					<button
-						className={`btn btn-secondary btn-xs ${
+						className={`btn-secondary btn-xs btn ${
 							page === 1 ? 'btn-disabled' : ''
 						}`}
 						onClick={() => setPage(page - 1)}
@@ -181,7 +181,7 @@ const EconomyPage: NextPageWithLayout = () => {
 						Previous Page
 					</button>
 					<button
-						className={`btn btn-primary btn-xs ${
+						className={`btn-primary btn-xs btn ${
 							page * limit >= count ? 'btn-disabled' : ''
 						}`}
 						onClick={() => setPage(page + 1)}
@@ -230,12 +230,12 @@ const EconomyPage: NextPageWithLayout = () => {
 						</div>
 						<div className="flex-none">
 							<button
-								className="btn btn-ghost btn-sm"
+								className="btn-ghost btn-sm btn"
 								onClick={() => setNewGuild(guild)}
 							>
 								Nay
 							</button>
-							<button className="btn btn-primary btn-sm" onClick={updateGuild}>
+							<button className="btn-primary btn-sm btn" onClick={updateGuild}>
 								Aye
 							</button>
 						</div>

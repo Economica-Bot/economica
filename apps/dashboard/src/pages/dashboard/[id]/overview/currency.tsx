@@ -1,10 +1,10 @@
 import { DefaultCurrencySymbol } from '@economica/common';
+import { Guild } from '@economica/db';
 import {
 	RESTGetAPICurrentUserGuildsResult,
 	RESTGetAPICurrentUserResult
 } from 'discord-api-types/v10';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import DashboardLayout from '../../../../components/layouts/DashboardLayout';
 import { trpc } from '../../../../lib/trpc';
@@ -17,29 +17,31 @@ type Props = {
 
 const CurrencyPage: NextPageWithLayout<Props> = () => {
 	const router = useRouter();
-	const [currency, setCurrency] = useState('');
 	const guildId = router.query.id as string;
 
-	const { data, refetch, isLoading } = trpc.guild.byId.useQuery({
+	const {
+		data: guild,
+		refetch,
+		isLoading,
+		isError
+	} = trpc.guild.byId.useQuery({
 		id: guildId
 	});
 	const mutation = trpc.guild.update.useMutation();
 
-	useEffect(() => {
-		if (data?.currency) setCurrency(data.currency);
-	}, [isLoading, data, data?.currency, mutation.isLoading]);
-
-	const changeCurrency = async (currency: string) => {
-		mutation.mutate({ id: guildId, currency });
+	const changeCurrency = async (guild: Guild, currency: string) => {
+		mutation.mutate({ ...guild, currency });
 		await refetch();
 		toast.success('Currency Symbol Updated');
 	};
+
+	if (isLoading || isError) return null;
 
 	return (
 		<div className="mt-5 flex items-center justify-between rounded-full bg-base-300 py-3 px-6">
 			<div>
 				<h1 className="max-w-full cursor-default select-none text-5xl">
-					{currency}
+					{guild.currency}
 				</h1>
 			</div>
 			<div className="flex items-center justify-center">
@@ -57,9 +59,10 @@ const CurrencyPage: NextPageWithLayout<Props> = () => {
 						<div className="modal-action">
 							<label
 								htmlFor="currency-modal"
-								className="btn btn-success"
+								className="btn-success btn"
 								onClick={() =>
 									changeCurrency(
+										guild,
 										(
 											document.getElementById(
 												'new_currency'
@@ -70,19 +73,19 @@ const CurrencyPage: NextPageWithLayout<Props> = () => {
 							>
 								Update
 							</label>
-							<label htmlFor="currency-modal" className="btn btn-warning">
+							<label htmlFor="currency-modal" className="btn-warning btn">
 								Cancel
 							</label>
 						</div>
 					</div>
 				</div>
 
-				<label className="btn btn-success mr-5" htmlFor="currency-modal">
+				<label className="btn-success btn mr-5" htmlFor="currency-modal">
 					Edit
 				</label>
 				<button
-					className="btn btn-error"
-					onClick={() => changeCurrency(DefaultCurrencySymbol)}
+					className="btn-error btn"
+					onClick={() => changeCurrency(guild, DefaultCurrencySymbol)}
 				>
 					Reset
 				</button>

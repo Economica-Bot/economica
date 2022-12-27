@@ -5,12 +5,15 @@
 			"outputs": ["dist/**", ".next/**", "public/dist/**"],
 			"dependsOn": ["^build"]
 		},
+		"start": {},
+		"dashboard#start": {
+			"dependsOn": ["build"]
+		},
 		"lint": {
 			"outputs": []
 		},
 		"dev": {
-			"dependsOn": [],
-			"cache": false
+			"dependsOn": []
 		},
 		"clean": {
 			"cache": false
@@ -18,5 +21,14 @@
 		"//#clean": {
 			"cache": false
 		}
-	}
+	},
+	"globalEnv": [
+		"NODE_ENV",
+		"DISCORD_BOT_TOKEN",
+		"DISCORD_CLIENT_ID",
+		"INVITE_BOT_URL",
+		"DB_URL",
+		"NEXTAUTH_SECRET",
+		"NEXTAUTH_URL"
+	]
 }

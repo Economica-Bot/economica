@@ -1,10 +1,6 @@
-import { config } from 'dotenv';
-import path from 'path';
 import { z } from 'zod';
 
-config({ path: `${path.join(process.cwd(), '../../.env.local')}` });
-
-export const schema = z.object({
+const schema = z.object({
 	DISCORD_BOT_TOKEN: z.string()
 });
 

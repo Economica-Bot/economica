@@ -134,8 +134,7 @@ export const ShopItem = {
 						listing.duration === null
 							? '`Never`'
 							: `<t:${Math.trunc(
-									(new Date(listing.createdAt).getTime() + listing.duration) /
-										1000
+									(listing.createdAt.getTime() + listing.duration) / 1000
 							  )}:R>`
 					}`}`,
 					fields: [

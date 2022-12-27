@@ -19,7 +19,7 @@ import {
 } from './types';
 
 export const DefaultCurrencySymbol = '💵';
-export const DefaultIntervalsObj = {
+export const DefaultIntervalsObj: Record<IntervalString, IntervalCommand> = {
 	minutely: {
 		amount: 50,
 		cooldown: 1000 * 60,
@@ -50,7 +50,7 @@ export const DefaultIntervalsObj = {
 		cooldown: 1000 * 60 * 60 * 24 * 7 * 4,
 		enabled: true
 	}
-} satisfies Record<IntervalString, IntervalCommand>;
+};
 export const DefaultIncomesObj = {
 	work: {
 		max: 500,
@@ -81,7 +81,7 @@ export const DefaultIncomesObj = {
 		cooldown: 1000 * 60
 	}
 } satisfies Record<IncomeString, IncomeCommand>;
-export const DefaultModulesObj = {
+export const DefaultModulesObj: Record<ModuleString, ModuleObj> = {
 	ECONOMY: {
 		type: 'DEFAULT',
 		enabled: true,
@@ -117,7 +117,7 @@ export const DefaultModulesObj = {
 		enabled: true,
 		user: null
 	}
-} satisfies Record<ModuleString, ModuleObj>;
+};
 export const EmbedColors = {
 	success: 'Green',
 	info: 'Blurple',

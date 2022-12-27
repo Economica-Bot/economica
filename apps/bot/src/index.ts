@@ -43,17 +43,31 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 	if (!interaction.inCachedGuild()) return;
 
-	await datasource.getRepository(User).save({ id: interaction.user.id });
-	await datasource.getRepository(User).save({ id: interaction.client.user.id });
-	const guildEntity = await datasource
+	await datasource
+		.getRepository(User)
+		.upsert({ id: interaction.user.id }, { conflictPaths: ['id'] });
+	await datasource
+		.getRepository(User)
+		.upsert({ id: interaction.client.user.id }, { conflictPaths: ['id'] });
+	await datasource
 		.getRepository(Guild)
-		.save({ id: interaction.guildId });
-	const memberEntity = await datasource
-		.getRepository(Member)
-		.save({ userId: interaction.user.id, guildId: interaction.guildId });
+		.upsert({ id: interaction.guildId }, { conflictPaths: ['id'] });
 	await datasource
 		.getRepository(Member)
-		.save({ userId: interaction.client.user.id, guildId: interaction.guildId });
+		.upsert(
+			{ userId: interaction.user.id, guildId: interaction.guildId },
+			{ conflictPaths: ['userId', 'guildId'] }
+		);
+	await datasource
+		.getRepository(Member)
+		.upsert(
+			{ userId: interaction.client.user.id, guildId: interaction.guildId },
+			{ conflictPaths: ['userId', 'guildId'] }
+		);
+
+	const guildEntity = await datasource
+		.getRepository(Guild)
+		.findOneByOrFail({ id: interaction.guildId });
 
 	try {
 		const command = Object.values(Commands).find((c) => {
@@ -93,13 +107,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
 						command: commandName
 					}
 				});
-				if (
-					command &&
-					new Date(command.createdAt).getTime() + cooldown > Date.now()
-				) {
+				if (command && command.createdAt.getTime() + cooldown > Date.now()) {
 					throw new Error(
 						`You may run this command in ${ms(
-							new Date(command.createdAt).getTime() + cooldown - Date.now(),
+							command.createdAt.getTime() + cooldown - Date.now(),
 							{ long: true }
 						)}\nCooldown: ${ms(cooldown)}`
 					);
@@ -108,7 +119,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 			await command.execute(interaction as never, {} as never);
 			const execution = datasource.getRepository(Command).create({
-				member: memberEntity,
+				member: { userId: interaction.user.id, guildId: interaction.guildId },
 				command: interaction.commandName
 			});
 			await datasource.getRepository(Command).save(execution);

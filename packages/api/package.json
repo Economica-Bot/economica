@@ -8,7 +8,6 @@
 		"@economica/db": "*",
 		"@trpc/server": "^10.0.0-rc.6",
 		"discord-api-types": "^0.37.16",
-		"dotenv": "^16.0.3",
 		"superjson": "^1.11.0",
 		"zod": "^3.19.1"
 	}

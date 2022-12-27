@@ -9,15 +9,6 @@ import {
 } from '@economica/common';
 import { z } from 'zod';
 
-export const IncomeCommandSchema = z.object({
-	// min: z.number(),
-	max: z.number().nullish(),
-	chance: z.number().nullish(),
-	minfine: z.number().nullish(),
-	maxfine: z.number().nullish(),
-	cooldown: z.number().optional()
-});
-
 export const IntervalCommandSchema = z.object({
 	amount: z.number().optional(),
 	cooldown: z.number().optional(),
@@ -44,7 +35,30 @@ export const GuildSchema = z.object({
 	currency: z.string().optional(),
 	transactionLogId: z.string().nullish(),
 	infractionLogId: z.string().nullish(),
-	incomes: z.record(z.enum(IncomeArr), IncomeCommandSchema).optional(),
+	incomes: z.object({
+		work: z.object({
+			max: z.number().int().positive(),
+			cooldown: z.number().int().positive()
+		}),
+		beg: z.object({
+			max: z.number().int().positive(),
+			chance: z.number().int().min(1).max(100),
+			cooldown: z.number().int().positive()
+		}),
+		crime: z.object({
+			max: z.number().int().positive(),
+			chance: z.number().int().min(1).max(100),
+			minfine: z.number().int().positive(),
+			maxfine: z.number().int().positive(),
+			cooldown: z.number().int().positive()
+		}),
+		rob: z.object({
+			chance: z.number().int().min(1).max(100),
+			minfine: z.number().int().positive(),
+			maxfine: z.number().int().positive(),
+			cooldown: z.number().int().positive()
+		})
+	}),
 	intervals: z.record(z.enum(IntervalArr), IntervalCommandSchema).optional(),
 	modules: z.record(z.enum(ModuleStringArr), ModuleSchema).optional()
 });

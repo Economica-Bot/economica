@@ -8,7 +8,7 @@ COPY . .
 RUN turbo prune --scope=@economica/bot --docker
 
 FROM node:16-alpine AS installer
-RUN apk add --no-cache libc6-compat git
+RUN apk add --no-cache libc6-compat git python3 make g++
 RUN apk update
 WORKDIR /app
 COPY --from=builder /app/out/json/ .

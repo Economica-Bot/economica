@@ -15,6 +15,8 @@ const nextConfig = {
 	},
 	experimental: {
 		transpilePackages: ['@economica/api', '@economica/db', '@economica/common'],
+		// this includes files from the monorepo base two directories up
+		outputFileTracingRoot: path.join(__dirname, '../../')
 	},
 	webpack: (config) => {
 		// this will override the experiments

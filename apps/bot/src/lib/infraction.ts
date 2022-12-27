@@ -53,7 +53,7 @@ export const recordInfraction = async (
 					}
 				])
 				.setFooter({ text: `ID: ${infraction.id}` })
-				.setTimestamp(new Date(infraction.createdAt));
+				.setTimestamp(infraction.createdAt);
 			channel.send({ embeds: [embed] });
 		}
 	}
