@@ -10,7 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      node_env: production
+      NODE_ENV: production
+      DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
