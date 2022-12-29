@@ -18,7 +18,10 @@ export const Timeout = {
 		await datasource.getRepository(User).save({ id: target.id });
 		await datasource
 			.getRepository(Member)
-			.save({ userId: target.id, guildId: interaction.guildId });
+			.upsert(
+				{ userId: target.id, guildId: interaction.guildId },
+				{ conflictPaths: ['userId', 'guildId'] }
+			);
 		const durationInput = interaction.options.getString('duration', true);
 		const duration = ms(durationInput);
 		if (duration > 1000 * 60 * 60 * 24 * 28)

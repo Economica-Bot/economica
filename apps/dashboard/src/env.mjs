@@ -1,10 +1,14 @@
 import { z } from 'zod';
 
 const schema = z.object({
+	NODE_ENV: z.enum(['development', 'test', 'production']),
+	DISCORD_BOT_TOKEN: z.string(),
 	DISCORD_CLIENT_ID: z.string(),
 	DISCORD_CLIENT_SECRET: z.string(),
 	NEXTAUTH_SECRET: z.string(),
 	NEXTAUTH_URL: z.string().url(),
+	DB_URL: z.string().url(),
+	DB_OPTION: z.enum(['nothing', 'sync', 'drop']),
 	SUPPORT_GUILD_INVITE_URL: z.string().url(),
 	INVITE_BOT_URL: z.string().url()
 });

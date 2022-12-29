@@ -4,8 +4,8 @@
 	"type": "module",
 	"scripts": {
 		"lint": "eslint .",
-		"dev": "dotenv -e ../../.env.local tsx watch --clear-screen=false --tsconfig ./tsconfig.json src/index.ts",
-		"start": "dotenv -e ../../.env.production tsx --clear-screen=false --tsconfig ./tsconfig.json src/index.ts"
+		"dev": "dotenv -e .env.local tsx watch --clear-screen=false --tsconfig ./tsconfig.json src/index.ts",
+		"start": "dotenv -e .env.production tsx --clear-screen=false --tsconfig ./tsconfig.json src/index.ts"
 	},
 	"dependencies": {
 		"@economica/api": "*",

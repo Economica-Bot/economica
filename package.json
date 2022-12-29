@@ -15,7 +15,7 @@
 		"start": "turbo start --parallel",
 		"lint": "turbo lint",
 		"format": "./node_modules/.bin/prettier --write \"**/*.{ts,tsx}\"",
-		"deploy": "docker compose --env-file .env.production up --build --force-recreate"
+		"deploy": "docker compose up --build --force-recreate"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^17.1.2",

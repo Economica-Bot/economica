@@ -9,8 +9,6 @@ services:
       context: .
       dockerfile: ./apps/dashboard/Dockerfile
     restart: always
-    env_file:
-      - .env.production
     ports:
       - 3000:3000
     networks:
@@ -23,8 +21,6 @@ services:
       context: .
       dockerfile: ./apps/bot/Dockerfile
     restart: always
-    env_file:
-      - .env.production
     networks:
       - default
   nginx:

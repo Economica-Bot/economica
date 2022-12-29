@@ -4,7 +4,9 @@ import { client } from '..';
 
 export const BansJob = cron.schedule('* * * * *', async () => {
 	console.info('updating active bans');
-	const bans = await datasource.getRepository(Infraction).find();
+	const bans = await datasource
+		.getRepository(Infraction)
+		.find({ relations: ['guild', 'target'] });
 	bans
 		.filter(
 			(ban) =>

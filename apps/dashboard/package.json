@@ -2,8 +2,8 @@
 	"name": "@economica/dashboard",
 	"version": "0.0.1",
 	"scripts": {
-		"dev": "dotenv -e ../../.env.local next dev",
-		"build": "dotenv -e ../../.env.production next build",
+		"dev": "next dev",
+		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
 		"export": "next export"
@@ -21,7 +21,6 @@
 		"@trpc/server": "^10.0.0-rc.6",
 		"daisyui": "^2.31.0",
 		"discord-api-types": "^0.37.9",
-		"dotenv-cli": "^6.0.0",
 		"next": "13.0.0",
 		"next-auth": "^4.13.0",
 		"next-themes": "^0.2.1",

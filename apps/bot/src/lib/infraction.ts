@@ -16,7 +16,7 @@ export const recordInfraction = async (
 	const guildEntity = await datasource
 		.getRepository(Guild)
 		.findOneByOrFail({ id: guildId });
-	const infraction = await datasource.getRepository(Infraction).save({
+	const infraction = datasource.getRepository(Infraction).create({
 		guild: { id: guildId },
 		target: { userId: targetId, guildId },
 		agent: { userId: agentId, guildId },
@@ -25,6 +25,7 @@ export const recordInfraction = async (
 		duration,
 		active
 	});
+	await datasource.getRepository(Infraction).save(infraction);
 	const { infractionLogId } = guildEntity;
 	if (infractionLogId) {
 		const channel = await client.channels.fetch(infractionLogId);
