@@ -9,10 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      NODE_ENV: production
-      DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker compose -f docker-compose.yml build --no-cache --pull
+      run:
+        touch apps/dashboard/.env.local
+        echo DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }} >> apps/dashboard/.env.local 
+        docker compose -f docker-compose.yml build --no-cache --pull
