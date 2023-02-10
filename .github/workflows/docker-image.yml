@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run:
+      run: |
         touch apps/dashboard/.env.local
         echo DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }} >> apps/dashboard/.env.local 
         docker compose -f docker-compose.yml build --no-cache --pull
