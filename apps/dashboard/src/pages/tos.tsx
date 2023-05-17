@@ -169,8 +169,8 @@ const TOS: NextPageWithLayout = () => (
 			</p>
 			<h2>Contact Us</h2>
 			<p>
-				If you have any questions about our Privacy Policy, please contact us on
-				our <Link href="/api/support">support server</Link>.
+				If you have any questions about our Terms of Service, please contact us
+				on our <Link href="/api/support">support server</Link>.
 			</p>
 		</article>
 	</div>
