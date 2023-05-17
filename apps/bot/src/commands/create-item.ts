@@ -164,7 +164,6 @@ export const CreateItem = {
 			interaction.options.getString('generator_period') ?? undefined;
 		const generatorAmount =
 			interaction.options.getString('generator_amount') ?? undefined;
-
 		const result = await validator.parseAsync({
 			name,
 			price,
@@ -183,12 +182,11 @@ export const CreateItem = {
 			generatorPeriod,
 			generatorAmount
 		});
-
-		await datasource.getRepository(Listing).save({
+		const listing = datasource.getRepository(Listing).create({
 			guild: { id: interaction.guildId },
 			...result
 		});
-
+		await datasource.getRepository(Listing).save(listing);
 		const embed = new EmbedBuilder()
 			.setTitle('Success')
 			.setDescription(
