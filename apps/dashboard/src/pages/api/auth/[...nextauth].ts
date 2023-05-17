@@ -13,6 +13,7 @@ export const authOptions: NextAuthOptions = {
 	jwt: {
 		maxAge: 14 * 24 * 30 * 60 // 2 weeks
 	},
+	secret: env.NEXTAUTH_SECRET,
 	callbacks: {
 		jwt: async ({ token, account, profile }) => {
 			if (profile) token.profile = profile;
