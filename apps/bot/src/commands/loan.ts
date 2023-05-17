@@ -32,42 +32,42 @@ export const Loan = {
 		if (subcommand === 'manage') {
 			const outgoingPendingLoanCount = await datasource
 				.getRepository(LoanEntity)
-				.findBy({
+				.countBy({
 					guild: { id: interaction.guildId },
 					lender: { user: { id: interaction.user.id } },
 					status: LoanStatus.PENDING
 				});
 			const incomingPendingLoanCount = await datasource
 				.getRepository(LoanEntity)
-				.findBy({
+				.countBy({
 					guild: { id: interaction.guildId },
 					borrower: { user: { id: interaction.user.id } },
 					status: LoanStatus.PENDING
 				});
 			const outgoingActiveLoanCount = await datasource
 				.getRepository(LoanEntity)
-				.findBy({
+				.countBy({
 					guild: { id: interaction.guildId },
 					lender: { user: { id: interaction.user.id } },
 					status: LoanStatus.ACTIVE
 				});
 			const incomingActiveLoanCount = await datasource
 				.getRepository(LoanEntity)
-				.findBy({
+				.countBy({
 					guild: { id: interaction.guildId },
 					borrower: { user: { id: interaction.user.id } },
 					status: LoanStatus.ACTIVE
 				});
 			const outgoingCompleteLoanCount = await datasource
 				.getRepository(LoanEntity)
-				.findBy({
+				.countBy({
 					guild: { id: interaction.guildId },
 					lender: { user: { id: interaction.user.id } },
 					status: LoanStatus.COMPLETE
 				});
 			const incomingCompleteLoanCount = await datasource
 				.getRepository(LoanEntity)
-				.findBy({
+				.countBy({
 					guild: { id: interaction.guildId },
 					borrower: { user: { id: interaction.user.id } },
 					status: LoanStatus.COMPLETE
@@ -314,14 +314,9 @@ export const LoanAccept = {
 			loan.principal,
 			0
 		);
-		await datasource.getRepository(LoanEntity).update(
-			{
-				id: args.groups.loanId
-			},
-			{
-				status: LoanStatus.ACTIVE
-			}
-		);
+		await datasource
+			.getRepository(LoanEntity)
+			.update({ id: args.groups.loanId }, { status: LoanStatus.ACTIVE });
 		const embed = new EmbedBuilder().setDescription(
 			`${Emojis.CHECK} **Loan Accepted**`
 		);
