@@ -9,7 +9,9 @@ export const LoginAvatar: React.FC = () => {
 
 	if (status === 'loading') {
 		return <FaSpinner className="h-5 w-5 animate-spin" />;
-	} else if (status === 'authenticated') {
+	}
+
+	if (status === 'authenticated') {
 		return (
 			<div className="dropdown-end dropdown">
 				<label tabIndex={0} className="online btn-ghost btn-circle avatar btn">
@@ -41,13 +43,14 @@ export const LoginAvatar: React.FC = () => {
 				</ul>
 			</div>
 		);
-	} else
-		return (
-			<button
-				onClick={() => signIn('discord', { callbackUrl: '/dashboard' })}
-				className="btn-accent btn"
-			>
-				Login
-			</button>
-		);
+	}
+
+	return (
+		<button
+			onClick={() => signIn('discord', { callbackUrl: '/dashboard' })}
+			className="btn-accent btn"
+		>
+			Login
+		</button>
+	);
 };
