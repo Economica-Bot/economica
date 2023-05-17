@@ -92,26 +92,11 @@ export const IncomeEdit = {
 } satisfies Command<'selectMenu'>;
 
 const validators = {
-	max: z.preprocess(
-		(a) => parseInt(z.string().parse(a)),
-		z.number().int().positive()
-	),
-	chance: z.preprocess(
-		(a) => parseInt(z.string().parse(a)),
-		z.number().int().positive().max(100)
-	),
-	minfine: z.preprocess(
-		(a) => parseInt(z.string().parse(a)),
-		z.number().int().positive()
-	),
-	maxfine: z.preprocess(
-		(a) => parseInt(z.string().parse(a)),
-		z.number().int().positive()
-	),
-	cooldown: z.preprocess(
-		(a) => parseInt(z.string().parse(a)),
-		z.number().int().positive()
-	)
+	max: z.coerce.number().int().positive(),
+	chance: z.coerce.number().int().positive().max(100),
+	minfine: z.coerce.number().int().positive(),
+	maxfine: z.coerce.number().int().positive(),
+	cooldown: z.coerce.number().int().positive()
 } as const;
 
 export const IncomeSubmit = {
