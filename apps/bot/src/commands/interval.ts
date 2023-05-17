@@ -89,14 +89,8 @@ export const IntervalEdit = {
 } satisfies Command<'selectMenu', 'command'>;
 
 const validator = {
-	amount: z.preprocess(
-		(a) => parseInt(z.string().parse(a)),
-		z.number().int().positive()
-	),
-	cooldown: z.preprocess(
-		(a) => parseInt(z.string().parse(a)),
-		z.number().int().positive()
-	),
+	amount: z.coerce.number().int().positive(),
+	cooldown: z.coerce.number().int().positive(),
 	enabled: z.preprocess((a) => a === 'true', z.boolean())
 } as const;
 
