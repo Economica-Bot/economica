@@ -19,6 +19,7 @@ import ms from 'ms';
 import { recordTransaction } from '../lib';
 import { parseNumber, parseString } from '../lib/economy';
 import { Command } from '../structures/commands';
+import { PAGINATION_LIMIT } from '../types';
 
 export const Loan = {
 	identifier: /^loan$/,
@@ -335,10 +336,9 @@ export const LoanViewType = {
 		const status = LoanStatus[args.groups.status as keyof typeof LoanStatus];
 		const page = +args.groups.page;
 
-		const limit = 4;
 		const loans = await datasource.getRepository(LoanEntity).find({
-			take: limit,
-			skip: (page - 1) * limit,
+			take: PAGINATION_LIMIT,
+			skip: (page - 1) * PAGINATION_LIMIT,
 			where: {
 				guild: { id: interaction.guildId },
 				lender: { user: { id: interaction.user.id } },

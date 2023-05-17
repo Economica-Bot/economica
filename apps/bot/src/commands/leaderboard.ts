@@ -6,6 +6,7 @@ import {
 	EmbedBuilder
 } from 'discord.js';
 import { Command } from '../structures/commands';
+import { PAGINATION_LIMIT } from '../types';
 
 export const Leaderboard = {
 	identifier: /^leaderboard$/,
@@ -23,8 +24,6 @@ export const LeaderboardPage = {
 			page = interaction.options.getInteger('page') ?? 1;
 		else page = +args.groups.page;
 
-		const limit = 5;
-
 		const guildEntity = await datasource
 			.getRepository(Guild)
 			.findOneByOrFail({ id: interaction.guildId });
@@ -32,8 +31,8 @@ export const LeaderboardPage = {
 			where: {
 				guildId: interaction.guildId
 			},
-			skip: (page - 1) * limit,
-			take: limit,
+			skip: (page - 1) * PAGINATION_LIMIT,
+			take: PAGINATION_LIMIT,
 			order: {
 				wallet: 'ASC'
 			}
@@ -42,18 +41,20 @@ export const LeaderboardPage = {
 			.map(
 				(member, i) =>
 					`${
-						(page - 1) * limit + i + 1 === 1
+						(page - 1) * PAGINATION_LIMIT + i + 1 === 1
 							? ':medal:'
-							: ` \`${(page - 1) * limit + i + 1}\` `
+							: ` \`${(page - 1) * PAGINATION_LIMIT + i + 1}\` `
 					} • <@${member.userId}> | ${guildEntity.currency} \`${
 						member.treasury + member.wallet
 					}\``
 			)
 			.join('\n');
-		const embed = new EmbedBuilder().setDescription(description).setAuthor({
-			name: `${interaction.guild}'s Leaderboard`,
-			iconURL: interaction.guild.iconURL() ?? undefined
-		});
+		const embed = new EmbedBuilder()
+			.setDescription(description.length ? description : null)
+			.setAuthor({
+				name: `${interaction.guild}'s Leaderboard`,
+				iconURL: interaction.guild.iconURL() ?? undefined
+			});
 		// .setFooter({ text: `page ${i + 1} of ${pageCount}` });
 		const row = new ActionRowBuilder<ButtonBuilder>().setComponents(
 			new ButtonBuilder()
@@ -65,7 +66,7 @@ export const LeaderboardPage = {
 				.setCustomId(`leaderboard_page:${interaction.user.id}:${page + 1}`)
 				.setLabel('Next Page')
 				.setStyle(ButtonStyle.Primary)
-				.setDisabled(members.length < limit)
+				.setDisabled(members.length < PAGINATION_LIMIT)
 		);
 		interaction.isChatInputCommand()
 			? await interaction.reply({ embeds: [embed], components: [row] })

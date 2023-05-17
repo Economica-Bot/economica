@@ -6,6 +6,7 @@ import {
 	EmbedBuilder
 } from 'discord.js';
 import { Command } from '../structures/commands';
+import { PAGINATION_LIMIT } from '../types';
 
 export const Inventory = {
 	identifier: /^inventory$/,
@@ -16,7 +17,7 @@ export const Inventory = {
 } satisfies Command<'chatInput'>;
 
 export const InventoryPage = {
-	identifier: /^leaderboard_page:(?<userId>(.*)):(?<page>(.*))$/,
+	identifier: /^inventory_page:(?<userId>(.*)):(?<page>(.*))$/,
 	type: 'button',
 	execute: async (interaction, args) => {
 		let page: number;
@@ -28,8 +29,6 @@ export const InventoryPage = {
 			userId = args.groups.userId;
 			page = +args.groups.page;
 		}
-
-		const limit = 5;
 
 		const items = await datasource.getRepository(Item).find({
 			relations: ['listing'],
@@ -59,7 +58,7 @@ export const InventoryPage = {
 				.setCustomId(`inventory_page:${interaction.user.id}:${page + 1}`)
 				.setLabel('Next Page')
 				.setStyle(ButtonStyle.Primary)
-				.setDisabled(items.length < limit)
+				.setDisabled(items.length < PAGINATION_LIMIT)
 		);
 		interaction.isChatInputCommand()
 			? await interaction.reply({ embeds: [embed], components: [row] })

@@ -29,6 +29,7 @@ import { z } from 'zod';
 import { recordTransaction } from '../lib';
 import { parseInteger, parseNumber } from '../lib/economy';
 import { Command } from '../structures/commands';
+import { PAGINATION_LIMIT } from '../types';
 
 export const Shop = {
 	identifier: /^shop$/,
@@ -46,14 +47,12 @@ export const ShopPage = {
 			page = interaction.options.getInteger('page') ?? 1;
 		else page = +args.groups.page;
 
-		const limit = 2;
-
 		const guildEntity = await datasource
 			.getRepository(Guild)
 			.findOneByOrFail({ id: interaction.guildId });
 		const listings = await datasource.getRepository(Listing).find({
-			take: limit,
-			skip: (page - 1) * limit,
+			take: PAGINATION_LIMIT,
+			skip: (page - 1) * PAGINATION_LIMIT,
 			where: { guild: { id: interaction.guildId } }
 		});
 		const embed = new EmbedBuilder()
@@ -93,7 +92,7 @@ export const ShopPage = {
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				.setEmoji({ id: parseEmoji(Emojis.NEXT)!.id! })
 				.setStyle(ButtonStyle.Primary)
-				.setDisabled(listings.length < limit)
+				.setDisabled(listings.length < PAGINATION_LIMIT)
 		);
 		const messagePayload: Omit<InteractionReplyOptions, 'flags'> = {
 			embeds: [embed],
