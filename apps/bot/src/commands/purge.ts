@@ -21,6 +21,6 @@ export const Purge = {
 		const embed = new EmbedBuilder()
 			.setTitle('Succces')
 			.setDescription(`Deleted \`${count.size}\` message(s).`);
-		await interaction.reply({ embeds: [embed] });
+		await interaction.reply({ embeds: [embed], ephemeral: true });
 	}
 } satisfies Command<'chatInput'>;
