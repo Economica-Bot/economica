@@ -18,7 +18,7 @@ export const Collect = {
 				listing: { type: ListingType.GENERATOR }
 			}
 		});
-		let amount = 0;
+		const amounts: Array<{ amount: number; generator: string }> = [];
 		generators.forEach(async (generator) => {
 			if (
 				Date.now() <
@@ -27,25 +27,36 @@ export const Collect = {
 					(generator.lastGeneratedAt?.getTime() ?? 0)
 			)
 				return;
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			amount += generator.listing.generatorAmount!;
+			amounts.push({
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				amount: generator.listing.generatorAmount!,
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				generator: generator.listing.name!
+			});
 			await datasource
 				.getRepository(Item)
 				.update({ id: generator.id }, { lastGeneratedAt: new Date() });
 		});
 
 		let result: string;
-		if (amount) {
-			result = `${Emojis.CHECK} Collected ${
-				guildEntity.currency
-			} \`${parseNumber(amount)}\``;
+		if (amounts.length) {
+			result =
+				`${Emojis.CHECK} Collected ${guildEntity.currency} \`${parseNumber(
+					amounts.reduce((a, b) => a + b.amount, 0)
+				)}\` via\n` +
+				`${amounts.map(
+					({ amount, generator }) =>
+						`\n**${generator}** - ${guildEntity.currency} \`${parseNumber(
+							amount
+						)}\``
+				)}.`;
 			await recordTransaction(
 				interaction.guildId,
 				interaction.user.id,
 				interaction.user.id,
 				'GENERATOR',
 				0,
-				amount
+				amounts.reduce((a, b) => a + b.amount, 0)
 			);
 		} else {
 			result =
