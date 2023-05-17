@@ -153,11 +153,12 @@ export const ShopItem = {
 						},
 						{
 							name: `${Emojis.BACKPACK} Items required`,
-							value: listing.itemsRequired.length
-								? listing.itemsRequired
-										.map((item) => `\`${item.name}\``)
-										.join('\n')
-								: '`None`',
+							value:
+								listing.itemsRequired && listing.itemsRequired.length
+									? listing.itemsRequired
+											.map((item) => `\`${item.name}\``)
+											.join('\n')
+									: '`None`',
 							inline: true
 						},
 						{
@@ -342,15 +343,17 @@ export const ShopItemBuyConfirm = {
 
 		// Validation
 		const missingItems: Listing[] = [];
-		for await (const item of listing.itemsRequired) {
-			const memberItem = await datasource.getRepository(Item).findOneBy({
-				owner: {
-					userId: interaction.user.id,
-					guildId: interaction.guildId
-				},
-				listing: { id: item.id }
-			});
-			if (!memberItem) missingItems.push(item);
+		if (listing.itemsRequired) {
+			for await (const item of listing.itemsRequired) {
+				const memberItem = await datasource.getRepository(Item).findOneBy({
+					owner: {
+						userId: interaction.user.id,
+						guildId: interaction.guildId
+					},
+					listing: { id: item.id }
+				});
+				if (!memberItem) missingItems.push(item);
+			}
 		}
 
 		const missingRoles: string[] = [];
@@ -384,25 +387,18 @@ export const ShopItemBuyConfirm = {
 
 		// Purchase complete
 		if (listing.stock) {
-			await datasource.getRepository(Listing).update(
-				{
-					id: listing.id
-				},
-				{
-					stock: listing.stock - parsedAmount
-				}
-			);
+			await datasource
+				.getRepository(Listing)
+				.update({ id: listing.id }, { stock: listing.stock - parsedAmount });
 		}
 
 		if (existingItem) {
-			await datasource.getRepository(Item).update(
-				{
-					id: existingItem.id
-				},
-				{
-					amount: existingItem.amount + parsedAmount
-				}
-			);
+			await datasource
+				.getRepository(Item)
+				.update(
+					{ id: existingItem.id },
+					{ amount: existingItem.amount + parsedAmount }
+				);
 		} else {
 			listing.rolesGranted.forEach((role) =>
 				interaction.member.roles.add(role, `Purchased ${listing.name}`)
@@ -412,11 +408,12 @@ export const ShopItemBuyConfirm = {
 			);
 
 			if (listing.type !== ListingType.INSTANT) {
-				await datasource.getRepository(Item).save({
+				const item = datasource.getRepository(Item).create({
 					amount: parsedAmount,
 					listing: { id: listing.id },
 					owner: { userId: interaction.user.id, guildId: interaction.guildId }
 				});
+				await datasource.getRepository(Item).save(item);
 			}
 		}
 
