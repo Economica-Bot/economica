@@ -8,7 +8,7 @@ import { Command } from '../structures/commands';
 export const Unban = {
 	identifier: /^unban$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction }) => {
 		await validateTarget(interaction, false);
 		const target = interaction.options.getUser('target', true);
 		const ban = (await interaction.guild.bans.fetch()).get(target.id);

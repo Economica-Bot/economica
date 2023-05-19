@@ -1,11 +1,5 @@
 import { Emojis, LoanStatus } from '@economica/common';
-import {
-	datasource,
-	Guild,
-	Loan as LoanEntity,
-	Member,
-	User
-} from '@economica/db';
+import { datasource, Loan as LoanEntity, Member, User } from '@economica/db';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -24,10 +18,7 @@ import { PAGINATION_LIMIT } from '../types';
 export const Loan = {
 	identifier: /^loan$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
+	execute: async ({ interaction, guildEntity }) => {
 		const subcommand = interaction.options.getSubcommand();
 		if (subcommand === 'manage') {
 			const outgoingPendingLoanCount = await datasource
@@ -262,7 +253,7 @@ export const Loan = {
 export const LoanCancel = {
 	identifier: /^loan_cancel:(?<userId>(.*)):(?<loanId>(.*))$/,
 	type: 'button',
-	execute: async (interaction, args) => {
+	execute: async ({ interaction, args }) => {
 		const loan = await datasource
 			.getRepository(LoanEntity)
 			.findOneByOrFail({ id: args.groups.loanId });
@@ -280,29 +271,26 @@ export const LoanCancel = {
 		);
 		await interaction.update({ embeds: [embed], components: [] });
 	}
-} satisfies Command<'button', 'userId' | 'loanId'>;
+} satisfies Command<'button', true, 'userId' | 'loanId'>;
 
 export const LoanCreate = {
 	identifier: /^loan_create:(?<userId>(.*)):(?<loanId>(.*))$/,
 	type: 'button',
-	execute: async (interaction, args) => {
-		await datasource.getRepository(LoanEntity).update(
-			{
-				id: args.groups.loanId
-			},
-			{ status: LoanStatus.PENDING }
-		);
+	execute: async ({ interaction, args }) => {
+		await datasource
+			.getRepository(LoanEntity)
+			.update({ id: args.groups.loanId }, { status: LoanStatus.PENDING });
 		const embed = new EmbedBuilder().setDescription(
 			`${Emojis.DEED} **Loan Proposal Created**`
 		);
 		await interaction.update({ embeds: [embed], components: [] });
 	}
-} satisfies Command<'button', 'userId' | 'loanId'>;
+} satisfies Command<'button', true, 'userId' | 'loanId'>;
 
 export const LoanAccept = {
 	identifier: /^loan_accept:(?<userId>(.*)):(?<loanId>(.*))$/,
 	type: 'button',
-	execute: async (interaction, args) => {
+	execute: async ({ interaction, args }) => {
 		const loan = await datasource.getRepository(LoanEntity).findOneByOrFail({
 			id: args.groups.loanId
 		});
@@ -322,12 +310,12 @@ export const LoanAccept = {
 		);
 		await interaction.update({ embeds: [embed], components: [] });
 	}
-} satisfies Command<'button', 'userId' | 'loanId'>;
+} satisfies Command<'button', true, 'userId' | 'loanId'>;
 
 export const LoanViewType = {
 	identifier: /^loan_view_(?<status>(.*))_(?<page>\d)$/,
 	type: 'selectMenu',
-	execute: async (interaction, args) => {
+	execute: async ({ interaction, args }) => {
 		const status = LoanStatus[args.groups.status as keyof typeof LoanStatus];
 		const page = +args.groups.page;
 
@@ -376,12 +364,12 @@ export const LoanViewType = {
 			components: row.components[0].options.length ? [row] : []
 		});
 	}
-} satisfies Command<'selectMenu', 'status' | 'page'>;
+} satisfies Command<'selectMenu', true, 'status' | 'page'>;
 
 export const LoanViewSingle = {
 	identifier: /^loan_view_single_(?<loanId>(.*))$/,
 	type: 'selectMenu',
-	execute: async (interaction, args) => {
+	execute: async ({ interaction, args }) => {
 		const loan = await datasource
 			.getRepository(LoanEntity)
 			.findOneByOrFail({ id: args.groups.loanId });
@@ -455,4 +443,4 @@ export const LoanViewSingle = {
 			components: row.components.length ? [row] : []
 		});
 	}
-} satisfies Command<'selectMenu', 'loanId'>;
+} satisfies Command<'selectMenu', true, 'loanId'>;

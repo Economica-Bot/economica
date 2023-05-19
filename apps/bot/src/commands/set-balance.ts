@@ -1,21 +1,15 @@
-import { datasource, Guild, Member } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import { recordTransaction } from '../lib';
 import { parseNumber, parseString } from '../lib/economy';
 import { Command } from '../structures/commands';
+import { createMemberDTO } from '../utils';
 
 export const SetBalance = {
 	identifier: /^set-balance$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction, guildEntity }) => {
 		const target = interaction.options.getUser('user', true);
-		const targetEntity = await datasource.getRepository(Member).save({
-			userId: target.id,
-			guildId: interaction.guildId
-		});
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
+		const targetEntity = await createMemberDTO(target.id, interaction.guildId);
 		const amount = parseString(interaction.options.getString('amount', true));
 		const balance = interaction.options.getString('balance', true);
 		const { wallet: w, treasury: t } = targetEntity;

@@ -4,5 +4,5 @@ import { Command } from '../structures/commands';
 export const Weekly = {
 	identifier: /^weekly$/,
 	type: 'chatInput',
-	execute: async (interaction) => interval(interaction, 'weekly')
+	execute: async (ctx) => interval(ctx, 'weekly')
 } satisfies Command<'chatInput'>;

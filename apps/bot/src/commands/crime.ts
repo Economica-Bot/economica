@@ -1,4 +1,3 @@
-import { datasource, Guild } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import { recordTransaction } from '../lib';
 import { parseNumber } from '../lib/economy';
@@ -7,10 +6,7 @@ import { Command } from '../structures/commands';
 export const Crime = {
 	identifier: /^crime$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
+	execute: async ({ interaction, guildEntity }) => {
 		const { max, chance, minfine, maxfine } = guildEntity.incomes.crime;
 		const amount = Math.ceil(Math.random() * max);
 		const fine = Math.ceil(Math.random() * (maxfine - minfine) + minfine);
@@ -29,21 +25,22 @@ export const Crime = {
 				)}\`.`
 			);
 			await interaction.reply({ embeds: [embed] });
-		} else {
-			await recordTransaction(
-				interaction.guildId,
-				interaction.user.id,
-				interaction.client.user.id,
-				'CRIME_SUCCESS',
-				amount,
-				0
-			);
-			const embed = new EmbedBuilder().setDescription(
-				`You successfully committed a crime and earned ${
-					guildEntity.currency
-				} \`${parseNumber(amount)}\`.`
-			);
-			await interaction.reply({ embeds: [embed] });
+			return;
 		}
+
+		await recordTransaction(
+			interaction.guildId,
+			interaction.user.id,
+			interaction.client.user.id,
+			'CRIME_SUCCESS',
+			amount,
+			0
+		);
+		const embed = new EmbedBuilder().setDescription(
+			`You successfully committed a crime and earned ${
+				guildEntity.currency
+			} \`${parseNumber(amount)}\`.`
+		);
+		await interaction.reply({ embeds: [embed] });
 	}
 } satisfies Command<'chatInput'>;

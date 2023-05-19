@@ -4,10 +4,7 @@ import { Command } from '../structures/commands';
 export const TransactionLog = {
 	identifier: /^transaction-log$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
+	execute: async ({ interaction, guildEntity }) => {
 		const subcommand = interaction.options.getSubcommand();
 		if (subcommand === 'view') {
 			const channelId = guildEntity.transactionLogId;

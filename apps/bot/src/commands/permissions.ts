@@ -11,7 +11,7 @@ import { Command } from '../structures/commands';
 export const Permissions = {
 	identifier: /^permissions$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction }) => {
 		const commandInput = interaction.options.getString('command', true);
 		const command = CommandData.find(
 			(command) => command.name.toLowerCase() === commandInput.toLowerCase()

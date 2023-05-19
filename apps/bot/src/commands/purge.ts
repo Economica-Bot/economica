@@ -4,7 +4,7 @@ import { Command } from '../structures/commands';
 export const Purge = {
 	identifier: /^purge$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction }) => {
 		const channel =
 			interaction.options.getChannel('channel') ?? interaction.channel;
 		if (channel?.type !== ChannelType.GuildText)

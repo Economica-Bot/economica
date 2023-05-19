@@ -5,7 +5,7 @@ import { Command } from '../structures/commands';
 export const Memory = {
 	identifier: /^memory$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction }) => {
 		const description =
 			'**View bots usage of memory in various measures.**\n\n' +
 			'**rss**: Resident Set Size, the total memory allocated for the process execution\n' +

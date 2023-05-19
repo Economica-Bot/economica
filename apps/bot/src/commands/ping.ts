@@ -5,7 +5,7 @@ import { Command } from '../structures/commands';
 export const Ping = {
 	identifier: /^ping$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction }) => {
 		let now = Date.now();
 		await interaction.reply('Pinging...');
 		const api = Date.now() - now;

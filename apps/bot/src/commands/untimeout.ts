@@ -8,7 +8,7 @@ import { Command } from '../structures/commands';
 export const Untimeout = {
 	identifier: /^untimeout$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction }) => {
 		await validateTarget(interaction);
 		const target = interaction.options.getUser('target', true);
 		const targetMember = await interaction.guild.members.fetch({

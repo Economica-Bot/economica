@@ -1,4 +1,3 @@
-import { datasource, Guild, Member, User } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import { recordTransaction } from '../lib';
 import { parseNumber, validateAmount } from '../lib/economy';
@@ -7,21 +6,8 @@ import { Command } from '../structures/commands';
 export const Pay = {
 	identifier: /^pay$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction, guildEntity, memberEntity }) => {
 		const target = interaction.options.getUser('user', true);
-		await datasource.getRepository(User).save({ id: target.id });
-		await datasource
-			.getRepository(Member)
-			.save({ userId: target.id, guildId: interaction.guildId });
-		const memberEntity = await datasource
-			.getRepository(Member)
-			.findOneByOrFail({
-				userId: interaction.user.id,
-				guildId: interaction.guildId
-			});
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
 		const amount = interaction.options.getString('amount', true);
 		const result = validateAmount(memberEntity.wallet, amount, 'wallet');
 		await recordTransaction(

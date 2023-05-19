@@ -5,7 +5,7 @@ import { Command } from '../structures/commands';
 export const Invite = {
 	identifier: /^invite$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction }) => {
 		const invite = interaction.client.generateInvite(inviteOptions);
 		const embed = new EmbedBuilder()
 			.setAuthor({ name: interaction.client.user.username })

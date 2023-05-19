@@ -4,5 +4,5 @@ import { Command } from '../structures/commands';
 export const Minutely = {
 	identifier: /^minutely$/,
 	type: 'chatInput',
-	execute: async (interaction) => interval(interaction, 'minutely')
+	execute: async (ctx) => interval(ctx, 'minutely')
 } satisfies Command<'chatInput'>;

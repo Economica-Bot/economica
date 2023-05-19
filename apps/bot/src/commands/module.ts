@@ -6,12 +6,9 @@ import { Command } from '../structures/commands';
 export const Module = {
 	identifier: /^module$/,
 	type: 'chatInput' as const,
-	execute: async (interaction) => {
+	execute: async ({ interaction, userEntity, guildEntity }) => {
 		const subcommand = interaction.options.getSubcommand();
 		if (subcommand === 'view') {
-			const guildEntity = await datasource
-				.getRepository(Guild)
-				.findOneByOrFail({ id: interaction.guildId });
 			const description = `**View ${interaction.guild}'s Modules!**`;
 			const embed = new EmbedBuilder()
 				.setAuthor({
@@ -52,12 +49,6 @@ export const Module = {
 				'module',
 				true
 			) as ModuleString;
-			const userEntity = await datasource
-				.getRepository(User)
-				.findOneByOrFail({ id: interaction.user.id });
-			const guildEntity = await datasource
-				.getRepository(Guild)
-				.findOneByOrFail({ id: interaction.guildId });
 			if (userEntity.keys < 1) {
 				throw new Error('You do not have any keys.');
 			} else if (guildEntity.modules[moduleName].enabled) {
@@ -89,12 +80,6 @@ export const Module = {
 				'module',
 				true
 			) as ModuleString;
-			const userEntity = await datasource
-				.getRepository(User)
-				.findOneByOrFail({ id: interaction.user.id });
-			const guildEntity = await datasource
-				.getRepository(Guild)
-				.findOneByOrFail({ id: interaction.guildId });
 			if (guildEntity.modules[moduleName].user !== userEntity.id) {
 				throw new Error('You have not enabled this module in this server.');
 			} else {

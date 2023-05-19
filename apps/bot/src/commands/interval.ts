@@ -16,11 +16,8 @@ import { Command } from '../structures/commands';
 export const Interval = {
 	identifier: /^interval$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction, guildEntity }) => {
 		const subcommand = interaction.options.getSubcommand();
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
 		if (subcommand === 'view') {
 			const embed = new EmbedBuilder().setTitle('Interval command information');
 			Object.entries(guildEntity.intervals).forEach((interval) => {
@@ -64,11 +61,8 @@ export const Interval = {
 export const IntervalEdit = {
 	identifier: /^interval_edit_(?<command>(.*))$/,
 	type: 'selectMenu',
-	execute: async (interaction, args) => {
+	execute: async ({ interaction, guildEntity, args }) => {
 		const command = args.groups.command as IntervalString;
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
 		const modal = new ModalBuilder()
 			.setCustomId(`interval_result_${command}`)
 			.setTitle(`Edit ${command}`)
@@ -86,7 +80,7 @@ export const IntervalEdit = {
 			);
 		await interaction.showModal(modal);
 	}
-} satisfies Command<'selectMenu', 'command'>;
+} satisfies Command<'selectMenu', true, 'command'>;
 
 const validator = {
 	amount: z.coerce.number().int().positive(),
@@ -97,11 +91,8 @@ const validator = {
 export const IntervalSubmit = {
 	identifier: /^interval_result_(?<command>(.*))$/,
 	type: 'modal',
-	execute: async (interaction, args) => {
+	execute: async ({ interaction, args, guildEntity }) => {
 		const command = args.groups.command as IntervalString;
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
 		const embed = new EmbedBuilder().setTitle(
 			`Interval Command Updated: ${command}`
 		);
@@ -131,4 +122,4 @@ export const IntervalSubmit = {
 		await datasource.getRepository(Guild).save(guildEntity);
 		await interaction.reply({ embeds: [embed] });
 	}
-} satisfies Command<'modal', 'command'>;
+} satisfies Command<'modal', true, 'command'>;

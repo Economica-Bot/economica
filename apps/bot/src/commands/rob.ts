@@ -1,21 +1,15 @@
-import { datasource, Guild, Member } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import { recordTransaction } from '../lib';
 import { parseNumber } from '../lib/economy';
 import { Command } from '../structures/commands';
+import { createMemberDTO } from '../utils';
 
 export const Rob = {
 	identifier: /^rob$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction, guildEntity }) => {
 		const target = interaction.options.getUser('user', true);
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
-		const targetEntity = await datasource.getRepository(Member).save({
-			userId: target.id,
-			guildId: interaction.guildId
-		});
+		const targetEntity = await createMemberDTO(target.id, interaction.guildId);
 		const amount = Math.ceil(Math.random() * targetEntity.wallet);
 		const { chance, minfine, maxfine } = guildEntity.incomes.rob;
 		const fine = Math.ceil(Math.random() * (maxfine - minfine) + minfine);

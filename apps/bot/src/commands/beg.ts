@@ -1,4 +1,3 @@
-import { datasource, Guild } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import { recordTransaction } from '../lib';
 import { parseNumber } from '../lib/economy';
@@ -7,10 +6,7 @@ import { Command } from '../structures/commands';
 export const Beg = {
 	identifier: /^beg$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
+	execute: async ({ interaction, guildEntity }) => {
 		const { max, chance } = guildEntity.incomes.beg;
 		const amount = Math.ceil(Math.random() * max);
 		if (Math.random() * 100 > chance)

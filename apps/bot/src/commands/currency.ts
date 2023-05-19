@@ -5,11 +5,8 @@ import { Command } from '../structures/commands';
 export const Currency = {
 	identifier: /^currency$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction, guildEntity }) => {
 		const subcommand = interaction.options.getSubcommand();
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
 		if (subcommand === 'view') {
 			await interaction.reply({
 				embeds: [

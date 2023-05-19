@@ -11,15 +11,15 @@ import { PAGINATION_LIMIT } from '../types';
 export const Inventory = {
 	identifier: /^inventory$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
-		await InventoryPage.execute(interaction, undefined as never);
+	execute: async (ctx) => {
+		await InventoryPage.execute(ctx);
 	}
 } satisfies Command<'chatInput'>;
 
 export const InventoryPage = {
 	identifier: /^inventory_page:(?<userId>(.*)):(?<page>(.*))$/,
 	type: 'button',
-	execute: async (interaction, args) => {
+	execute: async ({ interaction, args }) => {
 		let page: number;
 		let userId: string;
 		if (interaction.isChatInputCommand()) {
@@ -64,4 +64,4 @@ export const InventoryPage = {
 			? await interaction.reply({ embeds: [embed], components: [row] })
 			: await interaction.update({ embeds: [embed], components: [row] });
 	}
-} satisfies Command<'button' | 'chatInput', 'userId' | 'page'>;
+} satisfies Command<'button' | 'chatInput', true, 'userId' | 'page'>;

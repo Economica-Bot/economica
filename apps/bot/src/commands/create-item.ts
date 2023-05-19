@@ -139,7 +139,7 @@ const validator = z
 export const CreateItem = {
 	identifier: /^create-item$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction }) => {
 		const name = interaction.options.getString('name', true);
 		const price = interaction.options.getString('price', true);
 		const type = interaction.options.getString('type', true);

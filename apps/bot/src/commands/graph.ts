@@ -6,7 +6,7 @@ import { Command } from '../structures/commands';
 export const Graph = {
 	identifier: /^graph$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction }) => {
 		const user = interaction.options.getUser('user');
 		const wallets: number[] = [];
 		const treasuries: number[] = [];

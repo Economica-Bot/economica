@@ -65,6 +65,22 @@ client.on(Events.InteractionCreate, async (interaction) => {
 			{ conflictPaths: ['userId', 'guildId'] }
 		);
 
+	const userEntity = await datasource
+		.getRepository(User)
+		.findOneByOrFail({ id: interaction.user.id });
+	const clientUserEntity = await datasource
+		.getRepository(User)
+		.findOneByOrFail({ id: interaction.client.user.id });
+	const memberEntity = await datasource.getRepository(Member).findOneByOrFail({
+		userId: interaction.user.id,
+		guildId: interaction.guildId
+	});
+	const clientMemberEntity = await datasource
+		.getRepository(Member)
+		.findOneByOrFail({
+			userId: interaction.client.user.id,
+			guildId: interaction.guildId
+		});
 	const guildEntity = await datasource
 		.getRepository(Guild)
 		.findOneByOrFail({ id: interaction.guildId });
@@ -117,7 +133,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
 				}
 			}
 
-			await command.execute(interaction as never, {} as never);
+			await command.execute({
+				interaction,
+				userEntity,
+				clientUserEntity,
+				memberEntity,
+				clientMemberEntity,
+				guildEntity
+			});
 			const execution = datasource.getRepository(Command).create({
 				member: { userId: interaction.user.id, guildId: interaction.guildId },
 				command: interaction.commandName
@@ -129,9 +152,17 @@ client.on(Events.InteractionCreate, async (interaction) => {
 					? command.identifier.exec(interaction.customId)
 					: interaction.isAnySelectMenu()
 					? command.identifier.exec(interaction.values[0])
-					: undefined;
+					: null;
 
-			await command.execute(interaction as never, args as never);
+			await command.execute({
+				interaction,
+				args,
+				userEntity,
+				clientUserEntity,
+				memberEntity,
+				clientMemberEntity,
+				guildEntity
+			});
 		}
 	} catch (err) {
 		const message =

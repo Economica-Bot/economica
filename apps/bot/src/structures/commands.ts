@@ -8,32 +8,58 @@ import {
 	SelectMenuInteraction
 } from 'discord.js';
 
+type RegExpGroups<T extends string> = {
+	groups: { [name in T]: string } | { [key: string]: string };
+};
+
+type InGuild = boolean;
+type Nullish<T> = T | null | undefined;
+
+export interface Context<
+	T extends InteractionInput,
+	I extends InGuild = true,
+	K extends string = string
+> {
+	interaction: InteractionForm<T, I>;
+	args: RegExpGroups<K>;
+	guildEntity: I extends true ? Guild : Nullish<Guild>;
+	userEntity: User;
+	clientUserEntity: User;
+	memberEntity: I extends true ? Member : Nullish<Member>;
+	clientMemberEntity: I extends true ? Member : Nullish<Member>;
+}
+
 export interface Command<
 	T extends InteractionInput = InteractionInput,
+	I extends InGuild = true,
 	K extends string = string
 > {
 	identifier: RegExp;
 	readonly type: T;
-	execute: (
-		interaction: InteractionForm<T>,
-		args: RegExpGroups<K>
-	) => Promise<void> | void;
+	execute: (ctx: Context<T, I, K>) => Promise<void> | void;
 }
-
-export type RegExpGroups<T extends string> = {
-	groups: { [name in T]: string } | { [key: string]: string };
-};
 
 type InteractionInput = 'chatInput' | 'selectMenu' | 'button' | 'modal';
 
-type InteractionForm<T extends InteractionInput> = T extends 'chatInput'
-	? ChatInputCommandInteraction<'cached'>
+type InteractionForm<
+	T extends InteractionInput,
+	I extends InGuild = InGuild
+> = T extends 'chatInput'
+	? I extends true
+		? ChatInputCommandInteraction<'cached'>
+		: ChatInputCommandInteraction
 	: T extends 'selectMenu'
-	? SelectMenuInteraction<'cached'>
+	? I extends true
+		? SelectMenuInteraction<'cached'>
+		: SelectMenuInteraction
 	: T extends 'button'
-	? ButtonInteraction<'cached'>
+	? I extends true
+		? ButtonInteraction<'cached'>
+		: ButtonInteraction
 	: T extends 'modal'
-	? ModalMessageModalSubmitInteraction<'cached'>
+	? I extends true
+		? ModalMessageModalSubmitInteraction<'cached'>
+		: ModalMessageModalSubmitInteraction
 	: never;
 
 export enum ReplyContext {
@@ -60,15 +86,6 @@ export enum ReplyFooter {
 	USER
 }
 
-export interface Context<T extends InteractionInput = InteractionInput> {
-	interaction: InteractionForm<T>;
-	guildEntity: Guild;
-	userEntity: User;
-	clientUserEntity: User;
-	memberEntity: Member;
-	clientMemberEntity: Member;
-}
-
 export const embedify = <T extends InteractionInput>(
 	interaction: InteractionForm<T>,
 	context: keyof typeof ReplyContext,
@@ -86,9 +103,10 @@ export const embedify = <T extends InteractionInput>(
 				iconURL: interaction.client.user.displayAvatarURL()
 			});
 		case ReplyFooter.SERVER:
+			if (!interaction.guild) throw new Error('Interaction is not in a guild');
 			embed.setFooter({
 				text: interaction.guild.name,
-				iconURL: interaction.guild.iconURL() ?? undefined
+				iconURL: interaction.guild.iconURL() ?? ''
 			});
 		case ReplyFooter.USER:
 			embed.setFooter({

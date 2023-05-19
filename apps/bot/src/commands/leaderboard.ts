@@ -11,31 +11,22 @@ import { PAGINATION_LIMIT } from '../types';
 export const Leaderboard = {
 	identifier: /^leaderboard$/,
 	type: 'chatInput',
-	execute: async (interaction) =>
-		LeaderboardPage.execute(interaction, undefined as never)
+	execute: async (ctx) => LeaderboardPage.execute(ctx)
 } satisfies Command<'chatInput'>;
 
 export const LeaderboardPage = {
 	identifier: /^leaderboard_page:(?<user>(.*)):(?<page>(.*))$/,
 	type: 'button',
-	execute: async (interaction, args) => {
+	execute: async ({ interaction, args, guildEntity }) => {
 		let page: number;
 		if (interaction.isChatInputCommand())
 			page = interaction.options.getInteger('page') ?? 1;
 		else page = +args.groups.page;
-
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
 		const members = await datasource.getRepository(Member).find({
-			where: {
-				guildId: interaction.guildId
-			},
+			where: { guildId: interaction.guildId },
 			skip: (page - 1) * PAGINATION_LIMIT,
 			take: PAGINATION_LIMIT,
-			order: {
-				wallet: 'ASC'
-			}
+			order: { wallet: 'ASC' }
 		});
 		const description = members
 			.map(
@@ -72,4 +63,4 @@ export const LeaderboardPage = {
 			? await interaction.reply({ embeds: [embed], components: [row] })
 			: await interaction.update({ embeds: [embed], components: [row] });
 	}
-} satisfies Command<'button' | 'chatInput', 'user' | 'page'>;
+} satisfies Command<'button' | 'chatInput', true, 'user' | 'page'>;

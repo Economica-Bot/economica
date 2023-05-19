@@ -4,14 +4,7 @@ import {
 	ListingEmojis,
 	ListingType
 } from '@economica/common';
-import {
-	datasource,
-	Guild,
-	isGenerator,
-	Item,
-	Listing,
-	Member
-} from '@economica/db';
+import { datasource, isGenerator, Item, Listing } from '@economica/db';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -34,22 +27,17 @@ import { PAGINATION_LIMIT } from '../types';
 export const Shop = {
 	identifier: /^shop$/,
 	type: 'chatInput',
-	execute: async (interaction) =>
-		ShopPage.execute(interaction, undefined as never)
+	execute: async (ctx) => ShopPage.execute(ctx)
 } satisfies Command<'chatInput'>;
 
 export const ShopPage = {
 	identifier: /^shop_page:(?<user>(.*)):(?<page>(.*))$/,
 	type: 'button',
-	execute: async (interaction, args) => {
+	execute: async ({ interaction, args, guildEntity }) => {
 		let page: number;
 		if (interaction.isChatInputCommand())
 			page = interaction.options.getInteger('page') ?? 1;
 		else page = +args.groups.page;
-
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
 		const listings = await datasource.getRepository(Listing).find({
 			take: PAGINATION_LIMIT,
 			skip: (page - 1) * PAGINATION_LIMIT,
@@ -104,18 +92,15 @@ export const ShopPage = {
 			? await interaction.reply(messagePayload)
 			: await interaction.update(messagePayload);
 	}
-} satisfies Command<'button' | 'chatInput', 'user' | 'page'>;
+} satisfies Command<'button' | 'chatInput', true, 'user' | 'page'>;
 
 export const ShopItem = {
 	identifier: /^shop_item:(?<item>(.*))$/,
 	type: 'selectMenu',
-	execute: async (interaction, args) => {
+	execute: async ({ interaction, args, guildEntity }) => {
 		const listing = await datasource
 			.getRepository(Listing)
 			.findOneByOrFail({ id: args.groups.item });
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
 		await interaction.update({
 			embeds: [
 				{
@@ -249,7 +234,7 @@ export const ShopItem = {
 			]
 		});
 	}
-} satisfies Command<'selectMenu', 'item'>;
+} satisfies Command<'selectMenu', true, 'item'>;
 
 // export const ShopItemEdit = {
 // 	identifier: /^shop_item_edit:(?<userId>(.*)):(?<listingId>(.*))/,
@@ -262,7 +247,7 @@ export const ShopItem = {
 export const ShopItemDelete = {
 	identifier: /^shop_item_delete:(?<userId>(.*)):(?<listingId>(.*))$/,
 	type: 'button',
-	execute: async (interaction, args) => {
+	execute: async ({ interaction, args }) => {
 		const listing = await datasource
 			.getRepository(Listing)
 			.findOneByOrFail({ id: args.groups.listingId });
@@ -285,12 +270,12 @@ export const ShopItemDelete = {
 			components: []
 		});
 	}
-} satisfies Command<'button', 'userId' | 'listingId'>;
+} satisfies Command<'button', true, 'userId' | 'listingId'>;
 
 export const ShopItemBuy = {
 	identifier: /^shop_item_buy:(?<userId>(.*)):(?<listingId>(.*))/,
 	type: 'button',
-	execute: async (interaction, args) => {
+	execute: async ({ interaction, args }) => {
 		await interaction.showModal({
 			title: 'Specify amount',
 			custom_id: `shop_item_buy_amount:${interaction.user.id}:${args.groups.listingId}`,
@@ -310,26 +295,17 @@ export const ShopItemBuy = {
 			]
 		});
 	}
-} satisfies Command<'button', 'userId' | 'listingId'>;
+} satisfies Command<'button', true, 'userId' | 'listingId'>;
 
 export const ShopItemBuyConfirm = {
 	identifier: /^shop_item_buy_amount:(?<userId>(.*)):(?<listingId>(.*))$/,
 	type: 'modal',
-	execute: async (interaction, args) => {
+	execute: async ({ interaction, args, memberEntity, guildEntity }) => {
 		const amount = interaction.fields.getTextInputValue('amount');
 		const listing = await datasource
 			.getRepository(Listing)
 			.findOneByOrFail({ id: args.groups.listingId });
 		if (!listing) throw new Error('Could not find listing :(');
-		const memberEntity = await datasource
-			.getRepository(Member)
-			.findOneByOrFail({
-				userId: interaction.user.id,
-				guildId: interaction.guildId
-			});
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
 		const existingItem = await datasource.getRepository(Item).findOneBy({
 			listing: { id: args.groups.listingId },
 			owner: { userId: interaction.user.id, guildId: interaction.guildId }
@@ -436,4 +412,4 @@ export const ShopItemBuyConfirm = {
 			components: []
 		});
 	}
-} satisfies Command<'modal', 'userId' | 'listingId'>;
+} satisfies Command<'modal', true, 'userId' | 'listingId'>;

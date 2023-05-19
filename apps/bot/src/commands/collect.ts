@@ -1,5 +1,5 @@
 import { Emojis, ListingType } from '@economica/common';
-import { datasource, Item, Guild } from '@economica/db';
+import { datasource, Item } from '@economica/db';
 import { recordTransaction } from '../lib';
 import { parseNumber } from '../lib/economy';
 import { Command } from '../structures/commands';
@@ -7,10 +7,7 @@ import { Command } from '../structures/commands';
 export const Collect = {
 	identifier: /^collect$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
+	execute: async ({ interaction, guildEntity }) => {
 		const generators = await datasource.getRepository(Item).find({
 			relations: ['listing'],
 			where: {

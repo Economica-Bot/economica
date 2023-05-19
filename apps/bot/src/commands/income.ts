@@ -15,11 +15,8 @@ import { Command } from '../structures/commands';
 export const Income = {
 	identifier: /^income$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction, guildEntity }) => {
 		const subcommand = interaction.options.getSubcommand();
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
 		if (subcommand === 'view') {
 			const embed = new EmbedBuilder().setTitle('Income command information');
 			Object.entries(guildEntity.incomes).forEach((income) => {
@@ -63,13 +60,10 @@ export const Income = {
 export const IncomeEdit = {
 	identifier: /^income_edit_(.*)$/,
 	type: 'selectMenu',
-	execute: async (interaction) => {
+	execute: async ({ interaction, guildEntity }) => {
 		const command = /^income_edit_(.*)$/
 			.exec(interaction.values[0])
 			?.at(1) as IncomeString;
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
 		const modal = new ModalBuilder()
 			.setCustomId(`income_result_${command}`)
 			.setTitle(`Edit ${command}`)
@@ -102,13 +96,10 @@ const validators = {
 export const IncomeSubmit = {
 	identifier: /^income_result_(.*)$/,
 	type: 'modal',
-	execute: async (interaction) => {
+	execute: async ({ interaction, guildEntity }) => {
 		const command = /^income_result_(.*)$/
 			.exec(interaction.customId)
 			?.at(1) as IncomeString;
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
 		const embed = new EmbedBuilder().setTitle(
 			`Income Command Updated: ${command}`
 		);

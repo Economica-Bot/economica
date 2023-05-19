@@ -7,7 +7,7 @@ import { Command } from '../structures/commands';
 export const Statistics = {
 	identifier: /^statistics$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction }) => {
 		const description = `**Welcome to ${interaction.client.user}'s Statistics Dashboard!**`;
 		const botStats =
 			`Websocket Ping: \`${interaction.client.ws.ping}ms\`\n` +

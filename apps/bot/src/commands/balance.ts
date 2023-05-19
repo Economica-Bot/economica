@@ -1,31 +1,14 @@
-import { datasource, Guild, Member } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import { parseNumber } from '../lib/economy';
 import { Command } from '../structures/commands';
+import { createMemberDTO } from '../utils';
 
 export const Balance = {
 	identifier: /^balance$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction, guildEntity }) => {
 		const target = interaction.options.getUser('user') ?? interaction.user;
-		const guildEntity = await datasource
-			.getRepository(Guild)
-			.findOneByOrFail({ id: interaction.guildId });
-		await datasource.getRepository(Member).upsert(
-			{
-				userId: target.id,
-				guildId: interaction.guildId
-			},
-			{
-				conflictPaths: ['userId', 'guildId']
-			}
-		);
-		const targetEntity = await datasource
-			.getRepository(Member)
-			.findOneByOrFail({
-				userId: target.id,
-				guildId: interaction.guildId
-			});
+		const targetEntity = await createMemberDTO(target.id, interaction.guildId);
 		const embed = new EmbedBuilder()
 			.setAuthor({
 				name: `${target.username}'s Balance`,

@@ -1,24 +1,20 @@
-import { datasource, Member, User } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import ms from 'ms';
-
 import { recordInfraction } from '../lib';
 import { validateTarget } from '../lib/moderation';
 import { Command } from '../structures/commands';
+import { createMemberDTO } from '../utils';
 
 export const Ban = {
 	identifier: /^ban$/,
 	type: 'chatInput',
-	execute: async (interaction) => {
+	execute: async ({ interaction }) => {
 		await validateTarget(interaction);
 		const target = interaction.options.getUser('target', true);
 		const targetMember = await interaction.guild.members.fetch({
 			user: target
 		});
-		await datasource.getRepository(User).save({ id: target.id });
-		await datasource
-			.getRepository(Member)
-			.save({ userId: target.id, guildId: interaction.guildId });
+		await createMemberDTO(target.id, interaction.guildId);
 		const durationInput = interaction.options.getString('duration');
 		const duration = durationInput ? ms(durationInput) : Infinity;
 		const formattedDuration =

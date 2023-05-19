@@ -1,5 +1,4 @@
-import { CommandData, Emojis } from '@economica/common';
-import { datasource, Guild } from '@economica/db';
+import { CommandData, DefaultModulesObj, Emojis } from '@economica/common';
 import {
 	ActionRowBuilder,
 	EmbedBuilder,
@@ -15,7 +14,7 @@ import { Command } from '../structures/commands.js';
 export const Help = {
 	identifier: /^help$/,
 	type: 'chatInput',
-	async execute(interaction) {
+	async execute({ interaction, guildEntity }) {
 		const query = interaction.options.getString('query');
 		if (!query) {
 			const helpEmbed = new EmbedBuilder()
@@ -26,14 +25,12 @@ export const Help = {
 				.setDescription(
 					`${Emojis.GEM} **Welcome to the ${interaction.client.user} Help Dashboard!**\nHere, you can get information about any command or module. Use the select menu below to specify a module.\n\n${Emojis.MENU} **The Best New Discord Economy Bot**\nTo become more familiar with Economica, please refer to the [documentation](${env.DOCS_URL}). There you can set up various permissions-related settings and get detailed information about all command modules.\n\n🔗 **Useful Links**:\n**[Home Page](${env.HOME_URL}) | [Command Docs](${env.COMMANDS_URL}) | [Vote For Us](${env.VOTE_URL})**`
 				);
-			const guildEntity = await datasource
-				.getRepository(Guild)
-				.findOneByOrFail({ id: interaction.guildId });
-			const labels = Object.keys(guildEntity.modules).map((module) =>
-				new StringSelectMenuOptionBuilder()
-					.setLabel(module)
-					.setValue(`help_${module}`)
-					.toJSON()
+			const labels = Object.keys(guildEntity?.modules ?? DefaultModulesObj).map(
+				(module) =>
+					new StringSelectMenuOptionBuilder()
+						.setLabel(module)
+						.setValue(`help_${module}`)
+						.toJSON()
 			);
 			const dropdown =
 				new ActionRowBuilder<StringSelectMenuBuilder>().setComponents([
@@ -98,12 +95,12 @@ export const Help = {
 		});
 		await interaction.reply({ embeds: [commandEmbed] });
 	}
-} satisfies Command<'chatInput'>;
+} satisfies Command<'chatInput', false>;
 
 export const HelpSelect = {
 	identifier: /^help_(.*)$/,
 	type: 'selectMenu',
-	execute: async (interaction) => {
+	execute: async ({ interaction }) => {
 		const module = /^help_(.*)$/.exec(interaction.values[0])?.at(1);
 		const description = CommandData.filter(
 			(command) => command.module === module
@@ -117,4 +114,4 @@ export const HelpSelect = {
 			embeds: [moduleEmbed.toJSON()]
 		});
 	}
-} satisfies Command<'selectMenu'>;
+} satisfies Command<'selectMenu', false>;
