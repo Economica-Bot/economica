@@ -13,6 +13,8 @@ services:
       - 3000:3000
     networks:
       - default
+    env_file:
+      - ./apps/dashboard/.env
   bot:
     x-aws-pull_credentials: arn:aws:secretsmanager:us-east-1:787454512443:secret:aws-7Z7iwX
     container_name: bot
@@ -23,6 +25,8 @@ services:
     restart: always
     networks:
       - default
+    env_file:
+      - ./apps/bot/.env
   nginx:
     container_name: proxy
     ports:
