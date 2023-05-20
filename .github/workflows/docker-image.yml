@@ -57,8 +57,7 @@ jobs:
           context: .
           file: ./docker-compose.yml
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/discord-bot:latest
-        run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/economica:bot
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/economica:dash
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/economica:proxy
+          tags: 
+            - ${{ secrets.DOCKERHUB_USERNAME }}/economica:bot
+            - ${{ secrets.DOCKERHUB_USERNAME }}/economica:dash
+            - ${{ secrets.DOCKERHUB_USERNAME }}/economica:proxy
