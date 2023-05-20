@@ -38,3 +38,7 @@ jobs:
           echo SUPPORT_GUILD_INVITE_URL=${{ secrets.SUPPORT_GUILD_INVITE_URL }} >> apps/dashboard/.env 
 
           docker compose -f docker-compose.yml build --no-cache --pull
+
+          docker push adrastopoulos/economica:bot
+          docker push adrastopoulos/economica:dashboard
+          docker push adrastopoulos/economica:proxy
