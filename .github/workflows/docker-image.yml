@@ -48,16 +48,6 @@ jobs:
 
           docker compose -f docker-compose.yml build --no-cache --pull
 
-  push:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Push the Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/economica:bot
-            ${{ secrets.DOCKERHUB_USERNAME }}/economica:dash
-            ${{ secrets.DOCKERHUB_USERNAME }}/economica:proxy
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/economica:bot
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/economica:dash
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/economica:proxy
