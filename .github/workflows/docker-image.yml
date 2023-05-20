@@ -2,17 +2,39 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "Production" ]
+    branches: ['Production']
   pull_request:
-    branches: [ "Production" ]
+    branches: ['Production']
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: |
-        touch apps/dashboard/.env.local
-        echo DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }} >> apps/dashboard/.env.local 
-        docker compose -f docker-compose.yml build --no-cache --pull
+      - uses: actions/checkout@v3
+      - name: Build the Docker image
+        run: |
+          touch apps/bot/.env
+          echo DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }} >> apps/bot/.env
+          echo DEV_GUILD_IDS=${{ secrets.DEV_GUILD_IDS }} >> apps/bot/.env 
+          echo SUPPORT_GUILD_INVITE_URL=${{ secrets.SUPPORT_GUILD_INVITE_URL }} >> apps/bot/.env
+          echo DEPLOY_COMMANDS=${{ secrets.DEPLOY_COMMANDS }} >> apps/bot/.env 
+          echo DEPLOY_ALL_MODULES=${{ secrets.DEPLOY_ALL_MODULES }} >> apps/bot/.env 
+          echo DB_URL=${{ secrets.DB_URL }} >> apps/bot/.env 
+          echo DB_OPTION=${{ secrets.DB_OPTION }} >> apps/bot/.env 
+          echo HOME_URL=${{ secrets.HOME_URL }} >> apps/bot/.env 
+          echo COMMANDS_URL=${{ secrets.COMMANDS_URL }} >> apps/bot/.env 
+          echo DOCS_URL=${{ secrets.DOCS_URL }} >> apps/bot/.env
+          echo VOTE_URL=${{ secrets.VOTE_URL }} >> apps/bot/.env
+
+          touch apps/dashboard/.env
+          echo DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }} >> apps/dashboard/.env
+          echo DISCORD_CLIENT_ID=${{ secrets.DISCORD_CLIENT_ID }} >> apps/dashboard/.env
+          echo DISCORD_CLIENT_SECRET=${{ secrets.DISCORD_CLIENT_SECRET }} >> apps/dashboard/.env
+          echo NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }} >> apps/dashboard/.env 
+          echo NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }} >> apps/dashboard/.env
+          echo DB_URL=${{ secrets.DB_URL }} >> apps/dashboard/.env 
+          echo DB_OPTION=${{ secrets.DB_OPTION }} >> apps/dashboard/.env 
+          echo INVITE_BOT_URL=${{ secrets.INVITE_BOT_URL }} >> apps/dashboard/.env 
+          echo SUPPORT_GUILD_INVITE_URL=${{ secrets.SUPPORT_GUILD_INVITE_URL }} >> apps/dashboard/.env 
+
+          docker compose -f docker-compose.yml build --no-cache --pull
