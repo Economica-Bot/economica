@@ -37,4 +37,4 @@ jobs:
           echo INVITE_BOT_URL=${{ secrets.INVITE_BOT_URL }} >> apps/dashboard/.env 
           echo SUPPORT_GUILD_INVITE_URL=${{ secrets.SUPPORT_GUILD_INVITE_URL }} >> apps/dashboard/.env 
 
-          docker compose -f docker-compose.yml build --no-cache --pull 
+          docker compose -f docker-compose.yml build --no-cache --pull
