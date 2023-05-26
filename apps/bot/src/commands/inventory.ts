@@ -34,7 +34,6 @@ export const InventoryPage = {
 			relations: ['listing'],
 			where: { owner: { userId, guildId: interaction.guildId } }
 		});
-
 		const embed = new EmbedBuilder()
 			.setTitle('Viewing Inventory')
 			.setDescription(
