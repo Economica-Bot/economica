@@ -59,7 +59,7 @@ const CurrencyPage: NextPageWithLayout<Props> = () => {
 						<div className="modal-action">
 							<label
 								htmlFor="currency-modal"
-								className="btn-success btn"
+								className="btn btn-success"
 								onClick={() =>
 									changeCurrency(
 										guild,
@@ -73,18 +73,18 @@ const CurrencyPage: NextPageWithLayout<Props> = () => {
 							>
 								Update
 							</label>
-							<label htmlFor="currency-modal" className="btn-warning btn">
+							<label htmlFor="currency-modal" className="btn btn-warning">
 								Cancel
 							</label>
 						</div>
 					</div>
 				</div>
 
-				<label className="btn-success btn mr-5" htmlFor="currency-modal">
+				<label className="btn btn-success mr-5" htmlFor="currency-modal">
 					Edit
 				</label>
 				<button
-					className="btn-error btn"
+					className="btn btn-error"
 					onClick={() => changeCurrency(guild, DefaultCurrencySymbol)}
 				>
 					Reset
