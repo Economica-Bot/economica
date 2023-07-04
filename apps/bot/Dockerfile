@@ -1,5 +1,5 @@
-FROM node:16-alpine AS builder
-RUN apk add --no-cache libc6-compat
+FROM node:16.20-alpine AS builder
+RUN apk add --no-cache libc6-compat python3 make g++
 RUN apk update
 
 WORKDIR /app

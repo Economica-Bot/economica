@@ -2,7 +2,6 @@ version: "3.9"
 
 services:
   dashboard:
-    x-aws-pull_credentials: arn:aws:secretsmanager:us-east-1:787454512443:secret:aws-7Z7iwX
     container_name: dashboard
     image: adrastopoulos/economica:dash
     build:
@@ -16,7 +15,6 @@ services:
     env_file:
       - ./apps/dashboard/.env
   bot:
-    x-aws-pull_credentials: arn:aws:secretsmanager:us-east-1:787454512443:secret:aws-7Z7iwX
     container_name: bot
     image: adrastopoulos/economica:bot
     build:
