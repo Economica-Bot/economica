@@ -51,6 +51,10 @@ jobs:
 
           docker compose -f docker-compose.yml build --no-cache --pull
 
+          sudo docker tag economica_bot ${{ secrets.DOCKERHUB_USERNAME }}/economica:bot
+          sudo docker tag economica_dash ${{ secrets.DOCKERHUB_USERNAME }}/economica:dash
+          sudo docker tag economica_proxy ${{ secrets.DOCKERHUB_USERNAME }}/economica:proxy
+
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/economica:bot
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/economica:dash
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/economica:proxy
