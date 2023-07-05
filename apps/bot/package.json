@@ -4,9 +4,11 @@
 	"type": "module",
 	"scripts": {
 		"lint": "eslint .",
+		"build": "esbuild ./src/index.ts --platform=node --format=esm --sourcemap --bundle --external:./node_modules/* --external:../../node_modules/* --outdir=dist",
 		"dev": "dotenv -e .env.local tsx watch --clear-screen=false --tsconfig ./tsconfig.json src/index.ts",
-		"start": "dotenv -e .env.production tsx --clear-screen=false --tsconfig ./tsconfig.json src/index.ts"
+		"start": "dotenv -e .env.production node --enable-source-maps --es-module-specifier-resolution=node ./dist/index.js"
 	},
+	"packageManager": "yarn@1.22.19",
 	"dependencies": {
 		"@economica/api": "*",
 		"@economica/common": "*",
