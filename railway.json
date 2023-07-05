@@ -7,7 +7,7 @@
 				"setup": {
 					"nixPkgs": [
 						"...",
-						"nodePackages.node-gyp-build","python39"
+						"gcc","python39"
 					]
 				}
 			}
