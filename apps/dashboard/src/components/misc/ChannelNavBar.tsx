@@ -5,6 +5,7 @@ import {
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { FC, PropsWithChildren } from 'react';
+import { FaHome, FaSignOutAlt } from 'react-icons/fa';
 
 const ChannelGroup: FC<PropsWithChildren & { text: string }> = ({
 	text,
@@ -91,12 +92,15 @@ export const ChannelNavBar: FC<Props> = ({ guild, user }) => (
 			<div className="flex-1 p-5 font-thin">
 				{guild ? <GuildChannelNavBar guild={guild} /> : <UserChannelNavBar />}
 			</div>
-			<div className="mx-auto my-5">
+			<div className="flex w-full justify-end bg-base-300 p-2 ring ring-inset ring-base-100">
+				<Link className="btn-ghost btn-sm btn" href="/">
+					<FaHome />
+				</Link>
 				<button
-					className="btn-error btn"
+					className="btn-ghost btn-sm btn"
 					onClick={() => signOut({ callbackUrl: '/' })}
 				>
-					Logout
+					<FaSignOutAlt />
 				</button>
 			</div>
 		</div>
