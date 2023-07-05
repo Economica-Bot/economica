@@ -2,7 +2,7 @@ import { RouteBases } from 'discord-api-types/v10';
 import Image from 'next/image';
 import Link from 'next/link';
 import { signIn, signOut, useSession } from 'next-auth/react';
-import { FaSpinner } from 'react-icons/fa';
+import { FaSignOutAlt, FaSpinner, FaWpforms } from 'react-icons/fa';
 
 export const LoginAvatar: React.FC = () => {
 	const { data: session, status } = useSession();
@@ -28,16 +28,20 @@ export const LoginAvatar: React.FC = () => {
 
 				<ul
 					tabIndex={0}
-					className="dropdown-content menu rounded-box mt-3 w-52 bg-base-300 p-2 shadow-3xl"
+					className="dropdown-content menu rounded-box menu-compact mt-3 bg-base-300 p-2 font-bold shadow-3xl"
 				>
 					<li>
-						<Link href="/dashboard">Dashboard</Link>
+						<Link href="/dashboard">
+							<FaWpforms />
+							Dashboard
+						</Link>
 					</li>
 					<li>
 						<button
 							onClick={() => signOut({ redirect: false, callbackUrl: '/' })}
+							className="text-error"
 						>
-							Logout
+							<FaSignOutAlt /> Logout
 						</button>
 					</li>
 				</ul>
