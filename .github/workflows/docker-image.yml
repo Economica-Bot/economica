@@ -41,8 +41,7 @@ jobs:
           echo NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }} >> apps/dashboard/.env 
           echo NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }} >> apps/dashboard/.env
           echo DB_URL=${{ secrets.DB_URL }} >> apps/dashboard/.env 
-          echo DB_OPTION=${{ secrets.DB_OPTION }} >> apps/dashboard/.env 
-          echo INVITE_BOT_URL=${{ secrets.INVITE_BOT_URL }} >> apps/dashboard/.env 
+          echo DB_OPTION=${{ secrets.DB_OPTION }} >> apps/dashboard/.env
           echo SUPPORT_GUILD_INVITE_URL=${{ secrets.SUPPORT_GUILD_INVITE_URL }} >> apps/dashboard/.env 
 
           docker compose -f docker-compose.yml build --no-cache --pull

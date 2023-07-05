@@ -9,8 +9,7 @@ const schema = z.object({
 	NEXTAUTH_URL: z.string().url(),
 	DB_URL: z.string().url(),
 	DB_OPTION: z.enum(['nothing', 'sync', 'drop']),
-	SUPPORT_GUILD_INVITE_URL: z.string().url(),
-	INVITE_BOT_URL: z.string().url()
+	SUPPORT_GUILD_INVITE_URL: z.string().url()
 });
 
 export const formatErrors = (
