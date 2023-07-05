@@ -1,5 +1,5 @@
 import { TransactionString } from '@economica/common';
-import { datasource, Guild, Member, Transaction } from '@economica/db';
+import { datasource, Guild, Member, Transaction, User } from '@economica/db';
 import { EmbedBuilder } from 'discord.js';
 import { client } from '..';
 import { parseNumber } from './economy';
@@ -12,6 +12,9 @@ export const recordTransaction = async (
 	wallet: number,
 	treasury: number
 ) => {
+	await datasource
+		.getRepository(User)
+		.upsert({ id: targetId }, { conflictPaths: ['id'] });
 	const target = await datasource
 		.getRepository(Member)
 		.findOneByOrFail({ userId: targetId, guildId });
