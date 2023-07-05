@@ -5,7 +5,10 @@
 		"nixpacksPlan": {
 			"phases": {
 				"setup": {
-					"nixPkgs": ["...", "python39"]
+					"nixPkgs": [
+						"...",
+						"nodePackages.node-gyp-build","python39"
+					]
 				}
 			}
 		}
