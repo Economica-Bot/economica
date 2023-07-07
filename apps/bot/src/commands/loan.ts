@@ -176,7 +176,7 @@ export const Loan = {
 				userId: borrower.id,
 				guildId: interaction.guildId
 			});
-			const loan = await datasource.getRepository(LoanEntity).save({
+			const loan = datasource.getRepository(LoanEntity).create({
 				guild: { id: interaction.guildId },
 				lender: { userId: interaction.user.id, guildId: interaction.guildId },
 				borrower: { userId: borrower.id, guildId: interaction.guildId },
@@ -186,6 +186,7 @@ export const Loan = {
 				duration: ms(duration),
 				status: LoanStatus.CANCELED
 			});
+			await datasource.getRepository(LoanEntity).save(loan);
 
 			await recordTransaction(
 				interaction.guildId,
