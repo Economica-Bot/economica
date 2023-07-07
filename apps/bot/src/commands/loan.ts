@@ -323,12 +323,18 @@ export const LoanViewType = {
 		const loans = await datasource.getRepository(LoanEntity).find({
 			take: PAGINATION_LIMIT,
 			skip: (page - 1) * PAGINATION_LIMIT,
-			where: {
-				guild: { id: interaction.guildId },
-				lender: { user: { id: interaction.user.id } },
-				borrower: { user: { id: interaction.user.id } },
-				status
-			}
+			where: [
+				{
+					guild: { id: interaction.guildId },
+					lender: { user: { id: interaction.user.id } },
+					status
+				},
+				{
+					guild: { id: interaction.guildId },
+					borrower: { user: { id: interaction.user.id } },
+					status
+				}
+			]
 		});
 
 		const embed = new EmbedBuilder()
