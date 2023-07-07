@@ -1,11 +1,13 @@
 import { recordTransaction } from '../lib';
 import cron from 'node-cron';
 import { LoanStatus } from '@economica/common';
-import { datasource, Loan } from '@economica/db';
+import { datasource, Loan, Not } from '@economica/db';
 
 export const LoanJob = cron.schedule('* * * * *', async () => {
 	console.info('updating active loans');
-	const loans = await datasource.getRepository(Loan).find();
+	const loans = await datasource.getRepository(Loan).find({
+		where: { status: Not(LoanStatus.COMPLETE) }
+	});
 	loans
 		.filter((loan) => loan.createdAt.getTime() + loan.duration < Date.now())
 		.forEach(async (loan) => {
