@@ -8,7 +8,7 @@ export const SetBalance = {
 	identifier: /^set-balance$/,
 	type: 'chatInput',
 	execute: async ({ interaction, guildEntity }) => {
-		const target = interaction.options.getUser('user', true);
+		const target = interaction.options.getUser('target', true);
 		const targetEntity = await createMemberDTO(target.id, interaction.guildId);
 		const amount = parseString(interaction.options.getString('amount', true));
 		const balance = interaction.options.getString('balance', true);
